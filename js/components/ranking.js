@@ -202,32 +202,38 @@ class RankingDmaior extends HTMLElement {
       .growth.neutral{background:var(--border-dim);color:var(--text-muted);border:1px solid var(--border-dim)}
       .growth.new{background:var(--bloom-grad);color:#fff;border:none;padding:3px 7px}
       .badges-container{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+      /* ── Pódio ── */
       .podium{display:flex;justify-content:center;align-items:flex-end;height:320px;margin-bottom:40px;margin-top:70px;gap:14px;animation:fadeUp 0.6s ease both}
-      .podium-item{display:flex;flex-direction:column;align-items:center;width:30%;border-radius:16px 16px 0 0;padding-top:15px;padding-bottom:10px;position:relative;border-top:1px solid;border-left:1px solid;border-right:1px solid;backdrop-filter:blur(8px)}
-      .podium-item.second{height:230px;background:linear-gradient(to bottom,var(--podium-2),rgba(0,0,0,0.5));border-color:var(--roxo)}
-      .podium-item.first{height:290px;background:linear-gradient(to bottom,var(--podium-1),rgba(0,0,0,0.5));border-color:var(--gold);width:36%;box-shadow:0 -10px 25px rgba(240,192,64,0.15)}
-      .podium-item.third{height:200px;background:linear-gradient(to bottom,var(--podium-3),rgba(0,0,0,0.5));border-color:var(--bronze)}
+      /* Cards totalmente arredondados e com borda completa nos 4 lados */
+      .podium-item{display:flex;flex-direction:column;align-items:center;width:30%;border-radius:16px;padding-top:15px;padding-bottom:14px;position:relative;border:1px solid;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+      /* Fundo adapta ao tema: gradient de tint para bg-card2 — fica escuro no dark, branco no claro */
+      .podium-item.second{height:230px;background:linear-gradient(to bottom,var(--podium-2),var(--bg-card2));border-color:var(--roxo)}
+      .podium-item.first{height:290px;background:linear-gradient(to bottom,var(--podium-1),var(--bg-card2));border-color:var(--azul);width:36%;box-shadow:0 0 28px var(--podium-1)}
+      .podium-item.third{height:200px;background:linear-gradient(to bottom,var(--podium-3),var(--bg-card2));border-color:var(--bronze)}
       .avatar-wrapper{position:relative;margin-top:-45px;margin-bottom:12px}
-      .avatar{width:60px;height:60px;border-radius:50%;background-color:rgba(0,0,0,0.5);border:3px solid transparent;object-fit:cover}
-      .first .avatar{width:75px;height:75px;border-color:var(--gold)}
+      /* Anel do avatar: todos os 3 usam a cor de acento do tema */
+      .avatar{width:60px;height:60px;border-radius:50%;background-color:rgba(0,0,0,0.5);border:3px solid var(--azul);object-fit:cover}
+      .first .avatar{width:75px;height:75px;border-color:var(--azul);border-width:3.5px}
+      .second .avatar{border-color:var(--roxo)}
+      .third .avatar{border-color:var(--bronze)}
       .badge{position:absolute;top:-5px;right:-5px;width:24px;height:24px;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:12px;font-weight:900;font-family:'Rajdhani';border:2px solid #000;z-index:3}
       .first .badge{background:var(--gold);color:#000;width:28px;height:28px;top:-8px;right:-8px}
       .second .badge{background:var(--roxo);color:#fff}
       .third .badge{background:var(--bronze);color:#fff}
-      .podium-val{font-size:1.2rem;font-weight:800;font-family:'Rajdhani';display:flex;align-items:center;gap:5px;margin-top:2px}
-      .first .podium-val{color:var(--gold);font-size:1.5rem}
-      .second .podium-val{color:var(--roxo)}
-      .third .podium-val{color:var(--bronze)}
+      /* Valores: todos usam var(--azul) do tema atual para consistência visual */
+      .podium-val{font-size:1.2rem;font-weight:800;font-family:'Rajdhani';display:flex;align-items:center;gap:5px;margin-top:2px;color:var(--azul)}
+      .first .podium-val{font-size:1.5rem}
       .crown-emoji{position:absolute;top:-42px;left:50%;transform:translateX(-50%) rotate(-10deg);font-size:36px;filter:drop-shadow(0 2px 8px rgba(240,192,64,0.7));z-index:5}
       .podium-item .name{width:95%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;margin-bottom:0;font-size:13px}
       .podium-id{font-size:10px;color:var(--text-muted);margin-bottom:4px;font-family:'Exo 2',sans-serif}
-      .prize-tag{font-size:0.9rem;color:var(--green2);background:rgba(74,222,128,0.15);padding:4px 10px;border-radius:6px;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:700;border:1px solid rgba(74,222,128,0.3);display:flex;align-items:center;letter-spacing:0.5px}
-      .first .prize-tag{font-size:1.1rem}
-      .list-prize-tag{font-size:0.75rem;color:var(--green2);background:rgba(74,222,128,0.15);padding:2px 6px;border-radius:4px;font-family:'Rajdhani',sans-serif;font-weight:700;border:1px solid rgba(74,222,128,0.3);display:inline-flex;align-items:center;margin-top:4px}
+      /* Tag de prêmio: verde sólido preenchido + texto branco — igual ao design de referência */
+      .prize-tag{font-size:0.9rem;color:#fff;background:#166534;padding:6px 16px;border-radius:20px;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:700;border:none;display:flex;align-items:center;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(22,101,52,0.35)}
+      .first .prize-tag{font-size:1.1rem;padding:7px 18px}
+      .list-prize-tag{font-size:0.75rem;color:#fff;background:#166534;padding:3px 9px;border-radius:12px;font-family:'Rajdhani',sans-serif;font-weight:700;border:none;display:inline-flex;align-items:center;margin-top:4px;box-shadow:0 1px 5px rgba(22,101,52,0.3)}
       .currency-symbol{margin-right:4px;font-size:0.9em;opacity:0.9}
       .ranking-list{display:flex;flex-direction:column;gap:10px;width:100%;animation:fadeUp 0.8s ease both}
       .list-item{display:flex;align-items:center;padding:12px 18px;background:var(--bg-card);border-radius:16px;border:1px solid var(--border-dim);transition:transform 0.2s}
-      .list-item:hover{transform:translateX(5px);background:rgba(59,130,246,0.05);border-color:var(--border)}
+      .list-item:hover{transform:translateX(5px);background:var(--podium-2);border-color:var(--border)}
       .list-rank{width:35px;font-size:var(--t-title-md);font-family:'Rajdhani';font-weight:700;color:var(--text-muted);text-align:center}
       .list-avatar-wrap{position:relative;width:45px;height:45px;margin-right:15px;flex-shrink:0}
       .list-avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid var(--border-dim);display:block}
@@ -235,7 +241,7 @@ class RankingDmaior extends HTMLElement {
       .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:2px solid var(--border-dim)}
       .live-badge,.list-live-badge{display:none}
       /* Bolinha animada estilo Kwai */
-      .live-dot{position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:1.5px;z-index:4;box-shadow:0 0 6px rgba(0,229,229,0.8);border:2px solid var(--azul);outline:2px solid rgba(0,0,0,0.5);}
+      .live-dot{position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:1.5px;z-index:4;box-shadow:0 0 6px var(--border);border:2px solid var(--azul);outline:2px solid rgba(0,0,0,0.5);}
       .live-dot span{display:block;width:2px;border-radius:2px;background:#000;animation:livebar 0.9s ease-in-out infinite;}
       .live-dot span:nth-child(1){height:4px;animation-delay:0s}
       .live-dot span:nth-child(2){height:7px;animation-delay:0.2s}
@@ -244,7 +250,8 @@ class RankingDmaior extends HTMLElement {
       .list-name-col{display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;margin-right:10px}
       .list-name{font-size:var(--t-info);color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .list-id{font-size:0.7rem;color:var(--text-muted);font-family:'Exo 2',sans-serif}
-      .list-score{font-size:var(--t-val);font-weight:700;color:var(--azul);display:flex;align-items:center;gap:6px;font-family:'Rajdhani';margin-left:auto}
+      /* Valor do score na lista — estilo idêntico ao panel-value do painel admin: gradiente de texto + letter-spacing */
+      .list-score{font-size:var(--t-val);font-weight:700;font-family:'Rajdhani';margin-left:auto;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
       .state-msg{text-align:center;padding:40px;color:var(--roxo);font-family:'Rajdhani'}
       .spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(59,130,246,0.1);border-top-color:var(--roxo);animation:spin 0.8s linear infinite;margin:0 auto 15px}
       .logout-btn{background:rgba(0,0,0,0.4);border:1px solid var(--border-dim);color:var(--red);cursor:pointer;margin-top:35px;padding:8px 16px;border-radius:8px;transition:0.3s}
@@ -253,8 +260,9 @@ class RankingDmaior extends HTMLElement {
       @keyframes spin{100%{transform:rotate(360deg)}}
       .panel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:298;}
       .panel-overlay.show{display:block}
-      .info-tab-btn{position:fixed;right:0;bottom:28%;background:var(--bloom-grad);color:#fff;border:none;border-radius:10px 0 0 10px;padding:22px 10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-lr;z-index:299;box-shadow:-4px 0 22px rgba(59,130,246,0.4);display:flex;align-items:center;gap:10px;line-height:1;opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.25s ease,visibility 0.25s ease,box-shadow 0.3s;}
-      .info-tab-btn:hover{box-shadow:-4px 0 32px rgba(0,229,229,0.55)}
+      /* Botão "Regras" lateral — box-shadow usa var(--roxo) para seguir o tema */
+      .info-tab-btn{position:fixed;right:0;bottom:28%;background:var(--bloom-grad);color:#fff;border:none;border-radius:10px 0 0 10px;padding:22px 10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-lr;z-index:299;box-shadow:-4px 0 22px var(--border);display:flex;align-items:center;gap:10px;line-height:1;opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.25s ease,visibility 0.25s ease,box-shadow 0.3s;}
+      .info-tab-btn:hover{box-shadow:-4px 0 32px var(--azul)}
       .info-tab-btn .tab-icon{display:block;transform:rotate(90deg);width:15px;height:15px;flex-shrink:0;}
       .info-panel{position:fixed;right:-290px;bottom:10%;width:255px;max-height:82vh;overflow-y:auto;overflow-x:hidden;padding:20px 18px 22px;z-index:299;border-radius:16px 0 0 16px !important;transition:right 0.35s cubic-bezier(0.4,0,0.2,1);scrollbar-width:thin;scrollbar-color:rgba(59,130,246,0.3) transparent;}
       .info-panel::-webkit-scrollbar{width:3px}

@@ -119,9 +119,10 @@ class KwaiLiveWidget extends HTMLElement {
         #liveWidget.minimized{padding-bottom:6px;}
 
         #liveTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding:0 8px;}
-        #liveCount{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4ade80;display:flex;align-items:center;gap:6px;}
-        .live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;animation:dotPulse 2s infinite;}
-        @keyframes dotPulse{0%,100%{box-shadow:0 0 6px #4ade80;}50%{box-shadow:0 0 2px #4ade80;opacity:.4;}}
+        /* Cor do texto "N AO VIVO" e bolinha — usa --dm-green que já adapta por tema */
+        #liveCount{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm-green,#4ade80);display:flex;align-items:center;gap:6px;}
+        .live-dot{width:6px;height:6px;border-radius:50%;background:var(--dm-green,#4ade80);box-shadow:0 0 6px var(--dm-green,#4ade80);animation:dotPulse 2s infinite;}
+        @keyframes dotPulse{0%,100%{box-shadow:0 0 6px var(--dm-green,#4ade80);}50%{box-shadow:0 0 2px var(--dm-green,#4ade80);opacity:.4;}}
 
         .top-right{display:flex;align-items:center;gap:8px;}
 
@@ -156,11 +157,12 @@ class KwaiLiveWidget extends HTMLElement {
         .live-card{flex-shrink:0;text-align:center;cursor:pointer;width:52px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s;}
         .live-card:hover{transform:scale(1.07);}
 
+        /* Anel do avatar — usa var(--dm-cyan) para seguir o tema atual */
         .avatar-wrap{position:relative;width:52px;height:52px;margin:0 auto;border-radius:50%;
-          background:linear-gradient(135deg,#00e5e5,#007f9f,#00e5e5);padding:2.5px;
+          background:var(--dm-grad-cyan,linear-gradient(135deg,var(--dm-cyan,#00e5e5),#007f9f,var(--dm-cyan,#00e5e5)));padding:2.5px;
           animation:ringGlow 2s ease-in-out infinite;}
         @media(min-width:600px){.live-card{width:60px;}.avatar-wrap{width:60px;height:60px;}#liveRow{gap:10px;}}
-        @keyframes ringGlow{0%,100%{box-shadow:0 0 0 0 rgba(0,212,212,0),0 0 8px rgba(0,212,212,.4);}50%{box-shadow:0 0 0 4px rgba(0,212,212,.18),0 0 16px rgba(0,212,212,.7);}}
+        @keyframes ringGlow{0%,100%{box-shadow:0 0 0 0 transparent,0 0 8px var(--dm-cyan-20,rgba(0,212,212,.4));}50%{box-shadow:0 0 0 4px var(--dm-cyan-08,rgba(0,212,212,.18)),0 0 16px var(--dm-cyan-40,rgba(0,212,212,.7));}}
         .avatar-wrap::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(0,229,229,.5);animation:ringPulse 2s ease-in-out infinite;pointer-events:none;}
         @keyframes ringPulse{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.28);opacity:0;}}
 

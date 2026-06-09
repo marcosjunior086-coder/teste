@@ -285,7 +285,7 @@ class MenuMobileDMaior extends HTMLElement {
             </div>
           </div>
           <div class="auth-actions">
-            <a href="/painel/index.html" class="auth-link">${SVG_PAINEL} Painel do Host</a>
+            <a href="painel/index.html" class="auth-link">${SVG_PAINEL} Painel do Host</a>
             <button class="auth-link danger" id="btnLogout">${SVG_LOGOUT} Sair</button>
           </div>
         </div>
