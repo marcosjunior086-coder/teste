@@ -219,8 +219,8 @@ class DmaiorFooter extends HTMLElement {
           <!-- Links legais -->
           <div class="col">
             <ul class="legal-list">
-              <li><a href="/politicas-host.html">Política de Privacidade</a></li>
-              <li><a href="/politicas-premium.html">Termos e Condições</a></li>
+              <li><a href="politicas.html">Política de Privacidade</a></li>
+              <li><a href="politicas.html">Termos e Condições</a></li>
             </ul>
           </div>
 

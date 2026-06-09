@@ -83,19 +83,19 @@ class MenuMobileDMaior extends HTMLElement {
     const SVG_USER   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
 
     const menuData = [
-      { label: 'Início',      link: '/',                 icon: SVG_HOME   },
-      { label: 'Rank',        link: '/ranking.html',     icon: SVG_RANK   },
+      { label: 'Início',      link: 'index.html',             icon: SVG_HOME   },
+      { label: 'Rank',        link: 'ranking.html',           icon: SVG_RANK   },
       { label: 'Material',    icon: SVG_FOLDER, subItems: [
-          { label: 'Políticas Host',     link: '/politicas-host.html' },
-          { label: 'Políticas Premium',  link: '/politicas-premium.html' },
+          { label: 'Políticas Host',     link: 'politicas-host.html' },
+          { label: 'Políticas Premium',  link: 'politicas-premium.html' },
       ]},
-      { label: 'Cursos',      link: '/cursos.html',      icon: SVG_BOOK   },
+      { label: 'Cursos',      link: 'cursos.html',            icon: SVG_BOOK   },
       { label: 'Eventos',     icon: SVG_EVENT, subItems: [
-          { label: 'PK Interno', link: '/pk-interno.html' },
+          { label: 'PK Interno', link: 'pk-interno.html' },
       ]},
-      { label: 'Ferramentas', link: '/aplicativos.html', icon: SVG_TOOL   },
+      { label: 'Ferramentas', link: 'aplicativos.html',       icon: SVG_TOOL   },
       { label: 'Portfólio',   icon: SVG_INFO, subItems: [
-          { label: 'Quem Somos?', link: '/quem-somos.html' },
+          { label: 'Quem Somos?', link: 'quem-somos.html' },
       ]},
     ];
 
