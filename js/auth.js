@@ -99,8 +99,8 @@ const Auth = {
     if (typeof window === 'undefined') return;
     if (!this.isLoggedIn()) {
       const dest = encodeURIComponent(window.location.pathname);
-      // Caminho relativo para funcionar tanto em GitHub Pages (/teste/) quanto em domínio raiz
-      window.location.href = 'index.html?' + redirectParam + '=' + dest;
+      // Usa document.baseURI (definido pelo <base href>) para evitar ambiguidade com index.html local
+      window.location.href = document.baseURI + '?' + redirectParam + '=' + dest;
     }
   },
 };
