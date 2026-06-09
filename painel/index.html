@@ -5,11 +5,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel do Streamer — DMaior Agency</title>
+  <!-- CSS global — define variáveis de tema usadas pelo menu-mobile e componentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
   <style>
     /* Base mínima — o próprio componente define todo o visual */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-      background: #04040f;
+      background: var(--dm-bg, #04040f);
       min-height: 100%;
       width: 100%;
     }
