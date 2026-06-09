@@ -185,10 +185,16 @@ class RankingDmaior extends HTMLElement {
       .list-rank{width:35px;font-size:var(--t-title-md);font-family:'Rajdhani';font-weight:700;color:var(--text-muted);text-align:center}
       .list-avatar-wrap{position:relative;width:45px;height:45px;margin-right:15px;flex-shrink:0}
       .list-avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid var(--border-dim);display:block}
-      .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:3px solid var(--azul);box-shadow:0 0 10px rgba(0,229,229,0.6);animation:live-ring 2s ease-in-out infinite}
-      .live-badge{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:var(--azul);color:#000;font-family:'Rajdhani';font-size:9px;font-weight:900;letter-spacing:1px;padding:1px 5px;border-radius:4px;white-space:nowrap;z-index:4;line-height:14px}
-      .list-live-badge{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:var(--azul);color:#000;font-family:'Rajdhani';font-size:8px;font-weight:900;letter-spacing:1px;padding:1px 4px;border-radius:3px;white-space:nowrap;z-index:4;line-height:12px}
-      @keyframes live-ring{0%,100%{box-shadow:0 0 8px rgba(0,229,229,0.6)}50%{box-shadow:0 0 18px rgba(0,229,229,1)}}
+      /* ── Live: sem borda azul, sem texto LIVE — só bolinha com barrinhas animadas ── */
+      .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:2px solid var(--border-dim)}
+      .live-badge,.list-live-badge{display:none}
+      /* Bolinha animada estilo Kwai */
+      .live-dot{position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:2px;z-index:4;box-shadow:0 0 8px rgba(0,229,229,0.7);border:1.5px solid #000;}
+      .live-dot span{display:block;width:2px;border-radius:2px;background:#000;animation:livebar 0.9s ease-in-out infinite;}
+      .live-dot span:nth-child(1){height:4px;animation-delay:0s}
+      .live-dot span:nth-child(2){height:7px;animation-delay:0.2s}
+      .live-dot span:nth-child(3){height:4px;animation-delay:0.4s}
+      @keyframes livebar{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1.2)}}
       .list-name-col{display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;margin-right:10px}
       .list-name{font-size:var(--t-info);color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .list-id{font-size:0.7rem;color:var(--text-muted);font-family:'Exo 2',sans-serif}
@@ -632,14 +638,14 @@ class RankingDmaior extends HTMLElement {
         const prizeValue = isSupa && currentPrizes[idx] ? currentPrizes[idx] : '';
         const prizeHtml  = prizeValue ? `<div class="prize-tag"><span class="currency-symbol">R$</span> ${prizeValue}</div>` : '';
         const isLive     = isMes && this.liveSet.has(s.uid);
-        const liveBadge  = isLive ? `<span class="live-badge">LIVE</span>` : '';
+        const liveDot    = isLive ? `<div class="live-dot"><span></span><span></span><span></span></div>` : '';
         html += `
           <div class="podium-item ${type}">
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
               <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
               <div class="badge">${idx + 1}</div>
-              ${liveBadge}
+              ${liveDot}
             </div>
             <div class="name" title="${s.nome}">${s.nome || 'Sem Nome'}</div>
             <div class="podium-id">@${s.id}</div>
@@ -658,13 +664,13 @@ class RankingDmaior extends HTMLElement {
       const globalIndex   = offset + i;
       const prizeValue    = isSupa && currentPrizes[globalIndex] ? currentPrizes[globalIndex] : '';
       const isLiveItem    = isMes && this.liveSet.has(s.uid);
-      const liveBadgeItem = isLiveItem ? `<span class="list-live-badge">LIVE</span>` : '';
+      const liveDotItem   = isLiveItem ? `<div class="live-dot"><span></span><span></span><span></span></div>` : '';
       html += `
         <div class="list-item">
           <div class="list-rank">${globalIndex + 1}</div>
           <div class="list-avatar-wrap${isLiveItem ? ' is-live' : ''}">
             <img src="${s.img}" class="list-avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-            ${liveBadgeItem}
+            ${liveDotItem}
           </div>
           <div class="list-name-col">
             <div class="list-name" title="${s.nome}">${s.nome || 'Sem Nome'}</div>
@@ -684,7 +690,10 @@ class RankingDmaior extends HTMLElement {
       html += `<div style="display:flex;justify-content:center;gap:8px;margin-top:25px;flex-wrap:wrap">`;
       for (let p = 1; p <= totalPages; p++) {
         const active = p === this.currentPage;
-        html += `<button class="page-btn" data-page="${p}" style="background:${active ? 'var(--bloom-grad)' : 'rgba(18,18,31,0.8)'};color:${active ? '#fff' : 'var(--text-muted)'};border:1px solid ${active ? 'transparent' : 'var(--border-dim)'};">${p}</button>`;
+        const inicio = (p - 1) * this.PAGE_SIZE + 1;
+        const fim    = Math.min(p * this.PAGE_SIZE, filtered.length);
+        const label  = `${inicio}–${fim}`;
+        html += `<button class="page-btn" data-page="${p}" style="background:${active ? 'var(--bloom-grad)' : 'rgba(18,18,31,0.8)'};color:${active ? '#fff' : 'var(--text-muted)'};border:1px solid ${active ? 'transparent' : 'var(--border-dim)'};box-shadow:${active ? '0 0 15px rgba(59,130,246,0.35)' : 'none'};">${label}</button>`;
       }
       html += `</div>`;
     }

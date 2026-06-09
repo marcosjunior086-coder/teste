@@ -28,7 +28,7 @@ class DmaiorFooter extends HTMLElement {
     const SVG_KWAI = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>`;
 
     // URL do logo (mesmo do menu)
-    const URL_LOGO = 'https://static.wixstatic.com/media/afc56e_9d9cf00783264a9e9dcf6d0fb2e17d02~mv2.png';
+    const URL_LOGO = 'https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png';
 
     this.shadowRoot.innerHTML = `
       <style>

@@ -186,7 +186,7 @@ class DmaiorServicesMenu extends HTMLElement {
       <div class="container">
         <!-- ══ Layout original — menu universal (mobile e desktop) ══ -->
         <div class="mobile-layout" style="display:${layout === 'dinamico' ? 'none' : 'flex'}">
-          <a href="/recrutamento.html" class="btn-agency-mobile">
+          <a href="recrutamento.html" class="btn-agency-mobile">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
             <span>Entrar na Agência</span>
           </a>
@@ -212,7 +212,7 @@ class DmaiorServicesMenu extends HTMLElement {
         <div class="dinamico-layout">
 
           <!-- Banner destaque: Recarga de Diamantes -->
-          <a href="/recarga.html" class="dp-banner">
+          <a href="recarga.html" class="dp-banner">
             <div class="dp-banner-icon">${SVG_DIAMOND}</div>
             <div class="dp-banner-text">
               <div class="dp-banner-title">Recarga de Diamantes</div>
@@ -222,7 +222,7 @@ class DmaiorServicesMenu extends HTMLElement {
           </a>
 
           <!-- Botão Entrar na Agência -->
-          <a href="/recrutamento.html" class="dp-agency-btn">
+          <a href="recrutamento.html" class="dp-agency-btn">
             ${SVG_AGENCY}
             <span>Entrar na Agência</span>
             <span class="dp-agency-badge">Gratuito</span>
@@ -248,7 +248,7 @@ class DmaiorServicesMenu extends HTMLElement {
               </div>
             </a>
 
-            <a href="/ranking.html" class="dp-item dp-cyan">
+            <a href="ranking.html" class="dp-item dp-cyan">
               <div class="dp-item-icon">${SVG_RANK}</div>
               <div>
                 <div class="dp-item-name">Ranking</div>
@@ -256,7 +256,7 @@ class DmaiorServicesMenu extends HTMLElement {
               </div>
             </a>
 
-            <a href="/tutoriais.html" class="dp-item dp-purple">
+            <a href="tutoriais.html" class="dp-item dp-purple">
               <div class="dp-item-icon">${SVG_VIDEO}</div>
               <div>
                 <div class="dp-item-name">Tutoriais</div>
@@ -264,7 +264,7 @@ class DmaiorServicesMenu extends HTMLElement {
               </div>
             </a>
 
-            <a href="/pk-interno.html" class="dp-item dp-orange">
+            <a href="pk-interno.html" class="dp-item dp-orange">
               <div class="dp-item-icon">${SVG_CALENDAR}</div>
               <div>
                 <div class="dp-item-name">Eventos</div>
@@ -286,7 +286,7 @@ class DmaiorServicesMenu extends HTMLElement {
           <div class="dp-section-title">Políticas</div>
           <div class="dp-grid">
 
-            <a href="/politicas-host.html" class="dp-item dp-teal">
+            <a href="politicas-host.html" class="dp-item dp-teal">
               <div class="dp-item-icon">${SVG_DOC}</div>
               <div>
                 <div class="dp-item-name">Política de Host</div>
@@ -294,7 +294,7 @@ class DmaiorServicesMenu extends HTMLElement {
               </div>
             </a>
 
-            <a href="/politicas-premium.html" class="dp-item dp-gold">
+            <a href="politicas-premium.html" class="dp-item dp-gold">
               <div class="dp-item-icon">${SVG_STAR}</div>
               <div>
                 <div class="dp-item-name">Pol. Especial</div>
