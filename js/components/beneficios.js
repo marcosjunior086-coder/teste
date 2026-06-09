@@ -21,88 +21,93 @@ class WidgetBeneficios extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap');
       *{margin:0;padding:0;box-sizing:border-box;max-width:100%}
-      :host{display:block;width:100%;font-family:'Inter',sans-serif;color:var(--dm-text);background:transparent}
+      :host{display:block;width:100%;font-family:'Exo 2',sans-serif;color:var(--dm-text);background:transparent}
+
+      /* ── Containers ── */
       .benefits-container{max-width:1000px;margin:0 auto;padding:40px 20px}
-      .header-benefits{text-align:center;margin-bottom:35px}
-      .main-title{font-size:2.2rem;font-weight:700;color:var(--dm-text);margin-bottom:15px;text-shadow:0 2px 10px rgba(59,130,246,0.2);letter-spacing:-0.02em}
-      .subtitle{font-size:1.1rem;color:var(--dm-text-sub);font-weight:300;max-width:500px;margin:0 auto;line-height:1.5}
-      .benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:35px}
-      .benefit-card{background:var(--dm-bg-card);backdrop-filter:blur(10px);border:1px solid var(--dm-bw10);border-radius:16px;padding:25px 20px;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden}
-      .benefit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#3b82f6,#00e5e5,#10b981,#3b82f6);transform:scaleX(0);transition:transform 0.6s ease;border-radius:20px 20px 0 0}
-      .benefit-card::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(0,229,229,0.08),rgba(16,185,129,0.05));opacity:0;transition:opacity 0.5s ease;border-radius:20px}
-      .benefit-card:hover{transform:translateY(-15px) scale(1.03);background:rgba(255,255,255,0.1);border-color:rgba(59,130,246,0.5);box-shadow:0 30px 60px rgba(59,130,246,0.2),0 0 40px rgba(0,229,229,0.15),inset 0 1px 0 rgba(255,255,255,0.1)}
-      .benefit-card:hover::before{transform:scaleX(1)}
-      .benefit-card:hover::after{opacity:1}
-      .card-header{display:flex;align-items:center;gap:15px;margin-bottom:15px}
-      .icon-container{width:50px;height:50px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-      .icon{width:35px;height:35px;fill:white}
-      .benefit-title{font-size:1.2rem;font-weight:600;color:var(--dm-text);margin:0}
-      .benefit-text{font-size:0.9rem;color:var(--dm-text-sub);line-height:1.6}
       .faq-container{max-width:900px;margin:0 auto;padding:40px 20px}
-      .gradient-text{background:linear-gradient(135deg,#3b82f6,#00e5e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-      .faq-header{text-align:center;margin-bottom:40px}
-      .faq-title{font-size:2.5rem;font-weight:700;margin-bottom:15px;line-height:1.2}
-      .faq-subtitle{font-size:1.1rem;color:var(--dm-text-sub);max-width:600px;margin:0 auto}
+
+      /* ── Cabeçalhos ── */
+      .header-benefits,.faq-header{text-align:center;margin-bottom:35px}
+      .main-title,.faq-title{font-family:'Rajdhani',sans-serif;font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+      .subtitle,.faq-subtitle{font-size:clamp(.85rem,2vw,1rem);color:var(--dm-text-sub);font-weight:300;max-width:520px;margin:0 auto;line-height:1.6}
+      .gradient-text{color:var(--dm-cyan)}
+
+      /* ── Cards de benefício ── */
+      .benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:35px}
+      .benefit-card{background:var(--dm-grad-card);border:1px solid var(--dm-border-dim);border-radius:16px;padding:25px 20px;transition:all .4s ease;position:relative;overflow:hidden}
+      .benefit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-cyan),var(--dm-gold),transparent);transform:scaleX(0);transition:transform .5s ease}
+      .benefit-card:hover{transform:translateY(-8px);border-color:var(--dm-cyan-25);box-shadow:0 20px 40px var(--dm-shadow-lg),0 0 20px var(--dm-cyan-10)}
+      .benefit-card:hover::before{transform:scaleX(1)}
+      .card-header{display:flex;align-items:center;gap:15px;margin-bottom:12px}
+      .icon-container{width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--dm-cyan-08);border-radius:12px;border:1px solid var(--dm-cyan-20)}
+      .icon{width:28px;height:28px}
+      .benefit-title{font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px;margin:0}
+      .benefit-text{font-size:.88rem;color:var(--dm-text-sub);line-height:1.65}
+
+      /* ── Tips grid ── */
       .tips-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:40px}
-      .tip-card{background:linear-gradient(to bottom right,rgba(37,99,235,0.2),rgba(6,182,212,0.2));border:1px solid rgba(59,130,246,0.3);padding:15px;border-radius:12px;text-align:center;transition:all 0.3s}
-      .tip-card:hover{transform:translateY(-5px);box-shadow:0 10px 20px rgba(59,130,246,0.2)}
-      .tip-icon{width:48px;height:48px;margin:0 auto 10px auto;display:flex;align-items:center;justify-content:center}
-      .tip-icon svg{width:28px;height:28px}
-      .tip-text{font-size:0.85rem;font-weight:600;line-height:1.2}
-      .accordion-wrapper{display:flex;flex-direction:column;gap:16px}
-      .accordion-item{background:linear-gradient(to right,rgba(30,58,138,0.3),rgba(22,78,99,0.3));border-radius:16px;border:1px solid rgba(59,130,246,0.3);overflow:hidden;box-shadow:0 0 15px rgba(59,130,246,0.1)}
-      .accordion-header{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background 0.3s}
-      .accordion-header:hover{background:linear-gradient(to right,rgba(30,58,138,0.4),rgba(22,78,99,0.4))}
+      .tip-card{background:var(--dm-grad-card);border:1px solid var(--dm-border-dim);padding:16px;border-radius:12px;text-align:center;transition:all .3s}
+      .tip-card:hover{transform:translateY(-4px);border-color:var(--dm-cyan-25);box-shadow:0 10px 20px var(--dm-shadow-md)}
+      .tip-icon{width:44px;height:44px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:50%;border:1px solid var(--dm-cyan-20)}
+      .tip-icon svg{width:24px;height:24px}
+      .tip-text{font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px;line-height:1.3}
+
+      /* ── Acordeão ── */
+      .accordion-wrapper{display:flex;flex-direction:column;gap:14px}
+      .accordion-item{background:var(--dm-grad-card);border-radius:16px;border:1px solid var(--dm-border-dim);overflow:hidden;transition:border-color .3s}
+      .accordion-item:has(.accordion-content.active){border-color:var(--dm-cyan-25)}
+      .accordion-header{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .25s}
+      .accordion-header:hover{background:var(--dm-cyan-05)}
       .acc-title-wrapper{display:flex;align-items:center}
-      .acc-icon-left{width:40px;height:40px;margin-right:15px;display:flex;align-items:center;justify-content:center}
-      .acc-icon-left svg{width:28px;height:28px}
-      .acc-title{font-size:1.25rem;font-weight:700}
-      .acc-icon-right{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:rgba(37,99,235,0.3);border-radius:50%;border:1px solid rgba(96,165,250,0.5);transition:transform 0.3s;flex-shrink:0}
-      .acc-icon-right svg{width:20px;height:20px}
+      .acc-icon-left{width:38px;height:38px;margin-right:14px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:10px;border:1px solid var(--dm-cyan-20);flex-shrink:0}
+      .acc-icon-left svg{width:22px;height:22px}
+      .acc-title{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px}
+      .acc-icon-right{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:50%;border:1px solid var(--dm-cyan-20);color:var(--dm-cyan);transition:transform .3s;flex-shrink:0}
+      .acc-icon-right svg{width:18px;height:18px;stroke:var(--dm-cyan)}
       .acc-icon-right.rotated{transform:rotate(45deg)}
-      .accordion-content{max-height:0;overflow:hidden;transition:max-height 0.4s ease-out}
-      .accordion-content.active{max-height:1200px}
-      .acc-body{padding:0 24px 24px 24px;display:flex;flex-direction:column;gap:16px}
-      .alert-box{background:rgba(0,0,0,0.3);padding:16px;border-radius:12px;border-left:4px solid}
-      .alert-blue{border-left-color:#3b82f6}
-      .alert-cyan{border-left-color:#06b6d4}
-      .alert-green{border-left-color:#10b981}
-      .alert-red{border-left-color:#ef4444}
-      .alert-title{font-weight:600;margin-bottom:8px;font-size:1rem}
-      .alert-blue .alert-title{color:#93c5fd}
-      .alert-cyan .alert-title{color:#67e8f9}
-      .alert-green .alert-title{color:#6ee7b7}
-      .alert-red .alert-title{color:#fca5a5}
-      .alert-text{font-size:0.95rem;color:var(--dm-text-sub);line-height:1.6}
-      .hl-cyan{color:#22d3ee;font-weight:600}
-      .hl-blue{color:#60a5fa;font-weight:600}
-      .hl-green{color:#34d399;font-weight:600}
-      .hl-red{color:#f87171;font-weight:600}
-      .bonus-wrapper{background:linear-gradient(135deg,rgba(37,99,235,0.1),rgba(6,182,212,0.1));border:1px solid rgba(37,99,235,0.3);border-radius:12px;padding:24px}
-      .bonus-header{font-weight:600;color:#fde047;margin-bottom:16px;display:flex;align-items:center;font-size:1rem}
-      .bonus-header svg{width:24px;height:24px;margin-right:8px}
-      .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-      .bonus-card{padding:16px;border-radius:8px;text-align:center;border:1px solid;transition:all 0.3s}
-      .bonus-card:hover{transform:translateY(-4px) scale(1.02)}
-      .bonus-yellow{background:linear-gradient(to bottom right,rgba(202,138,4,0.2),rgba(234,88,12,0.2));border-color:rgba(234,179,8,0.3)}
-      .bonus-orange{background:linear-gradient(to bottom right,rgba(234,88,12,0.2),rgba(239,68,68,0.2));border-color:rgba(249,115,22,0.3)}
-      .bonus-red{background:linear-gradient(to bottom right,rgba(239,68,68,0.2),rgba(219,39,119,0.2));border-color:rgba(239,68,68,0.3)}
-      .bonus-val{font-size:1.5rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
-      .bonus-yellow .bonus-val{color:#facc15}
-      .bonus-orange .bonus-val{color:#fb923c}
-      .bonus-red .bonus-val{color:#f87171}
-      .bonus-val svg{width:24px;height:24px}
-      .bonus-sub{font-size:0.85rem;color:var(--dm-text-sub);margin-top:4px}
-      .support-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px}
+      .accordion-content{max-height:0;overflow:hidden;transition:max-height .4s ease-out}
+      .accordion-content.active{max-height:1400px}
+      .acc-body{padding:0 22px 22px;display:flex;flex-direction:column;gap:14px}
+
+      /* ── Alertas ── */
+      .alert-box{background:var(--dm-bg-1);padding:16px;border-radius:12px;border-left:3px solid}
+      .alert-blue{border-left-color:var(--dm-cyan)}
+      .alert-cyan{border-left-color:var(--dm-cyan)}
+      .alert-green{border-left-color:var(--dm-green,#10b981)}
+      .alert-red{border-left-color:var(--dm-red,#ef4444)}
+      .alert-title{font-family:'Rajdhani',sans-serif;font-weight:700;margin-bottom:8px;font-size:.95rem;text-transform:uppercase;letter-spacing:.5px}
+      .alert-blue .alert-title,.alert-cyan .alert-title{color:var(--dm-cyan)}
+      .alert-green .alert-title{color:var(--dm-green,#10b981)}
+      .alert-red .alert-title{color:var(--dm-red,#ef4444)}
+      .alert-text{font-size:.9rem;color:var(--dm-text-sub);line-height:1.65}
+      .hl-cyan,.hl-blue{color:var(--dm-cyan);font-weight:600}
+      .hl-green{color:var(--dm-green,#10b981);font-weight:600}
+      .hl-red{color:var(--dm-red,#ef4444);font-weight:600}
+
+      /* ── Bônus ── */
+      .bonus-wrapper{background:var(--dm-cyan-05);border:1px solid var(--dm-cyan-20);border-radius:12px;padding:22px}
+      .bonus-header{font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--dm-gold);margin-bottom:16px;display:flex;align-items:center;font-size:1rem;text-transform:uppercase;letter-spacing:.5px}
+      .bonus-header svg{width:22px;height:22px;margin-right:8px}
+      .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+      .bonus-card{padding:16px;border-radius:10px;text-align:center;border:1px solid var(--dm-gold-10);background:var(--dm-gold-10);transition:all .3s}
+      .bonus-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px var(--dm-shadow-md)}
+      .bonus-val{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;color:var(--dm-gold);display:flex;align-items:center;justify-content:center;gap:8px}
+      .bonus-val svg{width:22px;height:22px}
+      .bonus-sub{font-size:.82rem;color:var(--dm-text-muted);margin-top:4px}
+
+      /* ── Suporte grid ── */
+      .support-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
       .support-item{display:flex;flex-direction:column;align-items:center;text-align:center}
-      .support-icon{width:48px;height:48px;margin-bottom:8px;display:flex;align-items:center;justify-content:center}
-      .support-icon svg{width:28px;height:28px}
-      .support-text{font-size:0.85rem;color:#9ca3af;line-height:1.2}
+      .support-icon{width:44px;height:44px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:50%;border:1px solid var(--dm-cyan-20)}
+      .support-icon svg{width:24px;height:24px}
+      .support-text{font-size:.82rem;color:var(--dm-text-muted);line-height:1.3;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.3px}
+
       @media(max-width:1024px){.benefits-grid{grid-template-columns:repeat(2,1fr)}.tips-grid,.support-grid{grid-template-columns:repeat(2,1fr)}}
-      @media(max-width:768px){.benefits-container,.faq-container{padding:30px 15px}.main-title,.faq-title{font-size:1.8rem}.benefits-grid{grid-template-columns:1fr}.bonus-grid{grid-template-columns:1fr}.acc-title{font-size:1.1rem}.accordion-header{padding:16px}.acc-body{padding:0 16px 16px 16px}}
-      @media(max-width:480px){.accordion-content.active{max-height:1800px}}
+      @media(max-width:768px){.benefits-container,.faq-container{padding:28px 14px}.benefits-grid{grid-template-columns:1fr}.bonus-grid{grid-template-columns:1fr}.acc-title{font-size:1rem}.accordion-header{padding:14px 16px}.acc-body{padding:0 14px 18px}}
+      @media(max-width:480px){.tips-grid{grid-template-columns:repeat(2,1fr)}.support-grid{grid-template-columns:repeat(2,1fr)}.accordion-content.active{max-height:1800px}}
     </style>
 
     <div class="benefits-container">

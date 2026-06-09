@@ -47,7 +47,7 @@ const Router = {
     const path = window.location.pathname;
     const requerLogin = this.protectedRoutes.some(r => path.includes(r));
     if (requerLogin && !Auth.isLoggedIn()) {
-      window.location.href = '/index.html?redirect=' + encodeURIComponent(path);
+      window.location.href = 'index.html?redirect=' + encodeURIComponent(path);
     }
   },
 

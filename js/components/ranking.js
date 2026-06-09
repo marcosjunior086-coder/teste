@@ -145,6 +145,26 @@ class RankingDmaior extends HTMLElement {
         --roxo:#0369a1;--azul:#0095a8;
         --gold:#b8860b;--bronze:#7c5000;--red:#dc2626;--green2:#15803d;
         --podium-1:rgba(184,134,11,0.12);--podium-2:rgba(3,105,161,0.12);--podium-3:rgba(124,80,0,0.12);}
+      /* ── Tema Rosa ── */
+      :host-context([data-theme="rosa"]){
+        --bg-app:#fff5f8;--bg-app2:#fce4ec;
+        --bg-card:rgba(255,255,255,0.95);--bg-card2:rgba(252,228,236,0.98);
+        --text:#1a0010;--text-sub:#4a0028;--text-muted:#80004a;
+        --border:rgba(233,30,140,0.35);--border-dim:rgba(233,30,140,0.15);
+        --roxo:#e91e8c;--azul:#c2185b;
+        --bloom-grad:linear-gradient(135deg,#e91e8c 0%,#ff6090 100%);
+        --gold:#c2185b;--bronze:#880040;--red:#b71c1c;--green2:#2e7d32;
+        --podium-1:rgba(194,24,91,0.15);--podium-2:rgba(233,30,140,0.12);--podium-3:rgba(136,0,64,0.12);}
+      /* ── Tema Laranja ── */
+      :host-context([data-theme="laranja"]){
+        --bg-app:#fff8f0;--bg-app2:#fff3e0;
+        --bg-card:rgba(255,255,255,0.95);--bg-card2:rgba(255,243,224,0.98);
+        --text:#1a0a00;--text-sub:#4a2000;--text-muted:#7c3a00;
+        --border:rgba(249,115,22,0.35);--border-dim:rgba(249,115,22,0.15);
+        --roxo:#f97316;--azul:#ea580c;
+        --bloom-grad:linear-gradient(135deg,#f97316 0%,#fbbf24 100%);
+        --gold:#ea580c;--bronze:#92400e;--red:#dc2626;--green2:#15803d;
+        --podium-1:rgba(234,88,12,0.15);--podium-2:rgba(249,115,22,0.12);--podium-3:rgba(146,64,14,0.12);}
       *{margin:0;padding:0;box-sizing:border-box}
       .app-container{background:linear-gradient(180deg,var(--bg-app) 0%,var(--bg-app2) 100%);background-attachment:fixed;color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;padding-bottom:50px;overflow-x:hidden;width:100%}
       h1,h2,h3,.rajdhani,.name{font-family:var(--font-title);letter-spacing:1px;text-transform:uppercase}
@@ -215,7 +235,7 @@ class RankingDmaior extends HTMLElement {
       .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:2px solid var(--border-dim)}
       .live-badge,.list-live-badge{display:none}
       /* Bolinha animada estilo Kwai */
-      .live-dot{position:absolute;top:0;right:0;width:18px;height:18px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:2px;z-index:4;box-shadow:0 0 8px rgba(0,229,229,0.7);border:1.5px solid #000;}
+      .live-dot{position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:1.5px;z-index:4;box-shadow:0 0 6px rgba(0,229,229,0.8);border:2px solid var(--azul);outline:2px solid rgba(0,0,0,0.5);}
       .live-dot span{display:block;width:2px;border-radius:2px;background:#000;animation:livebar 0.9s ease-in-out infinite;}
       .live-dot span:nth-child(1){height:4px;animation-delay:0s}
       .live-dot span:nth-child(2){height:7px;animation-delay:0.2s}

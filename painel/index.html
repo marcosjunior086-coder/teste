@@ -118,7 +118,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const session = window.Auth ? Auth.getSession() : null;
       if (!session) {
-        window.location.href = '/?redirect=/painel/';
+        window.location.href = '../index.html?redirect=painel/';
         return;
       }
 
