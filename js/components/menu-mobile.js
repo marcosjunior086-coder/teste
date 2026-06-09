@@ -128,9 +128,19 @@ class MenuMobileDMaior extends HTMLElement {
       .logo{ height:38px; width:auto; max-width:150px; object-fit:contain; display:block; flex-shrink:1; min-width:0; transition:filter .3s; }
       .hamburger{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .2s,opacity .2s; margin-right:-8px; flex-shrink:0; }
       .hamburger:active{ transform:scale(.9); opacity:.7; }
-      /* ── Tema branco: logo e linhas do hambúrguer ficam escuros ── */
-      :host-context([data-theme="branco"]) .logo { filter: brightness(0); }
-      :host-context([data-theme="branco"]) .hamburger svg line { stroke: #1a1a1a; }
+      /* ── Temas claros: logo preta, hambúrguer e X escuros ── */
+      :host-context([data-theme="branco"]) .logo,
+      :host-context([data-theme="rosa"]) .logo,
+      :host-context([data-theme="laranja"]) .logo { filter: brightness(0); }
+      :host-context([data-theme="branco"]) .hamburger svg line,
+      :host-context([data-theme="rosa"]) .hamburger svg line,
+      :host-context([data-theme="laranja"]) .hamburger svg line { stroke: #1a1a1a; }
+      :host-context([data-theme="branco"]) .close-btn svg line,
+      :host-context([data-theme="branco"]) .close-btn svg path,
+      :host-context([data-theme="rosa"]) .close-btn svg line,
+      :host-context([data-theme="rosa"]) .close-btn svg path,
+      :host-context([data-theme="laranja"]) .close-btn svg line,
+      :host-context([data-theme="laranja"]) .close-btn svg path { stroke: #1a1a1a; }
       /* ── Engrenagem de layout ── */
       .topbar-right{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
       .gear-btn{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--dm-text-sub); transition:color .2s; position:relative; }
@@ -218,6 +228,12 @@ class MenuMobileDMaior extends HTMLElement {
             <button class="dd-option" id="ddThemeBranco" data-theme-id="branco">
               <span class="dd-dot" style="background:#f0f4f8;border:1.5px solid rgba(0,0,0,.25);"></span> Branco
             </button>
+            <button class="dd-option" id="ddThemeRosa" data-theme-id="rosa">
+              <span class="dd-dot" style="background:#fce4ec;border:1.5px solid #e91e8c;"></span> Rosa
+            </button>
+            <button class="dd-option" id="ddThemeLaranja" data-theme-id="laranja">
+              <span class="dd-dot" style="background:#fff3e0;border:1.5px solid #f97316;"></span> Laranja
+            </button>
           </div>
         </div>
 
@@ -234,7 +250,7 @@ class MenuMobileDMaior extends HTMLElement {
       </div>
 
       <div class="auth-area">
-        <a href="/painel/index.html" class="btn-access" id="btnAccess">
+        <a href="painel/index.html" class="btn-access" id="btnAccess">
           ${SVG_ACCESS} ACESSAR PAINEL
         </a>
         <div class="hidden" id="userCard">
@@ -340,6 +356,8 @@ class MenuMobileDMaior extends HTMLElement {
       root.getElementById('ddThemeOriginal'),
       root.getElementById('ddThemeDark'),
       root.getElementById('ddThemeBranco'),
+      root.getElementById('ddThemeRosa'),
+      root.getElementById('ddThemeLaranja'),
     ];
 
     // Marca opção de cor ativa

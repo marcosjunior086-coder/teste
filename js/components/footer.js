@@ -74,9 +74,13 @@ class DmaiorFooter extends HTMLElement {
           transition: filter .2s;
         }
         .footer-logo:hover { filter: brightness(1.15); }
-        /* Tema branco: logo fica escura */
-        :host-context([data-theme="branco"]) .footer-logo { filter: brightness(0); }
-        :host-context([data-theme="branco"]) .footer-logo:hover { filter: brightness(0.2); }
+        /* Temas claros: logo fica escura */
+        :host-context([data-theme="branco"]) .footer-logo,
+        :host-context([data-theme="rosa"]) .footer-logo,
+        :host-context([data-theme="laranja"]) .footer-logo { filter: brightness(0); }
+        :host-context([data-theme="branco"]) .footer-logo:hover,
+        :host-context([data-theme="rosa"]) .footer-logo:hover,
+        :host-context([data-theme="laranja"]) .footer-logo:hover { filter: brightness(0.2); }
         .col-logo p {
           font-size: .68rem;
           color: var(--dm-text-muted, #7a9ab4);

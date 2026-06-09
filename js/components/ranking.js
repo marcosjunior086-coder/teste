@@ -63,10 +63,14 @@ class RankingDmaior extends HTMLElement {
     this.bindEvents();
     if (this._isLoggedIn()) this.initDashboard();
     this._setupMenuDetection();
+    // Re-renderiza a lista quando o tema muda para atualizar cores inline
+    this._temaHandler = () => { if (this.allRows.length) this.renderList(); };
+    window.addEventListener('dmaior:tema', this._temaHandler);
   }
 
   disconnectedCallback() {
     if (this._menuObserver)     { this._menuObserver.disconnect(); this._menuObserver = null; }
+    window.removeEventListener('dmaior:tema', this._temaHandler);
     if (this._menuPollInterval) { clearInterval(this._menuPollInterval); }
     clearInterval(this.timerInterval);
   }
@@ -117,15 +121,37 @@ class RankingDmaior extends HTMLElement {
         --roxo:#3b82f6;--azul:#00e5e5;
         --bloom-grad:linear-gradient(135deg,var(--roxo) 0%,var(--azul) 100%);
         --text:#ffffff;--text-sub:#d0d8e8;--text-muted:#a0b8c8;
+        --bg-app:#0C0E1E;--bg-app2:#040404;
+        --bg-card:rgba(18,18,31,0.85);--bg-card2:rgba(12,14,30,0.9);
         --border:rgba(59,130,246,0.4);--border-dim:rgba(59,130,246,0.1);
         --gold:#f0c040;--bronze:#a86c31;--red:#f87171;--green2:#4ade80;--yellow:#fbbf24;
         --podium-1:rgba(240,192,64,0.15);--podium-2:rgba(59,130,246,0.15);--podium-3:rgba(168,108,49,0.15);
         --t-title-lg:clamp(1.1rem,4.5vw,1.6rem);--t-title-md:clamp(1rem,4vw,1.3rem);
-        --t-val:clamp(0.78rem,2vw,0.9rem);--t-info:clamp(0.72rem,1.9vw,0.82rem);}
+        --t-val:clamp(0.78rem,2vw,0.9rem);--t-info:clamp(0.72rem,1.9vw,0.82rem);
+        --font-title:'Rajdhani',sans-serif;--font-body:'Exo 2',sans-serif;}
+      /* ── Tema escuro ── */
+      :host-context([data-theme="dark"]){
+        --bg-app:#0d0f14;--bg-app2:#08090e;
+        --bg-card:rgba(19,22,31,0.9);--bg-card2:rgba(13,15,20,0.95);
+        --text:#e8edf5;--text-sub:#b0bec8;--text-muted:#8898b0;
+        --border:rgba(0,196,196,0.35);--border-dim:rgba(0,196,196,0.1);
+        --roxo:#2563eb;--azul:#00c4c4;}
+      /* ── Tema branco ── */
+      :host-context([data-theme="branco"]){
+        --bg-app:#eaeff6;--bg-app2:#f0f4f8;
+        --bg-card:rgba(255,255,255,0.95);--bg-card2:rgba(240,244,248,0.98);
+        --text:#0d1117;--text-sub:#2d3748;--text-muted:#4a5568;
+        --border:rgba(0,149,168,0.35);--border-dim:rgba(0,149,168,0.12);
+        --roxo:#0369a1;--azul:#0095a8;
+        --gold:#b8860b;--bronze:#7c5000;--red:#dc2626;--green2:#15803d;
+        --podium-1:rgba(184,134,11,0.12);--podium-2:rgba(3,105,161,0.12);--podium-3:rgba(124,80,0,0.12);}
       *{margin:0;padding:0;box-sizing:border-box}
-      .app-container{background:linear-gradient(180deg,#0C0E1E 0%,#040404 100%);background-attachment:fixed;color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;padding-bottom:50px;overflow-x:hidden;width:100%}
-      h1,h2,h3,.rajdhani,.name{font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase}
-      .glass-card{background:linear-gradient(160deg,rgba(12,14,30,0.9) 0%,rgba(4,4,4,0.9) 100%);border:1px solid var(--border);border-radius:20px;position:relative;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+      .app-container{background:linear-gradient(180deg,var(--bg-app) 0%,var(--bg-app2) 100%);background-attachment:fixed;color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;padding-bottom:50px;overflow-x:hidden;width:100%}
+      h1,h2,h3,.rajdhani,.name{font-family:var(--font-title);letter-spacing:1px;text-transform:uppercase}
+      /* ── Botões de faixa (1-20, 21-40…) via classe — reage ao tema ── */
+      .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:var(--font-title);font-weight:700;background:var(--bg-card);color:var(--text-muted);border:1px solid var(--border-dim);transition:all .2s}
+      .page-btn.active{background:var(--bloom-grad);color:#fff;border:1px solid transparent;box-shadow:0 0 15px rgba(59,130,246,0.35)}
+      .glass-card{background:linear-gradient(160deg,var(--bg-card2) 0%,var(--bg-card) 100%);border:1px solid var(--border);border-radius:20px;position:relative;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
       .glass-card::after{content:'';position:absolute;bottom:0;left:0;right:0;background:linear-gradient(90deg,transparent,var(--roxo),var(--azul),transparent);height:2px}
       #login-screen{position:fixed;inset:0;background:rgba(4,4,4,0.98);display:flex;align-items:flex-start;justify-content:center;padding-top:20px;z-index:1000}
       .login-box{padding:40px;width:90%;max-width:400px;text-align:center}
@@ -150,10 +176,10 @@ class RankingDmaior extends HTMLElement {
       .tab-btn{flex:1;padding:12px;border:none;background:transparent;color:var(--text-sub);font-family:'Rajdhani';font-size:var(--t-info);border-radius:8px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
       .tab-btn.active{background:var(--bloom-grad);color:#fff;box-shadow:0 0 15px rgba(59,130,246,0.3)}
       .tab-btn svg{width:16px;height:16px}
-      .growth{font-size:0.68rem;padding:2px 6px;border-radius:4px;display:inline-flex;align-items:center;font-weight:700;margin-top:4px}
+      .growth{font-size:0.68rem;padding:2px 6px;border-radius:4px;display:inline-flex;align-items:center;font-family:var(--font-title);font-weight:700;margin-top:4px}
       .growth.up{background:rgba(74,222,128,0.15);color:var(--green2);border:1px solid rgba(74,222,128,0.3)}
       .growth.down{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
-      .growth.neutral{background:rgba(255,255,255,0.05);color:var(--text-muted);border:1px solid rgba(255,255,255,0.1)}
+      .growth.neutral{background:var(--border-dim);color:var(--text-muted);border:1px solid var(--border-dim)}
       .growth.new{background:var(--bloom-grad);color:#fff;border:none;padding:3px 7px}
       .badges-container{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
       .podium{display:flex;justify-content:center;align-items:flex-end;height:320px;margin-bottom:40px;margin-top:70px;gap:14px;animation:fadeUp 0.6s ease both}
@@ -180,7 +206,7 @@ class RankingDmaior extends HTMLElement {
       .list-prize-tag{font-size:0.75rem;color:var(--green2);background:rgba(74,222,128,0.15);padding:2px 6px;border-radius:4px;font-family:'Rajdhani',sans-serif;font-weight:700;border:1px solid rgba(74,222,128,0.3);display:inline-flex;align-items:center;margin-top:4px}
       .currency-symbol{margin-right:4px;font-size:0.9em;opacity:0.9}
       .ranking-list{display:flex;flex-direction:column;gap:10px;width:100%;animation:fadeUp 0.8s ease both}
-      .list-item{display:flex;align-items:center;padding:12px 18px;background:rgba(18,18,31,0.85);border-radius:16px;border:1px solid var(--border-dim);transition:transform 0.2s}
+      .list-item{display:flex;align-items:center;padding:12px 18px;background:var(--bg-card);border-radius:16px;border:1px solid var(--border-dim);transition:transform 0.2s}
       .list-item:hover{transform:translateX(5px);background:rgba(59,130,246,0.05);border-color:var(--border)}
       .list-rank{width:35px;font-size:var(--t-title-md);font-family:'Rajdhani';font-weight:700;color:var(--text-muted);text-align:center}
       .list-avatar-wrap{position:relative;width:45px;height:45px;margin-right:15px;flex-shrink:0}
@@ -189,7 +215,7 @@ class RankingDmaior extends HTMLElement {
       .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:2px solid var(--border-dim)}
       .live-badge,.list-live-badge{display:none}
       /* Bolinha animada estilo Kwai */
-      .live-dot{position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:2px;z-index:4;box-shadow:0 0 8px rgba(0,229,229,0.7);border:1.5px solid #000;}
+      .live-dot{position:absolute;top:0;right:0;width:18px;height:18px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:2px;z-index:4;box-shadow:0 0 8px rgba(0,229,229,0.7);border:1.5px solid #000;}
       .live-dot span{display:block;width:2px;border-radius:2px;background:#000;animation:livebar 0.9s ease-in-out infinite;}
       .live-dot span:nth-child(1){height:4px;animation-delay:0s}
       .live-dot span:nth-child(2){height:7px;animation-delay:0.2s}
@@ -693,7 +719,7 @@ class RankingDmaior extends HTMLElement {
         const inicio = (p - 1) * this.PAGE_SIZE + 1;
         const fim    = Math.min(p * this.PAGE_SIZE, filtered.length);
         const label  = `${inicio}–${fim}`;
-        html += `<button class="page-btn" data-page="${p}" style="background:${active ? 'var(--bloom-grad)' : 'rgba(18,18,31,0.8)'};color:${active ? '#fff' : 'var(--text-muted)'};border:1px solid ${active ? 'transparent' : 'var(--border-dim)'};box-shadow:${active ? '0 0 15px rgba(59,130,246,0.35)' : 'none'};">${label}</button>`;
+        html += `<button class="page-btn${active ? ' active' : ''}" data-page="${p}">${label}</button>`;
       }
       html += `</div>`;
     }

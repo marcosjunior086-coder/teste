@@ -212,6 +212,114 @@
   --dm-green: #16a34a;
 }
 
+/* ─── Tema Rosa (Kwai Pink) ─────────────────────────────────────────────────── */
+[data-theme="rosa"] {
+  --dm-bg:   #fff5f8;
+  --dm-bg-2: #ffffff;
+  --dm-bg-1: #fce4ec;
+  --dm-bg-3: #f8bbd0;
+  --dm-bg-4: #fff0f4;
+  --dm-bg-card:  rgba(233,30,140,.04);
+  --dm-bg-deep:  #f8bbd0;
+  --dm-bg-panel: rgba(255,255,255,.97);
+  --dm-bg-tint:  rgba(233,30,140,.04);
+  --dm-grad-card:     linear-gradient(160deg, #ffffff 0%, #fce4ec 100%);
+  --dm-grad-card-alt: linear-gradient(135deg, #ffffff, #fce4ec);
+  --dm-grad-sidebar:  linear-gradient(160deg, #ffffff 0%, #fff5f8 60%, #fce4ec 100%);
+  --dm-grad-deep:     linear-gradient(160deg, #ffffff, #fce4ec);
+  --dm-grad-bg:       linear-gradient(160deg, #ffffff 0%, #fce4ec 100%);
+  --dm-text:      #1a0010;
+  --dm-text-sub:  #4a0028;
+  --dm-text-muted:#80004a;
+  --dm-text-dim:  #aa5577;
+  --dm-cyan:  #e91e8c;
+  --dm-gold:  #c2185b;
+  --dm-cyan-dim:    rgba(233,30,140,.65);
+  --dm-cyan-glow:   rgba(233,30,140,.15);
+  --dm-cyan-border: rgba(233,30,140,.22);
+  --dm-border:      rgba(233,30,140,.25);
+  --dm-border-dim:  rgba(233,30,140,.12);
+  --dm-cyan-05: rgba(233,30,140,.05);
+  --dm-cyan-08: rgba(233,30,140,.08);
+  --dm-cyan-10: rgba(233,30,140,.10);
+  --dm-cyan-12: rgba(233,30,140,.12);
+  --dm-cyan-20: rgba(233,30,140,.20);
+  --dm-cyan-25: rgba(233,30,140,.25);
+  --dm-cyan-30: rgba(233,30,140,.30);
+  --dm-cyan-40: rgba(233,30,140,.40);
+  --dm-gold-glow: rgba(194,24,91,.2);
+  --dm-gold-10:   rgba(194,24,91,.10);
+  --dm-gold-20:   rgba(194,24,91,.20);
+  --dm-gold-70:   rgba(194,24,91,.70);
+  --dm-shadow-sm: rgba(233,30,140,.06);
+  --dm-shadow-md: rgba(233,30,140,.10);
+  --dm-shadow-50: rgba(233,30,140,.12);
+  --dm-shadow-lg: rgba(0,0,0,.14);
+  --dm-shadow-xl: rgba(0,0,0,.20);
+  --dm-overlay:   rgba(0,0,0,.45);
+  --dm-bw03: rgba(0,0,0,.03);
+  --dm-bw05: rgba(0,0,0,.05);
+  --dm-bw06: rgba(0,0,0,.06);
+  --dm-bw10: rgba(0,0,0,.10);
+  --dm-grad-cyan: linear-gradient(90deg, #e91e8c, #c2185b);
+  --dm-red:   #c2185b;
+  --dm-green: #2e7d32;
+}
+
+/* ─── Tema Laranja (Kwai Orange) ────────────────────────────────────────────── */
+[data-theme="laranja"] {
+  --dm-bg:   #fff8f0;
+  --dm-bg-2: #ffffff;
+  --dm-bg-1: #fff3e0;
+  --dm-bg-3: #ffe0b2;
+  --dm-bg-4: #fff8f0;
+  --dm-bg-card:  rgba(249,115,22,.04);
+  --dm-bg-deep:  #ffe0b2;
+  --dm-bg-panel: rgba(255,255,255,.97);
+  --dm-bg-tint:  rgba(249,115,22,.04);
+  --dm-grad-card:     linear-gradient(160deg, #ffffff 0%, #fff3e0 100%);
+  --dm-grad-card-alt: linear-gradient(135deg, #ffffff, #fff3e0);
+  --dm-grad-sidebar:  linear-gradient(160deg, #ffffff 0%, #fff8f0 60%, #fff3e0 100%);
+  --dm-grad-deep:     linear-gradient(160deg, #ffffff, #fff3e0);
+  --dm-grad-bg:       linear-gradient(160deg, #ffffff 0%, #fff3e0 100%);
+  --dm-text:      #1a0a00;
+  --dm-text-sub:  #4a2000;
+  --dm-text-muted:#7c3a00;
+  --dm-text-dim:  #a05020;
+  --dm-cyan:  #f97316;
+  --dm-gold:  #ea580c;
+  --dm-cyan-dim:    rgba(249,115,22,.65);
+  --dm-cyan-glow:   rgba(249,115,22,.15);
+  --dm-cyan-border: rgba(249,115,22,.22);
+  --dm-border:      rgba(249,115,22,.25);
+  --dm-border-dim:  rgba(249,115,22,.12);
+  --dm-cyan-05: rgba(249,115,22,.05);
+  --dm-cyan-08: rgba(249,115,22,.08);
+  --dm-cyan-10: rgba(249,115,22,.10);
+  --dm-cyan-12: rgba(249,115,22,.12);
+  --dm-cyan-20: rgba(249,115,22,.20);
+  --dm-cyan-25: rgba(249,115,22,.25);
+  --dm-cyan-30: rgba(249,115,22,.30);
+  --dm-cyan-40: rgba(249,115,22,.40);
+  --dm-gold-glow: rgba(234,88,12,.2);
+  --dm-gold-10:   rgba(234,88,12,.10);
+  --dm-gold-20:   rgba(234,88,12,.20);
+  --dm-gold-70:   rgba(234,88,12,.70);
+  --dm-shadow-sm: rgba(249,115,22,.06);
+  --dm-shadow-md: rgba(249,115,22,.10);
+  --dm-shadow-50: rgba(249,115,22,.12);
+  --dm-shadow-lg: rgba(0,0,0,.14);
+  --dm-shadow-xl: rgba(0,0,0,.20);
+  --dm-overlay:   rgba(0,0,0,.45);
+  --dm-bw03: rgba(0,0,0,.03);
+  --dm-bw05: rgba(0,0,0,.05);
+  --dm-bw06: rgba(0,0,0,.06);
+  --dm-bw10: rgba(0,0,0,.10);
+  --dm-grad-cyan: linear-gradient(90deg, #f97316, #ea580c);
+  --dm-red:   #dc2626;
+  --dm-green: #16a34a;
+}
+
 /* ─── Reset base ────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
