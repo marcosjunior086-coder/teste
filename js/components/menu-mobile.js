@@ -125,9 +125,12 @@ class MenuMobileDMaior extends HTMLElement {
       *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
       :host{ display:block; font-family:'Exo 2',sans-serif; width:100%; }
       .topbar{ display:flex; align-items:center; justify-content:space-between; width:100%; padding:12px 20px; background:var(--dm-grad-card); border-bottom:1px solid var(--dm-border); box-shadow:0 4px 15px var(--dm-shadow-md); }
-      .logo{ height:38px; width:auto; max-width:150px; object-fit:contain; display:block; flex-shrink:1; min-width:0; }
+      .logo{ height:38px; width:auto; max-width:150px; object-fit:contain; display:block; flex-shrink:1; min-width:0; transition:filter .3s; }
       .hamburger{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .2s,opacity .2s; margin-right:-8px; flex-shrink:0; }
       .hamburger:active{ transform:scale(.9); opacity:.7; }
+      /* ── Tema branco: logo e linhas do hambúrguer ficam escuros ── */
+      :host-context([data-theme="branco"]) .logo { filter: brightness(0); }
+      :host-context([data-theme="branco"]) .hamburger svg line { stroke: #1a1a1a; }
       /* ── Engrenagem de layout ── */
       .topbar-right{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
       .gear-btn{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--dm-text-sub); transition:color .2s; position:relative; }

@@ -56,9 +56,11 @@ class DMaiorPolicies extends HTMLElement {
     this.shadowRoot.innerHTML = `
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap');
-      :host{display:block;width:100%;box-sizing:border-box;font-family:'Exo 2',sans-serif;min-height:600px;height:clamp(600px,88vh,920px);--cyan:#00f2ff;--cyan-dim:rgba(0,242,255,0.65);--cyan-glow:rgba(0,242,255,0.22);--cyan-border:rgba(0,242,255,0.16);--bg-deep:#0b0b18;--bg-card:rgba(255,255,255,0.025);--text-main:#e4eef8;--text-muted:#7a9ab4;--text-dim:#4a6070;--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
+      :host{display:block;width:100%;box-sizing:border-box;font-family:'Exo 2',sans-serif;--cyan:#00f2ff;--cyan-dim:rgba(0,242,255,0.65);--cyan-glow:rgba(0,242,255,0.22);--cyan-border:rgba(0,242,255,0.16);--bg-deep:#0b0b18;--bg-card:rgba(255,255,255,0.025);--text-main:#e4eef8;--text-muted:#7a9ab4;--text-dim:#4a6070;--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
+      /* ── Tema branco: cards e fundo claros ── */
+      :host-context([data-theme="branco"]){--bg-deep:#f0f4f8;--bg-card:#ffffff;--text-main:#0d1117;--text-muted:#2d3748;--text-dim:#4a5568;--cyan:#0095a8;--cyan-dim:rgba(0,149,168,0.8);--cyan-glow:rgba(0,149,168,0.15);--cyan-border:rgba(0,149,168,0.25)}
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-      .root{background:var(--bg-deep);border:1px solid var(--cyan-border);border-radius:20px;box-shadow:0 8px 60px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.035);max-width:980px;margin:10px auto;height:100%;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+      .root{background:var(--bg-deep);border:1px solid var(--cyan-border);border-radius:20px;box-shadow:0 8px 60px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.035);max-width:980px;margin:10px auto;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
       .header{padding:clamp(26px,5vw,52px) clamp(22px,5vw,56px) clamp(18px,3vw,34px);border-bottom:1px solid var(--cyan-border);background:linear-gradient(135deg,rgba(0,242,255,0.04) 0%,transparent 55%)}
       .header-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,242,255,0.07);border:1px solid var(--cyan-border);border-radius:20px;padding:4px 13px;margin-bottom:14px;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cyan-dim)}
       .badge-dot{width:6px;height:6px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);animation:pdot 2.2s ease-in-out infinite}
@@ -67,8 +69,8 @@ class DMaiorPolicies extends HTMLElement {
       .header h1 em{font-style:normal;color:var(--cyan)}
       .header-sub{margin-top:10px;font-size:0.8rem;color:var(--text-dim);letter-spacing:0.04em}
       .header-sub span{color:var(--text-muted)}
-      .body{display:grid;grid-template-columns:230px 1fr;min-height:0;overflow:hidden}
-      .toc{border-right:1px solid var(--cyan-border);padding:28px 18px;overflow-y:auto}
+      .body{display:grid;grid-template-columns:230px 1fr}
+      .toc{border-right:1px solid var(--cyan-border);padding:28px 18px;}
       .toc::-webkit-scrollbar{width:2px}.toc::-webkit-scrollbar-thumb{background:var(--cyan-border);border-radius:2px}
       .toc-label{font-family:'Rajdhani',sans-serif;font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;padding-left:10px}
       .toc-link{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:8px;color:var(--text-muted);font-size:0.82rem;font-weight:500;cursor:pointer;transition:var(--ease);border:1px solid transparent;margin-bottom:3px;background:none;text-align:left;width:100%;line-height:1.35}
@@ -76,7 +78,7 @@ class DMaiorPolicies extends HTMLElement {
       .toc-link.active{color:var(--cyan);background:rgba(0,242,255,0.08);border-color:rgba(0,242,255,0.28)}
       .toc-num{font-family:'Rajdhani',sans-serif;font-size:0.7rem;font-weight:700;color:var(--text-dim);min-width:18px;padding-top:1px;transition:color var(--ease)}
       .toc-link.active .toc-num{color:var(--cyan)}
-      .scroll-area{overflow-y:auto;padding:clamp(28px,4vw,48px) clamp(22px,4vw,52px);scroll-behavior:smooth}
+      .scroll-area{padding:clamp(28px,4vw,48px) clamp(22px,4vw,52px);}
       .scroll-area::-webkit-scrollbar{width:3px}.scroll-area::-webkit-scrollbar-thumb{background:var(--cyan-border);border-radius:3px}
       .policy-section{margin-bottom:54px;scroll-margin-top:24px}
       .animate{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
