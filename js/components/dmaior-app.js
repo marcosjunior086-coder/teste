@@ -356,9 +356,7 @@ class DMaiorPainel extends HTMLElement {
             .valor-input-wrap .prefix{position:absolute;left:14px;color:var(--muted);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;pointer-events:none;}
             .valor-input-wrap input{padding-left:46px!important;}
 
-            /* ── iframe views (rank / impulso) ── */
-            .iframe-view{width:100%;display:flex;flex-direction:column;}
-            .iframe-view iframe{width:100%;border:none;border-radius:16px;flex:1;}
+            /* ── Botão voltar nas views inline (rank / impulso) ── */
             .iframe-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;padding:0 0 14px;text-transform:uppercase;}
             .iframe-back svg{width:20px;height:20px;fill:var(--cyan);}
 
@@ -841,10 +839,10 @@ class DMaiorPainel extends HTMLElement {
 
                 </div><!-- /vC -->
 
-                <!-- ══════ RANKING (inline) ══════ -->
-                <div id="vRank" class="view iframe-view">
+                <!-- ══════ RANKING (componente nativo) ══════ -->
+                <div id="vRank" class="view" style="width:100%;">
                     <button class="iframe-back" id="btnBackRank">${this.svgBack()} VOLTAR AO PAINEL</button>
-                    <iframe id="ifrRank" src="" title="Ranking" style="height:85vh;"></iframe>
+                    <ranking-dmaior id="rankingEl" style="display:block;width:100%;min-height:80vh;"></ranking-dmaior>
                 </div>
 
                 <!-- ══════ IMPULSO (componente nativo) ══════ -->
@@ -1405,20 +1403,32 @@ class DMaiorPainel extends HTMLElement {
 
     // ── Ranking / Impulsionamento / Logout ───────────────────────────
     goRanking(){
-        // Abre ranking como view interna (iframe) sem sair do painel
-        const base = window.DmaiorConfig?.baseUrl || '';
-        const src  = base ? base + 'ranking.html' : document.baseURI + 'ranking.html';
-        const ifr  = this.qs('#ifrRank');
-        if(ifr && ifr.src !== src) ifr.src = src;
+        // Abre o componente ranking-dmaior inline, sem sair do painel
         this.navigate('vRank');
         this.navActive('nRank');
+
+        // Patcha o botão de logout do Shadow DOM para voltar ao dashboard
+        // em vez de recarregar a página
+        const patchRank = () => {
+            const el = this.qs('#rankingEl');
+            const sr = el?.shadowRoot;
+            if(!sr) return;
+            const btn = sr.getElementById('btn-logout');
+            if(btn) btn.onclick = (e) => {
+                e.stopPropagation();
+                this.navigate('vD'); this.navActive('nD'); this.loadDash();
+            };
+        };
+        // Componente pode já estar renderizado (segunda visita) ou precisar de delay
+        setTimeout(patchRank, 200);
     }
     goImpulsionamento(){
         // Abre o componente dmaior-impulso inline, sem sair do painel
         const el = this.qs('#impulsoEl');
         if(el){
             // Define o worker-url para o componente (lido em connectedCallback)
-            const workerUrl = window.DmaiorConfig?.workers?.impulso || 'https://impulsionamento.agencydmaior.com.br';
+            // Auth e quota do impulso rodam no mesmo worker do painel (dashboard)
+            const workerUrl = window.DmaiorConfig?.workers?.dashboard || 'https://dashboard.agencydmaior.com.br';
             el.setAttribute('worker-url', workerUrl);
 
             // Patcha os botões internos do Shadow DOM (mode:'open') para navegar dentro do painel
