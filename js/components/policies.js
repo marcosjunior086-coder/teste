@@ -56,9 +56,8 @@ class DMaiorPolicies extends HTMLElement {
     this.shadowRoot.innerHTML = `
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap');
-      :host{display:block;width:100%;box-sizing:border-box;font-family:'Exo 2',sans-serif;--cyan:#00f2ff;--cyan-dim:rgba(0,242,255,0.65);--cyan-glow:rgba(0,242,255,0.22);--cyan-border:rgba(0,242,255,0.16);--bg-deep:#0b0b18;--bg-card:rgba(255,255,255,0.025);--text-main:#e4eef8;--text-muted:#7a9ab4;--text-dim:#4a6070;--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
-      /* ── Tema branco: cards e fundo claros ── */
-      :host-context([data-theme="branco"]){--bg-deep:#f0f4f8;--bg-card:#ffffff;--text-main:#0d1117;--text-muted:#2d3748;--text-dim:#4a5568;--cyan:#0095a8;--cyan-dim:rgba(0,149,168,0.8);--cyan-glow:rgba(0,149,168,0.15);--cyan-border:rgba(0,149,168,0.25)}
+      /* Mapeia vars locais para as globais — adapta-se automaticamente ao tema ativo */
+      :host{display:block;width:100%;box-sizing:border-box;font-family:'Exo 2',sans-serif;--cyan:var(--dm-cyan);--cyan-dim:var(--dm-cyan-dim);--cyan-glow:var(--dm-cyan-08);--cyan-border:var(--dm-border);--bg-deep:var(--dm-bg-1);--bg-card:var(--dm-bg-card);--text-main:var(--dm-text);--text-muted:var(--dm-text-sub);--text-dim:var(--dm-text-muted);--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
       .root{background:var(--bg-deep);border:1px solid var(--cyan-border);border-radius:20px;box-shadow:0 8px 60px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.035);max-width:980px;margin:10px auto;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
       .header{padding:clamp(26px,5vw,52px) clamp(22px,5vw,56px) clamp(18px,3vw,34px);border-bottom:1px solid var(--cyan-border);background:linear-gradient(135deg,rgba(0,242,255,0.04) 0%,transparent 55%)}

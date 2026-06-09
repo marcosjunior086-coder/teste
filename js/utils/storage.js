@@ -67,3 +67,6 @@ const Storage = {
     try { localStorage.clear(); } catch {}
   },
 };
+
+// Nota: NÃO expor como window.Storage pois conflita com a interface nativa do browser.
+// Storage é usado diretamente pelos scripts que carregam após este arquivo.

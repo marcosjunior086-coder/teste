@@ -28,13 +28,17 @@ class MenuMobileDMaior extends HTMLElement {
     this.render();
     this.bindEvents();
     this.checkAuth();
-    window.addEventListener('storage', (e) => {
+    // Guarda referências para poder remover corretamente no disconnectedCallback
+    this._storageHandler = (e) => {
       if (['dm_token', 'dm_foto', 'dm_nome'].includes(e.key)) this.checkAuth();
-    });
-    window.addEventListener('dmaior:auth', (e) => this.updateAuthUI(e.detail));
+    };
+    this._authHandler = (e) => this.updateAuthUI(e.detail);
+    window.addEventListener('storage', this._storageHandler);
+    window.addEventListener('dmaior:auth', this._authHandler);
   }
 
   disconnectedCallback() {
+    window.removeEventListener('storage',     this._storageHandler);
     window.removeEventListener('dmaior:auth', this._authHandler);
   }
 
@@ -67,21 +71,23 @@ class MenuMobileDMaior extends HTMLElement {
 
   render() {
     const URL_LOGO   = `https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png`;
-    const SVG_MENU   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
-    const SVG_CLOSE  = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-    const SVG_CHEV   = `<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-    const SVG_HOME   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
-    const SVG_RANK   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`;
-    const SVG_FOLDER = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
-    const SVG_BOOK   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
-    const SVG_EVENT  = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
-    const SVG_TOOL   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`;
-    const SVG_INFO   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-    const SVG_PAINEL = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`;
-    const SVG_LOGOUT = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
+    // Todos os ícones usam stroke="currentColor" — a cor é controlada por CSS via var(--dm-*)
+    const SVG_MENU   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+    const SVG_CLOSE  = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+    const SVG_CHEV   = `<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    const SVG_HOME   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
+    const SVG_RANK   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`;
+    const SVG_FOLDER = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+    const SVG_BOOK   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+    const SVG_EVENT  = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+    const SVG_TOOL   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`;
+    const SVG_INFO   = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+    const SVG_PAINEL = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`;
+    const SVG_LOGOUT = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
     const SVG_ACCESS = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>`;
-    const SVG_USER   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+    const SVG_USER   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
 
+    // Itens com disabled:true são exibidos mas não navegam — páginas ainda não criadas
     const menuData = [
       { label: 'Início',      link: 'index.html',             icon: SVG_HOME   },
       { label: 'Rank',        link: 'ranking.html',           icon: SVG_RANK   },
@@ -89,11 +95,11 @@ class MenuMobileDMaior extends HTMLElement {
           { label: 'Políticas Host',     link: 'politicas-host.html' },
           { label: 'Políticas Premium',  link: 'politicas-premium.html' },
       ]},
-      { label: 'Cursos',      link: 'cursos.html',            icon: SVG_BOOK   },
+      { label: 'Cursos',      disabled: true,                 icon: SVG_BOOK   },
       { label: 'Eventos',     icon: SVG_EVENT, subItems: [
           { label: 'PK Interno', link: 'pk-interno.html' },
       ]},
-      { label: 'Ferramentas', link: 'aplicativos.html',       icon: SVG_TOOL   },
+      { label: 'Ferramentas', disabled: true,                 icon: SVG_TOOL   },
       { label: 'Portfólio',   icon: SVG_INFO, subItems: [
           { label: 'Quem Somos?', link: 'quem-somos.html' },
       ]},
@@ -110,6 +116,13 @@ class MenuMobileDMaior extends HTMLElement {
               ${SVG_CHEV}
             </button>
             <div class="sub-wrap" id="sub-${i}"><div class="sub-inner">${subs}</div></div>
+          </div>`;
+      } else if (item.disabled) {
+        // Página ainda não criada — exibe como "em breve" sem link clicável
+        menuHTML += `
+          <div class="menu-item direct disabled-item">
+            <div class="menu-content">${item.icon}<span>${item.label}</span></div>
+            <span class="em-breve-tag">Em breve</span>
           </div>`;
       } else {
         menuHTML += `
@@ -128,19 +141,26 @@ class MenuMobileDMaior extends HTMLElement {
       .logo{ height:38px; width:auto; max-width:150px; object-fit:contain; display:block; flex-shrink:1; min-width:0; transition:filter .3s; }
       .hamburger{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .2s,opacity .2s; margin-right:-8px; flex-shrink:0; }
       .hamburger:active{ transform:scale(.9); opacity:.7; }
+      /* ── Cor dos ícones do menu: via variável de tema ── */
+      .menu-content svg { color: var(--dm-cyan); }
+      .chevron { color: var(--dm-text-sub); }
+      /* Hambúrguer e fechar: brancos em temas escuros (padrão) */
+      .hamburger svg, .close-btn svg { color: #ffffff; }
+      /* Ícone de usuário não logado */
+      .auth-area svg { color: var(--dm-text-sub); }
+      /* Ícones dentro da área autenticada (painel, logout) */
+      .auth-link svg { color: var(--dm-text-sub); }
+      .auth-link.danger svg { color: var(--dm-red, #f87171); }
       /* ── Temas claros: logo preta, hambúrguer e X escuros ── */
       :host-context([data-theme="branco"]) .logo,
       :host-context([data-theme="rosa"]) .logo,
       :host-context([data-theme="laranja"]) .logo { filter: brightness(0); }
-      :host-context([data-theme="branco"]) .hamburger svg line,
-      :host-context([data-theme="rosa"]) .hamburger svg line,
-      :host-context([data-theme="laranja"]) .hamburger svg line { stroke: #1a1a1a; }
-      :host-context([data-theme="branco"]) .close-btn svg line,
-      :host-context([data-theme="branco"]) .close-btn svg path,
-      :host-context([data-theme="rosa"]) .close-btn svg line,
-      :host-context([data-theme="rosa"]) .close-btn svg path,
-      :host-context([data-theme="laranja"]) .close-btn svg line,
-      :host-context([data-theme="laranja"]) .close-btn svg path { stroke: #1a1a1a; }
+      :host-context([data-theme="branco"]) .hamburger svg,
+      :host-context([data-theme="rosa"]) .hamburger svg,
+      :host-context([data-theme="laranja"]) .hamburger svg { color: #1a1a1a; }
+      :host-context([data-theme="branco"]) .close-btn svg,
+      :host-context([data-theme="rosa"]) .close-btn svg,
+      :host-context([data-theme="laranja"]) .close-btn svg { color: #1a1a1a; }
       /* ── Engrenagem de layout ── */
       .topbar-right{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
       .gear-btn{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--dm-text-sub); transition:color .2s; position:relative; }
@@ -165,7 +185,7 @@ class MenuMobileDMaior extends HTMLElement {
       .close-btn{ background:transparent; border:none; padding:5px; cursor:pointer; display:flex; align-items:center; transition:transform .2s; }
       .close-btn:active{ transform:scale(.8); }
       .auth-area{ padding:16px 20px; border-bottom:1px solid var(--dm-cyan-10); background:var(--dm-bg-tint); }
-      .btn-access{ display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,#3b82f6 0%,#00e5e5 100%); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; text-transform:uppercase; cursor:pointer; text-decoration:none; width:100%; letter-spacing:.05em; transition:box-shadow .25s,opacity .2s; box-shadow:0 0 14px rgba(59,130,246,.35); }
+      .btn-access{ display:flex; align-items:center; justify-content:center; gap:8px; background:var(--dm-grad-cyan, linear-gradient(135deg,var(--dm-cyan,#00d4d4) 0%,var(--dm-gold,#f0c040) 100%)); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; text-transform:uppercase; cursor:pointer; text-decoration:none; width:100%; letter-spacing:.05em; transition:box-shadow .25s,opacity .2s; box-shadow:0 0 14px var(--dm-cyan-20,rgba(0,212,212,.35)); }
       .btn-access:active{ opacity:.85; }
       .btn-access:hover{ box-shadow:0 0 22px rgba(0,229,229,.5); }
       .user-card{ display:flex; align-items:center; gap:12px; }
@@ -177,7 +197,7 @@ class MenuMobileDMaior extends HTMLElement {
       .auth-actions{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
       .auth-link{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; text-decoration:none; font-size:.9rem; font-weight:600; color:var(--dm-text-sub); transition:background .2s,color .2s; border:none; background:none; cursor:pointer; font-family:'Exo 2',sans-serif; width:100%; }
       .auth-link:hover{ background:var(--dm-cyan-08); color:var(--dm-text); }
-      .auth-link.danger{ color:#f87171; }
+      .auth-link.danger{ color:var(--dm-red, #f87171); }
       .auth-link.danger:hover{ background:rgba(248,113,113,.08); }
       .hidden{ display:none !important; }
       .menu-list{ padding:15px 0; display:flex; flex-direction:column; }
@@ -187,13 +207,16 @@ class MenuMobileDMaior extends HTMLElement {
       .direct:active,.menu-acc:active{ background:var(--dm-cyan-10); }
       .menu-content{ display:flex; align-items:center; gap:14px; font-family:'Rajdhani',sans-serif; font-size:1.15rem; font-weight:700; color:var(--dm-text); text-transform:uppercase; letter-spacing:.5px; }
       .chevron{ transition:transform .3s; }
-      .has-sub.open .chevron{ transform:rotate(180deg); stroke:var(--dm-cyan); }
+      .has-sub.open .chevron{ transform:rotate(180deg); color:var(--dm-cyan); }
       .has-sub.open .menu-content{ color:var(--dm-cyan); }
       .sub-wrap{ max-height:0; overflow:hidden; transition:max-height .3s ease; background:var(--dm-bg-tint); }
       .sub-inner{ display:flex; flex-direction:column; padding:5px 0 10px 52px; }
       .sub-link{ text-decoration:none; color:var(--dm-text-sub); font-size:.95rem; font-weight:600; padding:12px 24px 12px 0; border-bottom:1px solid var(--dm-bw03); transition:color .2s; }
       .sub-link:last-child{ border-bottom:none; }
       .sub-link:active,.sub-link:hover{ color:var(--dm-cyan); }
+      /* ── Itens "em breve": desabilitados visualmente ── */
+      .disabled-item{ opacity:.45; cursor:default; pointer-events:none; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+      .em-breve-tag{ font-family:'Rajdhani',sans-serif; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--dm-gold); background:var(--dm-gold-10,rgba(240,192,64,.12)); border:1px solid var(--dm-gold-20,rgba(240,192,64,.25)); border-radius:20px; padding:2px 8px; }
     </style>
 
     <div class="topbar">
@@ -282,7 +305,21 @@ class MenuMobileDMaior extends HTMLElement {
     if (detail.logado) {
       btnAccess.classList.add('hidden');
       userCard.classList.remove('hidden');
-      if (detail.foto) avatarWrap.innerHTML = `<img src="${detail.foto}" alt="Avatar">`;
+      // Cria <img> via DOM para evitar XSS — valida esquema antes de atribuir src
+      if (detail.foto) {
+        let fotoSrc = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        try {
+          const u = new URL(String(detail.foto));
+          if (u.protocol === 'http:' || u.protocol === 'https:') fotoSrc = detail.foto;
+        } catch {}
+        const imgEl = document.createElement('img');
+        imgEl.src = fotoSrc;
+        imgEl.alt = 'Avatar';
+        imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+        imgEl.onerror = () => { imgEl.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; };
+        avatarWrap.innerHTML = '';
+        avatarWrap.appendChild(imgEl);
+      }
       if (detail.nome) userName.textContent = detail.nome.split(' ')[0];
     } else {
       btnAccess.classList.remove('hidden');

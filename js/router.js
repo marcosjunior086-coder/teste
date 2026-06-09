@@ -62,7 +62,8 @@ const Router = {
   },
 };
 
-// Verifica proteção de rota ao carregar qualquer página
+// Verifica proteção de rota ao carregar qualquer página e expõe Router globalmente
 if (typeof window !== 'undefined') {
+  window.Router = Router;
   document.addEventListener('DOMContentLoaded', () => Router.checkProtection());
 }

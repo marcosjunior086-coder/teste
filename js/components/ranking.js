@@ -636,9 +636,30 @@ class RankingDmaior extends HTMLElement {
     return (parseInt(p[0] || 0) * 60) + parseInt(p[1] || 0);
   }
 
+  // Valida que a URL tem esquema http/https antes de usar — bloqueia javascript: e data:
+  safeUrl(url) {
+    if (!url) return '';
+    try {
+      const u = new URL(String(url));
+      return (u.protocol === 'http:' || u.protocol === 'https:') ? url : '';
+    } catch { return ''; }
+  }
+
   proxyImg(url) {
-    if (!url) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=80&h=80&fit=cover&output=webp`;
+    const safe = this.safeUrl(url);
+    if (!safe) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    return `https://images.weserv.nl/?url=${encodeURIComponent(safe)}&w=80&h=80&fit=cover&output=webp`;
+  }
+
+  // Escapa caracteres HTML perigosos de dados externos (Supabase/Sheets) antes de injetar via innerHTML
+  esc(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
   }
 
   growthHtml(s) {
@@ -693,8 +714,8 @@ class RankingDmaior extends HTMLElement {
               <div class="badge">${idx + 1}</div>
               ${liveDot}
             </div>
-            <div class="name" title="${s.nome}">${s.nome || 'Sem Nome'}</div>
-            <div class="podium-id">@${s.id}</div>
+            <div class="name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}</div>
+            <div class="podium-id">@${this.esc(s.id)}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${prizeHtml}
             ${this.growthHtml(s)}
@@ -719,8 +740,8 @@ class RankingDmaior extends HTMLElement {
             ${liveDotItem}
           </div>
           <div class="list-name-col">
-            <div class="list-name" title="${s.nome}">${s.nome || 'Sem Nome'}</div>
-            <div class="list-id">@${s.id}</div>
+            <div class="list-name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}</div>
+            <div class="list-id">@${this.esc(s.id)}</div>
             <div class="badges-container">
               ${this.growthHtml(s)}
               ${prizeValue ? `<span class="list-prize-tag"><span class="currency-symbol">R$</span> ${prizeValue}</span>` : ''}

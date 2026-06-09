@@ -12,16 +12,18 @@
     Referrer-Policy        = "strict-origin-when-cross-origin"
     Permissions-Policy     = "camera=(), microphone=(), geolocation=()"
 
-# ── Cache longo para CSS e JS (1 ano) ─────────────
+# ── Cache de CSS e JS ─────────────────────────────
+# FASE DE TESTES: max-age curto para facilitar atualizações sem cache preso.
+# Em produção final: trocar para max-age=31536000,immutable SE usar hash/versionamento nos nomes de arquivo.
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=3600"
 
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=3600"
 
 # ── Cache para fontes e imagens ───────────────────
 [[headers]]

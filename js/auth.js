@@ -99,7 +99,8 @@ const Auth = {
     if (typeof window === 'undefined') return;
     if (!this.isLoggedIn()) {
       const dest = encodeURIComponent(window.location.pathname);
-      window.location.href = `/index.html?${redirectParam}=${dest}`;
+      // Caminho relativo para funcionar tanto em GitHub Pages (/teste/) quanto em domínio raiz
+      window.location.href = 'index.html?' + redirectParam + '=' + dest;
     }
   },
 };
@@ -107,4 +108,6 @@ const Auth = {
 // Inicializa o listener de logout assim que o script carrega
 if (typeof window !== 'undefined') {
   Auth.listenLogout();
+  // Expõe Auth globalmente para que painel/admin possam verificar window.Auth
+  window.Auth = Auth;
 }

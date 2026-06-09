@@ -51,12 +51,13 @@ class PoliticasHost extends HTMLElement {
             
             :host {
                 display: block;
-                --bg-grad: linear-gradient(160deg, #1a1a2e 0%, #12121f 60%, #0d0d1a 100%);
-                --cyan: #00d4d4;
-                --gold: #f0c040;
-                --text: #ffffff;
-                --sub: #a0b8c8;
-                --border: rgba(0, 230, 230, 0.18);
+                /* Mapeia vars locais para as globais — muda automaticamente com o tema */
+                --bg-grad:  var(--dm-grad-card);
+                --cyan:     var(--dm-cyan);
+                --gold:     var(--dm-gold);
+                --text:     var(--dm-text);
+                --sub:      var(--dm-text-sub);
+                --border:   var(--dm-border);
                 width: 100%;
                 font-family: 'Exo 2', sans-serif;
                 color: var(--text);
@@ -157,10 +158,10 @@ class PoliticasHost extends HTMLElement {
             .box-title img { height: 20px; width: auto; object-fit: contain; }
             
             .text-block { margin-bottom: 10px; }
-            .text-block h4 { font-size: 0.8rem; color: #fff; margin-bottom: 4px; }
-            .text-block p { font-size: 0.75rem; color: #c0cfe0; line-height: 1.4; margin-bottom: 4px; }
+            .text-block h4 { font-size: 0.8rem; color: var(--text); margin-bottom: 4px; }
+            .text-block p { font-size: 0.75rem; color: var(--sub); line-height: 1.4; margin-bottom: 4px; }
             .text-block ul { list-style: none; padding-left: 5px; margin-bottom: 6px; }
-            .text-block ul li { font-size: 0.75rem; color: #c0cfe0; line-height: 1.4; position: relative; padding-left: 12px; margin-bottom: 4px; }
+            .text-block ul li { font-size: 0.75rem; color: var(--sub); line-height: 1.4; position: relative; padding-left: 12px; margin-bottom: 4px; }
             .text-block ul li::before { content: '•'; color: var(--cyan); position: absolute; left: 0; font-size: 1rem; line-height: 1.2; }
             
             .highlight { color: var(--gold); font-weight: 700; }
@@ -169,7 +170,7 @@ class PoliticasHost extends HTMLElement {
             /* ===== ESTILO DE TABELAS (ESPREMIDAS, SEM SCROLL) ===== */
             table { width: 100%; border-collapse: collapse; table-layout: fixed; }
             thead tr th {
-                font-size: clamp(0.55rem, 2vw, 0.65rem); color: #d0d8e8; text-transform: uppercase; padding: 6px 2px;
+                font-size: clamp(0.55rem, 2vw, 0.65rem); color: var(--sub); text-transform: uppercase; padding: 6px 2px;
                 text-align: center; background: rgba(0,200,200,0.07); border-bottom: 1px solid rgba(0,230,230,0.18);
                 word-wrap: break-word; line-height: 1.1; letter-spacing: -0.2px;
             }
@@ -188,9 +189,9 @@ class PoliticasHost extends HTMLElement {
             .t-tarefas th:nth-child(5) { width: 20%; }
 
             .t-tarefas td:nth-child(1) { font-weight: 700; color: #fff; }
-            .t-tarefas td:nth-child(2) { color: #5ecfcf; font-weight: 600; }
-            .t-tarefas td:nth-child(3) { color: #7de0c8; }
-            .t-tarefas td:nth-child(4) { color: #a8eaaa; }
+            .t-tarefas td:nth-child(2) { color: var(--cyan); font-weight: 600; }
+            .t-tarefas td:nth-child(3) { color: var(--sub); }
+            .t-tarefas td:nth-child(4) { color: var(--sub); }
             .t-tarefas td:nth-child(5) { font-weight: 700; color: var(--gold); }
 
             /* Específicos Tabela Regras de Horas */
@@ -200,7 +201,7 @@ class PoliticasHost extends HTMLElement {
             .t-horas th:nth-child(4) { width: 15%; }
 
             .t-horas td.cat { font-weight: 700; color: #fff; border-right: 1px solid rgba(0,230,230,0.12); }
-            .t-horas td.sub { color: #7de0c8; font-weight: 600; font-size: 0.65rem; }
+            .t-horas td.sub { color: var(--sub); font-weight: 600; font-size: 0.65rem; }
             .t-horas td.sub-full { color: var(--cyan); font-weight: 700; text-transform: uppercase; font-size: 0.65rem; }
             .t-horas td.val { font-weight: 700; color: var(--gold); font-size: 0.75rem; }
             .t-horas tr.inner td { border-top: 1px solid rgba(0,230,230,0.08); }
@@ -214,7 +215,7 @@ class PoliticasHost extends HTMLElement {
             .alert-box.info { background: rgba(0, 212, 212, 0.05); border-color: rgba(0, 212, 212, 0.3); }
             .alert-box.col-info { flex-direction: column; gap: 4px; }
             .alert-text { font-size: 0.75rem; line-height: 1.3; color: #f87171; font-weight: 600; }
-            .info .alert-text { color: #c0cfe0; font-weight: 400; }
+            .info .alert-text { color: var(--sub); font-weight: 400; }
 
             @media (max-width: 480px) {
                 .tabs-nav { flex-wrap: wrap; }

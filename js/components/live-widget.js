@@ -76,8 +76,16 @@ class KwaiLiveWidget extends HTMLElement {
     await this.loadHlsLib();
     this.initObserver();
     this.init();
-    // Atualiza as lives a cada 30 segundos
-    setInterval(() => this.init(), 30000);
+    // Atualiza as lives a cada 30 segundos — timer guardado para limpeza
+    this.refreshTimer = setInterval(() => this.init(), 30000);
+  }
+
+  disconnectedCallback() {
+    // Limpa o timer de atualização ao remover o componente do DOM
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
   }
 
   // Carrega HLS.js do CDN de forma assíncrona (não bloqueia se CDN falhar)
@@ -85,7 +93,7 @@ class KwaiLiveWidget extends HTMLElement {
     return new Promise((resolve) => {
       if (window.Hls) return resolve();
       const s   = document.createElement('script');
-      s.src     = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+      s.src     = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20'; // versão fixada — evita quebra por update automático
       s.onload  = resolve;
       s.onerror = resolve; // não bloqueia se CDN falhar
       document.head.appendChild(s);

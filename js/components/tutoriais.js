@@ -30,14 +30,14 @@ class DmaiorTutoriais extends HTMLElement {
       @media(max-width:600px){.card{width:100%;max-width:340px}}
     </style>
     <div class="container">
-      <a href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" class="card">
+      <a href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="card">
         <div class="icon-wrapper">
           <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z"/></svg>
         </div>
         <h3 class="title">Como Aceitar Convite</h3>
         <span class="subtitle">Clique para ver o tutorial</span>
       </a>
-      <a href="https://drive.google.com/file/d/1WV08AveTDUVlyyTVRMAx9sTikH2KiyP_/view?usp=drive_link" target="_blank" class="card">
+      <a href="https://drive.google.com/file/d/1WV08AveTDUVlyyTVRMAx9sTikH2KiyP_/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="card">
         <div class="icon-wrapper">
           <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21,18H3V6H21V18M19,16V8H5V16H19M11,10H13V14H11V10M9,10H10V14H9V10M14,10H15V14H14V10M2,4H22V6H2V4M2,18H22V20H2V18Z"/></svg>
         </div>
