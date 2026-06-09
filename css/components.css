@@ -1,0 +1,208 @@
+/**
+ * components.css — Estilos compartilhados dos componentes DMaior Agency
+ *
+ * Botões, cards, modais e elementos reutilizáveis entre páginas.
+ * Importado após global.css em todas as páginas.
+ */
+
+/* ─── Botões primários ──────────────────────────────────────────────────────── */
+
+/* Botão cyan gradiente — ação principal */
+.dm-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--dm-grad-cyan);
+  color: #000;
+  border: none;
+  padding: 10px 22px;
+  border-radius: var(--dm-radius);
+  font-family: var(--dm-font-title);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--dm-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dm-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px var(--dm-cyan-glow);
+  color: #000;
+}
+
+/* Botão outline */
+.dm-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--dm-cyan);
+  border: 1px solid var(--dm-cyan-border);
+  padding: 10px 22px;
+  border-radius: var(--dm-radius);
+  font-family: var(--dm-font-title);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--dm-ease);
+}
+
+.dm-btn-outline:hover {
+  background: rgba(0, 212, 212, 0.08);
+  border-color: var(--dm-cyan);
+  color: #fff;
+}
+
+/* Botão perigo (logout, excluir) */
+.dm-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--dm-red);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  padding: 8px 16px;
+  border-radius: var(--dm-radius);
+  font-family: var(--dm-font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--dm-ease);
+}
+
+.dm-btn-danger:hover {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: var(--dm-red);
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────────── */
+
+/* Card de vidro (glassmorphism) */
+.dm-glass-card {
+  background: linear-gradient(160deg, rgba(12, 14, 30, 0.9) 0%, rgba(4, 4, 4, 0.9) 100%);
+  border: 1px solid var(--dm-border);
+  border-radius: var(--dm-radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--dm-ease);
+}
+
+/* Linha de gradiente na borda inferior do card */
+.dm-glass-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--dm-blue), var(--dm-cyan), transparent);
+}
+
+/* ─── Spinner de carregamento ────────────────────────────────────────────────── */
+.dm-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(59, 130, 246, 0.1);
+  border-top-color: var(--dm-blue);
+  animation: dm-spin 0.8s linear infinite;
+  margin: 0 auto 15px;
+}
+
+/* Mensagem de estado (loading / erro / vazio) */
+.dm-state-msg {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--dm-blue);
+  font-family: var(--dm-font-title);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.dm-state-msg.erro { color: var(--dm-red); }
+
+/* ─── Inputs ──────────────────────────────────────────────────────────────────── */
+
+.dm-input-field {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--dm-border);
+  border-radius: 8px;
+  color: var(--dm-text);
+  font-family: var(--dm-font-body);
+  font-size: 0.95rem;
+  transition: border-color var(--dm-ease), box-shadow var(--dm-ease);
+}
+
+.dm-input-field:focus {
+  border-color: var(--dm-cyan);
+  box-shadow: 0 0 8px var(--dm-cyan-glow);
+}
+
+.dm-input-field.erro {
+  border-color: var(--dm-red) !important;
+}
+
+/* ─── Badges ─────────────────────────────────────────────────────────────────── */
+
+.dm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-family: var(--dm-font-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dm-badge-cyan  { background: rgba(0,212,212,0.1); border: 1px solid var(--dm-cyan-border); color: var(--dm-cyan); }
+.dm-badge-gold  { background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.3); color: var(--dm-gold); }
+.dm-badge-red   { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: var(--dm-red); }
+.dm-badge-green { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: var(--dm-green); }
+
+/* ─── Separador ──────────────────────────────────────────────────────────────── */
+.dm-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dm-border), transparent);
+  margin: 30px 0;
+}
+
+/* ─── Overlay / Modal ────────────────────────────────────────────────────────── */
+.dm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dm-ease);
+}
+
+.dm-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── Responsividade: container em telas menores ─────────────────────────────── */
+@media (max-width: 768px) {
+  .dm-container { padding: 0 15px; }
+}
+
+@media (max-width: 480px) {
+  .dm-btn-primary,
+  .dm-btn-outline { padding: 12px 20px; font-size: 0.9rem; min-height: 44px; }
+}

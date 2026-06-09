@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base href="/teste/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin — DMaior Agency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .admin-wrap {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .admin-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .admin-header h1 {
+      font-family: var(--dm-font-title);
+      color: var(--dm-gold);
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+    .admin-header p {
+      color: var(--dm-text-muted);
+      font-size: 0.9rem;
+    }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .admin-card {
+      padding: 24px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--dm-ease);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--dm-cyan);
+    }
+    .admin-card-icon {
+      font-size: 2.2rem;
+    }
+    .admin-card-title {
+      font-family: var(--dm-font-title);
+      font-size: 1rem;
+      color: var(--dm-text);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .admin-card-desc {
+      font-size: 0.8rem;
+      color: var(--dm-text-muted);
+    }
+    .admin-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      background: rgba(240,192,64,0.1);
+      border: 1px solid rgba(240,192,64,0.3);
+      border-radius: 20px;
+      font-size: 0.7rem;
+      color: var(--dm-gold);
+      font-family: var(--dm-font-title);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <menu-mobile-dmaior></menu-mobile-dmaior>
+
+  <main class="dm-main">
+    <div class="admin-wrap">
+      <div class="admin-header">
+        <div class="admin-badge">⚙️ Área Administrativa</div>
+        <h1>Painel Admin</h1>
+        <p>Acesso restrito à equipe DMaior Agency</p>
+      </div>
+
+      <div id="admin-content">
+        <div class="dm-state-msg dm-glass-card" style="padding:40px">
+          <div class="dm-spinner"></div>
+          Verificando acesso...
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/router.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/components/menu-mobile.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const session = window.Auth ? Auth.getSession() : null;
+      if (!session) {
+        window.location.href = '/?redirect=/admin/';
+        return;
+      }
+
+      document.getElementById('admin-content').innerHTML = `
+        <div class="admin-grid">
+          <div class="admin-card dm-glass-card">
+            <div class="admin-card-icon">📊</div>
+            <div class="admin-card-title">Ranking</div>
+            <div class="admin-card-desc">Visualizar ranking geral de diamantes e horas</div>
+          </div>
+          <div class="admin-card dm-glass-card">
+            <div class="admin-card-icon">👥</div>
+            <div class="admin-card-title">Streamers</div>
+            <div class="admin-card-desc">Gerenciar perfis e métricas dos streamers</div>
+          </div>
+          <div class="admin-card dm-glass-card">
+            <div class="admin-card-icon">🏆</div>
+            <div class="admin-card-title">Premiações</div>
+            <div class="admin-card-desc">Configurar prêmios por posição no ranking</div>
+          </div>
+          <div class="admin-card dm-glass-card">
+            <div class="admin-card-icon">💸</div>
+            <div class="admin-card-title">Recargas</div>
+            <div class="admin-card-desc">Histórico de recargas de diamantes</div>
+          </div>
+          <div class="admin-card dm-glass-card">
+            <div class="admin-card-icon">📝</div>
+            <div class="admin-card-title">Candidaturas</div>
+            <div class="admin-card-desc">Formulários de recrutamento recebidos</div>
+          </div>
+          <div class="admin-card dm-glass-card">
+            <div class="admin-card-icon">⚙️</div>
+            <div class="admin-card-title">Configurações</div>
+            <div class="admin-card-desc">Parâmetros gerais da agência</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:30px">
+          <button class="dm-btn-danger" id="btn-logout-admin">Sair</button>
+        </div>`;
+
+      document.getElementById('btn-logout-admin').addEventListener('click', () => {
+        if (window.Auth) Auth.logout();
+      });
+    });
+  </script>
+</body>
+</html>
