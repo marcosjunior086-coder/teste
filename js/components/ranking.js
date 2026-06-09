@@ -143,6 +143,7 @@ class RankingDmaior extends HTMLElement {
         --text:#0d1117;--text-sub:#2d3748;--text-muted:#4a5568;
         --border:rgba(0,149,168,0.35);--border-dim:rgba(0,149,168,0.12);
         --roxo:#0369a1;--azul:#0095a8;
+        --bloom-grad:linear-gradient(135deg,#0369a1 0%,#0095a8 100%);
         --gold:#b8860b;--bronze:#7c5000;--red:#dc2626;--green2:#15803d;
         --podium-1:rgba(184,134,11,0.12);--podium-2:rgba(3,105,161,0.12);--podium-3:rgba(124,80,0,0.12);}
       /* ── Tema Rosa ── */
@@ -168,9 +169,10 @@ class RankingDmaior extends HTMLElement {
       *{margin:0;padding:0;box-sizing:border-box}
       .app-container{background:linear-gradient(180deg,var(--bg-app) 0%,var(--bg-app2) 100%);background-attachment:fixed;color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;padding-bottom:50px;overflow-x:hidden;width:100%}
       h1,h2,h3,.rajdhani,.name{font-family:var(--font-title);letter-spacing:1px;text-transform:uppercase}
-      /* ── Botões de faixa (1-20, 21-40…) via classe — reage ao tema ── */
+      /* ── Botões de faixa (1-20, 21-40…) — reage ao tema (ativo = bloom-grad, inativo = bg-card) ── */
       .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:var(--font-title);font-weight:700;background:var(--bg-card);color:var(--text-muted);border:1px solid var(--border-dim);transition:all .2s}
-      .page-btn.active{background:var(--bloom-grad);color:#fff;border:1px solid transparent;box-shadow:0 0 15px rgba(59,130,246,0.35)}
+      .page-btn:hover{background:var(--border-dim);color:var(--text-sub);border-color:var(--border);}
+      .page-btn.active{background:var(--bloom-grad);color:#fff;border:1px solid transparent;box-shadow:0 0 15px var(--border)}
       .glass-card{background:linear-gradient(160deg,var(--bg-card2) 0%,var(--bg-card) 100%);border:1px solid var(--border);border-radius:20px;position:relative;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
       .glass-card::after{content:'';position:absolute;bottom:0;left:0;right:0;background:linear-gradient(90deg,transparent,var(--roxo),var(--azul),transparent);height:2px}
       #login-screen{position:fixed;inset:0;background:rgba(4,4,4,0.98);display:flex;align-items:flex-start;justify-content:center;padding-top:20px;z-index:1000}
@@ -178,23 +180,27 @@ class RankingDmaior extends HTMLElement {
       .login-box h2{font-size:var(--t-title-lg);background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
       .input-group{position:relative;margin-bottom:20px}
       .input-group input{width:100%;padding:15px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.6);color:var(--text);font-family:'Exo 2';font-size:var(--t-info);outline:none;text-align:center;letter-spacing:2px}
-      .input-group input:focus{border-color:var(--roxo);box-shadow:0 0 10px rgba(59,130,246,0.3)}
+      .input-group input:focus{border-color:var(--roxo);box-shadow:0 0 10px var(--border)}
       #toggle-pw{position:absolute;right:15px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted)}
       #toggle-pw svg{width:22px;height:22px;fill:currentColor}
       .remember-me{display:flex;align-items:center;justify-content:center;gap:8px;font-size:var(--t-info);color:var(--text-sub);margin-bottom:20px;cursor:pointer}
       .btn-submit{width:100%;padding:15px;background:var(--bloom-grad);border:none;border-radius:10px;color:#fff;font-family:'Rajdhani';font-size:var(--t-title-md);font-weight:700;cursor:pointer}
-      .btn-submit:hover{box-shadow:0 0 20px rgba(59,130,246,0.4);transform:translateY(-1px)}
+      .btn-submit:hover{box-shadow:0 0 20px var(--border);transform:translateY(-1px)}
       #login-error{color:var(--red);font-size:var(--t-info);margin-top:15px;display:none}
       #dashboard{display:none;width:100%;max-width:600px;margin:0 auto}
       .header{text-align:center;margin-bottom:20px}
-      .header h1{font-size:var(--t-title-lg);color:var(--text);margin-bottom:10px;text-shadow:0 0 15px rgba(59,130,246,0.5)}
+      .header h1{font-size:var(--t-title-lg);color:var(--text);margin-bottom:10px;text-shadow:0 0 15px var(--border)}
       .time-counter{font-size:var(--t-info);color:var(--gold);font-family:'Rajdhani';letter-spacing:1px;margin-bottom:12px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;min-height:20px}
       .period-wrapper{position:relative;width:100%;max-width:300px;margin:0 auto}
       .period-wrapper::after{content:"▼";position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--roxo);pointer-events:none;font-size:0.8rem}
-      .period-select{width:100%;padding:12px 35px 12px 15px;background:rgba(0,0,0,0.6);color:var(--text);border:1px solid var(--border);border-radius:10px;font-family:'Rajdhani';font-size:var(--t-title-md);outline:none;cursor:pointer;appearance:none;text-align:center;text-transform:uppercase}
-      .tabs{display:flex;gap:10px;margin-bottom:15px;margin-top:15px;background:rgba(18,18,31,0.8);padding:5px;border-radius:12px;border:1px solid var(--border-dim)}
-      .tab-btn{flex:1;padding:12px;border:none;background:transparent;color:var(--text-sub);font-family:'Rajdhani';font-size:var(--t-info);border-radius:8px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
-      .tab-btn.active{background:var(--bloom-grad);color:#fff;box-shadow:0 0 15px rgba(59,130,246,0.3)}
+      /* MÊS ATUAL — fundo usa var(--bg-card) para ficar claro nos temas claros */
+      .period-select{width:100%;padding:12px 35px 12px 15px;background:var(--bg-card);color:var(--text);border:1px solid var(--border);border-radius:10px;font-family:'Rajdhani';font-size:var(--t-title-md);outline:none;cursor:pointer;appearance:none;text-align:center;text-transform:uppercase;box-shadow:0 2px 8px var(--border-dim);transition:border-color .2s,box-shadow .2s}
+      .period-select:focus{border-color:var(--roxo);box-shadow:0 0 0 3px var(--border-dim)}
+      /* Barra DIAMANTES/HORAS — fundo usa var(--bg-card2) para adaptar ao tema */
+      .tabs{display:flex;gap:10px;margin-bottom:15px;margin-top:15px;background:var(--bg-card2);padding:5px;border-radius:12px;border:1px solid var(--border-dim)}
+      .tab-btn{flex:1;padding:12px;border:none;background:transparent;color:var(--text-muted);font-family:'Rajdhani';font-size:var(--t-info);border-radius:8px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+      .tab-btn:hover{background:var(--border-dim);color:var(--text-sub);}
+      .tab-btn.active{background:var(--bloom-grad);color:#fff;box-shadow:0 0 15px var(--border)}
       .tab-btn svg{width:16px;height:16px}
       .growth{font-size:0.68rem;padding:2px 6px;border-radius:4px;display:inline-flex;align-items:center;font-family:var(--font-title);font-weight:700;margin-top:4px}
       .growth.up{background:rgba(74,222,128,0.15);color:var(--green2);border:1px solid rgba(74,222,128,0.3)}
@@ -211,8 +217,8 @@ class RankingDmaior extends HTMLElement {
       .podium-item.first{height:290px;background:linear-gradient(to bottom,var(--podium-1),var(--bg-card2));border-color:var(--azul);width:36%;box-shadow:0 0 28px var(--podium-1)}
       .podium-item.third{height:200px;background:linear-gradient(to bottom,var(--podium-3),var(--bg-card2));border-color:var(--bronze)}
       .avatar-wrapper{position:relative;margin-top:-45px;margin-bottom:12px}
-      /* Anel do avatar: todos os 3 usam a cor de acento do tema */
-      .avatar{width:60px;height:60px;border-radius:50%;background-color:rgba(0,0,0,0.5);border:3px solid var(--azul);object-fit:cover}
+      /* Anel do avatar: todos os 3 usam a cor de acento do tema; fundo usa bg-card2 (claro nos temas claros) */
+      .avatar{width:60px;height:60px;border-radius:50%;background-color:var(--bg-card2);border:3px solid var(--azul);object-fit:cover}
       .first .avatar{width:75px;height:75px;border-color:var(--azul);border-width:3.5px}
       .second .avatar{border-color:var(--roxo)}
       .third .avatar{border-color:var(--bronze)}
@@ -240,21 +246,28 @@ class RankingDmaior extends HTMLElement {
       /* ── Live: sem borda azul, sem texto LIVE — só bolinha com barrinhas animadas ── */
       .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:2px solid var(--border-dim)}
       .live-badge,.list-live-badge{display:none}
-      /* Bolinha animada estilo Kwai */
+      /* Bolinha animada estilo Kwai — tema escuro: sólida na cor azul do tema */
       .live-dot{position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:1.5px;z-index:4;box-shadow:0 0 6px var(--border);border:2px solid var(--azul);outline:2px solid rgba(0,0,0,0.5);}
-      .live-dot span{display:block;width:2px;border-radius:2px;background:#000;animation:livebar 0.9s ease-in-out infinite;}
+      .live-dot span{display:block;width:2px;border-radius:2px;background:#fff;animation:livebar 0.9s ease-in-out infinite;}
       .live-dot span:nth-child(1){height:4px;animation-delay:0s}
       .live-dot span:nth-child(2){height:7px;animation-delay:0.2s}
       .live-dot span:nth-child(3){height:4px;animation-delay:0.4s}
       @keyframes livebar{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1.2)}}
+      /* Temas claros — bolinha branca com borda/glow da cor do tema */
+      :host-context([data-theme="branco"]) .live-dot,
+      :host-context([data-theme="rosa"]) .live-dot,
+      :host-context([data-theme="laranja"]) .live-dot{background:#fff;border-color:var(--azul);outline-color:rgba(255,255,255,0.6);}
+      :host-context([data-theme="branco"]) .live-dot span,
+      :host-context([data-theme="rosa"]) .live-dot span,
+      :host-context([data-theme="laranja"]) .live-dot span{background:var(--azul);}
       .list-name-col{display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;margin-right:10px}
       .list-name{font-size:var(--t-info);color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .list-id{font-size:0.7rem;color:var(--text-muted);font-family:'Exo 2',sans-serif}
       /* Valor do score na lista — estilo idêntico ao panel-value do painel admin: gradiente de texto + letter-spacing */
       .list-score{font-size:var(--t-val);font-weight:700;font-family:'Rajdhani';margin-left:auto;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
       .state-msg{text-align:center;padding:40px;color:var(--roxo);font-family:'Rajdhani'}
-      .spinner{width:40px;height:40px;border-radius:50%;border:3px solid rgba(59,130,246,0.1);border-top-color:var(--roxo);animation:spin 0.8s linear infinite;margin:0 auto 15px}
-      .logout-btn{background:rgba(0,0,0,0.4);border:1px solid var(--border-dim);color:var(--red);cursor:pointer;margin-top:35px;padding:8px 16px;border-radius:8px;transition:0.3s}
+      .spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border-dim);border-top-color:var(--roxo);animation:spin 0.8s linear infinite;margin:0 auto 15px}
+      .logout-btn{background:var(--bg-card);border:1px solid var(--border-dim);color:var(--red);cursor:pointer;margin-top:35px;padding:8px 16px;border-radius:8px;transition:0.3s}
       .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:'Rajdhani';font-weight:700}
       @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
       @keyframes spin{100%{transform:rotate(360deg)}}
@@ -264,14 +277,14 @@ class RankingDmaior extends HTMLElement {
       .info-tab-btn{position:fixed;right:0;bottom:28%;background:var(--bloom-grad);color:#fff;border:none;border-radius:10px 0 0 10px;padding:22px 10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-lr;z-index:299;box-shadow:-4px 0 22px var(--border);display:flex;align-items:center;gap:10px;line-height:1;opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.25s ease,visibility 0.25s ease,box-shadow 0.3s;}
       .info-tab-btn:hover{box-shadow:-4px 0 32px var(--azul)}
       .info-tab-btn .tab-icon{display:block;transform:rotate(90deg);width:15px;height:15px;flex-shrink:0;}
-      .info-panel{position:fixed;right:-290px;bottom:10%;width:255px;max-height:82vh;overflow-y:auto;overflow-x:hidden;padding:20px 18px 22px;z-index:299;border-radius:16px 0 0 16px !important;transition:right 0.35s cubic-bezier(0.4,0,0.2,1);scrollbar-width:thin;scrollbar-color:rgba(59,130,246,0.3) transparent;}
+      .info-panel{position:fixed;right:-290px;bottom:10%;width:255px;max-height:82vh;overflow-y:auto;overflow-x:hidden;padding:20px 18px 22px;z-index:299;border-radius:16px 0 0 16px !important;transition:right 0.35s cubic-bezier(0.4,0,0.2,1);scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
       .info-panel::-webkit-scrollbar{width:3px}
-      .info-panel::-webkit-scrollbar-thumb{background:rgba(59,130,246,0.3);border-radius:4px}
+      .info-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
       .info-panel::after{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;right:auto !important;background:linear-gradient(180deg,transparent,var(--roxo),var(--azul),transparent);height:100% !important;}
       .info-panel.open{right:40px}
       .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border-dim)}
       .panel-title{font-size:1rem;font-family:'Rajdhani',sans-serif;letter-spacing:2px;text-transform:uppercase;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-      .close-panel{background:rgba(255,255,255,0.05);border:1px solid var(--border-dim);color:var(--text-muted);cursor:pointer;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:0.2s;flex-shrink:0}
+      .close-panel{background:var(--border-dim);border:1px solid var(--border-dim);color:var(--text-muted);cursor:pointer;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:0.2s;flex-shrink:0}
       .close-panel:hover{color:var(--red);border-color:rgba(248,113,113,0.4);background:rgba(248,113,113,0.08)}
       .panel-row{display:flex;flex-direction:column;gap:3px;margin-bottom:13px}
       .panel-label{font-size:0.6rem;color:var(--text-muted);font-family:'Rajdhani',sans-serif;letter-spacing:2px;text-transform:uppercase}
@@ -281,12 +294,13 @@ class RankingDmaior extends HTMLElement {
       #rule-text{font-size:0.75rem;color:var(--text-sub);line-height:1.5;text-align:left;padding:0;margin-bottom:0}
       #rule-text b{color:var(--azul)}
       .btn-refresh{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Rajdhani';font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px}
-      .btn-refresh:hover{border-color:var(--azul);color:var(--azul);background:rgba(0,229,229,0.05)}
+      .btn-refresh:hover{border-color:var(--azul);color:var(--azul);background:var(--border-dim)}
       .btn-refresh:disabled{opacity:0.35;cursor:not-allowed}
       .btn-refresh svg{width:15px;height:15px;fill:currentColor;transition:transform 0.4s}
       .btn-refresh:not(:disabled):hover svg{transform:rotate(180deg)}
       @media(max-width:480px){
-        .app-container{background:linear-gradient(180deg,#0C0E1E 0%,#040404 100%) !important}
+        /* Mobile: usa as vars do tema em vez de forçar fundo escuro */
+        .app-container{background:linear-gradient(180deg,var(--bg-app) 0%,var(--bg-app2) 100%) !important}
         .glass-card,.podium-item,.tabs,.list-item,.period-select{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-shadow:none !important}
         .podium{height:270px;gap:8px;animation:none}
         .podium-item.first{height:250px}.podium-item.second{height:190px}.podium-item.third{height:160px}

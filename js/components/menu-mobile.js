@@ -273,6 +273,7 @@ class MenuMobileDMaior extends HTMLElement {
       </div>
 
       <div class="auth-area">
+        <!-- Botão de acesso ao painel — visível quando não logado -->
         <a href="painel/index.html" class="btn-access" id="btnAccess">
           ${SVG_ACCESS} ACESSAR PAINEL
         </a>

@@ -163,7 +163,8 @@ class KwaiLiveWidget extends HTMLElement {
           animation:ringGlow 2s ease-in-out infinite;}
         @media(min-width:600px){.live-card{width:60px;}.avatar-wrap{width:60px;height:60px;}#liveRow{gap:10px;}}
         @keyframes ringGlow{0%,100%{box-shadow:0 0 0 0 transparent,0 0 8px var(--dm-cyan-20,rgba(0,212,212,.4));}50%{box-shadow:0 0 0 4px var(--dm-cyan-08,rgba(0,212,212,.18)),0 0 16px var(--dm-cyan-40,rgba(0,212,212,.7));}}
-        .avatar-wrap::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(0,229,229,.5);animation:ringPulse 2s ease-in-out infinite;pointer-events:none;}
+        /* Ring pulse — usa var(--dm-cyan-30) para seguir a cor de acento do tema */
+        .avatar-wrap::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--dm-cyan-30,rgba(0,229,229,.5));animation:ringPulse 2s ease-in-out infinite;pointer-events:none;}
         @keyframes ringPulse{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.28);opacity:0;}}
 
         /* Avatar: foto (fallback) embaixo, vídeo (primário) em cima */
@@ -186,11 +187,16 @@ class KwaiLiveWidget extends HTMLElement {
           clip-path:circle(50% at 50% 50%);-webkit-clip-path:circle(50% at 50% 50%);
         }
 
+        /* Badge LIVE — fundo = cor de acento do tema; texto #000 no dark (cyan claro), #fff nos temas claros (pink/laranja/teal saturado) */
         .live-badge{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);z-index:5;
           background:var(--dm-cyan);color:#000;font-size:.42rem;font-weight:700;letter-spacing:1px;
           padding:1px 5px;border-radius:5px;border:1.5px solid var(--dm-bg-3);white-space:nowrap;
           box-shadow:0 0 8px var(--dm-cyan-30);}
         @media(min-width:600px){.live-badge{font-size:.46rem;padding:1px 6px;}}
+        /* Temas claros — texto branco sobre fundo saturado */
+        :host-context([data-theme="branco"]) .live-badge,
+        :host-context([data-theme="rosa"]) .live-badge,
+        :host-context([data-theme="laranja"]) .live-badge{color:#fff;}
 
         .live-name{margin-top:5px;font-size:.54rem;font-weight:600;color:var(--dm-text-sub);
           white-space:nowrap;overflow:hidden;text-overflow:ellipsis;

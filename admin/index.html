@@ -110,7 +110,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const session = window.Auth ? Auth.getSession() : null;
       if (!session) {
-        window.location.href = '../index.html?redirect=admin/';
+        window.location.href = 'index.html?redirect=admin/';
         return;
       }
 
