@@ -114,52 +114,26 @@ class DmaiorImpulso extends HTMLElement {
 
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
 
+        /* Nav interno removido — o painel pai já tem menu */
         .shell {
-          display: flex;
-          flex-direction: row;
-          min-height: 100%;
+          display: block;
+          width: 100%;
           background: transparent;
         }
 
         .content {
-          flex: 1;
           display: flex;
           justify-content: center;
           align-items: flex-start;
-          padding: 24px 20px;
-          min-width: 0;
+          padding: 8px 20px 24px;
+          width: 100%;
         }
 
-        .bnav {
-          order: -1; 
-          width: 220px; min-width: 220px; flex-shrink: 0;
-          display: flex; flex-direction: column;
-          align-items: stretch; justify-content: flex-start;
-          position: relative; height: 100%;
-          background: transparent;
-          border-right: 1px solid var(--border);
-          padding: 20px 0; gap: 2px; z-index: 100;
-        }
-
-        .nit {
-          display: flex; flex-direction: row; align-items: center; justify-content: flex-start;
-          color: var(--muted); font-size: 0.8rem;
-          font-family: 'Rajdhani', sans-serif; font-weight: 600;
-          gap: 10px; cursor: pointer; transition: all 0.2s;
-          border: none; background: none;
-          padding: 12px 16px; border-radius: 8px;
-          margin: 0 10px; width: calc(100% - 20px);
-        }
-        .nit svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
-        .nit:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-        .nit.on  { color: var(--cyan); background: var(--cyan-d); }
-        .nit.on svg { filter: drop-shadow(0 0 5px var(--cyan)); }
-        .nit.sair { color: var(--red); margin-top: auto; }
-        .nit.sair:hover { background: rgba(248,113,113,.1); }
+        .bnav { display: none !important; }
 
         .wrap {
           background: var(--glass);
-          border: 1px solid var(--border); 
+          border: 1px solid var(--border);
           border-radius: 20px;
           box-shadow: 0 8px 32px rgba(0,0,0,0.3);
           padding: 24px 25px;
@@ -167,30 +141,10 @@ class DmaiorImpulso extends HTMLElement {
         }
 
         @media(max-width:768px){
-          .shell { flex-direction: column; }
-          .content { padding: 15px 10px 90px; }
-          .wrap { background: rgba(30,30,46,0.95); backdrop-filter: none; padding: 20px 15px; }
+          .content { padding: 8px 10px 24px; }
+          .wrap { padding: 20px 15px; }
           .radio-group { flex-direction: column; }
           .radio-opt { width: 100%; min-width: unset; }
-          
-          .bnav {
-            order: 0; position: fixed; top: auto; bottom: 0; left: 0;
-            width: 100%; min-width: 0; height: 70px; min-height: 0;
-            flex-direction: row; justify-content: space-around; align-items: center;
-            border-right: none; border-top: 1px solid var(--border);
-            padding: 0; background: rgba(18, 18, 31, 0.95); backdrop-filter: blur(10px);
-            z-index: 1000;
-          }
-          .nit {
-            flex-direction: column; justify-content: center;
-            font-size: 0.65rem; gap: 4px;
-            padding: 8px 10px; margin: 0;
-            width: auto; border-radius: 0; background: none;
-          }
-          .nit svg { width: 22px; height: 22px; }
-          .nit:hover, .nit.sair:hover { background: none; }
-          .nit.on { background: none; }
-          .nit.sair { margin-top: 0; }
         }
 
         .header { display:flex; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid rgba(0,212,212,0.15); }
@@ -253,58 +207,75 @@ class DmaiorImpulso extends HTMLElement {
         .spinner { width:16px; height:16px; border:2px solid rgba(0,242,255,0.3); border-top-color:#00f2ff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
         @keyframes spin { to { transform:rotate(360deg); } }
 
-        /* ── Temas claros ── */
-        :host-context([data-theme="branco"]),
-        :host-context([data-theme="rosa"]),
+        /* ══ TEMA BRANCO ══ */
+        :host-context([data-theme="branco"]) {
+          --text: #1a1a2e; --muted: #4a5568;
+          --border: rgba(0,150,180,0.25);
+        }
+        :host-context([data-theme="branco"]) .wrap {
+          background: linear-gradient(135deg,#e0f7fa 0%,#f0faff 100%);
+          border-color: rgba(0,180,210,0.3);
+          box-shadow: 0 6px 24px rgba(0,150,180,0.12);
+        }
+        :host-context([data-theme="branco"]) .header-sub { color: #0095a8; }
+
+        /* ══ TEMA ROSA ══ */
+        :host-context([data-theme="rosa"]) {
+          --text: #1a1a2e; --muted: #5a3a4a;
+          --border: rgba(220,80,120,0.25);
+        }
+        :host-context([data-theme="rosa"]) .wrap {
+          background: linear-gradient(135deg,#fce4ec 0%,#fff0f4 100%);
+          border-color: rgba(220,80,120,0.3);
+          box-shadow: 0 6px 24px rgba(200,60,100,0.12);
+        }
+        :host-context([data-theme="rosa"]) .header-sub { color: #c2185b; }
+        :host-context([data-theme="rosa"]) .field-label { color: #c2185b; }
+        :host-context([data-theme="rosa"]) .header-title { color: #880e4f; }
+
+        /* ══ TEMA LARANJA ══ */
         :host-context([data-theme="laranja"]) {
-          --glass: rgba(255,255,255,0.92);
-          --text: #1a1a2e;
-          --muted: #5a6a7e;
-          --border: rgba(0,0,0,0.1);
+          --text: #1a1a2e; --muted: #5a3a1a;
+          --border: rgba(220,100,20,0.25);
         }
-        :host-context([data-theme="branco"]) .wrap,
-        :host-context([data-theme="rosa"]) .wrap,
         :host-context([data-theme="laranja"]) .wrap {
-          background: rgba(255,255,255,0.92);
-          border-color: rgba(0,0,0,0.09);
-          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          background: linear-gradient(135deg,#fff3e0 0%,#fff8f0 100%);
+          border-color: rgba(220,100,20,0.3);
+          box-shadow: 0 6px 24px rgba(200,80,0,0.12);
         }
+        :host-context([data-theme="laranja"]) .header-sub { color: #e65100; }
+        :host-context([data-theme="laranja"]) .field-label { color: #e65100; }
+        :host-context([data-theme="laranja"]) .header-title { color: #bf360c; }
+
+        /* ══ Campos e radio compartilhados (todos os temas claros) ══ */
         :host-context([data-theme="branco"]) .quota-box,
         :host-context([data-theme="rosa"]) .quota-box,
         :host-context([data-theme="laranja"]) .quota-box {
-          background: rgba(0,0,0,0.04);
-          border-color: rgba(0,0,0,0.07);
+          background: rgba(0,0,0,0.05);
+          border-color: rgba(0,0,0,0.1);
         }
+        :host-context([data-theme="branco"]) .quota-label,
+        :host-context([data-theme="rosa"]) .quota-label,
+        :host-context([data-theme="laranja"]) .quota-label { color: #1a1a2e; }
         :host-context([data-theme="branco"]) .field-input,
         :host-context([data-theme="rosa"]) .field-input,
         :host-context([data-theme="laranja"]) .field-input {
-          background: rgba(0,0,0,0.06);
-          border-color: rgba(0,0,0,0.12);
+          background: rgba(255,255,255,0.8);
+          border-color: rgba(0,0,0,0.15);
           color: #1a1a2e;
         }
         :host-context([data-theme="branco"]) .field-input::placeholder,
         :host-context([data-theme="rosa"]) .field-input::placeholder,
-        :host-context([data-theme="laranja"]) .field-input::placeholder { color: rgba(0,0,0,0.3); }
+        :host-context([data-theme="laranja"]) .field-input::placeholder { color: rgba(0,0,0,0.35); }
         :host-context([data-theme="branco"]) .radio-card,
         :host-context([data-theme="rosa"]) .radio-card,
         :host-context([data-theme="laranja"]) .radio-card {
-          background: rgba(0,0,0,0.05);
-          border-color: rgba(0,0,0,0.1);
+          background: rgba(255,255,255,0.7);
+          border-color: rgba(0,0,0,0.12);
         }
-        @media(max-width:768px){
-          :host-context([data-theme="branco"]) .bnav,
-          :host-context([data-theme="rosa"]) .bnav,
-          :host-context([data-theme="laranja"]) .bnav {
-            background: rgba(255,255,255,0.96);
-            border-top-color: rgba(0,0,0,0.1);
-          }
-          :host-context([data-theme="branco"]) .nit,
-          :host-context([data-theme="rosa"]) .nit,
-          :host-context([data-theme="laranja"]) .nit { color: #5a6a7e; }
-          :host-context([data-theme="branco"]) .nit.on,
-          :host-context([data-theme="rosa"]) .nit.on,
-          :host-context([data-theme="laranja"]) .nit.on { color: var(--cyan); }
-        }
+        :host-context([data-theme="branco"]) .radio-card .rc-tempo,
+        :host-context([data-theme="rosa"]) .radio-card .rc-tempo,
+        :host-context([data-theme="laranja"]) .radio-card .rc-tempo { color: #1a1a2e; }
       </style>
 
       <div class="shell">
@@ -367,23 +338,10 @@ class DmaiorImpulso extends HTMLElement {
           </div>
         </div>
 
-        <nav class="bnav">
-          <button class="nit" id="nav-painel">${SVG_GRID} PAINEL</button>
-          <button class="nit on" id="nav-impulso">${SVG_BOOST} IMPULSO</button>
-          <button class="nit sair" id="nav-sair">${SVG_LOGOUT} SAIR</button>
-        </nav>
-
       </div>
     `;
 
     this.shadowRoot.getElementById('btn-impulso').addEventListener('click', () => this._enviar());
-    this.shadowRoot.getElementById('nav-painel').addEventListener('click', () => {
-      try { window.parent.location.href = '/painel-streamer'; } catch(e) { window.open('/painel-streamer', '_top'); }
-    });
-    this.shadowRoot.getElementById('nav-sair').addEventListener('click', () => {
-      ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome'].forEach(k => localStorage.removeItem(k));
-      try { window.parent.location.href = '/painel-streamer'; } catch(e) { window.open('/painel-streamer', '_top'); }
-    });
   }
 
   async _carregarQuota(retry = false) {

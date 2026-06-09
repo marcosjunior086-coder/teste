@@ -1431,25 +1431,7 @@ class DMaiorPainel extends HTMLElement {
             const workerUrl = window.DmaiorConfig?.workers?.dashboard || 'https://dashboard.agencydmaior.com.br';
             el.setAttribute('worker-url', workerUrl);
 
-            // Patcha os botões internos do Shadow DOM (mode:'open') para navegar dentro do painel
-            // Aguarda o componente renderizar antes de acessar o shadowRoot
-            const patchNav = () => {
-                const sr = el.shadowRoot;
-                if(!sr) return;
-                const btnPainel = sr.getElementById('nav-painel');
-                const btnSair   = sr.getElementById('nav-sair');
-                if(btnPainel) btnPainel.onclick = (e) => {
-                    e.stopPropagation();
-                    this.navigate('vD'); this.navActive('nD'); this.loadDash();
-                };
-                if(btnSair) btnSair.onclick = (e) => {
-                    e.stopPropagation();
-                    this.logout();
-                };
-            };
-            // Tenta patchear imediatamente (se já renderizou) ou aguarda
-            if(el.shadowRoot?.getElementById('nav-painel')) patchNav();
-            else setTimeout(patchNav, 150);
+            // Nav interno do componente removido — painel pai já tem menu
         }
         this.navigate('vImpulso');
         this.navActive('nImpulso');
