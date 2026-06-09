@@ -355,6 +355,95 @@ class DMaiorPainel extends HTMLElement {
             .valor-input-wrap{position:relative;display:flex;align-items:center;margin-bottom:12px;}
             .valor-input-wrap .prefix{position:absolute;left:14px;color:var(--muted);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;pointer-events:none;}
             .valor-input-wrap input{padding-left:46px!important;}
+
+            /* ── iframe views (rank / impulso) ── */
+            .iframe-view{width:100%;display:flex;flex-direction:column;}
+            .iframe-view iframe{width:100%;border:none;border-radius:16px;flex:1;}
+            .iframe-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;padding:0 0 14px;text-transform:uppercase;}
+            .iframe-back svg{width:20px;height:20px;fill:var(--cyan);}
+
+            /* ── Temas claros — adapta vars do componente ao tema global ── */
+            [data-theme="branco"] .shell,
+            [data-theme="rosa"] .shell,
+            [data-theme="laranja"] .shell {
+                --glass: rgba(255,255,255,0.92);
+                --text: #1a1a2e;
+                --muted: #5a6a7e;
+                --border: rgba(0,0,0,0.1);
+            }
+            [data-theme="branco"] .shell .card,
+            [data-theme="rosa"] .shell .card,
+            [data-theme="laranja"] .shell .card {
+                background: rgba(255,255,255,0.92);
+                border-color: rgba(0,0,0,0.09);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            }
+            [data-theme="branco"] .shell .mbox,
+            [data-theme="rosa"] .shell .mbox,
+            [data-theme="laranja"] .shell .mbox {
+                background: rgba(0,0,0,0.04);
+                border-color: rgba(0,0,0,0.07);
+            }
+            [data-theme="branco"] .shell .saque-form,
+            [data-theme="rosa"] .shell .saque-form,
+            [data-theme="laranja"] .shell .saque-form {
+                background: rgba(0,0,0,0.04);
+            }
+            [data-theme="branco"] .shell input,
+            [data-theme="branco"] .shell select,
+            [data-theme="rosa"] .shell input,
+            [data-theme="rosa"] .shell select,
+            [data-theme="laranja"] .shell input,
+            [data-theme="laranja"] .shell select {
+                background: rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+                color: #1a1a2e;
+            }
+            [data-theme="branco"] .shell .tbtn,
+            [data-theme="rosa"] .shell .tbtn,
+            [data-theme="laranja"] .shell .tbtn {
+                background: rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.1);
+                color: #5a6a7e;
+            }
+            [data-theme="branco"] .shell .tbtn.on,
+            [data-theme="rosa"] .shell .tbtn.on,
+            [data-theme="laranja"] .shell .tbtn.on {
+                background: rgba(0,212,212,0.12);
+                border-color: var(--cyan);
+                color: var(--cyan);
+            }
+            /* Nav lateral — temas claros */
+            [data-theme="branco"] .shell .bnav,
+            [data-theme="rosa"] .shell .bnav,
+            [data-theme="laranja"] .shell .bnav {
+                border-right-color: rgba(0,0,0,0.1);
+            }
+            @media(max-width:768px){
+                [data-theme="branco"] .shell .bnav,
+                [data-theme="rosa"] .shell .bnav,
+                [data-theme="laranja"] .shell .bnav {
+                    background: rgba(255,255,255,0.96);
+                    border-top-color: rgba(0,0,0,0.1);
+                    backdrop-filter: blur(12px);
+                }
+                [data-theme="branco"] .shell .nit,
+                [data-theme="rosa"] .shell .nit,
+                [data-theme="laranja"] .shell .nit {
+                    color: #5a6a7e;
+                }
+                [data-theme="branco"] .shell .nit.on,
+                [data-theme="rosa"] .shell .nit.on,
+                [data-theme="laranja"] .shell .nit.on {
+                    color: var(--cyan);
+                }
+            }
+            /* Loading overlay — temas claros */
+            [data-theme="branco"] #vLoading,
+            [data-theme="rosa"] #vLoading,
+            [data-theme="laranja"] #vLoading {
+                background: rgba(240,244,248,0.97) !important;
+            }
         </style>
 
         <div class="shell">
@@ -752,6 +841,17 @@ class DMaiorPainel extends HTMLElement {
 
                 </div><!-- /vC -->
 
+                <!-- ══════ RANKING (inline) ══════ -->
+                <div id="vRank" class="view iframe-view">
+                    <button class="iframe-back" id="btnBackRank">${this.svgBack()} VOLTAR AO PAINEL</button>
+                    <iframe id="ifrRank" src="" title="Ranking" style="height:85vh;"></iframe>
+                </div>
+
+                <!-- ══════ IMPULSO (componente nativo) ══════ -->
+                <div id="vImpulso" class="view" style="width:100%;">
+                    <dmaior-impulso id="impulsoEl"></dmaior-impulso>
+                </div>
+
             </div><!-- /content -->
         </div><!-- /shell -->`;
     }
@@ -858,6 +958,7 @@ class DMaiorPainel extends HTMLElement {
         this.qs('#nO').addEventListener('click',()=>this.logout());
         this.qs('#nRank').addEventListener('click',()=>this.goRanking());
         this.qs('#nImpulso').addEventListener('click',()=>this.goImpulsionamento());
+        this.qs('#btnBackRank').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');this.loadDash();});
     }
 
     setupActionListeners(){
@@ -1304,12 +1405,44 @@ class DMaiorPainel extends HTMLElement {
 
     // ── Ranking / Impulsionamento / Logout ───────────────────────────
     goRanking(){
-        const rankUrl='https://www.agencydmaior.com.br/rank-geral';
-        try { window.parent.location.href=rankUrl; } catch(e) { window.open(rankUrl,'_top'); }
+        // Abre ranking como view interna (iframe) sem sair do painel
+        const base = window.DmaiorConfig?.baseUrl || '';
+        const src  = base ? base + 'ranking.html' : document.baseURI + 'ranking.html';
+        const ifr  = this.qs('#ifrRank');
+        if(ifr && ifr.src !== src) ifr.src = src;
+        this.navigate('vRank');
+        this.navActive('nRank');
     }
     goImpulsionamento(){
-        const url='https://www.agencydmaior.com.br/impulsionamento';
-        try { window.parent.location.href=url; } catch(e) { window.open(url,'_top'); }
+        // Abre o componente dmaior-impulso inline, sem sair do painel
+        const el = this.qs('#impulsoEl');
+        if(el){
+            // Define o worker-url para o componente (lido em connectedCallback)
+            const workerUrl = window.DmaiorConfig?.workers?.impulso || 'https://impulsionamento.agencydmaior.com.br';
+            el.setAttribute('worker-url', workerUrl);
+
+            // Patcha os botões internos do Shadow DOM (mode:'open') para navegar dentro do painel
+            // Aguarda o componente renderizar antes de acessar o shadowRoot
+            const patchNav = () => {
+                const sr = el.shadowRoot;
+                if(!sr) return;
+                const btnPainel = sr.getElementById('nav-painel');
+                const btnSair   = sr.getElementById('nav-sair');
+                if(btnPainel) btnPainel.onclick = (e) => {
+                    e.stopPropagation();
+                    this.navigate('vD'); this.navActive('nD'); this.loadDash();
+                };
+                if(btnSair) btnSair.onclick = (e) => {
+                    e.stopPropagation();
+                    this.logout();
+                };
+            };
+            // Tenta patchear imediatamente (se já renderizou) ou aguarda
+            if(el.shadowRoot?.getElementById('nav-painel')) patchNav();
+            else setTimeout(patchNav, 150);
+        }
+        this.navigate('vImpulso');
+        this.navActive('nImpulso');
     }
     logout(){
         this._clearSession();

@@ -11,6 +11,9 @@
 // CONFIGURAÇÃO — URLs dos Workers Cloudflare
 // ─────────────────────────────────────────────────────────────────────────────
 window.DmaiorConfig = {
+  // URL base do site — usada pelos componentes para montar links internos
+  // document.baseURI resolve o <base href> automaticamente
+  get baseUrl() { return typeof document !== 'undefined' ? document.baseURI : '/'; },
   workers: {
     recarga:     'https://recarga-dmaior.agencydmaior.com.br',
     rank:        'https://rank.agencydmaior.com.br',

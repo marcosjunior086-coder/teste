@@ -1,0 +1,498 @@
+// ============================================================
+//  DMaior Agency — Custom Element: dmaior-impulso v12
+//  Atributo obrigatório:
+//    worker-url → URL base do Cloudflare Worker
+// ============================================================
+
+const QUOTA_MAX = 5; // ✅ 5 usos por semana, reinicia toda segunda-feira
+
+const SVG_ROCKET = `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M24 4C24 4 34 10 34 24c0 6-2 11-4 14H18c-2-3-4-8-4-14C14 10 24 4 24 4z" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  <ellipse cx="24" cy="22" rx="4" ry="4" fill="currentColor" opacity="0.8"/>
+  <path d="M18 38l-4 6h20l-4-6" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M14 24c-3 1-6 4-6 8h8" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M34 24c3 1 6 4 6 8h-8" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>`;
+
+const SVG_CLOCK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+const SVG_LINK  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+const SVG_GRID  = `<svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>`;
+const SVG_BOOST = `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`;
+const SVG_LOGOUT= `<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>`;
+
+class DmaiorImpulso extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this._workerUrl      = '';
+    this._uid            = '';
+    this._token          = '';
+    this._refreshToken   = '';
+    this._quota          = 0;
+    this._quotaCarregada = false;
+  }
+
+  connectedCallback() {
+    this._workerUrl    = (this.getAttribute('worker-url') || '').replace(/\/+$/, '');
+    this._uid          = localStorage.getItem('dm_uid')      || '';
+    this._token        = localStorage.getItem('dm_token')    || '';
+    this._refreshToken = localStorage.getItem('dm_refresh')  || '';
+
+    this._renderShell();
+
+    if (!this._uid || !this._token) {
+      this._mostrarSessaoExpirada();
+      return;
+    }
+
+    this._iniciar();
+  }
+
+  _mostrarSessaoExpirada() {
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    for (let i = 1; i <= QUOTA_MAX; i++) {
+      const dot = sr.getElementById(`d${i}`);
+      if (dot) { dot.classList.remove('loading'); dot.style.borderColor = 'rgba(255,80,80,0.35)'; }
+    }
+    const fb = sr.getElementById('feedback');
+    if (fb) {
+      fb.className = 'feedback erro';
+      fb.innerHTML = 'Sua sessão expirou. Saia da conta e faça login novamente para gerar uma nova sessão.';
+    }
+    const btnTexto = sr.getElementById('btn-texto');
+    if (btnTexto) btnTexto.textContent = 'Sessão Expirada';
+    this._travar();
+  }
+
+  async _renovarToken() {
+    if (!this._refreshToken) return false;
+    try {
+      const res = await fetch(`${this._workerUrl}/api/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: this._refreshToken }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      if (data.token) {
+        this._token = data.token;
+        localStorage.setItem('dm_token', data.token);
+      }
+      if (data.refresh_token) {
+        this._refreshToken = data.refresh_token;
+        localStorage.setItem('dm_refresh', data.refresh_token);
+      }
+      return true;
+    } catch(_) { return false; }
+  }
+
+  async _iniciar() {
+    await this._renovarToken();
+    this._carregarQuota(false);
+  }
+
+  _renderShell() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600;700&display=swap');
+        
+        :host {
+          display: block;
+          --cyan: #00d4d4; 
+          --cyan-d: rgba(0,212,212,0.15);
+          --gold: #f0c040; 
+          --green: #4ade80; 
+          --red: #f87171;
+          --border: rgba(0,230,230,0.18); 
+          --glass: rgba(26,26,46,0.85);
+          --text: #fff; 
+          --muted: #a0b8c8;
+          font-family: 'Exo 2', sans-serif;
+          color: var(--text);
+        }
+
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+
+        .shell {
+          display: flex;
+          flex-direction: row;
+          min-height: 100%;
+          background: transparent;
+        }
+
+        .content {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          padding: 24px 20px;
+          min-width: 0;
+        }
+
+        .bnav {
+          order: -1; 
+          width: 220px; min-width: 220px; flex-shrink: 0;
+          display: flex; flex-direction: column;
+          align-items: stretch; justify-content: flex-start;
+          position: relative; height: 100%;
+          background: transparent;
+          border-right: 1px solid var(--border);
+          padding: 20px 0; gap: 2px; z-index: 100;
+        }
+
+        .nit {
+          display: flex; flex-direction: row; align-items: center; justify-content: flex-start;
+          color: var(--muted); font-size: 0.8rem;
+          font-family: 'Rajdhani', sans-serif; font-weight: 600;
+          gap: 10px; cursor: pointer; transition: all 0.2s;
+          border: none; background: none;
+          padding: 12px 16px; border-radius: 8px;
+          margin: 0 10px; width: calc(100% - 20px);
+        }
+        .nit svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+        .nit:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+        .nit.on  { color: var(--cyan); background: var(--cyan-d); }
+        .nit.on svg { filter: drop-shadow(0 0 5px var(--cyan)); }
+        .nit.sair { color: var(--red); margin-top: auto; }
+        .nit.sair:hover { background: rgba(248,113,113,.1); }
+
+        .wrap {
+          background: var(--glass);
+          border: 1px solid var(--border); 
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          padding: 24px 25px;
+          width: 100%; max-width: 520px;
+        }
+
+        @media(max-width:768px){
+          .shell { flex-direction: column; }
+          .content { padding: 15px 10px 90px; }
+          .wrap { background: rgba(30,30,46,0.95); backdrop-filter: none; padding: 20px 15px; }
+          .radio-group { flex-direction: column; }
+          .radio-opt { width: 100%; min-width: unset; }
+          
+          .bnav {
+            order: 0; position: fixed; top: auto; bottom: 0; left: 0;
+            width: 100%; min-width: 0; height: 70px; min-height: 0;
+            flex-direction: row; justify-content: space-around; align-items: center;
+            border-right: none; border-top: 1px solid var(--border);
+            padding: 0; background: rgba(18, 18, 31, 0.95); backdrop-filter: blur(10px);
+            z-index: 1000;
+          }
+          .nit {
+            flex-direction: column; justify-content: center;
+            font-size: 0.65rem; gap: 4px;
+            padding: 8px 10px; margin: 0;
+            width: auto; border-radius: 0; background: none;
+          }
+          .nit svg { width: 22px; height: 22px; }
+          .nit:hover, .nit.sair:hover { background: none; }
+          .nit.on { background: none; }
+          .nit.sair { margin-top: 0; }
+        }
+
+        .header { display:flex; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid rgba(0,212,212,0.15); }
+        .header-icon { width:42px; height:42px; flex-shrink:0; color:var(--cyan); }
+        .header-icon svg { width:100%; height:100%; }
+        .header-title { font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700; color:var(--text); letter-spacing:0.08em; text-transform:uppercase; }
+        .header-sub { font-family:'Rajdhani',sans-serif; font-size:0.75rem; font-weight:700; color:var(--gold); letter-spacing:0.06em; text-transform:uppercase; }
+
+        .quota-box { background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:12px 14px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+        .quota-label { font-size:0.72rem; color:var(--muted); font-family:'Rajdhani',sans-serif; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; }
+        .quota-dots { display:flex; gap:6px; align-items:center; }
+        .dot { width:12px; height:12px; border-radius:50%; border:1.5px solid rgba(0,212,212,0.3); background:transparent; transition:background 0.25s,border-color 0.25s,box-shadow 0.25s; }
+        .dot.used { background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 8px var(--cyan-d); }
+        .dot.loading { border-color:rgba(0,212,212,0.15); animation:pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.8} }
+
+        .alerta { border-radius:10px; padding:14px 16px; margin-bottom:20px; font-size:0.82rem; line-height:1.5; display:none; }
+        .alerta.limite { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); color:var(--red); }
+        .alerta.erro-quota { background:rgba(240,192,64,0.1); border:1px solid rgba(240,192,64,0.2); color:var(--gold); }
+        .destaque { color:var(--gold); font-weight:700; }
+
+        .field-group { margin-bottom:18px; }
+        .field-label { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:700; color:var(--cyan); font-family:'Rajdhani',sans-serif; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+        .field-input { width:100%; background:rgba(0,0,0,0.5); border:1px solid var(--border); border-radius:10px; padding:14px; color:var(--text); font-family:inherit; font-size:0.95rem; outline:none; transition:0.3s; }
+        .field-input::placeholder { color:rgba(255,255,255,0.2); }
+        .field-input:focus { border-color:var(--cyan); box-shadow:0 0 10px var(--cyan-d); }
+        .field-input:disabled { opacity:0.5; cursor:not-allowed; }
+
+        .radio-group { display:flex; gap:10px; flex-wrap:wrap; }
+        .radio-opt { flex:1; min-width:120px; }
+        .radio-opt input[type="radio"] { display:none; }
+        .radio-card { display:flex; align-items:center; justify-content:center; padding:14px 10px; border:1px solid var(--border); border-radius:10px; cursor:pointer; background:rgba(0,0,0,0.3); transition:all 0.3s; user-select:none; }
+        .radio-card:hover { background:var(--cyan-d); border-color:var(--cyan); }
+        .radio-card .rc-tempo { font-family:'Rajdhani',sans-serif; font-size:1.05rem; font-weight:700; color:var(--muted); letter-spacing:0.05em; text-align:center; text-transform:uppercase; transition:color 0.3s; }
+        
+        .radio-opt input[type="radio"]:checked + .radio-card, 
+        #btn-impulso {
+          background: linear-gradient(135deg, rgba(0,242,255,0.12), rgba(0,100,255,0.12));
+          border: 1px solid #00f2ff;
+          color: #00f2ff;
+        }
+        .radio-opt input[type="radio"]:checked + .radio-card { box-shadow: 0 0 16px rgba(0,242,255,0.15); }
+        .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo { color: #00f2ff; }
+        .radio-opt input[type="radio"]:disabled + .radio-card { opacity:0.4; cursor:not-allowed; background:rgba(0,0,0,0.2); border-color:rgba(255,255,255,0.05); transform:none; box-shadow:none; }
+
+        #btn-impulso {
+          width: 100%; margin-top: 22px; padding: 14px;
+          border-radius: 12px;
+          font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700;
+          letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+          display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
+        }
+        #btn-impulso:hover:not(:disabled) { box-shadow: 0 0 22px rgba(0,242,255,0.25); transform: translateY(-2px); }
+        #btn-impulso:disabled { opacity:0.35; background:transparent; border-color:rgba(0,242,255,0.3); color:rgba(0,242,255,0.4); cursor: not-allowed; box-shadow: none; transform: none; }
+
+        .feedback { margin-top:14px; padding:12px 14px; border-radius:9px; font-size:0.82rem; line-height:1.5; display:none; }
+        .feedback.ok   { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.3); color:var(--green); display:block; }
+        .feedback.erro { background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.2); color:var(--red); display:block; }
+
+        .spinner { width:16px; height:16px; border:2px solid rgba(0,242,255,0.3); border-top-color:#00f2ff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* ── Temas claros ── */
+        :host-context([data-theme="branco"]),
+        :host-context([data-theme="rosa"]),
+        :host-context([data-theme="laranja"]) {
+          --glass: rgba(255,255,255,0.92);
+          --text: #1a1a2e;
+          --muted: #5a6a7e;
+          --border: rgba(0,0,0,0.1);
+        }
+        :host-context([data-theme="branco"]) .wrap,
+        :host-context([data-theme="rosa"]) .wrap,
+        :host-context([data-theme="laranja"]) .wrap {
+          background: rgba(255,255,255,0.92);
+          border-color: rgba(0,0,0,0.09);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        :host-context([data-theme="branco"]) .quota-box,
+        :host-context([data-theme="rosa"]) .quota-box,
+        :host-context([data-theme="laranja"]) .quota-box {
+          background: rgba(0,0,0,0.04);
+          border-color: rgba(0,0,0,0.07);
+        }
+        :host-context([data-theme="branco"]) .field-input,
+        :host-context([data-theme="rosa"]) .field-input,
+        :host-context([data-theme="laranja"]) .field-input {
+          background: rgba(0,0,0,0.06);
+          border-color: rgba(0,0,0,0.12);
+          color: #1a1a2e;
+        }
+        :host-context([data-theme="branco"]) .field-input::placeholder,
+        :host-context([data-theme="rosa"]) .field-input::placeholder,
+        :host-context([data-theme="laranja"]) .field-input::placeholder { color: rgba(0,0,0,0.3); }
+        :host-context([data-theme="branco"]) .radio-card,
+        :host-context([data-theme="rosa"]) .radio-card,
+        :host-context([data-theme="laranja"]) .radio-card {
+          background: rgba(0,0,0,0.05);
+          border-color: rgba(0,0,0,0.1);
+        }
+        @media(max-width:768px){
+          :host-context([data-theme="branco"]) .bnav,
+          :host-context([data-theme="rosa"]) .bnav,
+          :host-context([data-theme="laranja"]) .bnav {
+            background: rgba(255,255,255,0.96);
+            border-top-color: rgba(0,0,0,0.1);
+          }
+          :host-context([data-theme="branco"]) .nit,
+          :host-context([data-theme="rosa"]) .nit,
+          :host-context([data-theme="laranja"]) .nit { color: #5a6a7e; }
+          :host-context([data-theme="branco"]) .nit.on,
+          :host-context([data-theme="rosa"]) .nit.on,
+          :host-context([data-theme="laranja"]) .nit.on { color: var(--cyan); }
+        }
+      </style>
+
+      <div class="shell">
+
+        <div class="content">
+          <div class="wrap">
+            <div class="header">
+              <div class="header-icon">${SVG_ROCKET}</div>
+              <div class="header-text">
+                <div class="header-title">Impulsionar Live</div>
+                <div class="header-sub">Integração Kwai</div>
+              </div>
+            </div>
+
+            <div class="quota-box">
+              <div class="quota-label">Usos esta semana</div>
+              <div class="quota-dots">
+                <div class="dot loading" id="d1"></div>
+                <div class="dot loading" id="d2"></div>
+                <div class="dot loading" id="d3"></div>
+                <div class="dot loading" id="d4"></div>
+                <div class="dot loading" id="d5"></div>
+              </div>
+            </div>
+
+            <div class="alerta limite" id="alerta-limite">
+              Limite semanal atingido. Você já utilizou os <span class="destaque">5 impulsionamentos</span> desta semana.
+              O contador reinicia toda <span class="destaque">segunda-feira</span>.
+            </div>
+
+            <div class="alerta erro-quota" id="alerta-erro-quota">
+              Não foi possível verificar sua cota. Recarregue a página.
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">${SVG_LINK} Link da Live</label>
+              <input type="url" id="inp-link" class="field-input" placeholder="https://www.kwai.com/..." autocomplete="off" spellcheck="false" disabled/>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
+              <div class="radio-group">
+                <label class="radio-opt">
+                  <input type="radio" name="tempo" value="30min" checked disabled/>
+                  <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
+                </label>
+                <label class="radio-opt">
+                  <input type="radio" name="tempo" value="1hora" disabled/>
+                  <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
+                </label>
+              </div>
+            </div>
+
+            <button id="btn-impulso" disabled>
+              <div class="spinner" id="spinner"></div>
+              <span id="btn-texto">Verificando...</span>
+            </button>
+
+            <div class="feedback" id="feedback"></div>
+          </div>
+        </div>
+
+        <nav class="bnav">
+          <button class="nit" id="nav-painel">${SVG_GRID} PAINEL</button>
+          <button class="nit on" id="nav-impulso">${SVG_BOOST} IMPULSO</button>
+          <button class="nit sair" id="nav-sair">${SVG_LOGOUT} SAIR</button>
+        </nav>
+
+      </div>
+    `;
+
+    this.shadowRoot.getElementById('btn-impulso').addEventListener('click', () => this._enviar());
+    this.shadowRoot.getElementById('nav-painel').addEventListener('click', () => {
+      try { window.parent.location.href = '/painel-streamer'; } catch(e) { window.open('/painel-streamer', '_top'); }
+    });
+    this.shadowRoot.getElementById('nav-sair').addEventListener('click', () => {
+      ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome'].forEach(k => localStorage.removeItem(k));
+      try { window.parent.location.href = '/painel-streamer'; } catch(e) { window.open('/painel-streamer', '_top'); }
+    });
+  }
+
+  async _carregarQuota(retry = false) {
+    try {
+      const res = await fetch(`${this._workerUrl}/api/quota`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this._token}` },
+        body: JSON.stringify({ uid: this._uid }),
+      });
+
+      if (res.status === 401 && !retry) {
+        const renovado = await this._renovarToken();
+        if (renovado) return this._carregarQuota(true);
+        this._mostrarSessaoExpirada();
+        return;
+      }
+
+      if (!res.ok) { this._erroQuota(); return; }
+
+      const data = await res.json();
+      this._quota = data.usado || 0;
+      this._quotaCarregada = true;
+      this._atualizarQuotaUI();
+
+    } catch(_) { this._erroQuota(); }
+  }
+
+  _erroQuota() {
+    const sr = this.shadowRoot;
+    for (let i = 1; i <= QUOTA_MAX; i++) {
+      const dot = sr.getElementById(`d${i}`);
+      if (dot) { dot.classList.remove('loading'); dot.style.borderColor = 'rgba(240,192,64,0.4)'; }
+    }
+    sr.getElementById('alerta-erro-quota').style.display = 'block';
+    sr.getElementById('btn-texto').textContent = 'Indisponível';
+  }
+
+  _atualizarQuotaUI() {
+    const sr = this.shadowRoot;
+    for (let i = 1; i <= QUOTA_MAX; i++) {
+      const dot = sr.getElementById(`d${i}`);
+      if (dot) { dot.classList.remove('loading'); dot.classList.toggle('used', i <= this._quota); }
+    }
+    if (this._quota >= QUOTA_MAX) {
+      sr.getElementById('alerta-limite').style.display = 'block';
+      this._travar();
+    } else {
+      sr.getElementById('btn-impulso').disabled = false;
+      sr.getElementById('inp-link').disabled    = false;
+      sr.querySelectorAll('input[name="tempo"]').forEach(r => r.disabled = false);
+      sr.getElementById('btn-texto').textContent = 'Impulsionar Live';
+    }
+  }
+
+  _travar() {
+    const sr = this.shadowRoot;
+    sr.getElementById('btn-impulso').disabled = true;
+    sr.getElementById('inp-link').disabled    = true;
+    sr.querySelectorAll('input[name="tempo"]').forEach(r => r.disabled = true);
+  }
+
+  async _enviar() {
+    if (!this._quotaCarregada) return;
+    const sr       = this.shadowRoot;
+    const link     = sr.getElementById('inp-link').value.trim();
+    const tempo    = sr.querySelector('input[name="tempo"]:checked')?.value || '30min';
+    const btn      = sr.getElementById('btn-impulso');
+    const spinner  = sr.getElementById('spinner');
+    const btnTexto = sr.getElementById('btn-texto');
+    const feedback = sr.getElementById('feedback');
+
+    feedback.className   = 'feedback';
+    feedback.textContent = '';
+
+    if (!link) { feedback.className='feedback erro'; feedback.textContent='Informe o link da sua live antes de continuar.'; return; }
+    if (!link.includes('kwai.com')) { feedback.className='feedback erro'; feedback.textContent='O link informado não parece ser uma live do Kwai.'; return; }
+
+    btn.disabled          = true;
+    spinner.style.display = 'block';
+    btnTexto.textContent  = 'Aguarde...';
+
+    try {
+      const res = await fetch(`${this._workerUrl}/api/impulsionar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this._token}` },
+        body: JSON.stringify({ uid: this._uid, link, tempo }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.sucesso) {
+        this._quota++;
+        this._atualizarQuotaUI();
+        feedback.className   = 'feedback ok';
+        feedback.textContent = 'Impulsionamento iniciado com sucesso!';
+        sr.getElementById('inp-link').value = '';
+      } else {
+        feedback.className   = 'feedback erro';
+        feedback.textContent = data.erro || 'Erro ao processar o pedido. Tente novamente.';
+        if (this._quota < QUOTA_MAX) btn.disabled = false;
+      }
+    } catch(_) {
+      feedback.className   = 'feedback erro';
+      feedback.textContent = 'Falha de conexão com o servidor. Verifique sua internet.';
+      if (this._quota < QUOTA_MAX) btn.disabled = false;
+    } finally {
+      spinner.style.display = 'none';
+      btnTexto.textContent  = 'Impulsionar Live';
+    }
+  }
+}
+
+customElements.define('dmaior-impulso', DmaiorImpulso);
