@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base href="/teste/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PK Interno — DMaior Agency</title>
+  <meta name="description" content="Confrontos e ranking de PK interno da DMaior Agency.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <!-- Menu unificado — funciona em mobile e desktop -->
+  <menu-mobile-dmaior></menu-mobile-dmaior>
+
+  <main class="dm-main" style="padding:0;">
+    <!-- Componente PK Interno — recebe dados via atributo estado-painel -->
+    <painel-pk id="pk-widget"></painel-pk>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/components/menu-mobile.js"></script>
+  <script src="js/components/painel-pk.js"></script>
+  <script>
+    // ── Integração PK Interno ────────────────────────────────────────────────
+    // Busca dados do Worker PK + Supabase e alimenta o componente <painel-pk>
+
+    const pkWidget = document.getElementById('pk-widget');
+
+    // Estado inicial — mostra spinner enquanto carrega
+    const estadoInicial = {
+      carregando: true,
+      abaAtiva: 'confrontos',
+      rodadas: [],
+      rodadaAtiva: 0,
+      datas: [],
+      dataAtiva: 0,
+      confrontos: [],
+      ranking: [],
+      liveStatus: {},
+    };
+    pkWidget.setAttribute('estado-painel', JSON.stringify(estadoInicial));
+
+    // Escuta ações disparadas pelo componente (troca de aba, rodada, data)
+    pkWidget.addEventListener('acaoui', async (e) => {
+      const { acao, valor } = e.detail;
+      const estadoAtual = JSON.parse(pkWidget.getAttribute('estado-painel') || '{}');
+
+      if (acao === 'mudar-aba') {
+        estadoAtual.abaAtiva = valor;
+        pkWidget.setAttribute('estado-painel', JSON.stringify(estadoAtual));
+      } else if (acao === 'mudar-rodada') {
+        estadoAtual.rodadaAtiva = valor;
+        pkWidget.setAttribute('estado-painel', JSON.stringify(estadoAtual));
+      } else if (acao === 'mudar-data') {
+        estadoAtual.dataAtiva = valor;
+        pkWidget.setAttribute('estado-painel', JSON.stringify(estadoAtual));
+      }
+    });
+
+    // Busca dados do Worker dashboard (PK) — via DmaiorAPI se disponível
+    async function carregarDadosPK() {
+      try {
+        const workerPk = (window.DmaiorConfig && window.DmaiorConfig.workers && window.DmaiorConfig.workers.pk)
+          ? window.DmaiorConfig.workers.pk
+          : 'https://pk.agencydmaior.com.br';
+
+        // Tenta buscar dados do Worker
+        const res = await fetch(`${workerPk}/api/pk`, {
+          signal: AbortSignal.timeout(10000),
+        }).catch(() => null);
+
+        if (res && res.ok) {
+          const dados = await res.json();
+          pkWidget.setAttribute('estado-painel', JSON.stringify({
+            carregando: false,
+            ...dados,
+          }));
+        } else {
+          // Worker não retornou dados — exibe estado vazio
+          pkWidget.setAttribute('estado-painel', JSON.stringify({
+            carregando: false,
+            abaAtiva: 'confrontos',
+            rodadas: [{ label: 'Rodada 1' }],
+            rodadaAtiva: 0,
+            datas: [],
+            dataAtiva: 0,
+            confrontos: [],
+            ranking: [],
+            liveStatus: {},
+          }));
+        }
+      } catch (err) {
+        // Erro de rede — mostra estado vazio
+        pkWidget.setAttribute('estado-painel', JSON.stringify({
+          carregando: false,
+          abaAtiva: 'confrontos',
+          rodadas: [],
+          rodadaAtiva: 0,
+          datas: [],
+          dataAtiva: 0,
+          confrontos: [],
+          ranking: [],
+          liveStatus: {},
+        }));
+      }
+    }
+
+    // Inicia carregamento
+    carregarDadosPK();
+  </script>
+
+  <dmaior-footer></dmaior-footer>
+  <script src="js/components/footer.js"></script>
+</body>
+</html>

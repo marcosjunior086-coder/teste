@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base href="/teste/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulário de Recrutamento — DMaior Agency</title>
+  <meta name="description" content="Candidate-se para ser agenciado pela DMaior Agency. Processo 100% gratuito.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .dm-form-page {
+      max-width: 560px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .dm-form-page h1 {
+      font-family: var(--dm-font-title);
+      color: var(--dm-cyan);
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .dm-form-page p.sub {
+      text-align: center;
+      color: var(--dm-text-muted);
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    .dm-form-card {
+      padding: 30px;
+    }
+    .dm-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .dm-form-group label {
+      font-family: var(--dm-font-title);
+      font-size: 0.8rem;
+      color: var(--dm-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .dm-form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--dm-border);
+      border-radius: 8px;
+      color: var(--dm-text);
+      font-family: var(--dm-font-body);
+      font-size: 0.95rem;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+    }
+    .dm-form-group select:focus { border-color: var(--dm-cyan); }
+    .dm-form-status {
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-family: var(--dm-font-title);
+      font-size: 1rem;
+      display: none;
+    }
+    .dm-form-status.sucesso { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: #4ade80; display: block; }
+    .dm-form-status.erro    { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #f87171; display: block; }
+  </style>
+</head>
+<body>
+  <menu-mobile-dmaior></menu-mobile-dmaior>
+
+  <main class="dm-main">
+    <div class="dm-form-page">
+      <h1>Quero ser agenciado</h1>
+      <p class="sub">Preencha o formulário abaixo. Nossa equipe entrará em contato em até 24h.</p>
+
+      <div class="dm-glass-card dm-form-card">
+        <form id="form-recrutamento" novalidate>
+          <div class="dm-form-group">
+            <label for="f-nome">Nome completo *</label>
+            <input id="f-nome" class="dm-input-field" type="text" placeholder="Seu nome completo" required maxlength="120" autocomplete="name">
+          </div>
+          <div class="dm-form-group">
+            <label for="f-kwai">ID do Kwai *</label>
+            <input id="f-kwai" class="dm-input-field" type="text" placeholder="Seu ID ou usuário no Kwai" required maxlength="80">
+          </div>
+          <div class="dm-form-group">
+            <label for="f-whatsapp">WhatsApp *</label>
+            <input id="f-whatsapp" class="dm-input-field" type="tel" placeholder="(00) 90000-0000" required maxlength="15" inputmode="numeric" autocomplete="tel">
+          </div>
+          <div class="dm-form-group">
+            <label for="f-horas">Horas de live por dia</label>
+            <select id="f-horas">
+              <option value="">Selecione uma opção</option>
+              <option value="menos-2">Menos de 2 horas</option>
+              <option value="2-4">2 a 4 horas</option>
+              <option value="4-8">4 a 8 horas</option>
+              <option value="mais-8">Mais de 8 horas</option>
+            </select>
+          </div>
+          <div class="dm-form-group">
+            <label for="f-mensagem">Fale sobre você (opcional)</label>
+            <textarea id="f-mensagem" class="dm-input-field" rows="3" placeholder="Conte um pouco sobre sua experiência com lives..." maxlength="500" style="resize:vertical;min-height:80px"></textarea>
+          </div>
+          <button type="submit" class="dm-btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:1rem;" id="btn-enviar">
+            ENVIAR CANDIDATURA
+          </button>
+          <div id="form-status" class="dm-form-status"></div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/components/menu-mobile.js"></script>
+  <script>
+    // Máscara WhatsApp
+    document.getElementById('f-whatsapp').addEventListener('input', function() {
+      let v = this.value.replace(/\D/g,'').substring(0,11);
+      v = v.length > 10
+        ? v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+        : v.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+      this.value = v;
+    });
+
+    document.getElementById('form-recrutamento').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn    = document.getElementById('btn-enviar');
+      const status = document.getElementById('form-status');
+
+      const nome     = document.getElementById('f-nome').value.trim();
+      const kwai     = document.getElementById('f-kwai').value.trim();
+      const whatsapp = document.getElementById('f-whatsapp').value.replace(/\D/g,'');
+
+      status.className = 'dm-form-status';
+      status.textContent = '';
+
+      if (!nome || !kwai || whatsapp.length < 10) {
+        status.className  = 'dm-form-status erro';
+        status.textContent = '⚠️ Preencha os campos obrigatórios corretamente.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'ENVIANDO...';
+
+      try {
+        await window.DmaiorAPI.recrutamento.enviar({
+          nome,
+          kwai_id:   kwai,
+          whatsapp,
+          horas:     document.getElementById('f-horas').value,
+          mensagem:  document.getElementById('f-mensagem').value.trim(),
+        });
+        status.className  = 'dm-form-status sucesso';
+        status.textContent = '✅ Candidatura enviada! Entraremos em contato em breve.';
+        document.getElementById('form-recrutamento').reset();
+      } catch {
+        status.className  = 'dm-form-status erro';
+        status.textContent = '❌ Erro ao enviar. Tente novamente ou fale conosco pelo WhatsApp.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'ENVIAR CANDIDATURA';
+      }
+    });
+  </script>
+
+  <dmaior-footer></dmaior-footer>
+  <script src="js/components/footer.js"></script>
+</body>
+</html>

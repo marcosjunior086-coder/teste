@@ -1,0 +1,54 @@
+# =====================================================
+# DMaior Agency — .htaccess para Hostinger
+# Apache 2.4 | mod_rewrite obrigatório
+# =====================================================
+
+Options -Indexes
+ServerSignature Off
+
+# ─── Força HTTPS ──────────────────────────────────
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ─── Remove www (ou adicione www se preferir) ─────
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+# ─── Compressão GZIP ──────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# ─── Cache de arquivos estáticos ──────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html                  "access plus 1 hour"
+  ExpiresByType text/css                   "access plus 1 month"
+  ExpiresByType application/javascript     "access plus 1 month"
+  ExpiresByType image/png                  "access plus 6 months"
+  ExpiresByType image/jpeg                 "access plus 6 months"
+  ExpiresByType image/webp                 "access plus 6 months"
+  ExpiresByType image/svg+xml              "access plus 6 months"
+  ExpiresByType font/woff2                 "access plus 1 year"
+</IfModule>
+
+# ─── Headers de segurança ─────────────────────────
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# ─── Página de erro personalizada ─────────────────
+ErrorDocument 404 /index.html
+ErrorDocument 403 /index.html
+
+# ─── Redirecionar rotas antigas do Wix ────────────
+# (caso alguém acesse URLs antigas com slug /rank-geral)
+RewriteRule ^rank-geral/?$        /ranking.html [R=301,L]
+RewriteRule ^recarga/?$           /recarga.html [R=301,L]
+RewriteRule ^politicas/?$         /politicas.html [R=301,L]
+RewriteRule ^tutoriais/?$         /tutoriais.html [R=301,L]
+RewriteRule ^formulario/?$        /recrutamento.html [R=301,L]
