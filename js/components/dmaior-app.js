@@ -360,21 +360,37 @@ class DMaiorPainel extends HTMLElement {
             .iframe-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;padding:0 0 14px;text-transform:uppercase;}
             .iframe-back svg{width:20px;height:20px;fill:var(--cyan);}
 
-            /* ── Temas claros — adapta vars do componente ao tema global ── */
-            [data-theme="branco"] .shell,
-            [data-theme="rosa"] .shell,
-            [data-theme="laranja"] .shell {
-                --glass: rgba(255,255,255,0.92);
-                --text: #1a1a2e;
-                --muted: #5a6a7e;
-                --border: rgba(0,0,0,0.1);
+            /* ══ TEMA BRANCO — bloom azul-petróleo (padrão do ranking) ══ */
+            [data-theme="branco"] .shell {
+                --cyan:#0095a8; --cyan-d:rgba(0,149,168,0.15);
+                --gold:#b8860b; --red:#dc2626; --green:#15803d;
+                --border:rgba(0,149,168,0.35); --glass:rgba(255,255,255,0.95);
+                --text:#0d1117; --muted:#4a5568;
+                --bloom: linear-gradient(135deg,#0369a1 0%,#0095a8 100%);
             }
+            /* ══ TEMA ROSA — bloom pink/magenta ══ */
+            [data-theme="rosa"] .shell {
+                --cyan:#e91e8c; --cyan-d:rgba(233,30,140,0.15);
+                --gold:#c2185b; --red:#b71c1c; --green:#2e7d32;
+                --border:rgba(233,30,140,0.35); --glass:rgba(255,255,255,0.95);
+                --text:#1a0010; --muted:#80004a;
+                --bloom: linear-gradient(135deg,#e91e8c 0%,#ff6090 100%);
+            }
+            /* ══ TEMA LARANJA — bloom laranja/âmbar ══ */
+            [data-theme="laranja"] .shell {
+                --cyan:#f97316; --cyan-d:rgba(249,115,22,0.15);
+                --gold:#ea580c; --red:#dc2626; --green:#15803d;
+                --border:rgba(249,115,22,0.35); --glass:rgba(255,255,255,0.95);
+                --text:#1a0a00; --muted:#7c3a00;
+                --bloom: linear-gradient(135deg,#f97316 0%,#fbbf24 100%);
+            }
+            /* ══ Cards, inputs, nav — todos os temas claros ══ */
             [data-theme="branco"] .shell .card,
             [data-theme="rosa"] .shell .card,
             [data-theme="laranja"] .shell .card {
-                background: rgba(255,255,255,0.92);
-                border-color: rgba(0,0,0,0.09);
-                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                background: var(--glass);
+                border-color: var(--border);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.07);
             }
             [data-theme="branco"] .shell .mbox,
             [data-theme="rosa"] .shell .mbox,
@@ -384,64 +400,59 @@ class DMaiorPainel extends HTMLElement {
             }
             [data-theme="branco"] .shell .saque-form,
             [data-theme="rosa"] .shell .saque-form,
-            [data-theme="laranja"] .shell .saque-form {
-                background: rgba(0,0,0,0.04);
+            [data-theme="laranja"] .shell .saque-form { background: rgba(0,0,0,0.03); }
+            [data-theme="branco"] .shell input, [data-theme="branco"] .shell select,
+            [data-theme="rosa"] .shell input,   [data-theme="rosa"] .shell select,
+            [data-theme="laranja"] .shell input, [data-theme="laranja"] .shell select {
+                background: rgba(0,0,0,0.05);
+                border-color: var(--border);
+                color: var(--text);
             }
-            [data-theme="branco"] .shell input,
-            [data-theme="branco"] .shell select,
-            [data-theme="rosa"] .shell input,
-            [data-theme="rosa"] .shell select,
-            [data-theme="laranja"] .shell input,
-            [data-theme="laranja"] .shell select {
-                background: rgba(0,0,0,0.06);
-                border-color: rgba(0,0,0,0.12);
-                color: #1a1a2e;
-            }
+            /* Botões toggle (Diamantes/Horas, 7dias/30dias) */
             [data-theme="branco"] .shell .tbtn,
             [data-theme="rosa"] .shell .tbtn,
             [data-theme="laranja"] .shell .tbtn {
-                background: rgba(0,0,0,0.06);
-                border-color: rgba(0,0,0,0.1);
-                color: #5a6a7e;
+                background: rgba(0,0,0,0.05);
+                border-color: var(--border);
+                color: var(--muted);
             }
             [data-theme="branco"] .shell .tbtn.on,
             [data-theme="rosa"] .shell .tbtn.on,
             [data-theme="laranja"] .shell .tbtn.on {
-                background: rgba(0,212,212,0.12);
-                border-color: var(--cyan);
-                color: var(--cyan);
+                background: var(--bloom, var(--cyan-d));
+                border-color: transparent;
+                color: #fff;
             }
-            /* Nav lateral — temas claros */
+            /* Botão principal (ENTRAR, ATUALIZAR etc.) */
+            [data-theme="branco"] .shell .btn,
+            [data-theme="rosa"] .shell .btn,
+            [data-theme="laranja"] .shell .btn {
+                background: var(--bloom, linear-gradient(90deg,var(--cyan),#008c8c));
+            }
+            /* Barra de progresso */
+            [data-theme="branco"] .shell .progf,
+            [data-theme="rosa"] .shell .progf,
+            [data-theme="laranja"] .shell .progf {
+                background: var(--bloom, var(--cyan));
+                box-shadow: none;
+            }
+            /* Nav lateral */
             [data-theme="branco"] .shell .bnav,
             [data-theme="rosa"] .shell .bnav,
-            [data-theme="laranja"] .shell .bnav {
-                border-right-color: rgba(0,0,0,0.1);
-            }
+            [data-theme="laranja"] .shell .bnav { border-right-color: var(--border); }
             @media(max-width:768px){
                 [data-theme="branco"] .shell .bnav,
                 [data-theme="rosa"] .shell .bnav,
                 [data-theme="laranja"] .shell .bnav {
-                    background: rgba(255,255,255,0.96);
-                    border-top-color: rgba(0,0,0,0.1);
+                    background: rgba(255,255,255,0.97);
+                    border-top-color: var(--border);
                     backdrop-filter: blur(12px);
                 }
-                [data-theme="branco"] .shell .nit,
-                [data-theme="rosa"] .shell .nit,
-                [data-theme="laranja"] .shell .nit {
-                    color: #5a6a7e;
-                }
-                [data-theme="branco"] .shell .nit.on,
-                [data-theme="rosa"] .shell .nit.on,
-                [data-theme="laranja"] .shell .nit.on {
-                    color: var(--cyan);
-                }
             }
-            /* Loading overlay — temas claros */
+            /* Loading overlay */
             [data-theme="branco"] #vLoading,
             [data-theme="rosa"] #vLoading,
-            [data-theme="laranja"] #vLoading {
-                background: rgba(240,244,248,0.97) !important;
-            }
+            [data-theme="laranja"] #vLoading { background: rgba(240,244,248,0.97) !important; }
         </style>
 
         <div class="shell">

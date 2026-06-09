@@ -207,75 +207,102 @@ class DmaiorImpulso extends HTMLElement {
         .spinner { width:16px; height:16px; border:2px solid rgba(0,242,255,0.3); border-top-color:#00f2ff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
         @keyframes spin { to { transform:rotate(360deg); } }
 
-        /* ══ TEMA BRANCO ══ */
+        /* ══ TEMA BRANCO — bloom azul-petróleo ══ */
         :host-context([data-theme="branco"]) {
-          --text: #1a1a2e; --muted: #4a5568;
-          --border: rgba(0,150,180,0.25);
+          --cyan:#0095a8; --cyan-d:rgba(0,149,168,0.15);
+          --gold:#b8860b; --text:#0d1117; --muted:#4a5568;
+          --border:rgba(0,149,168,0.35); --glass:rgba(255,255,255,0.95);
+          --bloom:linear-gradient(135deg,#0369a1 0%,#0095a8 100%);
         }
         :host-context([data-theme="branco"]) .wrap {
-          background: linear-gradient(135deg,#e0f7fa 0%,#f0faff 100%);
-          border-color: rgba(0,180,210,0.3);
-          box-shadow: 0 6px 24px rgba(0,150,180,0.12);
+          background: var(--glass);
+          border-color: var(--border);
+          box-shadow: 0 6px 24px rgba(0,149,168,0.1);
         }
-        :host-context([data-theme="branco"]) .header-sub { color: #0095a8; }
 
-        /* ══ TEMA ROSA ══ */
+        /* ══ TEMA ROSA — bloom pink/magenta ══ */
         :host-context([data-theme="rosa"]) {
-          --text: #1a1a2e; --muted: #5a3a4a;
-          --border: rgba(220,80,120,0.25);
+          --cyan:#e91e8c; --cyan-d:rgba(233,30,140,0.15);
+          --gold:#c2185b; --text:#1a0010; --muted:#80004a;
+          --border:rgba(233,30,140,0.35); --glass:rgba(255,255,255,0.95);
+          --bloom:linear-gradient(135deg,#e91e8c 0%,#ff6090 100%);
         }
         :host-context([data-theme="rosa"]) .wrap {
-          background: linear-gradient(135deg,#fce4ec 0%,#fff0f4 100%);
-          border-color: rgba(220,80,120,0.3);
-          box-shadow: 0 6px 24px rgba(200,60,100,0.12);
+          background: var(--glass);
+          border-color: var(--border);
+          box-shadow: 0 6px 24px rgba(233,30,140,0.1);
         }
-        :host-context([data-theme="rosa"]) .header-sub { color: #c2185b; }
-        :host-context([data-theme="rosa"]) .field-label { color: #c2185b; }
-        :host-context([data-theme="rosa"]) .header-title { color: #880e4f; }
 
-        /* ══ TEMA LARANJA ══ */
+        /* ══ TEMA LARANJA — bloom laranja/âmbar ══ */
         :host-context([data-theme="laranja"]) {
-          --text: #1a1a2e; --muted: #5a3a1a;
-          --border: rgba(220,100,20,0.25);
+          --cyan:#f97316; --cyan-d:rgba(249,115,22,0.15);
+          --gold:#ea580c; --text:#1a0a00; --muted:#7c3a00;
+          --border:rgba(249,115,22,0.35); --glass:rgba(255,255,255,0.95);
+          --bloom:linear-gradient(135deg,#f97316 0%,#fbbf24 100%);
         }
         :host-context([data-theme="laranja"]) .wrap {
-          background: linear-gradient(135deg,#fff3e0 0%,#fff8f0 100%);
-          border-color: rgba(220,100,20,0.3);
-          box-shadow: 0 6px 24px rgba(200,80,0,0.12);
+          background: var(--glass);
+          border-color: var(--border);
+          box-shadow: 0 6px 24px rgba(249,115,22,0.1);
         }
-        :host-context([data-theme="laranja"]) .header-sub { color: #e65100; }
-        :host-context([data-theme="laranja"]) .field-label { color: #e65100; }
-        :host-context([data-theme="laranja"]) .header-title { color: #bf360c; }
 
-        /* ══ Campos e radio compartilhados (todos os temas claros) ══ */
+        /* ══ Campos, radio e quota — todos os temas claros ══ */
         :host-context([data-theme="branco"]) .quota-box,
         :host-context([data-theme="rosa"]) .quota-box,
         :host-context([data-theme="laranja"]) .quota-box {
-          background: rgba(0,0,0,0.05);
-          border-color: rgba(0,0,0,0.1);
+          background: rgba(0,0,0,0.04);
+          border-color: var(--border);
         }
         :host-context([data-theme="branco"]) .quota-label,
         :host-context([data-theme="rosa"]) .quota-label,
-        :host-context([data-theme="laranja"]) .quota-label { color: #1a1a2e; }
+        :host-context([data-theme="laranja"]) .quota-label { color: var(--text); }
         :host-context([data-theme="branco"]) .field-input,
         :host-context([data-theme="rosa"]) .field-input,
         :host-context([data-theme="laranja"]) .field-input {
-          background: rgba(255,255,255,0.8);
-          border-color: rgba(0,0,0,0.15);
-          color: #1a1a2e;
+          background: rgba(0,0,0,0.05);
+          border-color: var(--border);
+          color: var(--text);
         }
         :host-context([data-theme="branco"]) .field-input::placeholder,
         :host-context([data-theme="rosa"]) .field-input::placeholder,
-        :host-context([data-theme="laranja"]) .field-input::placeholder { color: rgba(0,0,0,0.35); }
+        :host-context([data-theme="laranja"]) .field-input::placeholder { color: var(--muted); }
+        /* Radio cards inativos */
         :host-context([data-theme="branco"]) .radio-card,
         :host-context([data-theme="rosa"]) .radio-card,
         :host-context([data-theme="laranja"]) .radio-card {
-          background: rgba(255,255,255,0.7);
-          border-color: rgba(0,0,0,0.12);
+          background: rgba(0,0,0,0.04);
+          border-color: var(--border);
         }
         :host-context([data-theme="branco"]) .radio-card .rc-tempo,
         :host-context([data-theme="rosa"]) .radio-card .rc-tempo,
-        :host-context([data-theme="laranja"]) .radio-card .rc-tempo { color: #1a1a2e; }
+        :host-context([data-theme="laranja"]) .radio-card .rc-tempo { color: var(--text); }
+        /* Radio card selecionado + botão impulso — usa bloom do tema */
+        :host-context([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card,
+        :host-context([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card,
+        :host-context([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card,
+        :host-context([data-theme="branco"]) #btn-impulso,
+        :host-context([data-theme="rosa"])   #btn-impulso,
+        :host-context([data-theme="laranja"]) #btn-impulso {
+          background: var(--bloom);
+          border-color: transparent;
+          color: #fff;
+        }
+        :host-context([data-theme="branco"]) #btn-impulso:disabled,
+        :host-context([data-theme="rosa"])   #btn-impulso:disabled,
+        :host-context([data-theme="laranja"]) #btn-impulso:disabled {
+          background: rgba(0,0,0,0.08);
+          color: var(--muted);
+        }
+        /* Labels de campo */
+        :host-context([data-theme="branco"]) .field-label,
+        :host-context([data-theme="rosa"]) .field-label,
+        :host-context([data-theme="laranja"]) .field-label { color: var(--cyan); }
+        :host-context([data-theme="branco"]) .header-sub,
+        :host-context([data-theme="rosa"]) .header-sub,
+        :host-context([data-theme="laranja"]) .header-sub { color: var(--cyan); }
+        :host-context([data-theme="branco"]) .header-title,
+        :host-context([data-theme="rosa"]) .header-title,
+        :host-context([data-theme="laranja"]) .header-title { color: var(--text); }
       </style>
 
       <div class="shell">
