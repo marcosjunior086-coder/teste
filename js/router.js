@@ -22,10 +22,9 @@ const Router = {
     '/admin':           '/admin/index.html',
   },
 
-  // Rotas que exigem login — se o usuário não estiver logado, redireciona para a home
+  // Rotas que exigem login pelo router — /painel/ e /admin/ têm login próprio,
+  // portanto NÃO entram aqui (o router não deve interceptá-las)
   protectedRoutes: [
-    '/painel/',
-    '/admin/',
     '/painel-streamer',
   ],
 
