@@ -449,6 +449,22 @@ class DMaiorPainel extends HTMLElement {
                     backdrop-filter: blur(12px);
                 }
             }
+            /* Cart-hero — saldo disponível — segue bloom do tema */
+            [data-theme="branco"] .shell .cart-hero {
+                background: linear-gradient(0deg,#0d1a2e 0%,#0369a1 55%,#0095a8 100%);
+                border-color: rgba(0,149,168,0.4);
+                box-shadow: 0 8px 40px rgba(0,149,168,0.2);
+            }
+            [data-theme="rosa"] .shell .cart-hero {
+                background: linear-gradient(0deg,#1a0010 0%,#880040 55%,#e91e8c 100%);
+                border-color: rgba(233,30,140,0.4);
+                box-shadow: 0 8px 40px rgba(233,30,140,0.2);
+            }
+            [data-theme="laranja"] .shell .cart-hero {
+                background: linear-gradient(0deg,#1a0800 0%,#92400e 55%,#f97316 100%);
+                border-color: rgba(249,115,22,0.4);
+                box-shadow: 0 8px 40px rgba(249,115,22,0.2);
+            }
             /* Loading overlay */
             [data-theme="branco"] #vLoading,
             [data-theme="rosa"] #vLoading,
@@ -1414,24 +1430,9 @@ class DMaiorPainel extends HTMLElement {
 
     // ── Ranking / Impulsionamento / Logout ───────────────────────────
     goRanking(){
-        // Abre o componente ranking-dmaior inline, sem sair do painel
-        this.navigate('vRank');
-        this.navActive('nRank');
-
-        // Patcha o botão de logout do Shadow DOM para voltar ao dashboard
-        // em vez de recarregar a página
-        const patchRank = () => {
-            const el = this.qs('#rankingEl');
-            const sr = el?.shadowRoot;
-            if(!sr) return;
-            const btn = sr.getElementById('btn-logout');
-            if(btn) btn.onclick = (e) => {
-                e.stopPropagation();
-                this.navigate('vD'); this.navActive('nD'); this.loadDash();
-            };
-        };
-        // Componente pode já estar renderizado (segunda visita) ou precisar de delay
-        setTimeout(patchRank, 200);
+        // Redireciona para a página de ranking — integração inline fica para depois
+        const base = (document.baseURI || '/').replace(/\/$/, '');
+        window.location.href = base + '/ranking/';
     }
     goImpulsionamento(){
         // Abre o componente dmaior-impulso inline, sem sair do painel
