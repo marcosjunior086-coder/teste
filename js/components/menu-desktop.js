@@ -43,24 +43,6 @@ class MenuDesktopDMaior extends HTMLElement {
     } catch {}
   }
 
-  // Som de clique característico da DMaior — Web Audio API nativa
-  playClickSound() {
-    try {
-      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(650, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } catch {}
-  }
-
   render() {
     const URL_LOGO   = `https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png`;
     const SVG_CHEV   = `<svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
@@ -192,15 +174,9 @@ class MenuDesktopDMaior extends HTMLElement {
 
   bindEvents() {
     const root = this.shadowRoot;
-    // Som em todos os links
-    root.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => this.playClickSound());
-    });
-    // Logout dispara evento global — capturado por auth.js
     const btnLogout = root.getElementById('btnLogout');
     if (btnLogout) {
       btnLogout.addEventListener('click', () => {
-        this.playClickSound();
         window.dispatchEvent(new CustomEvent('dmaior:logout'));
       });
     }

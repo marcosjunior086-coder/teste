@@ -10,30 +10,6 @@ class PoliticasPremium extends HTMLElement {
         this.bindEvents();
     }
 
-    // Função de áudio para o clique (Web Audio API)
-    playClickSound() {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(650, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
-
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1);
-        } catch (e) {
-            console.log("AudioContext não suportado.");
-        }
-    }
-
     render() {
         // Ícones SVG Minimalistas
         const SVG_ALERT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
@@ -427,9 +403,6 @@ class PoliticasPremium extends HTMLElement {
 
         btns.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Toca o som em toda troca de aba
-                this.playClickSound();
-
                 btns.forEach(b => b.classList.remove('active'));
                 contents.forEach(c => c.classList.remove('active'));
                 btn.classList.add('active');
@@ -462,9 +435,6 @@ class PoliticasPremium extends HTMLElement {
         });
 
         btnPlay.addEventListener('click', () => {
-            // Toca o som curto ao clicar no play/pause
-            this.playClickSound();
-
             if (isPlaying) {
                 audio.pause();
                 btnPlay.innerHTML = SVG_PLAY;

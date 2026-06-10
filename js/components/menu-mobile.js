@@ -52,23 +52,6 @@ class MenuMobileDMaior extends HTMLElement {
     } catch {}
   }
 
-  playClickSound() {
-    try {
-      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(650, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } catch {}
-  }
-
   render() {
     const URL_LOGO   = `https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png`;
     // Todos os ícones usam stroke="currentColor" — a cor é controlada por CSS via var(--dm-*)
@@ -336,7 +319,6 @@ class MenuMobileDMaior extends HTMLElement {
     const sidebar = root.getElementById('sidebar');
 
     const toggle = (force = null) => {
-      this.playClickSound();
       const isOpen    = sidebar.classList.contains('on');
       const shouldClose = force === false || (force === null && isOpen);
       sidebar.classList.toggle('on', !shouldClose);
@@ -430,7 +412,6 @@ class MenuMobileDMaior extends HTMLElement {
     // Submenus com accordion
     root.querySelectorAll('.menu-acc').forEach(btn => {
       btn.addEventListener('click', () => {
-        this.playClickSound();
         const idx    = btn.getAttribute('data-index');
         const wrap   = root.getElementById(`sub-${idx}`);
         const parent = btn.parentElement;
@@ -451,7 +432,6 @@ class MenuMobileDMaior extends HTMLElement {
     // Fecha sidebar ao clicar em qualquer link
     root.querySelectorAll('a').forEach(a => {
       a.addEventListener('click', () => {
-        this.playClickSound();
         setTimeout(() => toggle(false), 200);
       });
     });
@@ -460,7 +440,6 @@ class MenuMobileDMaior extends HTMLElement {
     const btnLogout = root.getElementById('btnLogout');
     if (btnLogout) {
       btnLogout.addEventListener('click', () => {
-        this.playClickSound();
         toggle(false);
         window.dispatchEvent(new CustomEvent('dmaior:logout'));
       });

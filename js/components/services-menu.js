@@ -44,29 +44,7 @@ class DmaiorServicesMenu extends HTMLElement {
     window.removeEventListener('storage',       this._storageHandler);
   }
 
-  // Som de clique característico da DMaior — Web Audio API nativa
-  playClickSound() {
-    try {
-      const audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode   = audioCtx.createGain();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(650, audioCtx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
-      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.1);
-    } catch {}
-  }
-
   setupListeners() {
-    const buttons = this.shadowRoot.querySelectorAll('a, .floating-btn, .btn-agency-mobile, .btn-box, .dp-item, .dp-banner, .dp-agency-btn');
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => this.playClickSound());
-    });
   }
 
   render() {

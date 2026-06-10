@@ -3,6 +3,64 @@
  * Contém formatadores, timers, áudio e sanitização de dados.
  */
 
+// ── SOM GLOBAL — singleton AudioContext ──────────────────────────────────────
+// AudioContext criado uma única vez na primeira interação — zero delay a partir daí.
+(function () {
+  let _ctx = null;
+
+  function _getCtx() {
+    if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_ctx.state === 'suspended') _ctx.resume();
+    return _ctx;
+  }
+
+  window.dmPlayClick = function () {
+    try {
+      const ctx  = _getCtx();
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const now  = ctx.currentTime;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(650, now);
+      osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } catch {}
+  };
+
+  // Listener global — captura cliques em botões e links de TODO o sistema,
+  // incluindo dentro de Shadow DOM (via composedPath).
+  document.addEventListener('click', function (e) {
+    const path = e.composedPath();
+    for (let i = 0; i < path.length; i++) {
+      const el = path[i];
+      if (!el || !el.tagName) continue;
+      const tag = el.tagName.toUpperCase();
+      if (tag === 'BUTTON' || tag === 'A') { window.dmPlayClick(); return; }
+      if (tag === 'INPUT' && el.type === 'submit') { window.dmPlayClick(); return; }
+      if (el.classList && (
+        el.classList.contains('btn') ||
+        el.classList.contains('ni') ||
+        el.classList.contains('nav-link') ||
+        el.classList.contains('dd-link') ||
+        el.classList.contains('menu-item') ||
+        el.classList.contains('dp-item') ||
+        el.classList.contains('floating-btn') ||
+        el.classList.contains('premio-tipo-tab') ||
+        el.classList.contains('radio-opt') ||
+        el.classList.contains('com-toggle') ||
+        el.classList.contains('bloq-rev')
+      )) { window.dmPlayClick(); return; }
+      // Para quando sai dos elementos interativos (evita percorrer o DOM inteiro)
+      if (tag === 'BODY' || tag === 'HTML') break;
+    }
+  }, true); // capture: true garante execução antes de qualquer handler nos componentes
+})();
+
 const Helpers = {
 
   /**
@@ -93,26 +151,7 @@ const Helpers = {
     } catch { return ''; }
   },
 
-  /**
-   * Toca o som de clique característico da DMaior Agency.
-   * Usa Web Audio API nativa — sem dependências externas.
-   */
-  playClickSound() {
-    try {
-      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(650, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } catch { /* navegador sem suporte a AudioContext */ }
-  },
+  playClickSound() { window.dmPlayClick?.(); },
 
   /**
    * Aguarda N milissegundos (usado com async/await).
