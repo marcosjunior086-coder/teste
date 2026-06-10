@@ -61,7 +61,7 @@ class DmaiorServicesMenu extends HTMLElement {
     const SVG_INFO     = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
     const SVG_DOC      = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;
     const SVG_STAR     = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-    const SVG_ARROW    = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+    const SVG_ARROW    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -142,13 +142,16 @@ class DmaiorServicesMenu extends HTMLElement {
 
         /* Grid 2 colunas */
         .dp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px 14px; }
-        .dp-item { display:flex; flex-direction:column; gap:10px; padding:14px 12px; border-radius:14px; background:var(--dm-grad-card-alt); border:1px solid var(--dm-bw06); text-decoration:none; position:relative; overflow:hidden; transition:transform .18s; min-height:86px; justify-content:space-between; }
+        .dp-item { display:flex; flex-direction:row; align-items:center; gap:11px; padding:13px 12px; border-radius:14px; background:var(--dm-grad-card-alt); border:1px solid var(--dm-bw06); text-decoration:none; position:relative; overflow:hidden; transition:transform .18s; min-height:68px; }
         .dp-item:active { transform:scale(.97); }
         .dp-item::before { content:''; position:absolute; top:0; left:0; right:0; height:1.5px; }
-        .dp-item-icon { width:36px; height:36px; border-radius:10px; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .dp-item-icon svg { width:18px; height:18px; }
+        .dp-item-icon { width:38px; height:38px; border-radius:10px; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .dp-item-icon svg { width:19px; height:19px; }
+        .dp-item-text { flex:1; min-width:0; }
         .dp-item-name { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.3px; line-height:1.1; }
         .dp-item-label { font-size:.62rem; font-weight:600; margin-top:2px; opacity:.75; }
+        .dp-item-arrow { width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex-shrink:0; opacity:.4; margin-left:auto; color:var(--dm-text); }
+        .dp-item-arrow svg { width:14px; height:14px; }
 
         /* Variantes de cor */
         .dp-pink  { border-color:rgba(225,48,108,.15); } .dp-pink::before  { background:linear-gradient(90deg,transparent,#E1306C,transparent); } .dp-pink  .dp-item-icon { background:rgba(225,48,108,.1); border-color:rgba(225,48,108,.2); } .dp-pink  .dp-item-icon svg { fill:#E1306C; } .dp-pink  .dp-item-label { color:#E1306C; }
@@ -214,50 +217,56 @@ class DmaiorServicesMenu extends HTMLElement {
 
             <a href="https://www.instagram.com/dmaioragency/" target="_blank" rel="noopener noreferrer" class="dp-item dp-pink">
               <div class="dp-item-icon">${SVG_INSTA}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Instagram</div>
                 <div class="dp-item-label">@dmaioragency</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
             <a href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" class="dp-item dp-green">
               <div class="dp-item-icon">${SVG_WA}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Suporte</div>
                 <div class="dp-item-label">WhatsApp</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
             <a href="ranking.html" class="dp-item dp-cyan">
               <div class="dp-item-icon">${SVG_RANK}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Ranking</div>
                 <div class="dp-item-label">Ver posições</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
             <a href="tutoriais.html" class="dp-item dp-purple">
               <div class="dp-item-icon">${SVG_VIDEO}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Tutoriais</div>
                 <div class="dp-item-label">Aprenda mais</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
             <a href="pk-interno.html" class="dp-item dp-orange">
               <div class="dp-item-icon">${SVG_CALENDAR}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Eventos</div>
                 <div class="dp-item-label">PK e desafios</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
             <a href="quem-somos.html" class="dp-item dp-blue">
               <div class="dp-item-icon">${SVG_INFO}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Portfólio</div>
                 <div class="dp-item-label">Quem somos</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
           </div>
@@ -268,18 +277,20 @@ class DmaiorServicesMenu extends HTMLElement {
 
             <a href="politicas-host.html" class="dp-item dp-teal">
               <div class="dp-item-icon">${SVG_DOC}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Política de Host</div>
                 <div class="dp-item-label">Pagamentos Kwai</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
             <a href="politicas-premium.html" class="dp-item dp-gold">
               <div class="dp-item-icon">${SVG_STAR}</div>
-              <div>
+              <div class="dp-item-text">
                 <div class="dp-item-name">Pol. Especial</div>
                 <div class="dp-item-label">Streamer Premium</div>
               </div>
+              <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
 
           </div>

@@ -378,7 +378,7 @@ class RankingDmaior extends HTMLElement {
         :host(.dinamico) .ctrls-row .period-wrapper{flex:1;max-width:none;order:1}
         :host(.dinamico) .ctrls-row .time-counter{order:2;font-size:.7rem;padding:6px 8px}
         :host(.dinamico) .ctrls-row .dyn-rules-btn{order:3}
-        :host(.dinamico) .podium{margin-top:42px;gap:6px}
+        :host(.dinamico) .podium{margin-top:58px;gap:6px}
         :host(.dinamico) .podium-item{padding:0 7px 14px!important;border-radius:18px!important}
         :host(.dinamico) .podium-item.first{min-height:225px}
         :host(.dinamico) .podium-item.second{min-height:185px}
