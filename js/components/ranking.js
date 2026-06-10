@@ -352,7 +352,8 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .dyn-rules-btn:hover{border-color:var(--azul);color:var(--azul)}
       /* ── Pódio dinâmico ── */
       :host(.dinamico) .podium{height:auto;margin-top:55px;margin-bottom:20px;gap:8px}
-      :host(.dinamico) .podium-item{height:auto!important;min-height:190px;border-radius:22px!important;padding:0 10px 18px!important;overflow:hidden}
+      :host(.dinamico) .podium-item{height:auto!important;min-height:190px;border-radius:22px!important;padding:0 10px 18px!important;overflow:visible}
+      :host(.dinamico) .list-id{display:none}
       :host(.dinamico) .podium-item.second{min-height:215px;background:linear-gradient(160deg,rgba(30,130,255,.22) 0%,rgba(0,80,180,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(30,160,255,.55)!important;box-shadow:0 0 30px rgba(30,130,255,.14),0 8px 24px rgba(0,0,0,.4)!important}
       :host(.dinamico) .podium-item.first{min-height:265px;background:linear-gradient(160deg,rgba(240,192,64,.28) 0%,rgba(220,140,0,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(240,192,64,.65)!important;box-shadow:0 0 42px rgba(240,192,64,.24),0 10px 32px rgba(0,0,0,.5)!important}
       :host(.dinamico) .podium-item.third{background:linear-gradient(160deg,rgba(200,60,200,.22) 0%,rgba(140,30,180,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(200,70,200,.5)!important;box-shadow:0 0 26px rgba(200,60,200,.13),0 8px 20px rgba(0,0,0,.35)!important}
@@ -860,14 +861,12 @@ class RankingDmaior extends HTMLElement {
         if (dyn) {
           html += `
           <div class="podium-item ${type}">
-            ${isLive ? `<div class="pod-live-badge">LIVE</div>` : ''}
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
               <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
               ${liveDot}
             </div>
             <div class="name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}</div>
-            <div class="podium-id">@${this.esc(s.id)}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${prizeHtml}
             <div class="pod-pos-num">${idx + 1}</div>
