@@ -63,14 +63,17 @@ class RankingDmaior extends HTMLElement {
     this.bindEvents();
     if (this._isLoggedIn()) this.initDashboard();
     this._setupMenuDetection();
-    // Re-renderiza a lista quando o tema muda para atualizar cores inline
-    this._temaHandler = () => { if (this.allRows.length) this.renderList(); };
-    window.addEventListener('dmaior:tema', this._temaHandler);
+    this._applyLayout();
+    this._temaHandler   = () => { if (this.allRows.length) this.renderScreen(); };
+    this._layoutHandler = () => this._applyLayout();
+    window.addEventListener('dmaior:tema',   this._temaHandler);
+    window.addEventListener('dmaior:layout', this._layoutHandler);
   }
 
   disconnectedCallback() {
     if (this._menuObserver)     { this._menuObserver.disconnect(); this._menuObserver = null; }
-    window.removeEventListener('dmaior:tema', this._temaHandler);
+    window.removeEventListener('dmaior:tema',   this._temaHandler);
+    window.removeEventListener('dmaior:layout', this._layoutHandler);
     if (this._menuPollInterval) { clearInterval(this._menuPollInterval); }
     clearInterval(this.timerInterval);
   }
@@ -329,6 +332,58 @@ class RankingDmaior extends HTMLElement {
         .info-panel{width:232px}
         .info-panel.open{right:34px}
       }
+      /* ── Controles compactos ── */
+      .rank-title{font-size:var(--t-title-lg);color:var(--text);margin-bottom:10px;text-shadow:0 0 15px var(--border)}
+      .ctrls-row{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+      .dyn-rules-btn{display:none}
+      /* ── TEMA DINÂMICO ─────────────────────────────────────────────────────── */
+      :host(.dinamico) .rank-title{display:none}
+      :host(.dinamico) .info-tab-btn{display:none!important}
+      :host(.dinamico) .header{margin-bottom:10px}
+      :host(.dinamico) .ctrls-row{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+      :host(.dinamico) .ctrls-row .time-counter{order:2;background:var(--bg-card2);border:1px solid var(--border-dim);border-radius:10px;padding:7px 12px;font-size:.78rem;margin:0;min-height:unset;justify-content:center;flex-shrink:0}
+      :host(.dinamico) .ctrls-row .period-wrapper{order:1;width:auto;flex:1;max-width:160px;margin:0}
+      :host(.dinamico) .ctrls-row .period-wrapper::after{display:none}
+      :host(.dinamico) .ctrls-row .period-select{padding:8px 12px;font-size:.8rem;text-align:center}
+      :host(.dinamico) .ctrls-row .tabs{order:0;width:auto;flex-shrink:0;margin:0;padding:4px;border-radius:10px}
+      :host(.dinamico) .ctrls-row .tab-btn{padding:8px 14px;font-size:.78rem;gap:5px}
+      :host(.dinamico) .ctrls-row .tab-btn svg{width:13px;height:13px}
+      :host(.dinamico) .dyn-rules-btn{order:3;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card2);color:var(--text-muted);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:border-color .2s,color .2s}
+      :host(.dinamico) .dyn-rules-btn:hover{border-color:var(--azul);color:var(--azul)}
+      /* ── Pódio dinâmico ── */
+      :host(.dinamico) .podium{height:auto;margin-top:55px;margin-bottom:20px;gap:8px}
+      :host(.dinamico) .podium-item{height:auto!important;min-height:190px;border-radius:22px!important;padding:0 10px 18px!important;overflow:hidden}
+      :host(.dinamico) .podium-item.second{min-height:215px;background:linear-gradient(160deg,rgba(30,130,255,.22) 0%,rgba(0,80,180,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(30,160,255,.55)!important;box-shadow:0 0 30px rgba(30,130,255,.14),0 8px 24px rgba(0,0,0,.4)!important}
+      :host(.dinamico) .podium-item.first{min-height:265px;background:linear-gradient(160deg,rgba(240,192,64,.28) 0%,rgba(220,140,0,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(240,192,64,.65)!important;box-shadow:0 0 42px rgba(240,192,64,.24),0 10px 32px rgba(0,0,0,.5)!important}
+      :host(.dinamico) .podium-item.third{background:linear-gradient(160deg,rgba(200,60,200,.22) 0%,rgba(140,30,180,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(200,70,200,.5)!important;box-shadow:0 0 26px rgba(200,60,200,.13),0 8px 20px rgba(0,0,0,.35)!important}
+      :host(.dinamico) .badge{display:none!important}
+      :host(.dinamico) .avatar{border-width:3px!important}
+      :host(.dinamico) .second .avatar{border-color:#1eb8ff!important}
+      :host(.dinamico) .first .avatar{border-color:#f0c040!important}
+      :host(.dinamico) .third .avatar{border-color:#d040c8!important}
+      :host(.dinamico) .crown-emoji{top:-40px}
+      :host(.dinamico) .pod-pos-num{position:absolute;font-family:'Rajdhani',sans-serif;font-weight:900;font-size:5.5rem;opacity:.12;bottom:-5px;right:6px;line-height:1;user-select:none;pointer-events:none;color:#fff}
+      :host(.dinamico) .pod-live-badge{position:absolute;top:9px;left:50%;transform:translateX(-50%);background:#166534;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;padding:3px 9px;border-radius:6px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+      :host(.dinamico) .pod-live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulsedot 1.5s infinite}
+      @keyframes pulsedot{0%,100%{opacity:1}50%{opacity:.4}}
+      :host(.dinamico) .podium-item .name,:host(.dinamico) .podium-item .podium-val,:host(.dinamico) .podium-item .podium-id,:host(.dinamico) .podium-item .prize-tag{position:relative;z-index:2}
+      :host(.dinamico) .podium-val{font-size:1.1rem!important}
+      :host(.dinamico) .first .podium-val{font-size:1.35rem!important}
+      :host(.dinamico) .podium-item::after{content:'';position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.28));pointer-events:none;z-index:1}
+      :host(.dinamico) .avatar-wrapper{position:relative;z-index:2}
+      /* Mobile dinâmico */
+      @media(max-width:480px){
+        :host(.dinamico) .ctrls-row .tabs{flex-basis:100%;order:0}
+        :host(.dinamico) .ctrls-row .period-wrapper{flex:1;max-width:none;order:1}
+        :host(.dinamico) .ctrls-row .time-counter{order:2;font-size:.7rem;padding:6px 8px}
+        :host(.dinamico) .ctrls-row .dyn-rules-btn{order:3}
+        :host(.dinamico) .podium{margin-top:42px;gap:6px}
+        :host(.dinamico) .podium-item{padding:0 7px 14px!important;border-radius:18px!important}
+        :host(.dinamico) .podium-item.first{min-height:225px}
+        :host(.dinamico) .podium-item.second{min-height:185px}
+        :host(.dinamico) .podium-item.third{min-height:165px}
+        :host(.dinamico) .pod-pos-num{font-size:4rem}
+      }
     </style>
 
     <div class="app-container">
@@ -349,21 +404,24 @@ class RankingDmaior extends HTMLElement {
 
       <div id="dashboard">
         <div class="header">
-          <h1>RANKING GERAL</h1>
-          <div id="time-counter" class="time-counter"></div>
-          <div class="period-wrapper">
-            <select id="sheet-selector" class="period-select"></select>
+          <h1 class="rank-title">RANKING GERAL</h1>
+          <div class="ctrls-row">
+            <div id="time-counter" class="time-counter"></div>
+            <div class="period-wrapper">
+              <select id="sheet-selector" class="period-select"></select>
+            </div>
+            <div class="tabs">
+              <button class="tab-btn active" id="btn-diamonds">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg> DIAMANTES
+              </button>
+              <button class="tab-btn" id="btn-hours">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> HORAS
+              </button>
+            </div>
+            <button class="dyn-rules-btn" id="dyn-info-btn" title="Regras e Informações">?</button>
           </div>
         </div>
         <div id="anuncios-container"></div>
-        <div class="tabs">
-          <button class="tab-btn active" id="btn-diamonds">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg> DIAMANTES
-          </button>
-          <button class="tab-btn" id="btn-hours">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> HORAS
-          </button>
-        </div>
         <div id="content"></div>
         <div style="text-align:center"><button class="logout-btn" id="btn-logout">Sair</button></div>
         <div id="panel-overlay" class="panel-overlay"></div>
@@ -413,6 +471,8 @@ class RankingDmaior extends HTMLElement {
     r.getElementById('info-tab-btn').addEventListener('click', () => this.togglePanel());
     r.getElementById('close-panel').addEventListener('click', () => this.closePanel());
     r.getElementById('panel-overlay').addEventListener('click', () => this.closePanel());
+    const dynInfo = r.getElementById('dyn-info-btn');
+    if (dynInfo) dynInfo.addEventListener('click', () => this.togglePanel());
     r.addEventListener('click', e => {
       if (e.target.classList.contains('page-btn')) this.goPage(parseInt(e.target.getAttribute('data-page')));
     });
@@ -781,7 +841,8 @@ class RankingDmaior extends HTMLElement {
     const start         = (this.currentPage - 1) * this.PAGE_SIZE;
     const slice         = filtered.slice(start, start + this.PAGE_SIZE);
     const icon          = isD ? this.DSVG : this.HSVG;
-    const getVal        = s => isD ? s.diamonds.toLocaleString('pt-BR') : s.hoursStr;
+    const dyn           = this._isDinamico();
+    const getVal        = s => isD ? (dyn ? this.fmtCompact(s.diamonds) : s.diamonds.toLocaleString('pt-BR')) : s.hoursStr;
     const currentPrizes = isD ? this.prizesD : this.prizesH;
 
     let html = '';
@@ -796,7 +857,23 @@ class RankingDmaior extends HTMLElement {
         const prizeHtml  = prizeValue ? `<div class="prize-tag"><span class="currency-symbol">R$</span> ${prizeValue}</div>` : '';
         const isLive     = isMes && this.liveSet.has(s.uid);
         const liveDot    = isLive ? `<div class="live-dot"><span></span><span></span><span></span></div>` : '';
-        html += `
+        if (dyn) {
+          html += `
+          <div class="podium-item ${type}">
+            ${isLive ? `<div class="pod-live-badge">LIVE</div>` : ''}
+            <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
+              ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
+              <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+              ${liveDot}
+            </div>
+            <div class="name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}</div>
+            <div class="podium-id">@${this.esc(s.id)}</div>
+            <div class="podium-val">${icon} ${getVal(s)}</div>
+            ${prizeHtml}
+            <div class="pod-pos-num">${idx + 1}</div>
+          </div>`;
+        } else {
+          html += `
           <div class="podium-item ${type}">
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
@@ -810,6 +887,7 @@ class RankingDmaior extends HTMLElement {
             ${prizeHtml}
             ${this.positionBadge(s, idx + 1)}
           </div>`;
+        }
       });
       html += `</div>`;
     }
@@ -859,6 +937,22 @@ class RankingDmaior extends HTMLElement {
   }
 
   goPage(p) { this.currentPage = p; this.renderScreen(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+  fmtCompact(n) {
+    if (n >= 1_000_000) return (n / 1_000_000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'M';
+    if (n >= 1_000)     return (n / 1_000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'K';
+    return n.toLocaleString('pt-BR');
+  }
+
+  _isDinamico() {
+    try { return localStorage.getItem('dm_layout') === 'dinamico'; } catch { return false; }
+  }
+
+  _applyLayout() {
+    const dyn = this._isDinamico();
+    this.classList.toggle('dinamico', dyn);
+    if (this.allRows.length) this.renderScreen();
+  }
 
   setTab(t) {
     this.currentTab  = t;
