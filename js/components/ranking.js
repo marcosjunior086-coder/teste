@@ -387,6 +387,29 @@ class RankingDmaior extends HTMLElement {
         :host(.dinamico) .podium-item.third{min-height:170px}
         :host(.dinamico) .pod-pos-num{font-size:4rem}
       }
+
+      /* ══ PÓDIO DINÂMICO — TEMAS CLAROS (sobrescreve o fundo escuro) ══════════ */
+
+      /* ── Tema Branco/Azul ── */
+      :host-context([data-theme="branco"]) .podium-item.first{background:linear-gradient(to bottom,rgba(210,165,0,.84) 0%,rgba(255,195,0,.48) 48%,rgba(232,240,252,.99) 100%)!important;border-color:rgba(180,145,0,.28)!important;border-bottom:none!important;box-shadow:0 0 26px rgba(180,145,0,.18),0 4px 16px rgba(0,0,0,.10)!important}
+      :host-context([data-theme="branco"]) .podium-item.second{background:linear-gradient(to bottom,rgba(0,105,230,.82) 0%,rgba(30,140,255,.44) 48%,rgba(225,238,255,.99) 100%)!important;border-color:rgba(0,105,230,.26)!important;border-bottom:none!important;box-shadow:0 0 22px rgba(0,105,230,.16),0 4px 14px rgba(0,0,0,.08)!important}
+      :host-context([data-theme="branco"]) .podium-item.third{background:linear-gradient(to bottom,rgba(148,45,215,.80) 0%,rgba(190,80,240,.42) 48%,rgba(240,230,255,.99) 100%)!important;border-color:rgba(130,40,200,.26)!important;border-bottom:none!important;box-shadow:0 0 20px rgba(130,40,200,.15),0 4px 14px rgba(0,0,0,.08)!important}
+      :host-context([data-theme="branco"]) .podium-item::after{background:linear-gradient(to bottom,transparent,rgba(232,240,252,.80))!important}
+      :host-context([data-theme="branco"]) .pod-pos-num{color:rgba(0,20,60,.12)!important}
+
+      /* ── Tema Laranja ── */
+      :host-context([data-theme="laranja"]) .podium-item.first{background:linear-gradient(to bottom,rgba(215,90,0,.88) 0%,rgba(245,138,0,.50) 48%,rgba(255,247,232,.99) 100%)!important;border-color:rgba(200,85,0,.28)!important;border-bottom:none!important;box-shadow:0 0 28px rgba(200,85,0,.20),0 4px 16px rgba(0,0,0,.10)!important}
+      :host-context([data-theme="laranja"]) .podium-item.second{background:linear-gradient(to bottom,rgba(0,105,230,.80) 0%,rgba(30,140,255,.42) 48%,rgba(225,238,255,.99) 100%)!important;border-color:rgba(0,105,230,.24)!important;border-bottom:none!important;box-shadow:0 0 20px rgba(0,105,230,.14),0 4px 14px rgba(0,0,0,.08)!important}
+      :host-context([data-theme="laranja"]) .podium-item.third{background:linear-gradient(to bottom,rgba(228,62,0,.85) 0%,rgba(255,112,28,.46) 48%,rgba(255,244,228,.99) 100%)!important;border-color:rgba(200,55,0,.26)!important;border-bottom:none!important;box-shadow:0 0 22px rgba(200,55,0,.17),0 4px 14px rgba(0,0,0,.08)!important}
+      :host-context([data-theme="laranja"]) .podium-item::after{background:linear-gradient(to bottom,transparent,rgba(255,247,232,.80))!important}
+      :host-context([data-theme="laranja"]) .pod-pos-num{color:rgba(80,28,0,.10)!important}
+
+      /* ── Tema Rosa ── */
+      :host-context([data-theme="rosa"]) .podium-item.first{background:linear-gradient(to bottom,rgba(195,142,0,.84) 0%,rgba(235,182,0,.46) 48%,rgba(255,240,248,.99) 100%)!important;border-color:rgba(175,128,0,.26)!important;border-bottom:none!important;box-shadow:0 0 22px rgba(170,122,0,.18),0 4px 14px rgba(0,0,0,.08)!important}
+      :host-context([data-theme="rosa"]) .podium-item.second{background:linear-gradient(to bottom,rgba(0,105,230,.74) 0%,rgba(30,140,255,.38) 48%,rgba(230,240,255,.99) 100%)!important;border-color:rgba(0,100,220,.22)!important;border-bottom:none!important;box-shadow:0 0 18px rgba(0,100,215,.13),0 4px 12px rgba(0,0,0,.07)!important}
+      :host-context([data-theme="rosa"]) .podium-item.third{background:linear-gradient(to bottom,rgba(215,15,122,.86) 0%,rgba(255,52,152,.46) 48%,rgba(255,232,246,.99) 100%)!important;border-color:rgba(195,12,112,.26)!important;border-bottom:none!important;box-shadow:0 0 24px rgba(190,10,110,.20),0 4px 14px rgba(0,0,0,.08)!important}
+      :host-context([data-theme="rosa"]) .podium-item::after{background:linear-gradient(to bottom,transparent,rgba(255,240,248,.80))!important}
+      :host-context([data-theme="rosa"]) .pod-pos-num{color:rgba(80,0,38,.10)!important}
     </style>
 
     <div class="app-container">
