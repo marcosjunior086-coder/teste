@@ -206,6 +206,38 @@ window.DmaiorAPI = {
         window.DmaiorAPI.rank._auth(token),
       );
     },
+
+    /**
+     * Busca comunicados ativos filtrados por local (sem auth — público).
+     * @param {string} local - 'ranking' | 'painel' | 'impulsionamento'
+     */
+    async getComunicados(local = '') {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.rank,
+        `/comunicados${local ? `?local=${encodeURIComponent(local)}` : ''}`,
+      );
+    },
+
+    /**
+     * Retorna configuração pública do impulsionamento (quota, opções ativas).
+     */
+    async getImpulsoConfig() {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.rank,
+        '/impulso/config',
+      );
+    },
+
+    /**
+     * Verifica se um UID está bloqueado no impulsionamento.
+     * @param {string} uid - UID do streamer
+     */
+    async checkImpulsoBlock(uid) {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.rank,
+        `/impulso/check?uid=${encodeURIComponent(uid)}`,
+      );
+    },
   },
 
   // ── Módulo: Autenticação do Painel ────────────────────────────────────────

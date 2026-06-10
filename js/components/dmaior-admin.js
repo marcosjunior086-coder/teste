@@ -24,6 +24,7 @@ class DimaiorAdmin extends HTMLElement {
     this._premioRemover = { diamantes: new Set(), horas: new Set() };
     this._taxaSaque = 0;
     this._taxaPerc  = 0;
+    this._edtCom    = null;
     this._creditoRapidoUid = null;
     // Lives — layout e modo (persistido em localStorage)
     const _lo = (() => { try { return JSON.parse(localStorage.getItem('dm_lives_opts')||'{}'); } catch { return {}; } })();
@@ -122,6 +123,8 @@ class DimaiorAdmin extends HTMLElement {
       check_c:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
       calendar:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
       zap:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+      megaphone:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`,
+      bell:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
     };
     return icons[name]||icons.search;
   }
@@ -169,7 +172,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));s.getElementById('side').classList.remove('open');
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor()};
     mapa[pag]?.();
   }
 
@@ -969,6 +972,298 @@ class DimaiorAdmin extends HTMLElement {
     // v2: Prêmios
     s.getElementById('btnAtuPremios').addEventListener('click',()=>this._carregarPremios());s.getElementById('btnProcessarPremios').addEventListener('click',()=>this._abrirModalProcessar());s.getElementById('btnCancelarProc').addEventListener('click',()=>this._fechaModal('mProc'));s.getElementById('mProcConfirmar').addEventListener('click',()=>this._confirmarProcessarPremios());
     s.querySelectorAll('.premio-tipo-tab').forEach(tab=>{tab.addEventListener('click',()=>{s.querySelectorAll('.premio-tipo-tab').forEach(t=>t.classList.remove('on'));tab.classList.add('on');this._premioTipo=tab.dataset.tipo;this._renderPremiosConfig();});});
+    // Comunicados
+    s.getElementById('btnAtuCom').addEventListener('click',()=>this._carregarComunicados());
+    s.getElementById('btnNovoCom').addEventListener('click',()=>this._abrirModalCom());
+    s.getElementById('mComSave').addEventListener('click',()=>this._salvarComunicado());
+    s.getElementById('mComCancel').addEventListener('click',()=>this._fechaModal('mCom'));
+    // Monitor Kwai
+    s.getElementById('btnAtuMonitor').addEventListener('click',()=>this._verificarCookieStatus());
+    s.getElementById('btnVerificarCookie').addEventListener('click',()=>this._verificarCookieStatus());
+    s.getElementById('btnSalvarCookie').addEventListener('click',()=>this._atualizarCookie());
+    s.getElementById('btnSimularResgate').addEventListener('click',()=>this._executarResgate(true));
+    s.getElementById('btnExecutarResgate').addEventListener('click',()=>this._confirmarDel('Executar correção e gravar dados no banco?',()=>this._executarResgate(false)));
+    s.getElementById('btnVerBuffer').addEventListener('click',()=>this._verBufferMonitor());
+    s.getElementById('btnTestarTelegram').addEventListener('click',()=>this._testarTelegram());
+    // Controle Impulsionamento
+    s.getElementById('btnAtuImpulso').addEventListener('click',()=>this._carregarImpulsoCtrl());
+    s.getElementById('btnSalvarImpulsoConfig').addEventListener('click',()=>this._salvarImpulsoConfig());
+    s.getElementById('btnBuscarBloqUid').addEventListener('click',()=>this._buscarStreamerBloqueio());
+    s.getElementById('btnAplicarBloqueio').addEventListener('click',()=>this._bloquearStreamer());
+    s.getElementById('btnAtuBloqueios').addEventListener('click',async()=>{const blq=await this._api('GET','/admin/impulso/bloqueios');this._renderBloqueios(blq?.bloqueios||[]);});
+  }
+
+  // ── COMUNICADOS ─────────────────────────────────────────────────────────────
+  async _carregarComunicados(){
+    const s=this.shadowRoot;const el=s.getElementById('tbCom');if(el)el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/comunicados');
+    if(!d?.ok){if(el)el.innerHTML=this._empty('warning','Erro ao carregar comunicados');return;}
+    this._renderComunicados(d.comunicados||[]);
+  }
+
+  _renderComunicados(lista){
+    const s=this.shadowRoot;const el=s.getElementById('tbCom');if(!el)return;
+    const LOCAIS_LABEL={ranking:'Ranking Geral',painel:'Painel/App',impulsionamento:'Impulsionamento'};
+    if(!lista.length){el.innerHTML=this._empty('bell','Nenhum comunicado criado ainda');return;}
+    el.innerHTML=`<div class="com-lista">${lista.map(c=>{
+      const locaisBadges=(c.locais||[]).map(l=>`<span class="com-local">${LOCAIS_LABEL[l]||l}</span>`).join('');
+      const statusBadge=c.ativo
+        ?`<span class="com-status ativo">Ativo</span>`
+        :`<span class="com-status inativo">Inativo</span>`;
+      const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'—';
+      const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` · atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
+      return`<div class="com-item">
+        <div class="com-preview">
+          ${c.emoji?`<span class="com-emoji">${c.emoji}</span>`:''}
+          <span class="com-texto">${this._esc(c.texto)}</span>
+        </div>
+        <div class="com-meta">
+          <div class="com-meta-esq">${statusBadge}${locaisBadges}</div>
+          <div class="com-data">${dataStr}${atualStr}</div>
+        </div>
+        <div class="com-acoes">
+          <button class="btn btn-o btn-sm" data-com-edit="${c.id}">${this._ico('edit',12)} Editar</button>
+          <button class="btn btn-sm com-toggle ${c.ativo?'btn-o':'btn-g'}" data-com-toggle="${c.id}" data-com-ativo="${c.ativo}">${c.ativo?`${this._ico('x_circle',12)} Desativar`:`${this._ico('check',12)} Ativar`}</button>
+          <button class="btn btn-sm" style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--verm)" data-com-del="${c.id}">${this._ico('trash',12)} Excluir</button>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+
+    el.querySelectorAll('[data-com-edit]').forEach(btn=>btn.addEventListener('click',()=>{
+      const c=lista.find(x=>x.id===btn.dataset.comEdit);if(c)this._abrirModalCom(c);
+    }));
+    el.querySelectorAll('[data-com-toggle]').forEach(btn=>btn.addEventListener('click',()=>{
+      const ativo=btn.dataset.comAtivo==='true';this._toggleComunicadoAtivo(btn.dataset.comToggle,!ativo);
+    }));
+    el.querySelectorAll('[data-com-del]').forEach(btn=>btn.addEventListener('click',()=>{
+      this._confirmarDel('Excluir este comunicado permanentemente?',()=>this._excluirComunicado(btn.dataset.comDel));
+    }));
+  }
+
+  _esc(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  _abrirModalCom(c=null){
+    const s=this.shadowRoot;
+    s.getElementById('mComTit').textContent=c?'Editar Comunicado':'Novo Comunicado';
+    s.getElementById('mComEmoji').value=c?.emoji||'';
+    s.getElementById('mComTexto').value=c?.texto||'';
+    s.getElementById('mComAtivo').value=c?(c.ativo?'true':'false'):'true';
+    const locais=c?.locais||[];
+    ['ranking','painel','impulsionamento'].forEach(l=>{
+      const cb=s.getElementById('mComLocal_'+l);if(cb)cb.checked=locais.includes(l);
+    });
+    this._edtCom=c?.id||null;
+    this._abrirModal('mCom');
+  }
+
+  async _salvarComunicado(){
+    const s=this.shadowRoot;
+    const emoji=s.getElementById('mComEmoji').value.trim();
+    const texto=s.getElementById('mComTexto').value.trim();
+    const ativo=s.getElementById('mComAtivo').value==='true';
+    const locais=['ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
+    if(!texto){this._toast('Texto é obrigatório','err');return;}
+    const btn=s.getElementById('mComSave');btn.disabled=true;
+    let r;
+    if(this._edtCom){
+      r=await this._api('PUT',`/admin/comunicados/${this._edtCom}`,{emoji,texto,ativo,locais});
+    }else{
+      r=await this._api('POST','/admin/comunicados',{emoji,texto,ativo,locais});
+    }
+    btn.disabled=false;
+    if(r?.ok){this._fechaModal('mCom');this._toast(this._edtCom?'Comunicado atualizado!':'Comunicado criado!');this._carregarComunicados();}
+    else{this._toast(r?.erro||'Erro ao salvar','err');}
+  }
+
+  async _excluirComunicado(id){
+    const r=await this._api('DELETE',`/admin/comunicados/${id}`);
+    if(r?.ok){this._toast('Comunicado excluído');this._carregarComunicados();}
+    else this._toast(r?.erro||'Erro ao excluir','err');
+  }
+
+  async _toggleComunicadoAtivo(id,novoAtivo){
+    const r=await this._api('PATCH',`/admin/comunicados/${id}`,{ativo:novoAtivo});
+    if(r?.ok){this._toast(novoAtivo?'Comunicado ativado':'Comunicado desativado');this._carregarComunicados();}
+    else this._toast(r?.erro||'Erro','err');
+  }
+
+  // ── MONITOR KWAI ────────────────────────────────────────────
+  async _carregarMonitor(){
+    this._verificarCookieStatus();
+  }
+  async _verificarCookieStatus(){
+    const el=this.shadowRoot.getElementById('monCookieStatus');
+    el.style.cssText='display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--brddim);font-size:13px;color:var(--t3)';
+    el.textContent='Verificando...';
+    const d=await this._api('GET','/admin/monitor/cookie-status');
+    if(!d){el.innerHTML=`<span style="color:var(--verm)">${this._ico('warning',14)} Erro de conexão com o monitor</span>`;return;}
+    if(d.erro){el.innerHTML=`<span style="color:var(--verm)">${this._ico('warning',14)} ${this._esc(d.erro)}</span>`;return;}
+    const vivo=d.status==='COOKIE_VIVO';
+    const cor=vivo?'var(--verde)':'var(--verm)';
+    const ico=vivo?this._ico('check_c',16):this._ico('x_circle',16);
+    const txt=vivo?`Cookie ativo — ${d.total_itens??0} live(s) visível(is) no histórico`:'Cookie expirado ou inválido — precisa atualizar';
+    el.style.borderColor=vivo?'rgba(74,222,128,.3)':'rgba(248,113,113,.3)';
+    el.style.background=vivo?'rgba(74,222,128,.07)':'rgba(248,113,113,.07)';
+    el.innerHTML=`<span style="color:${cor};display:flex;align-items:center;gap:6px">${ico} <strong>${d.status??'—'}</strong></span><span style="color:var(--t2)">${txt}</span>`;
+  }
+  async _atualizarCookie(){
+    const s=this.shadowRoot;
+    const cookie=s.getElementById('monCookieInput').value.trim();
+    if(!cookie||cookie.length<50){this._toast('Cookie muito curto ou vazio','err');return;}
+    const d=await this._api('POST','/admin/monitor/atualizar-cookie',{cookie});
+    if(d?.status){this._toast('Cookie atualizado!');s.getElementById('monCookieInput').value='';this._verificarCookieStatus();}
+    else this._toast(d?.erro||'Erro ao salvar cookie','err');
+  }
+  async _executarResgate(preview){
+    const s=this.shadowRoot;
+    const dias=parseInt(s.getElementById('monDias').value)||7;
+    const statusEl=s.getElementById('monResgateStatus');
+    const resultEl=s.getElementById('monResgateResult');
+    statusEl.style.display='block';
+    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px">${this._ico('refresh',13)} ${preview?'Simulando':'Executando correção'} dos últimos ${dias} dias... (pode levar até 60s)</div>`;
+    resultEl.style.display='none';
+    const rota=preview?'/admin/monitor/preview':'/admin/monitor/corrigir';
+    const d=await this._api('GET',`${rota}?dias=${dias}`);
+    statusEl.style.display='none';
+    resultEl.style.display='block';
+    if(!d){resultEl.textContent='Erro de conexão com o monitor.';return;}
+    if(d.erro){resultEl.textContent=`Erro: ${d.erro}`;return;}
+    // Formata resumo legível
+    const linhas=[
+      `Modo:        ${d.modo||d.status||'—'}`,
+      `Dias alvo:   ${d.dias_alvo??'—'}`,
+      `Total Kwai:  ${d.total_kwai_bruto??'—'} lives brutas`,
+      `Válidos:     ${d.total_valido??'—'}`,
+      `Inseridas:   ${d.inseridas?.length??0}`,
+      `Corrigidas:  ${d.corrigidas?.length??0}`,
+      `Ignoradas (recentes): ${d.ignoradas_recentes??0}`,
+      `Ignoradas (iguais):   ${d.ignoradas_iguais??0}`,
+      `Erros:       ${d.erros?.length??0}`,
+      `Duração:     ${d.duracao_segundos??'—'}s`,
+    ];
+    if(d.inseridas?.length>0){
+      linhas.push('','── Inseridas ──');
+      d.inseridas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | ${x.diamantes}💎`));
+      if(d.inseridas.length>20)linhas.push(`  ... +${d.inseridas.length-20} mais`);
+    }
+    if(d.corrigidas?.length>0){
+      linhas.push('','── Corrigidas ──');
+      d.corrigidas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | banco:${x.banco_diamantes}💎 → kwai:${x.kwai_diamantes}💎`));
+      if(d.corrigidas.length>20)linhas.push(`  ... +${d.corrigidas.length-20} mais`);
+    }
+    if(d.erros?.length>0){
+      linhas.push('','── Erros ──');
+      d.erros.forEach(e=>linhas.push(`  ${e}`));
+    }
+    resultEl.textContent=linhas.join('\n');
+  }
+  async _verBufferMonitor(){
+    const el=this.shadowRoot.getElementById('monBufferResult');
+    el.textContent='Carregando...';
+    const d=await this._api('GET','/admin/monitor/debug-buffer');
+    if(!d||d.erro){el.innerHTML=`<span style="color:var(--verm)">${d?.erro||'Erro de conexão'}</span>`;return;}
+    if(!d.total_no_buffer){el.innerHTML='<span style="color:var(--verde)">Buffer vazio — nenhum dado pendente.</span>';return;}
+    el.innerHTML=`<div style="margin-bottom:8px;color:var(--cyan);font-weight:600">${d.total_no_buffer} item(s) no buffer</div>`
+      +`<div style="display:flex;flex-direction:column;gap:4px">${(d.itens||[]).slice(0,30).map(i=>
+        `<div style="display:flex;gap:8px;font-size:11px;color:var(--t2);border-bottom:1px solid var(--brddim);padding-bottom:4px">
+          <span style="color:var(--t3);min-width:80px">${i.data||'—'}</span>
+          <span style="flex:1">${this._esc(i.nome||'—')}</span>
+          <span style="color:var(--cyan)">${i.diamantes??0}💎</span>
+          <span style="color:var(--t3)">${i.minutos_live??0}min</span>
+        </div>`).join('')}
+      ${d.total_no_buffer>30?`<div style="color:var(--t3);font-size:11px">... +${d.total_no_buffer-30} mais</div>`:''}</div>`;
+  }
+  async _testarTelegram(){
+    const d=await this._api('POST','/admin/monitor/testar-telegram');
+    if(d?.status)this._toast('Mensagem enviada! Verifique o Telegram.');
+    else this._toast(d?.erro||'Erro ao enviar','err');
+  }
+
+  // ── CONTROLE DE IMPULSIONAMENTO ──────────────────────────────
+  async _carregarImpulsoCtrl(){
+    // Carrega config e bloqueios em paralelo
+    const [cfg,blq]=await Promise.all([
+      this._api('GET','/admin/impulso/config'),
+      this._api('GET','/admin/impulso/bloqueios'),
+    ]);
+    const s=this.shadowRoot;
+    if(cfg?.ok){
+      s.getElementById('iQuotaMax').value=cfg.quota_max??5;
+      s.getElementById('iOpcao30min').checked=cfg.opcao_30min!==false;
+      s.getElementById('iOpcao1hora').checked=cfg.opcao_1hora!==false;
+    }
+    this._renderBloqueios(blq?.bloqueios||[]);
+  }
+  async _salvarImpulsoConfig(){
+    const s=this.shadowRoot;
+    const quota_max=parseInt(s.getElementById('iQuotaMax').value)||5;
+    const opcao_30min=s.getElementById('iOpcao30min').checked;
+    const opcao_1hora=s.getElementById('iOpcao1hora').checked;
+    const r=await this._api('POST','/admin/impulso/config',{quota_max,opcao_30min,opcao_1hora});
+    if(r?.ok)this._toast('Configurações salvas!');
+    else this._toast(r?.erro||'Erro ao salvar','err');
+  }
+  async _buscarStreamerBloqueio(){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('iBloqUid').value.trim();
+    if(!uid)return;
+    const infoEl=s.getElementById('iBloqStreamerInfo');
+    infoEl.style.display='block';infoEl.textContent='Buscando...';
+    // Busca pelo nome do streamer via ranking (lista de streamers cadastrados)
+    const d=await this._api('GET',`/admin/streamers?uid=${encodeURIComponent(uid)}`);
+    const match=(d?.perfis||[])[0];
+    if(match){
+      infoEl.innerHTML=`<strong style="color:var(--cyan)">${this._esc(match.nome)}</strong><br><span style="color:var(--t3)">UID: ${uid}</span>`;
+    } else {
+      infoEl.innerHTML=`<span style="color:var(--t3)">UID: ${uid} (não encontrado no cadastro)</span>`;
+    }
+  }
+  async _bloquearStreamer(){
+    const s=this.shadowRoot;
+    const kwai_uid=s.getElementById('iBloqUid').value.trim();
+    const motivo=s.getElementById('iBloqMotivo').value.trim();
+    const expiraRaw=s.getElementById('iBloqExpira').value;
+    if(!kwai_uid||!motivo){this._toast('Preencha UID e motivo','err');return;}
+    const body={kwai_uid,motivo};
+    if(expiraRaw)body.expira_em=new Date(expiraRaw+'T23:59:59').toISOString();
+    const r=await this._api('POST','/admin/impulso/bloqueios',body);
+    if(r?.ok){
+      this._toast('Streamer bloqueado!');
+      s.getElementById('iBloqUid').value='';
+      s.getElementById('iBloqMotivo').value='';
+      s.getElementById('iBloqExpira').value='';
+      s.getElementById('iBloqStreamerInfo').style.display='none';
+      const blq=await this._api('GET','/admin/impulso/bloqueios');
+      this._renderBloqueios(blq?.bloqueios||[]);
+    } else this._toast(r?.erro||'Erro ao bloquear','err');
+  }
+  async _revogarBloqueio(id){
+    const r=await this._api('PATCH',`/admin/impulso/bloqueios/${id}`,{ativo:false});
+    if(r?.ok){
+      this._toast('Bloqueio revogado');
+      const blq=await this._api('GET','/admin/impulso/bloqueios');
+      this._renderBloqueios(blq?.bloqueios||[]);
+    } else this._toast(r?.erro||'Erro','err');
+  }
+  _renderBloqueios(lista){
+    const s=this.shadowRoot;const el=s.getElementById('tbBloqueios');
+    if(!lista.length){el.innerHTML=this._empty('check_c','Nenhum bloqueio ativo');return;}
+    el.innerHTML=`<div class="bloq-lista">${lista.map(b=>`
+      <div class="bloq-item">
+        <div class="bloq-info">
+          <div class="bloq-uid">${this._ico('lock_r',13)} UID: <strong>${this._esc(b.kwai_uid)}</strong></div>
+          <div class="bloq-motivo">${this._esc(b.motivo||'—')}</div>
+          <div class="bloq-meta">
+            Bloqueado: ${this._fdtCurto(b.bloqueado_em)}
+            ${b.expira_em?` • Expira: ${this._fdtCurto(b.expira_em)}`:'<span style="color:var(--verm);margin-left:6px">Permanente</span>'}
+            ${b.bloqueado_por?` • por ${this._esc(b.bloqueado_por)}`:''}
+          </div>
+        </div>
+        <button class="btn btn-o btn-sm bloq-rev" data-rev="${b.id}">${this._ico('unlock',12)} Revogar</button>
+      </div>`).join('')}</div>`;
+    el.querySelectorAll('.bloq-rev').forEach(btn=>{
+      btn.addEventListener('click',()=>this._confirmarDel('Revogar este bloqueio?',()=>this._revogarBloqueio(btn.dataset.rev)));
+    });
   }
 
   _css(){return`
@@ -1558,6 +1853,48 @@ class DimaiorAdmin extends HTMLElement {
     }
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes spin{100%{transform:rotate(360deg)}}@keyframes bl{0%,100%{opacity:1}50%{opacity:.35}}
     ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(0,212,212,.3);border-radius:99px}
+    /* ── Comunicados ── */
+    .com-lista{display:flex;flex-direction:column;gap:12px;padding:4px 0}
+    .com-item{background:rgba(0,0,0,.35);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+    .com-preview{display:flex;align-items:flex-start;gap:10px;background:rgba(0,212,212,.06);border:1px solid var(--brddim);border-radius:var(--rs);padding:10px 13px}
+    .com-emoji{font-size:1.4rem;line-height:1;flex-shrink:0;min-width:28px}
+    .com-texto{font-size:13px;color:var(--t1);line-height:1.5;flex:1}
+    .com-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+    .com-meta-esq{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+    .com-status{font-size:10px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;padding:2px 8px;border-radius:99px;font-weight:700}
+    .com-status.ativo{background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);color:var(--verde)}
+    .com-status.inativo{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--verm)}
+    .com-local{font-size:9px;font-family:'Rajdhani',sans-serif;letter-spacing:.8px;padding:2px 7px;border-radius:99px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.3);color:var(--cyan);text-transform:uppercase}
+    .com-data{font-size:10px;color:var(--t3);font-family:'Exo 2',sans-serif}
+    .com-acoes{display:flex;gap:7px;flex-wrap:wrap}
+    .com-locais-check{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+    .com-check-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);cursor:pointer}
+    .com-check-label input[type=checkbox]{width:15px;height:15px;accent-color:var(--cyan);cursor:pointer}
+    #mComTexto{width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;resize:vertical;transition:border-color .2s}
+    #mComTexto:focus{border-color:var(--cyan);box-shadow:0 0 8px var(--cyan-d)}
+    @media(max-width:600px){.com-acoes{gap:5px}.com-acoes .btn-sm{font-size:10px;padding:4px 7px}}
+    /* ── Monitor Kwai ── */
+    .mon-section{margin-bottom:16px}
+    #monResgateResult{font-size:11px;font-family:'Courier New',monospace;line-height:1.7}
+    #monBufferResult{padding:16px}
+    @media(max-width:600px){#pag-monitor .btn{width:100%;justify-content:center}}
+    /* ── Controle Impulsionamento ── */
+    .impulso-section{margin-bottom:16px}
+    .impulso-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--brddim);border-radius:10px}
+    .tog-switch{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+    .tog-switch input{opacity:0;width:0;height:0}
+    .tog-slider{position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:99px;cursor:pointer;transition:background .25s}
+    .tog-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .25s}
+    .tog-switch input:checked+.tog-slider{background:var(--cyan)}
+    .tog-switch input:checked+.tog-slider::before{transform:translateX(18px)}
+    .bloq-lista{display:flex;flex-direction:column;gap:0}
+    .bloq-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--brddim)}
+    .bloq-item:last-child{border-bottom:none}
+    .bloq-info{flex:1;min-width:0}
+    .bloq-uid{font-size:12px;color:var(--t1);display:flex;align-items:center;gap:6px;margin-bottom:3px}
+    .bloq-motivo{font-size:12px;color:var(--t2);font-style:italic;margin-bottom:3px}
+    .bloq-meta{font-size:10px;color:var(--t3)}
+    @media(max-width:600px){.bloq-item{flex-direction:column;align-items:flex-start}.impulso-toggle-row{flex-wrap:wrap}}
   `;}
 
   _html(){
@@ -1587,6 +1924,9 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)}
             ${ni('award','premios','Prêmios')}
             <div class="ns">Sistema</div>
+            ${ni('bolt','impulsoCtrl','Ctrl. Impulso')}
+            ${ni('bell','comunicados','Comunicados')}
+            ${ni('server','monitor','Monitor Kwai')}
             ${ni('search','logs','Auditoria')}
             ${ni('settings','config','Configurações')}
           </div>
@@ -1604,6 +1944,73 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-carteira">${ph('Carteira Financeira','wallet','Saldos dos streamers','btnAtuCart',`<button class="btn btn-g" id="btnCreditoRapido">${this._ico('plus',13)} Adicionar Saldo</button>`)}<div class="dc2-grid" id="carteiraResumo">${this._loading('grid-column:1/-1')}</div><div id="carteiraStreamers">${this._loading()}</div></div>
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
             <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<button class="btn btn-g" id="btnNovoCom">${this._ico('plus',13)} Novo Comunicado</button>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','Configurações e bloqueios','btnAtuImpulso')}
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Configurações Gerais</div></div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+                  <div class="mc"><label>Quota máxima semanal por streamer</label><div style="display:flex;gap:8px;align-items:center"><input id="iQuotaMax" type="number" min="1" max="99" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">usos por semana</span></div></div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <label style="font-size:12px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Opções disponíveis</label>
+                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulsionar 30 minutos</div><div style="font-size:11px;color:var(--t3)">Libera a opção de 30min no painel do streamer</div></div><label class="tog-switch"><input type="checkbox" id="iOpcao30min"><span class="tog-slider"></span></label></div>
+                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulsionar 1 hora</div><div style="font-size:11px;color:var(--t3)">Libera a opção de 1h no painel do streamer</div></div><label class="tog-switch"><input type="checkbox" id="iOpcao1hora"><span class="tog-slider"></span></label></div>
+                  </div>
+                  <div><button class="btn btn-g" id="btnSalvarImpulsoConfig">${this._ico('check',13)} Salvar Configurações</button></div>
+                </div>
+              </div>
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('lock_r',14)} Bloquear Streamer</div></div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="iBloqUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><button class="btn btn-o" id="btnBuscarBloqUid">${this._ico('search',13)} Buscar</button></div></div>
+                  <div id="iBloqStreamerInfo" style="display:none;background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.15);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--t2)"></div>
+                  <div class="mc"><label>Motivo do Bloqueio <span style="color:var(--verm)">*</span></label><textarea id="iBloqMotivo" rows="2" placeholder="Ex: Suspeita de uso indevido, manipulação..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;resize:none"></textarea></div>
+                  <div class="mc"><label>Data de Expiração <span style="color:var(--t3);font-size:11px">(opcional — vazio = permanente)</span></label><input id="iBloqExpira" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div>
+                  <div><button class="btn" id="btnAplicarBloqueio" style="background:linear-gradient(135deg,#c00030,#f87171)">${this._ico('lock_r',13)} Aplicar Bloqueio</button></div>
+                </div>
+              </div>
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('x_circle',14)} Bloqueios Ativos</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuBloqueios">${this._ico('refresh',12)} Atualizar</button></div></div>
+                <div id="tbBloqueios">${this._loading()}</div>
+              </div>
+            </div>
+            <div class="pag" id="pag-monitor">${ph('Monitor Kwai','server','Controle do worker de monitoramento','btnAtuMonitor')}
+              <div class="box mon-section">
+                <div class="bhead"><div class="btitulo">${this._ico('check_c',14)} Status do Cookie Kwai</div></div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div id="monCookieStatus" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--brddim);font-size:13px;color:var(--t3)">Clique em Atualizar para verificar</div>
+                  <div><button class="btn btn-o" id="btnVerificarCookie">${this._ico('refresh',13)} Verificar Agora</button></div>
+                  <div style="border-top:1px solid var(--brddim);padding-top:12px">
+                    <label style="font-size:12px;color:var(--t3);display:block;margin-bottom:6px">Novo cookie (cole aqui para atualizar)</label>
+                    <textarea id="monCookieInput" rows="3" placeholder="Cole o cookie completo aqui..." style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:12px;outline:none;resize:vertical;transition:border-color .2s;word-break:break-all"></textarea>
+                    <div style="margin-top:8px"><button class="btn btn-g" id="btnSalvarCookie">${this._ico('check',13)} Salvar Cookie</button></div>
+                  </div>
+                </div>
+              </div>
+              <div class="box mon-section">
+                <div class="bhead"><div class="btitulo">${this._ico('history',14)} Resgate / Correção de Dados</div></div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="background:rgba(248,193,0,.06);border:1px solid rgba(248,193,0,.25);border-radius:var(--rs);padding:10px 14px;font-size:11px;color:#fcd34d;display:flex;align-items:flex-start;gap:6px;line-height:1.6">${this._ico('warning',13)}<span><strong>Simular</strong> mostra o que seria alterado sem gravar nada. <strong>Executar</strong> grava os dados corrigidos no banco — confirme antes.</span></div>
+                  <div class="mc"><label>Janela de dias a reprocessar</label><div style="display:flex;gap:8px;align-items:center"><input id="monDias" type="number" min="1" max="90" value="7" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">dias atrás</span></div></div>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <button class="btn btn-o" id="btnSimularResgate">${this._ico('search',13)} Simular (sem gravar)</button>
+                    <button class="btn" id="btnExecutarResgate" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">${this._ico('zap',13)} Executar Correção</button>
+                  </div>
+                  <div id="monResgateStatus" style="display:none"></div>
+                  <div id="monResgateResult" style="display:none;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);padding:12px;max-height:320px;overflow-y:auto;font-size:11px;font-family:monospace;color:var(--t2);word-break:break-word;white-space:pre-wrap;line-height:1.6"></div>
+                </div>
+              </div>
+              <div class="box mon-section">
+                <div class="bhead"><div class="btitulo">${this._ico('chart',14)} Buffer Atual</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnVerBuffer">${this._ico('refresh',12)} Ver Buffer</button></div></div>
+                <div id="monBufferResult" style="padding:16px;color:var(--t3);font-size:12px">Clique em "Ver Buffer" para inspecionar os dados pendentes de envio ao banco.</div>
+              </div>
+              <div class="box mon-section">
+                <div class="bhead"><div class="btitulo">${this._ico('send',14)} Telegram</div></div>
+                <div style="padding:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <span style="font-size:12px;color:var(--t3);flex:1">Envia uma mensagem de teste para confirmar que o bot está funcionando.</span>
+                  <button class="btn btn-o" id="btnTestarTelegram">${this._ico('send',13)} Testar Bot</button>
+                </div>
+              </div>
+            </div>
             <div class="pag" id="pag-logs">${ph('Auditoria','search','Registro de ações','btnAtuLog')}<div class="box"><div class="bhead"><div class="btitulo">Logs</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bL" type="text" placeholder="Filtrar..."/></div></div></div><div id="tbL">${this._loading()}</div><div class="pag-bar" id="pgL"></div></div></div>
             <div class="pag" id="pag-config">${ph('Configurações','settings','Variáveis operacionais','btnAtuCfg')}<div class="box"><div id="tbC">${this._loading()}</div></div></div>
           </div>
@@ -1619,6 +2026,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:'Rajdhani',sans-serif;font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose">✕</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:'Rajdhani',sans-serif">Valor a pagar</div><div id="mPixValor" style="font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:'Exo 2',sans-serif">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
       <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">Observação</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"><option value="diamantes">💎 Ranking de Diamantes</option><option value="horas">⏱ Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
+      <div class="ov" id="mCom"><div class="modal"><div class="m-titulo" id="mComTit">Novo Comunicado</div><div class="mc"><label>Emoji ou Ícone <span style="color:var(--t3);font-size:11px">(opcional)</span></label><input id="mComEmoji" type="text" placeholder="Ex: 🏆 🎯 🔔" maxlength="8" style="font-size:1.3rem;letter-spacing:4px"/></div><div class="mc"><label>Texto do Comunicado <span style="color:var(--verm)">*</span></label><textarea id="mComTexto" rows="3" placeholder="Ex: Os Top 10 streamers do Ranking deste mês participarão do sorteio de 10K diamantes."></textarea></div><div class="mc"><label>Status</label><select id="mComAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div><div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel do Streamer / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Página de Impulsionamento</label></div></div><div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div></div></div>
       <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div>
     </div>`;
   }

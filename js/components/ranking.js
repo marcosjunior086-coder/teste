@@ -207,6 +207,14 @@ class RankingDmaior extends HTMLElement {
       .growth.down{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
       .growth.neutral{background:var(--border-dim);color:var(--text-muted);border:1px solid var(--border-dim)}
       .growth.new{background:var(--bloom-grad);color:#fff;border:none;padding:3px 7px}
+      /* ── Banner de Comunicados ── */
+      #anuncios-container{width:100%;display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+      .anuncio-banner{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border-radius:12px;background:rgba(240,192,64,0.08);border:1px solid rgba(240,192,64,0.35);animation:fadeUp 0.4s ease both}
+      :host-context([data-theme="branco"]) .anuncio-banner,:host-context([data-theme="laranja"]) .anuncio-banner{background:rgba(180,130,0,0.07);border-color:rgba(180,130,0,0.35)}
+      :host-context([data-theme="rosa"]) .anuncio-banner{background:rgba(233,30,140,0.07);border-color:rgba(233,30,140,0.3)}
+      .anuncio-ico{font-size:1.25rem;line-height:1;flex-shrink:0;min-width:26px}
+      .anuncio-txt{font-size:0.78rem;color:var(--text-sub);line-height:1.55;flex:1}
+      .anuncio-txt strong,.anuncio-txt b{color:var(--gold)}
       .badges-container{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
       /* ── Pódio ── */
       .podium{display:flex;justify-content:center;align-items:flex-end;height:320px;margin-bottom:40px;margin-top:70px;gap:14px;animation:fadeUp 0.6s ease both}
@@ -347,6 +355,7 @@ class RankingDmaior extends HTMLElement {
             <select id="sheet-selector" class="period-select"></select>
           </div>
         </div>
+        <div id="anuncios-container"></div>
         <div class="tabs">
           <button class="tab-btn active" id="btn-diamonds">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg> DIAMANTES
@@ -475,6 +484,7 @@ class RankingDmaior extends HTMLElement {
     });
     this.updateRuleText();
     this.loadTabData();
+    this.fetchComunicados();
   }
 
   _isMesAtual() {
@@ -553,6 +563,7 @@ class RankingDmaior extends HTMLElement {
           hoursMin: this.h2m(s.horas_video),
         }));
         this.prevRows = [];
+        this._saveCurrentPositions(this.allRows);
         const hoje = new Date();
         const mm   = String(hoje.getMonth() + 1).padStart(2, '0');
         const ano  = hoje.getFullYear();
@@ -696,6 +707,63 @@ class RankingDmaior extends HTMLElement {
     return `<span class="growth neutral">- 0%</span>`;
   }
 
+  // ── Comunicados ────────────────────────────────────────────────────────────
+  async fetchComunicados() {
+    try {
+      const data = await window.DmaiorAPI.rank.getComunicados('ranking');
+      this.renderComunicados(data.comunicados || []);
+    } catch { this.renderComunicados([]); }
+  }
+
+  renderComunicados(lista) {
+    const el = this.shadowRoot.getElementById('anuncios-container');
+    if (!el) return;
+    const ativos = lista.filter(c => c.ativo !== false);
+    if (!ativos.length) { el.innerHTML = ''; return; }
+    el.innerHTML = ativos.map(c => `
+      <div class="anuncio-banner">
+        ${c.emoji ? `<span class="anuncio-ico">${c.emoji}</span>` : ''}
+        <span class="anuncio-txt">${this.esc(c.texto)}</span>
+      </div>`).join('');
+  }
+
+  // ── Indicador de posição ────────────────────────────────────────────────────
+  positionBadge(s, curPos) {
+    if (this.prevRows.length) {
+      const prevIdx = this.prevRows.findIndex(p => p.uid === s.uid);
+      if (prevIdx === -1) return `<span class="growth new">${this.STAR_SVG} Novo</span>`;
+      const prevPos = prevIdx + 1;
+      const delta   = prevPos - curPos;
+      if (delta > 0)  return `<span class="growth up">↑ ${delta}</span>`;
+      if (delta < 0)  return `<span class="growth down">↓ ${Math.abs(delta)}</span>`;
+      return `<span class="growth neutral">—</span>`;
+    }
+    const saved = this._getSavedPositions();
+    if (!saved) return '';
+    const prevPos = saved[s.uid];
+    if (prevPos === undefined) return `<span class="growth new">${this.STAR_SVG} Novo</span>`;
+    const delta = prevPos - curPos;
+    if (delta > 0)  return `<span class="growth up">↑ ${delta}</span>`;
+    if (delta < 0)  return `<span class="growth down">↓ ${Math.abs(delta)}</span>`;
+    return `<span class="growth neutral">—</span>`;
+  }
+
+  _getSavedPositions() {
+    try { const r = localStorage.getItem('dm_rank_pos_snap'); return r ? JSON.parse(r) : null; } catch { return null; }
+  }
+
+  _saveCurrentPositions(rows) {
+    // Atualiza snapshot somente a cada 4 horas para manter comparação significativa
+    try {
+      const lastTime = Number(localStorage.getItem('dm_rank_pos_time') || 0);
+      if (Date.now() - lastTime < 4 * 60 * 60 * 1000) return;
+      const pos = {};
+      rows.forEach((r, i) => { pos[r.uid] = i + 1; });
+      localStorage.setItem('dm_rank_pos_snap', JSON.stringify(pos));
+      localStorage.setItem('dm_rank_pos_time', String(Date.now()));
+    } catch {}
+  }
+
   renderScreen() {
     const el      = this.shadowRoot.getElementById('content');
     const nomeAba = this.shadowRoot.getElementById('sheet-selector').value;
@@ -740,7 +808,7 @@ class RankingDmaior extends HTMLElement {
             <div class="podium-id">@${this.esc(s.id)}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${prizeHtml}
-            ${this.growthHtml(s)}
+            ${this.positionBadge(s, idx + 1)}
           </div>`;
       });
       html += `</div>`;
@@ -765,7 +833,7 @@ class RankingDmaior extends HTMLElement {
             <div class="list-name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}</div>
             <div class="list-id">@${this.esc(s.id)}</div>
             <div class="badges-container">
-              ${this.growthHtml(s)}
+              ${this.positionBadge(s, globalIndex + 1)}
               ${prizeValue ? `<span class="list-prize-tag"><span class="currency-symbol">R$</span> ${prizeValue}</span>` : ''}
             </div>
           </div>

@@ -4,7 +4,7 @@
 //    worker-url → URL base do Cloudflare Worker
 // ============================================================
 
-const QUOTA_MAX = 5; // ✅ 5 usos por semana, reinicia toda segunda-feira
+const QUOTA_MAX_DEFAULT = 5; // fallback enquanto config não carrega
 
 const SVG_ROCKET = `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M24 4C24 4 34 10 34 24c0 6-2 11-4 14H18c-2-3-4-8-4-14C14 10 24 4 24 4z" fill="rgba(0,0,0,0.3)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
@@ -29,6 +29,7 @@ class DmaiorImpulso extends HTMLElement {
     this._token          = '';
     this._refreshToken   = '';
     this._quota          = 0;
+    this._quotaMax       = QUOTA_MAX_DEFAULT;
     this._quotaCarregada = false;
   }
 
@@ -51,7 +52,7 @@ class DmaiorImpulso extends HTMLElement {
   _mostrarSessaoExpirada() {
     const sr = this.shadowRoot;
     if (!sr) return;
-    for (let i = 1; i <= QUOTA_MAX; i++) {
+    for (let i = 1; i <= this._quotaMax; i++) {
       const dot = sr.getElementById(`d${i}`);
       if (dot) { dot.classList.remove('loading'); dot.style.borderColor = 'rgba(255,80,80,0.35)'; }
     }
@@ -89,7 +90,63 @@ class DmaiorImpulso extends HTMLElement {
 
   async _iniciar() {
     await this._renovarToken();
+    await this._carregarConfig();
     this._carregarQuota(false);
+  }
+
+  async _carregarConfig() {
+    try {
+      const cfg = await window.DmaiorAPI.rank.getImpulsoConfig();
+      const qMax = parseInt(cfg.quota_max) || QUOTA_MAX_DEFAULT;
+      this._quotaMax = qMax;
+
+      // Atualiza dots conforme novo quota_max
+      this._renderDots();
+
+      // Atualiza texto do alerta de limite
+      const alertaEl = this.shadowRoot.getElementById('alerta-limite');
+      if (alertaEl) {
+        alertaEl.innerHTML = `Limite semanal atingido. Você já utilizou os <span class="destaque">${qMax} impulsionamentos</span> desta semana. O contador reinicia toda <span class="destaque">segunda-feira</span>.`;
+      }
+
+      // Ativa/desativa opções de tempo
+      const opt30 = this.shadowRoot.querySelector('label.radio-opt-30min');
+      const opt1h  = this.shadowRoot.querySelector('label.radio-opt-1hora');
+      if (opt30) opt30.style.display = cfg.opcao_30min === false ? 'none' : '';
+      if (opt1h)  opt1h.style.display  = cfg.opcao_1hora  === false ? 'none' : '';
+
+      // Se 30min desativado e 1h ativo, força seleção de 1h
+      if (cfg.opcao_30min === false && cfg.opcao_1hora !== false) {
+        const r1h = this.shadowRoot.querySelector('input[name="tempo"][value="1hora"]');
+        if (r1h) r1h.checked = true;
+      }
+
+      // Verifica se o UID está bloqueado
+      if (this._uid) {
+        const check = await window.DmaiorAPI.rank.checkImpulsoBlock(this._uid);
+        if (check.bloqueado) {
+          const fb = this.shadowRoot.getElementById('feedback');
+          if (fb) {
+            fb.className = 'feedback erro';
+            fb.innerHTML = check.motivo
+              ? `Seu acesso ao impulsionamento foi suspenso. Motivo: <strong>${check.motivo}</strong>`
+              : 'Seu acesso ao impulsionamento está suspenso. Entre em contato com a agência.';
+          }
+          this._travar();
+          this._quotaCarregada = true; // evita que _enviar() rode
+        }
+      }
+    } catch { /* usa defaults */ }
+  }
+
+  _renderDots() {
+    const container = this.shadowRoot.getElementById('quota-dots');
+    if (!container) return;
+    let html = '';
+    for (let i = 1; i <= this._quotaMax; i++) {
+      html += `<div class="dot loading" id="d${i}"></div>`;
+    }
+    container.innerHTML = html;
   }
 
   _renderShell() {
@@ -319,7 +376,7 @@ class DmaiorImpulso extends HTMLElement {
 
             <div class="quota-box">
               <div class="quota-label">Usos esta semana</div>
-              <div class="quota-dots">
+              <div class="quota-dots" id="quota-dots">
                 <div class="dot loading" id="d1"></div>
                 <div class="dot loading" id="d2"></div>
                 <div class="dot loading" id="d3"></div>
@@ -329,7 +386,7 @@ class DmaiorImpulso extends HTMLElement {
             </div>
 
             <div class="alerta limite" id="alerta-limite">
-              Limite semanal atingido. Você já utilizou os <span class="destaque">5 impulsionamentos</span> desta semana.
+              Limite semanal atingido. Você já utilizou os <span class="destaque">${QUOTA_MAX_DEFAULT} impulsionamentos</span> desta semana.
               O contador reinicia toda <span class="destaque">segunda-feira</span>.
             </div>
 
@@ -345,11 +402,11 @@ class DmaiorImpulso extends HTMLElement {
             <div class="field-group">
               <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
               <div class="radio-group">
-                <label class="radio-opt">
+                <label class="radio-opt radio-opt-30min">
                   <input type="radio" name="tempo" value="30min" checked disabled/>
                   <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
                 </label>
-                <label class="radio-opt">
+                <label class="radio-opt radio-opt-1hora">
                   <input type="radio" name="tempo" value="1hora" disabled/>
                   <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
                 </label>
@@ -398,7 +455,7 @@ class DmaiorImpulso extends HTMLElement {
 
   _erroQuota() {
     const sr = this.shadowRoot;
-    for (let i = 1; i <= QUOTA_MAX; i++) {
+    for (let i = 1; i <= this._quotaMax; i++) {
       const dot = sr.getElementById(`d${i}`);
       if (dot) { dot.classList.remove('loading'); dot.style.borderColor = 'rgba(240,192,64,0.4)'; }
     }
@@ -408,11 +465,11 @@ class DmaiorImpulso extends HTMLElement {
 
   _atualizarQuotaUI() {
     const sr = this.shadowRoot;
-    for (let i = 1; i <= QUOTA_MAX; i++) {
+    for (let i = 1; i <= this._quotaMax; i++) {
       const dot = sr.getElementById(`d${i}`);
       if (dot) { dot.classList.remove('loading'); dot.classList.toggle('used', i <= this._quota); }
     }
-    if (this._quota >= QUOTA_MAX) {
+    if (this._quota >= this._quotaMax) {
       sr.getElementById('alerta-limite').style.display = 'block';
       this._travar();
     } else {
@@ -467,12 +524,12 @@ class DmaiorImpulso extends HTMLElement {
       } else {
         feedback.className   = 'feedback erro';
         feedback.textContent = data.erro || 'Erro ao processar o pedido. Tente novamente.';
-        if (this._quota < QUOTA_MAX) btn.disabled = false;
+        if (this._quota < this._quotaMax) btn.disabled = false;
       }
     } catch(_) {
       feedback.className   = 'feedback erro';
       feedback.textContent = 'Falha de conexão com o servidor. Verifique sua internet.';
-      if (this._quota < QUOTA_MAX) btn.disabled = false;
+      if (this._quota < this._quotaMax) btn.disabled = false;
     } finally {
       spinner.style.display = 'none';
       btnTexto.textContent  = 'Impulsionar Live';
