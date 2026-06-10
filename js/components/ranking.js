@@ -352,11 +352,11 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .dyn-rules-btn:hover{border-color:var(--azul);color:var(--azul)}
       /* ── Pódio dinâmico ── */
       :host(.dinamico) .podium{height:auto;margin-top:55px;margin-bottom:20px;gap:8px}
-      :host(.dinamico) .podium-item{height:auto!important;min-height:195px;border-radius:22px!important;padding:0 10px 18px!important;overflow:visible;gap:4px}
+      :host(.dinamico) .podium-item{height:auto!important;min-height:195px;border-radius:22px!important;padding:0 10px 18px!important;overflow:visible;gap:4px;border-bottom:none!important}
       :host(.dinamico) .list-id{display:none}
-      :host(.dinamico) .podium-item.second{min-height:220px;background:linear-gradient(160deg,rgba(30,130,255,.58) 0%,rgba(0,80,200,.30) 50%,rgba(6,8,20,.96) 100%)!important;border-color:rgba(30,170,255,.72)!important;box-shadow:0 0 36px rgba(30,130,255,.24),0 8px 24px rgba(0,0,0,.45)!important}
-      :host(.dinamico) .podium-item.first{min-height:272px;background:linear-gradient(160deg,rgba(240,192,64,.62) 0%,rgba(210,145,0,.32) 50%,rgba(6,8,20,.96) 100%)!important;border-color:rgba(240,192,64,.80)!important;box-shadow:0 0 55px rgba(240,192,64,.34),0 10px 32px rgba(0,0,0,.5)!important}
-      :host(.dinamico) .podium-item.third{min-height:196px;background:linear-gradient(160deg,rgba(200,60,200,.58) 0%,rgba(140,30,185,.30) 50%,rgba(6,8,20,.96) 100%)!important;border-color:rgba(210,70,210,.68)!important;box-shadow:0 0 32px rgba(200,60,200,.22),0 8px 20px rgba(0,0,0,.4)!important}
+      :host(.dinamico) .podium-item.second{min-height:220px;background:linear-gradient(to bottom,rgba(15,115,255,.92) 0%,rgba(0,70,190,.60) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(30,170,255,.72)!important;border-bottom:none!important;box-shadow:0 0 40px rgba(15,115,255,.30),0 8px 28px rgba(0,0,0,.55)!important}
+      :host(.dinamico) .podium-item.first{min-height:272px;background:linear-gradient(to bottom,rgba(240,185,20,.96) 0%,rgba(200,130,0,.62) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(240,192,64,.85)!important;border-bottom:none!important;box-shadow:0 0 60px rgba(240,185,20,.40),0 10px 36px rgba(0,0,0,.55)!important}
+      :host(.dinamico) .podium-item.third{min-height:196px;background:linear-gradient(to bottom,rgba(210,40,210,.92) 0%,rgba(140,20,180,.58) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(215,60,215,.72)!important;border-bottom:none!important;box-shadow:0 0 38px rgba(210,40,210,.28),0 8px 24px rgba(0,0,0,.5)!important}
       :host(.dinamico) .badge{display:none!important}
       :host(.dinamico) .avatar{border-width:3.5px!important}
       :host(.dinamico) .second .avatar{border-color:#1eb8ff!important;box-shadow:0 0 12px rgba(30,184,255,.5)!important}
@@ -371,7 +371,9 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .podium-val{font-size:1.1rem!important}
       :host(.dinamico) .first .podium-val{font-size:1.35rem!important}
       :host(.dinamico) .podium-item::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.42));pointer-events:none;z-index:1;border-radius:0 0 22px 22px}
-      :host(.dinamico) .avatar-wrapper{display:flex;justify-content:center;align-items:center;width:100%;position:relative;margin-top:-50px;margin-bottom:6px;z-index:5}
+      :host(.dinamico) .avatar-wrapper{display:flex;justify-content:center;width:100%;position:relative;margin-top:-30px;margin-bottom:6px;z-index:5}
+      :host(.dinamico) .first .avatar-wrapper{margin-top:-38px}
+      :host(.dinamico) .av-inner{position:relative;display:inline-flex}
       /* Mobile dinâmico */
       @media(max-width:480px){
         :host(.dinamico) .ctrls-row .tabs{flex-basis:100%;order:0}
@@ -863,8 +865,10 @@ class RankingDmaior extends HTMLElement {
           <div class="podium-item ${type}">
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
-              <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-              ${liveDot}
+              <div class="av-inner">
+                <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                ${liveDot}
+              </div>
             </div>
             <div class="name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
