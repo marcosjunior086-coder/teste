@@ -317,7 +317,6 @@ class KwaiLiveWidget extends HTMLElement {
               </div>
               <div class="modal-actions">
                 <button class="btn-kwai" id="btnOpenKwai">Abrir no Kwai</button>
-                <button class="btn-kwai-pk" id="btnPkCentral">⚔ PK Central</button>
                 <button class="btn-close" id="btnFechar">Fechar</button>
               </div>
             </div>
@@ -332,10 +331,6 @@ class KwaiLiveWidget extends HTMLElement {
     this.shadowRoot.getElementById('btnFechar').addEventListener('click',  () => this.closeModal());
     this.shadowRoot.getElementById('muteBadge').addEventListener('click',  () => this.toggleMute());
     this.shadowRoot.getElementById('toggleMin').addEventListener('click',  () => this.setMinimized(!this.isMinimized, true));
-    // Botão PK Central — abre a Central de Criadores do Kwai
-    this.shadowRoot.getElementById('btnPkCentral').addEventListener('click', () => {
-      window.open('https://creators.kwai.com', '_blank', 'noopener,noreferrer');
-    });
     this.shadowRoot.getElementById('catFilter').addEventListener('change', (e) => {
       this.activeCategory = e.target.value;
       this.activePlayers.forEach(({ streamer, card }) => {
@@ -469,6 +464,13 @@ class KwaiLiveWidget extends HTMLElement {
     }
 
     const entries  = await this.fetchEntries();
+
+    // Se a API retornou vazio provavelmente foi erro de rede — não remove ninguém
+    if (entries.length === 0 && this.activePlayers.size > 0) {
+      this.isChecking = false;
+      return;
+    }
+
     const liveUrls = new Set(entries.map((e) => e.url));
 
     // Remove quem saiu da live

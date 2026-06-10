@@ -161,7 +161,8 @@ class MenuMobileDMaior extends HTMLElement {
       .dd-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
       .overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--dm-overlay); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .3s; z-index:9998; }
       .overlay.on{ opacity:1; pointer-events:auto; }
-      .sidebar{ position:fixed; top:0; right:-100%; width:280px; max-width:85vw; height:100vh; background:var(--dm-grad-sidebar); border-left:1px solid var(--dm-cyan-20); box-shadow:-5px 0 30px var(--dm-shadow-lg); transition:right .3s cubic-bezier(.25,.8,.25,1); z-index:9999; display:flex; flex-direction:column; overflow-y:auto; }
+      .sidebar{ position:fixed; top:0; right:-100%; width:280px; max-width:85vw; height:100vh; background:var(--dm-grad-sidebar); border-left:1px solid var(--dm-cyan-20); box-shadow:-5px 0 30px var(--dm-shadow-lg); transition:right .3s cubic-bezier(.25,.8,.25,1); z-index:9999; display:flex; flex-direction:column; overflow-y:auto; scrollbar-width:none; }
+      .sidebar::-webkit-scrollbar{ display:none; }
       .sidebar.on{ right:0; }
       .sb-header{ display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--dm-border); position:sticky; top:0; background:var(--dm-bg-panel); backdrop-filter:blur(5px); z-index:10; }
       .sb-title{ font-family:'Rajdhani',sans-serif; font-size:1.4rem; font-weight:700; color:var(--dm-text); letter-spacing:1px; text-transform:uppercase; text-shadow:0 0 10px var(--dm-cyan-40); }
