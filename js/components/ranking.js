@@ -352,37 +352,37 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .dyn-rules-btn:hover{border-color:var(--azul);color:var(--azul)}
       /* ── Pódio dinâmico ── */
       :host(.dinamico) .podium{height:auto;margin-top:55px;margin-bottom:20px;gap:8px}
-      :host(.dinamico) .podium-item{height:auto!important;min-height:190px;border-radius:22px!important;padding:0 10px 18px!important;overflow:visible}
+      :host(.dinamico) .podium-item{height:auto!important;min-height:195px;border-radius:22px!important;padding:0 10px 18px!important;overflow:visible;gap:4px}
       :host(.dinamico) .list-id{display:none}
-      :host(.dinamico) .podium-item.second{min-height:215px;background:linear-gradient(160deg,rgba(30,130,255,.22) 0%,rgba(0,80,180,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(30,160,255,.55)!important;box-shadow:0 0 30px rgba(30,130,255,.14),0 8px 24px rgba(0,0,0,.4)!important}
-      :host(.dinamico) .podium-item.first{min-height:265px;background:linear-gradient(160deg,rgba(240,192,64,.28) 0%,rgba(220,140,0,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(240,192,64,.65)!important;box-shadow:0 0 42px rgba(240,192,64,.24),0 10px 32px rgba(0,0,0,.5)!important}
-      :host(.dinamico) .podium-item.third{background:linear-gradient(160deg,rgba(200,60,200,.22) 0%,rgba(140,30,180,.07) 55%,var(--bg-card2) 100%)!important;border-color:rgba(200,70,200,.5)!important;box-shadow:0 0 26px rgba(200,60,200,.13),0 8px 20px rgba(0,0,0,.35)!important}
+      :host(.dinamico) .podium-item.second{min-height:220px;background:linear-gradient(160deg,rgba(30,130,255,.58) 0%,rgba(0,80,200,.30) 50%,rgba(6,8,20,.96) 100%)!important;border-color:rgba(30,170,255,.72)!important;box-shadow:0 0 36px rgba(30,130,255,.24),0 8px 24px rgba(0,0,0,.45)!important}
+      :host(.dinamico) .podium-item.first{min-height:272px;background:linear-gradient(160deg,rgba(240,192,64,.62) 0%,rgba(210,145,0,.32) 50%,rgba(6,8,20,.96) 100%)!important;border-color:rgba(240,192,64,.80)!important;box-shadow:0 0 55px rgba(240,192,64,.34),0 10px 32px rgba(0,0,0,.5)!important}
+      :host(.dinamico) .podium-item.third{min-height:196px;background:linear-gradient(160deg,rgba(200,60,200,.58) 0%,rgba(140,30,185,.30) 50%,rgba(6,8,20,.96) 100%)!important;border-color:rgba(210,70,210,.68)!important;box-shadow:0 0 32px rgba(200,60,200,.22),0 8px 20px rgba(0,0,0,.4)!important}
       :host(.dinamico) .badge{display:none!important}
-      :host(.dinamico) .avatar{border-width:3px!important}
-      :host(.dinamico) .second .avatar{border-color:#1eb8ff!important}
-      :host(.dinamico) .first .avatar{border-color:#f0c040!important}
-      :host(.dinamico) .third .avatar{border-color:#d040c8!important}
-      :host(.dinamico) .crown-emoji{top:-40px}
-      :host(.dinamico) .pod-pos-num{position:absolute;font-family:'Rajdhani',sans-serif;font-weight:900;font-size:5.5rem;opacity:.12;bottom:-5px;right:6px;line-height:1;user-select:none;pointer-events:none;color:#fff}
+      :host(.dinamico) .avatar{border-width:3.5px!important}
+      :host(.dinamico) .second .avatar{border-color:#1eb8ff!important;box-shadow:0 0 12px rgba(30,184,255,.5)!important}
+      :host(.dinamico) .first .avatar{border-color:#f0c040!important;box-shadow:0 0 14px rgba(240,192,64,.55)!important}
+      :host(.dinamico) .third .avatar{border-color:#d040c8!important;box-shadow:0 0 12px rgba(200,60,200,.5)!important}
+      :host(.dinamico) .crown-emoji{top:-42px}
+      :host(.dinamico) .pod-pos-num{position:absolute;font-family:'Rajdhani',sans-serif;font-weight:900;font-size:5.5rem;opacity:.14;bottom:6px;right:8px;line-height:1;user-select:none;pointer-events:none;color:#fff;z-index:1}
       :host(.dinamico) .pod-live-badge{position:absolute;top:9px;left:50%;transform:translateX(-50%);background:#166534;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;padding:3px 9px;border-radius:6px;display:flex;align-items:center;gap:4px;white-space:nowrap}
       :host(.dinamico) .pod-live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulsedot 1.5s infinite}
       @keyframes pulsedot{0%,100%{opacity:1}50%{opacity:.4}}
       :host(.dinamico) .podium-item .name,:host(.dinamico) .podium-item .podium-val,:host(.dinamico) .podium-item .podium-id,:host(.dinamico) .podium-item .prize-tag{position:relative;z-index:2}
       :host(.dinamico) .podium-val{font-size:1.1rem!important}
       :host(.dinamico) .first .podium-val{font-size:1.35rem!important}
-      :host(.dinamico) .podium-item::after{content:'';position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.28));pointer-events:none;z-index:1}
-      :host(.dinamico) .avatar-wrapper{position:relative;z-index:2}
+      :host(.dinamico) .podium-item::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.42));pointer-events:none;z-index:1;border-radius:0 0 22px 22px}
+      :host(.dinamico) .avatar-wrapper{display:flex;justify-content:center;align-items:center;width:100%;position:relative;margin-top:-50px;margin-bottom:6px;z-index:5}
       /* Mobile dinâmico */
       @media(max-width:480px){
         :host(.dinamico) .ctrls-row .tabs{flex-basis:100%;order:0}
         :host(.dinamico) .ctrls-row .period-wrapper{flex:1;max-width:none;order:1}
         :host(.dinamico) .ctrls-row .time-counter{order:2;font-size:.7rem;padding:6px 8px}
         :host(.dinamico) .ctrls-row .dyn-rules-btn{order:3}
-        :host(.dinamico) .podium{margin-top:58px;gap:6px}
+        :host(.dinamico) .podium{margin-top:62px;gap:6px}
         :host(.dinamico) .podium-item{padding:0 7px 14px!important;border-radius:18px!important}
-        :host(.dinamico) .podium-item.first{min-height:225px}
-        :host(.dinamico) .podium-item.second{min-height:185px}
-        :host(.dinamico) .podium-item.third{min-height:165px}
+        :host(.dinamico) .podium-item.first{min-height:228px}
+        :host(.dinamico) .podium-item.second{min-height:192px}
+        :host(.dinamico) .podium-item.third{min-height:170px}
         :host(.dinamico) .pod-pos-num{font-size:4rem}
       }
     </style>
