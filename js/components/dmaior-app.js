@@ -27,6 +27,10 @@ class DMaiorPainel extends HTMLElement {
             window.removeEventListener('dmaior:avisos', this._avisosHandler);
             this._avisosHandler = null;
         }
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
     }
 
     _startHeightObserver() {
@@ -34,8 +38,8 @@ class DMaiorPainel extends HTMLElement {
             const h = Math.max(this.scrollHeight, this.offsetHeight, 600);
             window.parent.postMessage({ height: h }, '*');
         };
-        const ro = new ResizeObserver(() => sendHeight());
-        ro.observe(this);
+        this._resizeObserver = new ResizeObserver(() => sendHeight());
+        this._resizeObserver.observe(this);
         this._sendHeight = sendHeight;
         sendHeight();
     }
@@ -1300,21 +1304,12 @@ class DMaiorPainel extends HTMLElement {
             if (pixOk) {
                 this.qs('#cPixInfo').textContent = `PIX ${pixTipo}: ${pixChave}`;
                 const btnSaque = this.qs('#btnSaque');
-                const asaasOk  = cart.asaas_disponivel;
 
                 if (btnSaque) {
                     if (saldo <= 0) {
                         btnSaque.disabled = true;
                         btnSaque.textContent = 'SALDO INDISPONÍVEL';
                         btnSaque.style.background = '#333';
-                    } else if (asaasOk) {
-                        btnSaque.disabled = false;
-                        btnSaque.innerHTML = `<img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0" alt="pix"> SACAR AGORA`;
-                        btnSaque.style.background = 'linear-gradient(90deg,#00b450,#008040)';
-                        const h3 = this.qs('#cSaqueForm h3');
-                        if(h3) h3.textContent = 'SAQUE AUTOMÁTICO VIA PIX';
-                        const desc = this.qs('#cSaqueDesc');
-                        if(desc) desc.innerHTML = `<span style="color:var(--green);font-size:.75rem">✓ PIX enviado na hora para ${pixTipo}: ${pixChave}</span>`;
                     } else {
                         btnSaque.disabled = false;
                         btnSaque.innerHTML = `<img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0" alt="pix"> SOLICITAR SAQUE`;
@@ -1535,8 +1530,8 @@ class DMaiorPainel extends HTMLElement {
                 else {
                     el.innerHTML = rapidos.map(c => `
                         <div class="dm-comunicado">
-                            ${c.emoji ? `<span class="dm-comunicado-ico">${c.emoji}</span>` : ''}
-                            <span class="dm-comunicado-txt">${c.texto || ''}</span>
+                            ${c.emoji ? `<span class="dm-comunicado-ico">${this._escHtml(c.emoji)}</span>` : ''}
+                            <span class="dm-comunicado-txt">${this._escHtml(c.texto)}</span>
                         </div>`).join('');
                 }
             }
@@ -1598,6 +1593,9 @@ class DMaiorPainel extends HTMLElement {
             const data  = await window.DmaiorAPI.rank.getComunicados('painel');
             // Notificações mostram apenas avisos importantes
             const lista = (data.comunicados || []).filter(c => c.tipo === 'importante');
+
+            // Armazena para uso em _marcarTodosLidos
+            this._avisosLista = lista;
 
             // Marca todos como lidos e apaga o ponto do sino
             this._salvarIdsLidos(lista);
@@ -1678,14 +1676,9 @@ class DMaiorPainel extends HTMLElement {
     }
 
     _marcarTodosLidos(){
-        const el = this.qs('#avisosList');
-        if(el && !el.querySelector('.avisos-loading')){
-            // Já carregou — só precisa salvar/apagar dot (loadAvisos já fez, mas refaz por segurança)
-            try {
-                const uid = localStorage.getItem('dm_uid') || 'anon';
-                const existing = JSON.parse(localStorage.getItem(`dm_avisos_ids_${uid}`) || '[]');
-                localStorage.setItem(`dm_avisos_ids_${uid}`, JSON.stringify(existing));
-            } catch {}
+        // Salva os IDs da lista ATUALMENTE carregada (não reler os mesmos do localStorage)
+        if(this._avisosLista?.length) {
+            this._salvarIdsLidos(this._avisosLista);
         }
         // Apaga ponto do sino visualmente
         const menu = document.querySelector('menu-mobile-dmaior');
