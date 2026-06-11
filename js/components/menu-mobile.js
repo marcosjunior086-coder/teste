@@ -475,8 +475,8 @@ class MenuMobileDMaior extends HTMLElement {
           // Dentro do painel — navega inline via evento
           window.dispatchEvent(new CustomEvent('dmaior:avisos'));
         } else {
-          // Site público — redireciona para o painel
-          window.location.href = 'painel/index.html';
+          // Site público — redireciona para o painel com deeplink #avisos
+          window.location.href = 'painel/index.html#avisos';
         }
       });
     }

@@ -88,10 +88,16 @@ class DMaiorPainel extends HTMLElement {
                 const uidEl = this.qs('#dUid'); if(uidEl) uidEl.textContent = `UID: ${uid}`;
 
                 if (loading) loading.style.display = 'none';
-                this.navigate('vD');
-                this.navActive('nD');
-                this.loadDash();
-                this.fetchComunicados();
+                // Verifica deeplink — sino no site público redireciona com #avisos
+                if (window.location.hash === '#avisos') {
+                    history.replaceState(null, '', window.location.pathname);
+                    this.goAvisos();
+                } else {
+                    this.navigate('vD');
+                    this.navActive('nD');
+                    this.loadDash();
+                    this.fetchComunicados();
+                }
                 return;
             }
         } catch(e) {}
