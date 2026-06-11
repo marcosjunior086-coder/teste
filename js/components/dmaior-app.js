@@ -14,10 +14,19 @@ class DMaiorPainel extends HTMLElement {
     connectedCallback() {
         this.render();
         this.loadChartJS();
+        // Guarda referência antes de setupNavigation para poder remover depois
+        this._avisosHandler = () => this.goAvisos();
         this.setupNavigation();
         this.setupActionListeners();
         this.restoreSession();
         this._startHeightObserver();
+    }
+
+    disconnectedCallback() {
+        if (this._avisosHandler) {
+            window.removeEventListener('dmaior:avisos', this._avisosHandler);
+            this._avisosHandler = null;
+        }
     }
 
     _startHeightObserver() {
@@ -70,6 +79,7 @@ class DMaiorPainel extends HTMLElement {
                 this.sessionUid   = uid;
                 this.sessionToken = localStorage.getItem('dm_token') || token;
                 this.sessionEmail = email;
+                try { localStorage.setItem('agencia_auth', 'true'); } catch(e){}
 
                 const savedNome = localStorage.getItem('dm_nome') || '';
                 const savedFoto = localStorage.getItem('dm_foto') || '';
@@ -81,6 +91,7 @@ class DMaiorPainel extends HTMLElement {
                 this.navigate('vD');
                 this.navActive('nD');
                 this.loadDash();
+                this.fetchComunicados();
                 return;
             }
         } catch(e) {}
@@ -93,7 +104,7 @@ class DMaiorPainel extends HTMLElement {
         this.sessionUid = ''; this.sessionToken = ''; this.sessionEmail = '';
         this.historicoCompleto = [];
         try {
-            ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome']
+            ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome','agencia_auth']
                 .forEach(k => localStorage.removeItem(k));
         } catch(e) {}
     }
@@ -142,7 +153,7 @@ class DMaiorPainel extends HTMLElement {
             .shell {
                 --cyan:#00d4d4; --cyan-d:rgba(0,212,212,.15);
                 --gold:#f0c040; --green:#4ade80; --red:#f87171;
-                --border:rgba(0,230,230,.18); --glass:rgba(26,26,46,.85);
+                --border:rgba(0,230,230,.18); --glass:rgba(26,26,26,.92);
                 --text:#fff; --muted:#a0b8c8;
                 --ftitle:clamp(1.2rem,5vw,1.8rem); --fval:clamp(1.1rem,4vw,1.5rem);
                 font-family:'Exo 2',sans-serif; background:transparent; color:var(--text);
@@ -162,10 +173,10 @@ class DMaiorPainel extends HTMLElement {
             @media(max-width:768px){
                 .shell { flex-direction:column; }
                 .content { padding:15px 10px 90px; }
-                .card { background:rgba(30,30,46,.95); backdrop-filter:none; padding:15px; }
+                .card { background:rgba(26,26,26,.97); backdrop-filter:none; padding:15px; }
                 .earn .usd { font-size:1.8rem; }
                 .mbox { padding:12px; }
-                .bnav { order:0; position:fixed; top:auto; bottom:0; left:0; width:100%; height:70px; min-height:0; flex-direction:row; justify-content:space-around; align-items:center; border-right:none; border-top:1px solid var(--border); padding:0; background:rgba(18,18,31,0.95); z-index:1000; backdrop-filter:blur(10px); }
+                .bnav { order:0; position:fixed; top:auto; bottom:0; left:0; width:100%; height:70px; min-height:0; flex-direction:row; justify-content:space-around; align-items:center; border-right:none; border-top:1px solid var(--border); padding:0; background:rgba(18,18,18,0.97); z-index:1000; backdrop-filter:blur(10px); }
                 .nit { flex-direction:column; justify-content:center; font-size:.6rem; gap:3px; padding:6px 8px; margin:0; width:auto; border-radius:0; background:none; }
                 .nit svg { width:20px; height:20px; }
                 .nit:hover,.nit.sair:hover { background:none; }
@@ -359,6 +370,63 @@ class DMaiorPainel extends HTMLElement {
             /* ── Botão voltar nas views inline (rank / impulso) ── */
             .iframe-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;padding:0 0 14px;text-transform:uppercase;}
             .iframe-back svg{width:20px;height:20px;fill:var(--cyan);}
+
+            /* ── Banners de comunicados ── */
+            .dm-comunicado{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border-radius:12px;background:rgba(240,192,64,0.08);border:1px solid rgba(240,192,64,0.30);animation:fi .4s ease both;width:100%;}
+            .dm-comunicado-ico{font-size:1.2rem;line-height:1;flex-shrink:0;}
+            .dm-comunicado-txt{font-size:0.78rem;color:var(--muted);line-height:1.55;flex:1;}
+            .dm-comunicado-txt strong,.dm-comunicado-txt b{color:var(--gold);}
+            /* Temas claros */
+            [data-theme="branco"] .dm-comunicado,[data-theme="laranja"] .dm-comunicado{background:rgba(180,130,0,0.07);border-color:rgba(180,130,0,0.30);}
+            [data-theme="rosa"] .dm-comunicado{background:rgba(233,30,140,0.07);border-color:rgba(233,30,140,0.28);}
+            /* Dark */
+            [data-theme="dark"] .dm-comunicado{background:rgba(240,192,64,0.06);border-color:rgba(240,192,64,0.22);}
+
+            /* ── View Avisos ── */
+            .avisos-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px;flex-wrap:wrap;}
+            .avisos-topbar .iframe-back{padding:0;}
+            .btn-mark-all{display:flex;align-items:center;gap:6px;background:none;border:1.5px solid var(--border);color:var(--cyan);border-radius:20px;padding:7px 14px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:background .2s,border-color .2s;white-space:nowrap;}
+            .btn-mark-all:hover{background:rgba(0,212,212,.07);border-color:var(--cyan);}
+            .btn-mark-all svg{width:14px;height:14px;fill:var(--cyan);}
+            /* Card destaque */
+            .aviso-destaque{border-radius:16px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:20px;animation:fi .4s ease both;}
+            .aviso-destaque-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+            .aviso-destaque-body{padding:16px;}
+            .aviso-destaque-titulo{font-family:'Rajdhani',sans-serif;font-size:1.15rem;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:3px;}
+            .aviso-destaque-sub{font-size:.78rem;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+            .aviso-destaque-desc{font-size:.82rem;color:var(--muted);line-height:1.55;margin-bottom:14px;}
+            .aviso-destaque-btns{display:flex;gap:8px;flex-wrap:wrap;}
+            .aviso-btn-sec{background:none;border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:9px 18px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:border-color .2s;}
+            .aviso-btn-sec:hover{border-color:var(--cyan);}
+            .aviso-btn-pri{background:var(--cyan);border:none;color:#000;border-radius:8px;padding:9px 18px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:opacity .2s;}
+            .aviso-btn-pri:hover{opacity:.85;}
+            /* Seção lista */
+            .avisos-sec-titulo{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;}
+            .avisos-list{display:flex;flex-direction:column;gap:8px;}
+            /* Card item */
+            .aviso-card{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--glass);animation:fi .35s ease both;cursor:default;}
+            .aviso-card-thumb{width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0;display:block;}
+            .aviso-card-emoji{width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;border-radius:10px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);}
+            .aviso-card-body{flex:1;min-width:0;}
+            .aviso-card-titulo{font-weight:700;font-size:.88rem;color:var(--text);line-height:1.3;margin-bottom:3px;}
+            .aviso-card-desc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:6px;}
+            .aviso-card-data{font-size:.7rem;color:var(--muted);opacity:.7;display:flex;align-items:center;gap:4px;}
+            .aviso-card-data svg{width:11px;height:11px;flex-shrink:0;}
+            .avisos-empty{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
+            .avisos-loading{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
+
+            /* ══ TEMA DARK — cinza neutro, sem azul ══ */
+            [data-theme="dark"] .shell {
+                --glass: rgba(28,28,28,.96);
+                --border: rgba(255,255,255,.10);
+            }
+            [data-theme="dark"] .shell .card { background: rgba(28,28,28,.97); }
+            [data-theme="dark"] .shell .mbox { background: rgba(0,0,0,.35); border-color: rgba(255,255,255,.06); }
+            [data-theme="dark"] .shell .saque-form { background: rgba(0,0,0,.35); }
+            @media(max-width:768px){
+                [data-theme="dark"] .shell .card { background: rgba(28,28,28,.98); }
+                [data-theme="dark"] .shell .bnav { background: rgba(18,18,18,.99); border-top-color: rgba(255,255,255,.10); }
+            }
 
             /* ══ TEMA BRANCO — bloom azul-petróleo (padrão do ranking) ══ */
             [data-theme="branco"] .shell {
@@ -632,6 +700,7 @@ class DMaiorPainel extends HTMLElement {
                     <div class="hd">
                         <button class="btn-sm" id="btnRef"><span id="refIco">${this.svgRefresh()}</span> ATUALIZAR</button>
                     </div>
+                    <div id="painelComunicados" style="width:100%;margin-bottom:4px;display:flex;flex-direction:column;gap:8px;"></div>
                     <div class="dash-grid">
                         <div class="dash-left">
                             <div class="card pcard">
@@ -877,6 +946,18 @@ class DMaiorPainel extends HTMLElement {
                     <dmaior-impulso id="impulsoEl"></dmaior-impulso>
                 </div>
 
+                <!-- ══════ AVISOS ══════ -->
+                <div id="vAvisos" class="view" style="width:100%;">
+                    <div class="avisos-topbar">
+                        <button class="iframe-back" id="btnBackAvisos">${this.svgBack()} VOLTAR</button>
+                        <button class="btn-mark-all" id="btnMarkAllRead">
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                            MARCAR TODOS COMO LIDOS
+                        </button>
+                    </div>
+                    <div id="avisosList"></div>
+                </div>
+
             </div><!-- /content -->
         </div><!-- /shell -->`;
     }
@@ -984,6 +1065,10 @@ class DMaiorPainel extends HTMLElement {
         this.qs('#nRank').addEventListener('click',()=>this.goRanking());
         this.qs('#nImpulso').addEventListener('click',()=>this.goImpulsionamento());
         this.qs('#btnBackRank').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');this.loadDash();});
+        this.qs('#btnBackAvisos').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
+        this.qs('#btnMarkAllRead').addEventListener('click',()=>this._marcarTodosLidos());
+        // Escuta o clique no sino do menu — navega para a view de avisos
+        window.addEventListener('dmaior:avisos', this._avisosHandler);
     }
 
     setupActionListeners(){
@@ -1054,12 +1139,14 @@ class DMaiorPainel extends HTMLElement {
                 localStorage.setItem('dm_email',data.email||'');
                 localStorage.setItem('dm_foto',data.foto_url||'');
                 localStorage.setItem('dm_nome',data.nome||'');
+                localStorage.setItem('agencia_auth','true');
                 window.dispatchEvent(new CustomEvent('dmaior:auth',{detail:{logado:true,foto:data.foto_url||'',nome:data.nome||'',uid}}));
             } catch(e){}
             await this.loadDash();
             this.qs('#lPass').value='';
             this.navigate('vD');
             this.navActive('nD');
+            this.fetchComunicados();
         } catch(e){ this.showAlert('#alL',e.message); }
         finally{ btn.textContent='ENTRAR NO PAINEL'; btn.disabled=false; }
     }
@@ -1428,11 +1515,28 @@ class DMaiorPainel extends HTMLElement {
         finally{ btn.disabled=false; btn.textContent='SALVAR NOVA SENHA'; }
     }
 
+    // ── Comunicados do painel ────────────────────────────────────────
+    async fetchComunicados() {
+        try {
+            const data = await window.DmaiorAPI.rank.getComunicados('painel');
+            const lista = (data.comunicados || []);
+            const el = this.qs('#painelComunicados');
+            if (!el) return;
+            if (!lista.length) { el.innerHTML = ''; return; }
+            el.innerHTML = lista.map(c => `
+                <div class="dm-comunicado">
+                    ${c.emoji ? `<span class="dm-comunicado-ico">${c.emoji}</span>` : ''}
+                    <span class="dm-comunicado-txt">${c.texto || ''}</span>
+                </div>`).join('');
+        } catch { /* silencia erro — comunicados são opcionais */ }
+    }
+
     // ── Ranking / Impulsionamento / Logout ───────────────────────────
     goRanking(){
-        // Redireciona para a página de ranking — integração inline fica para depois
-        const base = (document.baseURI || '/').replace(/\/$/, '');
-        window.location.href = base + '/ranking/';
+        // Sinaliza ao componente ranking que o acesso é autenticado via painel
+        try { localStorage.setItem('agencia_auth', 'true'); } catch(e){}
+        this.navigate('vRank');
+        this.navActive('nRank');
     }
     goImpulsionamento(){
         // Abre o componente dmaior-impulso inline, sem sair do painel
@@ -1448,6 +1552,133 @@ class DMaiorPainel extends HTMLElement {
         this.navigate('vImpulso');
         this.navActive('nImpulso');
     }
+    goAvisos(){
+        this.navigate('vAvisos');
+        // Sem item no menu inferior — remove o active de todos
+        this.querySelectorAll('.nit').forEach(e=>{
+            e.classList.remove('on');
+            if(e.id!=='nO') e.style.color='var(--muted)';
+        });
+        this.loadAvisos();
+    }
+
+    async loadAvisos(){
+        const el = this.qs('#avisosList');
+        if(!el) return;
+        el.innerHTML = '<div class="avisos-loading">Carregando avisos...</div>';
+        try {
+            const data  = await window.DmaiorAPI.rank.getComunicados('painel');
+            const lista = data.comunicados || [];
+
+            // Marca todos como lidos e apaga o ponto do sino
+            this._salvarIdsLidos(lista);
+
+            if(!lista.length){
+                el.innerHTML = '<div class="avisos-empty">Nenhum aviso no momento.</div>';
+                return;
+            }
+
+            // Separa destaque dos demais
+            const destaque = lista.find(c => c.destaque);
+            const demais   = lista.filter(c => !c.destaque);
+
+            let html = '';
+
+            // ── Card destaque ────────────────────────────────────────
+            if(destaque){
+                const imgHtml = destaque.imagem_url
+                    ? `<img class="aviso-destaque-img" src="${this._escHtml(destaque.imagem_url)}" alt="${this._escHtml(destaque.titulo||destaque.texto)}" loading="lazy">`
+                    : '';
+                const sub  = destaque.descricao ? `<div class="aviso-destaque-sub">${this._escHtml(destaque.descricao)}</div>` : '';
+                const desc = destaque.texto ? `<div class="aviso-destaque-desc">${this._escHtml(destaque.texto)}</div>` : '';
+                const btn1 = (destaque.link_url && destaque.link_label)
+                    ? `<a href="${this._escHtml(destaque.link_url)}" target="_blank" rel="noopener noreferrer" class="aviso-btn-pri">${this._escHtml(destaque.link_label)}</a>`
+                    : '';
+                const btn2 = (destaque.link2_url && destaque.link2_label)
+                    ? `<a href="${this._escHtml(destaque.link2_url)}" target="_blank" rel="noopener noreferrer" class="aviso-btn-sec">${this._escHtml(destaque.link2_label)}</a>`
+                    : '';
+                html += `<div class="aviso-destaque">
+                    ${imgHtml}
+                    <div class="aviso-destaque-body">
+                        <div class="aviso-destaque-titulo">${this._escHtml(destaque.titulo || destaque.texto)}</div>
+                        ${sub}${desc}
+                        ${(btn1||btn2)?`<div class="aviso-destaque-btns">${btn2}${btn1}</div>`:''}
+                    </div>
+                </div>`;
+            }
+
+            // ── Lista de avisos ──────────────────────────────────────
+            if(demais.length){
+                html += `<div class="avisos-sec-titulo">Últimos avisos</div>
+                <div class="avisos-list">${demais.map(c=>{
+                    const thumbHtml = c.imagem_url
+                        ? `<img class="aviso-card-thumb" src="${this._escHtml(c.imagem_url)}" alt="" loading="lazy">`
+                        : (c.emoji ? `<div class="aviso-card-emoji">${c.emoji}</div>` : '');
+                    const titulo = this._escHtml(c.titulo || c.texto);
+                    const desc   = c.titulo && c.texto ? `<div class="aviso-card-desc">${this._escHtml(c.texto)}</div>` : '';
+                    const data   = c.criado_em ? this._fdt(c.criado_em) : '';
+                    const dataHtml = data ? `<div class="aviso-card-data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${data}</div>` : '';
+                    return `<div class="aviso-card">
+                        ${thumbHtml}
+                        <div class="aviso-card-body">
+                            <div class="aviso-card-titulo">${titulo}</div>
+                            ${desc}${dataHtml}
+                        </div>
+                    </div>`;
+                }).join('')}</div>`;
+            }
+
+            el.innerHTML = html;
+        } catch {
+            el.innerHTML = '<div class="avisos-empty">Não foi possível carregar os avisos.</div>';
+        }
+    }
+
+    // Salva IDs no localStorage e apaga ponto do sino
+    _salvarIdsLidos(lista){
+        try {
+            const uid = localStorage.getItem('dm_uid') || 'anon';
+            const ids = lista.map(c => String(c.id));
+            localStorage.setItem(`dm_avisos_ids_${uid}`, JSON.stringify(ids));
+            const menu = document.querySelector('menu-mobile-dmaior');
+            if(menu?.shadowRoot){
+                const dot = menu.shadowRoot.getElementById('bellDot');
+                if(dot) dot.classList.add('hidden');
+            }
+        } catch {}
+    }
+
+    _marcarTodosLidos(){
+        const el = this.qs('#avisosList');
+        if(el && !el.querySelector('.avisos-loading')){
+            // Já carregou — só precisa salvar/apagar dot (loadAvisos já fez, mas refaz por segurança)
+            try {
+                const uid = localStorage.getItem('dm_uid') || 'anon';
+                const existing = JSON.parse(localStorage.getItem(`dm_avisos_ids_${uid}`) || '[]');
+                localStorage.setItem(`dm_avisos_ids_${uid}`, JSON.stringify(existing));
+            } catch {}
+        }
+        // Apaga ponto do sino visualmente
+        const menu = document.querySelector('menu-mobile-dmaior');
+        if(menu?.shadowRoot){
+            const dot = menu.shadowRoot.getElementById('bellDot');
+            if(dot) dot.classList.add('hidden');
+        }
+        const btn = this.qs('#btnMarkAllRead');
+        if(btn){ btn.style.opacity='.4'; btn.style.pointerEvents='none'; }
+    }
+
+    // Escapa HTML para evitar XSS em conteúdo vindo da API
+    _escHtml(str){
+        if(str==null) return '';
+        return String(str)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+    }
+
     logout(){
         this._clearSession();
         this.navigate('vL');

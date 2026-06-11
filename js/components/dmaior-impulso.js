@@ -92,6 +92,7 @@ class DmaiorImpulso extends HTMLElement {
     await this._renovarToken();
     await this._carregarConfig();
     this._carregarQuota(false);
+    this._fetchComunicados();
   }
 
   async _carregarConfig() {
@@ -261,6 +262,17 @@ class DmaiorImpulso extends HTMLElement {
         .feedback.ok   { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.3); color:var(--green); display:block; }
         .feedback.erro { background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.2); color:var(--red); display:block; }
 
+        /* ── Comunicados ── */
+        #imp-comunicados { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+        .imp-comunicado { display:flex; align-items:flex-start; gap:10px; padding:11px 14px; border-radius:10px; background:rgba(240,192,64,0.08); border:1px solid rgba(240,192,64,0.30); animation:pulse .0s; }
+        .imp-comunicado-ico { font-size:1.1rem; line-height:1; flex-shrink:0; }
+        .imp-comunicado-txt { font-size:0.76rem; color:var(--muted); line-height:1.55; flex:1; }
+        .imp-comunicado-txt strong, .imp-comunicado-txt b { color:var(--gold); }
+        :host-context([data-theme="branco"]) .imp-comunicado,
+        :host-context([data-theme="laranja"]) .imp-comunicado { background:rgba(180,130,0,0.07); border-color:rgba(180,130,0,0.28); }
+        :host-context([data-theme="rosa"]) .imp-comunicado { background:rgba(233,30,140,0.07); border-color:rgba(233,30,140,0.25); }
+        :host-context([data-theme="dark"]) .imp-comunicado { background:rgba(240,192,64,0.06); border-color:rgba(240,192,64,0.20); }
+
         .spinner { width:16px; height:16px; border:2px solid rgba(0,242,255,0.3); border-top-color:#00f2ff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
         @keyframes spin { to { transform:rotate(360deg); } }
 
@@ -373,6 +385,8 @@ class DmaiorImpulso extends HTMLElement {
                 <div class="header-sub">Integração Kwai</div>
               </div>
             </div>
+
+            <div id="imp-comunicados"></div>
 
             <div class="quota-box">
               <div class="quota-label">Usos esta semana</div>
@@ -534,6 +548,21 @@ class DmaiorImpulso extends HTMLElement {
       spinner.style.display = 'none';
       btnTexto.textContent  = 'Impulsionar Live';
     }
+  }
+
+  async _fetchComunicados() {
+    try {
+      const data  = await window.DmaiorAPI.rank.getComunicados('impulsionamento');
+      const lista = data.comunicados || [];
+      const el    = this.shadowRoot.getElementById('imp-comunicados');
+      if (!el) return;
+      if (!lista.length) { el.innerHTML = ''; return; }
+      el.innerHTML = lista.map(c => `
+        <div class="imp-comunicado">
+          ${c.emoji ? `<span class="imp-comunicado-ico">${c.emoji}</span>` : ''}
+          <span class="imp-comunicado-txt">${c.texto || ''}</span>
+        </div>`).join('');
+    } catch { /* comunicados são opcionais */ }
   }
 }
 

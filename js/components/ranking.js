@@ -356,7 +356,7 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .dyn-rules-btn{order:3;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card2);color:var(--text-muted);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:border-color .2s,color .2s}
       :host(.dinamico) .dyn-rules-btn:hover{border-color:var(--azul);color:var(--azul)}
       /* ── Pódio dinâmico ── */
-      :host(.dinamico) .podium{height:auto;margin-top:55px;margin-bottom:20px;gap:8px}
+      :host(.dinamico) .podium{height:auto;margin-top:80px;margin-bottom:20px;gap:8px}
       :host(.dinamico) .podium-item{height:auto!important;min-height:195px;border-radius:22px!important;padding:0 10px 18px!important;overflow:visible;gap:4px;border-bottom:none!important}
       :host(.dinamico) .list-id{display:none}
       :host(.dinamico) .podium-item.second{min-height:220px;background:linear-gradient(to bottom,rgba(15,115,255,.92) 0%,rgba(0,70,190,.60) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(30,170,255,.72)!important;border-bottom:none!important;box-shadow:0 0 40px rgba(15,115,255,.30),0 8px 28px rgba(0,0,0,.55)!important}
@@ -385,7 +385,7 @@ class RankingDmaior extends HTMLElement {
         :host(.dinamico) .ctrls-row .period-wrapper{flex:1;max-width:none;order:1}
         :host(.dinamico) .ctrls-row .time-counter{order:2;font-size:.7rem;padding:6px 8px}
         :host(.dinamico) .ctrls-row .dyn-rules-btn{order:3}
-        :host(.dinamico) .podium{margin-top:62px;gap:6px}
+        :host(.dinamico) .podium{margin-top:88px;gap:6px}
         :host(.dinamico) .podium-item{padding:0 7px 14px!important;border-radius:18px!important}
         :host(.dinamico) .podium-item.first{min-height:228px}
         :host(.dinamico) .podium-item.second{min-height:192px}

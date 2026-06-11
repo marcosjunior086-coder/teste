@@ -977,6 +977,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnNovoCom').addEventListener('click',()=>this._abrirModalCom());
     s.getElementById('mComSave').addEventListener('click',()=>this._salvarComunicado());
     s.getElementById('mComCancel').addEventListener('click',()=>this._fechaModal('mCom'));
+    // Preview ao colar/digitar URL de imagem
+    s.getElementById('mComImagem').addEventListener('input',e=>this._atualizarPreviewImagem(e.target.value));
     // Monitor Kwai
     s.getElementById('btnAtuMonitor').addEventListener('click',()=>this._verificarCookieStatus());
     s.getElementById('btnVerificarCookie').addEventListener('click',()=>this._verificarCookieStatus());
@@ -1010,15 +1012,23 @@ class DimaiorAdmin extends HTMLElement {
       const statusBadge=c.ativo
         ?`<span class="com-status ativo">Ativo</span>`
         :`<span class="com-status inativo">Inativo</span>`;
+      const destaqueBadge=c.destaque?`<span class="com-status" style="background:rgba(240,192,64,.15);color:var(--gold);border-color:rgba(240,192,64,.3)">⭐ Destaque</span>`:'';
       const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'—';
       const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` · atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
+      const thumbHtml=c.imagem_url
+        ?`<img src="${this._esc(c.imagem_url)}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--brddim)">`
+        :(c.emoji?`<span class="com-emoji">${c.emoji}</span>`:'');
+      const titulo=c.titulo?`<strong style="display:block;font-size:13px;color:var(--t1);margin-bottom:2px">${this._esc(c.titulo)}</strong>`:'';
       return`<div class="com-item">
-        <div class="com-preview">
-          ${c.emoji?`<span class="com-emoji">${c.emoji}</span>`:''}
-          <span class="com-texto">${this._esc(c.texto)}</span>
+        <div class="com-preview" style="align-items:flex-start;gap:10px">
+          ${thumbHtml}
+          <div style="flex:1;min-width:0">
+            ${titulo}
+            <span class="com-texto">${this._esc(c.texto)}</span>
+          </div>
         </div>
         <div class="com-meta">
-          <div class="com-meta-esq">${statusBadge}${locaisBadges}</div>
+          <div class="com-meta-esq">${statusBadge}${destaqueBadge}${locaisBadges}</div>
           <div class="com-data">${dataStr}${atualStr}</div>
         </div>
         <div class="com-acoes">
@@ -1045,9 +1055,19 @@ class DimaiorAdmin extends HTMLElement {
   _abrirModalCom(c=null){
     const s=this.shadowRoot;
     s.getElementById('mComTit').textContent=c?'Editar Comunicado':'Novo Comunicado';
-    s.getElementById('mComEmoji').value=c?.emoji||'';
-    s.getElementById('mComTexto').value=c?.texto||'';
-    s.getElementById('mComAtivo').value=c?(c.ativo?'true':'false'):'true';
+    s.getElementById('mComTitulo').value    = c?.titulo      || '';
+    s.getElementById('mComDescricao').value = c?.descricao   || '';
+    s.getElementById('mComTexto').value     = c?.texto       || '';
+    s.getElementById('mComImagem').value    = c?.imagem_url  || '';
+    s.getElementById('mComLinkLabel').value = c?.link_label  || '';
+    s.getElementById('mComLinkUrl').value   = c?.link_url    || '';
+    s.getElementById('mComLink2Label').value= c?.link2_label || '';
+    s.getElementById('mComLink2Url').value  = c?.link2_url   || '';
+    s.getElementById('mComEmoji').value     = c?.emoji       || '';
+    s.getElementById('mComAtivo').value     = c ? (c.ativo?'true':'false') : 'true';
+    s.getElementById('mComDestaque').checked= c?.destaque    || false;
+    // Preview da imagem atual
+    this._atualizarPreviewImagem(c?.imagem_url||'');
     const locais=c?.locais||[];
     ['ranking','painel','impulsionamento'].forEach(l=>{
       const cb=s.getElementById('mComLocal_'+l);if(cb)cb.checked=locais.includes(l);
@@ -1056,19 +1076,44 @@ class DimaiorAdmin extends HTMLElement {
     this._abrirModal('mCom');
   }
 
+  _atualizarPreviewImagem(url){
+    const s=this.shadowRoot;
+    const wrap=s.getElementById('mComImagemPreview');
+    const img =s.getElementById('mComImgEl');
+    if(!wrap||!img)return;
+    if(url&&url.trim()){
+      img.src=url.trim();
+      img.onerror=()=>{wrap.style.display='none';};
+      img.onload =()=>{wrap.style.display='block';};
+      wrap.style.display='block';
+    }else{
+      wrap.style.display='none';
+      img.src='';
+    }
+  }
+
   async _salvarComunicado(){
     const s=this.shadowRoot;
-    const emoji=s.getElementById('mComEmoji').value.trim();
-    const texto=s.getElementById('mComTexto').value.trim();
-    const ativo=s.getElementById('mComAtivo').value==='true';
-    const locais=['ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
+    const titulo      = s.getElementById('mComTitulo').value.trim();
+    const descricao   = s.getElementById('mComDescricao').value.trim();
+    const texto       = s.getElementById('mComTexto').value.trim();
+    const imagem_url  = s.getElementById('mComImagem').value.trim();
+    const link_label  = s.getElementById('mComLinkLabel').value.trim();
+    const link_url    = s.getElementById('mComLinkUrl').value.trim();
+    const link2_label = s.getElementById('mComLink2Label').value.trim();
+    const link2_url   = s.getElementById('mComLink2Url').value.trim();
+    const emoji       = s.getElementById('mComEmoji').value.trim();
+    const ativo       = s.getElementById('mComAtivo').value==='true';
+    const destaque    = s.getElementById('mComDestaque').checked;
+    const locais      = ['ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
     if(!texto){this._toast('Texto é obrigatório','err');return;}
     const btn=s.getElementById('mComSave');btn.disabled=true;
+    const payload={emoji,titulo,descricao,texto,imagem_url,link_url,link_label,link2_url,link2_label,destaque,ativo,locais};
     let r;
     if(this._edtCom){
-      r=await this._api('PUT',`/admin/comunicados/${this._edtCom}`,{emoji,texto,ativo,locais});
+      r=await this._api('PUT',`/admin/comunicados/${this._edtCom}`,payload);
     }else{
-      r=await this._api('POST','/admin/comunicados',{emoji,texto,ativo,locais});
+      r=await this._api('POST','/admin/comunicados',payload);
     }
     btn.disabled=false;
     if(r?.ok){this._fechaModal('mCom');this._toast(this._edtCom?'Comunicado atualizado!':'Comunicado criado!');this._carregarComunicados();}
@@ -2026,7 +2071,25 @@ class DimaiorAdmin extends HTMLElement {
       <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:'Rajdhani',sans-serif;font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose">✕</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:'Rajdhani',sans-serif">Valor a pagar</div><div id="mPixValor" style="font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:'Exo 2',sans-serif">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
       <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">Observação</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"><option value="diamantes">💎 Ranking de Diamantes</option><option value="horas">⏱ Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
-      <div class="ov" id="mCom"><div class="modal"><div class="m-titulo" id="mComTit">Novo Comunicado</div><div class="mc"><label>Emoji ou Ícone <span style="color:var(--t3);font-size:11px">(opcional)</span></label><input id="mComEmoji" type="text" placeholder="Ex: 🏆 🎯 🔔" maxlength="8" style="font-size:1.3rem;letter-spacing:4px"/></div><div class="mc"><label>Texto do Comunicado <span style="color:var(--verm)">*</span></label><textarea id="mComTexto" rows="3" placeholder="Ex: Os Top 10 streamers do Ranking deste mês participarão do sorteio de 10K diamantes."></textarea></div><div class="mc"><label>Status</label><select id="mComAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div><div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel do Streamer / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Página de Impulsionamento</label></div></div><div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div></div></div>
+      <div class="ov" id="mCom"><div class="modal" style="max-width:520px"><div class="m-titulo" id="mComTit">Novo Comunicado</div>
+        <div class="mc"><label>Título <span style="color:var(--t3);font-size:11px">(opcional — aparece em negrito no card)</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
+        <div class="mc"><label>Descrição <span style="color:var(--t3);font-size:11px">(texto menor abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: Não perca tempo! Garanta já o seu lugar."></textarea></div>
+        <div class="mc"><label>Texto do Aviso <span style="color:var(--verm)">*</span> <span style="color:var(--t3);font-size:11px">(exibido quando não há título)</span></label><textarea id="mComTexto" rows="2" placeholder="Ex: Os Top 10 streamers participarão do sorteio de 10K diamantes."></textarea></div>
+        <div class="mc"><label>Imagem (URL) <span style="color:var(--t3);font-size:11px">(opcional — thumbnail quadrado)</span></label><input id="mComImagem" type="url" placeholder="https://..."/><div id="mComImagemPreview" style="margin-top:6px;display:none"><img id="mComImgEl" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--brd)" alt="preview"/></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="mc" style="margin:0"><label>Botão 1 — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
+          <div class="mc" style="margin:0"><label>Botão 1 — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
+          <div class="mc" style="margin:0"><label>Botão 2 — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
+          <div class="mc" style="margin:0"><label>Botão 2 — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <div class="mc" style="margin:0"><label>Emoji <span style="color:var(--t3);font-size:11px">(sem imagem)</span></label><input id="mComEmoji" type="text" placeholder="Ex: 🏆" maxlength="8" style="font-size:1.2rem;letter-spacing:3px"/></div>
+          <div class="mc" style="margin:0"><label>Status</label><select id="mComAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div>
+        </div>
+        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
+        <div class="mc"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;⭐ Destaque — exibe como card principal no topo dos avisos</label></div>
+        <div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div>
+      </div></div>
       <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div>
     </div>`;
   }

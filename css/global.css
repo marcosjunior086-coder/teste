@@ -349,7 +349,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Tema dark — preto puro */
+/* Tema dark — preto puro (html + body para cobrir overscroll no mobile) */
+[data-theme="dark"] html,
 [data-theme="dark"] body {
   background: #0c0c0c;
 }

@@ -69,6 +69,7 @@ class MenuMobileDMaior extends HTMLElement {
     const SVG_LOGOUT = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
     const SVG_ACCESS = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>`;
     const SVG_USER   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+    const SVG_BELL   = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
 
     // Itens com disabled:true são exibidos mas não navegam — páginas ainda não criadas
     const menuData = [
@@ -150,6 +151,11 @@ class MenuMobileDMaior extends HTMLElement {
       .gear-btn:hover{ color:var(--dm-cyan); }
       .gear-btn svg{ transition:transform .4s; }
       .gear-btn.open svg{ transform:rotate(60deg); color:var(--dm-cyan); }
+      /* ── Sino de avisos ── */
+      .bell-btn{ position:relative; background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--dm-text-sub); transition:color .2s; }
+      .bell-btn:hover{ color:var(--dm-cyan); }
+      .bell-btn:active{ opacity:.7; }
+      .bell-dot{ position:absolute; top:7px; right:7px; width:8px; height:8px; border-radius:50%; background:#f87171; border:1.5px solid var(--dm-bg-1,#0a0e27); pointer-events:none; }
       .layout-dropdown{ position:absolute; top:calc(100% + 6px); right:0; background:var(--dm-bg-2); border:1px solid var(--dm-cyan-25); border-radius:12px; padding:6px; min-width:185px; box-shadow:0 10px 30px var(--dm-shadow-lg); display:none; flex-direction:column; gap:2px; z-index:10001; }
       .layout-dropdown.open{ display:flex; animation:ddFadeIn .15s ease; }
       @keyframes ddFadeIn{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
@@ -244,6 +250,12 @@ class MenuMobileDMaior extends HTMLElement {
           </div>
         </div>
 
+        <!-- Sino de avisos — visível somente quando logado -->
+        <button class="bell-btn hidden" id="bellBtn" title="Avisos">
+          ${SVG_BELL}
+          <span class="bell-dot hidden" id="bellDot"></span>
+        </button>
+
         <button class="hamburger" id="openSb">${SVG_MENU}</button>
       </div>
     </div>
@@ -286,10 +298,16 @@ class MenuMobileDMaior extends HTMLElement {
     const userCard   = root.getElementById('userCard');
     const avatarWrap = root.getElementById('avatarWrap');
     const userName   = root.getElementById('userName');
+    const bellBtn    = root.getElementById('bellBtn');
     if (!btnAccess || !userCard) return;
     if (detail.logado) {
       btnAccess.classList.add('hidden');
       userCard.classList.remove('hidden');
+      // Exibe o sino e verifica avisos não lidos (com retry até DmaiorAPI estar pronta)
+      if (bellBtn) {
+        bellBtn.classList.remove('hidden');
+        this._scheduleCheckUnread();
+      }
       // Cria <img> via DOM para evitar XSS — valida esquema antes de atribuir src
       if (detail.foto) {
         let fotoSrc = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
@@ -309,6 +327,8 @@ class MenuMobileDMaior extends HTMLElement {
     } else {
       btnAccess.classList.remove('hidden');
       userCard.classList.add('hidden');
+      // Esconde sino quando não logado
+      if (bellBtn) bellBtn.classList.add('hidden');
     }
   }
 
@@ -445,6 +465,66 @@ class MenuMobileDMaior extends HTMLElement {
         window.dispatchEvent(new CustomEvent('dmaior:logout'));
       });
     }
+
+    // Sino de avisos
+    const bellBtn = root.getElementById('bellBtn');
+    if (bellBtn) {
+      bellBtn.addEventListener('click', () => {
+        this.markAvisosRead();
+        if (document.querySelector('dmaior-app')) {
+          // Dentro do painel — navega inline via evento
+          window.dispatchEvent(new CustomEvent('dmaior:avisos'));
+        } else {
+          // Site público — redireciona para o painel
+          window.location.href = 'painel/index.html';
+        }
+      });
+    }
+  }
+
+  // Agenda checkUnread com retry enquanto DmaiorAPI não estiver disponível
+  // (evita falha silenciosa quando o menu carrega antes da API)
+  _scheduleCheckUnread(attempts = 0) {
+    if (window.DmaiorAPI?.rank?.getComunicados) {
+      this.checkUnread();
+      return;
+    }
+    // Tenta até 6 vezes (~5 s total): 300 ms → 600 → 900 → 1500 → 2000 → 2000
+    if (attempts < 6) {
+      const delay = attempts < 3 ? 300 + attempts * 300 : 2000;
+      setTimeout(() => this._scheduleCheckUnread(attempts + 1), delay);
+    }
+    // Após 6 tentativas desiste silenciosamente — comunicados são opcionais
+  }
+
+  // Verifica se há comunicados não lidos e acende o ponto vermelho
+  async checkUnread() {
+    try {
+      const uid     = localStorage.getItem('dm_uid') || 'anon';
+      const seenRaw = localStorage.getItem(`dm_avisos_ids_${uid}`);
+      const seen    = seenRaw ? JSON.parse(seenRaw) : [];
+      const data    = await window.DmaiorAPI.rank.getComunicados('painel');
+      const lista   = data.comunicados || [];
+      const hasNew  = lista.some(c => !seen.includes(String(c.id)));
+      const dot     = this.shadowRoot?.getElementById('bellDot');
+      if (dot) dot.classList.toggle('hidden', !hasNew);
+    } catch { /* silencia — sino é opcional */ }
+  }
+
+  // Marca todos os comunicados atuais como lidos e apaga o ponto
+  markAvisosRead() {
+    try {
+      if (!window.DmaiorAPI?.rank?.getComunicados) return;
+      const uid = localStorage.getItem('dm_uid') || 'anon';
+      window.DmaiorAPI.rank.getComunicados('painel')
+        .then(data => {
+          const ids = (data.comunicados || []).map(c => String(c.id));
+          localStorage.setItem(`dm_avisos_ids_${uid}`, JSON.stringify(ids));
+          const dot = this.shadowRoot?.getElementById('bellDot');
+          if (dot) dot.classList.add('hidden');
+        })
+        .catch(() => {});
+    } catch { /* silencia */ }
   }
 }
 
