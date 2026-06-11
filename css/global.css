@@ -61,20 +61,20 @@
   --dm-ease:        0.25s ease;
 
   /* ── Tokens extras para o sistema de temas ──────────────────────── */
-  /* Backgrounds sólidos — cinza-ardósia visível contra o fundo preto */
-  --dm-bg-2: #1c1f32;            /* cards, painéis, topbar */
-  --dm-bg-1: #161928;            /* fundo médio */
-  --dm-bg-3: #0e1018;            /* fundo profundo */
-  --dm-bg-4: #13151e;            /* fundo avatar/mídia */
+  /* Backgrounds sólidos — cinza neutro visível contra o fundo escuro */
+  --dm-bg-2: #1c1c24;            /* cards, painéis, topbar */
+  --dm-bg-1: #15151c;            /* fundo médio */
+  --dm-bg-3: #0e0e14;            /* fundo profundo */
+  --dm-bg-4: #131318;            /* fundo avatar/mídia */
 
   /* Gradientes reutilizáveis */
-  --dm-grad-card:     linear-gradient(160deg, #1c1f32 0%, #161928 100%);
-  --dm-grad-card-alt: linear-gradient(135deg, #1c1f32, #161928);
-  --dm-grad-sidebar:  linear-gradient(160deg, #1c1f32 0%, #161928 60%, #0e1018 100%);
-  --dm-grad-deep:     linear-gradient(160deg, #1c1f32, #0e1018);
+  --dm-grad-card:     linear-gradient(160deg, #1c1c24 0%, #15151c 100%);
+  --dm-grad-card-alt: linear-gradient(135deg, #1c1c24, #15151c);
+  --dm-grad-sidebar:  linear-gradient(160deg, #1c1c24 0%, #15151c 60%, #0e0e14 100%);
+  --dm-grad-deep:     linear-gradient(160deg, #1c1c24, #0e0e14);
 
   /* Background painel (sticky/semi-opaco) */
-  --dm-bg-panel: rgba(28,31,50,.97);
+  --dm-bg-panel: rgba(28,28,36,.97);
   --dm-bg-tint:  rgba(0,0,0,.22);
 
   /* Transparências cyan */
@@ -109,19 +109,19 @@
 
 /* ─── Tema Dark (preto grafite) ─────────────────────────────────────────────── */
 [data-theme="dark"] {
-  --dm-bg:   #060B16;
-  --dm-bg-2: #1b1e2e;
-  --dm-bg-1: #141722;
-  --dm-bg-3: #080a10;
-  --dm-bg-4: #111420;
+  --dm-bg:   #0c0c0c;
+  --dm-bg-2: #1e1e1e;
+  --dm-bg-1: #171717;
+  --dm-bg-3: #0a0a0a;
+  --dm-bg-4: #141414;
   --dm-bg-card:  rgba(255,255,255,.06);
-  --dm-bg-panel: rgba(27,30,46,.97);
+  --dm-bg-panel: rgba(26,26,26,.97);
   --dm-bg-tint:  rgba(0,0,0,.25);
-  --dm-grad-card:     linear-gradient(160deg, #1b1e2e 0%, #141722 100%);
-  --dm-grad-card-alt: linear-gradient(135deg, #1b1e2e, #141722);
-  --dm-grad-sidebar:  linear-gradient(160deg, #1b1e2e 0%, #141722 60%, #080a10 100%);
-  --dm-grad-deep:     linear-gradient(160deg, #1b1e2e, #080a10);
-  --dm-grad-bg:       linear-gradient(160deg, #1b1e2e 0%, #080a10 100%);
+  --dm-grad-card:     linear-gradient(160deg, #1e1e1e 0%, #171717 100%);
+  --dm-grad-card-alt: linear-gradient(135deg, #1e1e1e, #171717);
+  --dm-grad-sidebar:  linear-gradient(160deg, #1e1e1e 0%, #171717 60%, #0a0a0a 100%);
+  --dm-grad-deep:     linear-gradient(160deg, #1e1e1e, #0a0a0a);
+  --dm-grad-bg:       linear-gradient(160deg, #1e1e1e 0%, #0a0a0a 100%);
   --dm-text:      #e8edf5;
   --dm-text-sub:  #8898b0;
   --dm-text-muted:#667890;
@@ -349,15 +349,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Tema dark explícito — mantém o mesmo gradiente */
+/* Tema dark — preto/cinza puro, sem halos coloridos */
 [data-theme="dark"] body {
-  background:
-    radial-gradient(circle at 16% 12%, rgba(0,95,190,.26) 0%, rgba(0,95,190,.12) 24%, transparent 50%),
-    radial-gradient(circle at 88% 68%, rgba(220,20,135,.30) 0%, rgba(220,20,135,.13) 30%, transparent 58%),
-    radial-gradient(circle at 52% 52%, rgba(90,45,190,.18) 0%, rgba(90,45,190,.08) 34%, transparent 64%),
-    linear-gradient(180deg, #060B16 0%, #070912 45%, #05050A 100%);
+  background: linear-gradient(180deg, #0d0f14 0%, #08090e 100%);
   background-attachment: fixed;
-  background-size: cover;
 }
 
 /* Temas claros — restaura fundo sólido sem o gradiente escuro */
