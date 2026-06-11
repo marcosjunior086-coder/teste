@@ -9,7 +9,8 @@
  *
  * Desktop (800px+) sempre exibe o layout original independente da preferência.
  * Troca de layout em tempo real via evento window 'dmaior:layout'.
- * Sem chamadas a Workers — componente puramente visual.
+ * Banner carousel: busca comunicados do tipo 'importante' com local 'home' via
+ *   window.DmaiorAPI.rank.getComunicados('home') com retry automático.
  */
 
 class DmaiorServicesMenu extends HTMLElement {
@@ -29,7 +30,7 @@ class DmaiorServicesMenu extends HTMLElement {
     this.setupListeners();
 
     // Reage à troca de layout feita pela engrenagem do menu (sem reload)
-    this._layoutHandler = (e) => { this.render(); this.setupListeners(); };
+    this._layoutHandler = (e) => { this._stopCarousel(); this.render(); this.setupListeners(); };
     window.addEventListener('dmaior:layout', this._layoutHandler);
 
     // Sincroniza se outro contexto alterar o localStorage — handler guardado para limpeza
@@ -42,10 +43,125 @@ class DmaiorServicesMenu extends HTMLElement {
   disconnectedCallback() {
     window.removeEventListener('dmaior:layout', this._layoutHandler);
     window.removeEventListener('storage',       this._storageHandler);
+    this._stopCarousel();
   }
 
   setupListeners() {
+    // Agenda carregamento dos banners com retry (API pode não estar pronta)
+    this._scheduleBanners();
   }
+
+  // ── Banner Carousel ──────────────────────────────────────────
+
+  _scheduleBanners(attempts = 0) {
+    if (window.DmaiorAPI?.rank?.getComunicados) {
+      this._loadBanners();
+      return;
+    }
+    if (attempts < 6) {
+      const delay = attempts < 3 ? 300 + attempts * 300 : 2000;
+      setTimeout(() => this._scheduleBanners(attempts + 1), delay);
+    }
+  }
+
+  async _loadBanners() {
+    try {
+      const data    = await window.DmaiorAPI.rank.getComunicados('home');
+      const slides  = (data.comunicados || []).filter(c => c.imagem_url);
+      const wrap    = this.shadowRoot?.getElementById('bc-wrap');
+      if (!wrap) return;
+      if (!slides.length) { wrap.style.display = 'none'; return; }
+      wrap.style.display = '';
+      wrap.innerHTML = this._buildCarouselHTML(slides);
+      this._bindCarousel(slides);
+    } catch (_) { /* API indisponível — carrossel permanece oculto */ }
+  }
+
+  _buildCarouselHTML(slides) {
+    const imgs = slides.map((s, i) => {
+      const tag  = s.link_url ? 'a' : 'div';
+      const href = s.link_url ? ` href="${this._escAttr(s.link_url)}" target="_blank" rel="noopener noreferrer"` : '';
+      const alt  = s.titulo   ? ` title="${this._escAttr(s.titulo)}"` : '';
+      return `<${tag} class="bc-slide"${href}${alt} data-idx="${i}">
+        <img src="${this._escAttr(s.imagem_url)}" alt="${this._escAttr(s.titulo||'Banner')}" loading="lazy">
+        ${s.titulo ? `<div class="bc-caption"><span>${this._escHtml(s.titulo)}</span></div>` : ''}
+      </${tag}>`;
+    }).join('');
+    const dots = slides.map((_, i) =>
+      `<button class="bc-dot${i===0?' bc-dot-active':''}" data-idx="${i}" aria-label="Banner ${i+1}"></button>`
+    ).join('');
+    return `
+      <div class="bc-carousel" id="bc-carousel">
+        <div class="bc-track" id="bc-track">${imgs}</div>
+        ${slides.length > 1 ? `<div class="bc-dots" id="bc-dots">${dots}</div>` : ''}
+      </div>`;
+  }
+
+  _bindCarousel(slides) {
+    if (slides.length <= 1) return;
+    this._carouselIdx   = 0;
+    this._carouselTotal = slides.length;
+
+    // Dot clicks
+    const dotsEl = this.shadowRoot?.getElementById('bc-dots');
+    if (dotsEl) {
+      dotsEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.bc-dot');
+        if (!btn) return;
+        this._goSlide(Number(btn.dataset.idx));
+        this._resetTimer();
+      });
+    }
+
+    // Touch swipe
+    const carousel = this.shadowRoot?.getElementById('bc-carousel');
+    if (carousel) {
+      let touchX = null;
+      carousel.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+      carousel.addEventListener('touchend',   e => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        touchX = null;
+        if (Math.abs(dx) < 40) return;
+        dx < 0 ? this._nextSlide() : this._prevSlide();
+        this._resetTimer();
+      }, { passive: true });
+    }
+
+    this._startTimer();
+  }
+
+  _goSlide(idx) {
+    const total = this._carouselTotal || 1;
+    this._carouselIdx = ((idx % total) + total) % total;
+    const track = this.shadowRoot?.getElementById('bc-track');
+    if (track) track.style.transform = `translateX(-${this._carouselIdx * 100}%)`;
+    const dots = this.shadowRoot?.querySelectorAll('.bc-dot');
+    if (dots) dots.forEach((d, i) => d.classList.toggle('bc-dot-active', i === this._carouselIdx));
+  }
+
+  _nextSlide() { this._goSlide((this._carouselIdx || 0) + 1); }
+  _prevSlide() { this._goSlide((this._carouselIdx || 0) - 1); }
+
+  _startTimer() {
+    this._stopCarousel();
+    this._carouselTimer = setInterval(() => this._nextSlide(), 5000);
+  }
+
+  _resetTimer() { this._startTimer(); }
+
+  _stopCarousel() {
+    if (this._carouselTimer) { clearInterval(this._carouselTimer); this._carouselTimer = null; }
+  }
+
+  _escHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  _escAttr(str) { return this._escHtml(str); }
 
   render() {
     const layout = this.getLayout(); // 'original' ou 'dinamico'
@@ -164,9 +280,28 @@ class DmaiorServicesMenu extends HTMLElement {
         .dp-gold  { border-color:rgba(240,192,64,.2);  } .dp-gold::before  { background:linear-gradient(90deg,transparent,#f0c040,transparent); } .dp-gold  .dp-item-icon { background:rgba(240,192,64,.1);  border-color:rgba(240,192,64,.25); } .dp-gold  .dp-item-icon svg { stroke:#f0c040; } .dp-gold  .dp-item-label { color:#f0c040; }
 
         @keyframes pulse-gem { 0%,100%{transform:scale(1);filter:drop-shadow(0 0 5px #f0c040)} 50%{transform:scale(1.12);filter:drop-shadow(0 0 12px #f0c040)} }
+
+        /* ══ Banner Carousel ════════════════════════════════════════ */
+        #bc-wrap { width:100%; margin-bottom:18px; }
+        .bc-carousel { position:relative; width:100%; border-radius:16px; overflow:hidden; }
+        .bc-track { display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1); will-change:transform; }
+        .bc-slide { flex:0 0 100%; width:100%; min-width:100%; display:block; position:relative; text-decoration:none; cursor:default; }
+        a.bc-slide { cursor:pointer; }
+        .bc-slide img { display:block; width:100%; aspect-ratio:21/9; object-fit:cover; border-radius:16px; }
+        .bc-caption { position:absolute; bottom:0; left:0; right:0; padding:8px 14px 10px; background:linear-gradient(to top,rgba(0,0,0,.65),transparent); border-radius:0 0 16px 16px; pointer-events:none; }
+        .bc-caption span { font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+        .bc-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }
+        .bc-dot { width:7px; height:7px; border-radius:50%; border:none; background:rgba(255,255,255,.4); cursor:pointer; padding:0; transition:background .25s,transform .25s; }
+        .bc-dot-active { background:#fff; transform:scale(1.25); }
+        @media (min-width:800px) {
+          .bc-slide img { aspect-ratio:32/9; }
+        }
       </style>
 
-      <div class="container">
+      <div class="container" style="flex-direction:column">
+        <!-- ══ Banner Carousel — aparece acima dos dois layouts ══ -->
+        <div id="bc-wrap" style="display:none;width:100%;max-width:620px;"></div>
+
         <!-- ══ Layout original — menu universal (mobile e desktop) ══ -->
         <div class="mobile-layout" style="display:${layout === 'dinamico' ? 'none' : 'flex'}">
           <a href="recrutamento.html" class="btn-agency-mobile">

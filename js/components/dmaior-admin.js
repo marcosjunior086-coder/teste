@@ -974,7 +974,8 @@ class DimaiorAdmin extends HTMLElement {
     s.querySelectorAll('.premio-tipo-tab').forEach(tab=>{tab.addEventListener('click',()=>{s.querySelectorAll('.premio-tipo-tab').forEach(t=>t.classList.remove('on'));tab.classList.add('on');this._premioTipo=tab.dataset.tipo;this._renderPremiosConfig();});});
     // Comunicados
     s.getElementById('btnAtuCom').addEventListener('click',()=>this._carregarComunicados());
-    s.getElementById('btnNovoCom').addEventListener('click',()=>this._abrirModalCom());
+    s.getElementById('btnNovoRapido').addEventListener('click',()=>this._abrirModalCom(null,'rapido'));
+    s.getElementById('btnNovoImportante').addEventListener('click',()=>this._abrirModalCom(null,'importante'));
     s.getElementById('mComSave').addEventListener('click',()=>this._salvarComunicado());
     s.getElementById('mComCancel').addEventListener('click',()=>this._fechaModal('mCom'));
     // Preview ao colar/digitar URL de imagem
@@ -1012,6 +1013,9 @@ class DimaiorAdmin extends HTMLElement {
       const statusBadge=c.ativo
         ?`<span class="com-status ativo">Ativo</span>`
         :`<span class="com-status inativo">Inativo</span>`;
+      const tipoBadge=c.tipo==='importante'
+        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">📌 Importante</span>`
+        :`<span class="com-status" style="background:rgba(240,192,64,.1);color:var(--gold);border-color:rgba(240,192,64,.3)">⚡ Rápido</span>`;
       const destaqueBadge=c.destaque?`<span class="com-status" style="background:rgba(240,192,64,.15);color:var(--gold);border-color:rgba(240,192,64,.3)">⭐ Destaque</span>`:'';
       const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'—';
       const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` · atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
@@ -1028,7 +1032,7 @@ class DimaiorAdmin extends HTMLElement {
           </div>
         </div>
         <div class="com-meta">
-          <div class="com-meta-esq">${statusBadge}${destaqueBadge}${locaisBadges}</div>
+          <div class="com-meta-esq">${tipoBadge}${statusBadge}${destaqueBadge}${locaisBadges}</div>
           <div class="com-data">${dataStr}${atualStr}</div>
         </div>
         <div class="com-acoes">
@@ -1052,12 +1056,46 @@ class DimaiorAdmin extends HTMLElement {
 
   _esc(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-  _abrirModalCom(c=null){
+  _abrirModalCom(c=null, tipoForcado=null){
     const s=this.shadowRoot;
-    s.getElementById('mComTit').textContent=c?'Editar Comunicado':'Novo Comunicado';
+    const tipo = tipoForcado || c?.tipo || 'rapido';
+    const isImp = tipo === 'importante';
+
+    // Título do modal
+    if(c) {
+      s.getElementById('mComTit').textContent = isImp ? 'Editar Aviso Importante' : 'Editar Aviso Rápido';
+    } else {
+      s.getElementById('mComTit').textContent = isImp ? 'Novo Aviso Importante' : 'Novo Aviso Rápido';
+    }
+
+    // Badge de tipo no modal
+    const badge = s.getElementById('mComTipoBadge');
+    if(badge){
+      badge.textContent = isImp ? '📌 Importante' : '⚡ Rápido';
+      badge.style.cssText = isImp
+        ? 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(0,212,212,.12);color:var(--cyan);border:1px solid rgba(0,212,212,.3);margin-bottom:12px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:.05em'
+        : 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);margin-bottom:12px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:.05em';
+    }
+
+    // Guarda o tipo para o salvar
+    this._edtComTipo = tipo;
+
+    // Mostra/oculta seções por tipo
+    const secRapido    = s.getElementById('mComSecRapido');
+    const secImportante= s.getElementById('mComSecImportante');
+    if(secRapido)    secRapido.style.display    = isImp ? 'none' : 'block';
+    if(secImportante)secImportante.style.display = isImp ? 'block' : 'none';
+
+    // Preenche campos (texto vai para o campo certo por tipo)
     s.getElementById('mComTitulo').value    = c?.titulo      || '';
     s.getElementById('mComDescricao').value = c?.descricao   || '';
-    s.getElementById('mComTexto').value     = c?.texto       || '';
+    if(isImp){
+      const ti = s.getElementById('mComTexto_imp'); if(ti) ti.value = c?.texto || '';
+      const tr = s.getElementById('mComTexto');     if(tr) tr.value = '';
+    } else {
+      const tr = s.getElementById('mComTexto');     if(tr) tr.value = c?.texto || '';
+      const ti = s.getElementById('mComTexto_imp'); if(ti) ti.value = '';
+    }
     s.getElementById('mComImagem').value    = c?.imagem_url  || '';
     s.getElementById('mComLinkLabel').value = c?.link_label  || '';
     s.getElementById('mComLinkUrl').value   = c?.link_url    || '';
@@ -1066,10 +1104,9 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mComEmoji').value     = c?.emoji       || '';
     s.getElementById('mComAtivo').value     = c ? (c.ativo?'true':'false') : 'true';
     s.getElementById('mComDestaque').checked= c?.destaque    || false;
-    // Preview da imagem atual
     this._atualizarPreviewImagem(c?.imagem_url||'');
     const locais=c?.locais||[];
-    ['ranking','painel','impulsionamento'].forEach(l=>{
+    ['home','ranking','painel','impulsionamento'].forEach(l=>{
       const cb=s.getElementById('mComLocal_'+l);if(cb)cb.checked=locais.includes(l);
     });
     this._edtCom=c?.id||null;
@@ -1094,9 +1131,13 @@ class DimaiorAdmin extends HTMLElement {
 
   async _salvarComunicado(){
     const s=this.shadowRoot;
+    const tipo        = this._edtComTipo || 'rapido';
+    const isImp       = tipo === 'importante';
     const titulo      = s.getElementById('mComTitulo').value.trim();
     const descricao   = s.getElementById('mComDescricao').value.trim();
-    const texto       = s.getElementById('mComTexto').value.trim();
+    // Lê o campo de texto correto por tipo
+    const textoEl     = isImp ? s.getElementById('mComTexto_imp') : s.getElementById('mComTexto');
+    const texto       = textoEl?.value.trim() || '';
     const imagem_url  = s.getElementById('mComImagem').value.trim();
     const link_label  = s.getElementById('mComLinkLabel').value.trim();
     const link_url    = s.getElementById('mComLinkUrl').value.trim();
@@ -1105,10 +1146,10 @@ class DimaiorAdmin extends HTMLElement {
     const emoji       = s.getElementById('mComEmoji').value.trim();
     const ativo       = s.getElementById('mComAtivo').value==='true';
     const destaque    = s.getElementById('mComDestaque').checked;
-    const locais      = ['ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
+    const locais      = ['home','ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
     if(!texto){this._toast('Texto é obrigatório','err');return;}
     const btn=s.getElementById('mComSave');btn.disabled=true;
-    const payload={emoji,titulo,descricao,texto,imagem_url,link_url,link_label,link2_url,link2_label,destaque,ativo,locais};
+    const payload={tipo,emoji,titulo,descricao,texto,imagem_url,link_url,link_label,link2_url,link2_label,destaque,ativo,locais};
     let r;
     if(this._edtCom){
       r=await this._api('PUT',`/admin/comunicados/${this._edtCom}`,payload);
@@ -1989,7 +2030,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-carteira">${ph('Carteira Financeira','wallet','Saldos dos streamers','btnAtuCart',`<button class="btn btn-g" id="btnCreditoRapido">${this._ico('plus',13)} Adicionar Saldo</button>`)}<div class="dc2-grid" id="carteiraResumo">${this._loading('grid-column:1/-1')}</div><div id="carteiraStreamers">${this._loading()}</div></div>
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
             <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
-            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<button class="btn btn-g" id="btnNovoCom">${this._ico('plus',13)} Novo Comunicado</button>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
             <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','Configurações e bloqueios','btnAtuImpulso')}
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Configurações Gerais</div></div>
@@ -2071,23 +2112,35 @@ class DimaiorAdmin extends HTMLElement {
       <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:'Rajdhani',sans-serif;font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose">✕</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:'Rajdhani',sans-serif">Valor a pagar</div><div id="mPixValor" style="font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:'Exo 2',sans-serif">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
       <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">Observação</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"><option value="diamantes">💎 Ranking de Diamantes</option><option value="horas">⏱ Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
-      <div class="ov" id="mCom"><div class="modal" style="max-width:520px"><div class="m-titulo" id="mComTit">Novo Comunicado</div>
-        <div class="mc"><label>Título <span style="color:var(--t3);font-size:11px">(opcional — aparece em negrito no card)</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
-        <div class="mc"><label>Descrição <span style="color:var(--t3);font-size:11px">(texto menor abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: Não perca tempo! Garanta já o seu lugar."></textarea></div>
-        <div class="mc"><label>Texto do Aviso <span style="color:var(--verm)">*</span> <span style="color:var(--t3);font-size:11px">(exibido quando não há título)</span></label><textarea id="mComTexto" rows="2" placeholder="Ex: Os Top 10 streamers participarão do sorteio de 10K diamantes."></textarea></div>
-        <div class="mc"><label>Imagem (URL) <span style="color:var(--t3);font-size:11px">(opcional — thumbnail quadrado)</span></label><input id="mComImagem" type="url" placeholder="https://..."/><div id="mComImagemPreview" style="margin-top:6px;display:none"><img id="mComImgEl" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--brd)" alt="preview"/></div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div class="mc" style="margin:0"><label>Botão 1 — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
-          <div class="mc" style="margin:0"><label>Botão 1 — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
-          <div class="mc" style="margin:0"><label>Botão 2 — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
-          <div class="mc" style="margin:0"><label>Botão 2 — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
+      <div class="ov" id="mCom"><div class="modal" style="max-width:500px"><div class="m-titulo" id="mComTit">Novo Aviso</div>
+        <div id="mComTipoBadge"></div>
+
+        <!-- ── SEÇÃO: AVISO RÁPIDO ── -->
+        <div id="mComSecRapido">
+          <div class="mc"><label>Emoji <span style="color:var(--t3);font-size:11px">(opcional)</span></label><input id="mComEmoji" type="text" placeholder="Ex: ⚡ 🏆 🔔" maxlength="8" style="font-size:1.3rem;letter-spacing:4px"/></div>
+          <div class="mc"><label>Texto do Aviso <span style="color:var(--verm)">*</span></label><textarea id="mComTexto" rows="3" placeholder="Ex: Os Top 10 streamers do mês participarão do sorteio de 10K diamantes."></textarea></div>
         </div>
+
+        <!-- ── SEÇÃO: AVISO IMPORTANTE ── -->
+        <div id="mComSecImportante" style="display:none">
+          <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
+          <div class="mc"><label>Subtítulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
+          <div class="mc"><label>Descrição / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: Não perca tempo! Garanta já o seu lugar na Copa Arena."></textarea></div>
+          <div class="mc"><label>Imagem (URL) <span style="color:var(--t3);font-size:11px">(thumbnail — cole o link da imagem)</span></label><input id="mComImagem" type="url" placeholder="https://..."/><div id="mComImagemPreview" style="margin-top:6px;display:none"><img id="mComImgEl" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--brd)" alt="preview"/></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="mc" style="margin:0"><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
+            <div class="mc" style="margin:0"><label>Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
+            <div class="mc" style="margin:0"><label>Botão secundário — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
+            <div class="mc" style="margin:0"><label>Botão secundário — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
+          </div>
+          <div class="mc" style="margin-top:10px"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;⭐ Destaque — exibe como card principal no topo das notificações</label></div>
+        </div>
+
+        <!-- ── CAMPOS COMUNS ── -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
-          <div class="mc" style="margin:0"><label>Emoji <span style="color:var(--t3);font-size:11px">(sem imagem)</span></label><input id="mComEmoji" type="text" placeholder="Ex: 🏆" maxlength="8" style="font-size:1.2rem;letter-spacing:3px"/></div>
           <div class="mc" style="margin:0"><label>Status</label><select id="mComAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div>
         </div>
-        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
-        <div class="mc"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;⭐ Destaque — exibe como card principal no topo dos avisos</label></div>
+        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> 🏠 Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
         <div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div>
       </div></div>
       <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div>

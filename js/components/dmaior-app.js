@@ -1525,15 +1525,37 @@ class DMaiorPainel extends HTMLElement {
     async fetchComunicados() {
         try {
             const data = await window.DmaiorAPI.rank.getComunicados('painel');
-            const lista = (data.comunicados || []);
+            const todos = data.comunicados || [];
+
+            // Dashboard: só avisos rápidos (tipo = 'rapido' ou sem tipo — compatibilidade)
+            const rapidos = todos.filter(c => !c.tipo || c.tipo === 'rapido');
             const el = this.qs('#painelComunicados');
-            if (!el) return;
-            if (!lista.length) { el.innerHTML = ''; return; }
-            el.innerHTML = lista.map(c => `
-                <div class="dm-comunicado">
-                    ${c.emoji ? `<span class="dm-comunicado-ico">${c.emoji}</span>` : ''}
-                    <span class="dm-comunicado-txt">${c.texto || ''}</span>
-                </div>`).join('');
+            if (el) {
+                if (!rapidos.length) { el.innerHTML = ''; }
+                else {
+                    el.innerHTML = rapidos.map(c => `
+                        <div class="dm-comunicado">
+                            ${c.emoji ? `<span class="dm-comunicado-ico">${c.emoji}</span>` : ''}
+                            <span class="dm-comunicado-txt">${c.texto || ''}</span>
+                        </div>`).join('');
+                }
+            }
+
+            // Atualiza ponto do sino: verifica se há importantes não lidos
+            const importantes = todos.filter(c => c.tipo === 'importante');
+            if (importantes.length) {
+                try {
+                    const uid     = localStorage.getItem('dm_uid') || 'anon';
+                    const seenRaw = localStorage.getItem(`dm_avisos_ids_${uid}`);
+                    const seen    = seenRaw ? JSON.parse(seenRaw) : [];
+                    const hasNew  = importantes.some(c => !seen.includes(String(c.id)));
+                    const menu    = document.querySelector('menu-mobile-dmaior');
+                    if (menu?.shadowRoot) {
+                        const dot = menu.shadowRoot.getElementById('bellDot');
+                        if (dot) dot.classList.toggle('hidden', !hasNew);
+                    }
+                } catch {}
+            }
         } catch { /* silencia erro — comunicados são opcionais */ }
     }
 
@@ -1574,7 +1596,8 @@ class DMaiorPainel extends HTMLElement {
         el.innerHTML = '<div class="avisos-loading">Carregando avisos...</div>';
         try {
             const data  = await window.DmaiorAPI.rank.getComunicados('painel');
-            const lista = data.comunicados || [];
+            // Notificações mostram apenas avisos importantes
+            const lista = (data.comunicados || []).filter(c => c.tipo === 'importante');
 
             // Marca todos como lidos e apaga o ponto do sino
             this._salvarIdsLidos(lista);
