@@ -61,21 +61,21 @@
   --dm-ease:        0.25s ease;
 
   /* ── Tokens extras para o sistema de temas ──────────────────────── */
-  /* Backgrounds sólidos — cinza neutro visível contra o fundo escuro */
-  --dm-bg-2: #1c1c24;            /* cards, painéis, topbar */
-  --dm-bg-1: #15151c;            /* fundo médio */
-  --dm-bg-3: #0e0e14;            /* fundo profundo */
-  --dm-bg-4: #131318;            /* fundo avatar/mídia */
+  /* Backgrounds sólidos (azul-escuro original) */
+  --dm-bg-2: #1a1a2e;            /* cards, painéis, topbar */
+  --dm-bg-1: #12121f;            /* fundo médio */
+  --dm-bg-3: #0d0d1a;            /* fundo profundo */
+  --dm-bg-4: #111827;            /* fundo avatar/mídia */
 
   /* Gradientes reutilizáveis */
-  --dm-grad-card:     linear-gradient(160deg, #1c1c24 0%, #15151c 100%);
-  --dm-grad-card-alt: linear-gradient(135deg, #1c1c24, #15151c);
-  --dm-grad-sidebar:  linear-gradient(160deg, #1c1c24 0%, #15151c 60%, #0e0e14 100%);
-  --dm-grad-deep:     linear-gradient(160deg, #1c1c24, #0e0e14);
+  --dm-grad-card:     linear-gradient(160deg, #1a1a2e 0%, #12121f 100%);
+  --dm-grad-card-alt: linear-gradient(135deg, #1a1a2e, #12121f);
+  --dm-grad-sidebar:  linear-gradient(160deg, #1a1a2e 0%, #12121f 60%, #0d0d1a 100%);
+  --dm-grad-deep:     linear-gradient(160deg, #1a1a2e, #0d0d1a);
 
   /* Background painel (sticky/semi-opaco) */
-  --dm-bg-panel: rgba(28,28,36,.97);
-  --dm-bg-tint:  rgba(0,0,0,.22);
+  --dm-bg-panel: rgba(26,26,46,.97);
+  --dm-bg-tint:  rgba(0,0,0,.20);
 
   /* Transparências cyan */
   --dm-cyan-05: rgba(0,212,212,.05);
@@ -349,10 +349,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Tema dark — preto/cinza puro, sem halos coloridos */
+/* Tema dark — preto puro */
 [data-theme="dark"] body {
-  background: linear-gradient(180deg, #0d0f14 0%, #08090e 100%);
-  background-attachment: fixed;
+  background: #0c0c0c;
 }
 
 /* Temas claros — restaura fundo sólido sem o gradiente escuro */
@@ -401,6 +400,13 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: transparent; /* body já tem o gradiente no tema original/dark */
+}
+
+/* Temas claros precisam do fundo sólido */
+[data-theme="branco"] .dm-page,
+[data-theme="rosa"]   .dm-page,
+[data-theme="laranja"] .dm-page {
   background: var(--dm-bg);
 }
 

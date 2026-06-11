@@ -170,7 +170,12 @@ class RankingDmaior extends HTMLElement {
         --gold:#ea580c;--bronze:#92400e;--red:#dc2626;--green2:#15803d;
         --podium-1:rgba(234,88,12,0.15);--podium-2:rgba(249,115,22,0.12);--podium-3:rgba(146,64,14,0.12);}
       *{margin:0;padding:0;box-sizing:border-box}
-      .app-container{background:linear-gradient(180deg,var(--bg-app) 0%,var(--bg-app2) 100%);background-attachment:fixed;color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;padding-bottom:50px;overflow-x:hidden;width:100%}
+      .app-container{background:transparent;color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;padding-bottom:50px;overflow-x:hidden;width:100%}
+      /* Temas claros: restaura fundo sólido */
+      :host-context([data-theme="branco"]) .app-container,
+      :host-context([data-theme="rosa"])   .app-container,
+      :host-context([data-theme="laranja"]) .app-container{background:linear-gradient(180deg,var(--bg-app) 0%,var(--bg-app2) 100%)}
+      :host-context([data-theme="dark"]) .app-container{background:transparent}
       h1,h2,h3,.rajdhani,.name{font-family:var(--font-title);letter-spacing:1px;text-transform:uppercase}
       /* ── Botões de faixa (1-20, 21-40…) — reage ao tema (ativo = bloom-grad, inativo = bg-card) ── */
       .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:var(--font-title);font-weight:700;background:var(--bg-card);color:var(--text-muted);border:1px solid var(--border-dim);transition:all .2s}
