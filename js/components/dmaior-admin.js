@@ -635,10 +635,19 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div id="listaUsers"></div>`;
     const lu=s.getElementById('listaUsers');
     lu.innerHTML=lista.map(sv=>{
-      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';
-      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1)">${this._esc(nome)}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]].map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
+      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;const verifBadge=isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:#ff9800;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ VERIFICADO</span>`:'';
+      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px">${this._esc(nome)} ${verifBadge}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]].map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-verif="${isVerif?'true':'false'}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-premium="${isPremium?'true':'false'}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
     }).join('');
     this._renderPg('pgS',this._pg.s,lista.length,20,n=>{this._pg.s=n;this._carregarStreamers();});
+    lu.querySelectorAll('.sv-toggle-verif').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();this._toggleVerificado(btn.dataset.uid,'verificado',btn.dataset.verif==='true');});});
+    lu.querySelectorAll('.sv-toggle-premium').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();this._toggleVerificado(btn.dataset.uid,'verificado_premium',btn.dataset.premium==='true');});});
+  }
+  async _toggleVerificado(uid,campo,isAtivo){
+    const isPremium=campo==='verificado_premium';const tipo=isPremium?'premium':'verificado';
+    const acao=isAtivo?`Remover ${tipo}`:`Dar ${tipo}`;if(!confirm(`${acao} para o streamer ${uid}?`))return;
+    const rota=isPremium?`/admin/streamers/${encodeURIComponent(uid)}/verificado-premium`:`/admin/streamers/${encodeURIComponent(uid)}/verificado`;
+    const d=await this._api('PATCH',rota,{[campo]:!isAtivo});
+    if(d?.ok){this._toast(isAtivo?`${tipo.charAt(0).toUpperCase()+tipo.slice(1)} removido`:`Streamer ${tipo}!`);this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
   }
   async _carregarMetricas(){
     const s=this.shadowRoot;s.getElementById('gMet').innerHTML=this._loading('grid-column:1/-1');
@@ -676,9 +685,33 @@ class DimaiorAdmin extends HTMLElement {
   async _carregarConfig(){
     const s=this.shadowRoot;s.getElementById('tbC').innerHTML=this._loading();const d=await this._api('GET','/admin/config');const el=s.getElementById('tbC');
     if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configurações');return;}
-    const labels={taxa_saque_mp:{label:'Taxa fixa por saque (R$)',hint:'Deixe 0.00 para não cobrar taxa.'},taxa_saque_perc:{label:'Taxa percentual (%)',hint:'Ex: 0.99 = 0,99%.'},aviso_financeiro:{label:'Aviso no painel',hint:'Texto na aba Carteira.'}};
-    el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';return`<div class="cfg-row"><div style="flex:1;min-width:140px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div>${isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`}${isRO?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>`;}).join('')}`;
-    d.config.filter(c=>!labels[c.chave]?.readonly).forEach(c=>{s.getElementById(`cfgSave_${c.chave}`)?.addEventListener('click',async()=>{const val=s.getElementById(`cfg_${c.chave}`)?.value;const r=await this._api('POST','/admin/config',{chave:c.chave,valor:val});if(r?.ok){this._toast('Salvo!');if(c.chave==='taxa_saque_mp')this._taxaSaque=parseFloat(val)||0;if(c.chave==='taxa_saque_perc')this._taxaPerc=parseFloat(val)||0;}else this._toast(r?.erro||'Erro','err');});});
+    const labels={
+      taxa_saque_mp:{label:'Taxa fixa por saque (R$)',hint:'Deixe 0.00 para não cobrar taxa.'},
+      taxa_saque_perc:{label:'Taxa percentual (%)',hint:'Ex: 0.99 = 0,99%.'},
+      aviso_financeiro:{label:'Aviso no painel',hint:'Texto na aba Carteira.'},
+      badge_verificado_url:{label:'Badge Verificado — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = ícone padrão azul.',preview:true},
+      badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = ícone padrão laranja.',preview:true},
+    };
+    const _prevHtml=(chave,val)=>val?`<img src="${this._esc(val)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;
+    el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`}${isRO?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
+    d.config.filter(c=>!labels[c.chave]?.readonly).forEach(c=>{
+      s.getElementById(`cfgSave_${c.chave}`)?.addEventListener('click',async()=>{
+        const val=s.getElementById(`cfg_${c.chave}`)?.value||'';
+        const r=await this._api('POST','/admin/config',{chave:c.chave,valor:val});
+        if(r?.ok){
+          this._toast('Salvo!');
+          if(c.chave==='taxa_saque_mp')this._taxaSaque=parseFloat(val)||0;
+          if(c.chave==='taxa_saque_perc')this._taxaPerc=parseFloat(val)||0;
+          const prev=s.getElementById(`cfgPrev_${c.chave}`);
+          if(prev)prev.innerHTML=_prevHtml(c.chave,val);
+        }else this._toast(r?.erro||'Erro','err');
+      });
+      if(labels[c.chave]?.preview){
+        const inp=s.getElementById(`cfg_${c.chave}`);
+        const prev=s.getElementById(`cfgPrev_${c.chave}`);
+        if(inp&&prev)inp.addEventListener('input',()=>{prev.innerHTML=_prevHtml(c.chave,inp.value.trim());});
+      }
+    });
   }
 
   // ══════════════════════════ SEÇÕES v2 ══════════════════════════════════════
@@ -1002,6 +1035,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSalvarCookie').addEventListener('click',()=>this._atualizarCookie());
     s.getElementById('btnSimularResgate').addEventListener('click',()=>this._executarResgate(true));
     s.getElementById('btnExecutarResgate').addEventListener('click',()=>this._confirmarDel('Executar correção e gravar dados no banco?',()=>this._executarResgate(false)));
+    s.getElementById('btnLimparDatas').addEventListener('click',()=>{s.getElementById('monDataDe').value='';s.getElementById('monDataAte').value='';});
     s.getElementById('btnVerBuffer').addEventListener('click',()=>this._verBufferMonitor());
     s.getElementById('btnTestarTelegram').addEventListener('click',()=>this._testarTelegram());
     // Controle Impulsionamento
@@ -1220,14 +1254,19 @@ class DimaiorAdmin extends HTMLElement {
   }
   async _executarResgate(preview){
     const s=this.shadowRoot;
+    const de=s.getElementById('monDataDe').value;
+    const ate=s.getElementById('monDataAte').value;
     const dias=parseInt(s.getElementById('monDias').value)||7;
+    const usaPeriodo=de&&ate;
+    const labelPeriodo=usaPeriodo?`${de} a ${ate}`:`últimos ${dias} dias`;
     const statusEl=s.getElementById('monResgateStatus');
     const resultEl=s.getElementById('monResgateResult');
     statusEl.style.display='block';
-    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px">${this._ico('refresh',13)} ${preview?'Simulando':'Executando correção'} dos últimos ${dias} dias... (pode levar até 60s)</div>`;
+    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px">${this._ico('refresh',13)} ${preview?'Simulando':'Executando correção'} (${labelPeriodo})... (pode levar até 60s)</div>`;
     resultEl.style.display='none';
     const rota=preview?'/admin/monitor/preview':'/admin/monitor/corrigir';
-    const d=await this._api('GET',`${rota}?dias=${dias}`);
+    const qs=usaPeriodo?`inicio=${de}&fim=${ate}`:`dias=${dias}`;
+    const d=await this._api('GET',`${rota}?${qs}`);
     statusEl.style.display='none';
     resultEl.style.display='block';
     if(!d){resultEl.textContent='Erro de conexão com o monitor.';return;}
@@ -1235,7 +1274,7 @@ class DimaiorAdmin extends HTMLElement {
     // Formata resumo legível
     const linhas=[
       `Modo:        ${d.modo||d.status||'—'}`,
-      `Dias alvo:   ${d.dias_alvo??'—'}`,
+      `Período:     ${d.periodo??'—'}`,
       `Total Kwai:  ${d.total_kwai_bruto??'—'} lives brutas`,
       `Válidos:     ${d.total_valido??'—'}`,
       `Inseridas:   ${d.inseridas?.length??0}`,
@@ -2094,7 +2133,8 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead"><div class="btitulo">${this._ico('history',14)} Resgate / Correção de Dados</div></div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div style="background:rgba(248,193,0,.06);border:1px solid rgba(248,193,0,.25);border-radius:var(--rs);padding:10px 14px;font-size:11px;color:#fcd34d;display:flex;align-items:flex-start;gap:6px;line-height:1.6">${this._ico('warning',13)}<span><strong>Simular</strong> mostra o que seria alterado sem gravar nada. <strong>Executar</strong> grava os dados corrigidos no banco — confirme antes.</span></div>
-                  <div class="mc"><label>Janela de dias a reprocessar</label><div style="display:flex;gap:8px;align-items:center"><input id="monDias" type="number" min="1" max="90" value="7" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">dias atrás</span></div></div>
+                  <div class="mc"><label>Período específico (opcional)</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="monDataDe" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"/><span style="color:var(--t3);font-size:12px">até</span><input id="monDataAte" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"/><button class="btn btn-sm" id="btnLimparDatas" type="button">Limpar</button></div></div>
+                  <div class="mc"><label>Ou janela de dias a reprocessar (usada se nenhum período acima for escolhido)</label><div style="display:flex;gap:8px;align-items:center"><input id="monDias" type="number" min="1" max="90" value="7" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">dias atrás</span></div></div>
                   <div style="display:flex;gap:10px;flex-wrap:wrap">
                     <button class="btn btn-o" id="btnSimularResgate">${this._ico('search',13)} Simular (sem gravar)</button>
                     <button class="btn" id="btnExecutarResgate" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">${this._ico('zap',13)} Executar Correção</button>

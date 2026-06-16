@@ -27,10 +27,12 @@ class RankingDmaior extends HTMLElement {
         this._menuObserver     = null;
         this._menuPollInterval = null;
 
-        this.DSVG      = `<svg viewBox="0 0 24 24" width="16" fill="currentColor"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>`;
-        this.HSVG      = `<svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-        this.CLOCK_SVG = `<svg viewBox="0 0 24 24" width="15" fill="currentColor" style="flex-shrink:0"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
-        this.STAR_SVG  = `<svg viewBox="0 0 24 24" width="12" fill="currentColor" style="margin-right:3px"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+        this.DSVG           = `<svg viewBox="0 0 24 24" width="16" fill="currentColor"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>`;
+        this.HSVG           = `<svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+        this.CLOCK_SVG      = `<svg viewBox="0 0 24 24" width="15" fill="currentColor" style="flex-shrink:0"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
+        this.STAR_SVG       = `<svg viewBox="0 0 24 24" width="12" fill="currentColor" style="margin-right:3px"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+        this.VERIFICADO_SVG         = `<span title="Verificado" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,#29b6f6,#00e5ff);vertical-align:middle;flex-shrink:0;margin-left:4px"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+        this.VERIFICADO_PREMIUM_SVG = `<span title="Verificado Premium" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff5722);vertical-align:middle;flex-shrink:0;margin-left:4px"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
     }
 
     _getToken() {
@@ -502,14 +504,21 @@ class RankingDmaior extends HTMLElement {
         if (!res.ok) throw new Error(`Worker retornou ${res.status}`);
         const data = await res.json();
         if (data.erro) throw new Error(data.erro);
+        const _safeBadge = u => { try { const p = new URL(u).protocol; return (p==='https:'||p==='http:') ? u : ''; } catch { return ''; } };
+        const _safeV = _safeBadge(data.badge_verificado_url || '');
+        const _safeP = _safeBadge(data.badge_premium_url    || '');
+        if (_safeV) this.VERIFICADO_SVG         = `<img src="${_safeV.replace(/"/g,'&quot;')}" width="15" height="15" style="vertical-align:middle;flex-shrink:0;margin-left:4px;border-radius:50%;object-fit:cover" title="Verificado">`;
+        if (_safeP) this.VERIFICADO_PREMIUM_SVG = `<img src="${_safeP.replace(/"/g,'&quot;')}" width="15" height="15" style="vertical-align:middle;flex-shrink:0;margin-left:4px;border-radius:50%;object-fit:cover" title="Verificado Premium">`;
         return (data.streamers || []).map(s => ({
-            img:      this.proxyImg(s.foto_url),
-            id:       s.kwai_id  || s.kwai_uid,
-            uid:      s.kwai_uid,
-            nome:     s.kwai_id  || s.kwai_uid || '—',
-            diamonds: Number(s.diamantes_acumulados) || 0,
-            hoursStr: s.horas_video  || '00:00',
-            hoursMin: this.h2m(s.horas_video),
+            img:                this.proxyImg(s.foto_url),
+            id:                 s.kwai_id  || s.kwai_uid,
+            uid:                s.kwai_uid,
+            nome:               s.kwai_id  || s.kwai_uid || '—',
+            diamonds:           Number(s.diamantes_acumulados) || 0,
+            hoursStr:           s.horas_video  || '00:00',
+            hoursMin:           this.h2m(s.horas_video),
+            verificado:         s.verificado         || false,
+            verificado_premium: s.verificado_premium || false,
         }));
     }
 
@@ -651,7 +660,7 @@ class RankingDmaior extends HTMLElement {
                     <div class="badge">${idx + 1}</div>
                     ${liveBadge}
                   </div>
-                  <div class="name" title="${s.nome}">${s.nome || 'Sem Nome'}</div>
+                  <div class="name" title="${s.nome}">${s.nome || 'Sem Nome'}${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
                   <div class="podium-id">@${s.id}</div>
                   <div class="podium-val">${icon} ${getVal(s)}</div>
                   ${prizeHtml}
@@ -677,7 +686,7 @@ class RankingDmaior extends HTMLElement {
                 ${liveBadgeItem}
               </div>
               <div class="list-name-col">
-                <div class="list-name" title="${s.nome}">${s.nome || 'Sem Nome'}</div>
+                <div class="list-name" title="${s.nome}">${s.nome || 'Sem Nome'}${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
                 <div class="list-id">@${s.id}</div>
                 <div class="badges-container">
                   ${this.growthHtml(s)}
