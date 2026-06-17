@@ -287,15 +287,12 @@ class DmaiorServicesMenu extends HTMLElement {
         .bc-track { display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1); will-change:transform; }
         .bc-slide { flex:0 0 100%; width:100%; min-width:100%; display:block; position:relative; text-decoration:none; cursor:default; }
         a.bc-slide { cursor:pointer; }
-        .bc-slide img { display:block; width:100%; aspect-ratio:21/9; object-fit:cover; border-radius:16px; }
+        .bc-slide img { display:block; width:100%; aspect-ratio:32/9; object-fit:cover; border-radius:16px; }
         .bc-caption { position:absolute; bottom:0; left:0; right:0; padding:8px 14px 10px; background:linear-gradient(to top,rgba(0,0,0,.65),transparent); border-radius:0 0 16px 16px; pointer-events:none; }
         .bc-caption span { font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,.6); }
         .bc-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }
         .bc-dot { width:7px; height:7px; border-radius:50%; border:none; background:rgba(255,255,255,.4); cursor:pointer; padding:0; transition:background .25s,transform .25s; }
         .bc-dot-active { background:#fff; transform:scale(1.25); }
-        @media (min-width:800px) {
-          .bc-slide img { aspect-ratio:32/9; }
-        }
       </style>
 
       <div class="container" style="flex-direction:column">

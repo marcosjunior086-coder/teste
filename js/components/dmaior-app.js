@@ -400,7 +400,7 @@ class DMaiorPainel extends HTMLElement {
             .btn-mark-all svg{width:14px;height:14px;fill:var(--cyan);}
             /* Card destaque */
             .aviso-destaque{border-radius:16px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:20px;animation:fi .4s ease both;}
-            .aviso-destaque-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+            .aviso-destaque-img{width:100%;aspect-ratio:32/9;object-fit:cover;display:block;}
             .aviso-destaque-body{padding:16px;}
             .aviso-destaque-titulo{font-family:'Rajdhani',sans-serif;font-size:1.15rem;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:3px;}
             .aviso-destaque-sub{font-size:.78rem;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
