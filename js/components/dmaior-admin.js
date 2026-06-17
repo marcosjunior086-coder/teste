@@ -1262,16 +1262,80 @@ class DimaiorAdmin extends HTMLElement {
     const statusEl=s.getElementById('monResgateStatus');
     const resultEl=s.getElementById('monResgateResult');
     statusEl.style.display='block';
-    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px">${this._ico('refresh',13)} ${preview?'Simulando':'Executando correção'} (${labelPeriodo})... (pode levar até 60s)</div>`;
+    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px">${this._ico('refresh',13)} ${preview?'Simulando':'Executando correção'} (${labelPeriodo})...</div>`;
     resultEl.style.display='none';
     const rota=preview?'/admin/monitor/preview':'/admin/monitor/corrigir';
     const qs=usaPeriodo?`inicio=${de}&fim=${ate}`:`dias=${dias}`;
     const d=await this._api('GET',`${rota}?${qs}`);
+    if(!d){
+      statusEl.style.display='none';
+      resultEl.style.display='block';
+      resultEl.textContent='Erro de conexão com o monitor.';
+      return;
+    }
+    if(d.erro){
+      statusEl.style.display='none';
+      resultEl.style.display='block';
+      resultEl.textContent=`Erro: ${d.erro}`;
+      return;
+    }
+    // Período > 1 dia → job assíncrono: iniciar polling
+    if(d.job_id){
+      await this._acompanharJobCorrecao(d.job_id,d.total_dias,d.periodo,statusEl,resultEl);
+      return;
+    }
+    // Resultado síncrono (preview ou período de 1 dia)
     statusEl.style.display='none';
     resultEl.style.display='block';
-    if(!d){resultEl.textContent='Erro de conexão com o monitor.';return;}
-    if(d.erro){resultEl.textContent=`Erro: ${d.erro}`;return;}
-    // Formata resumo legível
+    this._exibirResumoCorrecao(d,resultEl);
+  }
+
+  async _acompanharJobCorrecao(jobId,totalDias,periodo,statusEl,resultEl){
+    const INTERVALO=3000,MAX=200; // até ~10 min
+    for(let t=0;t<MAX;t++){
+      await new Promise(r=>setTimeout(r,INTERVALO));
+      const job=await this._api('GET',`/admin/monitor/corrigir/status?job=${encodeURIComponent(jobId)}`);
+      if(!job||job.erro){
+        statusEl.innerHTML=`<div style="color:var(--verm);font-size:12px">${this._ico('warning',13)} Falha ao consultar status do job.</div>`;
+        continue;
+      }
+      if(job.status==='processando'){
+        const prog=job.progresso??0;
+        const diaAtual=job.dia_atual??'—';
+        const pct=totalDias>0?Math.round(((prog)/totalDias)*100):0;
+        statusEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px;font-size:12px;padding:10px 0">
+          <div style="display:flex;align-items:center;gap:8px;color:var(--t3)">${this._ico('refresh',13)} Dia ${prog+1} de ${totalDias} — <strong style="color:var(--t1)">${diaAtual}</strong></div>
+          <div style="height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--cyan);transition:width .4s"></div>
+          </div>
+          <div style="color:var(--t2)">${job.resumo?.upserts??0} registro(s) atualizados até agora</div>
+        </div>`;
+        continue;
+      }
+      if(job.status==='concluido'){
+        statusEl.style.display='none';
+        resultEl.style.display='block';
+        const fin=job.finalizado_em?new Date(job.finalizado_em).toLocaleString('pt-BR'):'—';
+        resultEl.textContent=[
+          `Modo:        Correção assíncrona concluída`,
+          `Período:     ${job.periodo??periodo??'—'}`,
+          `Dias:        ${job.dias_processados??totalDias} processado(s)`,
+          `Upserts:     ${job.resumo?.upserts??0}`,
+          `Finalizado:  ${fin}`,
+        ].join('\n');
+        return;
+      }
+      if(job.status==='erro'){
+        statusEl.style.display='none';
+        resultEl.style.display='block';
+        resultEl.textContent=`Erro no job: ${job.motivo??'desconhecido'}`;
+        return;
+      }
+    }
+    statusEl.innerHTML=`<div style="color:var(--verm);font-size:12px">${this._ico('warning',13)} Timeout aguardando o job. Verifique os logs do sistema.</div>`;
+  }
+
+  _exibirResumoCorrecao(d,resultEl){
     const linhas=[
       `Modo:        ${d.modo||d.status||'—'}`,
       `Período:     ${d.periodo??'—'}`,
