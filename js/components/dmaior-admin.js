@@ -1355,7 +1355,7 @@ class DimaiorAdmin extends HTMLElement {
     }
     if(d.corrigidas?.length>0){
       linhas.push('','── Corrigidas ──');
-      d.corrigidas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | banco:${x.banco_diamantes}💎 → kwai:${x.kwai_diamantes}💎`));
+      d.corrigidas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | banco:${x.banco_diamantes}💎/${x.banco_minutos}min → kwai:${x.kwai_diamantes}💎/${x.kwai_minutos}min`));
       if(d.corrigidas.length>20)linhas.push(`  ... +${d.corrigidas.length-20} mais`);
     }
     if(d.erros?.length>0){
