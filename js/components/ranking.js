@@ -979,8 +979,8 @@ class RankingDmaior extends HTMLElement {
   goPage(p) { this.currentPage = p; this.renderScreen(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
   fmtCompact(n) {
-    if (n >= 1_000_000) return (n / 1_000_000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'M';
-    if (n >= 1_000)     return (n / 1_000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'K';
+    if (n >= 1_000_000) return (Math.floor(n / 100_000) / 10).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'M';
+    if (n >= 1_000)     return (Math.floor(n / 100) / 10).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'K';
     return n.toLocaleString('pt-BR');
   }
 
