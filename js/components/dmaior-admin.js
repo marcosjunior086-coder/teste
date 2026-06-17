@@ -132,6 +132,9 @@ class DimaiorAdmin extends HTMLElement {
       zap:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
       megaphone:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`,
       bell:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+      user_plus:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
+      arrow_right:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+      eye:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
     };
     return icons[name]||icons.search;
   }
@@ -185,7 +188,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));s.getElementById('side').classList.remove('open');
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites()};
     mapa[pag]?.();
   }
 
@@ -1044,6 +1047,31 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnBuscarBloqUid').addEventListener('click',()=>this._buscarStreamerBloqueio());
     s.getElementById('btnAplicarBloqueio').addEventListener('click',()=>this._bloquearStreamer());
     s.getElementById('btnAtuBloqueios').addEventListener('click',async()=>{const blq=await this._api('GET','/admin/impulso/bloqueios');this._renderBloqueios(blq?.bloqueios||[]);});
+    // Convites / Candidaturas
+    s.getElementById('btnAtuConvites').addEventListener('click',()=>this._carregarConvites());
+    s.getElementById('btnConvBuscarPerfil').addEventListener('click',()=>this._abrirModalConvPerfil());
+    s.getElementById('btnBulkReenviar').addEventListener('click',()=>this._confirmarDel('Reenviar todos os convites elegíveis? (dry_run primeiro)',()=>this._bulkReenviar(true)));
+    s.getElementById('convSubTabs').addEventListener('click',e=>{
+      const b=e.target.closest('[data-sub]');if(!b)return;
+      const subs=['candidaturas','voyager','migracoes','recrutadores'];
+      subs.forEach(k=>{const el=s.getElementById(`conv-sub-${k}`);if(el)el.style.display=k===b.dataset.sub?'':'none';});
+      s.querySelectorAll('#convSubTabs .month-tab').forEach(t=>t.classList.toggle('on',t.dataset.sub===b.dataset.sub));
+      if(b.dataset.sub==='recrutadores')this._carregarRecrutadores();
+      if(b.dataset.sub==='migracoes')this._carregarMigracoes();
+      if(b.dataset.sub==='voyager')this._carregarConvitesVoyager();
+    });
+    s.getElementById('candFiltro').addEventListener('change',()=>this._carregarCandidaturas());
+    s.getElementById('btnSalvarModo').addEventListener('click',()=>this._salvarModoConvite());
+    s.getElementById('mConvPerfilX').addEventListener('click',()=>this._fechaModalConvPerfil());
+    s.getElementById('mConvBtnBuscar').addEventListener('click',()=>this._buscarPerfilConvite());
+    s.getElementById('mConvBtnDry').addEventListener('click',()=>this._enviarConviteManual(true));
+    s.getElementById('mConvBtnEnviar').addEventListener('click',()=>this._enviarConviteManual(false));
+    s.getElementById('btnPararBulk').addEventListener('click',()=>this._pararBulk());
+    s.getElementById('mConvPerfil').addEventListener('click',e=>{if(e.target===s.getElementById('mConvPerfil'))this._fechaModalConvPerfil();});
+    // Recrutadores
+    s.getElementById('btnNovoRecrutador').addEventListener('click',()=>this._abrirFormRecrutador(null));
+    s.getElementById('btnSalvarRecrutador').addEventListener('click',()=>this._salvarRecrutador());
+    s.getElementById('btnCancelarRecrutador').addEventListener('click',()=>s.getElementById('formRecrutadorBox').style.display='none');
   }
 
   // ── COMUNICADOS ─────────────────────────────────────────────────────────────
@@ -2126,6 +2154,7 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('key_uid','uids','Autorização UIDs')}
             ${ni('metrics','metricas','Métricas')}
             ${ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)}
+            ${ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)}
             <div class="ns">Financeiro</div>
             ${ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)}
             ${ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)}
@@ -2148,6 +2177,125 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
             <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulário','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-convites">
+              ${ph('Convites / Candidaturas','user_plus','Gestão de agenciamento via Voyager','btnAtuConvites',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnConvBuscarPerfil">${this._ico('search',13)} Buscar Perfil</button><button class="btn btn-g" id="btnBulkReenviar">${this._ico('send',13)} Reenviar Elegíveis</button></div>`)}
+              <!-- Modo operação -->
+              <div class="box" style="margin-bottom:14px">
+                <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Modo de Operação</div></div>
+                <div style="padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                  <select id="convModo" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:7px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none">
+                    <option value="simular">Simular (sem envio real)</option>
+                    <option value="aprovar">Aprovar manualmente</option>
+                    <option value="automatico">Automático (envia direto)</option>
+                  </select>
+                  <button class="btn btn-o" id="btnSalvarModo">${this._ico('check',13)} Salvar modo</button>
+                  <span id="convModoStatus" style="font-size:11px;color:var(--t3)"></span>
+                </div>
+              </div>
+              <!-- Sub-abas -->
+              <div class="month-tabs" id="convSubTabs" style="display:flex;gap:6px;padding:0 0 12px">
+                <button class="month-tab on" data-sub="candidaturas">Candidaturas</button>
+                <button class="month-tab" data-sub="voyager">Convites Voyager</button>
+                <button class="month-tab" data-sub="migracoes">Migrações</button>
+                <button class="month-tab" data-sub="recrutadores">Recrutadores</button>
+              </div>
+              <!-- Candidaturas -->
+              <div id="conv-sub-candidaturas">
+                <div class="box">
+                  <div class="bhead">
+                    <div class="btitulo">${this._ico('clipboard',14)} Candidaturas</div>
+                    <div class="bacoes">
+                      <select id="candFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none">
+                        <option value="">Todas</option>
+                        <option value="perfil_consultado">Aguardando</option>
+                        <option value="convite_enviado">Convite Enviado</option>
+                        <option value="em_revisao">Em Revisão</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="vinculado_outra_agencia">Outra Agência</option>
+                        <option value="migracao_solicitada">Migração Solicitada</option>
+                        <option value="recusado">Recusado</option>
+                        <option value="erro">Erro</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="tbCandidaturas">${this._loading()}</div>
+                </div>
+              </div>
+              <!-- Convites Voyager -->
+              <div id="conv-sub-voyager" class="rc-hidden-sub" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('send',14)} Convites no Voyager</div></div>
+                  <div id="tbConvitesVoyager">${this._loading()}</div>
+                </div>
+                <div class="box" id="convBulkProgressBox" style="display:none;margin-top:10px">
+                  <div class="bhead"><div class="btitulo">${this._ico('refresh',14)} Progresso do Reenvio em Massa</div><button class="btn btn-sm" style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--verm)" id="btnPararBulk">${this._ico('x_circle',12)} Parar</button></div>
+                  <div style="padding:14px 16px" id="convBulkProgressInfo">Iniciando…</div>
+                </div>
+              </div>
+              <!-- Migrações -->
+              <div id="conv-sub-migracoes" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('arrow_right',14)} Solicitações de Migração</div></div>
+                  <div id="tbMigracoes">${this._loading()}</div>
+                </div>
+              </div>
+              <!-- Recrutadores -->
+              <div id="conv-sub-recrutadores" style="display:none">
+                <div class="box">
+                  <div class="bhead">
+                    <div class="btitulo">${this._ico('user_plus',14)} Recrutadores</div>
+                    <button class="btn btn-g btn-sm" id="btnNovoRecrutador">${this._ico('plus',12)} Novo</button>
+                  </div>
+                  <div id="tbRecrutadores">${this._loading()}</div>
+                </div>
+                <!-- Formulário inline de criação/edição -->
+                <div class="box" id="formRecrutadorBox" style="display:none;margin-top:10px">
+                  <div class="bhead"><div class="btitulo" id="formRecrutadorTit">Novo Recrutador</div></div>
+                  <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                    <input type="hidden" id="fRecId">
+                    <div class="mc"><label>Nome</label><input id="fRecNome" type="text" placeholder="Ex: Dan" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <div class="mc"><label>Telefone (WhatsApp)</label><input id="fRecTel" type="text" placeholder="Ex: 17997176407" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--t2)">
+                      <input type="checkbox" id="fRecPadrao" style="width:15px;height:15px;accent-color:var(--cyan)">
+                      Usar como recrutador padrão (envios automáticos)
+                    </label>
+                    <div style="display:flex;gap:8px">
+                      <button class="btn btn-g" id="btnSalvarRecrutador" style="flex:1">${this._ico('check',13)} Salvar</button>
+                      <button class="btn" id="btnCancelarRecrutador" style="flex:0 0 auto;background:rgba(255,255,255,.05);border:1px solid var(--brddim)">${this._ico('x',12)} Cancelar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Modal: buscar perfil / envio manual -->
+              <div class="modal" id="mConvPerfil" style="display:none">
+                <div class="modal-box">
+                  <div class="modal-head"><span id="mConvPerfilTit">Buscar Perfil</span><button class="modal-x" id="mConvPerfilX">${this._ico('x',14)}</button></div>
+                  <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                    <div class="mc"><label>Kwai ID / UID</label><input id="mConvUid" type="text" placeholder="Digite o Kwai ID ou número" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <button class="btn btn-g" id="mConvBtnBuscar">${this._ico('search',13)} Buscar</button>
+                    <div id="mConvPerfilResult"></div>
+                    <div id="mConvEnvioArea" style="display:none">
+                      <div class="mc" style="margin-top:4px"><label>Categoria</label>
+                        <select id="mConvCategoria" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%">
+                          <option value="entretenimento">Entretenimento</option>
+                          <option value="games">Games</option>
+                        </select>
+                      </div>
+                      <div class="mc" style="margin-top:8px"><label>Recrutador responsável</label>
+                        <select id="mConvRecrutador" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%">
+                          <option value="">— Usar padrão —</option>
+                        </select>
+                      </div>
+                      <div style="display:flex;gap:8px;margin-top:10px">
+                        <button class="btn btn-o" id="mConvBtnDry" style="flex:1">${this._ico('eye',13)} Simular</button>
+                        <button class="btn btn-g" id="mConvBtnEnviar" style="flex:1">${this._ico('send',13)} Enviar Convite</button>
+                      </div>
+                      <div id="mConvEnvioResult" style="margin-top:8px"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="pag" id="pag-carteira">${ph('Carteira Financeira','wallet','Saldos dos streamers','btnAtuCart',`<button class="btn btn-g" id="btnCreditoRapido">${this._ico('plus',13)} Adicionar Saldo</button>`)}<div class="dc2-grid" id="carteiraResumo">${this._loading('grid-column:1/-1')}</div><div id="carteiraStreamers">${this._loading()}</div></div>
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
             <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
@@ -2272,6 +2420,314 @@ class DimaiorAdmin extends HTMLElement {
   _render(){
     const style=document.createElement('style');style.textContent=this._css();this.shadowRoot.appendChild(style);
     const wrap=document.createElement('div');wrap.innerHTML=this._html();this.shadowRoot.appendChild(wrap);
+  }
+
+  // ── CONVITES / CANDIDATURAS ──────────────────────────────────────────────────
+
+  async _carregarConvites(){
+    const s=this.shadowRoot;
+    // Carrega modo atual
+    const modoR=await this._api('GET','/admin/convites/modo');
+    if(modoR?.modo){const sel=s.getElementById('convModo');if(sel)sel.value=modoR.modo;}
+    // Carrega candidaturas por padrão
+    this._carregarCandidaturas();
+    // Atualiza badge
+    const cands=await this._api('GET','/admin/candidaturas?status=perfil_consultado');
+    const nb=s.getElementById('nbCand');
+    if(nb&&cands?.candidaturas?.length){nb.textContent=cands.candidaturas.length;nb.style.display='';}
+  }
+
+  async _salvarModoConvite(){
+    const s=this.shadowRoot;
+    const modo=s.getElementById('convModo')?.value;
+    const r=await this._api('POST','/admin/convites/modo',{modo});
+    const st=s.getElementById('convModoStatus');
+    if(r?.ok){if(st)st.textContent=`Salvo: ${modo}`;this._toast('Modo salvo: '+modo,'ok');}
+    else{this._toast('Erro ao salvar modo','err');}
+  }
+
+  async _carregarCandidaturas(){
+    const s=this.shadowRoot;const el=s.getElementById('tbCandidaturas');if(!el)return;
+    el.innerHTML=this._loading();
+    const filtro=s.getElementById('candFiltro')?.value||'';
+    const q=filtro?`?status=${encodeURIComponent(filtro)}`:'';
+    const d=await this._api('GET',`/admin/candidaturas${q}`);
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar candidaturas');return;}
+    const lista=d.candidaturas||[];
+    if(!lista.length){el.innerHTML=this._empty('clipboard','Nenhuma candidatura encontrada');return;}
+    const BADGE={perfil_consultado:'Aguardando',convite_enviado:'Convite Enviado',em_revisao:'Em Revisão',confirmado:'Confirmado',vinculado_outra_agencia:'Outra Agência',migracao_solicitada:'Migração',recusado:'Recusado',expirado:'Expirado',erro:'Erro'};
+    const COR={convite_enviado:'var(--cyan)',confirmado:'var(--verde)',recusado:'var(--verm)',erro:'var(--verm)',migracao_solicitada:'var(--gold)',vinculado_outra_agencia:'var(--gold)'};
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="border-bottom:1px solid var(--brddim)"><th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Perfil</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Categoria</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ações</th></tr></thead>
+      <tbody>${lista.map(c=>{
+        const foto=c.foto_url?`<img src="${this._safeImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(c.foto_url)}&w=36&h=36&fit=cover&output=webp`)}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--brd);vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">`:'';
+        const nome=this._esc(c.nome_kwai||c.uid||'—');
+        const wpp=c.whatsapp?`<br><span style="color:var(--t3);font-size:10px">${this._esc(c.whatsapp)}</span>`:'';
+        const cat=c.categoria==='games'?'🎮 Games':'🎭 Entretenimento';
+        const stBadge=`<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:${COR[c.status]||'var(--t2)'}">${BADGE[c.status]||c.status}</span>`;
+        const canAprovar=c.status==='perfil_consultado'&&c.member_id;
+        return`<tr style="border-bottom:1px solid var(--brddim)">
+          <td style="padding:8px 12px">${foto}<strong style="color:var(--t1)">${nome}</strong>${wpp}</td>
+          <td style="padding:8px">${cat}</td>
+          <td style="padding:8px">${stBadge}</td>
+          <td style="padding:8px;color:var(--t3)">${this._fdtCurto(c.criado_em)}</td>
+          <td style="padding:8px;display:flex;gap:4px;flex-wrap:wrap">
+            ${canAprovar?`<button class="btn btn-sm btn-g" data-cand-apr="${c.id}">${this._ico('check',11)} Aprovar</button>`:''}
+            ${c.status!=='recusado'?`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-cand-rej="${c.id}">${this._ico('x_circle',11)} Rejeitar</button>`:''}
+          </td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+    // Bind botões
+    el.querySelectorAll('[data-cand-apr]').forEach(b=>b.addEventListener('click',()=>this._aprovarCandidatura(b.dataset.candApr)));
+    el.querySelectorAll('[data-cand-rej]').forEach(b=>b.addEventListener('click',()=>this._rejeitarCandidatura(b.dataset.candRej)));
+  }
+
+  async _aprovarCandidatura(id){
+    const modo=this.shadowRoot.getElementById('convModo')?.value||'simular';
+    const dry=modo!=='automatico';
+    this._confirmarDel(`Aprovar candidatura ${id}?${dry?' (modo atual: '+modo+' — dry_run)':''}`,async()=>{
+      const r=await this._api('POST',`/admin/candidaturas/${id}/aprovar`,{dry_run:dry});
+      if(r?.ok){this._toast(dry?'Simulado com sucesso':'Convite enviado!','ok');this._carregarCandidaturas();}
+      else this._toast(r?.erro||'Erro ao aprovar','err');
+    });
+  }
+
+  async _rejeitarCandidatura(id){
+    const motivo=prompt('Motivo da rejeição (opcional):');
+    const r=await this._api('POST',`/admin/candidaturas/${id}/rejeitar`,{motivo:motivo||''});
+    if(r?.ok){this._toast('Candidatura rejeitada','ok');this._carregarCandidaturas();}
+    else this._toast(r?.erro||'Erro ao rejeitar','err');
+  }
+
+  async _carregarConvitesVoyager(){
+    const s=this.shadowRoot;const el=s.getElementById('tbConvitesVoyager');if(!el)return;
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/convites');
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao buscar convites no Voyager. Verifique o cookie.');return;}
+    const lista=d.convites||[];
+    if(!lista.length){el.innerHTML=this._empty('send','Nenhum convite encontrado no Voyager');return;}
+    const elegiveis=lista.filter(c=>c.sendAgainButtonType===1||c.inviteAgainButtonType===1);
+    el.innerHTML=`<div style="padding:10px 14px;font-size:11px;color:var(--t3);border-bottom:1px solid var(--brddim)">${lista.length} convites · <span style="color:var(--cyan)">${elegiveis.length} reenviáveis</span></div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="border-bottom:1px solid var(--brddim)">
+        <th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Membro</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Atualizado</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ação</th>
+      </tr></thead>
+      <tbody>${lista.slice(0,100).map(c=>{
+        const reenviavel=c.sendAgainButtonType===1||c.inviteAgainButtonType===1;
+        return`<tr style="border-bottom:1px solid var(--brddim)">
+          <td style="padding:8px 12px"><strong style="color:var(--t1)">${this._esc(c.memberName||c.userName||c.kwaiId||'—')}</strong><br><span style="color:var(--t3);font-size:10px">ID: ${this._esc(String(c.id||''))} · ${this._esc(c.kwaiId||'')}</span></td>
+          <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||c.inviteProcess||'—')}</td>
+          <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'—')}</td>
+          <td style="padding:8px">${reenviavel?`<button class="btn btn-sm btn-o" data-conv-reenv="${c.id}">${this._ico('refresh',11)} Reenviar</button>`:''}</td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+    el.querySelectorAll('[data-conv-reenv]').forEach(b=>b.addEventListener('click',()=>this._reenviarConvite(b.dataset.convReenv)));
+  }
+
+  async _reenviarConvite(inviteId){
+    const modo=this.shadowRoot.getElementById('convModo')?.value||'simular';
+    const dry=modo==='simular';
+    const r=await this._api('POST',`/admin/convites/${inviteId}/reenviar`,{dry_run:dry});
+    if(r?.ok)this._toast(dry?'Simulado OK':'Reenviado!','ok');
+    else this._toast(r?.erro||'Erro ao reenviar','err');
+  }
+
+  async _bulkReenviar(dry){
+    const s=this.shadowRoot;
+    const box=s.getElementById('convBulkProgressBox');
+    const info=s.getElementById('convBulkProgressInfo');
+    if(box)box.style.display='';
+    if(info)info.textContent='Iniciando reenvio em massa…';
+    const r=await this._api('POST','/admin/convites/bulk-reenviar',{dry_run:dry,limite:50,delay_ms:1300});
+    if(!r?.ok){this._toast(r?.erro||'Erro no bulk','err');if(box)box.style.display='none';return;}
+    if(info)info.textContent=`Concluído: ${r.processados} processados · ${r.resultados?.filter(x=>x.ok).length||0} OK${dry?' [DRY RUN]':''}`;
+    this._toast(`Bulk${dry?' simulado':''}: ${r.processados} processados`,'ok');
+    // Oferece envio real se era dry run
+    if(dry){this._confirmarDel(`Simulação OK (${r.processados} elegíveis). Enviar de verdade agora?`,()=>this._bulkReenviar(false));}
+  }
+
+  async _pararBulk(){
+    const s=this.shadowRoot;
+    // Não temos job_id aqui; o endpoint parará qualquer job em andamento via flag genérica
+    const r=await this._api('POST','/admin/convites/bulk-parar',{job_id:'current'});
+    if(r?.ok)this._toast('Sinal de parada enviado','ok');
+    const box=s.getElementById('convBulkProgressBox');if(box)box.style.display='none';
+  }
+
+  async _carregarMigracoes(){
+    const s=this.shadowRoot;const el=s.getElementById('tbMigracoes');if(!el)return;
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/migracoes');
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar migrações');return;}
+    const lista=d.migracoes||[];
+    if(!lista.length){el.innerHTML=this._empty('arrow_right','Nenhuma solicitação de migração');return;}
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="border-bottom:1px solid var(--brddim)">
+        <th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">UID</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Agência Origem</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th>
+      </tr></thead>
+      <tbody>${lista.map(m=>`<tr style="border-bottom:1px solid var(--brddim)">
+        <td style="padding:8px 12px"><strong style="color:var(--t1)">${this._esc(m.uid)}</strong><br><span style="color:var(--t3);font-size:10px">${this._esc(m.kwai_id||'')}</span></td>
+        <td style="padding:8px;color:var(--gold)">${this._esc(m.agencia_origem||'—')}</td>
+        <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(m.status||'pendente')}</td>
+        <td style="padding:8px;color:var(--t3)">${this._fdtCurto(m.criado_em)}</td>
+      </tr>`).join('')}</tbody></table>`;
+  }
+
+  async _abrirModalConvPerfil(){
+    const s=this.shadowRoot;
+    const m=s.getElementById('mConvPerfil');if(!m)return;
+    s.getElementById('mConvUid').value='';
+    s.getElementById('mConvPerfilResult').innerHTML='';
+    s.getElementById('mConvEnvioArea').style.display='none';
+    s.getElementById('mConvEnvioResult').innerHTML='';
+    // Popula select de recrutadores
+    const sel=s.getElementById('mConvRecrutador');
+    if(sel){
+      sel.innerHTML='<option value="">— Usar padrão —</option>';
+      const d=await this._api('GET','/admin/recrutadores');
+      (d?.recrutadores||[]).filter(r=>r.ativo).forEach(r=>{
+        const opt=document.createElement('option');
+        opt.value=r.id;
+        opt.textContent=`${r.nome} (${r.telefone})${r.padrao?' ★':''}`;
+        sel.appendChild(opt);
+      });
+    }
+    m.style.display='flex';m.style.position='fixed';m.style.inset='0';m.style.zIndex='999';m.style.alignItems='center';m.style.justifyContent='center';m.style.background='rgba(0,0,0,.7)';
+  }
+
+  // ── RECRUTADORES ─────────────────────────────────────────────────────────────
+
+  async _carregarRecrutadores(){
+    const s=this.shadowRoot;const el=s.getElementById('tbRecrutadores');if(!el)return;
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/recrutadores');
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar recrutadores');return;}
+    const lista=d.recrutadores||[];
+    if(!lista.length){el.innerHTML=this._empty('user_plus','Nenhum recrutador cadastrado. Clique em "+ Novo" para adicionar.');return;}
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:1px solid var(--brddim)">
+        <th style="padding:10px 16px;text-align:left;color:var(--t3);font-weight:600">Nome</th>
+        <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Telefone</th>
+        <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Status</th>
+        <th style="padding:10px 8px;text-align:right;color:var(--t3);font-weight:600">Ações</th>
+      </tr></thead>
+      <tbody>${lista.map(r=>`<tr style="border-bottom:1px solid var(--brddim)">
+        <td style="padding:10px 16px">
+          <strong style="color:var(--t1)">${this._esc(r.nome)}</strong>
+          ${r.padrao?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:10px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);color:var(--cyan)">★ Padrão</span>`:''}
+        </td>
+        <td style="padding:10px 8px;color:var(--t2)">${this._esc(r.telefone)}</td>
+        <td style="padding:10px 8px">
+          <span style="font-size:11px;padding:2px 8px;border-radius:10px;${r.ativo?'background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80':'background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)'}">${r.ativo?'Ativo':'Inativo'}</span>
+        </td>
+        <td style="padding:10px 8px;text-align:right;display:flex;gap:6px;justify-content:flex-end">
+          <button class="btn btn-sm btn-o" data-rec-edit='${JSON.stringify({id:r.id,nome:r.nome,telefone:r.telefone,padrao:r.padrao,ativo:r.ativo})}'>${this._ico('edit',11)} Editar</button>
+          <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-rec-del="${r.id}">${this._ico('x_circle',11)} Excluir</button>
+        </td>
+      </tr>`).join('')}</tbody></table>`;
+    el.querySelectorAll('[data-rec-edit]').forEach(b=>b.addEventListener('click',()=>{
+      try{this._abrirFormRecrutador(JSON.parse(b.dataset.recEdit));}catch{}
+    }));
+    el.querySelectorAll('[data-rec-del]').forEach(b=>b.addEventListener('click',()=>
+      this._confirmarDel(`Excluir recrutador?`,()=>this._excluirRecrutador(b.dataset.recDel))
+    ));
+  }
+
+  _abrirFormRecrutador(rec){
+    const s=this.shadowRoot;
+    const box=s.getElementById('formRecrutadorBox');if(!box)return;
+    s.getElementById('fRecId').value=rec?.id||'';
+    s.getElementById('fRecNome').value=rec?.nome||'';
+    s.getElementById('fRecTel').value=rec?.telefone||'';
+    s.getElementById('fRecPadrao').checked=!!rec?.padrao;
+    s.getElementById('formRecrutadorTit').textContent=rec?'Editar Recrutador':'Novo Recrutador';
+    box.style.display='';
+    s.getElementById('fRecNome').focus();
+  }
+
+  async _salvarRecrutador(){
+    const s=this.shadowRoot;
+    const id=s.getElementById('fRecId')?.value?.trim();
+    const nome=s.getElementById('fRecNome')?.value?.trim();
+    const telefone=s.getElementById('fRecTel')?.value?.trim();
+    const padrao=s.getElementById('fRecPadrao')?.checked||false;
+    if(!nome||!telefone){this._toast('Nome e telefone são obrigatórios','err');return;}
+    const btn=s.getElementById('btnSalvarRecrutador');btn.disabled=true;
+    const r=id
+      ?await this._api('PUT',`/admin/recrutadores/${id}`,{nome,telefone,padrao,ativo:true})
+      :await this._api('POST','/admin/recrutadores',{nome,telefone,padrao});
+    btn.disabled=false;
+    if(r?.ok){
+      this._toast(id?'Recrutador atualizado':'Recrutador criado','ok');
+      s.getElementById('formRecrutadorBox').style.display='none';
+      this._carregarRecrutadores();
+    }else{
+      this._toast(r?.erro||r?.mensagem||'Erro ao salvar','err');
+    }
+  }
+
+  async _excluirRecrutador(id){
+    const r=await this._api('DELETE',`/admin/recrutadores/${id}`);
+    if(r?.ok){this._toast('Recrutador excluído','ok');this._carregarRecrutadores();}
+    else this._toast(r?.erro||'Erro ao excluir','err');
+  }
+
+  _fechaModalConvPerfil(){
+    const m=this.shadowRoot.getElementById('mConvPerfil');if(m)m.style.display='none';
+  }
+
+  async _buscarPerfilConvite(){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('mConvUid')?.value?.trim();
+    if(!uid){this._toast('Informe o UID','err');return;}
+    s.getElementById('mConvPerfilResult').innerHTML=this._loading();
+    s.getElementById('mConvEnvioArea').style.display='none';
+    const r=await this._api('POST','/admin/candidaturas/buscar-perfil',{uid});
+    if(!r?.ok||!r?.perfil){
+      s.getElementById('mConvPerfilResult').innerHTML=`<div style="color:var(--verm);font-size:12px;padding:8px 0">${this._esc(r?.mensagem||'Perfil não encontrado')}</div>`;
+      return;
+    }
+    const p=r.perfil;
+    const foto=p.foto?`<img src="${this._safeImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(p.foto)}&w=60&h=60&fit=cover&output=webp`)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid var(--brd);flex-shrink:0" onerror="this.style.display='none'">`:'';
+    const agBadge=p.agencia?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);color:var(--gold)">${this._esc(p.agencia)}</span>`:'';
+    const stBadge=r.status==='LIVRE'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80">Livre</span>`:
+      r.status==='VINCULADO_OUTRA_AGENCIA'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)">Outra Agência</span>`:
+      `<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:var(--t3)">${this._esc(r.status)}</span>`;
+    s.getElementById('mConvPerfilResult').innerHTML=`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--brddim);margin-top:8px">
+      ${foto}
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome||p.kwaiId||'—')}</div>
+        <div style="font-size:10px;color:var(--t3)">ID: ${this._esc(p.memberId||'—')} · Kwai: ${this._esc(p.kwaiId||'—')}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${stBadge}${agBadge}</div>
+      </div></div>`;
+    if(r.status==='LIVRE'||r.acao==='ENVIAR')s.getElementById('mConvEnvioArea').style.display='';
+    this._convPerfilAtual=r.perfil;
+  }
+
+  async _enviarConviteManual(dry){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('mConvUid')?.value?.trim();
+    const categoria=s.getElementById('mConvCategoria')?.value||'entretenimento';
+    const recrutador_id=s.getElementById('mConvRecrutador')?.value||null;
+    const res=s.getElementById('mConvEnvioResult');
+    if(!uid){this._toast('UID inválido','err');return;}
+    s.getElementById('mConvBtnEnviar').disabled=true;s.getElementById('mConvBtnDry').disabled=true;
+    const payload={uid,categoria,dry_run:dry};
+    if(recrutador_id)payload.recrutador_id=recrutador_id;
+    const r=await this._api('POST','/admin/convites/enviar',payload);
+    s.getElementById('mConvBtnEnviar').disabled=false;s.getElementById('mConvBtnDry').disabled=false;
+    if(r?.ok){
+      if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'Simulação OK — sem envio real':'✅ Convite enviado com sucesso!'}</div>`;
+      this._toast(dry?'Simulado OK':'Convite enviado!','ok');
+    }else{
+      if(res)res.innerHTML=`<div style="color:var(--verm);font-size:12px;padding:6px 0">${this._esc(r?.mensagem||r?.erro||'Erro ao enviar')}</div>`;
+    }
   }
 }
 

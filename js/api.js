@@ -272,16 +272,29 @@ window.DmaiorAPI = {
   // ── Módulo: Recrutamento ──────────────────────────────────────────────────
 
   recrutamento: {
-    /**
-     * Envia formulário de recrutamento de novo streamer.
-     * @param {object} dados - Dados do formulário
-     */
     async enviar(dados) {
-      return window.DmaiorAPI._post(
-        window.DmaiorConfig.workers.recrutamento,
-        '/candidatura',
-        dados,
-      );
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.recrutamento, '/candidatura', dados);
+    },
+  },
+
+  // ── Módulo: Candidatura (fluxo Voyager) ───────────────────────────────────
+
+  candidatura: {
+    /** Busca perfil Kwai/Voyager pelo UID antes do cadastro. */
+    async buscarPerfil(uid) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/buscar-perfil', { uid });
+    },
+    /** Envia candidatura completa com perfil confirmado. */
+    async enviar({ uid, nome, whatsapp, categoria, aceite }) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, aceite });
+    },
+    /** Consulta status pelo protocolo gerado no envio. */
+    async status(protocolo) {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/candidatura/status/${encodeURIComponent(protocolo)}`);
+    },
+    /** Registra clique no botão de migração (para o admin acompanhar). */
+    async registrarMigracao({ uid, kwai_id, agencia_atual, candidatura_id }) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/migracao', { uid, kwai_id, agencia_atual, candidatura_id });
     },
   },
 
