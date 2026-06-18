@@ -1064,6 +1064,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSalvarModo').addEventListener('click',()=>this._salvarModoConvite());
     s.getElementById('mConvPerfilX').addEventListener('click',()=>this._fechaModalConvPerfil());
     s.getElementById('mConvBtnBuscar').addEventListener('click',()=>this._buscarPerfilConvite());
+    s.getElementById('mConvRecrutador').addEventListener('change',()=>this._atualizarResumoRecrutador());
     s.getElementById('mConvBtnDry').addEventListener('click',()=>this._enviarConviteManual(true));
     s.getElementById('mConvBtnEnviar').addEventListener('click',()=>this._enviarConviteManual(false));
     s.getElementById('btnPararBulk').addEventListener('click',()=>this._pararBulk());
@@ -2179,7 +2180,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
             <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulário','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
             <div class="pag" id="pag-convites">
-              ${ph('Convites / Candidaturas','user_plus','Gestão de agenciamento via Voyager','btnAtuConvites',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnConvBuscarPerfil">${this._ico('search',13)} Buscar Perfil</button><button class="btn btn-g" id="btnBulkReenviar">${this._ico('send',13)} Reenviar Elegíveis</button><button class="btn" id="btnAtualizarCache" style="background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('refresh',13)} Atualizar Cache</button></div>`)}
+              ${ph('Convites / Candidaturas','user_plus','Gestão de agenciamento via Voyager','btnAtuConvites',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnConvBuscarPerfil">${this._ico('plus',13)} Adicionar manualmente</button><button class="btn btn-g" id="btnBulkReenviar">${this._ico('send',13)} Reenviar Elegíveis</button><button class="btn" id="btnAtualizarCache" style="background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('refresh',13)} Atualizar Cache</button></div>`)}
               <!-- Modo operação -->
               <div class="box" style="margin-bottom:14px">
                 <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Modo de Operação</div></div>
@@ -2270,10 +2271,10 @@ class DimaiorAdmin extends HTMLElement {
               <!-- Modal: buscar perfil / envio manual -->
               <div class="modal" id="mConvPerfil" style="display:none">
                 <div class="modal-box">
-                  <div class="modal-head"><span id="mConvPerfilTit">Buscar Perfil</span><button class="modal-x" id="mConvPerfilX">${this._ico('x',14)}</button></div>
+                  <div class="modal-head"><span id="mConvPerfilTit">Adicionar convite manualmente</span><button class="modal-x" id="mConvPerfilX">${this._ico('x',14)}</button></div>
                   <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                    <div class="mc"><label>Kwai ID / UID</label><input id="mConvUid" type="text" placeholder="Digite o Kwai ID ou número" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
-                    <button class="btn btn-g" id="mConvBtnBuscar">${this._ico('search',13)} Buscar</button>
+                    <div class="mc"><label>Kwai ID / UID do streamer</label><input id="mConvUid" type="text" placeholder="Digite o ID para preencher o perfil" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <button class="btn btn-g" id="mConvBtnBuscar">${this._ico('search',13)} Buscar e preencher</button>
                     <div id="mConvPerfilResult"></div>
                     <div id="mConvEnvioArea" style="display:none">
                       <div class="mc" style="margin-top:4px"><label>Categoria</label>
@@ -2287,6 +2288,7 @@ class DimaiorAdmin extends HTMLElement {
                           <option value="">— Usar padrão —</option>
                         </select>
                       </div>
+                      <div id="mConvRecrutadorResumo" style="margin-top:8px;padding:10px 12px;border:1px solid var(--brddim);border-radius:8px;background:rgba(0,212,212,.04)"></div>
                       <div style="display:flex;gap:8px;margin-top:10px">
                         <button class="btn btn-o" id="mConvBtnDry" style="flex:1">${this._ico('eye',13)} Simular</button>
                         <button class="btn btn-g" id="mConvBtnEnviar" style="flex:1">${this._ico('send',13)} Enviar Convite</button>
@@ -2653,16 +2655,43 @@ class DimaiorAdmin extends HTMLElement {
     // Popula select de recrutadores
     const sel=s.getElementById('mConvRecrutador');
     if(sel){
-      sel.innerHTML='<option value="">— Usar padrão —</option>';
       const d=await this._api('GET','/admin/recrutadores');
-      (d?.recrutadores||[]).filter(r=>r.ativo).forEach(r=>{
+      this._convRecrutadores=(d?.recrutadores||[]).filter(r=>r.ativo);
+      sel.innerHTML='';
+      this._convRecrutadores.forEach(r=>{
         const opt=document.createElement('option');
         opt.value=r.id;
-        opt.textContent=`${r.nome} (${r.telefone})${r.padrao?' ★':''}`;
+        const dono=String(r.nome||'').trim().toLowerCase()==='dan';
+        opt.textContent=`${r.nome} — ${r.telefone}${r.padrao?' ★ Padrão':''}${dono?' · Dono da agência':''}`;
         sel.appendChild(opt);
       });
+      if(!this._convRecrutadores.length){
+        const opt=document.createElement('option');opt.value='';opt.textContent='Nenhum recrutador ativo';sel.appendChild(opt);
+      }else{
+        const padrao=this._convRecrutadores.find(r=>r.padrao)||this._convRecrutadores[0];
+        sel.value=String(padrao.id);
+      }
+      this._atualizarResumoRecrutador();
     }
     m.style.display='flex';m.style.position='fixed';m.style.inset='0';m.style.zIndex='999';m.style.alignItems='center';m.style.justifyContent='center';m.style.background='rgba(0,0,0,.7)';
+  }
+
+  _atualizarResumoRecrutador(){
+    const s=this.shadowRoot;
+    const sel=s.getElementById('mConvRecrutador');
+    const el=s.getElementById('mConvRecrutadorResumo');
+    if(!sel||!el)return;
+    const rec=(this._convRecrutadores||[]).find(r=>String(r.id)===String(sel.value));
+    if(!rec){
+      el.innerHTML='<span style="font-size:11px;color:var(--gold)">Cadastre ou ative um recrutador antes do envio.</span>';
+      return;
+    }
+    const dono=String(rec.nome||'').trim().toLowerCase()==='dan';
+    el.innerHTML=`<div style="display:flex;align-items:center;gap:9px">
+      <span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(0,212,212,.1);color:var(--cyan)">${this._ico('users',14)}</span>
+      <div style="min-width:0;flex:1"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Dados enviados ao Voyager</div>
+      <strong style="font-size:13px;color:var(--t1)">${this._esc(rec.nome)}</strong>${dono?'<span style="margin-left:6px;font-size:9px;color:var(--gold)">DONO DA AGÊNCIA</span>':''}<br>
+      <span style="font-size:11px;color:var(--t2)">${this._esc(rec.telefone)}</span></div></div>`;
   }
 
   // ── RECRUTADORES ─────────────────────────────────────────────────────────────
