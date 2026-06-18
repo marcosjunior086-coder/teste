@@ -76,6 +76,18 @@
     .rc-resultado h2 { font-family: var(--dm-font-title); font-size: 1.4rem; color: var(--dm-cyan); text-transform: uppercase; margin-bottom: 8px; }
     .rc-resultado p  { font-size: .88rem; color: var(--dm-text-muted); line-height: 1.6; }
     .rc-protocolo { display: inline-block; margin-top: 12px; padding: 8px 16px; background: rgba(0,212,212,.08); border: 1px solid rgba(0,212,212,.2); border-radius: 8px; font-family: monospace; font-size: .9rem; color: var(--dm-cyan); letter-spacing: .05em; }
+    .rc-pos-envio { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--dm-border); text-align: left; }
+    .rc-pos-envio h3 { margin: 0 0 10px; color: var(--dm-text); font-family: var(--dm-font-title); font-size: 1rem; text-transform: uppercase; }
+    .rc-pos-envio p { margin: 0 0 14px; }
+    .rc-agencia-id { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin-bottom: 14px; border: 1px solid rgba(0,212,212,.25); border-radius: 8px; background: rgba(0,212,212,.06); }
+    .rc-agencia-id span { color: var(--dm-text-muted); font-size: .78rem; }
+    .rc-agencia-id strong { display: block; margin-top: 2px; color: var(--dm-cyan); font-family: monospace; font-size: 1.05rem; letter-spacing: .08em; }
+    .rc-copy-btn { flex-shrink: 0; padding: 8px 11px; border: 1px solid rgba(0,212,212,.35); border-radius: 7px; background: transparent; color: var(--dm-cyan); font-family: var(--dm-font-title); font-weight: 700; cursor: pointer; }
+    .rc-result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .rc-result-link { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 12px; border: 1px solid var(--dm-border); border-radius: 8px; color: var(--dm-text); font-family: var(--dm-font-title); font-weight: 700; text-align: center; text-decoration: none; }
+    .rc-result-link:hover { border-color: var(--dm-cyan); color: var(--dm-cyan); }
+    .rc-result-link.whatsapp { border-color: rgba(37,211,102,.4); color: #25d366; }
+    @media(max-width:480px){ .rc-result-actions { grid-template-columns: 1fr; } }
 
     /* ── Termos ── */
     .rc-termos { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 20px; }
@@ -242,6 +254,18 @@
             <h2 id="resultado-titulo">Candidatura enviada!</h2>
             <p id="resultado-desc">Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp em breve.</p>
             <div class="rc-protocolo" id="resultado-protocolo"></div>
+            <div class="rc-pos-envio">
+              <h3>Próximos passos</h3>
+              <p>O convite será enviado pelo chat do Kwai e pode levar até 30 minutos para aparecer. Ao aceitar, informe o ID da agência abaixo quando solicitado.</p>
+              <div class="rc-agencia-id">
+                <div><span>ID da agência</span><strong id="agencia-kwai-id">KWAIRES</strong></div>
+                <button type="button" class="rc-copy-btn" id="btn-copiar-agencia">Copiar</button>
+              </div>
+              <div class="rc-result-actions">
+                <a class="rc-result-link" href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" rel="noopener noreferrer">Como aceitar o convite</a>
+                <a class="rc-result-link whatsapp" id="btn-wpp-resultado" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer">Falar com a agência</a>
+              </div>
+            </div>
           </div>
           <div style="margin-top:24px;">
             <button class="dm-btn-secondary" id="btn-nova" style="width:100%;padding:12px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;">Nova consulta</button>
@@ -266,6 +290,29 @@
     let _candidaturaId = null;
 
     const $ = id => document.getElementById(id);
+    const WHATSAPP_AGENCIA = '5517997176407';
+    const AGENCIA_KWAI_ID = 'KWAIRES';
+
+    function linkWhatsApp(mensagem) {
+      return `https://wa.me/${WHATSAPP_AGENCIA}?text=${encodeURIComponent(mensagem)}`;
+    }
+
+    function configurarWhatsAppMigracao() {
+      if (!_perfil) return;
+      const nome = _perfil.nome || _perfil.kwaiId || 'streamer';
+      const kwaiId = _perfil.kwaiId || $('f-uid').value.trim();
+      $('btn-wpp-migracao').href = linkWhatsApp(
+        `Olá! Sou ${nome}, meu Kwai ID é ${kwaiId} e quero solicitar orientação para migrar de agência e entrar para a DMaior Agency.`
+      );
+    }
+
+    function configurarWhatsAppResultado() {
+      const nome = $('f-nome').value.trim() || _perfil?.nome || 'streamer';
+      const kwaiId = _perfil?.kwaiId || $('f-uid').value.trim();
+      $('btn-wpp-resultado').href = linkWhatsApp(
+        `Olá! Sou ${nome}, meu Kwai ID é ${kwaiId} e solicitei entrada na DMaior Agency. Preciso de orientação sobre o convite.`
+      );
+    }
 
     /* ── Utilitários ── */
     function maskPhone(v) {
@@ -393,6 +440,7 @@
       if (!_verificacao || !_perfil) return;
       if (_verificacao.status === 'VINCULADO_OUTRA_AGENCIA') {
         $('migracao-agencia-texto').textContent = `Seu perfil está vinculado à agência: ${_perfil.agencia || 'outra agência'}. Para entrar na DMaior, será necessário solicitar migração.`;
+        configurarWhatsAppMigracao();
         irParaEtapa('migracao');
       } else {
         irParaEtapa(3);
@@ -446,6 +494,7 @@
           $('resultado-desc').textContent  = 'Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp informado em breve.';
         }
 
+        configurarWhatsAppResultado();
         irParaEtapa('resultado');
       } catch (e) {
         alerta('alerta-3', 'error', e?.message || 'Erro de conexão. Verifique sua internet e tente novamente.');
@@ -456,22 +505,33 @@
     });
 
     /* ── Migração ── */
-    $('btn-wpp-migracao').addEventListener('click', async function (e) {
+    $('btn-wpp-migracao').addEventListener('click', function () {
       // Registra migração antes de abrir o WhatsApp
       if (_perfil) {
-        try {
-          await window.DmaiorAPI.candidatura.registrarMigracao({
+        window.DmaiorAPI.candidatura.registrarMigracao({
             uid:          $('f-uid').value.trim(),
             kwai_id:      _perfil.kwaiId,
             agencia_atual: _perfil.agencia,
             candidatura_id: _candidaturaId,
-          });
-        } catch (_) { /* não bloqueia o fluxo */ }
+          }).catch(() => {});
       }
-      // Se o Worker retornou wpp_link, usamos ele; senão deixa o href="#"
-      if (_verificacao?.wpp_link) {
-        this.href = _verificacao.wpp_link;
+    });
+
+    $('btn-copiar-agencia').addEventListener('click', async function () {
+      try {
+        await navigator.clipboard.writeText(AGENCIA_KWAI_ID);
+      } catch (_) {
+        const campo = document.createElement('textarea');
+        campo.value = AGENCIA_KWAI_ID;
+        campo.style.position = 'fixed';
+        campo.style.opacity = '0';
+        document.body.appendChild(campo);
+        campo.select();
+        document.execCommand('copy');
+        campo.remove();
       }
+      this.textContent = 'Copiado';
+      setTimeout(() => { this.textContent = 'Copiar'; }, 1600);
     });
 
     $('btn-voltar-mig').addEventListener('click', () => {
