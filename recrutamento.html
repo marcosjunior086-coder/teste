@@ -377,7 +377,7 @@
 
         irParaEtapa(2);
       } catch (e) {
-        const msg = e?.message && !e.message.startsWith('HTTP') ? e.message : 'Erro de conexão. Verifique sua internet e tente novamente.';
+        const msg = e?.message || 'Erro de conexão. Verifique sua internet e tente novamente.';
         alerta('alerta-1', 'error', msg);
         console.error('[buscarPerfil]', e);
       } finally {
@@ -447,8 +447,8 @@
         }
 
         irParaEtapa('resultado');
-      } catch (_) {
-        alerta('alerta-3', 'error', 'Erro de conexão. Verifique sua internet e tente novamente.');
+      } catch (e) {
+        alerta('alerta-3', 'error', e?.message || 'Erro de conexão. Verifique sua internet e tente novamente.');
       } finally {
         $('btn-enviar').disabled = false;
         $('loading-3').classList.add('rc-hidden');

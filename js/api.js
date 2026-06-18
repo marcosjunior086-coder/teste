@@ -51,7 +51,7 @@ window.DmaiorAPI = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.mensagem || `HTTP ${res.status}`);
+      throw new Error(err.mensagem || err.erro || `HTTP ${res.status}`);
     }
     return res.json();
   },
