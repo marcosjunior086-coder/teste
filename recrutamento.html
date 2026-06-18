@@ -337,11 +337,11 @@
       try {
         const r = await window.DmaiorAPI.candidatura.buscarPerfil(uid);
 
-        if (!r.ok && r.status === 'COOKIE_INDISPONIVEL') {
+        if (r.status === 'COOKIE_INDISPONIVEL') {
           alerta('alerta-1', 'error', 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.');
           return;
         }
-        if (!r.ok || r.status === 'PERFIL_NAO_ENCONTRADO' || r.status === 'ERRO_REDE') {
+        if (!r.ok) {
           alerta('alerta-1', 'error', r.mensagem || 'Perfil não encontrado. Verifique o Kwai ID e tente novamente.');
           return;
         }
@@ -361,8 +361,10 @@
         }
 
         irParaEtapa(2);
-      } catch (_) {
-        alerta('alerta-1', 'error', 'Erro de conexão. Verifique sua internet e tente novamente.');
+      } catch (e) {
+        const msg = e?.message && !e.message.startsWith('HTTP') ? e.message : 'Erro de conexão. Verifique sua internet e tente novamente.';
+        alerta('alerta-1', 'error', msg);
+        console.error('[buscarPerfil]', e);
       } finally {
         $('btn-buscar').disabled = false;
         $('loading-1').classList.add('rc-hidden');
