@@ -1067,6 +1067,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mConvBtnDry').addEventListener('click',()=>this._enviarConviteManual(true));
     s.getElementById('mConvBtnEnviar').addEventListener('click',()=>this._enviarConviteManual(false));
     s.getElementById('btnPararBulk').addEventListener('click',()=>this._pararBulk());
+    s.getElementById('btnAtualizarCache').addEventListener('click',()=>this._atualizarCacheVoyager());
     s.getElementById('mConvPerfil').addEventListener('click',e=>{if(e.target===s.getElementById('mConvPerfil'))this._fechaModalConvPerfil();});
     // Recrutadores
     s.getElementById('btnNovoRecrutador').addEventListener('click',()=>this._abrirFormRecrutador(null));
@@ -2178,7 +2179,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
             <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulário','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
             <div class="pag" id="pag-convites">
-              ${ph('Convites / Candidaturas','user_plus','Gestão de agenciamento via Voyager','btnAtuConvites',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnConvBuscarPerfil">${this._ico('search',13)} Buscar Perfil</button><button class="btn btn-g" id="btnBulkReenviar">${this._ico('send',13)} Reenviar Elegíveis</button></div>`)}
+              ${ph('Convites / Candidaturas','user_plus','Gestão de agenciamento via Voyager','btnAtuConvites',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnConvBuscarPerfil">${this._ico('search',13)} Buscar Perfil</button><button class="btn btn-g" id="btnBulkReenviar">${this._ico('send',13)} Reenviar Elegíveis</button><button class="btn" id="btnAtualizarCache" style="background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('refresh',13)} Atualizar Cache</button></div>`)}
               <!-- Modo operação -->
               <div class="box" style="margin-bottom:14px">
                 <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Modo de Operação</div></div>
@@ -2424,6 +2425,29 @@ class DimaiorAdmin extends HTMLElement {
 
   // ── CONVITES / CANDIDATURAS ──────────────────────────────────────────────────
 
+  async _atualizarCacheVoyager(){
+    const btn=this.shadowRoot.getElementById('btnAtualizarCache');
+    const _setBtn=(txt,dis=true)=>{if(btn){btn.disabled=dis;btn.innerHTML=txt;}};
+    _setBtn('Iniciando…');
+    const r=await this._api('POST','/admin/cache/atualizar');
+    if(!r?.ok){_setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);this._toast(r?.mensagem||'Erro ao iniciar cache','err');return;}
+    this._toast('Rebuild iniciado — aguardando conclusão…','ok');
+    const t0=Date.now();
+    const poll=async()=>{
+      if(Date.now()-t0>120000){_setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);this._toast('Timeout aguardando rebuild','err');return;}
+      const s=await this._api('GET','/admin/cache/status');
+      if(s?.status==='processando'){_setBtn('Processando…');setTimeout(poll,2500);}
+      else if(s?.status==='concluido'){
+        _setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);
+        this._toast(`Cache atualizado — ${s.cache?.total_membros??'?'} membros · ${s.cache?.total_convites??'?'} convites`,'ok');
+      } else {
+        _setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);
+        this._toast(s?.status==='sem_cache'?'Cache ainda não disponível':'Erro desconhecido','err');
+      }
+    };
+    setTimeout(poll,2500);
+  }
+
   async _carregarConvites(){
     const s=this.shadowRoot;
     // Carrega modo atual
@@ -2484,12 +2508,12 @@ class DimaiorAdmin extends HTMLElement {
 
   async _aprovarCandidatura(id){
     const modo=this.shadowRoot.getElementById('convModo')?.value||'simular';
-    const dry=modo!=='automatico';
-    this._confirmarDel(`Aprovar candidatura ${id}?${dry?' (modo atual: '+modo+' — dry_run)':''}`,async()=>{
-      const r=await this._api('POST',`/admin/candidaturas/${id}/aprovar`,{dry_run:dry});
-      if(r?.ok){this._toast(dry?'Simulado com sucesso':'Convite enviado!','ok');this._carregarCandidaturas();}
-      else this._toast(r?.erro||'Erro ao aprovar','err');
-    });
+    const dry=modo==='simular';
+    const label=dry?`Simular aprovação (modo: ${modo})`:`Enviar convite real (modo: ${modo})`;
+    if(!confirm(`${label}\n\nCandidatura: ${id}\n\nConfirmar?`))return;
+    const r=await this._api('POST',`/admin/candidaturas/${id}/aprovar`,{dry_run:dry});
+    if(r?.ok){this._toast(dry?'Simulado com sucesso':'Convite enviado!','ok');this._carregarCandidaturas();}
+    else this._toast(r?.mensagem||r?.erro||'Erro ao aprovar','err');
   }
 
   async _rejeitarCandidatura(id){
@@ -2499,15 +2523,38 @@ class DimaiorAdmin extends HTMLElement {
     else this._toast(r?.erro||'Erro ao rejeitar','err');
   }
 
-  async _carregarConvitesVoyager(){
+  _convPagState={page:1,count:10};
+
+  async _carregarConvitesVoyager(page,count){
     const s=this.shadowRoot;const el=s.getElementById('tbConvitesVoyager');if(!el)return;
+    if(page)this._convPagState.page=page;
+    if(count)this._convPagState.count=count;
+    const pg=this._convPagState.page,cnt=this._convPagState.count;
     el.innerHTML=this._loading();
-    const d=await this._api('GET','/admin/convites');
+    const d=await this._api('GET',`/admin/convites?page=${pg}&count=${cnt}`);
     if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao buscar convites no Voyager. Verifique o cookie.');return;}
     const lista=d.convites||[];
-    if(!lista.length){el.innerHTML=this._empty('send','Nenhum convite encontrado no Voyager');return;}
-    const elegiveis=lista.filter(c=>c.sendAgainButtonType===1||c.inviteAgainButtonType===1);
-    el.innerHTML=`<div style="padding:10px 14px;font-size:11px;color:var(--t3);border-bottom:1px solid var(--brddim)">${lista.length} convites · <span style="color:var(--cyan)">${elegiveis.length} reenviáveis</span></div>
+    const total=d.total||0,totalPg=d.total_pages||1;
+    const elegiveis=lista.filter(c=>c.reenviavel).length;
+
+    // Paginação
+    const _pgBtn=(lbl,p,dis=false)=>`<button class="btn btn-sm${dis?' btn-dis':''}" ${dis?'disabled':''} data-conv-pg="${p}" style="min-width:32px">${lbl}</button>`;
+    let pgBtns='';
+    const maxVis=7,half=Math.floor(maxVis/2);
+    let start=Math.max(1,pg-half),end=Math.min(totalPg,start+maxVis-1);
+    if(end-start<maxVis-1)start=Math.max(1,end-maxVis+1);
+    if(start>1)pgBtns+=_pgBtn('1',1)+(start>2?'<span style="padding:0 4px;color:var(--t3)">…</span>':'');
+    for(let i=start;i<=end;i++)pgBtns+=_pgBtn(i,i,i===pg);
+    if(end<totalPg)pgBtns+=(end<totalPg-1?'<span style="padding:0 4px;color:var(--t3)">…</span>':'')+_pgBtn(totalPg,totalPg);
+
+    el.innerHTML=`
+    <div style="padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--brddim)">
+      <span style="font-size:11px;color:var(--t3)">${total} convites · <span style="color:var(--cyan)">${elegiveis} reenviáveis nesta página</span></span>
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <span style="font-size:11px;color:var(--t3)">por página:</span>
+        ${[10,20,50].map(n=>`<button class="btn btn-sm${cnt===n?' btn-dis':''}" ${cnt===n?'disabled':''} data-conv-cnt="${n}">${n}</button>`).join('')}
+      </div>
+    </div>
     <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="border-bottom:1px solid var(--brddim)">
         <th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Membro</th>
@@ -2515,16 +2562,31 @@ class DimaiorAdmin extends HTMLElement {
         <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Atualizado</th>
         <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ação</th>
       </tr></thead>
-      <tbody>${lista.slice(0,100).map(c=>{
-        const reenviavel=c.sendAgainButtonType===1||c.inviteAgainButtonType===1;
-        return`<tr style="border-bottom:1px solid var(--brddim)">
-          <td style="padding:8px 12px"><strong style="color:var(--t1)">${this._esc(c.memberName||c.userName||c.kwaiId||'—')}</strong><br><span style="color:var(--t3);font-size:10px">ID: ${this._esc(String(c.id||''))} · ${this._esc(c.kwaiId||'')}</span></td>
-          <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||c.inviteProcess||'—')}</td>
-          <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'—')}</td>
-          <td style="padding:8px">${reenviavel?`<button class="btn btn-sm btn-o" data-conv-reenv="${c.id}">${this._ico('refresh',11)} Reenviar</button>`:''}</td>
-        </tr>`;
-      }).join('')}</tbody></table>`;
+      <tbody>${lista.map(c=>`<tr style="border-bottom:1px solid var(--brddim)">
+        <td style="padding:8px 12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            ${c.foto?`<img src="${this._esc(c.foto)}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy" onerror="this.style.display='none'">`:
+              `<div style="width:30px;height:30px;border-radius:50%;background:var(--brddim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px">👤</div>`}
+            <div><strong style="color:var(--t1)">${this._esc(c.memberName||c.kwaiId||'—')}</strong><br>
+            <span style="color:var(--t3);font-size:10px">${this._esc(c.kwaiId||'')} · ID ${this._esc(String(c.id||''))}</span></div>
+          </div>
+        </td>
+        <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||'—')}</td>
+        <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'—')}</td>
+        <td style="padding:8px">${c.reenviavel?`<button class="btn btn-sm btn-o" data-conv-reenv="${c.id}">${this._ico('refresh',11)} Reenviar</button>`:''}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span style="font-size:11px;color:var(--t3)">Página ${pg} de ${totalPg}</span>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${_pgBtn('←',pg-1,pg<=1)}
+        ${pgBtns}
+        ${_pgBtn('→',pg+1,pg>=totalPg)}
+      </div>
+    </div>`;
     el.querySelectorAll('[data-conv-reenv]').forEach(b=>b.addEventListener('click',()=>this._reenviarConvite(b.dataset.convReenv)));
+    el.querySelectorAll('[data-conv-pg]').forEach(b=>b.addEventListener('click',()=>!b.disabled&&this._carregarConvitesVoyager(+b.dataset.convPg)));
+    el.querySelectorAll('[data-conv-cnt]').forEach(b=>b.addEventListener('click',()=>!b.disabled&&this._carregarConvitesVoyager(1,+b.dataset.convCnt)));
   }
 
   async _reenviarConvite(inviteId){

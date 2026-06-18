@@ -345,6 +345,10 @@
           alerta('alerta-1', 'warning', r.mensagem || 'Não foi possível verificar o status deste perfil. Tente novamente mais tarde.');
           return;
         }
+        if (r.status === 'RESTRICAO_LIVE') {
+          alerta('alerta-1', 'warning', r.checkMessage || r.mensagem || 'Este perfil tem restrição de horas de live. Tente novamente em alguns dias.');
+          return;
+        }
         if (!r.ok) {
           alerta('alerta-1', 'error', r.mensagem || 'Perfil não encontrado. Verifique o Kwai ID e tente novamente.');
           return;
