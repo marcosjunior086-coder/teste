@@ -262,16 +262,26 @@
             <h2 id="resultado-titulo">Candidatura enviada!</h2>
             <p id="resultado-desc">Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp em breve.</p>
             <div class="rc-protocolo" id="resultado-protocolo"></div>
-            <div class="rc-pos-envio">
+            <div class="rc-pos-envio rc-hidden" id="bloco-pos-envio">
               <h3>Próximos passos</h3>
-              <p>O convite será enviado pelo chat do Kwai e pode levar até 30 minutos para aparecer. Ao aceitar, informe o ID da agência abaixo quando solicitado.</p>
+              <p>O convite foi enviado pelo chat do Kwai e pode levar até 30 minutos para aparecer. Ao aceitar, informe o ID da agência abaixo quando solicitado.</p>
               <div class="rc-agencia-id">
                 <div><span>ID da agência</span><strong id="agencia-kwai-id">KWAIRES</strong></div>
                 <button type="button" class="rc-copy-btn" id="btn-copiar-agencia">Copiar</button>
               </div>
+              <div style="margin-bottom:14px;padding:10px 14px;border:1px solid var(--dm-border);border-radius:8px;font-size:.82rem;color:var(--dm-text-muted);line-height:1.6">
+                <strong style="color:var(--dm-text);display:block;margin-bottom:2px">Responsável pelo convite</strong>
+                Dan · (17) 99717-6407
+                <span style="display:block;margin-top:4px;font-size:.75rem;font-style:italic;color:var(--dm-text-muted)">Informações de recrutador em breve.</span>
+              </div>
               <div class="rc-result-actions">
                 <a class="rc-result-link" href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" rel="noopener noreferrer">Como aceitar o convite</a>
                 <a class="rc-result-link whatsapp" id="btn-wpp-resultado" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer">Falar com a agência</a>
+              </div>
+            </div>
+            <div class="rc-pos-envio" id="bloco-candidatura">
+              <div class="rc-result-actions" style="margin-top:0">
+                <a class="rc-result-link whatsapp" id="btn-wpp-resultado-b" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer">Falar com a agência</a>
               </div>
             </div>
           </div>
@@ -318,9 +328,10 @@
     function configurarWhatsAppResultado() {
       const nome = $('f-nome').value.trim() || _perfil?.nome || 'streamer';
       const kwaiId = _perfil?.kwaiId || $('f-uid').value.trim();
-      $('btn-wpp-resultado').href = linkWhatsApp(
-        `Olá! Sou ${nome}, meu Kwai ID é ${kwaiId} e solicitei entrada na DMaior Agency. Preciso de orientação sobre o convite.`
-      );
+      const msg = `Olá! Sou ${nome}, meu Kwai ID é ${kwaiId} e solicitei entrada na DMaior Agency. Preciso de orientação sobre o convite.`;
+      const link = linkWhatsApp(msg);
+      const a = $('btn-wpp-resultado'); if (a) a.href = link;
+      const b = $('btn-wpp-resultado-b'); if (b) b.href = link;
     }
 
     function definirIconeResultado(tipo) {
@@ -526,6 +537,10 @@
           alerta('alerta-3', 'error', r.mensagem || 'Erro ao enviar candidatura. Tente novamente.');
           return;
         }
+        if (r.status === 'erro') {
+          alerta('alerta-3', 'warn', `<strong>Não foi possível enviar o convite</strong><br>${r.motivoBloqueio || 'O Kwai recusou o convite. Nossa equipe analisará e entrará em contato.'}`);
+          return;
+        }
 
         _candidaturaId = r.candidatura_id || null;
 
@@ -534,10 +549,14 @@
           definirIconeResultado('enviado');
           $('resultado-titulo').textContent = 'Convite enviado!';
           $('resultado-desc').textContent  = 'O convite foi enviado para o seu perfil no Kwai. Aceite no aplicativo para concluir o agenciamento.';
+          $('bloco-pos-envio').classList.remove('rc-hidden');
+          $('bloco-candidatura').classList.add('rc-hidden');
         } else {
           definirIconeResultado('recebido');
           $('resultado-titulo').textContent = 'Candidatura recebida!';
           $('resultado-desc').textContent  = 'Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp informado em breve.';
+          $('bloco-pos-envio').classList.add('rc-hidden');
+          $('bloco-candidatura').classList.remove('rc-hidden');
         }
 
         configurarWhatsAppResultado();
