@@ -341,9 +341,20 @@
           alerta('alerta-1', 'error', 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.');
           return;
         }
+        if (r.status === 'VERIFICACAO_INCOMPLETA') {
+          alerta('alerta-1', 'warning', r.mensagem || 'Não foi possível verificar o status deste perfil. Tente novamente mais tarde.');
+          return;
+        }
         if (!r.ok) {
           alerta('alerta-1', 'error', r.mensagem || 'Perfil não encontrado. Verifique o Kwai ID e tente novamente.');
           return;
+        }
+        if (r.status === 'CONVITE_EXISTENTE' || r.status === 'CONVITE_REENVIAVEL') {
+          _verificacao = r; _perfil = r.perfil; mostrarPerfil(_perfil);
+          alerta('alerta-2', 'info', r.mensagem);
+          $('btn-sim').disabled = true;
+          $('btn-sim').textContent = r.status === 'CONVITE_REENVIAVEL' ? 'Convite expirado' : 'Convite ativo';
+          irParaEtapa(2); return;
         }
 
         _verificacao = r;
