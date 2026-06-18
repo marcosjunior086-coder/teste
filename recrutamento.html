@@ -211,6 +211,13 @@
               <option value="games">Games</option>
             </select>
           </div>
+          <div class="rc-group">
+            <label for="f-recrutador">Recrutador responsável</label>
+            <select id="f-recrutador">
+              <option value="">Dan — padrão da agência (dono)</option>
+            </select>
+            <span class="rc-hint">Escolha quem indicou você para a agência.</span>
+          </div>
 
           <div class="rc-termos">
             <input type="checkbox" id="f-aceite">
@@ -289,6 +296,7 @@
     let _perfil = null;
     let _verificacao = null;
     let _candidaturaId = null;
+    let _recrutadoresCarregados = false;
 
     const $ = id => document.getElementById(id);
     const WHATSAPP_AGENCIA = '5517997176407';
@@ -319,6 +327,28 @@
       $('resultado-icon').innerHTML = tipo === 'enviado'
         ? '<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>'
         : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.7 2.7L16.5 9"></path></svg>';
+    }
+
+    async function carregarRecrutadores() {
+      if (_recrutadoresCarregados) return;
+      const select = $('f-recrutador');
+      try {
+        const r = await window.DmaiorAPI.candidatura.listarRecrutadores();
+        const lista = Array.isArray(r?.recrutadores) ? r.recrutadores : [];
+        if (!r?.ok || !lista.length) return;
+        select.innerHTML = lista.map(rec => {
+          const nome = String(rec.nome || 'Recrutador');
+          const sufixo = rec.padrao
+            ? (nome.trim().toLowerCase() === 'dan' ? ' — padrão (dono da agência)' : ' — padrão da agência')
+            : '';
+          return `<option value="${String(rec.id).replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">${nome.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}${sufixo}</option>`;
+        }).join('');
+        const padrao = lista.find(rec => rec.padrao);
+        if (padrao) select.value = String(padrao.id);
+        _recrutadoresCarregados = true;
+      } catch (e) {
+        console.warn('[recrutadores]', e);
+      }
     }
 
     /* ── Utilitários ── */
@@ -396,12 +426,19 @@
           return;
         }
         if (r.status === 'VERIFICACAO_INCOMPLETA') {
-          alerta('alerta-1', 'warning', r.mensagem || 'Não foi possível verificar o status deste perfil. Tente novamente mais tarde.');
+          alerta('alerta-1', 'warn', r.mensagem || 'Não foi possível verificar o status deste perfil. Tente novamente mais tarde.');
           return;
         }
         if (r.status === 'RESTRICAO_LIVE') {
-          alerta('alerta-1', 'warning', r.checkMessage || r.mensagem || 'Este perfil tem restrição de horas de live. Tente novamente em alguns dias.');
+          alerta('alerta-1', 'warn', r.checkMessage || r.mensagem || 'Este perfil tem restrição de horas de live. Tente novamente em alguns dias.');
           return;
+        }
+        if (r.status === 'JA_MEMBRO_DMAIOR' && r.perfil) {
+          _verificacao = r; _perfil = r.perfil; mostrarPerfil(_perfil);
+          alerta('alerta-2', 'success', '<strong>✓ Perfil verificado</strong><br>Este streamer já está vinculado à DMaior Agency.');
+          $('btn-sim').disabled = true;
+          $('btn-sim').textContent = 'Já é membro';
+          irParaEtapa(2); return;
         }
         if (!r.ok) {
           alerta('alerta-1', 'error', r.mensagem || 'Perfil não encontrado. Verifique o Kwai ID e tente novamente.');
@@ -419,15 +456,9 @@
         _perfil      = r.perfil;
         mostrarPerfil(_perfil);
 
-        if (r.status === 'JA_MEMBRO_DMAIOR') {
-          alerta('alerta-2', 'success', '✅ Este perfil já está vinculado à DMaior Agency! Você já é nosso membro.');
-          $('btn-sim').disabled = true;
-          $('btn-sim').textContent = 'Já é membro';
-        } else {
-          limparAlerta('alerta-2');
-          $('btn-sim').disabled = false;
-          $('btn-sim').textContent = 'Sim, é o meu';
-        }
+        limparAlerta('alerta-2');
+        $('btn-sim').disabled = false;
+        $('btn-sim').textContent = 'Sim, é o meu';
 
         irParaEtapa(2);
       } catch (e) {
@@ -450,6 +481,7 @@
         configurarWhatsAppMigracao();
         irParaEtapa('migracao');
       } else {
+        carregarRecrutadores();
         irParaEtapa(3);
       }
     });
@@ -480,6 +512,7 @@
           nome,
           whatsapp,
           categoria,
+          recrutador_id: $('f-recrutador').value || null,
           aceite: true,
         });
 

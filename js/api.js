@@ -280,13 +280,17 @@ window.DmaiorAPI = {
   // ── Módulo: Candidatura (fluxo Voyager) ───────────────────────────────────
 
   candidatura: {
+    /** Lista os recrutadores ativos disponíveis no formulário público. */
+    async listarRecrutadores() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, '/candidatura/recrutadores');
+    },
     /** Busca perfil Kwai/Voyager pelo UID antes do cadastro. */
     async buscarPerfil(uid) {
       return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/buscar-perfil', { uid });
     },
     /** Envia candidatura completa com perfil confirmado. */
-    async enviar({ uid, nome, whatsapp, categoria, aceite }) {
-      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, aceite });
+    async enviar({ uid, nome, whatsapp, categoria, recrutador_id, aceite }) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, recrutador_id, aceite });
     },
     /** Consulta status pelo protocolo gerado no envio. */
     async status(protocolo) {

@@ -2482,17 +2482,19 @@ class DimaiorAdmin extends HTMLElement {
     const BADGE={perfil_consultado:'Aguardando',convite_enviado:'Convite Enviado',em_revisao:'Em Revisão',confirmado:'Confirmado',vinculado_outra_agencia:'Outra Agência',migracao_solicitada:'Migração',recusado:'Recusado',expirado:'Expirado',erro:'Erro'};
     const COR={convite_enviado:'var(--cyan)',confirmado:'var(--verde)',recusado:'var(--verm)',erro:'var(--verm)',migracao_solicitada:'var(--gold)',vinculado_outra_agencia:'var(--gold)'};
     el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="border-bottom:1px solid var(--brddim)"><th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Perfil</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Categoria</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ações</th></tr></thead>
+      <thead><tr style="border-bottom:1px solid var(--brddim)"><th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Perfil</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Categoria</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Recrutador</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ações</th></tr></thead>
       <tbody>${lista.map(c=>{
         const foto=c.foto_url?`<img src="${this._safeImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(c.foto_url)}&w=36&h=36&fit=cover&output=webp`)}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--brd);vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">`:'';
         const nome=this._esc(c.nome_kwai||c.uid||'—');
         const wpp=c.whatsapp?`<br><span style="color:var(--t3);font-size:10px">${this._esc(c.whatsapp)}</span>`:'';
         const cat=c.categoria==='games'?'🎮 Games':'🎭 Entretenimento';
+        const recrutador=this._esc(c.recrutador_nome||'Padrão da agência');
         const stBadge=`<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:${COR[c.status]||'var(--t2)'}">${BADGE[c.status]||c.status}</span>`;
         const canAprovar=c.status==='perfil_consultado'&&c.member_id;
         return`<tr style="border-bottom:1px solid var(--brddim)">
           <td style="padding:8px 12px">${foto}<strong style="color:var(--t1)">${nome}</strong>${wpp}</td>
           <td style="padding:8px">${cat}</td>
+          <td style="padding:8px;color:var(--t2)">${recrutador}</td>
           <td style="padding:8px">${stBadge}</td>
           <td style="padding:8px;color:var(--t3)">${this._fdtCurto(c.criado_em)}</td>
           <td style="padding:8px;display:flex;gap:4px;flex-wrap:wrap">
