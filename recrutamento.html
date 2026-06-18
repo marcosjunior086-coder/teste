@@ -430,7 +430,13 @@
           return;
         }
         if (r.status === 'RESTRICAO_LIVE') {
-          alerta('alerta-1', 'warn', r.checkMessage || r.mensagem || 'Este perfil tem restrição de horas de live. Tente novamente em alguns dias.');
+          if (r.perfil) { _verificacao = r; _perfil = r.perfil; mostrarPerfil(_perfil); }
+          const msgLive = r.checkMessage || r.mensagem || 'Este perfil não atingiu o mínimo de horas de live exigido pela plataforma.';
+          alerta(r.perfil ? 'alerta-2' : 'alerta-1', 'warn',
+            `<strong>⏱ Restrição de horas de live</strong><br>${msgLive} Tente novamente em alguns dias.`);
+          $('btn-sim').disabled = true;
+          $('btn-sim').textContent = 'Sem elegibilidade';
+          if (r.perfil) irParaEtapa(2);
           return;
         }
         if (r.status === 'JA_MEMBRO_DMAIOR' && r.perfil) {

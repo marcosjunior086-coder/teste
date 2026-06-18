@@ -2504,12 +2504,17 @@ class DimaiorAdmin extends HTMLElement {
         const cat=c.categoria==='games'?'🎮 Games':'🎭 Entretenimento';
         const recrutador=this._esc(c.recrutador_nome||'Padrão da agência');
         const stBadge=`<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:${COR[c.status]||'var(--t2)'}">${BADGE[c.status]||c.status}</span>`;
+        let motivoErro=String(c.motivo_bloqueio||'').trim();
+        if(!motivoErro&&c.status==='erro'&&c.resposta_voyager){
+          try{const rv=typeof c.resposta_voyager==='string'?JSON.parse(c.resposta_voyager):c.resposta_voyager;motivoErro=String(rv?.data?.checkMessage||rv?.message||rv?.msg||'').trim();}catch{}
+        }
+        const erroDetalhe=c.status==='erro'?`<div title="${this._esc(motivoErro||'Falha não detalhada pelo Voyager')}" style="max-width:230px;margin-top:5px;color:var(--verm);font-size:10px;line-height:1.3;white-space:normal;overflow-wrap:anywhere">${this._esc(motivoErro||'Falha não detalhada pelo Voyager')}</div>`:'';
         const canAprovar=c.status==='perfil_consultado'&&c.member_id;
         return`<tr style="border-bottom:1px solid var(--brddim)">
           <td style="padding:8px 12px">${foto}<strong style="color:var(--t1)">${nome}</strong>${wpp}</td>
           <td style="padding:8px">${cat}</td>
           <td style="padding:8px;color:var(--t2)">${recrutador}</td>
-          <td style="padding:8px">${stBadge}</td>
+          <td style="padding:8px">${stBadge}${erroDetalhe}</td>
           <td style="padding:8px;color:var(--t3)">${this._fdtCurto(c.criado_em)}</td>
           <td style="padding:8px;display:flex;gap:4px;flex-wrap:wrap">
             ${canAprovar?`<button class="btn btn-sm btn-g" data-cand-apr="${c.id}">${this._ico('check',11)} Aprovar</button>`:''}
