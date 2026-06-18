@@ -1701,6 +1701,14 @@ class DimaiorAdmin extends HTMLElement {
     .modal-close{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--t3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;line-height:1}.modal-close:hover{background:rgba(248,113,113,.2);border-color:var(--verm);color:var(--verm)}
     .modal{background:linear-gradient(160deg,rgba(11,11,26,.98),rgba(4,4,14,.98));border:1px solid var(--brd);border-radius:20px;padding:26px;width:90%;max-width:480px;box-shadow:0 0 40px var(--cyan-d),0 24px 64px rgba(0,0,0,.8);position:relative;overflow:hidden;transform:scale(.95);transition:transform .2s;max-height:90vh;overflow-y:auto}.modal::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}.ov.on .modal{transform:scale(1)}
     .modal-lg{max-width:660px;overflow-x:hidden;}
+    .conv-modal-overlay{position:fixed;top:0;left:0;width:100vw;height:100dvh;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,4,12,.82);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);box-sizing:border-box}
+    .conv-modal-dialog{width:480px;max-width:calc(100vw - 40px);max-height:calc(100dvh - 40px);flex:0 0 auto;display:flex;flex-direction:column;background:linear-gradient(160deg,rgba(11,11,26,.99),rgba(4,4,20,.99));border:1px solid var(--brd);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.75);overflow:hidden;position:relative}
+    .conv-modal-dialog::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}
+    .conv-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;padding:0 18px;border-bottom:1px solid var(--brddim);background:rgba(255,255,255,.025);flex-shrink:0}
+    .conv-modal-title{display:flex;align-items:center;gap:8px;min-width:0;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:.06em}
+    .conv-modal-x{width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;border:1px solid var(--brddim);border-radius:7px;background:transparent;color:var(--t3);cursor:pointer}
+    .conv-modal-x:hover{border-color:var(--verm);color:var(--verm);background:rgba(248,113,113,.08)}
+    .conv-modal-body{padding:18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;min-height:0}
     .m-titulo{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--t1);margin-bottom:16px;letter-spacing:1px;text-transform:uppercase}
     .mc{margin-bottom:12px}.mc label{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:4px;font-family:'Rajdhani',sans-serif}.mc input,.mc select,.mc textarea{width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:13px;font-family:'Exo 2',sans-serif;outline:none;transition:border-color .2s;resize:none}.mc input:focus,.mc select:focus,.mc textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-d)}.mc select option{background:#0b0b1a}
     .mf{display:flex;gap:7px;justify-content:flex-end;margin-top:16px}
@@ -1922,6 +1930,10 @@ class DimaiorAdmin extends HTMLElement {
       .modal-lg{max-width:96%;width:96%;overflow-x:hidden !important;}
       #mCartBody{overflow-x:auto;}
       .modal-box{width:95% !important;max-width:95% !important;}
+      .conv-modal-overlay{padding:12px}
+      .conv-modal-dialog{width:100%;max-height:calc(100dvh - 24px);border-radius:12px}
+      .conv-modal-head{padding:0 14px}
+      .conv-modal-body{padding:14px}
       .m-titulo{font-size:14px;}
       .mc label{font-size:9px;}
       .mc input,.mc select,.mc textarea{font-size:13px;padding:8px 10px;}
@@ -2269,10 +2281,10 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
               </div>
               <!-- Modal: buscar perfil / envio manual -->
-              <div class="modal" id="mConvPerfil" style="display:none">
-                <div class="modal-box">
-                  <div class="modal-head"><span id="mConvPerfilTit">Adicionar convite manualmente</span><button class="modal-x" id="mConvPerfilX">${this._ico('x',14)}</button></div>
-                  <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div class="conv-modal-overlay" id="mConvPerfil" style="display:none">
+                <div class="conv-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="mConvPerfilTit">
+                  <div class="conv-modal-head"><span class="conv-modal-title" id="mConvPerfilTit">${this._ico('user_plus',14)} Adicionar convite manualmente</span><button class="conv-modal-x" id="mConvPerfilX" title="Fechar">${this._ico('x',14)}</button></div>
+                  <div class="conv-modal-body">
                     <div class="mc"><label>Kwai ID / UID do streamer</label><input id="mConvUid" type="text" placeholder="Digite o ID para preencher o perfil" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
                     <button class="btn btn-g" id="mConvBtnBuscar">${this._ico('search',13)} Buscar e preencher</button>
                     <div id="mConvPerfilResult"></div>
@@ -2648,6 +2660,8 @@ class DimaiorAdmin extends HTMLElement {
   async _abrirModalConvPerfil(){
     const s=this.shadowRoot;
     const m=s.getElementById('mConvPerfil');if(!m)return;
+    const root=s.getElementById('root');
+    if(root&&m.parentElement!==root)root.appendChild(m);
     s.getElementById('mConvUid').value='';
     s.getElementById('mConvPerfilResult').innerHTML='';
     s.getElementById('mConvEnvioArea').style.display='none';
@@ -2673,7 +2687,7 @@ class DimaiorAdmin extends HTMLElement {
       }
       this._atualizarResumoRecrutador();
     }
-    m.style.display='flex';m.style.position='fixed';m.style.inset='0';m.style.zIndex='999';m.style.alignItems='center';m.style.justifyContent='center';m.style.background='rgba(0,0,0,.7)';
+    m.style.display='flex';
   }
 
   _atualizarResumoRecrutador(){
