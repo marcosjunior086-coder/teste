@@ -2532,7 +2532,7 @@ class DimaiorAdmin extends HTMLElement {
     const pg=this._convPagState.page,cnt=this._convPagState.count;
     el.innerHTML=this._loading();
     const d=await this._api('GET',`/admin/convites?page=${pg}&count=${cnt}`);
-    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao buscar convites no Voyager. Verifique o cookie.');return;}
+    if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||d?.mensagem||'Erro ao buscar convites no Voyager.');return;}
     const lista=d.convites||[];
     const total=d.total||0,totalPg=d.total_pages||1;
     const elegiveis=lista.filter(c=>c.reenviavel).length;
