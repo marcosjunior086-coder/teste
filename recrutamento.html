@@ -26,7 +26,7 @@
     .rc-step.done   { background: rgba(0,212,212,.35); }
 
     /* ── Card ── */
-    .rc-card { padding: 28px 24px; }
+    .rc-card { padding: 28px 24px; background: var(--dm-grad-card); color: var(--dm-text); }
     @media(max-width:480px){ .rc-card { padding: 20px 16px; } }
 
     /* ── Formulário ── */
@@ -72,17 +72,18 @@
 
     /* ── Resultado final ── */
     .rc-resultado { text-align: center; padding: 8px 0; }
-    .rc-resultado .rc-icon { font-size: 3rem; margin-bottom: 12px; }
+    .rc-resultado .rc-icon { width: 56px; height: 56px; margin: 0 auto 14px; display: grid; place-items: center; border: 1px solid var(--dm-border); border-radius: 50%; background: var(--dm-cyan-08); color: var(--dm-cyan); }
+    .rc-resultado .rc-icon svg { width: 32px; height: 32px; display: block; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
     .rc-resultado h2 { font-family: var(--dm-font-title); font-size: 1.4rem; color: var(--dm-cyan); text-transform: uppercase; margin-bottom: 8px; }
     .rc-resultado p  { font-size: .88rem; color: var(--dm-text-muted); line-height: 1.6; }
-    .rc-protocolo { display: inline-block; margin-top: 12px; padding: 8px 16px; background: rgba(0,212,212,.08); border: 1px solid rgba(0,212,212,.2); border-radius: 8px; font-family: monospace; font-size: .9rem; color: var(--dm-cyan); letter-spacing: .05em; }
+    .rc-protocolo { display: inline-block; margin-top: 12px; padding: 8px 16px; background: var(--dm-cyan-08); border: 1px solid var(--dm-border); border-radius: 8px; font-family: monospace; font-size: .9rem; color: var(--dm-cyan); letter-spacing: .05em; }
     .rc-pos-envio { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--dm-border); text-align: left; }
     .rc-pos-envio h3 { margin: 0 0 10px; color: var(--dm-text); font-family: var(--dm-font-title); font-size: 1rem; text-transform: uppercase; }
     .rc-pos-envio p { margin: 0 0 14px; }
-    .rc-agencia-id { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin-bottom: 14px; border: 1px solid rgba(0,212,212,.25); border-radius: 8px; background: rgba(0,212,212,.06); }
+    .rc-agencia-id { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--dm-border); border-radius: 8px; background: var(--dm-cyan-05); }
     .rc-agencia-id span { color: var(--dm-text-muted); font-size: .78rem; }
     .rc-agencia-id strong { display: block; margin-top: 2px; color: var(--dm-cyan); font-family: monospace; font-size: 1.05rem; letter-spacing: .08em; }
-    .rc-copy-btn { flex-shrink: 0; padding: 8px 11px; border: 1px solid rgba(0,212,212,.35); border-radius: 7px; background: transparent; color: var(--dm-cyan); font-family: var(--dm-font-title); font-weight: 700; cursor: pointer; }
+    .rc-copy-btn { flex-shrink: 0; padding: 8px 11px; border: 1px solid var(--dm-border); border-radius: 7px; background: transparent; color: var(--dm-cyan); font-family: var(--dm-font-title); font-weight: 700; cursor: pointer; }
     .rc-result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .rc-result-link { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 12px; border: 1px solid var(--dm-border); border-radius: 8px; color: var(--dm-text); font-family: var(--dm-font-title); font-weight: 700; text-align: center; text-decoration: none; }
     .rc-result-link:hover { border-color: var(--dm-cyan); color: var(--dm-cyan); }
@@ -250,7 +251,7 @@
         <!-- ── ETAPA 4: resultado ── -->
         <div id="etapa-resultado" class="rc-hidden">
           <div class="rc-resultado" id="resultado-content">
-            <div class="rc-icon" id="resultado-icon">✅</div>
+            <div class="rc-icon" id="resultado-icon" aria-hidden="true"></div>
             <h2 id="resultado-titulo">Candidatura enviada!</h2>
             <p id="resultado-desc">Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp em breve.</p>
             <div class="rc-protocolo" id="resultado-protocolo"></div>
@@ -312,6 +313,12 @@
       $('btn-wpp-resultado').href = linkWhatsApp(
         `Olá! Sou ${nome}, meu Kwai ID é ${kwaiId} e solicitei entrada na DMaior Agency. Preciso de orientação sobre o convite.`
       );
+    }
+
+    function definirIconeResultado(tipo) {
+      $('resultado-icon').innerHTML = tipo === 'enviado'
+        ? '<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>'
+        : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.7 2.7L16.5 9"></path></svg>';
     }
 
     /* ── Utilitários ── */
@@ -485,11 +492,11 @@
 
         $('resultado-protocolo').textContent = r.protocolo ? `Protocolo: ${r.protocolo}` : '';
         if (r.status === 'convite_enviado') {
-          $('resultado-icon').textContent  = '🎉';
+          definirIconeResultado('enviado');
           $('resultado-titulo').textContent = 'Convite enviado!';
           $('resultado-desc').textContent  = 'O convite foi enviado para o seu perfil no Kwai. Aceite no aplicativo para concluir o agenciamento.';
         } else {
-          $('resultado-icon').textContent  = '✅';
+          definirIconeResultado('recebido');
           $('resultado-titulo').textContent = 'Candidatura recebida!';
           $('resultado-desc').textContent  = 'Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp informado em breve.';
         }
