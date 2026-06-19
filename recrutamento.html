@@ -549,7 +549,7 @@
           mostrarFalhaEnvio(r);
           return;
         }
-        if (r.status === 'erro') {
+        if (r.status === 'erro' || r.status === 'RESTRICAO_LIVE') {
           mostrarFalhaEnvio(r);
           return;
         }
