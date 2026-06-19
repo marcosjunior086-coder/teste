@@ -49,10 +49,14 @@ window.DmaiorAPI = {
       body:    JSON.stringify(body),
       signal:  AbortSignal.timeout(25000),
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.mensagem || err.erro || `HTTP ${res.status}`);
-    }
+     if (!res.ok) {
+       const err = await res.json().catch(() => ({}));
+       const message = err.checkMessage || err.motivoBloqueio || err.mensagem || err.erro || `HTTP ${res.status}`;
+       const error = new Error(message);
+       error.httpStatus = res.status;
+       error.data = err;
+       throw error;
+     }
     return res.json();
   },
 

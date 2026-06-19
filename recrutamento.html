@@ -504,6 +504,22 @@
 
     $('f-whatsapp').addEventListener('input', function () { this.value = maskPhone(this.value); });
 
+    function escMensagem(valor) {
+      return String(valor || '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[c]);
+    }
+
+    function mostrarFalhaEnvio(origem) {
+      const dados = origem?.data && typeof origem.data === 'object' ? origem.data : (origem || {});
+      const motivo = dados.checkMessage || dados.motivoBloqueio || dados.mensagem || dados.erro || origem?.message
+        || 'O Kwai recusou o convite. Nossa equipe analisará e entrará em contato.';
+      const restricaoLive = dados.status === 'RESTRICAO_LIVE'
+        || /live|transmiss|30 dias|30 days|hora|hour|atividade recente/i.test(String(motivo));
+      const titulo = restricaoLive ? 'Restrição de tempo de live' : 'Não foi possível enviar o convite';
+      alerta('alerta-3', 'warn', `<strong>${titulo}</strong><br>${escMensagem(motivo)}`);
+    }
+
     $('btn-enviar').addEventListener('click', async () => {
       limparAlerta('alerta-3');
       const nome      = $('f-nome').value.trim();
@@ -530,11 +546,11 @@
         });
 
         if (!r.ok) {
-          alerta('alerta-3', 'error', r.mensagem || 'Erro ao enviar candidatura. Tente novamente.');
+          mostrarFalhaEnvio(r);
           return;
         }
         if (r.status === 'erro') {
-          alerta('alerta-3', 'warn', `<strong>Não foi possível enviar o convite</strong><br>${r.motivoBloqueio || 'O Kwai recusou o convite. Nossa equipe analisará e entrará em contato.'}`);
+          mostrarFalhaEnvio(r);
           return;
         }
 
@@ -558,7 +574,7 @@
         configurarWhatsAppResultado();
         irParaEtapa('resultado');
       } catch (e) {
-        alerta('alerta-3', 'error', e?.message || 'Erro de conexão. Verifique sua internet e tente novamente.');
+        mostrarFalhaEnvio(e);
       } finally {
         $('btn-enviar').disabled = false;
         $('loading-3').classList.add('rc-hidden');
