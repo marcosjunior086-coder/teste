@@ -158,6 +158,65 @@
   --dm-grad-cyan: linear-gradient(90deg, #00c4c4, #007878);
 }
 
+/* Tema experimental: visual limpo, tipografia nativa e superfícies sólidas. */
+[data-theme="teste-clean"] {
+  --dm-bg:       #121514;
+  --dm-bg-1:     #171b19;
+  --dm-bg-2:     #1d2320;
+  --dm-bg-3:     #0e1110;
+  --dm-bg-4:     #242b27;
+  --dm-bg-deep:  #0e1110;
+  --dm-bg-card:  #1d2320;
+  --dm-bg-panel: rgba(18,21,20,.98);
+  --dm-bg-tint:  rgba(255,255,255,.025);
+  --dm-grad-card:     #1d2320;
+  --dm-grad-card-alt: #202622;
+  --dm-grad-sidebar:  #171b19;
+  --dm-grad-deep:     #0e1110;
+  --dm-grad-bg:       #121514;
+  --dm-text:       #f3f5f4;
+  --dm-text-sub:   #c1c9c5;
+  --dm-text-muted: #929e98;
+  --dm-text-dim:   #68736e;
+  --dm-cyan:       #69b7a8;
+  --dm-cyan-dim:   rgba(105,183,168,.72);
+  --dm-cyan-glow:  transparent;
+  --dm-cyan-border:rgba(145,166,156,.24);
+  --dm-border:     rgba(145,166,156,.24);
+  --dm-border-dim: rgba(145,166,156,.14);
+  --dm-gold:       #d5ad68;
+  --dm-gold-glow:  transparent;
+  --dm-green:      #6fcf97;
+  --dm-red:        #ef8585;
+  --dm-blue:       #7ca8d8;
+  --dm-cyan-05: rgba(105,183,168,.05);
+  --dm-cyan-08: rgba(105,183,168,.08);
+  --dm-cyan-10: rgba(105,183,168,.10);
+  --dm-cyan-12: rgba(105,183,168,.12);
+  --dm-cyan-20: rgba(105,183,168,.20);
+  --dm-cyan-25: rgba(105,183,168,.25);
+  --dm-cyan-30: rgba(105,183,168,.30);
+  --dm-cyan-40: rgba(105,183,168,.40);
+  --dm-gold-10: rgba(213,173,104,.10);
+  --dm-gold-20: rgba(213,173,104,.20);
+  --dm-gold-70: rgba(213,173,104,.70);
+  --dm-shadow-sm: rgba(0,0,0,.18);
+  --dm-shadow-md: rgba(0,0,0,.24);
+  --dm-shadow-50: rgba(0,0,0,.30);
+  --dm-shadow-lg: rgba(0,0,0,.34);
+  --dm-shadow-xl: rgba(0,0,0,.42);
+  --dm-overlay: rgba(0,0,0,.72);
+  --dm-bw03: rgba(255,255,255,.03);
+  --dm-bw05: rgba(255,255,255,.05);
+  --dm-bw06: rgba(255,255,255,.06);
+  --dm-bw10: rgba(255,255,255,.10);
+  --dm-grad-cyan: #69b7a8;
+  --dm-font-title: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --dm-font-body:  system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --dm-radius: 6px;
+  --dm-radius-lg: 8px;
+}
+
 /* ─── Tema Branco ────────────────────────────────────────────────────────────── */
 [data-theme="branco"] {
   --dm-bg:   #f0f4f8;
@@ -355,6 +414,27 @@ body {
   background: #0c0c0c;
 }
 
+[data-theme="teste-clean"] body {
+  background: #121514;
+}
+
+[data-theme="teste-clean"] body * {
+  letter-spacing: 0 !important;
+  text-shadow: none !important;
+}
+
+[data-theme="teste-clean"] body h1,
+[data-theme="teste-clean"] body h2,
+[data-theme="teste-clean"] body h3,
+[data-theme="teste-clean"] body h4,
+[data-theme="teste-clean"] body h5,
+[data-theme="teste-clean"] body h6,
+[data-theme="teste-clean"] body button,
+[data-theme="teste-clean"] body label,
+[data-theme="teste-clean"] body .dm-badge {
+  text-transform: none !important;
+}
+
 /* Temas claros — restaura fundo sólido sem o gradiente escuro */
 [data-theme="branco"] body,
 [data-theme="rosa"]   body,
@@ -371,6 +451,16 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
   color: var(--dm-text);
   line-height: 1.2;
+}
+
+[data-theme="teste-clean"] h1,
+[data-theme="teste-clean"] h2,
+[data-theme="teste-clean"] h3,
+[data-theme="teste-clean"] h4,
+[data-theme="teste-clean"] h5,
+[data-theme="teste-clean"] h6 {
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 a {

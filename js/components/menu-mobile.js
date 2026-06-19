@@ -207,6 +207,12 @@ class MenuMobileDMaior extends HTMLElement {
       /* ── Itens "em breve": desabilitados visualmente ── */
       .disabled-item{ opacity:.45; cursor:default; pointer-events:none; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
       .em-breve-tag{ font-family:'Rajdhani',sans-serif; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--dm-gold); background:var(--dm-gold-10,rgba(240,192,64,.12)); border:1px solid var(--dm-gold-20,rgba(240,192,64,.25)); border-radius:20px; padding:2px 8px; }
+      /* Tema experimental: tipografia nativa e acabamento sem brilho. */
+      :host-context([data-theme="teste-clean"]) { font-family:var(--dm-font-body)!important; }
+      :host-context([data-theme="teste-clean"]) * { font-family:var(--dm-font-body)!important;letter-spacing:0!important;text-transform:none!important;text-shadow:none!important;box-shadow:none!important;backdrop-filter:none!important; }
+      :host-context([data-theme="teste-clean"]) .sidebar,
+      :host-context([data-theme="teste-clean"]) .layout-dropdown,
+      :host-context([data-theme="teste-clean"]) .dd-option { box-shadow:none!important;backdrop-filter:none!important; }
     </style>
 
     <div class="topbar">
@@ -246,6 +252,9 @@ class MenuMobileDMaior extends HTMLElement {
             </button>
             <button class="dd-option" id="ddThemeLaranja" data-theme-id="laranja">
               <span class="dd-dot" style="background:#fff3e0;border:1.5px solid #f97316;"></span> Laranja
+            </button>
+            <button class="dd-option" id="ddThemeTesteClean" data-theme-id="teste-clean">
+              <span class="dd-dot" style="background:#1d2320;border:1.5px solid #69b7a8;"></span> Teste Clean
             </button>
           </div>
         </div>
@@ -399,6 +408,7 @@ class MenuMobileDMaior extends HTMLElement {
       root.getElementById('ddThemeBranco'),
       root.getElementById('ddThemeRosa'),
       root.getElementById('ddThemeLaranja'),
+      root.getElementById('ddThemeTesteClean'),
     ];
 
     // Marca opção de cor ativa

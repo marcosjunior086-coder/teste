@@ -108,6 +108,16 @@ class WidgetBeneficios extends HTMLElement {
       @media(max-width:1024px){.benefits-grid{grid-template-columns:repeat(2,1fr)}.tips-grid,.support-grid{grid-template-columns:repeat(2,1fr)}}
       @media(max-width:768px){.benefits-container,.faq-container{padding:28px 14px}.benefits-grid{grid-template-columns:1fr}.bonus-grid{grid-template-columns:1fr}.acc-title{font-size:1rem}.accordion-header{padding:14px 16px}.acc-body{padding:0 14px 18px}}
       @media(max-width:480px){.tips-grid{grid-template-columns:repeat(2,1fr)}.support-grid{grid-template-columns:repeat(2,1fr)}.accordion-content.active{max-height:1800px}}
+      /* Tema experimental: tipografia nativa e superfícies discretas. */
+      :host-context([data-theme="teste-clean"]) * { font-family:var(--dm-font-body)!important;letter-spacing:0!important;text-transform:none!important;text-shadow:none!important;box-shadow:none!important;backdrop-filter:none!important; }
+      :host-context([data-theme="teste-clean"]) .benefit-card,
+      :host-context([data-theme="teste-clean"]) .accordion-item,
+      :host-context([data-theme="teste-clean"]) .tip-card,
+      :host-context([data-theme="teste-clean"]) .support-card { border-radius:8px!important;box-shadow:none!important;backdrop-filter:none!important; }
+      :host-context([data-theme="teste-clean"]) .main-title,
+      :host-context([data-theme="teste-clean"]) .faq-title,
+      :host-context([data-theme="teste-clean"]) .benefit-title,
+      :host-context([data-theme="teste-clean"]) .acc-title { text-transform:none!important; }
     </style>
 
     <div class="benefits-container">

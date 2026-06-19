@@ -184,6 +184,9 @@ class DmaiorFooter extends HTMLElement {
           .footer-grid { gap: 22px; }
           .col-logo { width: 100%; }
         }
+        /* Tema experimental: fonte nativa e hierarquia mais editorial. */
+        :host-context([data-theme="teste-clean"]) * { font-family:var(--dm-font-body)!important;letter-spacing:0!important;text-transform:none!important;text-shadow:none!important;box-shadow:none!important;backdrop-filter:none!important; }
+        :host-context([data-theme="teste-clean"]) .footer-title { text-transform:none!important; }
       </style>
 
       <footer class="footer">
