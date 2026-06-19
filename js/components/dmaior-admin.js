@@ -2538,8 +2538,14 @@ class DimaiorAdmin extends HTMLElement {
     const label=dry?`Simular aprovação (modo: ${modo})`:`Enviar convite real (modo: ${modo})`;
     if(!confirm(`${label}\n\nCandidatura: ${id}\n\nConfirmar?`))return;
     const r=await this._api('POST',`/admin/candidaturas/${id}/aprovar`,{dry_run:dry});
-    if(r?.ok){this._toast(dry?'Simulado com sucesso':'Convite enviado!','ok');this._carregarCandidaturas();}
-    else this._toast(r?.mensagem||r?.erro||'Erro ao aprovar','err');
+    const voyagerOk=Number(r?.resposta?.result)===1&&r?.resposta?.data?.checkResult!==false&&r?.resposta?.data?.success!==false;
+    const envioOk=r?.ok&&(dry||voyagerOk)&&r?.status!=='erro';
+    if(envioOk){this._toast(dry?'Simulado com sucesso':'Convite enviado!','ok');this._carregarCandidaturas();}
+    else{
+      const motivo=r?.checkMessage||r?.motivoBloqueio||r?.mensagem||r?.resposta?.data?.checkMessage||r?.resposta?.data?.message||r?.resposta?.message||r?.erro||'O Kwai recusou o convite.';
+      this._toast(motivo,'err');
+      this._carregarCandidaturas();
+    }
   }
 
   async _rejeitarCandidatura(id){
@@ -2839,11 +2845,15 @@ class DimaiorAdmin extends HTMLElement {
     if(recrutador_id)payload.recrutador_id=recrutador_id;
     const r=await this._api('POST','/admin/convites/enviar',payload);
     s.getElementById('mConvBtnEnviar').disabled=false;s.getElementById('mConvBtnDry').disabled=false;
-    if(r?.ok){
+    const voyagerOk=Number(r?.resposta?.result)===1&&r?.resposta?.data?.checkResult!==false&&r?.resposta?.data?.success!==false;
+    const envioOk=r?.ok&&(dry||voyagerOk);
+    if(envioOk){
       if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'Simulação OK — sem envio real':'✅ Convite enviado com sucesso!'}</div>`;
       this._toast(dry?'Simulado OK':'Convite enviado!','ok');
     }else{
-      if(res)res.innerHTML=`<div style="color:var(--verm);font-size:12px;padding:6px 0">${this._esc(r?.mensagem||r?.erro||'Erro ao enviar')}</div>`;
+      const motivo=r?.checkMessage||r?.motivoBloqueio||r?.mensagem||r?.resposta?.data?.checkMessage||r?.resposta?.data?.message||r?.resposta?.message||r?.erro||'O Kwai recusou o convite.';
+      if(res)res.innerHTML=`<div style="color:var(--verm);font-size:12px;padding:6px 0">${this._esc(motivo)}</div>`;
+      this._toast(motivo,'err');
     }
   }
 }
