@@ -271,10 +271,6 @@ class KwaiLiveWidget extends HTMLElement {
           color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;
           display:flex;align-items:center;justify-content:center;}
         #modalClose:hover{background:rgba(225,29,72,.5);color:#fff;}
-        /* Tema experimental: remove brilho e usa a fonte nativa. */
-        :host-context([data-theme="teste-clean"]) * { font-family:var(--dm-font-body)!important;letter-spacing:0!important;text-transform:none!important;text-shadow:none!important;box-shadow:none!important;backdrop-filter:none!important; }
-        :host-context([data-theme="teste-clean"]) .streamer-card,
-        :host-context([data-theme="teste-clean"]) .live-card { border-radius:8px!important;box-shadow:none!important;backdrop-filter:none!important; }
       </style>
 
       <div id="rootWrap" style="position:relative;">

@@ -106,25 +106,6 @@
   background: linear-gradient(90deg, transparent, var(--dm-blue), var(--dm-cyan), transparent);
 }
 
-[data-theme="teste-clean"] .dm-glass-card {
-  background: var(--dm-bg-2);
-  border-color: var(--dm-border);
-  border-radius: 8px;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-}
-
-[data-theme="teste-clean"] .dm-glass-card::after { display: none; }
-[data-theme="teste-clean"] .dm-btn-primary,
-[data-theme="teste-clean"] .dm-btn-outline,
-[data-theme="teste-clean"] .dm-badge {
-  font-family: var(--dm-font-body);
-  letter-spacing: 0;
-  text-transform: none;
-  box-shadow: none;
-}
-
 /* ─── Spinner de carregamento ────────────────────────────────────────────────── */
 .dm-spinner {
   width: 40px;

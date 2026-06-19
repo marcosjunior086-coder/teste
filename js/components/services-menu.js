@@ -293,11 +293,6 @@ class DmaiorServicesMenu extends HTMLElement {
         .bc-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }
         .bc-dot { width:7px; height:7px; border-radius:50%; border:none; background:rgba(255,255,255,.4); cursor:pointer; padding:0; transition:background .25s,transform .25s; }
         .bc-dot-active { background:#fff; transform:scale(1.25); }
-        /* Tema experimental: tipografia nativa e acabamento sem brilho. */
-        :host-context([data-theme="teste-clean"]) * { font-family:var(--dm-font-body)!important;letter-spacing:0!important;text-transform:none!important;text-shadow:none!important;box-shadow:none!important;backdrop-filter:none!important; }
-        :host-context([data-theme="teste-clean"]) .nav-item,
-        :host-context([data-theme="teste-clean"]) .dp-item,
-        :host-context([data-theme="teste-clean"]) .dp-agency-btn { border-radius:8px!important;box-shadow:none!important;backdrop-filter:none!important; }
       </style>
 
       <div class="container" style="flex-direction:column">
