@@ -147,6 +147,7 @@ class DMaiorPainel extends HTMLElement {
     svgInfo()    { return `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`; }
     svgRank()    { return `<svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
+    svgFrame()   { return `<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v2.17A3 3 0 0 0 16.17 5H19zM5 5h2.83A3 3 0 0 0 5 7.83V5zm0 14v-2.83A3 3 0 0 0 7.83 19H5zm14 0h-2.83A3 3 0 0 0 19 16.17V19zM9 19a5 5 0 0 1 10-5V10a5 5 0 0 1-5-5h-4a5 5 0 0 1-5 5v4a5 5 0 0 1 4 5z"/></svg>`; }
     svgKey()     { return `<svg viewBox="0 0 24 24"><path d="M12.65 10A6 6 0 1 0 14 14.65L14 14h2v2h2v2h2v-2.18A6.002 6.002 0 0 0 12.65 10zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>`; }
     svgWallet()  { return `<svg viewBox="0 0 24 24"><path d="M21 7H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H3V9h18v10zm-9-1c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM1 5h20V3H1v2z"/></svg>`; }
     svgSend()    { return `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`; }
@@ -192,6 +193,7 @@ class DMaiorPainel extends HTMLElement {
                 .nit:hover,.nit.sair:hover { background:none; }
                 .nit.on { background:none; }
                 .nit.sair { margin-top:0; }
+                .molduras-frame{height:calc(100vh - 98px);min-height:620px;border-radius:0;}
             }
 
             .raaj{font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.08em;}
@@ -380,6 +382,7 @@ class DMaiorPainel extends HTMLElement {
             /* ── Botão voltar nas views inline (rank / impulso) ── */
             .iframe-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;padding:0 0 14px;text-transform:uppercase;}
             .iframe-back svg{width:20px;height:20px;fill:var(--cyan);}
+            .molduras-frame{display:block;width:100%;height:calc(100vh - 48px);min-height:720px;border:0;border-radius:8px;background:transparent;}
 
             /* ── Banners de comunicados ── */
             .dm-comunicado{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border-radius:12px;background:rgba(240,192,64,0.08);border:1px solid rgba(240,192,64,0.30);animation:fi .4s ease both;width:100%;}
@@ -563,6 +566,7 @@ class DMaiorPainel extends HTMLElement {
                 <button class="nit" id="nS">${this.svgUser()} PERFIL</button>
                 <button class="nit" id="nC">${this.svgWallet()} CARTEIRA</button>
                 <button class="nit" id="nImpulso">${this.svgBoost()} IMPULSO</button>
+                <button class="nit" id="nMolduras">${this.svgFrame()} MOLDURAS</button>
                 <button class="nit" id="nRank">${this.svgRank()} RANKING</button>
                 <button class="nit sair" id="nO">${this.svgLogout()} SAIR</button>
             </nav>
@@ -956,6 +960,11 @@ class DMaiorPainel extends HTMLElement {
                     <dmaior-impulso id="impulsoEl"></dmaior-impulso>
                 </div>
 
+                <!-- Gerador local de molduras, carregado somente após autenticação -->
+                <div id="vMolduras" class="view" style="width:100%;">
+                    <iframe id="moldurasFrame" class="molduras-frame" title="Gerador de molduras da DMaior Agency" allow="clipboard-write"></iframe>
+                </div>
+
                 <!-- ══════ AVISOS ══════ -->
                 <div id="vAvisos" class="view" style="width:100%;">
                     <div class="avisos-topbar">
@@ -1074,6 +1083,7 @@ class DMaiorPainel extends HTMLElement {
         this.qs('#nO').addEventListener('click',()=>this.logout());
         this.qs('#nRank').addEventListener('click',()=>this.goRanking());
         this.qs('#nImpulso').addEventListener('click',()=>this.goImpulsionamento());
+        this.qs('#nMolduras').addEventListener('click',()=>this.goMolduras());
         this.qs('#btnBackRank').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');this.loadDash();});
         this.qs('#btnBackAvisos').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#btnMarkAllRead').addEventListener('click',()=>this._marcarTodosLidos());
@@ -1574,6 +1584,12 @@ class DMaiorPainel extends HTMLElement {
         }
         this.navigate('vImpulso');
         this.navActive('nImpulso');
+    }
+    goMolduras(){
+        const frame = this.qs('#moldurasFrame');
+        if(frame && !frame.getAttribute('src')) frame.setAttribute('src', 'molduras.html?v=20260622-1');
+        this.navigate('vMolduras');
+        this.navActive('nMolduras');
     }
     goAvisos(){
         this.navigate('vAvisos');
