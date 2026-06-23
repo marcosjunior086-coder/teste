@@ -736,8 +736,25 @@
     const parent = node.parentElement;
     if (!parent) return true;
     if (parent.closest('[data-no-i18n]')) return true;
+    if (parent.closest('[data-pref-lang-select]')) return true;
     const tag = parent.tagName;
     return ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'CODE', 'PRE', 'CANVAS'].includes(tag);
+  }
+
+  function syncLanguageSelectLabels(root) {
+    const scope = root || document;
+    if (!scope.querySelectorAll) return;
+    const labels = {
+      'pt-BR': 'Português BR',
+      en: 'English',
+      es: 'Español',
+      zh: '中文'
+    };
+    scope.querySelectorAll('[data-pref-lang-select]').forEach(select => {
+      Array.from(select.options || []).forEach(option => {
+        if (labels[option.value]) option.textContent = labels[option.value];
+      });
+    });
   }
 
   function translateTextNode(node, map) {
@@ -871,6 +888,7 @@
     scope.querySelectorAll('[data-pref-lang-select]').forEach(el => {
       el.value = getLang();
     });
+    syncLanguageSelectLabels(scope);
 
     autoTranslate(scope);
     if (notifyDone && window.dispatchEvent) {
