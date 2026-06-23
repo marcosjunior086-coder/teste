@@ -395,6 +395,298 @@
     extra: { scale: '1.22' }
   };
 
+  const textOriginals = new WeakMap();
+  let observer = null;
+  let scheduled = false;
+
+  const autoText = {
+    en: {
+      'CARREGANDO...': 'LOADING...',
+      'ACESSO STREAMER': 'STREAMER ACCESS',
+      'UID NUMERICO': 'NUMERIC UID',
+      'UID KWAI': 'KWAI UID',
+      'SENHA': 'PASSWORD',
+      'ENTRAR NO PAINEL': 'ENTER PANEL',
+      'Primeiro Acesso?': 'First access?',
+      'Validar Cadastro': 'Validate registration',
+      'Esqueceu a senha?': 'Forgot password?',
+      'Recuperar acesso': 'Recover access',
+      'Voltar': 'Back',
+      'VALIDACAO DE CONTA': 'ACCOUNT VALIDATION',
+      'Autorize seu acesso ao sistema.': 'Authorize your system access.',
+      'E-MAIL': 'EMAIL',
+      'RECEBER CODIGO': 'GET CODE',
+      'Insira o codigo de validacao enviado.': 'Enter the validation code sent.',
+      'CONFIRMAR CODIGO': 'CONFIRM CODE',
+      'CRIAR SENHA': 'CREATE PASSWORD',
+      'CONFIRMAR SENHA': 'CONFIRM PASSWORD',
+      'CONCLUIR CADASTRO': 'FINISH REGISTRATION',
+      'RECUPERAR SENHA': 'RECOVER PASSWORD',
+      'Redefina seu acesso em 3 passos.': 'Reset your access in 3 steps.',
+      'SEU UID KWAI': 'YOUR KWAI UID',
+      'BUSCAR CONTA': 'FIND ACCOUNT',
+      'Conta encontrada. Enviaremos o código para:': 'Account found. We will send the code to:',
+      'E-mail vinculado': 'Linked email',
+      'ENVIAR CÓDIGO': 'SEND CODE',
+      'UID diferente': 'Different UID',
+      'VALIDAR CÓDIGO': 'VALIDATE CODE',
+      'NOVA SENHA': 'NEW PASSWORD',
+      'SALVAR NOVA SENHA': 'SAVE NEW PASSWORD',
+      'RESUMO': 'SUMMARY',
+      'PERFIL': 'PROFILE',
+      'CARTEIRA': 'WALLET',
+      'IMPULSO': 'BOOST',
+      'MOLDURAS': 'FRAMES',
+      'RANKING': 'RANKING',
+      'SAIR': 'LOG OUT',
+      'ATUALIZAR': 'REFRESH',
+      'Aguardando...': 'Waiting...',
+      'ESTIMATIVA ACUMULADA (USD)': 'ACCUMULATED ESTIMATE (USD)',
+      'DIAMANTES': 'DIAMONDS',
+      'TEMPO TRANSMITIDO': 'STREAMED TIME',
+      'HORAS VÁLIDAS': 'VALID HOURS',
+      'DIAS DE LIVE': 'LIVE DAYS',
+      'DESEMPENHO': 'PERFORMANCE',
+      'Diamantes': 'Diamonds',
+      'Horas': 'Hours',
+      '7 dias': '7 days',
+      '30 dias': '30 days',
+      'HISTÓRICO DIÁRIO': 'DAILY HISTORY',
+      'Data': 'Date',
+      'Status': 'Status',
+      'Monitoramento de Desempenho': 'Performance monitoring',
+      'DADOS DE RECEBIMENTO': 'PAYMENT DATA',
+      'TIPO DE CHAVE PIX': 'PIX KEY TYPE',
+      'Selecione o tipo': 'Select type',
+      'CHAVE PIX': 'PIX KEY',
+      'SEGURANÇA': 'SECURITY',
+      'MODIFICAR SENHA': 'CHANGE PASSWORD',
+      '(opcional)': '(optional)',
+      '1 Letra Maiúscula': '1 uppercase letter',
+      '1 Número': '1 number',
+      'Saldo Disponível': 'Available balance',
+      'Nenhum saque pendente': 'No pending withdrawal',
+      'HISTÓRICO': 'HISTORY',
+      'TOTAL RECEBIDO': 'TOTAL RECEIVED',
+      'TOTAL SACADO': 'TOTAL WITHDRAWN',
+      'SOLICITAR SAQUE': 'REQUEST WITHDRAWAL',
+      'MEUS SAQUES': 'MY WITHDRAWALS',
+      'HISTÓRICO DE MOVIMENTAÇÕES': 'TRANSACTION HISTORY',
+      'VOLTAR AO PAINEL': 'BACK TO PANEL',
+      'MARCAR TODOS COMO LIDOS': 'MARK ALL AS READ',
+      'Abrir no Kwai': 'Open in Kwai',
+      'Fechar': 'Close',
+      'Todos': 'All',
+      'A procurar transmissões ao vivo...': 'Searching live streams...',
+      'A CARREGAR LIVE...': 'LOADING LIVE...',
+      'Entrar na Agência': 'Join the Agency',
+      'Ranking': 'Ranking',
+      'Tutoriais': 'Tutorials',
+      'PK Interno': 'Internal PK',
+      'Portfólio': 'Portfolio',
+      'Políticas': 'Policies',
+      'Política Host': 'Host Policy',
+      'Premium': 'Premium',
+      'Benefícios': 'Benefits',
+      'Suporte': 'Support',
+      'Início': 'Home',
+      'Recarga': 'Top-up',
+      'Como aceitar o convite': 'How to accept the invite',
+      'Termos': 'Terms',
+      'Políticas Premium': 'Premium Policies',
+      'Área do Streamer': 'Streamer Area',
+      'Adicionar imagem': 'Add image',
+      'Clique ou arraste uma foto aqui': 'Click or drag a photo here',
+      'Trocar': 'Change',
+      'Centralizar / Redefinir': 'Center / Reset',
+      'Baixar moldura': 'Download frame'
+    },
+    es: {
+      'CARREGANDO...': 'CARGANDO...',
+      'ACESSO STREAMER': 'ACCESO STREAMER',
+      'UID NUMERICO': 'UID NUMÉRICO',
+      'UID KWAI': 'UID KWAI',
+      'SENHA': 'CONTRASEÑA',
+      'ENTRAR NO PAINEL': 'ENTRAR AL PANEL',
+      'Primeiro Acesso?': '¿Primer acceso?',
+      'Validar Cadastro': 'Validar registro',
+      'Esqueceu a senha?': '¿Olvidaste la contraseña?',
+      'Recuperar acesso': 'Recuperar acceso',
+      'Voltar': 'Volver',
+      'VALIDACAO DE CONTA': 'VALIDACIÓN DE CUENTA',
+      'Autorize seu acesso ao sistema.': 'Autoriza tu acceso al sistema.',
+      'E-MAIL': 'E-MAIL',
+      'RECEBER CODIGO': 'RECIBIR CÓDIGO',
+      'Insira o codigo de validacao enviado.': 'Ingresa el código de validación enviado.',
+      'CONFIRMAR CODIGO': 'CONFIRMAR CÓDIGO',
+      'CRIAR SENHA': 'CREAR CONTRASEÑA',
+      'CONFIRMAR SENHA': 'CONFIRMAR CONTRASEÑA',
+      'CONCLUIR CADASTRO': 'FINALIZAR REGISTRO',
+      'RECUPERAR SENHA': 'RECUPERAR CONTRASEÑA',
+      'Redefina seu acesso em 3 passos.': 'Restablece tu acceso en 3 pasos.',
+      'SEU UID KWAI': 'TU UID KWAI',
+      'BUSCAR CONTA': 'BUSCAR CUENTA',
+      'Conta encontrada. Enviaremos o código para:': 'Cuenta encontrada. Enviaremos el código a:',
+      'E-mail vinculado': 'E-mail vinculado',
+      'ENVIAR CÓDIGO': 'ENVIAR CÓDIGO',
+      'UID diferente': 'UID diferente',
+      'VALIDAR CÓDIGO': 'VALIDAR CÓDIGO',
+      'NOVA SENHA': 'NUEVA CONTRASEÑA',
+      'SALVAR NOVA SENHA': 'GUARDAR NUEVA CONTRASEÑA',
+      'RESUMO': 'RESUMEN',
+      'PERFIL': 'PERFIL',
+      'CARTEIRA': 'BILLETERA',
+      'IMPULSO': 'IMPULSO',
+      'MOLDURAS': 'MARCOS',
+      'RANKING': 'RANKING',
+      'SAIR': 'SALIR',
+      'ATUALIZAR': 'ACTUALIZAR',
+      'Aguardando...': 'Esperando...',
+      'ESTIMATIVA ACUMULADA (USD)': 'ESTIMACIÓN ACUMULADA (USD)',
+      'DIAMANTES': 'DIAMANTES',
+      'TEMPO TRANSMITIDO': 'TIEMPO TRANSMITIDO',
+      'HORAS VÁLIDAS': 'HORAS VÁLIDAS',
+      'DIAS DE LIVE': 'DÍAS DE LIVE',
+      'DESEMPENHO': 'RENDIMIENTO',
+      'Diamantes': 'Diamantes',
+      'Horas': 'Horas',
+      '7 dias': '7 días',
+      '30 dias': '30 días',
+      'HISTÓRICO DIÁRIO': 'HISTORIAL DIARIO',
+      'Data': 'Fecha',
+      'Status': 'Estado',
+      'Monitoramento de Desempenho': 'Monitoreo de rendimiento',
+      'DADOS DE RECEBIMENTO': 'DATOS DE PAGO',
+      'TIPO DE CHAVE PIX': 'TIPO DE CLAVE PIX',
+      'Selecione o tipo': 'Selecciona el tipo',
+      'CHAVE PIX': 'CLAVE PIX',
+      'SEGURANÇA': 'SEGURIDAD',
+      'MODIFICAR SENHA': 'CAMBIAR CONTRASEÑA',
+      '(opcional)': '(opcional)',
+      '1 Letra Maiúscula': '1 letra mayúscula',
+      '1 Número': '1 número',
+      'Saldo Disponível': 'Saldo disponible',
+      'Nenhum saque pendente': 'Ningún retiro pendiente',
+      'HISTÓRICO': 'HISTORIAL',
+      'TOTAL RECEBIDO': 'TOTAL RECIBIDO',
+      'TOTAL SACADO': 'TOTAL RETIRADO',
+      'SOLICITAR SAQUE': 'SOLICITAR RETIRO',
+      'MEUS SAQUES': 'MIS RETIROS',
+      'HISTÓRICO DE MOVIMENTAÇÕES': 'HISTORIAL DE MOVIMIENTOS',
+      'VOLTAR AO PAINEL': 'VOLVER AL PANEL',
+      'MARCAR TODOS COMO LIDOS': 'MARCAR TODOS COMO LEÍDOS',
+      'Abrir no Kwai': 'Abrir en Kwai',
+      'Fechar': 'Cerrar',
+      'Todos': 'Todos',
+      'A procurar transmissões ao vivo...': 'Buscando transmisiones en vivo...',
+      'A CARREGAR LIVE...': 'CARGANDO LIVE...',
+      'Entrar na Agência': 'Entrar a la agencia',
+      'Tutoriais': 'Tutoriales',
+      'PK Interno': 'PK Interno',
+      'Portfólio': 'Portafolio',
+      'Políticas': 'Políticas',
+      'Política Host': 'Política Host',
+      'Benefícios': 'Beneficios',
+      'Suporte': 'Soporte',
+      'Início': 'Inicio',
+      'Recarga': 'Recarga',
+      'Termos': 'Términos',
+      'Área do Streamer': 'Área del streamer'
+    },
+    zh: {
+      'CARREGANDO...': '加载中...',
+      'ACESSO STREAMER': '主播登录',
+      'UID NUMERICO': '数字 UID',
+      'UID KWAI': 'Kwai UID',
+      'SENHA': '密码',
+      'ENTRAR NO PAINEL': '进入面板',
+      'Primeiro Acesso?': '首次访问？',
+      'Validar Cadastro': '验证注册',
+      'Esqueceu a senha?': '忘记密码？',
+      'Recuperar acesso': '找回访问',
+      'Voltar': '返回',
+      'VALIDACAO DE CONTA': '账号验证',
+      'Autorize seu acesso ao sistema.': '授权访问系统。',
+      'E-MAIL': '邮箱',
+      'RECEBER CODIGO': '获取验证码',
+      'Insira o codigo de validacao enviado.': '请输入收到的验证码。',
+      'CONFIRMAR CODIGO': '确认验证码',
+      'CRIAR SENHA': '创建密码',
+      'CONFIRMAR SENHA': '确认密码',
+      'CONCLUIR CADASTRO': '完成注册',
+      'RECUPERAR SENHA': '找回密码',
+      'Redefina seu acesso em 3 passos.': '通过 3 个步骤重置访问。',
+      'SEU UID KWAI': '你的 Kwai UID',
+      'BUSCAR CONTA': '查找账号',
+      'Conta encontrada. Enviaremos o código para:': '已找到账号。验证码将发送到：',
+      'E-mail vinculado': '绑定邮箱',
+      'ENVIAR CÓDIGO': '发送验证码',
+      'UID diferente': '其他 UID',
+      'VALIDAR CÓDIGO': '验证验证码',
+      'NOVA SENHA': '新密码',
+      'SALVAR NOVA SENHA': '保存新密码',
+      'RESUMO': '概览',
+      'PERFIL': '资料',
+      'CARTEIRA': '钱包',
+      'IMPULSO': '助推',
+      'MOLDURAS': '头像框',
+      'RANKING': '排行榜',
+      'SAIR': '退出',
+      'ATUALIZAR': '刷新',
+      'Aguardando...': '等待中...',
+      'ESTIMATIVA ACUMULADA (USD)': '累计预估 (USD)',
+      'DIAMANTES': '钻石',
+      'TEMPO TRANSMITIDO': '直播时长',
+      'HORAS VÁLIDAS': '有效小时',
+      'DIAS DE LIVE': '直播天数',
+      'DESEMPENHO': '表现',
+      'Diamantes': '钻石',
+      'Horas': '小时',
+      '7 dias': '7 天',
+      '30 dias': '30 天',
+      'HISTÓRICO DIÁRIO': '每日记录',
+      'Data': '日期',
+      'Status': '状态',
+      'Monitoramento de Desempenho': '表现监控',
+      'DADOS DE RECEBIMENTO': '收款资料',
+      'TIPO DE CHAVE PIX': 'PIX 密钥类型',
+      'Selecione o tipo': '选择类型',
+      'CHAVE PIX': 'PIX 密钥',
+      'SEGURANÇA': '安全',
+      'MODIFICAR SENHA': '修改密码',
+      '(opcional)': '（可选）',
+      '1 Letra Maiúscula': '1 个大写字母',
+      '1 Número': '1 个数字',
+      'Saldo Disponível': '可用余额',
+      'Nenhum saque pendente': '没有待处理提现',
+      'HISTÓRICO': '历史',
+      'TOTAL RECEBIDO': '总收入',
+      'TOTAL SACADO': '总提现',
+      'SOLICITAR SAQUE': '申请提现',
+      'MEUS SAQUES': '我的提现',
+      'HISTÓRICO DE MOVIMENTAÇÕES': '交易记录',
+      'VOLTAR AO PAINEL': '返回面板',
+      'MARCAR TODOS COMO LIDOS': '全部标为已读',
+      'Abrir no Kwai': '在 Kwai 打开',
+      'Fechar': '关闭',
+      'Todos': '全部',
+      'A procurar transmissões ao vivo...': '正在搜索直播...',
+      'A CARREGAR LIVE...': '正在加载直播...',
+      'Entrar na Agência': '加入公会',
+      'Tutoriais': '教程',
+      'PK Interno': '内部 PK',
+      'Portfólio': '作品集',
+      'Políticas': '政策',
+      'Política Host': '主播政策',
+      'Benefícios': '福利',
+      'Suporte': '支持',
+      'Início': '首页',
+      'Recarga': '充值',
+      'Termos': '条款',
+      'Área do Streamer': '主播区域'
+    }
+  };
+
   function getLang() {
     try {
       const lang = localStorage.getItem(LANG_KEY) || DEFAULT_LANG;
@@ -424,6 +716,114 @@
     return value;
   }
 
+  function normalizeText(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function phraseMap(lang) {
+    const map = Object.assign({}, autoText[lang] || {});
+    const base = dict[DEFAULT_LANG] || {};
+    const target = dict[lang] || base;
+    Object.keys(base).forEach(key => {
+      if (typeof base[key] === 'string' && typeof target[key] === 'string') {
+        map[normalizeText(base[key])] = target[key];
+      }
+    });
+    return map;
+  }
+
+  function shouldSkipNode(node) {
+    const parent = node.parentElement;
+    if (!parent) return true;
+    if (parent.closest('[data-no-i18n]')) return true;
+    const tag = parent.tagName;
+    return ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'CODE', 'PRE', 'CANVAS'].includes(tag);
+  }
+
+  function translateTextNode(node, map) {
+    if (shouldSkipNode(node)) return;
+    const raw = node.nodeValue;
+    const trimmed = normalizeText(raw);
+    if (!trimmed) return;
+    if (!textOriginals.has(node)) textOriginals.set(node, raw);
+    const original = normalizeText(textOriginals.get(node));
+    const translated = map[original] || map[trimmed];
+    if (!translated) return;
+    const leading = raw.match(/^\s*/)?.[0] || '';
+    const trailing = raw.match(/\s*$/)?.[0] || '';
+    const next = leading + translated + trailing;
+    if (node.nodeValue !== next) node.nodeValue = next;
+  }
+
+  function restoreAutoText(root) {
+    const scope = root || document;
+    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      if (textOriginals.has(node) && node.nodeValue !== textOriginals.get(node)) {
+        node.nodeValue = textOriginals.get(node);
+      }
+    });
+    if (scope.querySelectorAll) {
+      scope.querySelectorAll('[data-dm-i18n-placeholder-original], [data-dm-i18n-title-original], [data-dm-i18n-aria-label-original]').forEach(el => {
+        if (el.hasAttribute('data-dm-i18n-placeholder-original')) el.setAttribute('placeholder', el.getAttribute('data-dm-i18n-placeholder-original'));
+        if (el.hasAttribute('data-dm-i18n-title-original')) el.setAttribute('title', el.getAttribute('data-dm-i18n-title-original'));
+        if (el.hasAttribute('data-dm-i18n-aria-label-original')) el.setAttribute('aria-label', el.getAttribute('data-dm-i18n-aria-label-original'));
+      });
+    }
+  }
+
+  function translateAttr(el, attr, map) {
+    if (!el.hasAttribute(attr)) return;
+    const key = `data-dm-i18n-${attr}-original`;
+    if (!el.hasAttribute(key)) el.setAttribute(key, el.getAttribute(attr) || '');
+    const original = normalizeText(el.getAttribute(key));
+    const translated = map[original];
+    if (translated) el.setAttribute(attr, translated);
+  }
+
+  function autoTranslate(root) {
+    const lang = getLang();
+    if (lang === DEFAULT_LANG) {
+      restoreAutoText(root);
+      return;
+    }
+    const map = phraseMap(lang);
+    const scope = root || document;
+    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => translateTextNode(node, map));
+
+    if (scope.querySelectorAll) {
+      scope.querySelectorAll('input[placeholder], textarea[placeholder], [title], [aria-label]').forEach(el => {
+        translateAttr(el, 'placeholder', map);
+        translateAttr(el, 'title', map);
+        translateAttr(el, 'aria-label', map);
+      });
+    }
+  }
+
+  function bindTree(root) {
+    bind(root || document, false);
+    const scope = root || document;
+    if (scope.querySelectorAll) {
+      scope.querySelectorAll('*').forEach(el => {
+        if (el.shadowRoot) bindTree(el.shadowRoot);
+      });
+    }
+  }
+
+  function scheduleBind() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      bindTree(document);
+    });
+  }
+
   function applyFontSize(size) {
     const chosen = fonts[size] ? size : getFontSize();
     document.documentElement.dataset.fontSize = chosen;
@@ -441,11 +841,11 @@
     const chosen = dict[lang] ? lang : DEFAULT_LANG;
     try { localStorage.setItem(LANG_KEY, chosen); } catch (_) {}
     document.documentElement.lang = chosen;
-    bind(document);
+    bindTree(document);
     window.dispatchEvent(new CustomEvent('dmaior:preferences', { detail: getState() }));
   }
 
-  function bind(root) {
+  function bind(root, notifyDone = true) {
     const scope = root || document;
     const lang = getLang();
     document.documentElement.lang = lang;
@@ -471,6 +871,11 @@
     scope.querySelectorAll('[data-pref-lang-select]').forEach(el => {
       el.value = getLang();
     });
+
+    autoTranslate(scope);
+    if (notifyDone && window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent('dmaior:i18n-bound', { detail: getState() }));
+    }
   }
 
   function getState() {
@@ -481,19 +886,45 @@
     applyFontSize(getFontSize());
     document.documentElement.lang = getLang();
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => bind(document), { once: true });
+      document.addEventListener('DOMContentLoaded', () => {
+        bindTree(document);
+        startObserver();
+      }, { once: true });
     } else {
-      bind(document);
+      bindTree(document);
+      startObserver();
     }
     window.addEventListener('storage', event => {
       if (event.key === FONT_KEY) applyFontSize(getFontSize());
-      if (event.key === LANG_KEY) bind(document);
+      if (event.key === LANG_KEY) bindTree(document);
     });
+  }
+
+  function startObserver() {
+    if (observer || !document.body) return;
+    observer = new MutationObserver(mutations => {
+      if (getLang() === DEFAULT_LANG) return;
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+          scheduleBind();
+          return;
+        }
+        if (mutation.type === 'characterData') {
+          scheduleBind();
+          return;
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    setTimeout(() => bindTree(document), 100);
+    setTimeout(() => bindTree(document), 600);
+    setTimeout(() => bindTree(document), 1600);
   }
 
   window.DMaiorPrefs = {
     t,
     bind,
+    bindTree,
     init,
     getState,
     getLang,

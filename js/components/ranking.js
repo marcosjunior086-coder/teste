@@ -44,8 +44,8 @@ class RankingDmaior extends HTMLElement {
     this.HSVG           = `<svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
     this.CLOCK_SVG      = `<svg viewBox="0 0 24 24" width="15" fill="currentColor" style="flex-shrink:0"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
     this.STAR_SVG       = `<svg viewBox="0 0 24 24" width="12" fill="currentColor" style="margin-right:3px"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
-    this.VERIFICADO_SVG         = `<span title="Verificado" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,#29b6f6,#00e5ff);vertical-align:middle;flex-shrink:0;margin-left:4px"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
-    this.VERIFICADO_PREMIUM_SVG = `<span title="Verificado Premium" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff5722);vertical-align:middle;flex-shrink:0;margin-left:4px"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+    this.VERIFICADO_SVG         = `<span class="verified-badge" title="Verificado"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+    this.VERIFICADO_PREMIUM_SVG = `<span class="verified-badge premium" title="Verificado Premium"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   }
 
   // Lê token do ranking do localStorage de forma segura
@@ -179,6 +179,10 @@ class RankingDmaior extends HTMLElement {
       :host-context([data-theme="laranja"]) .app-container{background:linear-gradient(180deg,var(--bg-app) 0%,var(--bg-app2) 100%)}
       :host-context([data-theme="dark"]) .app-container{background:transparent}
       h1,h2,h3,.rajdhani,.name{font-family:var(--font-title);letter-spacing:1px;text-transform:uppercase}
+      .verified-badge{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,#29b6f6,#00e5ff);vertical-align:middle;flex:0 0 15px}
+      .verified-badge.premium{background:linear-gradient(135deg,#ffd600,#ff5722)}
+      img.verified-badge{display:inline-block;object-fit:cover}
+      .rank-name-text{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       /* ── Botões de faixa (1-20, 21-40…) — reage ao tema (ativo = bloom-grad, inativo = bg-card) ── */
       .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:var(--font-title);font-weight:700;background:var(--bg-card);color:var(--text-muted);border:1px solid var(--border-dim);transition:all .2s}
       .page-btn:hover{background:var(--border-dim);color:var(--text-sub);border-color:var(--border);}
@@ -248,7 +252,7 @@ class RankingDmaior extends HTMLElement {
       .podium-val{font-size:1.2rem;font-weight:800;font-family:'Rajdhani';display:flex;align-items:center;gap:5px;margin-top:2px;color:var(--azul)}
       .first .podium-val{font-size:1.5rem}
       .crown-emoji{position:absolute;top:-42px;left:50%;transform:translateX(-50%) rotate(-10deg);font-size:36px;filter:drop-shadow(0 2px 8px rgba(240,192,64,0.7));z-index:5}
-      .podium-item .name{width:95%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;margin-bottom:0;font-size:13px}
+      .podium-item .name{width:95%;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:visible;text-align:center;margin-bottom:0;font-size:13px}
       .podium-id{font-size:10px;color:var(--text-muted);margin-bottom:4px;font-family:'Exo 2',sans-serif}
       /* Tag de prêmio: verde sólido preenchido + texto branco — igual ao design de referência */
       .prize-tag{font-size:0.9rem;color:#fff;background:#166534;padding:6px 16px;border-radius:20px;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:700;border:none;display:flex;align-items:center;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(22,101,52,0.35)}
@@ -279,7 +283,7 @@ class RankingDmaior extends HTMLElement {
       :host-context([data-theme="rosa"]) .live-dot span,
       :host-context([data-theme="laranja"]) .live-dot span{background:var(--azul);}
       .list-name-col{display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;margin-right:10px}
-      .list-name{font-size:var(--t-info);color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .list-name{font-size:var(--t-info);color:var(--text);font-weight:600;display:flex;align-items:center;justify-content:flex-start;gap:4px;white-space:nowrap;overflow:visible;min-width:0}
       .list-id{font-size:0.7rem;color:var(--text-muted);font-family:'Exo 2',sans-serif}
       /* Valor do score na lista — estilo idêntico ao panel-value do painel admin: gradiente de texto + letter-spacing */
       .list-score{font-size:var(--t-val);font-weight:700;font-family:'Rajdhani';margin-left:auto;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
@@ -660,8 +664,8 @@ class RankingDmaior extends HTMLElement {
         const _safeBadge = u => { try { const p = new URL(u).protocol; return (p==='https:'||p==='http:') ? u : ''; } catch { return ''; } };
         const _safeV = _safeBadge(data.badge_verificado_url || '');
         const _safeP = _safeBadge(data.badge_premium_url    || '');
-        if (_safeV) this.VERIFICADO_SVG         = `<img src="${this.esc(_safeV)}" width="15" height="15" style="vertical-align:middle;flex-shrink:0;margin-left:4px;border-radius:50%;object-fit:cover" title="Verificado">`;
-        if (_safeP) this.VERIFICADO_PREMIUM_SVG = `<img src="${this.esc(_safeP)}" width="15" height="15" style="vertical-align:middle;flex-shrink:0;margin-left:4px;border-radius:50%;object-fit:cover" title="Verificado Premium">`;
+        if (_safeV) this.VERIFICADO_SVG         = `<img class="verified-badge" src="${this.esc(_safeV)}" width="15" height="15" title="Verificado">`;
+        if (_safeP) this.VERIFICADO_PREMIUM_SVG = `<img class="verified-badge premium" src="${this.esc(_safeP)}" width="15" height="15" title="Verificado Premium">`;
         this.prevRows = [];
         this._saveCurrentPositions(this.allRows);
         const hoje = new Date();
@@ -778,9 +782,25 @@ class RankingDmaior extends HTMLElement {
     } catch { return ''; }
   }
 
-  proxyImg(url) {
+  normalizeImageUrl(url) {
     const safe = this.safeUrl(url);
+    if (!safe) return '';
+    try {
+      const u = new URL(safe);
+      const host = u.hostname.toLowerCase();
+      if (host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')) {
+        const fileMatch = u.pathname.match(/\/file\/d\/([^/]+)/);
+        const id = fileMatch?.[1] || u.searchParams.get('id');
+        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}`;
+      }
+      return u.href;
+    } catch { return ''; }
+  }
+
+  proxyImg(url) {
+    const safe = this.normalizeImageUrl(url);
     if (!safe) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    if (/^https:\/\/drive\.google\.com\/uc\?/i.test(safe)) return safe;
     return `https://images.weserv.nl/?url=${encodeURIComponent(safe)}&w=80&h=80&fit=cover&output=webp`;
   }
 
@@ -907,7 +927,7 @@ class RankingDmaior extends HTMLElement {
                 ${liveDot}
               </div>
             </div>
-            <div class="name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
+            <div class="name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${prizeHtml}
             <div class="pod-pos-num">${idx + 1}</div>
@@ -921,7 +941,7 @@ class RankingDmaior extends HTMLElement {
               <div class="badge">${idx + 1}</div>
               ${liveDot}
             </div>
-            <div class="name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
+            <div class="name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
             <div class="podium-id">@${this.esc(s.id)}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${prizeHtml}
@@ -948,7 +968,7 @@ class RankingDmaior extends HTMLElement {
             ${liveDotItem}
           </div>
           <div class="list-name-col">
-            <div class="list-name" title="${this.esc(s.nome)}">${this.esc(s.nome) || 'Sem Nome'}${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
+            <div class="list-name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
             <div class="list-id">@${this.esc(s.id)}</div>
             <div class="badges-container">
               ${this.positionBadge(s, globalIndex + 1)}

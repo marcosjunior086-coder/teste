@@ -32,6 +32,7 @@ class MenuMobileDMaior extends HTMLElement {
 
     this.render();
     this.bindEvents();
+    this.applyPreferences();
     this.checkAuth();
     // Guarda referências para poder remover corretamente no disconnectedCallback
     this._storageHandler = (e) => {
@@ -170,6 +171,10 @@ class MenuMobileDMaior extends HTMLElement {
       .dd-option:hover{ background:var(--dm-cyan-08); }
       .dd-option.active{ background:var(--dm-cyan-12); color:var(--dm-cyan); }
       .dd-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+      .pref-row{ display:grid; gap:5px; padding:7px 10px 8px; }
+      .pref-row label{ font-size:.62rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.2px; font-family:'Rajdhani',sans-serif; font-weight:700; }
+      .pref-select{ width:100%; min-height:38px; border:1px solid var(--dm-cyan-20); border-radius:8px; background:var(--dm-bg-1); color:var(--dm-text); padding:0 10px; font-family:'Exo 2',sans-serif; font-size:.82rem; outline:none; cursor:pointer; }
+      .pref-select:focus{ border-color:var(--dm-cyan); box-shadow:0 0 0 2px var(--dm-cyan-10); }
       .overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--dm-overlay); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .3s; z-index:9998; }
       .overlay.on{ opacity:1; pointer-events:auto; }
       .sidebar{ position:fixed; top:0; right:-100%; width:280px; max-width:85vw; height:100vh; background:var(--dm-grad-sidebar); border-left:1px solid var(--dm-cyan-20); box-shadow:-5px 0 30px var(--dm-shadow-lg); transition:right .3s cubic-bezier(.25,.8,.25,1); z-index:9999; display:flex; flex-direction:column; overflow-y:auto; scrollbar-width:none; }
@@ -252,6 +257,25 @@ class MenuMobileDMaior extends HTMLElement {
             <button class="dd-option" id="ddThemeLaranja" data-theme-id="laranja">
               <span class="dd-dot" style="background:#fff3e0;border:1.5px solid #f97316;"></span> Laranja
             </button>
+            <div class="dd-divider"></div>
+            <div class="dd-label" data-i18n="accessibility">Acessibilidade</div>
+            <div class="pref-row">
+              <label for="ddFontSize" data-i18n="textSize">Tamanho do texto</label>
+              <select class="pref-select" id="ddFontSize" data-pref-font-select>
+                <option value="normal" data-i18n="fontNormal">Normal</option>
+                <option value="grande" data-i18n="fontLarge">Grande</option>
+                <option value="extra" data-i18n="fontExtra">Muito grande</option>
+              </select>
+            </div>
+            <div class="pref-row">
+              <label for="ddLang" data-i18n="language">Idioma</label>
+              <select class="pref-select" id="ddLang" data-pref-lang-select>
+                <option value="pt-BR">Português BR</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="zh">中文</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -376,6 +400,7 @@ class MenuMobileDMaior extends HTMLElement {
       const isOpen = layoutDropdown.classList.toggle('open');
       gearBtn.classList.toggle('open', isOpen);
     });
+    layoutDropdown.addEventListener('click', (e) => e.stopPropagation());
 
     // Fecha ao clicar fora (escuta no document via host element)
     document.addEventListener('click', () => {
@@ -435,6 +460,26 @@ class MenuMobileDMaior extends HTMLElement {
       });
     });
 
+    // Preferencias globais: idioma e tamanho do texto
+    const fontSelect = root.getElementById('ddFontSize');
+    const langSelect = root.getElementById('ddLang');
+    if (window.DMaiorPrefs) {
+      if (fontSelect) fontSelect.value = window.DMaiorPrefs.getFontSize();
+      if (langSelect) langSelect.value = window.DMaiorPrefs.getLang();
+    }
+    if (fontSelect) {
+      fontSelect.addEventListener('change', () => {
+        if (window.DMaiorPrefs) window.DMaiorPrefs.setFontSize(fontSelect.value);
+        this.applyPreferences();
+      });
+    }
+    if (langSelect) {
+      langSelect.addEventListener('change', () => {
+        if (window.DMaiorPrefs) window.DMaiorPrefs.setLanguage(langSelect.value);
+        this.applyPreferences();
+      });
+    }
+
     // Submenus com accordion
     root.querySelectorAll('.menu-acc').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -485,6 +530,11 @@ class MenuMobileDMaior extends HTMLElement {
         }
       });
     }
+  }
+
+  applyPreferences() {
+    if (!window.DMaiorPrefs) return;
+    window.DMaiorPrefs.bind(this.shadowRoot);
   }
 
   // Agenda checkUnread com retry enquanto DmaiorAPI não estiver disponível
