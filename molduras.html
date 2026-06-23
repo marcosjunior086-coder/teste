@@ -16,6 +16,10 @@
       }
       const savedTheme = localStorage.getItem('dm_tema') || 'original';
       if (savedTheme !== 'original') document.documentElement.dataset.theme = savedTheme;
+      const savedFont = localStorage.getItem('dm_tamanho_texto') || 'normal';
+      const fontScale = savedFont === 'extra' ? '1.22' : savedFont === 'grande' ? '1.12' : '1';
+      document.documentElement.dataset.fontSize = savedFont;
+      document.documentElement.style.setProperty('--dm-font-scale', fontScale);
     } catch (_) {
       window.location.replace('painel/index.html');
     }
@@ -24,6 +28,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="js/preferences.js?v=20260623-1"></script>
 <style>
   :root{
     --bg:#050611; --bg2:#0b0c1b; --panel:#101120; --panel2:#17192a;
@@ -43,6 +48,7 @@
   html,body{margin:0;padding:0}
   body{
     font-family:'Exo 2',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    font-size:calc(16px * var(--dm-font-scale, 1));
     background:
       radial-gradient(1200px 600px at 88% -8%, var(--glow1), transparent 60%),
       radial-gradient(1100px 620px at 6% 108%, var(--glow2), transparent 60%),
@@ -55,18 +61,7 @@
   }
   .wrap{max-width:1040px;margin:0 auto;padding:26px 20px 56px}
 
-  header.top{display:flex;align-items:center;gap:16px;margin-bottom:26px}
-  .brandmark{
-    width:54px;height:54px;border-radius:15px;flex:0 0 auto;position:relative;overflow:hidden;
-    background:var(--grad);
-    box-shadow:0 10px 26px -10px rgba(0,153,255,.6), inset 0 0 0 1px rgba(255,255,255,.18);
-    transition:background .35s ease;
-  }
-  .brandmark::before{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(135deg, transparent 49.4%, rgba(255,255,255,.22) 49.4%, rgba(255,255,255,.22) 50.6%, transparent 50.6%);
-  }
-  .brandmark span{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:22px;color:#fff;letter-spacing:-1px}
+  header.top{display:flex;align-items:center;margin-bottom:26px}
   .titles h1{margin:0;font-family:'Rajdhani',sans-serif;font-size:23px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
   .titles p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:500;letter-spacing:.12em;text-transform:uppercase}
 
@@ -176,10 +171,9 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brandmark"><span>DD</span></div>
     <div class="titles">
-      <h1>Gerador de Moldura</h1>
-      <p>DMaior Agency · Área do streamer</p>
+      <h1 data-i18n="frameTitle">Gerador de Moldura</h1>
+      <p data-i18n="frameArea">DMaior Agency · Área do streamer</p>
     </div>
   </header>
 
@@ -190,7 +184,7 @@
       </div>
       <div class="hint" id="dragHint">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
-        <span>Escolha um tema e arraste a foto para reposicioná-la no círculo.</span>
+        <span data-i18n="frameHint">Escolha um tema e arraste a foto para reposicioná-la no círculo.</span>
       </div>
     </section>
 
@@ -198,19 +192,19 @@
       <div class="panel-pad">
 
         <div class="section" id="themeSection">
-          <p class="label">1 · Tema da moldura</p>
+          <p class="label" data-i18n="frameTheme">1 · Tema da moldura</p>
           <div class="theme-grid" id="themeGrid"></div>
         </div>
 
         <div class="section" id="addSection">
-          <p class="label">2 · Sua foto</p>
+          <p class="label" data-i18n="framePhoto">2 · Sua foto</p>
 
           <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Adicionar imagem">
             <div class="ic">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             </div>
-            <div class="dz-title">Adicionar imagem</div>
-            <div class="dz-sub">Clique ou arraste uma foto aqui</div>
+            <div class="dz-title" data-i18n="addImage">Adicionar imagem</div>
+            <div class="dz-sub" data-i18n="addImageHelp">Clique ou arraste uma foto aqui</div>
           </div>
 
           <div class="row hidden" id="fileRow" style="margin-top:4px">
@@ -218,24 +212,24 @@
               <img class="thumb" id="thumb" alt="">
               <span class="fname" id="fname">imagem.jpg</span>
             </div>
-            <button class="btn-ghost" id="changeBtn">Trocar</button>
+            <button class="btn-ghost" id="changeBtn" data-i18n="change">Trocar</button>
           </div>
         </div>
 
         <div class="section hidden" id="adjustSection">
-          <p class="label">3 · Ajustar</p>
+          <p class="label" data-i18n="frameAdjust">3 · Ajustar</p>
           <div class="slider-row">
             <span class="zlabel">Zoom</span>
             <input type="range" id="zoom" min="1" max="3" step="0.01" value="1" aria-label="Zoom da imagem">
             <span class="zval" id="zoomVal">100%</span>
           </div>
           <div style="margin-top:12px">
-            <button class="btn-ghost" id="resetBtn">Centralizar / Redefinir</button>
+            <button class="btn-ghost" id="resetBtn" data-i18n="centerReset">Centralizar / Redefinir</button>
           </div>
         </div>
 
         <div class="section">
-          <p class="label">4 · Escolha a qualidade</p>
+          <p class="label" data-i18n="chooseQuality">4 · Escolha a qualidade</p>
           <div class="dl-grid">
             <button class="dl" data-px="1280" data-name="HD" disabled>
               <span class="dl-name">HD</span><span class="dl-px">1280 × 1280</span>
@@ -251,7 +245,7 @@
             </button>
           </div>
 
-          <div class="sublabel">Ultra alta resolução</div>
+          <div class="sublabel" data-i18n="ultraHigh">Ultra alta resolução</div>
           <div class="dl-grid dl-grid-3">
             <button class="dl" data-px="8192" data-name="8K" disabled>
               <span class="ultra">ULTRA</span>
@@ -269,11 +263,11 @@
 
           <button class="download-action" id="downloadBtn" type="button" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-            <span>Baixar moldura</span>
+            <span data-i18n="downloadFrame">Baixar moldura</span>
           </button>
 
           <div class="status" id="status"></div>
-          <p class="note">Selecione a qualidade e depois use o botão de download. Os arquivos são PNG sem perda. As opções <b>16K e 22K</b> são recomendadas apenas em computadores com boa memória.</p>
+          <p class="note" data-i18n="frameNote">Selecione a qualidade e depois use o botão de download. Os arquivos são PNG sem perda. As opções <b>16K e 22K</b> são recomendadas apenas em computadores com boa memória.</p>
         </div>
 
       </div>

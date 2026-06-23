@@ -54,6 +54,7 @@
   /* Tipografia */
   --dm-font-title:  'Rajdhani', sans-serif;
   --dm-font-body:   'Exo 2', sans-serif;
+  --dm-font-scale:  1;
 
   /* Raios e transições */
   --dm-radius:      12px;
@@ -330,6 +331,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  font-size: calc(16px * var(--dm-font-scale, 1));
 }
 
 body {
@@ -342,7 +344,7 @@ body {
   background-size: cover;
   color: var(--dm-text);
   font-family: var(--dm-font-body);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -394,6 +396,29 @@ button {
 input, select, textarea {
   font-family: var(--dm-font-body);
   outline: none;
+}
+
+[data-font-size="grande"] {
+  --dm-font-scale: 1.12;
+}
+
+[data-font-size="extra"] {
+  --dm-font-scale: 1.22;
+}
+
+[data-font-size="grande"] button,
+[data-font-size="grande"] input,
+[data-font-size="grande"] select,
+[data-font-size="grande"] textarea,
+[data-font-size="extra"] button,
+[data-font-size="extra"] input,
+[data-font-size="extra"] select,
+[data-font-size="extra"] textarea {
+  min-height: 44px;
+}
+
+[data-font-size="extra"] .dm-container {
+  max-width: 1280px;
 }
 
 /* ─── Layout base da página ─────────────────────────────────────────────────── */

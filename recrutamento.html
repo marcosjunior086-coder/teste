@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="css/components.css">
   <style>
     .rc-page { max-width: 560px; margin: 32px auto 60px; padding: 0 16px; }
+    .rc-prefbar { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .rc-prefbar select { width: auto; min-width: 132px; padding: 9px 30px 9px 11px; background: rgba(0,0,0,.45); border: 1px solid var(--dm-border); border-radius: 8px; color: var(--dm-text); font-family: var(--dm-font-body); font-size: .82rem; outline: none; }
 
     /* ── Cabeçalho ── */
     .rc-hero { text-align: center; margin-bottom: 28px; }
@@ -114,6 +116,10 @@
 
     /* ── Oculto ── */
     .rc-hidden { display: none !important; }
+    [data-font-size="grande"] .rc-perfil-nome,
+    [data-font-size="extra"] .rc-perfil-nome { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.15; }
+    [data-font-size="extra"] .rc-btn-row { flex-direction: column; }
+    [data-font-size="extra"] .rc-card { padding: 24px 18px; }
   </style>
 </head>
 <body>
@@ -121,9 +127,22 @@
 
   <main class="dm-main">
     <div class="rc-page">
+      <div class="rc-prefbar" aria-label="Preferências">
+        <select id="pref-lang" data-pref-lang-select aria-label="Idioma">
+          <option value="pt-BR">Português BR</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="zh">中文</option>
+        </select>
+        <select id="pref-font" data-pref-font-select aria-label="Tamanho do texto">
+          <option value="normal" data-i18n="fontNormal">Normal</option>
+          <option value="grande" data-i18n="fontLarge">Grande</option>
+          <option value="extra" data-i18n="fontExtra">Muito grande</option>
+        </select>
+      </div>
       <div class="rc-hero">
-        <h1>Entrar para a Agência</h1>
-        <p>Processo gratuito. Consulte seu perfil, confirme e envie sua candidatura.</p>
+        <h1 data-i18n="enterAgency">Entrar para a Agência</h1>
+        <p data-i18n="recruitmentSubtitle">Processo gratuito. Consulte seu perfil, confirme e envie sua candidatura.</p>
       </div>
 
       <!-- indicador de etapa -->
@@ -141,22 +160,22 @@
           <div class="rc-info-list">
             <div class="rc-info-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>Informe seu Kwai ID (nome de usuário ou número de ID) para consultarmos sua situação.</span>
+              <span data-i18n="infoKwaiId">Informe seu Kwai ID (nome de usuário ou número de ID) para consultarmos sua situação.</span>
             </div>
             <div class="rc-info-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>O processo é totalmente gratuito e sem compromisso.</span>
+              <span data-i18n="infoFree">O processo é totalmente gratuito e sem compromisso.</span>
             </div>
             <div class="rc-info-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span>Seus dados são usados apenas para o processo de agenciamento.</span>
+              <span data-i18n="infoData">Seus dados são usados apenas para o processo de agenciamento.</span>
             </div>
           </div>
 
           <div class="rc-group">
-            <label for="f-uid">Kwai ID ou número de membro</label>
-            <input id="f-uid" class="dm-input-field" type="text" placeholder="Ex: seu_usuario ou 123456789" maxlength="80" autocomplete="off" autocorrect="off" spellcheck="false">
-            <span class="rc-hint">Encontre seu ID no perfil do Kwai → três pontos → Copiar ID.</span>
+            <label for="f-uid" data-i18n="kwaiIdLabel">Kwai ID ou número de membro</label>
+            <input id="f-uid" class="dm-input-field" type="text" placeholder="Ex: seu_usuario ou 123456789" data-i18n-placeholder="kwaiIdPlaceholder" maxlength="80" autocomplete="off" autocorrect="off" spellcheck="false">
+            <span class="rc-hint" data-i18n="kwaiIdHint">Encontre seu ID no perfil do Kwai → três pontos → Copiar ID.</span>
           </div>
 
           <div id="alerta-1" class="rc-alert"></div>
@@ -164,13 +183,13 @@
           <div class="rc-btn-row">
             <button class="dm-btn-primary" id="btn-buscar">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              Buscar perfil
+              <span data-i18n="searchProfile">Buscar perfil</span>
             </button>
           </div>
 
           <div id="loading-1" class="rc-loading rc-hidden">
             <div class="rc-spinner"></div>
-            <span>Consultando perfil no Kwai…</span>
+            <span data-i18n="loadingProfile">Consultando perfil no Kwai…</span>
           </div>
         </div>
 
@@ -190,11 +209,11 @@
             </div>
           </div>
 
-          <p style="font-size:.9rem;color:var(--dm-text-muted);margin-bottom:18px;text-align:center;">Este é o seu perfil no Kwai?</p>
+          <p style="font-size:.9rem;color:var(--dm-text-muted);margin-bottom:18px;text-align:center;" data-i18n="confirmProfile">Este é o seu perfil no Kwai?</p>
 
           <div class="rc-btn-row">
-            <button class="dm-btn-secondary" id="btn-nao">Não, corrigir</button>
-            <button class="dm-btn-primary"   id="btn-sim">Sim, é o meu</button>
+            <button class="dm-btn-secondary" id="btn-nao" data-i18n="noCorrect">Não, corrigir</button>
+            <button class="dm-btn-primary"   id="btn-sim" data-i18n="yesMine">Sim, é o meu</button>
           </div>
         </div>
 
@@ -203,19 +222,19 @@
           <div id="alerta-3" class="rc-alert"></div>
 
           <div class="rc-group">
-            <label for="f-nome">Nome completo</label>
-            <input id="f-nome" class="dm-input-field" type="text" placeholder="Seu nome completo" maxlength="120" autocomplete="name">
+            <label for="f-nome" data-i18n="fullName">Nome completo</label>
+            <input id="f-nome" class="dm-input-field" type="text" placeholder="Seu nome completo" data-i18n-placeholder="fullNamePlaceholder" maxlength="120" autocomplete="name">
           </div>
           <div class="rc-group">
-            <label for="f-whatsapp">WhatsApp</label>
+            <label for="f-whatsapp" data-i18n="whatsapp">WhatsApp</label>
             <input id="f-whatsapp" class="dm-input-field" type="tel" placeholder="(00) 90000-0000" maxlength="15" inputmode="numeric" autocomplete="tel">
           </div>
           <div class="rc-group">
-            <label for="f-categoria">Categoria de conteúdo</label>
+            <label for="f-categoria" data-i18n="contentCategory">Categoria de conteúdo</label>
             <select id="f-categoria">
-              <option value="">Selecione…</option>
-              <option value="entretenimento">Entretenimento</option>
-              <option value="games">Games</option>
+              <option value="" data-i18n="select">Selecione…</option>
+              <option value="entretenimento" data-i18n="entertainment">Entretenimento</option>
+              <option value="games" data-i18n="games">Games</option>
             </select>
           </div>
           <select id="f-recrutador" style="display:none" aria-hidden="true">
@@ -224,37 +243,37 @@
 
           <div class="rc-termos">
             <input type="checkbox" id="f-aceite">
-            <label for="f-aceite">Autorizo o contato pela DMaior Agency e concordo que minhas informações sejam usadas exclusivamente para o processo de agenciamento.</label>
+            <label for="f-aceite" data-i18n="consent">Autorizo o contato pela DMaior Agency e concordo que minhas informações sejam usadas exclusivamente para o processo de agenciamento.</label>
           </div>
 
           <div id="loading-3" class="rc-loading rc-hidden">
             <div class="rc-spinner"></div>
-            <span>Enviando candidatura…</span>
+            <span data-i18n="sendingApplication">Enviando candidatura…</span>
           </div>
 
           <div class="rc-btn-row">
-            <button class="dm-btn-secondary" id="btn-voltar-3">Voltar</button>
-            <button class="dm-btn-primary"   id="btn-enviar">Enviar candidatura</button>
+            <button class="dm-btn-secondary" id="btn-voltar-3" data-i18n="back">Voltar</button>
+            <button class="dm-btn-primary"   id="btn-enviar" data-i18n="submitApplication">Enviar candidatura</button>
           </div>
         </div>
 
         <!-- ── ETAPA 3b: migração (vinculado a outra agência) ── -->
         <div id="etapa-migracao" class="rc-hidden">
           <div class="rc-alert warn visible" id="alerta-migracao">
-            <strong>Perfil vinculado a outra agência</strong><br>
+            <strong data-i18n="migrationTitle">Perfil vinculado a outra agência</strong><br>
             <span id="migracao-agencia-texto"></span>
           </div>
 
           <div class="rc-migracao">
-            <p>Para entrar na DMaior Agency você precisará solicitar sua liberação. Clique abaixo para iniciar o processo via WhatsApp — nossa equipe vai orientar você.</p>
+            <p data-i18n="migrationCopy">Para entrar na DMaior Agency você precisará solicitar sua liberação. Clique abaixo para iniciar o processo via WhatsApp — nossa equipe vai orientar você.</p>
             <a id="btn-wpp-migracao" href="#" target="_blank" rel="noopener" class="rc-wpp-btn" id="btn-wpp">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              Solicitar migração de agência
+              <span data-i18n="requestMigration">Solicitar migração de agência</span>
             </a>
           </div>
 
           <div style="margin-top:20px;">
-            <button class="dm-btn-secondary" id="btn-voltar-mig" style="width:100%;padding:12px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;">Voltar ao início</button>
+            <button class="dm-btn-secondary" id="btn-voltar-mig" style="width:100%;padding:12px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;" data-i18n="backStart">Voltar ao início</button>
           </div>
         </div>
 
@@ -262,34 +281,34 @@
         <div id="etapa-resultado" class="rc-hidden">
           <div class="rc-resultado" id="resultado-content">
             <div class="rc-icon" id="resultado-icon" aria-hidden="true"></div>
-            <h2 id="resultado-titulo">Candidatura enviada!</h2>
-            <p id="resultado-desc">Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp em breve.</p>
+            <h2 id="resultado-titulo" data-i18n="applicationSent">Candidatura enviada!</h2>
+            <p id="resultado-desc" data-i18n="resultDefault">Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp em breve.</p>
             <div class="rc-protocolo" id="resultado-protocolo"></div>
             <div class="rc-pos-envio rc-hidden" id="bloco-pos-envio">
-              <h3>Próximos passos</h3>
-              <p>O convite foi enviado pelo chat do Kwai e pode levar até 30 minutos para aparecer. Ao aceitar, informe o ID da agência abaixo quando solicitado.</p>
+              <h3 data-i18n="nextSteps">Próximos passos</h3>
+              <p data-i18n="inviteDelay">O convite foi enviado pelo chat do Kwai e pode levar até 30 minutos para aparecer. Ao aceitar, informe o ID da agência abaixo quando solicitado.</p>
               <div class="rc-agencia-id">
-                <div><span>ID da agência</span><strong id="agencia-kwai-id">KWAIRES</strong></div>
-                <button type="button" class="rc-copy-btn" id="btn-copiar-agencia">Copiar</button>
+                <div><span data-i18n="agencyId">ID da agência</span><strong id="agencia-kwai-id">KWAIRES</strong></div>
+                <button type="button" class="rc-copy-btn" id="btn-copiar-agencia" data-i18n="copy">Copiar</button>
               </div>
               <div style="margin-bottom:14px;padding:10px 14px;border:1px solid var(--dm-border);border-radius:8px;font-size:.82rem;color:var(--dm-text-muted);line-height:1.6">
-                <strong style="color:var(--dm-text);display:block;margin-bottom:2px">Responsável pelo convite</strong>
+                <strong style="color:var(--dm-text);display:block;margin-bottom:2px" data-i18n="recruiterResponsible">Responsável pelo convite</strong>
                 Dan · (17) 99717-6407
-                <span style="display:block;margin-top:4px;font-size:.75rem;font-style:italic;color:var(--dm-text-muted)">Informações de recrutador em breve.</span>
+                <span style="display:block;margin-top:4px;font-size:.75rem;font-style:italic;color:var(--dm-text-muted)" data-i18n="recruiterSoon">Informações de recrutador em breve.</span>
               </div>
               <div class="rc-result-actions">
-                <a class="rc-result-link" href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" rel="noopener noreferrer">Como aceitar o convite</a>
-                <a class="rc-result-link whatsapp" id="btn-wpp-resultado" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer">Falar com a agência</a>
+                <a class="rc-result-link" href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" rel="noopener noreferrer" data-i18n="howAcceptInvite">Como aceitar o convite</a>
+                <a class="rc-result-link whatsapp" id="btn-wpp-resultado" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" data-i18n="talkAgency">Falar com a agência</a>
               </div>
             </div>
             <div class="rc-pos-envio" id="bloco-candidatura">
               <div class="rc-result-actions" style="margin-top:0">
-                <a class="rc-result-link whatsapp" id="btn-wpp-resultado-b" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer">Falar com a agência</a>
+                <a class="rc-result-link whatsapp" id="btn-wpp-resultado-b" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" data-i18n="talkAgency">Falar com a agência</a>
               </div>
             </div>
           </div>
           <div style="margin-top:24px;">
-            <button class="dm-btn-secondary" id="btn-nova" style="width:100%;padding:12px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;">Nova consulta</button>
+            <button class="dm-btn-secondary" id="btn-nova" style="width:100%;padding:12px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;" data-i18n="newSearch">Nova consulta</button>
           </div>
         </div>
 
@@ -297,6 +316,7 @@
     </div><!-- /rc-page -->
   </main>
 
+  <script src="js/preferences.js?v=20260623-1"></script>
   <script src="js/utils/helpers.js"></script>
   <script src="js/api.js?v=20260619-3"></script>
   <script src="js/auth.js"></script>
@@ -312,6 +332,7 @@
     let _recrutadoresCarregados = false;
 
     const $ = id => document.getElementById(id);
+    const tt = (key, params) => window.DMaiorPrefs?.t ? window.DMaiorPrefs.t(key, params) : key;
     const WHATSAPP_AGENCIA = '5517997176407';
     const AGENCIA_KWAI_ID = 'KWAIRES';
 
@@ -383,6 +404,18 @@
       const el = $(elId); if (el) { el.className = 'rc-alert'; el.innerHTML = ''; }
     }
 
+    function inicializarPreferencias() {
+      const lang = $('pref-lang');
+      const font = $('pref-font');
+      if (window.DMaiorPrefs) {
+        window.DMaiorPrefs.bind(document);
+        if (lang) lang.value = window.DMaiorPrefs.getLang();
+        if (font) font.value = window.DMaiorPrefs.getFontSize();
+      }
+      if (lang) lang.addEventListener('change', e => window.DMaiorPrefs?.setLanguage(e.target.value));
+      if (font) font.addEventListener('change', e => window.DMaiorPrefs?.setFontSize(e.target.value));
+    }
+
     function irParaEtapa(n) {
       [1, 2, 3, 'migracao', 'resultado'].forEach(k => {
         const id = isNaN(k) ? `etapa-${k}` : `etapa-${k}`;
@@ -422,12 +455,13 @@
     }
 
     /* ── ETAPA 1 → buscar perfil ── */
+    inicializarPreferencias();
     $('f-uid').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-buscar').click(); });
 
     $('btn-buscar').addEventListener('click', async () => {
       limparAlerta('alerta-1');
       const uid = $('f-uid').value.trim();
-      if (!uid) { alerta('alerta-1', 'error', 'Informe o Kwai ID antes de buscar.'); return; }
+      if (!uid) { alerta('alerta-1', 'error', tt('informKwaiId')); return; }
 
       $('btn-buscar').disabled = true;
       $('loading-1').classList.remove('rc-hidden');
@@ -436,19 +470,19 @@
         const r = await window.DmaiorAPI.candidatura.buscarPerfil(uid);
 
         if (r.status === 'COOKIE_INDISPONIVEL') {
-          alerta('alerta-1', 'error', 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.');
+          alerta('alerta-1', 'error', tt('serviceUnavailable'));
           return;
         }
         if (r.status === 'VERIFICACAO_INCOMPLETA') {
-          alerta('alerta-1', 'warn', r.mensagem || 'Não foi possível verificar o status deste perfil. Tente novamente mais tarde.');
+          alerta('alerta-1', 'warn', r.mensagem || tt('verifyIncomplete'));
           return;
         }
         if (r.status === 'RESTRICAO_LIVE') {
           if (r.perfil) { _verificacao = r; _perfil = r.perfil; mostrarPerfil(_perfil); }
-          const msgLive = r.checkMessage || r.mensagem || 'Este perfil não atingiu o mínimo de horas de live exigido pela plataforma.';
+          const msgLive = r.checkMessage || r.mensagem || tt('eligibilityLiveDefault');
           mostrarRestricaoLive(r.perfil ? 'alerta-2' : 'alerta-1', msgLive);
           $('btn-sim').disabled = true;
-          $('btn-sim').textContent = 'Sem elegibilidade';
+          $('btn-sim').textContent = tt('noEligibility');
           if (r.perfil) irParaEtapa(2);
           return;
         }
@@ -456,18 +490,18 @@
           _verificacao = r; _perfil = r.perfil; mostrarPerfil(_perfil);
           alerta('alerta-2', 'success', '<strong>✓ Perfil verificado</strong><br>Este streamer já está vinculado à DMaior Agency.');
           $('btn-sim').disabled = true;
-          $('btn-sim').textContent = 'Já é membro';
+          $('btn-sim').textContent = tt('alreadyMember');
           irParaEtapa(2); return;
         }
         if (!r.ok) {
-          alerta('alerta-1', 'error', r.mensagem || 'Perfil não encontrado. Verifique o Kwai ID e tente novamente.');
+          alerta('alerta-1', 'error', r.mensagem || tt('profileNotFound'));
           return;
         }
         if (r.status === 'CONVITE_EXISTENTE' || r.status === 'CONVITE_REENVIAVEL') {
           _verificacao = r; _perfil = r.perfil; mostrarPerfil(_perfil);
           alerta('alerta-2', 'info', r.mensagem);
           $('btn-sim').disabled = true;
-          $('btn-sim').textContent = r.status === 'CONVITE_REENVIAVEL' ? 'Convite expirado' : 'Convite ativo';
+          $('btn-sim').textContent = r.status === 'CONVITE_REENVIAVEL' ? tt('expiredInvite') : tt('activeInvite');
           irParaEtapa(2); return;
         }
 
@@ -521,9 +555,9 @@
       alerta(elId, 'eligibility', `<div class="rc-eligibility-status">
         <span class="rc-eligibility-icon">${icone}</span>
         <span class="rc-eligibility-copy">
-          <strong>Requisito de live não atingido</strong>
+          <strong>${tt('liveRequirementTitle')}</strong>
           <span>${escMensagem(motivo)}</span>
-          <small>Você poderá tentar novamente quando cumprir o tempo mínimo exigido pelo Kwai.</small>
+          <small>${tt('liveRequirementHelp')}</small>
         </span>
       </div>`);
     }
@@ -531,14 +565,14 @@
     function mostrarFalhaEnvio(origem) {
       const dados = origem?.data && typeof origem.data === 'object' ? origem.data : (origem || {});
       const motivo = dados.checkMessage || dados.motivoBloqueio || dados.mensagem || dados.erro || origem?.message
-        || 'O Kwai recusou o convite. Nossa equipe analisará e entrará em contato.';
+        || tt('kwaiRefused');
       const restricaoLive = dados.status === 'RESTRICAO_LIVE'
         || /live|transmiss|30 dias|30 days|hora|hour|atividade recente/i.test(String(motivo));
       if (restricaoLive) {
         mostrarRestricaoLive('alerta-3', motivo);
         return;
       }
-      alerta('alerta-3', 'warn', `<strong>Não foi possível enviar o convite</strong><br>${escMensagem(motivo)}`);
+      alerta('alerta-3', 'warn', `<strong>${tt('cannotSendInvite')}</strong><br>${escMensagem(motivo)}`);
     }
 
     $('btn-enviar').addEventListener('click', async () => {
@@ -548,10 +582,10 @@
       const categoria = $('f-categoria').value;
       const aceite    = $('f-aceite').checked;
 
-      if (!nome)            { alerta('alerta-3', 'error', 'Informe seu nome completo.'); return; }
-      if (whatsapp.length < 10) { alerta('alerta-3', 'error', 'WhatsApp inválido. Use DDD + número.'); return; }
-      if (!categoria)       { alerta('alerta-3', 'error', 'Selecione uma categoria de conteúdo.'); return; }
-      if (!aceite)          { alerta('alerta-3', 'error', 'Você precisa aceitar os termos para continuar.'); return; }
+      if (!nome)            { alerta('alerta-3', 'error', tt('informName')); return; }
+      if (whatsapp.length < 10) { alerta('alerta-3', 'error', tt('invalidWhatsapp')); return; }
+      if (!categoria)       { alerta('alerta-3', 'error', tt('selectCategory')); return; }
+      if (!aceite)          { alerta('alerta-3', 'error', tt('acceptTerms')); return; }
 
       $('btn-enviar').disabled = true;
       $('loading-3').classList.remove('rc-hidden');
@@ -580,14 +614,14 @@
         $('resultado-protocolo').textContent = r.protocolo ? `Protocolo: ${r.protocolo}` : '';
         if (r.status === 'convite_enviado') {
           definirIconeResultado('enviado');
-          $('resultado-titulo').textContent = 'Convite enviado!';
-          $('resultado-desc').textContent  = 'O convite foi enviado para o seu perfil no Kwai. Aceite no aplicativo para concluir o agenciamento.';
+          $('resultado-titulo').textContent = tt('inviteSent');
+          $('resultado-desc').textContent  = tt('inviteDelay');
           $('bloco-pos-envio').classList.remove('rc-hidden');
           $('bloco-candidatura').classList.add('rc-hidden');
         } else {
           definirIconeResultado('recebido');
-          $('resultado-titulo').textContent = 'Candidatura recebida!';
-          $('resultado-desc').textContent  = 'Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp informado em breve.';
+          $('resultado-titulo').textContent = tt('applicationReceived');
+          $('resultado-desc').textContent  = tt('resultDefault');
           $('bloco-pos-envio').classList.add('rc-hidden');
           $('bloco-candidatura').classList.remove('rc-hidden');
         }
@@ -628,8 +662,8 @@
         document.execCommand('copy');
         campo.remove();
       }
-      this.textContent = 'Copiado';
-      setTimeout(() => { this.textContent = 'Copiar'; }, 1600);
+      this.textContent = tt('copied');
+      setTimeout(() => { this.textContent = tt('copy'); }, 1600);
     });
 
     $('btn-voltar-mig').addEventListener('click', () => {

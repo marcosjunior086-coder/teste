@@ -13,6 +13,7 @@ class DMaiorPainel extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        this.applyPreferences();
         this.loadChartJS();
         // Guarda referência antes de setupNavigation para poder remover depois
         this._avisosHandler = () => this.goAvisos();
@@ -167,7 +168,7 @@ class DMaiorPainel extends HTMLElement {
                 --border:rgba(0,230,230,.18); --glass:rgba(26,26,26,.92);
                 --text:#fff; --muted:#a0b8c8;
                 --ftitle:clamp(1.2rem,5vw,1.8rem); --fval:clamp(1.1rem,4vw,1.5rem);
-                font-family:'Exo 2',sans-serif; background:transparent; color:var(--text);
+                font-family:'Exo 2',sans-serif; font-size:calc(16px * var(--dm-font-scale, 1)); background:transparent; color:var(--text);
                 min-height:100%; display:flex; flex-direction:row; width:100%; overflow-x:hidden; position:relative;
             }
             .content { flex:1; display:flex; flex-direction:column; align-items:center; padding:24px; min-width:0; overflow-x:hidden; }
@@ -209,6 +210,9 @@ class DMaiorPainel extends HTMLElement {
             .btn-sm:hover{background:var(--cyan-d);}
             .ig{margin-bottom:16px;text-align:left;}
             .ig label{display:block;font-size:.75rem;color:var(--cyan);margin-bottom:6px;font-weight:600;font-family:'Rajdhani';}
+            .pref-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+            .pref-note{font-size:.78rem;color:var(--muted);line-height:1.55;margin-top:6px;}
+            @media(max-width:520px){.pref-grid{grid-template-columns:1fr;}}
             .iw{position:relative;display:flex;align-items:center;}
             .iw .ico{position:absolute;left:14px;width:18px;height:18px;fill:var(--muted);pointer-events:none;}
             .iw .eye{position:absolute;right:12px;width:20px;height:20px;fill:var(--muted);cursor:pointer;}
@@ -562,13 +566,13 @@ class DMaiorPainel extends HTMLElement {
 
             <!-- ══════ MENU ══════ -->
             <nav class="bnav" id="bNav">
-                <button class="nit on" id="nD">${this.svgGrid()} RESUMO</button>
-                <button class="nit" id="nS">${this.svgUser()} PERFIL</button>
-                <button class="nit" id="nC">${this.svgWallet()} CARTEIRA</button>
-                <button class="nit" id="nImpulso">${this.svgBoost()} IMPULSO</button>
-                <button class="nit" id="nMolduras">${this.svgFrame()} MOLDURAS</button>
-                <button class="nit" id="nRank">${this.svgRank()} RANKING</button>
-                <button class="nit sair" id="nO">${this.svgLogout()} SAIR</button>
+                <button class="nit on" id="nD">${this.svgGrid()} <span data-i18n="dashboard">RESUMO</span></button>
+                <button class="nit" id="nS">${this.svgUser()} <span data-i18n="profile">PERFIL</span></button>
+                <button class="nit" id="nC">${this.svgWallet()} <span data-i18n="wallet">CARTEIRA</span></button>
+                <button class="nit" id="nImpulso">${this.svgBoost()} <span data-i18n="boost">IMPULSO</span></button>
+                <button class="nit" id="nMolduras">${this.svgFrame()} <span data-i18n="frames">MOLDURAS</span></button>
+                <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
+                <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
             </nav>
 
             <div class="content">
@@ -821,9 +825,9 @@ class DMaiorPainel extends HTMLElement {
 
                 <!-- ══════ PERFIL ══════ -->
                 <div id="vS" class="view auth-view">
-                    <div class="hd"><h1 class="raaj" style="font-size:1.3rem;color:var(--text);">CONTROLE DE PERFIL</h1></div>
+                    <div class="hd"><h1 class="raaj" style="font-size:1.3rem;color:var(--text);" data-i18n="profileControl">CONTROLE DE PERFIL</h1></div>
                     <div class="card">
-                        <h2 class="raaj" style="font-size:.9rem;margin-bottom:15px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;">DADOS PESSOAIS</h2>
+                        <h2 class="raaj" style="font-size:.9rem;margin-bottom:15px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;" data-i18n="personalData">DADOS PESSOAIS</h2>
                         <div id="alS" class="al"></div>
                         <div class="ig"><label>NOME DE IDENTIFICACAO</label>
                             <div class="iw"><span class="ico">${this.svgUser()}</span><input type="text" id="sName" placeholder="Nome social"></div>
@@ -838,6 +842,27 @@ class DMaiorPainel extends HTMLElement {
                         <div class="ig"><label>ENDERECO RESIDENCIAL</label>
                             <div class="iw"><span class="ico">${this.svgPin()}</span><input type="text" id="sAddr" placeholder="Endereco completo"></div>
                         </div>
+                        <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--cyan);border-bottom:1px solid var(--border);padding-bottom:8px;" data-i18n="appearanceAccess">APARÊNCIA E ACESSIBILIDADE</h2>
+                        <div class="pref-grid">
+                            <div class="ig">
+                                <label data-i18n="textSize">TAMANHO DO TEXTO</label>
+                                <select id="sFontSize" data-pref-font-select>
+                                    <option value="normal" data-i18n="fontNormal">Normal</option>
+                                    <option value="grande" data-i18n="fontLarge">Grande</option>
+                                    <option value="extra" data-i18n="fontExtra">Muito grande</option>
+                                </select>
+                            </div>
+                            <div class="ig">
+                                <label data-i18n="language">IDIOMA</label>
+                                <select id="sLang" data-pref-lang-select>
+                                    <option value="pt-BR">Português BR</option>
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="zh">中文</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="pref-note" data-i18n="appearanceHelp">Essas opções ficam salvas neste aparelho e ajudam na leitura sem alterar seus dados.</p>
                         <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;">DADOS DE RECEBIMENTO</h2>
                         <div class="ig"><label>TIPO DE CHAVE PIX</label>
                             <div class="iw"><span class="ico">${this.svgPix()}</span>
@@ -866,7 +891,7 @@ class DMaiorPainel extends HTMLElement {
                                 <span class="prule fail" id="sn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Número</span>
                             </div>
                         </div>
-                        <button class="btn" id="btnSave" style="margin-top:20px;">ATUALIZAR DADOS</button>
+                        <button class="btn" id="btnSave" style="margin-top:20px;" data-i18n="updateData">ATUALIZAR DADOS</button>
                     </div>
                 </div>
 
@@ -983,6 +1008,16 @@ class DMaiorPainel extends HTMLElement {
 
     // ── Utils ───────────────────────────────────────────────────────
     qs(s){ return this.querySelector(s); }
+
+    applyPreferences(){
+        if(window.DMaiorPrefs){
+            window.DMaiorPrefs.bind(this);
+            const fs = this.qs('#sFontSize');
+            const lg = this.qs('#sLang');
+            if(fs) fs.value = window.DMaiorPrefs.getFontSize();
+            if(lg) lg.value = window.DMaiorPrefs.getLang();
+        }
+    }
 
     showAlert(id, msg, err=true){
         const el = this.qs(id);
@@ -1133,6 +1168,20 @@ class DMaiorPainel extends HTMLElement {
         this.qs('#sPass').addEventListener('input',()=>this.checkPass('#sPass','#sm1','#sn1'));
         this.qs('#fP1').addEventListener('input',()=>this.checkPass('#fP1','#fm1','#fn1'));
         this.qs('#sWpp').addEventListener('input',e=>this.maskPhone(e.target));
+
+        const fontSel = this.qs('#sFontSize');
+        if(fontSel) fontSel.addEventListener('change', e=>{
+            window.DMaiorPrefs?.setFontSize(e.target.value);
+            this.applyPreferences();
+            setTimeout(()=>{ if(this._sendHeight) this._sendHeight(); }, 80);
+        });
+
+        const langSel = this.qs('#sLang');
+        if(langSel) langSel.addEventListener('change', e=>{
+            window.DMaiorPrefs?.setLanguage(e.target.value);
+            this.applyPreferences();
+            setTimeout(()=>{ if(this._sendHeight) this._sendHeight(); }, 80);
+        });
 
         this.qs('#btnFind').addEventListener('click',()=>this.doFindAccount());
         this.qs('#btnSendReset').addEventListener('click',()=>this.doSendReset());
