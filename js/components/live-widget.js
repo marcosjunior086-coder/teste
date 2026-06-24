@@ -324,6 +324,7 @@ class KwaiLiveWidget extends HTMLElement {
         </div>
       </div>
     `;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 
   setupListeners() {

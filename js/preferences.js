@@ -477,6 +477,7 @@
 
   const textOriginals = new WeakMap();
   let observer = null;
+  const observedRoots = new WeakSet();
   let scheduled = false;
 
   const autoText = {
@@ -767,6 +768,241 @@
     }
   };
 
+  const extraAutoText = {
+    en: {
+      'Links Rápidos': 'Quick links',
+      'Redes Sociais': 'Social media',
+      'Política de Privacidade': 'Privacy Policy',
+      'Todos os direitos reservados': 'All rights reserved',
+      'Agência oficial Kwai': 'Official Kwai agency',
+      'Como Aceitar Convite': 'How to accept the invite',
+      'Como Efetuar Saque': 'How to request a withdrawal',
+      'Clique para ver o tutorial': 'Click to view the tutorial',
+      'Benefícios Exclusivos': 'Exclusive benefits',
+      'Políticas DMaior': 'DMaior Policies',
+      'Pagamentos e Políticas Kwai': 'Kwai payments and policies',
+      'Insira a Senha': 'Enter the password',
+      'Senha incorreta. Tente novamente.': 'Incorrect password. Try again.',
+      'Regras e Informações': 'Rules and information',
+      'Informações e Regras': 'Information and rules',
+      'Informações': 'Information',
+      'Período': 'Period',
+      'Período Encerrado': 'Period ended',
+      'Erro ao conectar no servidor.': 'Error connecting to the server.',
+      'Erro ao carregar os dados.': 'Error loading data.',
+      'Sem Nome': 'No name',
+      'Verificado': 'Verified',
+      'Verificado Premium': 'Premium verified',
+      'Carregando dados seguros...': 'Loading secure data...',
+      'Nenhum dado processado.': 'No processed data.',
+      'Sem confrontos disponíveis.': 'No matchups available.',
+      'Ranking Geral': 'Overall ranking',
+      'Confrontos': 'Matchups',
+      'Recarga Kwai': 'Kwai top-up',
+      'Online': 'Online',
+      'Como encontrar meu ID?': 'How to find my ID?',
+      'Onde fica meu ID?': 'Where is my ID?',
+      'Conexão criptografada · DMaior Agency': 'Encrypted connection · DMaior Agency',
+      'Erro ao validar ID. Verifique sua conexão e tente novamente.': 'Error validating ID. Check your connection and try again.',
+      'Sim, sou eu': 'Yes, it is me',
+      'Não sou eu': 'It is not me',
+      'Quantidade de Diamantes': 'Diamond amount',
+      'Continuar →': 'Continue →',
+      'Gerar PIX →': 'Generate PIX →',
+      'Pagamento PIX': 'PIX payment',
+      'Abrir Pagamento': 'Open payment',
+      'Aguardando pagamento': 'Waiting for payment',
+      'Pagar Agora': 'Pay now',
+      'Clique em "Pagar Agora" e conclua o PIX': 'Click "Pay now" and complete the PIX',
+      'Em processamento': 'Processing',
+      'Pagamento confirmado! Creditando diamantes...': 'Payment confirmed! Crediting diamonds...',
+      'Recarga concluída!': 'Top-up complete!',
+      'Diamantes creditados na sua conta 💎': 'Diamonds credited to your account 💎',
+      'PIX expirado': 'PIX expired',
+      'Inicie uma nova recarga.': 'Start a new top-up.',
+      'Nova Recarga': 'New top-up',
+      'Preencha seus dados no formulário acima': 'Fill in your details in the form above',
+      'Carregando...': 'Loading...',
+      'Nenhum registro.': 'No records.',
+      'Nenhuma movimentação ainda.': 'No transactions yet.',
+      'Nenhuma solicitação ainda.': 'No requests yet.',
+      'Erro ao carregar dados:': 'Error loading data:',
+      'Erro ao carregar carteira': 'Error loading wallet',
+      'Erro ao solicitar saque.': 'Error requesting withdrawal.',
+      'Erro ao enviar código.': 'Error sending code.',
+      'Processo recusado.': 'Process refused.',
+      'Falha na atualizacao.': 'Update failed.',
+      'UID não encontrado.': 'UID not found.',
+      'Código inválido ou expirado.': 'Invalid or expired code.',
+      'Carregando avisos...': 'Loading notices...',
+      'Nenhum aviso no momento.': 'No notices right now.',
+      'Não foi possível carregar os avisos.': 'Could not load notices.',
+      'Últimos avisos': 'Latest notices',
+      'VOLTAR': 'BACK',
+      'Atualizar dados': 'Update data',
+      'SALVANDO...': 'SAVING...',
+      'BUSCANDO...': 'SEARCHING...',
+      'ENVIANDO...': 'SENDING...',
+      'PROCESSANDO...': 'PROCESSING...'
+    },
+    es: {
+      'Links Rápidos': 'Enlaces rápidos',
+      'Redes Sociais': 'Redes sociales',
+      'Política de Privacidade': 'Política de privacidad',
+      'Todos os direitos reservados': 'Todos los derechos reservados',
+      'Agência oficial Kwai': 'Agencia oficial Kwai',
+      'Como Aceitar Convite': 'Cómo aceptar la invitación',
+      'Como Efetuar Saque': 'Cómo solicitar retiro',
+      'Clique para ver o tutorial': 'Haz clic para ver el tutorial',
+      'Benefícios Exclusivos': 'Beneficios exclusivos',
+      'Políticas DMaior': 'Políticas DMaior',
+      'Pagamentos e Políticas Kwai': 'Pagos y políticas Kwai',
+      'Insira a Senha': 'Ingresa la contraseña',
+      'Senha incorreta. Tente novamente.': 'Contraseña incorrecta. Intenta nuevamente.',
+      'Regras e Informações': 'Reglas e información',
+      'Informações e Regras': 'Información y reglas',
+      'Informações': 'Información',
+      'Período': 'Período',
+      'Período Encerrado': 'Período finalizado',
+      'Erro ao conectar no servidor.': 'Error al conectar con el servidor.',
+      'Erro ao carregar os dados.': 'Error al cargar los datos.',
+      'Sem Nome': 'Sin nombre',
+      'Verificado': 'Verificado',
+      'Verificado Premium': 'Verificado Premium',
+      'Carregando dados seguros...': 'Cargando datos seguros...',
+      'Nenhum dado processado.': 'Ningún dato procesado.',
+      'Sem confrontos disponíveis.': 'No hay enfrentamientos disponibles.',
+      'Ranking Geral': 'Ranking general',
+      'Confrontos': 'Enfrentamientos',
+      'Recarga Kwai': 'Recarga Kwai',
+      'Online': 'En línea',
+      'Como encontrar meu ID?': '¿Cómo encontrar mi ID?',
+      'Onde fica meu ID?': '¿Dónde está mi ID?',
+      'Conexão criptografada · DMaior Agency': 'Conexión cifrada · DMaior Agency',
+      'Erro ao validar ID. Verifique sua conexão e tente novamente.': 'Error al validar ID. Verifica tu conexión e intenta nuevamente.',
+      'Sim, sou eu': 'Sí, soy yo',
+      'Não sou eu': 'No soy yo',
+      'Quantidade de Diamantes': 'Cantidad de Diamantes',
+      'Continuar →': 'Continuar →',
+      'Gerar PIX →': 'Generar PIX →',
+      'Pagamento PIX': 'Pago PIX',
+      'Abrir Pagamento': 'Abrir pago',
+      'Aguardando pagamento': 'Esperando pago',
+      'Pagar Agora': 'Pagar ahora',
+      'Clique em "Pagar Agora" e conclua o PIX': 'Haz clic en "Pagar ahora" y completa el PIX',
+      'Em processamento': 'En procesamiento',
+      'Pagamento confirmado! Creditando diamantes...': '¡Pago confirmado! Acreditando diamantes...',
+      'Recarga concluída!': '¡Recarga concluida!',
+      'Diamantes creditados na sua conta 💎': 'Diamantes acreditados en tu cuenta 💎',
+      'PIX expirado': 'PIX expirado',
+      'Inicie uma nova recarga.': 'Inicia una nueva recarga.',
+      'Nova Recarga': 'Nueva recarga',
+      'Preencha seus dados no formulário acima': 'Completa tus datos en el formulario de arriba',
+      'Carregando...': 'Cargando...',
+      'Nenhum registro.': 'Ningún registro.',
+      'Nenhuma movimentação ainda.': 'Ningún movimiento aún.',
+      'Nenhuma solicitação ainda.': 'Ninguna solicitud aún.',
+      'Erro ao carregar dados:': 'Error al cargar datos:',
+      'Erro ao carregar carteira': 'Error al cargar cartera',
+      'Erro ao solicitar saque.': 'Error al solicitar retiro.',
+      'Erro ao enviar código.': 'Error al enviar código.',
+      'Processo recusado.': 'Proceso rechazado.',
+      'Falha na atualizacao.': 'Error en la actualización.',
+      'UID não encontrado.': 'UID no encontrado.',
+      'Código inválido ou expirado.': 'Código inválido o expirado.',
+      'Carregando avisos...': 'Cargando avisos...',
+      'Nenhum aviso no momento.': 'No hay avisos por ahora.',
+      'Não foi possível carregar os avisos.': 'No fue posible cargar los avisos.',
+      'Últimos avisos': 'Últimos avisos',
+      'VOLTAR': 'VOLVER',
+      'Atualizar dados': 'Actualizar datos',
+      'SALVANDO...': 'GUARDANDO...',
+      'BUSCANDO...': 'BUSCANDO...',
+      'ENVIANDO...': 'ENVIANDO...',
+      'PROCESSANDO...': 'PROCESANDO...'
+    },
+    zh: {
+      'Links Rápidos': '快捷链接',
+      'Redes Sociais': '社交媒体',
+      'Política de Privacidade': '隐私政策',
+      'Todos os direitos reservados': '保留所有权利',
+      'Agência oficial Kwai': 'Kwai 官方公会',
+      'Como Aceitar Convite': '如何接受邀请',
+      'Como Efetuar Saque': '如何提现',
+      'Clique para ver o tutorial': '点击查看教程',
+      'Benefícios Exclusivos': '专属福利',
+      'Políticas DMaior': 'DMaior 政策',
+      'Pagamentos e Políticas Kwai': 'Kwai 付款和政策',
+      'Insira a Senha': '输入密码',
+      'Senha incorreta. Tente novamente.': '密码错误，请重试。',
+      'Regras e Informações': '规则和信息',
+      'Informações e Regras': '信息和规则',
+      'Informações': '信息',
+      'Período': '周期',
+      'Período Encerrado': '周期已结束',
+      'Erro ao conectar no servidor.': '连接服务器出错。',
+      'Erro ao carregar os dados.': '数据加载失败。',
+      'Sem Nome': '无名称',
+      'Verificado': '已认证',
+      'Verificado Premium': '高级认证',
+      'Carregando dados seguros...': '正在加载安全数据...',
+      'Nenhum dado processado.': '没有已处理的数据。',
+      'Sem confrontos disponíveis.': '暂无可用对战。',
+      'Ranking Geral': '总排名',
+      'Confrontos': '对战',
+      'Recarga Kwai': 'Kwai 充值',
+      'Online': '在线',
+      'Como encontrar meu ID?': '如何找到我的 ID？',
+      'Onde fica meu ID?': '我的 ID 在哪里？',
+      'Conexão criptografada · DMaior Agency': '加密连接 · DMaior Agency',
+      'Erro ao validar ID. Verifique sua conexão e tente novamente.': 'ID 验证失败，请检查网络后重试。',
+      'Sim, sou eu': '是我',
+      'Não sou eu': '不是我',
+      'Quantidade de Diamantes': '钻石数量',
+      'Continuar →': '继续 →',
+      'Gerar PIX →': '生成 PIX →',
+      'Pagamento PIX': 'PIX 支付',
+      'Abrir Pagamento': '打开支付',
+      'Aguardando pagamento': '等待支付',
+      'Pagar Agora': '立即支付',
+      'Clique em "Pagar Agora" e conclua o PIX': '点击“立即支付”并完成 PIX',
+      'Em processamento': '处理中',
+      'Pagamento confirmado! Creditando diamantes...': '支付已确认，正在发放钻石...',
+      'Recarga concluída!': '充值完成！',
+      'Diamantes creditados na sua conta 💎': '钻石已到账 💎',
+      'PIX expirado': 'PIX 已过期',
+      'Inicie uma nova recarga.': '请开始新的充值。',
+      'Nova Recarga': '新充值',
+      'Preencha seus dados no formulário acima': '请在上方表单填写资料',
+      'Carregando...': '加载中...',
+      'Nenhum registro.': '没有记录。',
+      'Nenhuma movimentação ainda.': '暂无交易。',
+      'Nenhuma solicitação ainda.': '暂无申请。',
+      'Erro ao carregar dados:': '加载数据出错：',
+      'Erro ao carregar carteira': '加载钱包出错',
+      'Erro ao solicitar saque.': '申请提现出错。',
+      'Erro ao enviar código.': '发送验证码出错。',
+      'Processo recusado.': '流程被拒绝。',
+      'Falha na atualizacao.': '更新失败。',
+      'UID não encontrado.': '未找到 UID。',
+      'Código inválido ou expirado.': '验证码无效或已过期。',
+      'Carregando avisos...': '正在加载公告...',
+      'Nenhum aviso no momento.': '当前没有公告。',
+      'Não foi possível carregar os avisos.': '无法加载公告。',
+      'Últimos avisos': '最新公告',
+      'VOLTAR': '返回',
+      'Atualizar dados': '更新资料',
+      'SALVANDO...': '正在保存...',
+      'BUSCANDO...': '正在搜索...',
+      'ENVIANDO...': '正在发送...',
+      'PROCESSANDO...': '处理中...'
+    }
+  };
+
+  Object.keys(extraAutoText).forEach(lang => {
+    autoText[lang] = Object.assign(autoText[lang] || {}, extraAutoText[lang]);
+  });
+
   function getLang() {
     try {
       const lang = localStorage.getItem(LANG_KEY) || DEFAULT_LANG;
@@ -905,11 +1141,22 @@
   function bindTree(root) {
     bind(root || document, false);
     const scope = root || document;
+    observeScope(scope);
     if (scope.querySelectorAll) {
       scope.querySelectorAll('*').forEach(el => {
         if (el.shadowRoot) bindTree(el.shadowRoot);
       });
     }
+  }
+
+  function observeScope(scope) {
+    if (!observer || !scope) return;
+    const target = scope === document ? document.body : scope;
+    if (!target || observedRoots.has(target)) return;
+    try {
+      observer.observe(target, { childList: true, subtree: true, characterData: true });
+      observedRoots.add(target);
+    } catch (_) {}
   }
 
   function scheduleBind() {
@@ -1013,7 +1260,7 @@
         }
       }
     });
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    observeScope(document);
     setTimeout(() => bindTree(document), 100);
     setTimeout(() => bindTree(document), 600);
     setTimeout(() => bindTree(document), 1600);

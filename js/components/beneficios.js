@@ -211,6 +211,7 @@ class WidgetBeneficios extends HTMLElement {
         </section>
       </div>
     </div>`;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 
   bindEvents() {

@@ -51,6 +51,7 @@ class RankingDmaior extends HTMLElement {
     connectedCallback() {
         this.loadFonts();
         this.render();
+        window.DMaiorPrefs?.bind(this.shadowRoot);
         this.bindEvents();
         if (this._isLoggedIn()) this.initDashboard();
         this._setupMenuDetection();
@@ -730,6 +731,7 @@ class RankingDmaior extends HTMLElement {
         }
 
         el.innerHTML = html;
+        window.DMaiorPrefs?.bind(this.shadowRoot);
     }
 
     goPage(p) { this.currentPage = p; this.renderScreen(); window.scrollTo({ top: 0, behavior: 'smooth' }); }

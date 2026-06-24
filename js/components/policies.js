@@ -330,6 +330,7 @@ class DMaiorPolicies extends HTMLElement {
         </div>
       </div>
     </div>`;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 }
 

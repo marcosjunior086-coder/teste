@@ -45,6 +45,7 @@ class DmaiorTutoriais extends HTMLElement {
         <span class="subtitle">Clique para ver o tutorial</span>
       </a>
     </div>`;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 }
 

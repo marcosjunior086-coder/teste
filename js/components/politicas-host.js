@@ -458,6 +458,7 @@ class PoliticasHost extends HTMLElement {
             </div>
         </div>
         `;
+        window.DMaiorPrefs?.bind(this.shadowRoot);
     }
 
     bindEvents() {

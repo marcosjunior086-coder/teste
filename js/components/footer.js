@@ -239,6 +239,7 @@ class DmaiorFooter extends HTMLElement {
         </div>
       </footer>
     `;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 }
 

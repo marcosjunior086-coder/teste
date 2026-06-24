@@ -307,6 +307,7 @@ class DmaiorRecarga extends HTMLElement {
         <div class="dm-footer-badge">🔒 Conexão criptografada · DMaior Agency</div>
       </div>
     `;
+    window.DMaiorPrefs?.bind(this);
   }
 
   #bindEvents() {
@@ -697,7 +698,10 @@ class DmaiorRecarga extends HTMLElement {
     const div=document.createElement('div');
     div.className=`dm-msg ${tipo}`;
     if(tipo.startsWith('user')) div.textContent=html; else div.innerHTML=html;
-    body.appendChild(div); this.#scrollDown(); return div;
+    body.appendChild(div);
+    window.DMaiorPrefs?.bind(this);
+    this.#scrollDown();
+    return div;
   }
   #addTyping() {
     const body=this.querySelector('#dm-body');

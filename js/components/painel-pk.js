@@ -360,6 +360,7 @@ class PainelPK extends HTMLElement {
         </div>
       </div>
     `;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 }
 

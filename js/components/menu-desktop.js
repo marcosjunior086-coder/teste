@@ -151,6 +151,7 @@ class MenuDesktopDMaior extends HTMLElement {
         </div>
       </div>
     </header>`;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 
   // Atualiza a zona de auth conforme estado de login

@@ -392,6 +392,7 @@ class PoliticasPremium extends HTMLElement {
 
         </div>
         `;
+        window.DMaiorPrefs?.bind(this.shadowRoot);
     }
 
     bindEvents() {

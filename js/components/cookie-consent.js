@@ -87,6 +87,7 @@ class DmaiorCookieConsent extends HTMLElement {
         </div>
       </div>
     `;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
     this.shadowRoot.getElementById('btnAccept').addEventListener('click', () => this._accept());
     this.shadowRoot.getElementById('btnDecline').addEventListener('click', () => this._decline());
   }
