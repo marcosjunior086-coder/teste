@@ -83,7 +83,7 @@ class DmaiorServicesMenu extends HTMLElement {
       const href = s.link_url ? ` href="${this._escAttr(s.link_url)}" target="_blank" rel="noopener noreferrer"` : '';
       const alt  = s.titulo   ? ` title="${this._escAttr(s.titulo)}"` : '';
       return `<${tag} class="bc-slide"${href}${alt} data-idx="${i}">
-        <img src="${this._escAttr(s.imagem_url)}" alt="${this._escAttr(s.titulo||'Banner')}" loading="lazy">
+        <img src="${this._escAttr(this._normalizarImagemUrl(s.imagem_url))}" alt="${this._escAttr(s.titulo||'Banner')}" loading="lazy">
         ${s.titulo ? `<div class="bc-caption"><span>${this._escHtml(s.titulo)}</span></div>` : ''}
       </${tag}>`;
     }).join('');
@@ -162,6 +162,25 @@ class DmaiorServicesMenu extends HTMLElement {
   }
 
   _escAttr(str) { return this._escHtml(str); }
+
+  _normalizarImagemUrl(u) {
+    if (!u || typeof u !== 'string') return '';
+    const raw = u.trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+      const host = url.hostname.toLowerCase();
+      if (host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')) {
+        const fileMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
+        const id = fileMatch?.[1] || url.searchParams.get('id');
+        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`;
+      }
+      return url.href;
+    } catch (_) {
+      return '';
+    }
+  }
 
   render() {
     const layout = this.getLayout(); // 'original' ou 'dinamico'
@@ -303,7 +322,7 @@ class DmaiorServicesMenu extends HTMLElement {
         <div class="mobile-layout" style="display:${layout === 'dinamico' ? 'none' : 'flex'}">
           <a href="recrutamento.html" class="btn-agency-mobile">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-            <span>Entrar na Agência</span>
+            <span data-i18n="homeJoinAgency">Entrar na Agência</span>
           </a>
           <div class="menu-panel">
             <a href="https://www.instagram.com/dmaioragency/" target="_blank" rel="noopener noreferrer" class="nav-item item-instagram">
@@ -314,11 +333,11 @@ class DmaiorServicesMenu extends HTMLElement {
               <div class="floating-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"></path><path d="M11 3 8 9l4 13"></path><path d="M13 3l3 6-4 13"></path><path d="M2 9h20"></path></svg>
               </div>
-              <span>Recarga</span>
+              <span data-i18n="homeTopup">Recarga</span>
             </a>
             <a href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" class="nav-item item-whatsapp">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-              <span>Suporte</span>
+              <span data-i18n="homeSupport">Suporte</span>
             </a>
           </div>
         </div>
@@ -330,8 +349,8 @@ class DmaiorServicesMenu extends HTMLElement {
           <a href="recarga.html" class="dp-banner">
             <div class="dp-banner-icon">${SVG_DIAMOND}</div>
             <div class="dp-banner-text">
-              <div class="dp-banner-title">Recarga de Diamantes</div>
-              <div class="dp-banner-sub">Rápido, seguro e pelo melhor preço</div>
+              <div class="dp-banner-title" data-i18n="homeDiamondTopup">Recarga de Diamantes</div>
+              <div class="dp-banner-sub" data-i18n="homeTopupSub">Rápido, seguro e pelo melhor preço</div>
             </div>
             <div class="dp-banner-arrow">${SVG_ARROW}</div>
           </a>
@@ -339,12 +358,12 @@ class DmaiorServicesMenu extends HTMLElement {
           <!-- Botão Entrar na Agência -->
           <a href="recrutamento.html" class="dp-agency-btn">
             ${SVG_AGENCY}
-            <span>Entrar na Agência</span>
-            <span class="dp-agency-badge">Gratuito</span>
+            <span data-i18n="homeJoinAgency">Entrar na Agência</span>
+            <span class="dp-agency-badge" data-i18n="homeFree">Gratuito</span>
           </a>
 
           <!-- Seção: Acesso rápido -->
-          <div class="dp-section-title">Acesso rápido</div>
+          <div class="dp-section-title" data-i18n="homeQuickAccess">Acesso rápido</div>
           <div class="dp-grid">
 
             <a href="https://www.instagram.com/dmaioragency/" target="_blank" rel="noopener noreferrer" class="dp-item dp-pink">
@@ -359,7 +378,7 @@ class DmaiorServicesMenu extends HTMLElement {
             <a href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" class="dp-item dp-green">
               <div class="dp-item-icon">${SVG_WA}</div>
               <div class="dp-item-text">
-                <div class="dp-item-name">Suporte</div>
+                <div class="dp-item-name" data-i18n="homeSupport">Suporte</div>
                 <div class="dp-item-label">WhatsApp</div>
               </div>
               <div class="dp-item-arrow">${SVG_ARROW}</div>
@@ -368,8 +387,8 @@ class DmaiorServicesMenu extends HTMLElement {
             <a href="ranking.html" class="dp-item dp-cyan">
               <div class="dp-item-icon">${SVG_RANK}</div>
               <div class="dp-item-text">
-                <div class="dp-item-name">Ranking</div>
-                <div class="dp-item-label">Ver posições</div>
+                <div class="dp-item-name" data-i18n="homeRanking">Ranking</div>
+                <div class="dp-item-label" data-i18n="homeSeePositions">Ver posições</div>
               </div>
               <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
@@ -377,8 +396,8 @@ class DmaiorServicesMenu extends HTMLElement {
             <a href="tutoriais.html" class="dp-item dp-purple">
               <div class="dp-item-icon">${SVG_VIDEO}</div>
               <div class="dp-item-text">
-                <div class="dp-item-name">Tutoriais</div>
-                <div class="dp-item-label">Aprenda mais</div>
+                <div class="dp-item-name" data-i18n="homeTutorials">Tutoriais</div>
+                <div class="dp-item-label" data-i18n="homeLearnMore">Aprenda mais</div>
               </div>
               <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
@@ -386,8 +405,8 @@ class DmaiorServicesMenu extends HTMLElement {
             <a href="pk-interno.html" class="dp-item dp-orange">
               <div class="dp-item-icon">${SVG_CALENDAR}</div>
               <div class="dp-item-text">
-                <div class="dp-item-name">Eventos</div>
-                <div class="dp-item-label">PK e desafios</div>
+                <div class="dp-item-name" data-i18n="homeEvents">Eventos</div>
+                <div class="dp-item-label" data-i18n="homePkChallenges">PK e desafios</div>
               </div>
               <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
@@ -395,8 +414,8 @@ class DmaiorServicesMenu extends HTMLElement {
             <a href="quem-somos.html" class="dp-item dp-blue">
               <div class="dp-item-icon">${SVG_INFO}</div>
               <div class="dp-item-text">
-                <div class="dp-item-name">Portfólio</div>
-                <div class="dp-item-label">Quem somos</div>
+                <div class="dp-item-name" data-i18n="homePortfolio">Portfólio</div>
+                <div class="dp-item-label" data-i18n="homeWhoWeAre">Quem somos</div>
               </div>
               <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
@@ -404,14 +423,14 @@ class DmaiorServicesMenu extends HTMLElement {
           </div>
 
           <!-- Seção: Políticas (desagrupadas — antes dentro de "Material") -->
-          <div class="dp-section-title">Políticas</div>
+          <div class="dp-section-title" data-i18n="homePolicies">Políticas</div>
           <div class="dp-grid">
 
             <a href="politicas-host.html" class="dp-item dp-teal">
               <div class="dp-item-icon">${SVG_DOC}</div>
               <div class="dp-item-text">
-                <div class="dp-item-name">Política de Host</div>
-                <div class="dp-item-label">Pagamentos Kwai</div>
+                <div class="dp-item-name" data-i18n="homeHostPolicy">Política de Host</div>
+                <div class="dp-item-label" data-i18n="homeKwaiPayments">Pagamentos Kwai</div>
               </div>
               <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
@@ -419,8 +438,8 @@ class DmaiorServicesMenu extends HTMLElement {
             <a href="politicas-premium.html" class="dp-item dp-gold">
               <div class="dp-item-icon">${SVG_STAR}</div>
               <div class="dp-item-text">
-                <div class="dp-item-name">Pol. Especial</div>
-                <div class="dp-item-label">Streamer Premium</div>
+                <div class="dp-item-name" data-i18n="homeSpecialPolicy">Pol. Especial</div>
+                <div class="dp-item-label" data-i18n="homePremiumStreamer">Streamer Premium</div>
               </div>
               <div class="dp-item-arrow">${SVG_ARROW}</div>
             </a>
@@ -430,6 +449,7 @@ class DmaiorServicesMenu extends HTMLElement {
 
       </div>
     `;
+    window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 }
 

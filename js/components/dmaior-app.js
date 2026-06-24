@@ -1679,7 +1679,7 @@ class DMaiorPainel extends HTMLElement {
             // ── Card destaque ────────────────────────────────────────
             if(destaque){
                 const imgHtml = destaque.imagem_url
-                    ? `<img class="aviso-destaque-img" src="${this._escHtml(destaque.imagem_url)}" alt="${this._escHtml(destaque.titulo||destaque.texto)}" loading="lazy">`
+                    ? `<img class="aviso-destaque-img" src="${this._escHtml(this._normalizarImagemUrl(destaque.imagem_url))}" alt="${this._escHtml(destaque.titulo||destaque.texto)}" loading="lazy">`
                     : '';
                 const sub  = destaque.descricao ? `<div class="aviso-destaque-sub">${this._escHtml(destaque.descricao)}</div>` : '';
                 const desc = destaque.texto ? `<div class="aviso-destaque-desc">${this._escHtml(destaque.texto)}</div>` : '';
@@ -1704,7 +1704,7 @@ class DMaiorPainel extends HTMLElement {
                 html += `<div class="avisos-sec-titulo">Últimos avisos</div>
                 <div class="avisos-list">${demais.map(c=>{
                     const thumbHtml = c.imagem_url
-                        ? `<img class="aviso-card-thumb" src="${this._escHtml(c.imagem_url)}" alt="" loading="lazy">`
+                        ? `<img class="aviso-card-thumb" src="${this._escHtml(this._normalizarImagemUrl(c.imagem_url))}" alt="" loading="lazy">`
                         : (c.emoji ? `<div class="aviso-card-emoji">${c.emoji}</div>` : '');
                     const titulo = this._escHtml(c.titulo || c.texto);
                     const desc   = c.titulo && c.texto ? `<div class="aviso-card-desc">${this._escHtml(c.texto)}</div>` : '';
@@ -1764,6 +1764,25 @@ class DMaiorPainel extends HTMLElement {
             .replace(/>/g,'&gt;')
             .replace(/"/g,'&quot;')
             .replace(/'/g,'&#39;');
+    }
+
+    _normalizarImagemUrl(u){
+        if(!u || typeof u !== 'string') return '';
+        const raw = u.trim();
+        if(!raw) return '';
+        try{
+            const url = new URL(raw);
+            if(url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+            const host = url.hostname.toLowerCase();
+            if(host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')){
+                const fileMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
+                const id = fileMatch?.[1] || url.searchParams.get('id');
+                if(id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`;
+            }
+            return url.href;
+        }catch{
+            return '';
+        }
     }
 
     logout(){

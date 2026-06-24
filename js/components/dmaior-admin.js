@@ -1,11 +1,11 @@
 ﻿/* eslint-env browser */
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// DMaior Agency â€” Admin Panel v2.1
-// CORREÃ‡Ã•ES v2.1:
-//   â€¢ _carregarListaCarteiras: usa /admin/carteira/streamers
-//     (retorna TODOS os perfis, nÃ£o limit=20 de antes)
-//   â€¢ Modal carteira mobile: overflow-x:auto, nÃ£o alarga
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════
+// DMaior Agency — Admin Panel v2.1
+// CORREÇÕES v2.1:
+//   • _carregarListaCarteiras: usa /admin/carteira/streamers
+//     (retorna TODOS os perfis, não limit=20 de antes)
+//   • Modal carteira mobile: overflow-x:auto, não alarga
+// ════════════════════════════════════════════════════════════
 class DimaiorAdmin extends HTMLElement {
   constructor() {
     super();
@@ -26,7 +26,7 @@ class DimaiorAdmin extends HTMLElement {
     this._taxaPerc  = 0;
     this._edtCom    = null;
     this._creditoRapidoUid = null;
-    // Lives â€” layout e modo (persistido em localStorage)
+    // Lives — layout e modo (persistido em localStorage)
     const _lo = (() => { try { return JSON.parse(localStorage.getItem('dm_lives_opts')||'{}'); } catch { return {}; } })();
     this._livesOpts = { cols: _lo.cols||2, modo: _lo.modo||'capa', ordenar: _lo.ordenar||'padrao', estilo: _lo.estilo||1, dashboardAoVivo: _lo.dashboardAoVivo!==false };
     this._livesData = null;
@@ -57,7 +57,7 @@ class DimaiorAdmin extends HTMLElement {
     });
     this._widthObs.observe(this);
     const sendHeight=()=>{
-      // Pega a altura real do conteÃºdo renderizado
+      // Pega a altura real do conteúdo renderizado
       const root=this.shadowRoot.getElementById('root');
       const h=Math.max(
         root ? root.getBoundingClientRect().height : 0,
@@ -65,7 +65,7 @@ class DimaiorAdmin extends HTMLElement {
         this.offsetHeight,
         600
       );
-      if(h===lastH)return; // sÃ³ envia se mudou
+      if(h===lastH)return; // só envia se mudou
       lastH=h;
       // Envia para o iframe pai (Wix HtmlComponent)
       try{ window.parent.postMessage({type:'dmaior:height',height:h},'*'); }catch{}
@@ -74,7 +74,7 @@ class DimaiorAdmin extends HTMLElement {
     const debouncedSend=()=>{clearTimeout(this._debounceTimer);this._debounceTimer=setTimeout(sendHeight,100);};
     this._ro=new ResizeObserver(debouncedSend);
     this._ro.observe(this);
-    // TambÃ©m observa o #root interno para pegar mudanÃ§as de modal/accordion
+    // Também observa o #root interno para pegar mudanças de modal/accordion
     const root=this.shadowRoot.getElementById('root');
     if(root){this._ro2=new ResizeObserver(debouncedSend);this._ro2.observe(root);}
     this._sendHeight=sendHeight;
@@ -144,15 +144,15 @@ class DimaiorAdmin extends HTMLElement {
     try{
       const r=await fetch(this.WORKER+rota,opts);
       const d=await r.json();
-      // 401/403 em qualquer rota encerra a sessÃ£o
+      // 401/403 em qualquer rota encerra a sessão
       if(r.status===401||r.status===403){this._doLogout();return null;}
       return d;
     }
-    catch{if(rota!=='/admin/me')this._toast('Sem conexÃ£o com o servidor','err');return null;}
+    catch{if(rota!=='/admin/me')this._toast('Sem conexão com o servidor','err');return null;}
   }
   _validarSessao(){
     // Valida o JWT localmente (sem chamada ao servidor)
-    // Isso evita logout desnecessÃ¡rio por problemas de rede/timeout
+    // Isso evita logout desnecessário por problemas de rede/timeout
     try {
       const partes = this._token.split('.');
       if(partes.length !== 3) throw new Error('Token malformado');
@@ -160,15 +160,15 @@ class DimaiorAdmin extends HTMLElement {
       const payload = JSON.parse(atob(partes[1].replace(/-/g,'+').replace(/_/g,'/')));
       const agora   = Math.floor(Date.now()/1000);
       if(payload.exp && payload.exp < agora){
-        // Token expirado â€” limpa e mostra login
+        // Token expirado — limpa e mostra login
         this._token = '';
         localStorage.removeItem(this.TK_KEY);
         return;
       }
-      // Token vÃ¡lido â€” abre o app
+      // Token válido — abre o app
       this._abrirApp();
     } catch {
-      // Token corrompido â€” limpa
+      // Token corrompido — limpa
       this._token = '';
       localStorage.removeItem(this.TK_KEY);
     }
@@ -180,7 +180,7 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('POST','/admin/login',{usuario:u,senha:p});
     s.getElementById('btnL').style.display='';s.getElementById('lLoad').classList.remove('on');
     if(d?.ok&&d.token){this._token=d.token;localStorage.setItem(this.TK_KEY,d.token);this._abrirApp();}
-    else{err.textContent=d?.erro||'Credenciais invÃ¡lidas';err.style.display='block';}
+    else{err.textContent=d?.erro||'Credenciais inválidas';err.style.display='block';}
   }
   _doLogout(){this._token='';localStorage.removeItem(this.TK_KEY);const s=this.shadowRoot;s.getElementById('app').classList.remove('on');s.getElementById('login').style.display='flex';s.getElementById('iP').value='';}
   _abrirApp(){const s=this.shadowRoot;s.getElementById('login').style.display='none';s.getElementById('app').classList.add('on');this._ir('dashboard');this._carregarLives();}
@@ -192,8 +192,8 @@ class DimaiorAdmin extends HTMLElement {
     mapa[pag]?.();
   }
 
-  _fdt(v){if(!v)return'â€”';const d=new Date(v);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
-  _fdtCurto(v){if(!v)return'â€”';const d=new Date(v);return d.toLocaleDateString('pt-BR');}
+  _fdt(v){if(!v)return'—';const d=new Date(v);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+  _fdtCurto(v){if(!v)return'—';const d=new Date(v);return d.toLocaleDateString('pt-BR');}
   _dataHojeBR(){
     const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
     const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
@@ -213,15 +213,15 @@ class DimaiorAdmin extends HTMLElement {
   _numK(n){if(n>=1000)return(n/1000).toFixed(1)+'K';return String(n||0);}
   _brl(n){return'R$ '+Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
   _dbc(fn,t){let id;return(...a)=>{clearTimeout(id);id=setTimeout(()=>fn(...a),t);};}
-  _varBadge(v){if(v===null||v===undefined)return'<span class="vbadge neutro">â€”</span>';const cls=v>0?'up':v<0?'down':'neutro';const ico=v>0?this._ico('up',10):v<0?this._ico('down',10):'';return`<span class="vbadge ${cls}">${ico} ${v>0?'+':''}${v}%</span>`;}
-  _renderPg(elId,n,qtd,lim,fn){const el=this.shadowRoot.getElementById(elId);if(!el)return;el.innerHTML=`<button ${n<=1?'disabled':''}>Anterior</button><span class="pn">PÃ¡g ${n}</span><button ${qtd<lim?'disabled':''}>PrÃ³xima</button>`;el.children[0].addEventListener('click',()=>fn(n-1));el.children[2].addEventListener('click',()=>fn(n+1));}
+  _varBadge(v){if(v===null||v===undefined)return'<span class="vbadge neutro">—</span>';const cls=v>0?'up':v<0?'down':'neutro';const ico=v>0?this._ico('up',10):v<0?this._ico('down',10):'';return`<span class="vbadge ${cls}">${ico} ${v>0?'+':''}${v}%</span>`;}
+  _renderPg(elId,n,qtd,lim,fn){const el=this.shadowRoot.getElementById(elId);if(!el)return;el.innerHTML=`<button ${n<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${n}</span><button ${qtd<lim?'disabled':''}>Próxima</button>`;el.children[0].addEventListener('click',()=>fn(n-1));el.children[2].addEventListener('click',()=>fn(n+1));}
   _toast(msg,tipo='ok'){const el=this.shadowRoot.getElementById('toast');this.shadowRoot.getElementById('tIco').innerHTML=tipo==='ok'?this._ico('check',14):this._ico('warning',14);this.shadowRoot.getElementById('tMsg').textContent=msg;el.className='toast on '+tipo;setTimeout(()=>el.className='toast',3500);}
   _fechaModal(id){this.shadowRoot.getElementById(id)?.classList.remove('on');}
   _abrirModal(id){
     const el=this.shadowRoot.getElementById(id);
     if(!el)return;
     el.classList.add('on');
-    // Scroll para o topo do CE para garantir que o modal seja visÃ­vel
+    // Scroll para o topo do CE para garantir que o modal seja visível
     try{this.scrollIntoView({behavior:'instant',block:'start'});}catch{}
   }
 
@@ -234,15 +234,15 @@ class DimaiorAdmin extends HTMLElement {
     const m=d.metricas;
     const diamantesDia=this._listaDiario(diarioDash).reduce((acc,sv)=>acc+this._diam(sv),0);
 
-    // Cards coloridos 2x2 (estilo referÃªncia)
+    // Cards coloridos 2x2 (estilo referência)
     const dcards=[
       {ico:'trophy',  val:m.streamers_mes||0,    lbl:'No Ranking',    cor:'indigo', fmt:'num'},
       ...(this._livesOpts.dashboardAoVivo!==false?[{ico:'live',val:m.ao_vivo,lbl:'Ao Vivo Agora',cor:'verm',fmt:'num',blink:true}]:[]),
       {ico:'bolt',    val:m.impulsionamentos,    lbl:'Boosts',        cor:'verde',  fmt:'num'},
-      {ico:'diamond', val:m.total_diamantes||0,  lbl:'Diamantes MÃªs', cor:'cyan',   fmt:'num'},
+      {ico:'diamond', val:m.total_diamantes||0,  lbl:'Diamantes Mês', cor:'cyan',   fmt:'num'},
       {ico:'diamond', val:diamantesDia,          lbl:'Diamantes do Dia', cor:'cyan', fmt:'num'},
       {ico:'metrics', val:m.registros_hoje||0,   lbl:'Registros Hoje',cor:'gold',   fmt:'num'},
-      {ico:'server',  val:new Date(m.horario).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), lbl:'HorÃ¡rio Servidor', cor:'slate', fmt:'str'},
+      {ico:'server',  val:new Date(m.horario).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), lbl:'Horário Servidor', cor:'slate', fmt:'str'},
     ];
     s.getElementById('gMetricas').innerHTML=dcards.map(c=>`
       <div class="dc2 dc2-${c.cor}">
@@ -251,14 +251,14 @@ class DimaiorAdmin extends HTMLElement {
         <div class="dc2-lbl">${c.lbl}</div>
       </div>`).join('');
 
-    // AÃ§Ãµes RÃ¡pidas â€” estilo lista colorida (referÃªncia imagem 1)
+    // Ações Rápidas — estilo lista colorida (referência imagem 1)
     const qas=[
       {lbl:'Streamers',   sub:'Perfis cadastrados', pag:'streamers',   ico:'users',   cor:'indigo'},
-      {lbl:'Ao Vivo',     sub:'TransmissÃµes agora',  pag:'aoVivo',      ico:'live',    cor:'verm'},
+      {lbl:'Ao Vivo',     sub:'Transmissões agora',  pag:'aoVivo',      ico:'live',    cor:'verm'},
       {lbl:'Carteira',    sub:'Saldos e saques',     pag:'carteira',    ico:'wallet',  cor:'verde'},
-      {lbl:'Ranking',     sub:'Diamantes do mÃªs',    pag:'ranking',     ico:'trophy',  cor:'cyan'},
-      {lbl:'PrÃªmios',     sub:'DistribuiÃ§Ã£o mensal', pag:'premios',     ico:'award',   cor:'gold'},
-      {lbl:'ConfiguraÃ§Ã£o',sub:'Taxas e pagamentos', pag:'config',      ico:'settings',cor:'slate'},
+      {lbl:'Ranking',     sub:'Diamantes do mês',    pag:'ranking',     ico:'trophy',  cor:'cyan'},
+      {lbl:'Prêmios',     sub:'Distribuição mensal', pag:'premios',     ico:'award',   cor:'gold'},
+      {lbl:'Configuração',sub:'Taxas e pagamentos', pag:'config',      ico:'settings',cor:'slate'},
     ];
 
     const dashLiveCfg=()=>{
@@ -277,7 +277,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('pDash').innerHTML=`
       <div class="box qa-box">
         <div class="bhead">
-          <div class="btitulo">${this._ico('bolt',14)} Acesso RÃ¡pido</div>
+          <div class="btitulo">${this._ico('bolt',14)} Acesso Rápido</div>
         </div>
         <div class="qa-lista" id="qaLista"></div>
       </div>`;
@@ -333,31 +333,31 @@ class DimaiorAdmin extends HTMLElement {
     const ordenar=this._livesOpts.ordenar;
     const estilo=this._livesOpts.estilo||1;
     const dashboardAoVivo=this._livesOpts.dashboardAoVivo!==false;
-    // No mobile com >1 col, Estilo 1 (horizontal) nÃ£o funciona â€” forÃ§ar estilo 2
-    // Estilo efetivo: no mobile com >1 col, horizontal nÃ£o Ã© viÃ¡vel â†’ usa vertical
+    // No mobile com >1 col, Estilo 1 (horizontal) não funciona — forçar estilo 2
+    // Estilo efetivo: no mobile com >1 col, horizontal não é viável → usa vertical
     // Mas com 1 col o horizontal funciona normalmente
     const estiloEfetivo=(isMobile && cols>1 && estilo===1)?2:estilo;
     try{localStorage.setItem('dm_lives_opts',JSON.stringify(this._livesOpts));}catch{}
 
-    // â”€â”€ Ordena as lives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Ordena as lives ──────────────────────────────────────────────────────
     let lista=[...d.ao_vivo];
     if(ordenar==='espectadores') lista.sort((a,b)=>(Number(b.espectadores||0))-(Number(a.espectadores||0)));
     else if(ordenar==='presentes') lista.sort((a,b)=>(Number(b.gifts||0))-(Number(a.gifts||0)));
     else if(ordenar==='horas') lista.sort((a,b)=>(Number(a.inicio||Date.now()))-(Number(b.inicio||Date.now())));
 
-    // â”€â”€ SVGs de colunas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── SVGs de colunas ──────────────────────────────────────────────────────
     const svgIcos={1:`<svg width="4"  height="14" viewBox="0 0 4  14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/></svg>`,2:`<svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/><rect x="6"  y="1" width="4" height="12" rx="1"/></svg>`,3:`<svg width="16" height="14" viewBox="0 0 16 14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/><rect x="6"  y="1" width="4" height="12" rx="1"/><rect x="12" y="1" width="4" height="12" rx="1"/></svg>`,4:`<svg width="22" height="14" viewBox="0 0 22 14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/><rect x="6"  y="1" width="4" height="12" rx="1"/><rect x="12" y="1" width="4" height="12" rx="1"/><rect x="18" y="1" width="4" height="12" rx="1"/></svg>`};
     const colOpts=isMobile?[{n:1},{n:2}]:[{n:2},{n:3},{n:4}];
     const colsBtns=colOpts.map(b=>`<button class="lv-cfg-opt-btn lv-cfg-col ${b.n===cols?'on':''}" data-cols="${b.n}" title="${b.n} col">${svgIcos[b.n]}</button>`).join('');
 
-    // â”€â”€ BotÃµes de modo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Botões de modo ───────────────────────────────────────────────────────
     const modoBtns=`
       <button class="lv-cfg-opt-btn lv-cfg-modo ${modo==='capa'?'on':''}" data-modo="capa">${this._ico('gift',13)} Capa</button>
-      <button class="lv-cfg-opt-btn lv-cfg-modo ${modo==='video'?'on':''}" data-modo="video">${this._ico('live',13)} VÃ­deo</button>`;
+      <button class="lv-cfg-opt-btn lv-cfg-modo ${modo==='video'?'on':''}" data-modo="video">${this._ico('live',13)} Vídeo</button>`;
 
-    // â”€â”€ BotÃµes de ordenaÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Botões de ordenação ──────────────────────────────────────────────────
     const ordens=[
-      {k:'padrao',    lbl:'PadrÃ£o',      ico:'server'},
+      {k:'padrao',    lbl:'Padrão',      ico:'server'},
       {k:'espectadores',lbl:'Espectadores',ico:'users'},
       {k:'presentes', lbl:'Presentes',   ico:'gift'},
       {k:'horas',     lbl:'Horas ao vivo',ico:'clock_r'},
@@ -368,7 +368,7 @@ class DimaiorAdmin extends HTMLElement {
       <button class="lv-cfg-opt-btn lv-cfg-dash ${!dashboardAoVivo?'on':''}" data-dash="off">${this._ico('x_circle',12)} Ocultar card</button>`;
 
     el.innerHTML=`
-      <!-- Header: cards dc2 compactos + botÃ£o cfg -->
+      <!-- Header: cards dc2 compactos + botão cfg -->
       <div class="lv-header">
         <div class="lv-dc2 lv-dc2-verm">
           <div class="lv-dc2-ico">${this._ico('live',20)}</div>
@@ -387,12 +387,12 @@ class DimaiorAdmin extends HTMLElement {
         <div style="flex:1"></div>
         <button class="lv-cfg-btn" id="btnLvCfg">
           ${this._ico('settings',14)}
-          <span>ConfiguraÃ§Ãµes</span>
+          <span>Configurações</span>
           <span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span>
         </button>
       </div>
 
-      <!-- Painel de configuraÃ§Ãµes (toggle) -->
+      <!-- Painel de configurações (toggle) -->
       <div class="lv-cfg-painel" id="lvCfgPainel" style="display:none">
         <div class="lv-cfg-row">
           <span class="lv-cfg-label">Layout</span>
@@ -430,7 +430,7 @@ class DimaiorAdmin extends HTMLElement {
         ${lista.map((sv,i)=>this._livesCard(sv,i,modo,estiloEfetivo)).join('')}
       </div>`;
 
-    // â”€â”€ Bind botÃ£o de configuraÃ§Ãµes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Bind botão de configurações ──────────────────────────────────────────
     s.getElementById('btnLvCfg')?.addEventListener('click',()=>{
       const p=s.getElementById('lvCfgPainel');
       const a=s.getElementById('lvCfgArrow');
@@ -439,7 +439,7 @@ class DimaiorAdmin extends HTMLElement {
       if(a) a.style.transform=open?'rotate(180deg)':'';
     });
 
-    // â”€â”€ Bind colunas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Bind colunas ─────────────────────────────────────────────────────────
     el.querySelectorAll('.lv-cfg-col').forEach(btn=>{
       btn.addEventListener('click',()=>{
         this._livesOpts.cols=parseInt(btn.dataset.cols);
@@ -447,7 +447,7 @@ class DimaiorAdmin extends HTMLElement {
       });
     });
 
-    // â”€â”€ Bind modo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Bind modo ────────────────────────────────────────────────────────────
     el.querySelectorAll('.lv-cfg-modo').forEach(btn=>{
       btn.addEventListener('click',()=>{
         this._livesOpts.modo=btn.dataset.modo;
@@ -455,17 +455,17 @@ class DimaiorAdmin extends HTMLElement {
       });
     });
 
-    // â”€â”€ Bind estilo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Bind estilo ──────────────────────────────────────────────────────────
     el.querySelectorAll('.lv-cfg-est').forEach(btn=>{
       btn.addEventListener('click',()=>{
         this._livesOpts.estilo=parseInt(btn.dataset.est);
-        // Mobile com >1 col + estilo horizontal â†’ forÃ§a 1 coluna
+        // Mobile com >1 col + estilo horizontal → força 1 coluna
         if(isMobile && this._livesOpts.estilo===1 && this._livesOpts.cols>1)
           this._livesOpts.cols=1;
         if(this._livesData)this._renderLives(this._livesData,s.getElementById('gLives'));
       });
     });
-    // â”€â”€ Bind ordenaÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Bind ordenação ───────────────────────────────────────────────────────
     el.querySelectorAll('.lv-cfg-ord').forEach(btn=>{
       btn.addEventListener('click',()=>{
         this._livesOpts.ordenar=btn.dataset.ord;
@@ -473,7 +473,7 @@ class DimaiorAdmin extends HTMLElement {
       });
     });
 
-    // â”€â”€ Cria modal player â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Cria modal player ────────────────────────────────────────────────────
     // Dashboard
     el.querySelectorAll('.lv-cfg-dash').forEach(btn=>{
       btn.addEventListener('click',()=>{
@@ -483,12 +483,12 @@ class DimaiorAdmin extends HTMLElement {
       });
     });
 
-    // â”€â”€ Bind play-live (data-stream em vez de onclick inline) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Bind play-live (data-stream em vez de onclick inline) ───────────────────
     el.querySelectorAll('[data-stream]').forEach(btn=>{btn.addEventListener('click',()=>{window._dmPlayLive&&window._dmPlayLive(btn.dataset.stream,btn.dataset.nomeLive||'',btn.dataset.capaLive||'');});});
 
     this._injetarPlayerHLS();
 
-    // â”€â”€ Modo vÃ­deo: inicia HLS inline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Modo vídeo: inicia HLS inline ────────────────────────────────────────
     if(modo==='video'){
       lista.forEach((sv,i)=>{
         if(sv.stream_url) this._iniciarVideoInline(`lv-vid-${i}`,sv.stream_url);
@@ -516,14 +516,14 @@ class DimaiorAdmin extends HTMLElement {
     const tc=sv.inicio?this._tempoDecorrido(sv.inicio):'';
     const ca=sv.capa||'', fo=sv.foto||'';
 
-    // Ãrea de mÃ­dia: vÃ­deo inline (modo vÃ­deo) ou capa clicÃ¡vel (modo capa)
+    // Área de mídia: vídeo inline (modo vídeo) ou capa clicável (modo capa)
     const mediaHtml = modo==='video' && sv.stream_url
-      ? `<div class="lc-capa lc-capa-video"><video id="lv-vid-${i}" class="lvc-video" autoplay muted playsinline></video><div class="lc-capa-overlay"><div class="lc-studio">Studio: ${this._esc(sv.living_id||'â€”')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`
-      : `<div class="lc-capa lc-play-area" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${ca&&/^https?:\/\//i.test(ca)?`<img src="${this._esc(ca)}" class="lc-capa-img" onerror="this.style.display='none'"/>`:''}<div class="lc-capa-overlay">${sv.stream_url?`<div class="lc-play">${this._ico('live',20)}</div>`:''}<div class="lc-studio">Studio: ${this._esc(sv.living_id||'â€”')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`;
+      ? `<div class="lc-capa lc-capa-video"><video id="lv-vid-${i}" class="lvc-video" autoplay muted playsinline></video><div class="lc-capa-overlay"><div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`
+      : `<div class="lc-capa lc-play-area" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${ca&&/^https?:\/\//i.test(ca)?`<img src="${this._esc(ca)}" class="lc-capa-img" onerror="this.style.display='none'"/>`:''}<div class="lc-capa-overlay">${sv.stream_url?`<div class="lc-play">${this._ico('live',20)}</div>`:''}<div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`;
 
     const cardClass=`live-card-full${estilo===2?' lc-estilo2':' lc-horizontal'}`;
     return`<div class="${cardClass}">${mediaHtml}<div class="lc-info">
-      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'â€”')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'â€”')}</div></div></div>
+      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'—')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'—')}</div></div></div>
       <div class="lc-stats"><div class="lc-stat-row">${this._ico('users',12)}<span class="lc-stat-lbl">Seguidores</span><strong>${Number(sv.fans||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('heart',12)}<span class="lc-stat-lbl">Curtidas</span><strong>${Number(sv.likes||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('gift',12)}<span class="lc-stat-lbl">Presentes</span><strong style="color:var(--gold)">${sv.gifts||0}</strong></div></div>
       <div class="lc-footer"><div class="lc-espects"><div style="font-size:11px;color:var(--t3);font-family:'Exo 2',sans-serif">Espectadores</div><div style="font-size:24px;font-family:'Rajdhani',sans-serif;font-weight:700">${sv.espectadores||0}</div></div><div class="lc-acoes">${sv.stream_url?`<button class="btn btn-g btn-sm lc-play-btn" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${this._ico('live',12)} Assistir</button>`:''}${sv.jump_url&&/^https?:\/\//i.test(sv.jump_url)?`<a href="${this._esc(sv.jump_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="text-decoration:none">${this._ico('live',11)} Kwai</a>`:''}</div></div>
     </div></div>`;
@@ -535,7 +535,7 @@ class DimaiorAdmin extends HTMLElement {
     modal.innerHTML=`<div style="width:100%;max-width:800px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div id="lv-player-nome" style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#fff"></div><button id="lv-player-close" style="background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.4);border-radius:6px;color:#f87171;padding:6px 14px;cursor:pointer;font-size:12px">Fechar</button></div><div style="position:relative;padding-bottom:56.25%;background:#000;border-radius:10px;overflow:hidden"><video id="lv-player-video" style="position:absolute;inset:0;width:100%;height:100%" controls autoplay muted playsinline></video><img id="lv-player-capa" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/></div><div id="lv-player-status" style="text-align:center;color:#a0b8c8;font-size:11px;margin-top:8px">Carregando stream...</div></div>`;
     s.getElementById('root').appendChild(modal);
     s.getElementById('lv-player-close').addEventListener('click',()=>{modal.style.display='none';const vid=s.getElementById('lv-player-video');vid.pause();vid.src='';if(window._hlsInstance){window._hlsInstance.destroy();window._hlsInstance=null;}});
-    window._dmPlayLive=(url,nome,capa)=>{modal.style.display='flex';try{this.scrollIntoView({behavior:'instant',block:'start'});}catch{}s.getElementById('lv-player-nome').textContent=nome||'Live';const vid=s.getElementById('lv-player-video');const capaEl=s.getElementById('lv-player-capa');const status=s.getElementById('lv-player-status');if(capa){capaEl.src=capa;capaEl.style.display='block';}if(window._hlsInstance){window._hlsInstance.destroy();window._hlsInstance=null;}const iniciarHLS=()=>{const HlsLib=window['Hls'];if(HlsLib&&HlsLib.isSupported()){window._hlsInstance=new HlsLib({maxBufferLength:10});window._hlsInstance.loadSource(url);window._hlsInstance.attachMedia(vid);window._hlsInstance.on(HlsLib.Events.MANIFEST_PARSED,()=>{capaEl.style.display='none';vid.play().catch(()=>{});status.textContent='Reproduzindo ao vivo';});window._hlsInstance.on(HlsLib.Events.ERROR,(_,d)=>{if(d.fatal)status.textContent='Erro no stream.';});}else if(vid.canPlayType('application/vnd.apple.mpegurl')){vid.src=url;vid.play().catch(()=>{});capaEl.style.display='none';status.textContent='Reproduzindo';}else{status.textContent='HLS nÃ£o suportado.'}};const hlsScript=document.getElementById('hls-js-cdn');if(!hlsScript){const s2=document.createElement('script');s2.id='hls-js-cdn';s2.src='https://cdn.jsdelivr.net/npm/hls.js@latest';s2.onload=iniciarHLS;document.head.appendChild(s2);}else{iniciarHLS();}};
+    window._dmPlayLive=(url,nome,capa)=>{modal.style.display='flex';try{this.scrollIntoView({behavior:'instant',block:'start'});}catch{}s.getElementById('lv-player-nome').textContent=nome||'Live';const vid=s.getElementById('lv-player-video');const capaEl=s.getElementById('lv-player-capa');const status=s.getElementById('lv-player-status');if(capa){capaEl.src=capa;capaEl.style.display='block';}if(window._hlsInstance){window._hlsInstance.destroy();window._hlsInstance=null;}const iniciarHLS=()=>{const HlsLib=window['Hls'];if(HlsLib&&HlsLib.isSupported()){window._hlsInstance=new HlsLib({maxBufferLength:10});window._hlsInstance.loadSource(url);window._hlsInstance.attachMedia(vid);window._hlsInstance.on(HlsLib.Events.MANIFEST_PARSED,()=>{capaEl.style.display='none';vid.play().catch(()=>{});status.textContent='Reproduzindo ao vivo';});window._hlsInstance.on(HlsLib.Events.ERROR,(_,d)=>{if(d.fatal)status.textContent='Erro no stream.';});}else if(vid.canPlayType('application/vnd.apple.mpegurl')){vid.src=url;vid.play().catch(()=>{});capaEl.style.display='none';status.textContent='Reproduzindo';}else{status.textContent='HLS não suportado.'}};const hlsScript=document.getElementById('hls-js-cdn');if(!hlsScript){const s2=document.createElement('script');s2.id='hls-js-cdn';s2.src='https://cdn.jsdelivr.net/npm/hls.js@latest';s2.onload=iniciarHLS;document.head.appendChild(s2);}else{iniciarHLS();}};
   }
 
   async _carregarRanking(){
@@ -589,20 +589,20 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('resumoDesemp').innerHTML=`
       <div class="dc2 dc2-verde"><div class="dc2-ico">${this._ico('star',26)}</div><div class="dc2-val">${r.aprovado}</div><div class="dc2-lbl">Aprovados</div></div>
       <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('check',26)}</div><div class="dc2-val">${r.bom}</div><div class="dc2-lbl">No Caminho</div></div>
-      <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${r.atencao}</div><div class="dc2-lbl">AtenÃ§Ã£o</div></div>
+      <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${r.atencao}</div><div class="dc2-lbl">Atenção</div></div>
       <div class="dc2 dc2-indigo"><div class="dc2-ico">${this._ico('users',26)}</div><div class="dc2-val">${r.total}</div><div class="dc2-lbl">Avaliados</div></div>`;
-    s.getElementById('tbDesemp').innerHTML=`<div class="bhead" style="margin-bottom:0;border-bottom:none"><div class="btitulo">${this._ico('trend',14)} Progresso (${this._esc(d.mes_atual)})</div><div class="bacoes"><select id="filtroDesemp" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="">Todos</option><option value="aprovado">Aprovados</option><option value="bom">No Caminho</option><option value="atencao">AtenÃ§Ã£o</option></select></div></div><div id="listaDesemp"></div><div class="pag-bar" id="pgDesemp"></div>`;
+    s.getElementById('tbDesemp').innerHTML=`<div class="bhead" style="margin-bottom:0;border-bottom:none"><div class="btitulo">${this._ico('trend',14)} Progresso (${this._esc(d.mes_atual)})</div><div class="bacoes"><select id="filtroDesemp" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="">Todos</option><option value="aprovado">Aprovados</option><option value="bom">No Caminho</option><option value="atencao">Atenção</option></select></div></div><div id="listaDesemp"></div><div class="pag-bar" id="pgDesemp"></div>`;
     const render=(filtro='')=>{
       const POR_PAG=10;let lista=(d.streamers||[]);if(filtro)lista=lista.filter(sv=>sv.status===filtro);
       const total=lista.length,inicio=(this._pg.desemp-1)*POR_PAG,pagina=lista.slice(inicio,inicio+POR_PAG);
       const el=s.getElementById('listaDesemp');if(!pagina.length){el.innerHTML=this._empty('search','Nenhum');return;}
-      el.innerHTML=pagina.map(sv=>`<div class="dc-card ${this._esc(sv.status)}"><div class="dc-topo"><div class="dc-pos">${sv.posicao}</div><div>${this._avatar(sv.foto,sv.nome)}</div><div class="dc-info"><div class="dc-nome">${this._esc(sv.nome||'â€”')}</div><div class="dc-id">${this._esc(sv.kwai_id||sv.kwai_uid||'â€”')}</div></div><div>${this._statusBadgeDesemp(sv.status)}</div></div><div class="dc-meta-group"><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('calendar',11)} Dias</span><span class="dc-meta-val ${sv.dias_validos>=20?'ok':''}">${sv.dias_validos}/20</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_dias}%;background:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('live',11)} Horas</span><span class="dc-meta-val ${sv.horas_num>=40?'ok':''}">${this._esc(sv.horas_str)}/40h</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_horas}%;background:${sv.horas_num>=40?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('chart',11)} Diamantes</span><span class="dc-meta-val" style="color:var(--azul)">${this._num(sv.diamantes)}</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:100%;background:var(--azul)"></div></div></div></div></div>`).join('');
+      el.innerHTML=pagina.map(sv=>`<div class="dc-card ${this._esc(sv.status)}"><div class="dc-topo"><div class="dc-pos">${sv.posicao}</div><div>${this._avatar(sv.foto,sv.nome)}</div><div class="dc-info"><div class="dc-nome">${this._esc(sv.nome||'—')}</div><div class="dc-id">${this._esc(sv.kwai_id||sv.kwai_uid||'—')}</div></div><div>${this._statusBadgeDesemp(sv.status)}</div></div><div class="dc-meta-group"><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('calendar',11)} Dias</span><span class="dc-meta-val ${sv.dias_validos>=20?'ok':''}">${sv.dias_validos}/20</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_dias}%;background:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('live',11)} Horas</span><span class="dc-meta-val ${sv.horas_num>=40?'ok':''}">${this._esc(sv.horas_str)}/40h</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_horas}%;background:${sv.horas_num>=40?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('chart',11)} Diamantes</span><span class="dc-meta-val" style="color:var(--azul)">${this._num(sv.diamantes)}</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:100%;background:var(--azul)"></div></div></div></div></div>`).join('');
       const totalPags=Math.ceil(total/POR_PAG);const pgEl=s.getElementById('pgDesemp');
-      if(pgEl){pgEl.innerHTML=total>POR_PAG?`<button ${this._pg.desemp<=1?'disabled':''}>Anterior</button><span class="pn">PÃ¡g ${this._pg.desemp} / ${totalPags}</span><button ${this._pg.desemp>=totalPags?'disabled':''}>PrÃ³xima</button>`:`<span class="pn" style="color:var(--t3);font-size:11px">${total} streamers</span>`;if(total>POR_PAG){pgEl.children[0].addEventListener('click',()=>{this._pg.desemp--;render(s.getElementById('filtroDesemp')?.value||'');});pgEl.children[2].addEventListener('click',()=>{this._pg.desemp++;render(s.getElementById('filtroDesemp')?.value||'');});}}
+      if(pgEl){pgEl.innerHTML=total>POR_PAG?`<button ${this._pg.desemp<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${this._pg.desemp} / ${totalPags}</span><button ${this._pg.desemp>=totalPags?'disabled':''}>Próxima</button>`:`<span class="pn" style="color:var(--t3);font-size:11px">${total} streamers</span>`;if(total>POR_PAG){pgEl.children[0].addEventListener('click',()=>{this._pg.desemp--;render(s.getElementById('filtroDesemp')?.value||'');});pgEl.children[2].addEventListener('click',()=>{this._pg.desemp++;render(s.getElementById('filtroDesemp')?.value||'');});}}
     };
     render();s.getElementById('filtroDesemp').addEventListener('change',e=>{this._pg.desemp=1;render(e.target.value);});
   }
-  _statusBadgeDesemp(status){const m={aprovado:`<span class="sbadge excelente">${this._ico('star',10)} Aprovado</span>`,bom:`<span class="sbadge bom">${this._ico('check',10)} No Caminho</span>`,atencao:`<span class="sbadge critico">${this._ico('warning',10)} AtenÃ§Ã£o</span>`};return m[status]||m.atencao;}
+  _statusBadgeDesemp(status){const m={aprovado:`<span class="sbadge excelente">${this._ico('star',10)} Aprovado</span>`,bom:`<span class="sbadge bom">${this._ico('check',10)} No Caminho</span>`,atencao:`<span class="sbadge critico">${this._ico('warning',10)} Atenção</span>`};return m[status]||m.atencao;}
   async _carregarHistorico(forcar=false){
     const s=this.shadowRoot;const CACHE_KEY='dm_historico_cache';const CACHE_TTL=30*60*1000;
     if(!forcar){try{const cached=localStorage.getItem(CACHE_KEY);if(cached){const {ts,data}=JSON.parse(cached);if(Date.now()-ts<CACHE_TTL){this._renderHistorico(data);return;}}}catch(e){}}
@@ -620,10 +620,10 @@ class DimaiorAdmin extends HTMLElement {
       s.querySelectorAll('.month-tab').forEach(t=>t.classList.toggle('on',parseInt(t.dataset.idx)===idx));
       const c=s.getElementById('monthContent');if(!m.rows?.length){c.innerHTML=this._empty('history','Sem dados');return;}
       const POR_PAG=30,total=m.rows.length,inicio=(pgHist[idx]-1)*POR_PAG,pagina=m.rows.slice(inicio,inicio+POR_PAG),totalPags=Math.ceil(total/POR_PAG);
-      // Desktop: tabela â€” Mobile: accordion
-      const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>Diamantes</th><th>Var.ðŸ’Ž</th><th>Horas</th><th>Var.â±</th></tr></thead><tbody>${pagina.map(sv=>`<tr><td style="color:var(--t3);font-family:'Rajdhani',sans-serif;font-weight:700">${sv.posicao}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--t1)">${this._esc(sv.nome||'â€”')}</td><td style="color:var(--azul);font-family:'Rajdhani',sans-serif;font-weight:700">${this._num(sv.diamantes||0)}</td><td>${this._varBadge(sv.variacao)}</td><td style="color:var(--t2)">${sv.horas||'â€”'}</td><td>${this._varBadge(sv.var_horas)}</td></tr>`).join('')}</tbody></table></div>`;
-      const accordionHtml=`<div class="hist-lista hist-mobile-only">${pagina.map(sv=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><span class="hist-pos">${sv.posicao}</span><div class="hist-av">${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</div><div class="hist-info"><div class="hist-nome">${this._esc(sv.nome||'â€”')}</div><div class="hist-diam">${this._ico('diamond',10)} ${this._num(sv.diamantes||0)}</div></div><div class="hist-right">${this._varBadge(sv.variacao)}</div><span class="hist-chevron">${this._ico('down',11)}</span></div><div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Diamantes</div><div class="hist-val" style="color:var(--azul)">${this._num(sv.diamantes||0)}</div></div><div class="hist-cel"><div class="hist-lbl">Var.</div><div class="hist-val">${this._varBadge(sv.variacao)}</div></div><div class="hist-cel"><div class="hist-lbl">Horas</div><div class="hist-val">${sv.horas||'â€”'}</div></div><div class="hist-cel"><div class="hist-lbl">Var. Horas</div><div class="hist-val">${this._varBadge(sv.var_horas)}</div></div></div></div></div>`).join('')}</div>`;
-      c.innerHTML=tabelaHtml+accordionHtml+`${total>POR_PAG?`<div class="pag-bar"><button id="hPrev" ${pgHist[idx]<=1?'disabled':''}>Anterior</button><span class="pn">PÃ¡g ${pgHist[idx]} / ${totalPags}</span><button id="hNext" ${pgHist[idx]>=totalPags?'disabled':''}>PrÃ³xima</button></div>`:''}`;
+      // Desktop: tabela — Mobile: accordion
+      const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>Diamantes</th><th>Var.💎</th><th>Horas</th><th>Var.⏱</th></tr></thead><tbody>${pagina.map(sv=>`<tr><td style="color:var(--t3);font-family:'Rajdhani',sans-serif;font-weight:700">${sv.posicao}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--t1)">${this._esc(sv.nome||'—')}</td><td style="color:var(--azul);font-family:'Rajdhani',sans-serif;font-weight:700">${this._num(sv.diamantes||0)}</td><td>${this._varBadge(sv.variacao)}</td><td style="color:var(--t2)">${sv.horas||'—'}</td><td>${this._varBadge(sv.var_horas)}</td></tr>`).join('')}</tbody></table></div>`;
+      const accordionHtml=`<div class="hist-lista hist-mobile-only">${pagina.map(sv=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><span class="hist-pos">${sv.posicao}</span><div class="hist-av">${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</div><div class="hist-info"><div class="hist-nome">${this._esc(sv.nome||'—')}</div><div class="hist-diam">${this._ico('diamond',10)} ${this._num(sv.diamantes||0)}</div></div><div class="hist-right">${this._varBadge(sv.variacao)}</div><span class="hist-chevron">${this._ico('down',11)}</span></div><div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Diamantes</div><div class="hist-val" style="color:var(--azul)">${this._num(sv.diamantes||0)}</div></div><div class="hist-cel"><div class="hist-lbl">Var.</div><div class="hist-val">${this._varBadge(sv.variacao)}</div></div><div class="hist-cel"><div class="hist-lbl">Horas</div><div class="hist-val">${sv.horas||'—'}</div></div><div class="hist-cel"><div class="hist-lbl">Var. Horas</div><div class="hist-val">${this._varBadge(sv.var_horas)}</div></div></div></div></div>`).join('')}</div>`;
+      c.innerHTML=tabelaHtml+accordionHtml+`${total>POR_PAG?`<div class="pag-bar"><button id="hPrev" ${pgHist[idx]<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${pgHist[idx]} / ${totalPags}</span><button id="hNext" ${pgHist[idx]>=totalPags?'disabled':''}>Próxima</button></div>`:''}`;
       if(total>POR_PAG){s.getElementById('hPrev')?.addEventListener('click',()=>{pgHist[idx]--;renderMes(idx);});s.getElementById('hNext')?.addEventListener('click',()=>{pgHist[idx]++;renderMes(idx);});}
     };
     renderMes(0);s.getElementById('monthTabs').addEventListener('click',e=>{const btn=e.target.closest('.month-tab');if(btn)renderMes(parseInt(btn.dataset.idx));});
@@ -638,8 +638,8 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div id="listaUsers"></div>`;
     const lu=s.getElementById('listaUsers');
     lu.innerHTML=lista.map(sv=>{
-      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'â€”';const nome=sv.nome||sv.nome_social||'â€”';const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;const verifBadge=isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:#ff9800;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">âœ“ PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">âœ“ VERIFICADO</span>`:'';
-      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px">${this._esc(nome)} ${verifBadge}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'â€”')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${[['UID',uid],['Email',sv.email||'â€”'],['WhatsApp',sv.whatsapp||'â€”'],['EndereÃ§o',sv.endereco||'â€”'],['PIX Tipo',sv.pix_tipo||'â€”'],['PIX Chave',sv.pix_chave||'â€”'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]].map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-verif="${isVerif?'true':'false'}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-premium="${isPremium?'true':'false'}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
+      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;const verifBadge=isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:#ff9800;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ VERIFICADO</span>`:'';
+      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px">${this._esc(nome)} ${verifBadge}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]].map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-verif="${isVerif?'true':'false'}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-premium="${isPremium?'true':'false'}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
     }).join('');
     this._renderPg('pgS',this._pg.s,lista.length,20,n=>{this._pg.s=n;this._carregarStreamers();});
     lu.querySelectorAll('.sv-toggle-verif').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();this._toggleVerificado(btn.dataset.uid,'verificado',btn.dataset.verif==='true');});});
@@ -661,7 +661,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('metrics',26)}</div><div class="dc2-val">${c.sucesso_total}</div><div class="dc2-lbl">Total Sucesso</div></div>
       <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('clock_r',26)}</div><div class="dc2-val">${c.pendente}</div><div class="dc2-lbl">Pendentes</div></div>
       <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${c.com_erro}</div><div class="dc2-lbl">Com Erro</div></div>`;
-    const ultimos=d.ultimos||[];if(ultimos.length)el.insertAdjacentHTML('afterend',`<div class="box" style="margin-top:16px"><div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Ãšltimos Impulsionamentos</div></div><table><thead><tr><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(u=>`<tr><td style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'â€”')}</td><td>${this._esc(u.tempo_escolhido||'â€”')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'â€”')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
+    const ultimos=d.ultimos||[];if(ultimos.length)el.insertAdjacentHTML('afterend',`<div class="box" style="margin-top:16px"><div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Últimos Impulsionamentos</div></div><table><thead><tr><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(u=>`<tr><td style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
   }
   async _carregarRecrutamento(){
     const s=this.shadowRoot;s.getElementById('tbRec').innerHTML=this._loading();
@@ -672,8 +672,8 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--brddim)"><span style="color:var(--t3);font-size:11px">${this._ico('users',12)} <strong style="color:var(--cyan)">${d.total}</strong> candidatos</span><div class="busca">${this._ico('search',12)}<input id="bRec" type="text" placeholder="Buscar..." value="${this._esc(busca)}" style="width:160px"/></div></div><div id="listaRec"></div>`;
     const lista=s.getElementById('listaRec');
     lista.innerHTML=candidatos.map((c,i)=>{
-      const cols=headers.slice(0,4);const preview=cols.map(h=>`<span style="color:var(--t2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${this._esc(c[h]||'â€”')}</span>`).join('<span style="color:var(--brddim);margin:0 6px">|</span>');
-      return`<div class="rec-item" data-idx="${i}"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><span style="color:var(--t3);font-family:'Rajdhani',sans-serif;font-size:13px;width:28px;flex-shrink:0">${d.total-i}</span><div style="flex:1;display:flex;gap:12px;align-items:center;min-width:0;flex-wrap:wrap">${preview}</div><span class="rec-chevron">${this._ico('down',12)}</span></div><div class="rec-body"><div class="rec-campos">${headers.map(h=>`<div class="rec-campo"><div class="rec-campo-lbl">${this._esc(h)}</div><div class="rec-campo-val">${this._esc(c[h]||'â€”')}</div><button class="rec-copy-btn" data-copy="${this._esc(c[h]||'')}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div></div></div>`;
+      const cols=headers.slice(0,4);const preview=cols.map(h=>`<span style="color:var(--t2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${this._esc(c[h]||'—')}</span>`).join('<span style="color:var(--brddim);margin:0 6px">|</span>');
+      return`<div class="rec-item" data-idx="${i}"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><span style="color:var(--t3);font-family:'Rajdhani',sans-serif;font-size:13px;width:28px;flex-shrink:0">${d.total-i}</span><div style="flex:1;display:flex;gap:12px;align-items:center;min-width:0;flex-wrap:wrap">${preview}</div><span class="rec-chevron">${this._ico('down',12)}</span></div><div class="rec-body"><div class="rec-campos">${headers.map(h=>`<div class="rec-campo"><div class="rec-campo-lbl">${this._esc(h)}</div><div class="rec-campo-val">${this._esc(c[h]||'—')}</div><button class="rec-copy-btn" data-copy="${this._esc(c[h]||'')}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div></div></div>`;
     }).join('');
     const inp=s.getElementById('bRec');if(inp)inp.addEventListener('input',this._dbc(()=>this._carregarRecrutamento(),400));
   }
@@ -682,21 +682,21 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/logs?pagina=${this._pg.l}&tipo=${encodeURIComponent(busca)}`);
     const el=s.getElementById('tbL');if(!d?.ok||!d.logs?.length){el.innerHTML=this._empty('search','Nenhum log');return;}
     const cls=t=>{t=(t||'').toLowerCase();if(t.includes('login'))return'login';if(t.includes('uid')||t.includes('autoriza'))return'edit';if(t.includes('remov')||t.includes('erro')||t.includes('rejeit'))return'del';if(t.includes('carteira')||t.includes('saque')||t.includes('premio'))return'cfg';return'edit';};
-    el.innerHTML=d.logs.map(l=>`<div class="log"><span class="log-tag ${cls(l.tipo)}">${this._esc(l.tipo||'â€”')}</span><div class="log-info">${this._esc(l.mensagem||'')}</div><div class="log-hora">${this._fdt(l.criado_em)}</div></div>`).join('');
+    el.innerHTML=d.logs.map(l=>`<div class="log"><span class="log-tag ${cls(l.tipo)}">${this._esc(l.tipo||'—')}</span><div class="log-info">${this._esc(l.mensagem||'')}</div><div class="log-hora">${this._fdt(l.criado_em)}</div></div>`).join('');
     this._renderPg('pgL',this._pg.l,d.logs.length,50,n=>{this._pg.l=n;this._carregarLogs();});
   }
   async _carregarConfig(){
     const s=this.shadowRoot;s.getElementById('tbC').innerHTML=this._loading();const d=await this._api('GET','/admin/config');const el=s.getElementById('tbC');
-    if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configuraÃ§Ãµes');return;}
+    if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configurações');return;}
     const labels={
-      taxa_saque_mp:{label:'Taxa fixa por saque (R$)',hint:'Deixe 0.00 para nÃ£o cobrar taxa.'},
+      taxa_saque_mp:{label:'Taxa fixa por saque (R$)',hint:'Deixe 0.00 para não cobrar taxa.'},
       taxa_saque_perc:{label:'Taxa percentual (%)',hint:'Ex: 0.99 = 0,99%.'},
       aviso_financeiro:{label:'Aviso no painel',hint:'Texto na aba Carteira.'},
-      badge_verificado_url:{label:'Badge Verificado â€” URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = Ã­cone padrÃ£o azul.',preview:true},
-      badge_premium_url:{label:'Badge Premium â€” URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = Ã­cone padrÃ£o laranja.',preview:true},
+      badge_verificado_url:{label:'Badge Verificado — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = ícone padrão azul.',preview:true},
+      badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = ícone padrão laranja.',preview:true},
     };
-    const _prevHtml=(chave,val)=>val?`<img src="${this._esc(val)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio â€” usando Ã­cone SVG padrÃ£o</span>`;
-    el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} ConfiguraÃ§Ãµes financeiras e de exibiÃ§Ã£o.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'â€”')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`}${isRO?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
+    const _prevHtml=(chave,val)=>val?`<img src="${this._esc(val)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;
+    el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`}${isRO?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
     d.config.filter(c=>!labels[c.chave]?.readonly).forEach(c=>{
       s.getElementById(`cfgSave_${c.chave}`)?.addEventListener('click',async()=>{
         const val=s.getElementById(`cfg_${c.chave}`)?.value||'';
@@ -717,7 +717,7 @@ class DimaiorAdmin extends HTMLElement {
     });
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SEÃ‡Ã•ES v2 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ══════════════════════════ SEÇÕES v2 ══════════════════════════════════════
 
   async _carregarUids(){
     const s=this.shadowRoot;const container=s.getElementById('listaUids');if(container)container.innerHTML=this._loading();
@@ -738,16 +738,16 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/uids/${uid}/info`);btn.disabled=false;btn.textContent='Buscar';
     if(!d?.ok){s.getElementById('uidLookupResult').innerHTML=`<div class="uid-lookup-err">${this._ico('warning',16)} ${this._esc(d?.erro||'Erro ao buscar UID')}</div>`;return;}
     this._uidLookup=d;let html='';
-    if(d.autorizacao_existente){const a=d.autorizacao_existente;if(a.ativo&&!a.utilizado){html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} JÃ¡ possui autorizaÃ§Ã£o ativa.</div>`;}else if(a.utilizado){html+=`<div class="uid-lookup-err">${this._ico('lock_r',14)} JÃ¡ criou uma conta.</div>`;s.getElementById('uidLookupResult').innerHTML=html;return;}else{html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} AutorizaÃ§Ã£o revogada. Confirmar irÃ¡ reativar.</div>`;}}
-    if(d.tem_historico&&d.streamer){const st=d.streamer;html+=`<div class="uid-lookup-card ok"><div class="uid-lookup-avatar">${this._avatar(st.foto,st.nome,'uid-lookup-av')}</div><div class="uid-lookup-info"><div class="uid-lookup-nome">${this._esc(st.nome)}</div><div class="uid-lookup-id">UID: ${this._esc(uid)}</div><div class="uid-lookup-stats"><span>${this._ico('diamond',11)} ${this._num(st.total_diamantes)}</span><span>${this._ico('clock_r',11)} ${st.total_horas}</span><span>${this._ico('live',11)} ${st.dias_com_live} dias</span></div><div class="uid-lookup-datas"><span>Primeira live: ${this._fdtCurto(st.primeira_live)||'â€”'}</span><span>Ãšltima live: ${this._fdtCurto(st.ultima_live)||'â€”'}</span></div></div></div>`;}
-    else{html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} <strong>Sem transmissÃµes registradas.</strong> Pode liberar mesmo assim.</div>`;}
-    if(d.tem_conta){html+=`<div class="uid-lookup-warn">${this._ico('lock_r',14)} Este UID jÃ¡ possui conta no painel.</div>`;s.getElementById('uidLookupResult').innerHTML=html;return;}
+    if(d.autorizacao_existente){const a=d.autorizacao_existente;if(a.ativo&&!a.utilizado){html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} Já possui autorização ativa.</div>`;}else if(a.utilizado){html+=`<div class="uid-lookup-err">${this._ico('lock_r',14)} Já criou uma conta.</div>`;s.getElementById('uidLookupResult').innerHTML=html;return;}else{html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} Autorização revogada. Confirmar irá reativar.</div>`;}}
+    if(d.tem_historico&&d.streamer){const st=d.streamer;html+=`<div class="uid-lookup-card ok"><div class="uid-lookup-avatar">${this._avatar(st.foto,st.nome,'uid-lookup-av')}</div><div class="uid-lookup-info"><div class="uid-lookup-nome">${this._esc(st.nome)}</div><div class="uid-lookup-id">UID: ${this._esc(uid)}</div><div class="uid-lookup-stats"><span>${this._ico('diamond',11)} ${this._num(st.total_diamantes)}</span><span>${this._ico('clock_r',11)} ${st.total_horas}</span><span>${this._ico('live',11)} ${st.dias_com_live} dias</span></div><div class="uid-lookup-datas"><span>Primeira live: ${this._fdtCurto(st.primeira_live)||'—'}</span><span>Última live: ${this._fdtCurto(st.ultima_live)||'—'}</span></div></div></div>`;}
+    else{html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} <strong>Sem transmissões registradas.</strong> Pode liberar mesmo assim.</div>`;}
+    if(d.tem_conta){html+=`<div class="uid-lookup-warn">${this._ico('lock_r',14)} Este UID já possui conta no painel.</div>`;s.getElementById('uidLookupResult').innerHTML=html;return;}
     s.getElementById('uidLookupResult').innerHTML=html;s.getElementById('btnConfirmarUID').style.display='flex';
   }
   async _confirmarAutorizarUID(){
     const s=this.shadowRoot;const uid=s.getElementById('uidInputVal').value.trim();const nomeRef=s.getElementById('uidNomeRef').value.trim();if(!uid)return;
     const btn=s.getElementById('btnConfirmarUID');btn.disabled=true;btn.textContent='Autorizando...';
-    const d=await this._api('POST','/admin/uids',{kwai_uid:uid,nome_ref:nomeRef||null});btn.disabled=false;btn.textContent='Confirmar AutorizaÃ§Ã£o';
+    const d=await this._api('POST','/admin/uids',{kwai_uid:uid,nome_ref:nomeRef||null});btn.disabled=false;btn.textContent='Confirmar Autorização';
     if(d?.ok){this._fechaModal('mUID');this._toast(`UID ${uid} autorizado!`);this._carregarUids();}else{this._toast(d?.erro||'Erro ao autorizar','err');}
   }
   async _revogarUid(uid,reativar=false){
@@ -764,13 +764,13 @@ class DimaiorAdmin extends HTMLElement {
     this._taxaSaque=parseFloat(cfgMap.taxa_saque_mp||'0')||0;this._taxaPerc=parseFloat(cfgMap.taxa_saque_perc||'0')||0;
     const taxaInfo=this._taxaSaque>0||this._taxaPerc>0?`<div style="grid-column:1/-1;padding:10px 14px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:var(--rs);font-size:11px;color:#fbbf24;display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Taxa: <strong>${this._taxaSaque>0?this._brl(this._taxaSaque)+' fixo':''} ${this._taxaPerc>0?this._taxaPerc+'%':''}</strong></div>`:`<div style="grid-column:1/-1;padding:8px 14px;background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.15);border-radius:var(--rs);font-size:10px;color:var(--t3)">${this._ico('check_c',12)} PIX sem taxa configurada.</div>`;
     s.getElementById('carteiraResumo').innerHTML=`${taxaInfo}
-      <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('wallet',26)}</div><div class="dc2-val">${this._brl(r.saldo_total_disponivel)}</div><div class="dc2-lbl">DisponÃ­vel</div></div>
+      <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('wallet',26)}</div><div class="dc2-val">${this._brl(r.saldo_total_disponivel)}</div><div class="dc2-lbl">Disponível</div></div>
       <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('clock_r',26)}</div><div class="dc2-val">${this._brl(r.saldo_total_pendente)}</div><div class="dc2-lbl">Saques Pend.</div></div>
-      <div class="dc2 dc2-verde"><div class="dc2-ico">${this._ico('award',26)}</div><div class="dc2-val">${this._brl(r.total_distribuido)}</div><div class="dc2-lbl">DistribuÃ­do</div></div>
+      <div class="dc2 dc2-verde"><div class="dc2-ico">${this._ico('award',26)}</div><div class="dc2-val">${this._brl(r.total_distribuido)}</div><div class="dc2-lbl">Distribuído</div></div>
       <div class="dc2 dc2-indigo"><div class="dc2-ico">${this._ico('send',26)}</div><div class="dc2-val">${this._brl(r.total_sacado_historico)}</div><div class="dc2-lbl">Total Sacado</div></div>
       <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('pix_ico',26)}</div><div class="dc2-val">${r.saques_pendentes_qtd}</div><div class="dc2-lbl">Aguardando</div></div>`;
     const ultimas=d.ultimas_movimentacoes||[],urgentes=d.saques_urgentes||[],premiacoes=d.ultimas_premiacoes||[];
-    s.getElementById('carteiraStreamers').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px"><div class="box"><div class="bhead acc-toggle" id="accMov"><div class="btitulo">${this._ico('zap',14)} MovimentaÃ§Ãµes</div><span class="acc-chevron open" id="accMovIco">â–¼</span></div><div class="acc-body" id="accMovBody"><div style="padding:0">${ultimas.length?ultimas.map(t=>`<div class="tx-item"><span class="tx-tipo-badge ${['credito','premio_ranking'].includes(t.tipo)?'tx-entrada':'tx-saida'}">${['credito','premio_ranking'].includes(t.tipo)?'+':'-'}</span><div class="tx-desc"><span class="tx-uid">${this._esc(t.kwai_uid)}</span><span class="tx-detalhe">${this._esc(t.descricao||t.tipo)}</span></div><div class="tx-valor ${['credito','premio_ranking'].includes(t.tipo)?'tx-positivo':'tx-negativo'}">${this._brl(t.valor)}</div></div>`).join(''):this._empty('wallet','Sem movimentaÃ§Ãµes')}</div></div></div><div class="box"><div class="bhead acc-toggle" id="accSaq"><div class="btitulo">${this._ico('pix_ico',14)} Saques Urgentes</div><div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnVerSaques">${this._ico('send',12)} Ver todos</button><span class="acc-chevron open" id="accSaqIco">â–¼</span></div></div><div class="acc-body" id="accSaqBody"><div style="padding:0">${urgentes.length?urgentes.map(sg=>`<div class="tx-item"><div class="tx-desc"><span class="tx-uid">${this._esc(sg.kwai_uid)}</span><span class="tx-detalhe">${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}</span></div><span class="tx-valor">${this._brl(sg.valor)}</span></div>`).join(''):this._empty('check_c','Nenhum urgente')}</div></div></div></div><div class="box" style="margin-top:14px"><div class="bhead acc-toggle" id="accStr"><div class="btitulo">${this._ico('users',14)} Streamers com Saldo</div><div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnCarrStreams">${this._ico('refresh',12)} Carregar</button><span class="acc-chevron open" id="accStrIco">â–¼</span></div></div><div class="acc-body" id="accStrBody"><div id="listaCarteiraStreamers">${this._empty('wallet','Clique em Carregar')}</div></div></div>`;
+    s.getElementById('carteiraStreamers').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px"><div class="box"><div class="bhead acc-toggle" id="accMov"><div class="btitulo">${this._ico('zap',14)} Movimentações</div><span class="acc-chevron open" id="accMovIco">▼</span></div><div class="acc-body" id="accMovBody"><div style="padding:0">${ultimas.length?ultimas.map(t=>`<div class="tx-item"><span class="tx-tipo-badge ${['credito','premio_ranking'].includes(t.tipo)?'tx-entrada':'tx-saida'}">${['credito','premio_ranking'].includes(t.tipo)?'+':'-'}</span><div class="tx-desc"><span class="tx-uid">${this._esc(t.kwai_uid)}</span><span class="tx-detalhe">${this._esc(t.descricao||t.tipo)}</span></div><div class="tx-valor ${['credito','premio_ranking'].includes(t.tipo)?'tx-positivo':'tx-negativo'}">${this._brl(t.valor)}</div></div>`).join(''):this._empty('wallet','Sem movimentações')}</div></div></div><div class="box"><div class="bhead acc-toggle" id="accSaq"><div class="btitulo">${this._ico('pix_ico',14)} Saques Urgentes</div><div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnVerSaques">${this._ico('send',12)} Ver todos</button><span class="acc-chevron open" id="accSaqIco">▼</span></div></div><div class="acc-body" id="accSaqBody"><div style="padding:0">${urgentes.length?urgentes.map(sg=>`<div class="tx-item"><div class="tx-desc"><span class="tx-uid">${this._esc(sg.kwai_uid)}</span><span class="tx-detalhe">${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}</span></div><span class="tx-valor">${this._brl(sg.valor)}</span></div>`).join(''):this._empty('check_c','Nenhum urgente')}</div></div></div></div><div class="box" style="margin-top:14px"><div class="bhead acc-toggle" id="accStr"><div class="btitulo">${this._ico('users',14)} Streamers com Saldo</div><div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnCarrStreams">${this._ico('refresh',12)} Carregar</button><span class="acc-chevron open" id="accStrIco">▼</span></div></div><div class="acc-body" id="accStrBody"><div id="listaCarteiraStreamers">${this._empty('wallet','Clique em Carregar')}</div></div></div>`;
     s.getElementById('btnVerSaques')?.addEventListener('click',()=>this._ir('saques'));s.getElementById('btnCarrStreams')?.addEventListener('click',()=>this._carregarListaCarteiras());
     const _acc=(tId,bId,iId)=>{const btn=s.getElementById(tId),body=s.getElementById(bId),ico=s.getElementById(iId);if(!btn||!body)return;btn.addEventListener('click',e=>{if(e.target.closest('.btn'))return;body.classList.toggle('fechado');ico?.classList.toggle('open');});};
     _acc('accMov','accMovBody','accMovIco');_acc('accSaq','accSaqBody','accSaqIco');_acc('accStr','accStrBody','accStrIco');
@@ -779,7 +779,7 @@ class DimaiorAdmin extends HTMLElement {
       const tipo=p.tipo_ranking==='diamantes'?`${this._ico('diamond',12)} Diamantes`:`${this._ico('clock_r',12)} Horas`;
       return`<div class="ph-acc-item"><div class="ph-acc-preview" onclick="this.closest('.ph-acc-item').classList.toggle('open')"><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><span style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--cyan)">${this._esc(p.mes_referencia)}</span><span style="font-size:11px;color:var(--t3);display:flex;align-items:center;gap:4px">${tipo}</span></div><span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--azul);white-space:nowrap">${this._brl(p.total_valor)}</span><span class="ph-acc-chevron">${this._ico('down',12)}</span></div><div class="ph-acc-body"><div class="ph-acc-grid"><div class="ph-acc-cel"><div class="ph-acc-lbl">Premiados</div><div class="ph-acc-val" style="color:var(--verde)">${p.total_premiados}</div></div><div class="ph-acc-cel"><div class="ph-acc-lbl">Total</div><div class="ph-acc-val" style="color:var(--azul)">${this._brl(p.total_valor)}</div></div><div class="ph-acc-cel"><div class="ph-acc-lbl">Quando</div><div class="ph-acc-val" style="font-size:11px">${this._fdt(p.processado_em)}</div></div></div></div></div>`;
     }).join('');
-    sec.innerHTML=`<div class="bhead"><div class="btitulo">${this._ico('award',14)} Ãšltimas PremiaÃ§Ãµes</div></div>${_pHtml}`;
+    sec.innerHTML=`<div class="bhead"><div class="btitulo">${this._ico('award',14)} Últimas Premiações</div></div>${_pHtml}`;
     s.getElementById('carteiraStreamers').appendChild(sec);}
   }
 
@@ -790,9 +790,9 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;const uid=s.getElementById('mCrUid').value.trim();if(!uid)return this._toast('Digite um UID','err');
     const btn=s.getElementById('btnCrBuscar');const infoEl=s.getElementById('mCrInfo');btn.disabled=true;btn.textContent='Buscando...';infoEl.style.display='block';infoEl.innerHTML=this._loading('padding:12px 0');s.getElementById('mCrPasso2').style.display='none';s.getElementById('btnCrConfirmar').style.display='none';
     const d=await this._api('GET',`/admin/carteira/${uid}`);btn.disabled=false;btn.textContent='Buscar';
-    if(!d?.ok){infoEl.innerHTML=`<div class="uid-lookup-err">${this._ico('warning',14)} ${this._esc(d?.erro||'NÃ£o encontrado.')}</div>`;return;}
+    if(!d?.ok){infoEl.innerHTML=`<div class="uid-lookup-err">${this._ico('warning',14)} ${this._esc(d?.erro||'Não encontrado.')}</div>`;return;}
     this._creditoRapidoUid=uid;const p=d.perfil||{},c=d.carteira||{};infoEl.style.display='none';
-    s.getElementById('mCrStreamerCard').innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.25);border-radius:var(--rs)">${p.foto&&/^https?:\/\//i.test(p.foto)?`<img src="${this._esc(p.foto)}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,212,212,.4)" onerror="this.style.display='none'">`:`<div class="av-fb" style="width:42px;height:42px;font-size:16px">${this._ini(p.nome||uid)}</div>`}<div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--t1)">${this._esc(p.nome||'â€”')}</div><div style="font-size:11px;color:var(--t3)">UID: ${this._esc(uid)}</div>${p.pix_tipo&&p.pix_chave?`<div style="font-size:10px;color:var(--t3)">${this._ico('pix_ico',10)} PIX ${this._esc(p.pix_tipo)}: ${this._esc(p.pix_chave)}</div>`:''}</div><div style="text-align:right"><div style="font-size:10px;color:var(--t3)">Saldo atual</div><div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--verde)">${this._brl(c.saldo||0)}</div></div></div>`;
+    s.getElementById('mCrStreamerCard').innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.25);border-radius:var(--rs)">${p.foto&&/^https?:\/\//i.test(p.foto)?`<img src="${this._esc(p.foto)}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,212,212,.4)" onerror="this.style.display='none'">`:`<div class="av-fb" style="width:42px;height:42px;font-size:16px">${this._ini(p.nome||uid)}</div>`}<div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--t1)">${this._esc(p.nome||'—')}</div><div style="font-size:11px;color:var(--t3)">UID: ${this._esc(uid)}</div>${p.pix_tipo&&p.pix_chave?`<div style="font-size:10px;color:var(--t3)">${this._ico('pix_ico',10)} PIX ${this._esc(p.pix_tipo)}: ${this._esc(p.pix_chave)}</div>`:''}</div><div style="text-align:right"><div style="font-size:10px;color:var(--t3)">Saldo atual</div><div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--verde)">${this._brl(c.saldo||0)}</div></div></div>`;
     s.getElementById('mCrPasso2').style.display='block';s.getElementById('btnCrConfirmar').style.display='flex';setTimeout(()=>s.getElementById('mCrValor')?.focus(),100);
   }
   async _confirmarCreditoRapido(){
@@ -800,11 +800,11 @@ class DimaiorAdmin extends HTMLElement {
     if(!uid)return this._toast('Busque um streamer primeiro','err');if(!valor||Number(valor)<=0)return this._toast('Informe um valor','err');if(!descricao)return this._toast('Informe o motivo','err');
     const btn=s.getElementById('btnCrConfirmar');btn.disabled=true;btn.innerHTML=`<div class="sp" style="width:14px;height:14px;margin:0;border-width:2px;display:inline-block;vertical-align:middle"></div> Processando...`;
     const d=await this._api('POST',`/admin/carteira/${uid}/operacao`,{tipo:'credito',valor:Number(valor),descricao});
-    btn.disabled=false;btn.innerHTML=`${this._ico('check',13)} Confirmar CrÃ©dito`;
-    if(d?.ok){this._fechaModal('mCredito');this._toast(`âœ“ Saldo adicionado! Novo: ${this._brl(d.saldo_posterior)}`);this._carregarCarteiraDash();}else{this._toast(d?.erro||'Erro','err');}
+    btn.disabled=false;btn.innerHTML=`${this._ico('check',13)} Confirmar Crédito`;
+    if(d?.ok){this._fechaModal('mCredito');this._toast(`✓ Saldo adicionado! Novo: ${this._brl(d.saldo_posterior)}`);this._carregarCarteiraDash();}else{this._toast(d?.erro||'Erro','err');}
   }
 
-  // â”€â”€ FIX v2.1: usa /admin/carteira/streamers que retorna TODOS (limit=1000 no worker v5)
+  // ── FIX v2.1: usa /admin/carteira/streamers que retorna TODOS (limit=1000 no worker v5)
   async _carregarListaCarteiras(){
     const s=this.shadowRoot;const container=s.getElementById('listaCarteiraStreamers');if(!container)return;
     container.innerHTML=this._loading();
@@ -817,7 +817,7 @@ class DimaiorAdmin extends HTMLElement {
       const rows=filtro?lista.filter(c=>(c.nome||'').toLowerCase().includes(filtro)||c.kwai_uid.includes(filtro)):lista;
       const el=s.getElementById('listaCarteiraRows');if(!el)return;
       if(!rows.length){el.innerHTML=this._empty('search','Nenhum resultado');return;}
-      // Cards accordion â€” compacto por padrÃ£o, expande ao toque
+      // Cards accordion — compacto por padrão, expande ao toque
       el.innerHTML=rows.map(c=>{
         const nome=c.nome||c.kwai_uid;
         const saldoColor=c.saldo>0?'var(--verde)':'var(--t3)';
@@ -829,15 +829,15 @@ class DimaiorAdmin extends HTMLElement {
               <div class="sc-uid">UID: ${this._esc(c.kwai_uid)}</div>
             </div>
             <div class="sc-saldo-mini">
-              <div style="font-size:9px;color:var(--t3);text-align:right">DisponÃ­vel</div>
+              <div style="font-size:9px;color:var(--t3);text-align:right">Disponível</div>
               <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;color:${saldoColor}">${this._brl(c.saldo)}</div>
             </div>
             <span class="sc-chevron">${this._ico('down',12)}</span>
           </div>
           <div class="sc-body">
             <div class="sc-body-grid">
-              <div class="sc-detalhe"><div class="sc-dlbl">Pendente</div><div class="sc-dval" style="color:#fbbf24">${c.saldo_pendente>0?this._brl(c.saldo_pendente):'â€”'}</div></div>
-              <div class="sc-detalhe"><div class="sc-dlbl">Total Recebido</div><div class="sc-dval">${c.total_recebido>0?this._brl(c.total_recebido):'â€”'}</div></div>
+              <div class="sc-detalhe"><div class="sc-dlbl">Pendente</div><div class="sc-dval" style="color:#fbbf24">${c.saldo_pendente>0?this._brl(c.saldo_pendente):'—'}</div></div>
+              <div class="sc-detalhe"><div class="sc-dlbl">Total Recebido</div><div class="sc-dval">${c.total_recebido>0?this._brl(c.total_recebido):'—'}</div></div>
             </div>
             <div class="sc-body-acoes">
               <button class="btn btn-g btn-sm sc-add" data-uid="${this._esc(c.kwai_uid)}" data-nome="${this._esc(nome)}">${this._ico('plus',12)} Adicionar Saldo</button>
@@ -853,22 +853,22 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   async _abrirDetalheCarteira(uid,nome){
-    const s=this.shadowRoot;s.getElementById('mCartTitulo').textContent=`Carteira â€” ${nome}`;s.getElementById('mCartBody').innerHTML=this._loading();this._cartOp={uid,nome,tipo:null};this._abrirModal('mCart');
+    const s=this.shadowRoot;s.getElementById('mCartTitulo').textContent=`Carteira — ${nome}`;s.getElementById('mCartBody').innerHTML=this._loading();this._cartOp={uid,nome,tipo:null};this._abrirModal('mCart');
     const d=await this._api('GET',`/admin/carteira/${uid}`);if(!d?.ok){s.getElementById('mCartBody').innerHTML=this._empty('warning','Erro');return;}
     const c=d.carteira,txs=d.transacoes||[],sqs=d.saques||[];
-    s.getElementById('mCartBody').innerHTML=`<div class="cart-saldo-row"><div class="cart-saldo-box cy"><div class="cart-saldo-lbl">DisponÃ­vel</div><div class="cart-saldo-val">${this._brl(c.saldo)}</div></div><div class="cart-saldo-box" style="border-color:rgba(251,191,36,.3)"><div class="cart-saldo-lbl">Pendente</div><div class="cart-saldo-val" style="color:#fbbf24">${this._brl(c.saldo_pendente)}</div></div><div class="cart-saldo-box vd"><div class="cart-saldo-lbl">Recebido</div><div class="cart-saldo-val">${this._brl(c.total_recebido)}</div></div><div class="cart-saldo-box az"><div class="cart-saldo-lbl">Sacado</div><div class="cart-saldo-val">${this._brl(c.total_sacado)}</div></div></div><div class="cart-pix-row">${this._ico('pix_ico',13)} PIX: <strong>${this._esc(d.perfil?.pix_tipo||'â€”')}</strong> ${this._esc(d.perfil?.pix_chave||'â€”')}</div><div class="cart-acoes-row"><button class="btn btn-g" id="btnCartCredito">${this._ico('plus',14)} Adicionar Saldo</button><button class="btn" style="background:rgba(248,113,113,.2);color:var(--verm);border:1px solid rgba(248,113,113,.4)" id="btnCartDebito">${this._ico('trash',14)} Remover Saldo</button></div>${txs.length?`<div class="cart-hist-titulo">${this._ico('history',13)} TransaÃ§Ãµes (${txs.length})</div><div class="cart-hist-lista">${txs.map(t=>{const ent=['credito','premio_ranking'].includes(t.tipo);const tL={credito:'CrÃ©dito',debito:'DÃ©bito',saque_solicitado:'Saque Sol.',saque_aprovado:'Saque Aprov.',saque_rejeitado:'Saque Rejeit.',premio_ranking:'PrÃªmio',estorno:'Estorno'}[t.tipo]||t.tipo;return`<div class="tx-item"><span class="tx-tipo-badge ${ent?'tx-entrada':'tx-saida'}">${ent?'+':'âˆ’'}</span><div class="tx-desc"><span class="tx-uid">${this._esc(tL)}</span><span class="tx-detalhe">${this._esc(t.descricao||'â€”')}</span></div><div style="text-align:right"><div class="tx-valor ${ent?'tx-positivo':'tx-negativo'}">${this._brl(t.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(t.criado_em)}</div></div></div>`;}).join('')}</div>`:''}${sqs.length?`<div class="cart-hist-titulo">${this._ico('send',13)} Saques (${sqs.length})</div><div class="cart-hist-lista">${sqs.map(sg=>`<div class="tx-item"><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}"> ${this._esc(sg.status)}</span><div class="tx-desc"><span class="tx-uid">${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}</span></div><div style="text-align:right"><div class="tx-valor tx-negativo">${this._brl(sg.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(sg.solicitado_em)}</div></div></div>`).join('')}</div>`:''}`;
+    s.getElementById('mCartBody').innerHTML=`<div class="cart-saldo-row"><div class="cart-saldo-box cy"><div class="cart-saldo-lbl">Disponível</div><div class="cart-saldo-val">${this._brl(c.saldo)}</div></div><div class="cart-saldo-box" style="border-color:rgba(251,191,36,.3)"><div class="cart-saldo-lbl">Pendente</div><div class="cart-saldo-val" style="color:#fbbf24">${this._brl(c.saldo_pendente)}</div></div><div class="cart-saldo-box vd"><div class="cart-saldo-lbl">Recebido</div><div class="cart-saldo-val">${this._brl(c.total_recebido)}</div></div><div class="cart-saldo-box az"><div class="cart-saldo-lbl">Sacado</div><div class="cart-saldo-val">${this._brl(c.total_sacado)}</div></div></div><div class="cart-pix-row">${this._ico('pix_ico',13)} PIX: <strong>${this._esc(d.perfil?.pix_tipo||'—')}</strong> ${this._esc(d.perfil?.pix_chave||'—')}</div><div class="cart-acoes-row"><button class="btn btn-g" id="btnCartCredito">${this._ico('plus',14)} Adicionar Saldo</button><button class="btn" style="background:rgba(248,113,113,.2);color:var(--verm);border:1px solid rgba(248,113,113,.4)" id="btnCartDebito">${this._ico('trash',14)} Remover Saldo</button></div>${txs.length?`<div class="cart-hist-titulo">${this._ico('history',13)} Transações (${txs.length})</div><div class="cart-hist-lista">${txs.map(t=>{const ent=['credito','premio_ranking'].includes(t.tipo);const tL={credito:'Crédito',debito:'Débito',saque_solicitado:'Saque Sol.',saque_aprovado:'Saque Aprov.',saque_rejeitado:'Saque Rejeit.',premio_ranking:'Prêmio',estorno:'Estorno'}[t.tipo]||t.tipo;return`<div class="tx-item"><span class="tx-tipo-badge ${ent?'tx-entrada':'tx-saida'}">${ent?'+':'−'}</span><div class="tx-desc"><span class="tx-uid">${this._esc(tL)}</span><span class="tx-detalhe">${this._esc(t.descricao||'—')}</span></div><div style="text-align:right"><div class="tx-valor ${ent?'tx-positivo':'tx-negativo'}">${this._brl(t.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(t.criado_em)}</div></div></div>`;}).join('')}</div>`:''}${sqs.length?`<div class="cart-hist-titulo">${this._ico('send',13)} Saques (${sqs.length})</div><div class="cart-hist-lista">${sqs.map(sg=>`<div class="tx-item"><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}"> ${this._esc(sg.status)}</span><div class="tx-desc"><span class="tx-uid">${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}</span></div><div style="text-align:right"><div class="tx-valor tx-negativo">${this._brl(sg.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(sg.solicitado_em)}</div></div></div>`).join('')}</div>`:''}`;
     s.getElementById('btnCartCredito')?.addEventListener('click',()=>{this._fechaModal('mCart');this._abrirModalOperacao(uid,nome,'credito');});s.getElementById('btnCartDebito')?.addEventListener('click',()=>{this._fechaModal('mCart');this._abrirModalOperacao(uid,nome,'debito');});
   }
   _abrirModalOperacao(uid,nome,tipo){
-    const s=this.shadowRoot;this._cartOp={uid,nome,tipo};const isC=tipo==='credito';s.getElementById('mOpTitulo').textContent=`${isC?'Adicionar':'Remover'} Saldo â€” ${nome}`;s.getElementById('mOpValor').value='';s.getElementById('mOpDesc').value='';s.getElementById('mOpConfirmar').textContent=isC?'Confirmar CrÃ©dito':'Confirmar DÃ©bito';s.getElementById('mOpConfirmar').style.background=isC?'var(--grad)':'linear-gradient(135deg,#c00030,#f87171)';this._abrirModal('mOp');setTimeout(()=>s.getElementById('mOpValor')?.focus(),200);
+    const s=this.shadowRoot;this._cartOp={uid,nome,tipo};const isC=tipo==='credito';s.getElementById('mOpTitulo').textContent=`${isC?'Adicionar':'Remover'} Saldo — ${nome}`;s.getElementById('mOpValor').value='';s.getElementById('mOpDesc').value='';s.getElementById('mOpConfirmar').textContent=isC?'Confirmar Crédito':'Confirmar Débito';s.getElementById('mOpConfirmar').style.background=isC?'var(--grad)':'linear-gradient(135deg,#c00030,#f87171)';this._abrirModal('mOp');setTimeout(()=>s.getElementById('mOpValor')?.focus(),200);
   }
   async _confirmarOperacao(){
     const s=this.shadowRoot;const {uid,nome,tipo}=this._cartOp;const valor=s.getElementById('mOpValor').value;const descricao=s.getElementById('mOpDesc').value.trim();
-    if(!valor||!descricao)return this._toast('Preencha valor e descriÃ§Ã£o','err');
+    if(!valor||!descricao)return this._toast('Preencha valor e descrição','err');
     const btn=s.getElementById('mOpConfirmar');btn.disabled=true;btn.textContent='Processando...';
     const d=await this._api('POST',`/admin/carteira/${uid}/operacao`,{tipo,valor:Number(valor),descricao});
-    btn.disabled=false;btn.textContent=tipo==='credito'?'Confirmar CrÃ©dito':'Confirmar DÃ©bito';
-    if(d?.ok){this._fechaModal('mOp');this._toast(`${tipo==='credito'?'CrÃ©dito':'DÃ©bito'} realizado! Saldo: ${this._brl(d.saldo_posterior)}`);this._carregarCarteiraDash();}else{this._toast(d?.erro||'Erro','err');}
+    btn.disabled=false;btn.textContent=tipo==='credito'?'Confirmar Crédito':'Confirmar Débito';
+    if(d?.ok){this._fechaModal('mOp');this._toast(`${tipo==='credito'?'Crédito':'Débito'} realizado! Saldo: ${this._brl(d.saldo_posterior)}`);this._carregarCarteiraDash();}else{this._toast(d?.erro||'Erro','err');}
   }
 
   async _carregarSaques(){
@@ -876,10 +876,10 @@ class DimaiorAdmin extends HTMLElement {
     const filtro=s.getElementById('saqueFiltro')?.value||'pendente';const d=await this._api('GET',`/admin/saques?status=${filtro}&pagina=${this._pg.saques}`);
     if(!d?.ok){if(container)container.innerHTML=this._empty('warning','Erro');return;}
     const badge=s.getElementById('nbSaques');if(badge&&d.pendentes_total){badge.textContent=d.pendentes_total;badge.style.display='';}
-    const lista=d.saques||[];if(!lista.length){if(container)container.innerHTML=this._empty('check_c','Nenhuma solicitaÃ§Ã£o');return;}
+    const lista=d.saques||[];if(!lista.length){if(container)container.innerHTML=this._empty('check_c','Nenhuma solicitação');return;}
     if(container)container.innerHTML=lista.map(sg=>{
       const isPend=sg.status==='pendente';
-      return`<div class="saque-card ${isPend?'saque-pend':''}"><div class="saque-header"><div><div class="saque-nome">${this._esc(sg.nome_streamer||sg.kwai_uid)}</div><div class="saque-uid">${this._esc(sg.kwai_uid)}</div></div><div style="text-align:right"><div class="saque-valor">${this._brl(sg.valor)}</div><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}">${this._esc(sg.status)}</span></div></div><div class="saque-pix">${this._ico('pix_ico',12)} ${this._esc(sg.pix_tipo)}: <strong>${this._esc(sg.pix_chave)}</strong></div><div class="saque-meta"><span>${this._ico('calendar',11)} ${this._fdt(sg.solicitado_em)}</span>${sg.processado_em?`<span>${this._ico('check_c',11)} ${this._fdt(sg.processado_em)} por ${this._esc(sg.processado_por||'â€”')}</span>`:''}${sg.observacao?`<span>${this._ico('warning',11)} ${this._esc(sg.observacao)}</span>`:''}</div>${isPend?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-pagar-mp" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}" style="background:linear-gradient(135deg,#00b450,#00802e)"><img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" style="width:13px;height:13px;object-fit:contain;flex-shrink:0" alt="pix"> Pagar PIX</button><button class="btn btn-g btn-sm saque-aprovar" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('check_c',12)} SÃ³ Aprovar</button><button class="btn btn-sm saque-rejeitar" style="border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('x_circle',12)} Rejeitar</button><button class="btn btn-o btn-sm" data-pixcopy="${this._esc(sg.pix_chave)}">${this._ico('clipboard',11)} Copiar PIX</button></div>`:''}${sg.status==='aprovado'?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-marcar-pago" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" style="background:linear-gradient(135deg,#00b450,#008040)">${this._ico('check_c',12)} Marcar como Pago</button><button class="btn btn-o btn-sm saque-pagar-mp" data-id="${sg.id}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}">Pagar via MP (auto)</button></div>`:''}
+      return`<div class="saque-card ${isPend?'saque-pend':''}"><div class="saque-header"><div><div class="saque-nome">${this._esc(sg.nome_streamer||sg.kwai_uid)}</div><div class="saque-uid">${this._esc(sg.kwai_uid)}</div></div><div style="text-align:right"><div class="saque-valor">${this._brl(sg.valor)}</div><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}">${this._esc(sg.status)}</span></div></div><div class="saque-pix">${this._ico('pix_ico',12)} ${this._esc(sg.pix_tipo)}: <strong>${this._esc(sg.pix_chave)}</strong></div><div class="saque-meta"><span>${this._ico('calendar',11)} ${this._fdt(sg.solicitado_em)}</span>${sg.processado_em?`<span>${this._ico('check_c',11)} ${this._fdt(sg.processado_em)} por ${this._esc(sg.processado_por||'—')}</span>`:''}${sg.observacao?`<span>${this._ico('warning',11)} ${this._esc(sg.observacao)}</span>`:''}</div>${isPend?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-pagar-mp" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}" style="background:linear-gradient(135deg,#00b450,#00802e)"><img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" style="width:13px;height:13px;object-fit:contain;flex-shrink:0" alt="pix"> Pagar PIX</button><button class="btn btn-g btn-sm saque-aprovar" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('check_c',12)} Só Aprovar</button><button class="btn btn-sm saque-rejeitar" style="border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('x_circle',12)} Rejeitar</button><button class="btn btn-o btn-sm" data-pixcopy="${this._esc(sg.pix_chave)}">${this._ico('clipboard',11)} Copiar PIX</button></div>`:''}${sg.status==='aprovado'?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-marcar-pago" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" style="background:linear-gradient(135deg,#00b450,#008040)">${this._ico('check_c',12)} Marcar como Pago</button><button class="btn btn-o btn-sm saque-pagar-mp" data-id="${sg.id}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}">Pagar via MP (auto)</button></div>`:''}
       </div>`;
     }).join('');
     if(container){
@@ -887,11 +887,11 @@ class DimaiorAdmin extends HTMLElement {
       container.querySelectorAll('.saque-aprovar').forEach(btn=>{btn.addEventListener('click',()=>this._abrirModalSaque(btn.dataset.id,btn.dataset.nome,btn.dataset.val,'aprovar'));});
       container.querySelectorAll('.saque-rejeitar').forEach(btn=>{btn.addEventListener('click',()=>this._abrirModalSaque(btn.dataset.id,btn.dataset.nome,btn.dataset.val,'rejeitar'));});
       container.querySelectorAll('.saque-marcar-pago').forEach(btn=>{btn.addEventListener('click',()=>this._abrirModalSaque(btn.dataset.id,btn.dataset.nome,btn.dataset.val,'marcar_pago'));});
-      container.querySelectorAll('[data-pixcopy]').forEach(btn=>{btn.addEventListener('click',()=>navigator.clipboard?.writeText(btn.dataset.pixcopy||'').then(()=>this._toast('PIX copiado!')).catch(()=>this._toast('NÃ£o foi possÃ­vel copiar','err')));});
+      container.querySelectorAll('[data-pixcopy]').forEach(btn=>{btn.addEventListener('click',()=>navigator.clipboard?.writeText(btn.dataset.pixcopy||'').then(()=>this._toast('PIX copiado!')).catch(()=>this._toast('Não foi possível copiar','err')));});
     }
     this._renderPg('pgSaques',this._pg.saques,lista.length,20,n=>{this._pg.saques=n;this._carregarSaques();});
   }
-  // â”€â”€ PIX EMV Generator (PadrÃ£o Banco Central) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── PIX EMV Generator (Padrão Banco Central) ─────────────────────────────
   _gerarPixPayload(pixKey,valor){const f=(id,v)=>{const s=String(v);return`${id}${String(s.length).padStart(2,'0')}${s}`;};const mai=f('00','BR.GOV.BCB.PIX')+f('01',pixKey.replace(/\s/g,''));const amt=f('54',Number(valor).toFixed(2));const add=f('62',f('05','***'));let p=f('00','01')+f('01','12')+f('26',mai)+f('52','0000')+f('53','986')+amt+f('58','BR')+f('59','DMaior Agency')+f('60','Fortaleza')+add+'6304';let crc=0xFFFF;for(let i=0;i<p.length;i++){crc^=p.charCodeAt(i)<<8;for(let j=0;j<8;j++)crc=(crc&0x8000)?(crc<<1)^0x1021:crc<<1;}return p+(crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0');}
 
   async _pagarSaqueMp(id,nome,valor,pixInfo){
@@ -905,17 +905,17 @@ class DimaiorAdmin extends HTMLElement {
   _abrirModalPix(data){
     const s=this.shadowRoot;const foto=data.foto||'';const imgEl=s.getElementById('mPixFoto');
     if(foto){imgEl.src=foto;imgEl.onerror=()=>{imgEl.src='';imgEl.style.display='none';};}else{imgEl.style.display='none';}
-    s.getElementById('mPixNome').textContent=data.nome_streamer||data.uid||'â€”';s.getElementById('mPixUid').textContent=data.uid||'';s.getElementById('mPixValor').textContent=this._brl(data.valor);s.getElementById('mPixTipo').textContent=data.pix_tipo||'â€”';s.getElementById('mPixChave').textContent=data.pix_chave||'â€”';s.getElementById('mPixSaqueId').value=data.saque_id||'';this._abrirModal('mPix');
-    const btnCopiar=s.getElementById('mPixCopiarChave');if(btnCopiar){btnCopiar.onclick=()=>{navigator.clipboard?.writeText(data.pix_chave||'').then(()=>{this._toast('Chave PIX copiada!');btnCopiar.innerHTML=`${this._ico('check_c',13)} Copiado!`;setTimeout(()=>{btnCopiar.innerHTML=`${this._ico('clipboard',13)} Copiar chave PIX`;},2000);}).catch(()=>{this._toast('NÃ£o foi possÃ­vel copiar','err');});};}
+    s.getElementById('mPixNome').textContent=data.nome_streamer||data.uid||'—';s.getElementById('mPixUid').textContent=data.uid||'';s.getElementById('mPixValor').textContent=this._brl(data.valor);s.getElementById('mPixTipo').textContent=data.pix_tipo||'—';s.getElementById('mPixChave').textContent=data.pix_chave||'—';s.getElementById('mPixSaqueId').value=data.saque_id||'';this._abrirModal('mPix');
+    const btnCopiar=s.getElementById('mPixCopiarChave');if(btnCopiar){btnCopiar.onclick=()=>{navigator.clipboard?.writeText(data.pix_chave||'').then(()=>{this._toast('Chave PIX copiada!');btnCopiar.innerHTML=`${this._ico('check_c',13)} Copiado!`;setTimeout(()=>{btnCopiar.innerHTML=`${this._ico('clipboard',13)} Copiar chave PIX`;},2000);}).catch(()=>{this._toast('Não foi possível copiar','err');});};}
   }
   _abrirModalSaque(id,nome,valor,acao){
     const s=this.shadowRoot;this._saqueId=id;this._saqueAcao=acao;
-    const labels={aprovar:{titulo:'Aprovar Saque',btn:'Confirmar AprovaÃ§Ã£o',cor:'var(--grad)',obs:'ObservaÃ§Ã£o (opcional)'},rejeitar:{titulo:'Rejeitar Saque',btn:'Confirmar RejeiÃ§Ã£o',cor:'linear-gradient(135deg,#c00030,#f87171)',obs:'Motivo (opcional)'},marcar_pago:{titulo:'Marcar como Pago',btn:'Confirmar Pagamento',cor:'linear-gradient(135deg,#00b450,#008040)',obs:'ID/comprovante (opcional)'}};
-    const l=labels[acao]||labels.aprovar;s.getElementById('mSaqueTitulo').textContent=`${l.titulo} â€” ${nome}`;s.getElementById('mSaqueInfo').textContent=`Valor: ${this._brl(valor)}`;s.getElementById('mSaqueObs').value='';s.getElementById('mSaqueConfirmar').textContent=l.btn;s.getElementById('mSaqueConfirmar').style.background=l.cor;s.getElementById('mSaqueObsLabel').textContent=l.obs;this._abrirModal('mSaque');
+    const labels={aprovar:{titulo:'Aprovar Saque',btn:'Confirmar Aprovação',cor:'var(--grad)',obs:'Observação (opcional)'},rejeitar:{titulo:'Rejeitar Saque',btn:'Confirmar Rejeição',cor:'linear-gradient(135deg,#c00030,#f87171)',obs:'Motivo (opcional)'},marcar_pago:{titulo:'Marcar como Pago',btn:'Confirmar Pagamento',cor:'linear-gradient(135deg,#00b450,#008040)',obs:'ID/comprovante (opcional)'}};
+    const l=labels[acao]||labels.aprovar;s.getElementById('mSaqueTitulo').textContent=`${l.titulo} — ${nome}`;s.getElementById('mSaqueInfo').textContent=`Valor: ${this._brl(valor)}`;s.getElementById('mSaqueObs').value='';s.getElementById('mSaqueConfirmar').textContent=l.btn;s.getElementById('mSaqueConfirmar').style.background=l.cor;s.getElementById('mSaqueObsLabel').textContent=l.obs;this._abrirModal('mSaque');
   }
   async _confirmarSaqueAcao(){
     const s=this.shadowRoot;const observacao=s.getElementById('mSaqueObs').value.trim();const btn=s.getElementById('mSaqueConfirmar');btn.disabled=true;btn.textContent='Processando...';
-    const d=await this._api('POST',`/admin/saques/${this._saqueId}/processar`,{acao:this._saqueAcao,observacao});btn.disabled=false;btn.textContent=this._saqueAcao==='aprovar'?'Confirmar AprovaÃ§Ã£o':'Confirmar RejeiÃ§Ã£o';
+    const d=await this._api('POST',`/admin/saques/${this._saqueId}/processar`,{acao:this._saqueAcao,observacao});btn.disabled=false;btn.textContent=this._saqueAcao==='aprovar'?'Confirmar Aprovação':'Confirmar Rejeição';
     if(d?.ok){this._fechaModal('mSaque');this._toast(`Saque ${this._saqueAcao==='aprovar'?'aprovado':'rejeitado'}!`);this._carregarSaques();}else{this._toast(d?.erro||'Erro','err');}
   }
 
@@ -930,13 +930,13 @@ class DimaiorAdmin extends HTMLElement {
   }
   _renderPremioTabela(tipo){
     const s=this.shadowRoot;const container=s.getElementById('premiosConfigArea');const linhas=this._premioLinhas[tipo];
-    container.innerHTML=`<div class="premio-info-box">${this._ico('award',14)} SÃ³ posiÃ§Ãµes com valor <strong>&gt; R$ 0</strong> sÃ£o salvas.</div><table class="premio-table"><thead><tr><th style="width:130px">PosiÃ§Ã£o</th><th>Valor</th><th style="width:50px"></th></tr></thead><tbody id="premioTbody">${linhas.length===0?`<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--t3);font-size:12px">Nenhuma posiÃ§Ã£o. Clique em <strong>Adicionar</strong>.</td></tr>`:linhas.map(l=>this._premioLinhaHtml(l.posicao,l.valor)).join('')}</tbody></table><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn btn-o btn-sm" id="btnAddLinha">${this._ico('plus',12)} Adicionar PosiÃ§Ã£o</button><div style="display:flex;gap:10px;align-items:center"><span style="font-size:11px;color:var(--t3)" id="premioSaveStatus"></span><button class="btn btn-g" id="btnSalvarPremios">${this._ico('check',14)} Salvar</button></div></div>`;
+    container.innerHTML=`<div class="premio-info-box">${this._ico('award',14)} Só posições com valor <strong>&gt; R$ 0</strong> são salvas.</div><table class="premio-table"><thead><tr><th style="width:130px">Posição</th><th>Valor</th><th style="width:50px"></th></tr></thead><tbody id="premioTbody">${linhas.length===0?`<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--t3);font-size:12px">Nenhuma posição. Clique em <strong>Adicionar</strong>.</td></tr>`:linhas.map(l=>this._premioLinhaHtml(l.posicao,l.valor)).join('')}</tbody></table><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn btn-o btn-sm" id="btnAddLinha">${this._ico('plus',12)} Adicionar Posição</button><div style="display:flex;gap:10px;align-items:center"><span style="font-size:11px;color:var(--t3)" id="premioSaveStatus"></span><button class="btn btn-g" id="btnSalvarPremios">${this._ico('check',14)} Salvar</button></div></div>`;
     s.getElementById('btnAddLinha')?.addEventListener('click',()=>this._adicionarLinhaPremio(tipo));s.getElementById('btnSalvarPremios')?.addEventListener('click',()=>this._salvarPremios());
     container.querySelectorAll('.btn-remove-linha').forEach(btn=>{btn.addEventListener('click',()=>this._removerLinhaPremio(tipo,parseInt(btn.dataset.pos)));});
     container.querySelectorAll('.premio-val-inp').forEach(inp=>{inp.addEventListener('focus',()=>inp.style.borderColor='var(--cyan)');inp.addEventListener('blur',()=>inp.style.borderColor='var(--brd)');inp.addEventListener('input',()=>{const pos=parseInt(inp.dataset.pos),val=parseFloat(inp.value.replace(',','.'))||0;const linha=this._premioLinhas[tipo].find(l=>l.posicao===pos);if(linha)linha.valor=val;});});
   }
   _premioLinhaHtml(posicao,valor){
-    const medal=posicao===1?'ðŸ¥‡':posicao===2?'ðŸ¥ˆ':posicao===3?'ðŸ¥‰':`#${posicao}`;
+    const medal=posicao===1?'🥇':posicao===2?'🥈':posicao===3?'🥉':`#${posicao}`;
     return`<tr data-pos="${posicao}"><td class="premio-pos">${medal} Top ${posicao}</td><td><div style="display:flex;align-items:center;gap:8px"><span style="color:var(--t3);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700">R$</span><input class="premio-val-inp" data-pos="${posicao}" type="number" min="0.01" step="0.01" value="${valor>0?valor:''}" placeholder="0.00" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:7px 12px;width:150px;font-family:'Exo 2',sans-serif;font-size:14px;outline:none;transition:border-color .2s"/></div></td><td><button class="btn btn-sm btn-remove-linha" data-pos="${posicao}" style="border:1px solid rgba(248,113,113,.3);color:var(--verm);background:rgba(248,113,113,.06);padding:4px 8px">${this._ico('x_circle',13)}</button></td></tr>`;
   }
   _adicionarLinhaPremio(tipo){const linhas=this._premioLinhas[tipo];const proxPos=linhas.length>0?Math.max(...linhas.map(l=>l.posicao))+1:1;linhas.push({posicao:proxPos,valor:0});this._renderPremioTabela(tipo);setTimeout(()=>{const inp=this.shadowRoot.querySelector(`.premio-val-inp[data-pos="${proxPos}"]`);if(inp){inp.focus();inp.style.borderColor='var(--cyan)';}},50);}
@@ -945,12 +945,12 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;const tipo=this._premioTipo;const btn=s.getElementById('btnSalvarPremios');const statusEl=s.getElementById('premioSaveStatus');btn.disabled=true;btn.innerHTML=`<div class="sp" style="width:14px;height:14px;margin:0;border-width:2px;display:inline-block;vertical-align:middle"></div> Salvando...`;if(statusEl)statusEl.textContent='';
     const premios=[];s.querySelectorAll('.premio-val-inp').forEach(inp=>{const pos=parseInt(inp.dataset.pos),raw=inp.value.trim(),valor=raw===''?0:parseFloat(raw.replace(',','.'));if(!isNaN(valor)&&valor>0)premios.push({posicao:pos,valor_premio:valor});const linha=this._premioLinhas[tipo].find(l=>l.posicao===pos);if(linha)linha.valor=isNaN(valor)?0:valor;});
     const remover=[...this._premioRemover[tipo]];const d=await this._api('POST','/admin/premios/config',{tipo_ranking:tipo,premios,remover});btn.disabled=false;btn.innerHTML=`${this._ico('check',14)} Salvar`;
-    if(d?.ok){this._premioRemover[tipo]=new Set();this._premioLinhas[tipo]=this._premioLinhas[tipo].filter(l=>l.valor>0);this._toast(`${d.salvos||premios.length} posiÃ§Ã£o(Ãµes) salva(s).`);if(statusEl)statusEl.textContent=`Salvo Ã s ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;setTimeout(()=>{this._premioLinhas[tipo]=[];this._renderPremiosConfig();},1200);}else{this._toast(d?.erro||'Erro','err');}
+    if(d?.ok){this._premioRemover[tipo]=new Set();this._premioLinhas[tipo]=this._premioLinhas[tipo].filter(l=>l.valor>0);this._toast(`${d.salvos||premios.length} posição(ões) salva(s).`);if(statusEl)statusEl.textContent=`Salvo às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;setTimeout(()=>{this._premioLinhas[tipo]=[];this._renderPremiosConfig();},1200);}else{this._toast(d?.erro||'Erro','err');}
   }
   async _carregarHistoricoPremios(){
     const s=this.shadowRoot;const d=await this._api('GET','/admin/carteira');const container=s.getElementById('historicoPremios');if(!container)return;
-    const hist=d?.ultimas_premiacoes||[];if(!hist.length){container.innerHTML=this._empty('history','Nenhuma distribuiÃ§Ã£o ainda');return;}
-    // Accordion â€” funciona em mobile e desktop sem cortar
+    const hist=d?.ultimas_premiacoes||[];if(!hist.length){container.innerHTML=this._empty('history','Nenhuma distribuição ainda');return;}
+    // Accordion — funciona em mobile e desktop sem cortar
     container.innerHTML=hist.map((p,i)=>{
       const tipo=p.tipo_ranking==='diamantes'?`${this._ico('diamond',12)} Diamantes`:`${this._ico('clock_r',12)} Horas`;
       return`<div class="ph-acc-item">
@@ -965,8 +965,8 @@ class DimaiorAdmin extends HTMLElement {
         <div class="ph-acc-body">
           <div class="ph-acc-grid">
             <div class="ph-acc-cel"><div class="ph-acc-lbl">Premiados</div><div class="ph-acc-val" style="color:var(--verde)">${p.total_premiados}</div></div>
-            <div class="ph-acc-cel"><div class="ph-acc-lbl">Total DistribuÃ­do</div><div class="ph-acc-val" style="color:var(--azul)">${this._brl(p.total_valor)}</div></div>
-            <div class="ph-acc-cel"><div class="ph-acc-lbl">Processado por</div><div class="ph-acc-val">${this._esc(p.processado_por||'â€”')}</div></div>
+            <div class="ph-acc-cel"><div class="ph-acc-lbl">Total Distribuído</div><div class="ph-acc-val" style="color:var(--azul)">${this._brl(p.total_valor)}</div></div>
+            <div class="ph-acc-cel"><div class="ph-acc-lbl">Processado por</div><div class="ph-acc-val">${this._esc(p.processado_por||'—')}</div></div>
             <div class="ph-acc-cel"><div class="ph-acc-lbl">Quando</div><div class="ph-acc-val" style="font-size:11px">${this._fdt(p.processado_em)}</div></div>
           </div>
         </div>
@@ -974,22 +974,22 @@ class DimaiorAdmin extends HTMLElement {
     }).join('');
   }
   _abrirModalProcessar(){
-    const s=this.shadowRoot;const agora=new Date();const mesAnt=new Date(agora.getFullYear(),agora.getMonth()-1,1);const mesStr=`${mesAnt.getFullYear()}-${String(mesAnt.getMonth()+1).padStart(2,'0')}`;s.getElementById('mProcMes').value=mesStr;s.getElementById('mProcTipo').value=this._premioTipo;s.getElementById('mProcConfirmar').disabled=false;s.getElementById('mProcConfirmar').textContent='Processar PremiaÃ§Ã£o';s.getElementById('mProcStatus').innerHTML='';
+    const s=this.shadowRoot;const agora=new Date();const mesAnt=new Date(agora.getFullYear(),agora.getMonth()-1,1);const mesStr=`${mesAnt.getFullYear()}-${String(mesAnt.getMonth()+1).padStart(2,'0')}`;s.getElementById('mProcMes').value=mesStr;s.getElementById('mProcTipo').value=this._premioTipo;s.getElementById('mProcConfirmar').disabled=false;s.getElementById('mProcConfirmar').textContent='Processar Premiação';s.getElementById('mProcStatus').innerHTML='';
     const taxa=this._taxaSaque||0,taxaP=this._taxaPerc||0;const taxaInfo=s.getElementById('mProcTaxaInfo');if(taxaInfo){if(taxa>0||taxaP>0){taxaInfo.innerHTML=`<div style="padding:8px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:var(--rs);font-size:11px;color:#fbbf24;margin-bottom:10px">${this._ico('warning',12)} Taxa: ${taxa>0?this._brl(taxa)+' fixo':''}${taxaP>0?' + '+taxaP+'%':''}</div>`;}else{taxaInfo.innerHTML=`<div style="padding:6px 12px;background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.15);border-radius:var(--rs);font-size:10px;color:var(--t3);margin-bottom:10px">${this._ico('check_c',11)} Sem taxa.</div>`;}}
     this._abrirModal('mProc');
   }
   async _confirmarProcessarPremios(){
-    const s=this.shadowRoot;const mes=s.getElementById('mProcMes').value,tipo=s.getElementById('mProcTipo').value;if(!mes)return this._toast('Selecione o mÃªs','err');
-    if(!confirm(`âš ï¸ Confirmar premiaÃ§Ã£o ${tipo} para ${mes}?\n\nNÃƒO pode ser desfeita automaticamente.`))return;
+    const s=this.shadowRoot;const mes=s.getElementById('mProcMes').value,tipo=s.getElementById('mProcTipo').value;if(!mes)return this._toast('Selecione o mês','err');
+    if(!confirm(`⚠️ Confirmar premiação ${tipo} para ${mes}?\n\nNÃO pode ser desfeita automaticamente.`))return;
     const btn=s.getElementById('mProcConfirmar');const statusEl=s.getElementById('mProcStatus');btn.disabled=true;btn.textContent='Processando...';statusEl.innerHTML=`<div style="text-align:center;padding:10px;color:var(--t3);font-size:12px">${this._ico('refresh',14)} Calculando...</div>`;
-    const d=await this._api('POST','/admin/premios/processar',{mes_referencia:mes,tipo_ranking:tipo});btn.disabled=false;btn.textContent='Processar PremiaÃ§Ã£o';
-    if(d?.ok){statusEl.innerHTML=`<div class="mproc-sucesso">${this._ico('check_c',18)}<div><strong>${d.total_premiados} premiados</strong><br>${this._brl(d.total_valor)} distribuÃ­dos</div></div>${d.premiados?.map(p=>`<div class="mproc-item"><span class="prize-tag">Top ${p.posicao}</span><span>${this._esc(p.kwai_uid)}</span><span style="color:var(--verde);font-family:'Rajdhani',sans-serif;font-weight:700">${this._brl(p.valor)}</span></div>`).join('')||''}`;this._toast(`PremiaÃ§Ã£o de ${mes} processada!`);setTimeout(()=>{this._fechaModal('mProc');this._carregarPremios();},3000);}
+    const d=await this._api('POST','/admin/premios/processar',{mes_referencia:mes,tipo_ranking:tipo});btn.disabled=false;btn.textContent='Processar Premiação';
+    if(d?.ok){statusEl.innerHTML=`<div class="mproc-sucesso">${this._ico('check_c',18)}<div><strong>${d.total_premiados} premiados</strong><br>${this._brl(d.total_valor)} distribuídos</div></div>${d.premiados?.map(p=>`<div class="mproc-item"><span class="prize-tag">Top ${p.posicao}</span><span>${this._esc(p.kwai_uid)}</span><span style="color:var(--verde);font-family:'Rajdhani',sans-serif;font-weight:700">${this._brl(p.valor)}</span></div>`).join('')||''}`;this._toast(`Premiação de ${mes} processada!`);setTimeout(()=>{this._fechaModal('mProc');this._carregarPremios();},3000);}
     else{statusEl.innerHTML=`<div class="uid-lookup-err">${this._ico('warning',14)} ${this._esc(d?.erro||'Erro')}</div>`;this._toast(d?.erro||'Erro','err');}
   }
 
   _abrirModalS(){this._edtId=null;const s=this.shadowRoot;s.getElementById('mSTit').textContent='Adicionar Streamer';['mNome','mKwai','mFoto'].forEach(i=>s.getElementById(i).value='');s.getElementById('mAtivo').value='true';s.getElementById('mS').classList.add('on');}
   async _salvarStreamer(){
-    const s=this.shadowRoot;const dados={nome:s.getElementById('mNome').value.trim(),kwai_id:s.getElementById('mKwai').value.trim(),foto_url:this._normalizarImagemUrl(s.getElementById('mFoto').value.trim())};if(!dados.nome){this._toast('Nome obrigatÃ³rio','err');return;}
+    const s=this.shadowRoot;const dados={nome:s.getElementById('mNome').value.trim(),kwai_id:s.getElementById('mKwai').value.trim(),foto_url:this._normalizarImagemUrl(s.getElementById('mFoto').value.trim())};if(!dados.nome){this._toast('Nome obrigatório','err');return;}
     const rota=this._edtId?`/admin/streamers/${this._edtId}`:'/admin/streamers';const method=this._edtId?'PUT':'POST';
     const d=await this._api(method,rota,dados);if(d?.ok){this._fechaModal('mS');this._toast(this._edtId?'Atualizado!':'Adicionado!');this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
   }
@@ -1016,12 +1016,12 @@ class DimaiorAdmin extends HTMLElement {
     // Modal PIX
     s.getElementById('mPixClose').addEventListener('click',()=>this._fechaModal('mPix'));
     s.getElementById('mPixConfirmar').addEventListener('click',async()=>{
-      const saqueId=s.getElementById('mPixSaqueId').value;if(!saqueId){this._toast('ID invÃ¡lido','err');return;}
+      const saqueId=s.getElementById('mPixSaqueId').value;if(!saqueId){this._toast('ID inválido','err');return;}
       const btn=s.getElementById('mPixConfirmar');btn.disabled=true;btn.textContent='Confirmando...';
-      const r=await this._api('POST',`/admin/saques/${saqueId}/processar`,{acao:'marcar_pago',observacao:'PIX pago manualmente'});btn.disabled=false;btn.innerHTML=`${this._ico('check_c',15)} JÃ¡ Paguei â€” Confirmar`;
-      if(r?.ok){this._fechaModal('mPix');this._toast('âœ“ Saque marcado como pago!');setTimeout(()=>this._carregarSaques(),1000);}else{this._toast(r?.erro||'Erro','err');}
+      const r=await this._api('POST',`/admin/saques/${saqueId}/processar`,{acao:'marcar_pago',observacao:'PIX pago manualmente'});btn.disabled=false;btn.innerHTML=`${this._ico('check_c',15)} Já Paguei — Confirmar`;
+      if(r?.ok){this._fechaModal('mPix');this._toast('✓ Saque marcado como pago!');setTimeout(()=>this._carregarSaques(),1000);}else{this._toast(r?.erro||'Erro','err');}
     });
-    // v2: PrÃªmios
+    // v2: Prêmios
     s.getElementById('btnAtuPremios').addEventListener('click',()=>this._carregarPremios());s.getElementById('btnProcessarPremios').addEventListener('click',()=>this._abrirModalProcessar());s.getElementById('btnCancelarProc').addEventListener('click',()=>this._fechaModal('mProc'));s.getElementById('mProcConfirmar').addEventListener('click',()=>this._confirmarProcessarPremios());
     s.querySelectorAll('.premio-tipo-tab').forEach(tab=>{tab.addEventListener('click',()=>{s.querySelectorAll('.premio-tipo-tab').forEach(t=>t.classList.remove('on'));tab.classList.add('on');this._premioTipo=tab.dataset.tipo;this._renderPremiosConfig();});});
     // Comunicados
@@ -1037,7 +1037,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnVerificarCookie').addEventListener('click',()=>this._verificarCookieStatus());
     s.getElementById('btnSalvarCookie').addEventListener('click',()=>this._atualizarCookie());
     s.getElementById('btnSimularResgate').addEventListener('click',()=>this._executarResgate(true));
-    s.getElementById('btnExecutarResgate').addEventListener('click',()=>this._confirmarDel('Executar correÃ§Ã£o e gravar dados no banco?',()=>this._executarResgate(false)));
+    s.getElementById('btnExecutarResgate').addEventListener('click',()=>this._confirmarDel('Executar correção e gravar dados no banco?',()=>this._executarResgate(false)));
     s.getElementById('btnLimparDatas').addEventListener('click',()=>{s.getElementById('monDataDe').value='';s.getElementById('monDataAte').value='';});
     s.getElementById('btnVerBuffer').addEventListener('click',()=>this._verBufferMonitor());
     s.getElementById('btnTestarTelegram').addEventListener('click',()=>this._testarTelegram());
@@ -1050,7 +1050,7 @@ class DimaiorAdmin extends HTMLElement {
     // Convites / Candidaturas
     s.getElementById('btnAtuConvites').addEventListener('click',()=>this._carregarConvites());
     s.getElementById('btnConvBuscarPerfil').addEventListener('click',()=>this._abrirModalConvPerfil());
-    s.getElementById('btnBulkReenviar').addEventListener('click',()=>this._confirmarDel('Reenviar todos os convites elegÃ­veis? (dry_run primeiro)',()=>this._bulkReenviar(true)));
+    s.getElementById('btnBulkReenviar').addEventListener('click',()=>this._confirmarDel('Reenviar todos os convites elegíveis? (dry_run primeiro)',()=>this._bulkReenviar(true)));
     s.getElementById('convSubTabs').addEventListener('click',e=>{
       const b=e.target.closest('[data-sub]');if(!b)return;
       const subs=['candidaturas','voyager','migracoes','recrutadores'];
@@ -1076,7 +1076,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnCancelarRecrutador').addEventListener('click',()=>s.getElementById('formRecrutadorBox').style.display='none');
   }
 
-  // â”€â”€ COMUNICADOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── COMUNICADOS ─────────────────────────────────────────────────────────────
   async _carregarComunicados(){
     const s=this.shadowRoot;const el=s.getElementById('tbCom');if(el)el.innerHTML=this._loading();
     const d=await this._api('GET','/admin/comunicados');
@@ -1094,19 +1094,19 @@ class DimaiorAdmin extends HTMLElement {
         ?`<span class="com-status ativo">Ativo</span>`
         :`<span class="com-status inativo">Inativo</span>`;
       const tipoBadge=c.tipo==='importante'
-        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">ðŸ“Œ Importante</span>`
-        :`<span class="com-status" style="background:rgba(240,192,64,.1);color:var(--gold);border-color:rgba(240,192,64,.3)">âš¡ RÃ¡pido</span>`;
-      const destaqueBadge=c.destaque?`<span class="com-status" style="background:rgba(240,192,64,.15);color:var(--gold);border-color:rgba(240,192,64,.3)">â­ Destaque</span>`:'';
-      const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'â€”';
-      const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` Â· atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
+        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">📌 Importante</span>`
+        :`<span class="com-status" style="background:rgba(240,192,64,.1);color:var(--gold);border-color:rgba(240,192,64,.3)">⚡ Rápido</span>`;
+      const destaqueBadge=c.destaque?`<span class="com-status" style="background:rgba(240,192,64,.15);color:var(--gold);border-color:rgba(240,192,64,.3)">⭐ Destaque</span>`:'';
+      const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'—';
+      const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` · atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
       const thumbHtml=c.imagem_url
-        ?`<img src="${this._safeImgSrc(c.imagem_url)}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--brddim)">`
+        ?`<img class="com-thumb" src="${this._safeImgSrc(c.imagem_url)}" alt="" onerror="this.style.display='none'">`
         :(c.emoji?`<span class="com-emoji">${this._esc(c.emoji)}</span>`:'');
       const titulo=c.titulo?`<strong style="display:block;font-size:13px;color:var(--t1);margin-bottom:2px">${this._esc(c.titulo)}</strong>`:'';
-      return`<div class="com-item">
-        <div class="com-preview" style="align-items:flex-start;gap:10px">
+      return`<div class="com-item ${c.tipo==='importante'?'is-important':'is-fast'}">
+        <div class="com-preview">
           ${thumbHtml}
-          <div style="flex:1;min-width:0">
+          <div class="com-main">
             ${titulo}
             <span class="com-texto">${this._esc(c.texto)}</span>
           </div>
@@ -1135,7 +1135,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   _esc(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-  // Valida que a URL Ã© http/https antes de colocar em src (previne javascript: e data: URIs)
+  // Valida que a URL é http/https antes de colocar em src (previne javascript: e data: URIs)
   _normalizarImagemUrl(u){
     if(!u||typeof u!=='string')return'';
     const raw=u.trim();
@@ -1147,7 +1147,7 @@ class DimaiorAdmin extends HTMLElement {
       if(host==='drive.google.com'||host==='docs.google.com'||host.endsWith('.googleusercontent.com')){
         const fileMatch=url.pathname.match(/\/file\/d\/([^/]+)/);
         const id=fileMatch?.[1]||url.searchParams.get('id');
-        if(id&&/^[\w-]{10,}$/.test(id))return`https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}`;
+        if(id&&/^[\w-]{10,}$/.test(id))return`https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`;
       }
       return url.href;
     }catch{return'';}
@@ -1159,17 +1159,17 @@ class DimaiorAdmin extends HTMLElement {
     const tipo = tipoForcado || c?.tipo || 'rapido';
     const isImp = tipo === 'importante';
 
-    // TÃ­tulo do modal
+    // Título do modal
     if(c) {
-      s.getElementById('mComTit').textContent = isImp ? 'Editar Aviso Importante' : 'Editar Aviso RÃ¡pido';
+      s.getElementById('mComTit').textContent = isImp ? 'Editar Aviso Importante' : 'Editar Aviso Rápido';
     } else {
-      s.getElementById('mComTit').textContent = isImp ? 'Novo Aviso Importante' : 'Novo Aviso RÃ¡pido';
+      s.getElementById('mComTit').textContent = isImp ? 'Novo Aviso Importante' : 'Novo Aviso Rápido';
     }
 
     // Badge de tipo no modal
     const badge = s.getElementById('mComTipoBadge');
     if(badge){
-      badge.textContent = isImp ? 'ðŸ“Œ Importante' : 'âš¡ RÃ¡pido';
+      badge.textContent = isImp ? '📌 Importante' : '⚡ Rápido';
       badge.style.cssText = isImp
         ? 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(0,212,212,.12);color:var(--cyan);border:1px solid rgba(0,212,212,.3);margin-bottom:12px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:.05em'
         : 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);margin-bottom:12px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:.05em';
@@ -1178,7 +1178,7 @@ class DimaiorAdmin extends HTMLElement {
     // Guarda o tipo para o salvar
     this._edtComTipo = tipo;
 
-    // Mostra/oculta seÃ§Ãµes por tipo
+    // Mostra/oculta seções por tipo
     const secRapido    = s.getElementById('mComSecRapido');
     const secImportante= s.getElementById('mComSecImportante');
     if(secRapido)    secRapido.style.display    = isImp ? 'none' : 'block';
@@ -1234,7 +1234,7 @@ class DimaiorAdmin extends HTMLElement {
     const isImp       = tipo === 'importante';
     const titulo      = s.getElementById('mComTitulo').value.trim();
     const descricao   = s.getElementById('mComDescricao').value.trim();
-    // LÃª o campo de texto correto por tipo
+    // Lê o campo de texto correto por tipo
     const textoEl     = isImp ? s.getElementById('mComTexto_imp') : s.getElementById('mComTexto');
     const texto       = textoEl?.value.trim() || '';
     const imagem_url  = this._normalizarImagemUrl(s.getElementById('mComImagem').value.trim());
@@ -1246,7 +1246,7 @@ class DimaiorAdmin extends HTMLElement {
     const ativo       = s.getElementById('mComAtivo').value==='true';
     const destaque    = s.getElementById('mComDestaque').checked;
     const locais      = ['home','ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
-    if(!texto){this._toast('Texto Ã© obrigatÃ³rio','err');return;}
+    if(!texto){this._toast('Texto é obrigatório','err');return;}
     const btn=s.getElementById('mComSave');btn.disabled=true;
     const payload={tipo,emoji,titulo,descricao,texto,imagem_url,link_url,link_label,link2_url,link2_label,destaque,ativo,locais};
     let r;
@@ -1262,7 +1262,7 @@ class DimaiorAdmin extends HTMLElement {
 
   async _excluirComunicado(id){
     const r=await this._api('DELETE',`/admin/comunicados/${id}`);
-    if(r?.ok){this._toast('Comunicado excluÃ­do');this._carregarComunicados();}
+    if(r?.ok){this._toast('Comunicado excluído');this._carregarComunicados();}
     else this._toast(r?.erro||'Erro ao excluir','err');
   }
 
@@ -1272,7 +1272,7 @@ class DimaiorAdmin extends HTMLElement {
     else this._toast(r?.erro||'Erro','err');
   }
 
-  // â”€â”€ MONITOR KWAI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── MONITOR KWAI ────────────────────────────────────────────
   async _carregarMonitor(){
     this._verificarCookieStatus();
   }
@@ -1281,15 +1281,15 @@ class DimaiorAdmin extends HTMLElement {
     el.style.cssText='display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--brddim);font-size:13px;color:var(--t3)';
     el.textContent='Verificando...';
     const d=await this._api('GET','/admin/monitor/cookie-status');
-    if(!d){el.innerHTML=`<span style="color:var(--verm)">${this._ico('warning',14)} Erro de conexÃ£o com o monitor</span>`;return;}
+    if(!d){el.innerHTML=`<span style="color:var(--verm)">${this._ico('warning',14)} Erro de conexão com o monitor</span>`;return;}
     if(d.erro){el.innerHTML=`<span style="color:var(--verm)">${this._ico('warning',14)} ${this._esc(d.erro)}</span>`;return;}
     const vivo=d.status==='COOKIE_VIVO';
     const cor=vivo?'var(--verde)':'var(--verm)';
     const ico=vivo?this._ico('check_c',16):this._ico('x_circle',16);
-    const txt=vivo?`Cookie ativo â€” ${d.total_itens??0} live(s) visÃ­vel(is) no histÃ³rico`:'Cookie expirado ou invÃ¡lido â€” precisa atualizar';
+    const txt=vivo?`Cookie ativo — ${d.total_itens??0} live(s) visível(is) no histórico`:'Cookie expirado ou inválido — precisa atualizar';
     el.style.borderColor=vivo?'rgba(74,222,128,.3)':'rgba(248,113,113,.3)';
     el.style.background=vivo?'rgba(74,222,128,.07)':'rgba(248,113,113,.07)';
-    el.innerHTML=`<span style="color:${cor};display:flex;align-items:center;gap:6px">${ico} <strong>${this._esc(d.status??'â€”')}</strong></span><span style="color:var(--t2)">${txt}</span>`;
+    el.innerHTML=`<span style="color:${cor};display:flex;align-items:center;gap:6px">${ico} <strong>${this._esc(d.status??'—')}</strong></span><span style="color:var(--t2)">${txt}</span>`;
   }
   async _atualizarCookie(){
     const s=this.shadowRoot;
@@ -1305,11 +1305,11 @@ class DimaiorAdmin extends HTMLElement {
     const ate=s.getElementById('monDataAte').value;
     const dias=parseInt(s.getElementById('monDias').value)||7;
     const usaPeriodo=de&&ate;
-    const labelPeriodo=usaPeriodo?`${de} a ${ate}`:`Ãºltimos ${dias} dias`;
+    const labelPeriodo=usaPeriodo?`${de} a ${ate}`:`últimos ${dias} dias`;
     const statusEl=s.getElementById('monResgateStatus');
     const resultEl=s.getElementById('monResgateResult');
     statusEl.style.display='block';
-    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px">${this._ico('refresh',13)} ${preview?'Simulando':'Executando correÃ§Ã£o'} (${labelPeriodo})...</div>`;
+    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px">${this._ico('refresh',13)} ${preview?'Simulando':'Executando correção'} (${labelPeriodo})...</div>`;
     resultEl.style.display='none';
     const rota=preview?'/admin/monitor/preview':'/admin/monitor/corrigir';
     const qs=usaPeriodo?`inicio=${de}&fim=${ate}`:`dias=${dias}`;
@@ -1317,7 +1317,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d){
       statusEl.style.display='none';
       resultEl.style.display='block';
-      resultEl.textContent='Erro de conexÃ£o com o monitor.';
+      resultEl.textContent='Erro de conexão com o monitor.';
       return;
     }
     if(d.erro){
@@ -1326,19 +1326,19 @@ class DimaiorAdmin extends HTMLElement {
       resultEl.textContent=`Erro: ${d.erro}`;
       return;
     }
-    // PerÃ­odo > 1 dia â†’ job assÃ­ncrono: iniciar polling
+    // Período > 1 dia → job assíncrono: iniciar polling
     if(d.job_id){
       await this._acompanharJobCorrecao(d.job_id,d.total_dias,d.periodo,statusEl,resultEl);
       return;
     }
-    // Resultado sÃ­ncrono (preview ou perÃ­odo de 1 dia)
+    // Resultado síncrono (preview ou período de 1 dia)
     statusEl.style.display='none';
     resultEl.style.display='block';
     this._exibirResumoCorrecao(d,resultEl);
   }
 
   async _acompanharJobCorrecao(jobId,totalDias,periodo,statusEl,resultEl){
-    const INTERVALO=3000,MAX=200; // atÃ© ~10 min
+    const INTERVALO=3000,MAX=200; // até ~10 min
     for(let t=0;t<MAX;t++){
       await new Promise(r=>setTimeout(r,INTERVALO));
       const job=await this._api('GET',`/admin/monitor/corrigir/status?job=${encodeURIComponent(jobId)}`);
@@ -1348,24 +1348,24 @@ class DimaiorAdmin extends HTMLElement {
       }
       if(job.status==='processando'){
         const prog=job.progresso??0;
-        const diaAtual=job.dia_atual??'â€”';
+        const diaAtual=job.dia_atual??'—';
         const pct=totalDias>0?Math.round(((prog)/totalDias)*100):0;
         statusEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px;font-size:12px;padding:10px 0">
-          <div style="display:flex;align-items:center;gap:8px;color:var(--t3)">${this._ico('refresh',13)} Dia ${prog+1} de ${totalDias} â€” <strong style="color:var(--t1)">${diaAtual}</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;color:var(--t3)">${this._ico('refresh',13)} Dia ${prog+1} de ${totalDias} — <strong style="color:var(--t1)">${diaAtual}</strong></div>
           <div style="height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden">
             <div style="height:100%;width:${pct}%;background:var(--cyan);transition:width .4s"></div>
           </div>
-          <div style="color:var(--t2)">${job.resumo?.upserts??0} registro(s) atualizados atÃ© agora</div>
+          <div style="color:var(--t2)">${job.resumo?.upserts??0} registro(s) atualizados até agora</div>
         </div>`;
         continue;
       }
       if(job.status==='concluido'){
         statusEl.style.display='none';
         resultEl.style.display='block';
-        const fin=job.finalizado_em?new Date(job.finalizado_em).toLocaleString('pt-BR'):'â€”';
+        const fin=job.finalizado_em?new Date(job.finalizado_em).toLocaleString('pt-BR'):'—';
         resultEl.textContent=[
-          `Modo:        CorreÃ§Ã£o assÃ­ncrona concluÃ­da`,
-          `PerÃ­odo:     ${job.periodo??periodo??'â€”'}`,
+          `Modo:        Correção assíncrona concluída`,
+          `Período:     ${job.periodo??periodo??'—'}`,
           `Dias:        ${job.dias_processados??totalDias} processado(s)`,
           `Upserts:     ${job.resumo?.upserts??0}`,
           `Finalizado:  ${fin}`,
@@ -1384,29 +1384,29 @@ class DimaiorAdmin extends HTMLElement {
 
   _exibirResumoCorrecao(d,resultEl){
     const linhas=[
-      `Modo:        ${d.modo||d.status||'â€”'}`,
-      `PerÃ­odo:     ${d.periodo??'â€”'}`,
-      `Total Kwai:  ${d.total_kwai_bruto??'â€”'} lives brutas`,
-      `VÃ¡lidos:     ${d.total_valido??'â€”'}`,
+      `Modo:        ${d.modo||d.status||'—'}`,
+      `Período:     ${d.periodo??'—'}`,
+      `Total Kwai:  ${d.total_kwai_bruto??'—'} lives brutas`,
+      `Válidos:     ${d.total_valido??'—'}`,
       `Inseridas:   ${d.inseridas?.length??0}`,
       `Corrigidas:  ${d.corrigidas?.length??0}`,
       `Ignoradas (recentes): ${d.ignoradas_recentes??0}`,
       `Ignoradas (iguais):   ${d.ignoradas_iguais??0}`,
       `Erros:       ${d.erros?.length??0}`,
-      `DuraÃ§Ã£o:     ${d.duracao_segundos??'â€”'}s`,
+      `Duração:     ${d.duracao_segundos??'—'}s`,
     ];
     if(d.inseridas?.length>0){
-      linhas.push('','â”€â”€ Inseridas â”€â”€');
-      d.inseridas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | ${x.diamantes}ðŸ’Ž`));
+      linhas.push('','── Inseridas ──');
+      d.inseridas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | ${x.diamantes}💎`));
       if(d.inseridas.length>20)linhas.push(`  ... +${d.inseridas.length-20} mais`);
     }
     if(d.corrigidas?.length>0){
-      linhas.push('','â”€â”€ Corrigidas â”€â”€');
-      d.corrigidas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | banco:${x.banco_diamantes}ðŸ’Ž/${x.banco_minutos}min â†’ kwai:${x.kwai_diamantes}ðŸ’Ž/${x.kwai_minutos}min`));
+      linhas.push('','── Corrigidas ──');
+      d.corrigidas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | banco:${x.banco_diamantes}💎/${x.banco_minutos}min → kwai:${x.kwai_diamantes}💎/${x.kwai_minutos}min`));
       if(d.corrigidas.length>20)linhas.push(`  ... +${d.corrigidas.length-20} mais`);
     }
     if(d.erros?.length>0){
-      linhas.push('','â”€â”€ Erros â”€â”€');
+      linhas.push('','── Erros ──');
       d.erros.forEach(e=>linhas.push(`  ${e}`));
     }
     resultEl.textContent=linhas.join('\n');
@@ -1415,14 +1415,14 @@ class DimaiorAdmin extends HTMLElement {
     const el=this.shadowRoot.getElementById('monBufferResult');
     el.textContent='Carregando...';
     const d=await this._api('GET','/admin/monitor/debug-buffer');
-    if(!d||d.erro){el.innerHTML=`<span style="color:var(--verm)">${this._esc(d?.erro||'Erro de conexÃ£o')}</span>`;return;}
-    if(!d.total_no_buffer){el.innerHTML='<span style="color:var(--verde)">Buffer vazio â€” nenhum dado pendente.</span>';return;}
+    if(!d||d.erro){el.innerHTML=`<span style="color:var(--verm)">${this._esc(d?.erro||'Erro de conexão')}</span>`;return;}
+    if(!d.total_no_buffer){el.innerHTML='<span style="color:var(--verde)">Buffer vazio — nenhum dado pendente.</span>';return;}
     el.innerHTML=`<div style="margin-bottom:8px;color:var(--cyan);font-weight:600">${d.total_no_buffer} item(s) no buffer</div>`
       +`<div style="display:flex;flex-direction:column;gap:4px">${(d.itens||[]).slice(0,30).map(i=>
         `<div style="display:flex;gap:8px;font-size:11px;color:var(--t2);border-bottom:1px solid var(--brddim);padding-bottom:4px">
-          <span style="color:var(--t3);min-width:80px">${i.data||'â€”'}</span>
-          <span style="flex:1">${this._esc(i.nome||'â€”')}</span>
-          <span style="color:var(--cyan)">${i.diamantes??0}ðŸ’Ž</span>
+          <span style="color:var(--t3);min-width:80px">${i.data||'—'}</span>
+          <span style="flex:1">${this._esc(i.nome||'—')}</span>
+          <span style="color:var(--cyan)">${i.diamantes??0}💎</span>
           <span style="color:var(--t3)">${i.minutos_live??0}min</span>
         </div>`).join('')}
       ${d.total_no_buffer>30?`<div style="color:var(--t3);font-size:11px">... +${d.total_no_buffer-30} mais</div>`:''}</div>`;
@@ -1433,7 +1433,7 @@ class DimaiorAdmin extends HTMLElement {
     else this._toast(d?.erro||'Erro ao enviar','err');
   }
 
-  // â”€â”€ CONTROLE DE IMPULSIONAMENTO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── CONTROLE DE IMPULSIONAMENTO ──────────────────────────────
   async _carregarImpulsoCtrl(){
     // Carrega config e bloqueios em paralelo
     const [cfg,blq]=await Promise.all([
@@ -1454,7 +1454,7 @@ class DimaiorAdmin extends HTMLElement {
     const opcao_30min=s.getElementById('iOpcao30min').checked;
     const opcao_1hora=s.getElementById('iOpcao1hora').checked;
     const r=await this._api('POST','/admin/impulso/config',{quota_max,opcao_30min,opcao_1hora});
-    if(r?.ok)this._toast('ConfiguraÃ§Ãµes salvas!');
+    if(r?.ok)this._toast('Configurações salvas!');
     else this._toast(r?.erro||'Erro ao salvar','err');
   }
   async _buscarStreamerBloqueio(){
@@ -1469,7 +1469,7 @@ class DimaiorAdmin extends HTMLElement {
     if(match){
       infoEl.innerHTML=`<strong style="color:var(--cyan)">${this._esc(match.nome)}</strong><br><span style="color:var(--t3)">UID: ${this._esc(uid)}</span>`;
     } else {
-      infoEl.innerHTML=`<span style="color:var(--t3)">UID: ${this._esc(uid)} (nÃ£o encontrado no cadastro)</span>`;
+      infoEl.innerHTML=`<span style="color:var(--t3)">UID: ${this._esc(uid)} (não encontrado no cadastro)</span>`;
     }
   }
   async _bloquearStreamer(){
@@ -1506,11 +1506,11 @@ class DimaiorAdmin extends HTMLElement {
       <div class="bloq-item">
         <div class="bloq-info">
           <div class="bloq-uid">${this._ico('lock_r',13)} UID: <strong>${this._esc(b.kwai_uid)}</strong></div>
-          <div class="bloq-motivo">${this._esc(b.motivo||'â€”')}</div>
+          <div class="bloq-motivo">${this._esc(b.motivo||'—')}</div>
           <div class="bloq-meta">
             Bloqueado: ${this._fdtCurto(b.bloqueado_em)}
-            ${b.expira_em?` â€¢ Expira: ${this._fdtCurto(b.expira_em)}`:'<span style="color:var(--verm);margin-left:6px">Permanente</span>'}
-            ${b.bloqueado_por?` â€¢ por ${this._esc(b.bloqueado_por)}`:''}
+            ${b.expira_em?` • Expira: ${this._fdtCurto(b.expira_em)}`:'<span style="color:var(--verm);margin-left:6px">Permanente</span>'}
+            ${b.bloqueado_por?` • por ${this._esc(b.bloqueado_por)}`:''}
           </div>
         </div>
         <button class="btn btn-o btn-sm bloq-rev" data-rev="${b.id}">${this._ico('unlock',12)} Revogar</button>
@@ -1552,7 +1552,7 @@ class DimaiorAdmin extends HTMLElement {
     .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
     .titulo{font-family:'Rajdhani',sans-serif;font-size:clamp(1rem,3vw,1.4rem);font-weight:700;letter-spacing:2px;color:var(--t1);text-transform:uppercase;display:flex;align-items:center;gap:8px}.psub{font-size:11px;color:var(--t3);margin-top:3px}.ph-r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
     
-    /* â”€â”€ Dashboard cards coloridos 2x2 â”€â”€ */
+    /* ── Dashboard cards coloridos 2x2 ── */
     .dc2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
     .dc2{border-radius:var(--r);padding:18px 14px 14px;position:relative;overflow:hidden;cursor:default;transition:transform .2s,box-shadow .2s,filter .2s;border:1px solid transparent;box-shadow:0 10px 30px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);}
     @media(hover:hover){.dc2:hover{transform:translateY(-3px);filter:saturate(1.12);box-shadow:0 14px 38px rgba(0,0,0,.46),0 0 22px rgba(0,212,212,.08);}}
@@ -1566,7 +1566,7 @@ class DimaiorAdmin extends HTMLElement {
     .dc2-cyan{background:linear-gradient(135deg,rgba(37,99,235,.78),rgba(0,212,212,.55));border-color:rgba(34,211,238,.86);}.dc2-cyan .dc2-ico,.dc2-cyan .dc2-val{color:#a5f3fc;text-shadow:0 0 18px rgba(0,212,212,.72)}
     .dc2-gold{background:linear-gradient(135deg,rgba(217,119,6,.8),rgba(234,179,8,.56));border-color:rgba(251,191,36,.86);}.dc2-gold .dc2-ico,.dc2-gold .dc2-val{color:#fef3c7;text-shadow:0 0 18px rgba(245,158,11,.72)}
     .dc2-slate{background:linear-gradient(135deg,rgba(51,65,85,.82),rgba(14,165,233,.32));border-color:rgba(148,163,184,.72);}.dc2-slate .dc2-ico,.dc2-slate .dc2-val{color:#e2e8f0;text-shadow:0 0 16px rgba(148,163,184,.55)}
-    /* â”€â”€ Widget Ao Vivo no Dashboard â”€â”€ */
+    /* ── Widget Ao Vivo no Dashboard ── */
     .dlw-empty{display:flex;align-items:center;gap:8px;padding:16px;color:var(--t3);font-size:12px;font-family:'Exo 2',sans-serif}
     .dlw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
     .dlw-item{border-radius:var(--rs);overflow:hidden;cursor:pointer;transition:transform .15s;border:1px solid rgba(248,113,113,.2);}
@@ -1579,7 +1579,7 @@ class DimaiorAdmin extends HTMLElement {
     .dlw-est-1 .dlw-thumb{height:82px}
     .dlw-est-1 .dlw-meta{display:flex;flex-direction:column;justify-content:center;min-width:0}
     .dlw-mais{display:flex;align-items:center;justify-content:center;border-radius:var(--rs);border:1px dashed rgba(0,212,212,.3);color:var(--cyan);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;height:100%;min-height:100px;cursor:pointer}
-    /* â”€â”€ AÃ§Ãµes RÃ¡pidas â”€â”€ */
+    /* ── Ações Rápidas ── */
     .qa-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px}
     .qa-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px;min-height:92px;padding:14px 14px 13px 16px;cursor:pointer;border:1px solid rgba(0,212,212,.16);border-radius:var(--r);position:relative;overflow:hidden;transition:background .15s,border-color .15s,transform .15s;box-shadow:0 8px 24px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.05);}
     .qa-card:last-child{border-bottom:1px solid rgba(0,212,212,.16)}
@@ -1616,10 +1616,10 @@ class DimaiorAdmin extends HTMLElement {
     .btn{padding:7px 13px;border-radius:var(--rs);font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .2s;border:none;font-family:'Rajdhani',sans-serif;letter-spacing:.05em}.btn-g{background:var(--grad);color:#fff;box-shadow:0 2px 10px rgba(59,130,246,.25)}.btn-g:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(59,130,246,.5)}.btn-o{background:transparent;border:1px solid var(--brd);color:var(--t3)}.btn-o:hover{border-color:var(--cyan);color:var(--cyan)}.btn-sm{padding:4px 8px;font-size:11px}.btn-d:hover{border-color:var(--verm)!important;color:var(--verm)!important}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
     .pag-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px}.pag-bar button{padding:5px 13px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);color:var(--t3);font-size:11px;cursor:pointer;transition:all .15s;font-family:'Rajdhani',sans-serif;font-weight:700}.pag-bar button:hover:not(:disabled){border-color:var(--cyan);color:var(--cyan)}.pag-bar button:disabled{opacity:.35;cursor:not-allowed}.pag-bar .pn{font-size:11px;color:var(--t3);font-family:'Rajdhani',sans-serif}
     .log{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--brddim)}.log:last-child{border-bottom:none}.log-tag{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;letter-spacing:1px}.log-tag.login{background:rgba(74,222,128,.12);color:var(--verde)}.log-tag.edit{background:var(--cyan-d);color:var(--cyan)}.log-tag.del{background:rgba(248,113,113,.12);color:var(--verm)}.log-tag.cfg{background:rgba(240,192,64,.12);color:var(--gold)}.log-info{flex:1;font-size:11px;color:var(--t2);line-height:1.5}.log-hora{font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--t3);flex-shrink:0}
-    /* â”€â”€ Video inline (modo vÃ­deo) â”€â”€ */
+    /* ── Video inline (modo vídeo) ── */
     .lvc-video{width:100%;height:100%;object-fit:cover}.lc-capa-video{cursor:default}
 
-    /* â•â•â•â• LIVE HEADER v2 â•â•â•â• */
+    /* ════ LIVE HEADER v2 ════ */
     /* Header principal */
     .lv2-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;gap:12px}
     .lv2-header-left{display:flex;align-items:center;gap:14px}
@@ -1650,12 +1650,12 @@ class DimaiorAdmin extends HTMLElement {
     .lv2-controls{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
     .lv2-ctrl-group{display:flex;flex-direction:column;gap:8px}
     .lv2-ctrl-label{font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
-    /* BotÃµes de colunas */
+    /* Botões de colunas */
     .lv2-col-btns{display:flex;gap:6px}
     .lv2-col-btn{width:42px;height:42px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.4);color:var(--t3);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-weight:700}
     .lv2-col-btn:hover{border-color:rgba(0,212,212,.4);color:var(--cyan)}
     .lv2-col-btn.active{background:rgba(0,212,212,.1);border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px rgba(0,212,212,.2)}
-    /* Toggles Capa/VÃ­deo */
+    /* Toggles Capa/Vídeo */
     .lv2-modo-btns{display:flex;gap:8px}
     .lv2-modo-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.4);color:var(--t3);font-size:12px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
     .lv2-modo-btn:hover{border-color:rgba(0,212,212,.3)}
@@ -1666,7 +1666,7 @@ class DimaiorAdmin extends HTMLElement {
     .lv2-toggle-thumb{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.4)}
     .lv2-toggle.on .lv2-toggle-thumb{transform:translateX(14px)}
 
-    /* â•â•â•â• MOBILE lv2 â•â•â•â• */
+    /* ════ MOBILE lv2 ════ */
     @media(max-width:700px){
       .lv2-header{padding:12px 14px 8px;}
       .lv2-icon-wrap{width:42px;height:42px;border-radius:12px;}
@@ -1688,7 +1688,7 @@ class DimaiorAdmin extends HTMLElement {
     .lc-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     .lc-capa-video{cursor:default}
     .lives-lista{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start}.live-card-full{background:var(--glass);border:1px solid rgba(248,113,113,.25);border-radius:var(--r);overflow:hidden;min-height:200px;align-items:stretch}.live-card-full.lc-horizontal{display:grid;grid-template-columns:minmax(150px,40%) minmax(0,1fr);min-height:200px}
-    /* â”€â”€ Estilo 2: vertical (capa em cima, info embaixo) â”€â”€ */
+    /* ── Estilo 2: vertical (capa em cima, info embaixo) ── */
     .lc-estilo2{display:flex;flex-direction:column !important;min-height:auto !important}
     .lc-estilo2 .lc-capa{width:100% !important;height:175px !important;min-height:175px !important;flex-shrink:0}
     .lc-estilo2 .lc-info{padding:10px 12px !important}
@@ -1755,7 +1755,7 @@ class DimaiorAdmin extends HTMLElement {
     .premio-info-box{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:11px;color:var(--cyan);margin-bottom:14px;line-height:1.5}
     .mproc-sucesso{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3);border-radius:var(--rs);color:var(--verde);font-size:13px;margin-bottom:10px}
     .mproc-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 12px;background:rgba(0,0,0,.3);border-radius:var(--rs);font-size:12px;margin-bottom:4px;font-family:'Exo 2',sans-serif}
-    /* â”€â”€ Accordion histÃ³rico premiaÃ§Ãµes â”€â”€ */
+    /* ── Accordion histórico premiações ── */
     .ph-acc-item{border-bottom:1px solid var(--brddim)}.ph-acc-item:last-child{border-bottom:none}
     .ph-acc-preview{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:background .15s}@media(hover:hover){.ph-acc-preview:hover{background:var(--cyan-d)}}
     .ph-acc-chevron{flex-shrink:0;color:var(--t3);transition:transform .2s;margin-left:4px}.ph-acc-item.open .ph-acc-chevron{transform:rotate(180deg)}
@@ -1767,7 +1767,7 @@ class DimaiorAdmin extends HTMLElement {
     .acc-toggle{cursor:pointer;user-select:none;transition:background .15s;}.acc-toggle:hover{background:rgba(59,130,246,.05);}
     .acc-chevron{font-size:11px;color:var(--t3);transition:transform .25s;flex-shrink:0;margin-left:auto;padding:2px 6px;background:rgba(255,255,255,.05);border-radius:4px;}.acc-chevron.open{transform:rotate(180deg);}
     .acc-body{overflow:hidden;transition:max-height .35s ease;max-height:2000px;}.acc-body.fechado{max-height:0;}
-    /* â”€â”€ Streamer Cards (lista carteira) â”€â”€ */
+    /* ── Streamer Cards (lista carteira) ── */
     .sc-item{border-bottom:1px solid var(--brddim)}.sc-item:last-child{border-bottom:none}
     .sc-preview{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:background .15s}@media(hover:hover){.sc-preview:hover{background:var(--cyan-d)}}
     .sc-av{flex-shrink:0}
@@ -1780,9 +1780,9 @@ class DimaiorAdmin extends HTMLElement {
     .sc-dlbl{font-size:9px;color:var(--t3);font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
     .sc-dval{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1)}
     .sc-body-acoes{display:flex;gap:7px;flex-wrap:wrap}.sc-body-acoes .btn{flex:1;justify-content:center;min-width:0}
-    /* â•â• Ao Vivo â€” Header e Painel Config â•â• */
+    /* ══ Ao Vivo — Header e Painel Config ══ */
     .lv-header{display:flex;align-items:stretch;gap:12px;flex-wrap:nowrap;margin-bottom:0;padding:14px 16px;background:var(--glass);border:1px solid var(--brd);border-radius:var(--r) var(--r) 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
-    /* Cards dc2 no header â€” mesmo estilo do Dashboard */
+    /* Cards dc2 no header — mesmo estilo do Dashboard */
     .lv-dc2{border-radius:var(--r);padding:14px 18px 12px;position:relative;overflow:hidden;cursor:default;border:1px solid transparent;flex-shrink:0;min-width:130px;transition:transform .2s}
     @media(hover:hover){.lv-dc2:hover{transform:translateY(-2px);}}
     .lv-dc2-ico{position:absolute;top:10px;right:12px;opacity:.22}
@@ -1792,11 +1792,11 @@ class DimaiorAdmin extends HTMLElement {
     .lv-dc2-verm{background:linear-gradient(135deg,rgba(220,38,38,.78),rgba(249,115,22,.52));border-color:rgba(248,113,113,.82)}.lv-dc2-verm .lv-dc2-ico,.lv-dc2-verm .lv-dc2-val,.lv-dc2-verm .lv-dc2-lbl{color:#fecaca;text-shadow:0 0 16px rgba(248,113,113,.65)}
     .lv-dc2-azul{background:linear-gradient(135deg,rgba(37,99,235,.78),rgba(0,212,212,.52));border-color:rgba(34,211,238,.86)}.lv-dc2-azul .lv-dc2-ico,.lv-dc2-azul .lv-dc2-val,.lv-dc2-azul .lv-dc2-lbl{color:#a5f3fc;text-shadow:0 0 16px rgba(0,212,212,.68)}
     .lv-dc2-verde{background:linear-gradient(135deg,rgba(22,163,74,.78),rgba(5,150,105,.5));border-color:rgba(74,222,128,.82)}.lv-dc2-verde .lv-dc2-ico,.lv-dc2-verde .lv-dc2-val,.lv-dc2-verde .lv-dc2-lbl{color:#bbf7d0;text-shadow:0 0 16px rgba(34,197,94,.65)}
-    /* BotÃ£o de configuraÃ§Ãµes */
+    /* Botão de configurações */
     .lv-cfg-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rs);border:1px solid var(--brddim);background:rgba(0,0,0,.4);color:var(--t3);font-size:12px;cursor:pointer;transition:all .15s;font-family:'Rajdhani',sans-serif;font-weight:700;white-space:nowrap;flex-shrink:0}
     .lv-cfg-btn:hover{border-color:var(--cyan);color:var(--cyan)}
     .lv-cfg-arrow{transition:transform .25s;display:flex;align-items:center}
-    /* Painel de configuraÃ§Ãµes */
+    /* Painel de configurações */
     .lv-cfg-painel{background:rgba(0,0,0,.4);border:1px solid var(--brd);border-top:none;border-radius:0 0 var(--r) var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px;animation:fadeUp .2s ease}
     .lv-cfg-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .lv-cfg-label{font-size:10px;color:var(--t3);font-family:'Rajdhani',sans-serif;letter-spacing:1.5px;text-transform:uppercase;min-width:70px;flex-shrink:0}
@@ -1807,8 +1807,8 @@ class DimaiorAdmin extends HTMLElement {
     .lives-lista{margin-top:14px}
     
         @media(max-width:1150px) and (min-width:701px){.lives-lista{grid-template-columns:repeat(2,1fr) !important;}}
-    /* â”€â”€ Lives: layout baseado na largura real do CE (nÃ£o da viewport) â”€â”€ */
-    /* Estilo 1 no narrow: mantÃ©m horizontal, lc-capa menor */
+    /* ── Lives: layout baseado na largura real do CE (não da viewport) ── */
+    /* Estilo 1 no narrow: mantém horizontal, lc-capa menor */
     #root.narrow .live-card-full.lc-horizontal{grid-template-columns:minmax(112px,34%) minmax(0,1fr);min-height:160px}
     #root.narrow .live-card-full.lc-horizontal .lc-capa{width:100% !important;height:100% !important;min-height:160px !important}
     #root.narrow .live-card-full.lc-horizontal .lc-info{padding:8px 10px !important;}
@@ -1827,7 +1827,7 @@ class DimaiorAdmin extends HTMLElement {
     #root.narrow .lives-lista[style*='repeat(2']{grid-template-columns:repeat(2,1fr) !important;}
     #root.very-narrow .lc-footer{gap:4px;}
     @media(max-width:700px){
-      /* â”€â”€ Base â”€â”€ */
+      /* ── Base ── */
       :host{background:#04040e !important;}
       #root{background:#04040e !important;min-width:0;max-width:100vw;overflow:visible;}
       *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-sizing:border-box;}
@@ -1839,14 +1839,14 @@ class DimaiorAdmin extends HTMLElement {
       .btn-sair{font-size:10px;padding:4px 8px;flex-shrink:0;}
       .content{padding:10px;overflow-x:clip;max-width:100%;}.shell{min-height:auto;}
 
-      /* â”€â”€ Page Header â”€â”€ */
+      /* ── Page Header ── */
       .ph{flex-direction:column;gap:6px;margin-bottom:12px;}
       .titulo{font-size:0.9rem;gap:6px;}
       .psub{font-size:10px;}
       .ph-r{display:flex;flex-wrap:wrap;gap:5px;width:100%;}
       .ph-r>.btn{font-size:10px;padding:5px 9px;flex:1;justify-content:center;min-width:0;}
 
-      /* â”€â”€ Cards grid â”€â”€ */
+      /* ── Cards grid ── */
       .dc2-grid,#resumoDesemp,#carteiraResumo,#gMet{grid-template-columns:repeat(2,1fr) !important;gap:8px !important;}
       .dc2{padding:14px 10px 10px !important;}
       .dc2-val{font-size:clamp(1.2rem,5vw,1.8rem) !important;margin-top:22px !important;}
@@ -1862,7 +1862,7 @@ class DimaiorAdmin extends HTMLElement {
       .qa-ico-wrap{width:32px;height:32px;border-radius:9px;}
       .qa-ico-wrap svg{width:18px;height:18px;}
       #gMetricas,#carteiraResumo,#resumoDesemp,#gMet{grid-template-columns:1fr 1fr !important;gap:8px !important;}
-      /* Dashboard pDash: 2 colunas â†’ 1 coluna */
+      /* Dashboard pDash: 2 colunas → 1 coluna */
       #pDash{grid-template-columns:1fr !important;gap:10px;}
       .dlw-grid{grid-template-columns:repeat(2,1fr) !important;}
       .card{padding:9px 7px !important;border-radius:8px;min-width:0;overflow:hidden;}
@@ -1870,18 +1870,18 @@ class DimaiorAdmin extends HTMLElement {
       .card-val{font-size:clamp(0.85rem,5vw,1.2rem) !important;word-break:break-all;line-height:1.1;}
       .card-lbl{font-size:7.5px !important;letter-spacing:.5px;}
 
-      /* â”€â”€ Box / tabelas â”€â”€ */
+      /* ── Box / tabelas ── */
       .box{overflow-x:hidden;max-width:100%;}
       .bhead{padding:10px 12px;gap:6px;}
       .btitulo{font-size:12px;}
       .bacoes{flex-wrap:wrap;gap:4px;}
       .busca{flex:1;min-width:0;}.busca input{width:100%;min-width:0;}
-      /* Tabelas genÃ©ricas: scroll dentro do box */
+      /* Tabelas genéricas: scroll dentro do box */
       .box > table, .box > div > table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;}
       th{padding:5px 6px;font-size:9px;white-space:nowrap;}
       td{padding:6px 6px;font-size:11px;}
 
-      /* â”€â”€ Ranking â”€â”€ */
+      /* ── Ranking ── */
       #tbRank table{table-layout:fixed;width:100%;min-width:0;}
       #tbRank th:nth-child(1),#tbRank td:nth-child(1){width:20px;text-align:center;padding:5px 2px;}
       #tbRank th:nth-child(2),#tbRank td:nth-child(2){width:34px;padding:5px 2px;}
@@ -1889,7 +1889,7 @@ class DimaiorAdmin extends HTMLElement {
       #tbRank th:nth-child(4),#tbRank td:nth-child(4){width:70px;text-align:right;padding:5px 4px;font-size:11px;white-space:nowrap;}
       #tbRank th:nth-child(n+5),#tbRank td:nth-child(n+5){display:none;}
 
-      /* â”€â”€ DiÃ¡rio â”€â”€ */
+      /* ── Diário ── */
       #tbDiario table{table-layout:fixed;width:100%;min-width:0;}
       #tbDiario th:nth-child(1),#tbDiario td:nth-child(1){width:20px;text-align:center;padding:5px 2px;}
       #tbDiario th:nth-child(2),#tbDiario td:nth-child(2){width:34px;padding:5px 2px;}
@@ -1897,12 +1897,12 @@ class DimaiorAdmin extends HTMLElement {
       #tbDiario th:nth-child(4),#tbDiario td:nth-child(4){width:70px;text-align:right;font-size:11px;}
       #tbDiario th:nth-child(n+5),#tbDiario td:nth-child(n+5){display:none;}
 
-      /* â”€â”€ HistÃ³rico meses â”€â”€ */
+      /* ── Histórico meses ── */
       .month-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;padding:10px 12px 0;}
       .month-tab{flex-shrink:0;padding:6px 12px;font-size:12px;}
       #monthContent table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;min-width:400px;}
 
-      /* â”€â”€ Desempenho â”€â”€ */
+      /* ── Desempenho ── */
       .dc-card{width:100%;box-sizing:border-box;padding:10px;margin-bottom:8px;}
       .dc-topo{flex-wrap:wrap;gap:5px;margin-bottom:8px;}
       .dc-info{min-width:0;flex:1;}
@@ -1913,12 +1913,12 @@ class DimaiorAdmin extends HTMLElement {
       .dc-bar-bg{height:4px;}
       .dc-meta-group{display:flex;flex-direction:column;gap:6px;}
 
-      /* â”€â”€ Streamers (rec-item) â”€â”€ */
+      /* ── Streamers (rec-item) ── */
       .rec-preview{padding:10px 12px;}
       .rec-campos{grid-template-columns:1fr !important;}
       .rec-body{padding:0 12px 12px;}
 
-      /* â”€â”€ UIDs â”€â”€ */
+      /* ── UIDs ── */
       .uid-row-main{flex-wrap:wrap;}
       .uid-kwai{font-size:13px;}
       .uid-lookup-stats{gap:6px;}
@@ -1927,13 +1927,13 @@ class DimaiorAdmin extends HTMLElement {
       .uid-input-row input{width:100%;}
       .uid-input-row .btn{width:100%;justify-content:center;}
 
-      /* â”€â”€ TransaÃ§Ãµes â”€â”€ */
+      /* ── Transações ── */
       .tx-item{padding:8px 12px;gap:8px;}
       .tx-uid{font-size:11px;white-space:normal;word-break:break-all;}
       .tx-detalhe{white-space:normal;font-size:9px;}
       .tx-valor{font-size:12px;}
 
-      /* â”€â”€ Carteira detalhe â”€â”€ */
+      /* ── Carteira detalhe ── */
       .cart-saldo-row{grid-template-columns:1fr 1fr !important;gap:6px !important;margin-bottom:8px;}
       .cart-saldo-box{padding:7px 9px !important;}
       .cart-saldo-val{font-size:clamp(0.8rem,3.8vw,1rem) !important;}
@@ -1942,7 +1942,7 @@ class DimaiorAdmin extends HTMLElement {
       .cart-acoes-row .btn{justify-content:center;width:100%;}
       .cart-hist-lista{max-height:180px;}
 
-      /* â”€â”€ Modais â”€â”€ */
+      /* ── Modais ── */
       .modal{padding:14px;width:96%;max-width:96%;border-radius:14px;}
       .modal-lg{max-width:96%;width:96%;overflow-x:hidden !important;}
       #mCartBody{overflow-x:auto;}
@@ -1957,8 +1957,8 @@ class DimaiorAdmin extends HTMLElement {
       .mf{flex-wrap:wrap;gap:6px;}
       .mf .btn{flex:1;justify-content:center;min-width:0;}
 
-      /* â”€â”€ Saques â”€â”€ */
-      /* Saques â€” sem pirÃ¢mide, sem hover travado, botÃµes legÃ­veis */
+      /* ── Saques ── */
+      /* Saques — sem pirâmide, sem hover travado, botões legíveis */
       .saque-card{padding:12px 14px;word-break:normal;overflow-wrap:normal;background:transparent !important;}
       .saque-card:hover{background:transparent !important;}
       .saque-card:active{background:rgba(0,212,212,.06) !important;}
@@ -1971,7 +1971,7 @@ class DimaiorAdmin extends HTMLElement {
       .saque-meta{display:flex;flex-direction:column;gap:4px;}
       .saque-meta span{display:flex;align-items:center;gap:4px;font-size:10px;flex-wrap:nowrap;}
       .saque-acoes{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
-      /* BotÃµes: 2 por linha no mÃ¡ximo, texto nunca quebra */
+      /* Botões: 2 por linha no máximo, texto nunca quebra */
       .saque-acoes .btn{
         font-size:10px;padding:6px 10px;
         white-space:nowrap;
@@ -1981,23 +1981,23 @@ class DimaiorAdmin extends HTMLElement {
         min-width:0;overflow:hidden;
         text-overflow:ellipsis;
       }
-      /* BotÃ£o Ãºnico ocupa tudo */
+      /* Botão único ocupa tudo */
       .saque-acoes .btn:only-child{flex:1 1 100%;max-width:100%;}
 
-      /* â”€â”€ PrÃªmios â”€â”€ */
+      /* ── Prêmios ── */
       .premio-tipo-tabs{flex-direction:column;gap:5px;}
       .premio-tipo-tab{width:100%;justify-content:center;}
       .premio-info-box{flex-direction:column;align-items:flex-start;gap:4px;font-size:10px;padding:8px 10px;line-height:1.5;}
       .premio-table th:last-child,.premio-table td:last-child{width:36px;}
       .premio-val-inp{width:130px !important;}
 
-      /* â”€â”€ Config â”€â”€ */
+      /* ── Config ── */
       .cfg-row{flex-wrap:wrap;gap:8px;}
       .cfg-chave{width:100% !important;margin-bottom:2px;}
       .cfg-inp{width:100% !important;}
 
-      /* â”€â”€ Lives â”€â”€ */
-      /* Ao Vivo header mobile â€” compacto */
+      /* ── Lives ── */
+      /* Ao Vivo header mobile — compacto */
       .lv-header{gap:8px;padding:10px 12px;}
       /* Estilo 1 em tela estreita: capa um pouco mais estreita */
       #root.narrow .live-card-full:not(.lc-estilo2) .lc-info{padding:8px 10px;}
@@ -2022,7 +2022,7 @@ class DimaiorAdmin extends HTMLElement {
       .lc-acoes{flex-wrap:wrap;width:100%;}
       .lc-acoes .btn{flex:1 1 86px;justify-content:center;}
 
-      /* â”€â”€ Streamers com Saldo (sc-) â”€â”€ */
+      /* ── Streamers com Saldo (sc-) ── */
       .sc-preview{padding:10px 12px;}
       .sc-nome{font-size:12px;}
       .sc-uid{font-size:9px;}
@@ -2031,13 +2031,13 @@ class DimaiorAdmin extends HTMLElement {
       .sc-body-grid{grid-template-columns:1fr 1fr;gap:6px;}
       .sc-body-acoes .btn{font-size:10px;padding:5px 8px;}
 
-      /* â”€â”€ Accordions premiaÃ§Ã£o â”€â”€ */
+      /* ── Accordions premiação ── */
       .ph-acc-preview{padding:10px 12px;}
       .ph-acc-body{padding:0 12px 10px;}
       .ph-acc-grid{grid-template-columns:1fr 1fr;gap:6px;}
       .ph-acc-val{font-size:13px;}
 
-      /* â”€â”€ HistÃ³rico: tabela desktop / accordion mobile â”€â”€ */
+      /* ── Histórico: tabela desktop / accordion mobile ── */
     .hist-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block}
     .hist-table-wrap table{min-width:520px;width:100%}
     .hist-mobile-only{display:none !important}
@@ -2045,7 +2045,7 @@ class DimaiorAdmin extends HTMLElement {
       .hist-table-wrap{display:none !important}
       .hist-mobile-only{display:block !important}
     }
-    /* â”€â”€ Ranking/DiÃ¡rio: tabela desktop / accordion mobile â”€â”€ */
+    /* ── Ranking/Diário: tabela desktop / accordion mobile ── */
     .rank-table-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
     .rank-table-wrap table{min-width:560px;width:100%}
     .rank-mobile-only{display:none !important}
@@ -2053,7 +2053,7 @@ class DimaiorAdmin extends HTMLElement {
       .rank-table-wrap{display:none !important}
       .rank-mobile-only{display:block !important}
     }
-    /* Cards accordion Ranking/DiÃ¡rio */
+    /* Cards accordion Ranking/Diário */
     .rk-item{border-bottom:1px solid var(--brddim)}.rk-item:last-child{border-bottom:none}
     .rk-preview{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
     @media(hover:hover){.rk-preview:hover{background:var(--cyan-d)}}
@@ -2083,10 +2083,10 @@ class DimaiorAdmin extends HTMLElement {
     .hist-cel{background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:var(--rs);padding:8px 10px}
     .hist-lbl{font-size:9px;color:var(--t3);font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
     .hist-val{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--t1)}
-    /* â”€â”€ Badges nav â”€â”€ */
+    /* ── Badges nav ── */
       .nb{font-size:8px;padding:1px 4px;}
 
-      /* â”€â”€ PaginaÃ§Ã£o â”€â”€ */
+      /* ── Paginação ── */
       .pag-bar{gap:5px;padding:8px;}
       .pag-bar button{padding:4px 10px;font-size:10px;}
       .pag-bar .pn{font-size:10px;}
@@ -2119,32 +2119,37 @@ class DimaiorAdmin extends HTMLElement {
     }
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes spin{100%{transform:rotate(360deg)}}@keyframes bl{0%,100%{opacity:1}50%{opacity:.35}}
     ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(0,212,212,.3);border-radius:99px}
-    /* â”€â”€ Comunicados â”€â”€ */
-    .com-lista{display:flex;flex-direction:column;gap:12px;padding:4px 0}
-    .com-item{background:rgba(0,0,0,.35);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-    .com-preview{display:flex;align-items:flex-start;gap:10px;background:rgba(0,212,212,.06);border:1px solid var(--brddim);border-radius:var(--rs);padding:10px 13px}
-    .com-emoji{font-size:1.4rem;line-height:1;flex-shrink:0;min-width:28px}
-    .com-texto{font-size:13px;color:var(--t1);line-height:1.5;flex:1}
-    .com-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
-    .com-meta-esq{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+    /* ── Comunicados ── */
+    .com-lista{display:grid;grid-template-columns:1fr;gap:12px;padding:4px 0}
+    .com-item{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.26));border:1px solid var(--brd);border-radius:14px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"preview actions" "meta meta";gap:12px;box-shadow:0 12px 28px rgba(0,0,0,.22)}
+    .com-item.is-important{border-color:rgba(0,212,212,.28)}
+    .com-item.is-fast{border-color:rgba(240,192,64,.24)}
+    .com-preview{grid-area:preview;display:flex;align-items:center;gap:12px;background:rgba(0,212,212,.045);border:1px solid var(--brddim);border-radius:12px;padding:10px;min-width:0}
+    .com-thumb{width:72px;height:54px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid var(--brddim);background:rgba(255,255,255,.04)}
+    .com-main{flex:1;min-width:0}
+    .com-emoji{font-size:1.55rem;line-height:1;flex-shrink:0;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.18)}
+    .com-texto{font-size:13px;color:var(--t1);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .com-meta{grid-area:meta;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:0 2px}
+    .com-meta-esq{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0}
     .com-status{font-size:10px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;padding:2px 8px;border-radius:99px;font-weight:700}
     .com-status.ativo{background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);color:var(--verde)}
     .com-status.inativo{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--verm)}
     .com-local{font-size:9px;font-family:'Rajdhani',sans-serif;letter-spacing:.8px;padding:2px 7px;border-radius:99px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.3);color:var(--cyan);text-transform:uppercase}
-    .com-data{font-size:10px;color:var(--t3);font-family:'Exo 2',sans-serif}
-    .com-acoes{display:flex;gap:7px;flex-wrap:wrap}
+    .com-data{font-size:10px;color:var(--t3);font-family:'Exo 2',sans-serif;white-space:nowrap}
+    .com-acoes{grid-area:actions;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;align-content:flex-start;min-width:260px}
     .com-locais-check{display:flex;flex-direction:column;gap:8px;margin-top:4px}
     .com-check-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);cursor:pointer}
     .com-check-label input[type=checkbox]{width:15px;height:15px;accent-color:var(--cyan);cursor:pointer}
     #mComTexto{width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;resize:vertical;transition:border-color .2s}
     #mComTexto:focus{border-color:var(--cyan);box-shadow:0 0 8px var(--cyan-d)}
-    @media(max-width:600px){.com-acoes{gap:5px}.com-acoes .btn-sm{font-size:10px;padding:4px 7px}}
-    /* â”€â”€ Monitor Kwai â”€â”€ */
+    @media(max-width:760px){.com-item{grid-template-columns:1fr;grid-template-areas:"preview" "meta" "actions"}.com-acoes{min-width:0;justify-content:flex-start}.com-thumb{width:60px;height:60px}.com-data{white-space:normal}}
+    @media(max-width:600px){.com-preview{align-items:flex-start}.com-acoes{gap:5px}.com-acoes .btn-sm{font-size:10px;padding:4px 7px}}
+    /* ── Monitor Kwai ── */
     .mon-section{margin-bottom:16px}
     #monResgateResult{font-size:11px;font-family:'Courier New',monospace;line-height:1.7}
     #monBufferResult{padding:16px}
     @media(max-width:600px){#pag-monitor .btn{width:100%;justify-content:center}}
-    /* â”€â”€ Controle Impulsionamento â”€â”€ */
+    /* ── Controle Impulsionamento ── */
     .impulso-section{margin-bottom:16px}
     .impulso-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--brddim);border-radius:10px}
     .tog-switch{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
@@ -2167,7 +2172,7 @@ class DimaiorAdmin extends HTMLElement {
     const ni=(ico,pag,lbl,extra='')=>`<div class="ni" data-p="${pag}"><span class="ico">${this._ico(ico,14)}</span><span class="nlb">${lbl}</span>${extra}</div>`;
     const ph=(titulo,icoN,sub,btnId,extra='')=>`<div class="ph"><div><div class="titulo">${this._ico(icoN,18)} ${titulo}</div><div class="psub">${sub}</div></div><div class="ph-r"><button class="btn btn-o" id="${btnId}">${this._ico('refresh',13)} Atualizar</button>${extra}</div></div>`;
     return`<div id="root">
-      <div id="login"><div class="glass lbox"><h2>DMAIOR<br>ADMIN MASTER</h2><div style="text-align:center"><span class="lchip"><span class="ldot"></span>ACESSO RESTRITO</span></div><div class="campo"><label>UsuÃ¡rio</label><input id="iU" type="text" placeholder="UsuÃ¡rio" autocomplete="username"/></div><div class="campo"><label>Senha</label><input id="iP" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password"/></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
+      <div id="login"><div class="glass lbox"><h2>DMAIOR<br>ADMIN MASTER</h2><div style="text-align:center"><span class="lchip"><span class="ldot"></span>ACESSO RESTRITO</span></div><div class="campo"><label>Usuário</label><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="campo"><label>Senha</label><input id="iP" type="password" placeholder="••••••••" autocomplete="current-password"/></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
       <div id="app">
         <div class="top"><button class="btn-ham" id="btnHam">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
         <div class="shell">
@@ -2176,48 +2181,48 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('dashboard','dashboard','Dashboard')}
             ${ni('live','aoVivo','Ao Vivo',`<span class="nb live" id="nbLive">0</span>`)}
             <div class="ns">Ranking</div>
-            ${ni('trophy','ranking','Ranking MÃªs')}
-            ${ni('chart','diario','Resultado DiÃ¡rio')}
+            ${ni('trophy','ranking','Ranking Mês')}
+            ${ni('chart','diario','Resultado Diário')}
             ${ni('trend','desempenho','Desempenho')}
-            ${ni('history','historico','HistÃ³rico')}
-            <div class="ns">GestÃ£o</div>
+            ${ni('history','historico','Histórico')}
+            <div class="ns">Gestão</div>
             ${ni('users','streamers','Streamers')}
-            ${ni('key_uid','uids','AutorizaÃ§Ã£o UIDs')}
-            ${ni('metrics','metricas','MÃ©tricas')}
+            ${ni('key_uid','uids','Autorização UIDs')}
+            ${ni('metrics','metricas','Métricas')}
             ${ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)}
             ${ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)}
             <div class="ns">Financeiro</div>
             ${ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)}
             ${ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)}
-            ${ni('award','premios','PrÃªmios')}
+            ${ni('award','premios','Prêmios')}
             <div class="ns">Sistema</div>
             ${ni('bolt','impulsoCtrl','Ctrl. Impulso')}
             ${ni('bell','comunicados','Comunicados')}
             ${ni('server','monitor','Monitor Kwai')}
             ${ni('search','logs','Auditoria')}
-            ${ni('settings','config','ConfiguraÃ§Ãµes')}
+            ${ni('settings','config','Configurações')}
           </div>
           <div class="content">
-            <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','VisÃ£o geral da agÃªncia','btnAtuDash')}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
+            <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash')}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
             <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive')}<div id="gLives">${this._loading()}</div></div>
-            <div class="pag" id="pag-ranking">${ph('Ranking do MÃªs','trophy','Diamantes acumulados','btnAtuRank')}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
-            <div class="pag" id="pag-diario">${ph('Resultado DiÃ¡rio','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
-            <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mÃªs','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
-            <div class="pag" id="pag-historico">${ph('HistÃ³rico de Meses','history','VariaÃ§Ã£o mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
+            <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank')}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
+            <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r"><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
-            <div class="pag" id="pag-uids">${ph('AutorizaÃ§Ã£o de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
-            <div class="pag" id="pag-metricas">${ph('MÃ©tricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
-            <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulÃ¡rio','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
+            <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
+            <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulário','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
             <div class="pag" id="pag-convites">
-              ${ph('Convites / Candidaturas','user_plus','GestÃ£o de agenciamento via Voyager','btnAtuConvites',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnConvBuscarPerfil">${this._ico('plus',13)} Adicionar manualmente</button><button class="btn btn-g" id="btnBulkReenviar">${this._ico('send',13)} Reenviar ElegÃ­veis</button><button class="btn" id="btnAtualizarCache" style="background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('refresh',13)} Atualizar Cache</button></div>`)}
-              <!-- Modo operaÃ§Ã£o -->
+              ${ph('Convites / Candidaturas','user_plus','Gestão de agenciamento via Voyager','btnAtuConvites',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnConvBuscarPerfil">${this._ico('plus',13)} Adicionar manualmente</button><button class="btn btn-g" id="btnBulkReenviar">${this._ico('send',13)} Reenviar Elegíveis</button><button class="btn" id="btnAtualizarCache" style="background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('refresh',13)} Atualizar Cache</button></div>`)}
+              <!-- Modo operação -->
               <div class="box" style="margin-bottom:14px">
-                <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Modo de OperaÃ§Ã£o</div></div>
+                <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Modo de Operação</div></div>
                 <div style="padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
                   <select id="convModo" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:7px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none">
                     <option value="simular">Simular (sem envio real)</option>
                     <option value="aprovar">Aprovar manualmente</option>
-                    <option value="automatico">AutomÃ¡tico (envia direto)</option>
+                    <option value="automatico">Automático (envia direto)</option>
                   </select>
                   <button class="btn btn-o" id="btnSalvarModo">${this._ico('check',13)} Salvar modo</button>
                   <span id="convModoStatus" style="font-size:11px;color:var(--t3)"></span>
@@ -2227,7 +2232,7 @@ class DimaiorAdmin extends HTMLElement {
               <div class="month-tabs" id="convSubTabs" style="display:flex;gap:6px;padding:0 0 12px">
                 <button class="month-tab on" data-sub="candidaturas">Candidaturas</button>
                 <button class="month-tab" data-sub="voyager">Convites Voyager</button>
-                <button class="month-tab" data-sub="migracoes">MigraÃ§Ãµes</button>
+                <button class="month-tab" data-sub="migracoes">Migrações</button>
                 <button class="month-tab" data-sub="recrutadores">Recrutadores</button>
               </div>
               <!-- Candidaturas -->
@@ -2240,10 +2245,10 @@ class DimaiorAdmin extends HTMLElement {
                         <option value="">Todas</option>
                         <option value="perfil_consultado">Aguardando</option>
                         <option value="convite_enviado">Convite Enviado</option>
-                        <option value="em_revisao">Em RevisÃ£o</option>
+                        <option value="em_revisao">Em Revisão</option>
                         <option value="confirmado">Confirmado</option>
-                        <option value="vinculado_outra_agencia">Outra AgÃªncia</option>
-                        <option value="migracao_solicitada">MigraÃ§Ã£o Solicitada</option>
+                        <option value="vinculado_outra_agencia">Outra Agência</option>
+                        <option value="migracao_solicitada">Migração Solicitada</option>
                         <option value="recusado">Recusado</option>
                         <option value="erro">Erro</option>
                       </select>
@@ -2260,13 +2265,13 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
                 <div class="box" id="convBulkProgressBox" style="display:none;margin-top:10px">
                   <div class="bhead"><div class="btitulo">${this._ico('refresh',14)} Progresso do Reenvio em Massa</div><button class="btn btn-sm" style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--verm)" id="btnPararBulk">${this._ico('x_circle',12)} Parar</button></div>
-                  <div style="padding:14px 16px" id="convBulkProgressInfo">Iniciandoâ€¦</div>
+                  <div style="padding:14px 16px" id="convBulkProgressInfo">Iniciando…</div>
                 </div>
               </div>
-              <!-- MigraÃ§Ãµes -->
+              <!-- Migrações -->
               <div id="conv-sub-migracoes" style="display:none">
                 <div class="box">
-                  <div class="bhead"><div class="btitulo">${this._ico('arrow_right',14)} SolicitaÃ§Ãµes de MigraÃ§Ã£o</div></div>
+                  <div class="bhead"><div class="btitulo">${this._ico('arrow_right',14)} Solicitações de Migração</div></div>
                   <div id="tbMigracoes">${this._loading()}</div>
                 </div>
               </div>
@@ -2279,7 +2284,7 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                   <div id="tbRecrutadores">${this._loading()}</div>
                 </div>
-                <!-- FormulÃ¡rio inline de criaÃ§Ã£o/ediÃ§Ã£o -->
+                <!-- Formulário inline de criação/edição -->
                 <div class="box" id="formRecrutadorBox" style="display:none;margin-top:10px">
                   <div class="bhead"><div class="btitulo" id="formRecrutadorTit">Novo Recrutador</div></div>
                   <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
@@ -2288,7 +2293,7 @@ class DimaiorAdmin extends HTMLElement {
                     <div class="mc"><label>Telefone (WhatsApp)</label><input id="fRecTel" type="text" placeholder="Ex: 17997176407" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
                     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--t2)">
                       <input type="checkbox" id="fRecPadrao" style="width:15px;height:15px;accent-color:var(--cyan)">
-                      Usar como recrutador padrÃ£o (envios automÃ¡ticos)
+                      Usar como recrutador padrão (envios automáticos)
                     </label>
                     <div style="display:flex;gap:8px">
                       <button class="btn btn-g" id="btnSalvarRecrutador" style="flex:1">${this._ico('check',13)} Salvar</button>
@@ -2312,9 +2317,9 @@ class DimaiorAdmin extends HTMLElement {
                           <option value="games">Games</option>
                         </select>
                       </div>
-                      <div class="mc" style="margin-top:8px"><label>Recrutador responsÃ¡vel</label>
+                      <div class="mc" style="margin-top:8px"><label>Recrutador responsável</label>
                         <select id="mConvRecrutador" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%">
-                          <option value="">â€” Usar padrÃ£o â€”</option>
+                          <option value="">— Usar padrão —</option>
                         </select>
                       </div>
                       <div id="mConvRecrutadorResumo" style="margin-top:8px;padding:10px 12px;border:1px solid var(--brddim);border-radius:8px;background:rgba(0,212,212,.04)"></div>
@@ -2329,20 +2334,20 @@ class DimaiorAdmin extends HTMLElement {
               </div>
             </div>
             <div class="pag" id="pag-carteira">${ph('Carteira Financeira','wallet','Saldos dos streamers','btnAtuCart',`<button class="btn btn-g" id="btnCreditoRapido">${this._ico('plus',13)} Adicionar Saldo</button>`)}<div class="dc2-grid" id="carteiraResumo">${this._loading('grid-column:1/-1')}</div><div id="carteiraStreamers">${this._loading()}</div></div>
-            <div class="pag" id="pag-saques">${ph('SolicitaÃ§Ãµes de Saque','send','AprovaÃ§Ã£o de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
-            <div class="pag" id="pag-premios">${ph('PrÃªmios','award','PremiaÃ§Ã£o por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de PrÃªmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} HistÃ³rico de DistribuiÃ§Ãµes</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
-            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso RÃ¡pido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
-            <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','ConfiguraÃ§Ãµes e bloqueios','btnAtuImpulso')}
+            <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
+            <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px"><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','Configurações e bloqueios','btnAtuImpulso')}
               <div class="box impulso-section">
-                <div class="bhead"><div class="btitulo">${this._ico('settings',14)} ConfiguraÃ§Ãµes Gerais</div></div>
+                <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Configurações Gerais</div></div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
-                  <div class="mc"><label>Quota mÃ¡xima semanal por streamer</label><div style="display:flex;gap:8px;align-items:center"><input id="iQuotaMax" type="number" min="1" max="99" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">usos por semana</span></div></div>
+                  <div class="mc"><label>Quota máxima semanal por streamer</label><div style="display:flex;gap:8px;align-items:center"><input id="iQuotaMax" type="number" min="1" max="99" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">usos por semana</span></div></div>
                   <div style="display:flex;flex-direction:column;gap:10px">
-                    <label style="font-size:12px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.08em">OpÃ§Ãµes disponÃ­veis</label>
-                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulsionar 30 minutos</div><div style="font-size:11px;color:var(--t3)">Libera a opÃ§Ã£o de 30min no painel do streamer</div></div><label class="tog-switch"><input type="checkbox" id="iOpcao30min"><span class="tog-slider"></span></label></div>
-                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulsionar 1 hora</div><div style="font-size:11px;color:var(--t3)">Libera a opÃ§Ã£o de 1h no painel do streamer</div></div><label class="tog-switch"><input type="checkbox" id="iOpcao1hora"><span class="tog-slider"></span></label></div>
+                    <label style="font-size:12px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Opções disponíveis</label>
+                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulsionar 30 minutos</div><div style="font-size:11px;color:var(--t3)">Libera a opção de 30min no painel do streamer</div></div><label class="tog-switch"><input type="checkbox" id="iOpcao30min"><span class="tog-slider"></span></label></div>
+                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulsionar 1 hora</div><div style="font-size:11px;color:var(--t3)">Libera a opção de 1h no painel do streamer</div></div><label class="tog-switch"><input type="checkbox" id="iOpcao1hora"><span class="tog-slider"></span></label></div>
                   </div>
-                  <div><button class="btn btn-g" id="btnSalvarImpulsoConfig">${this._ico('check',13)} Salvar ConfiguraÃ§Ãµes</button></div>
+                  <div><button class="btn btn-g" id="btnSalvarImpulsoConfig">${this._ico('check',13)} Salvar Configurações</button></div>
                 </div>
               </div>
               <div class="box impulso-section">
@@ -2350,8 +2355,8 @@ class DimaiorAdmin extends HTMLElement {
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="iBloqUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><button class="btn btn-o" id="btnBuscarBloqUid">${this._ico('search',13)} Buscar</button></div></div>
                   <div id="iBloqStreamerInfo" style="display:none;background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.15);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--t2)"></div>
-                  <div class="mc"><label>Motivo do Bloqueio <span style="color:var(--verm)">*</span></label><textarea id="iBloqMotivo" rows="2" placeholder="Ex: Suspeita de uso indevido, manipulaÃ§Ã£o..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;resize:none"></textarea></div>
-                  <div class="mc"><label>Data de ExpiraÃ§Ã£o <span style="color:var(--t3);font-size:11px">(opcional â€” vazio = permanente)</span></label><input id="iBloqExpira" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div>
+                  <div class="mc"><label>Motivo do Bloqueio <span style="color:var(--verm)">*</span></label><textarea id="iBloqMotivo" rows="2" placeholder="Ex: Suspeita de uso indevido, manipulação..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;resize:none"></textarea></div>
+                  <div class="mc"><label>Data de Expiração <span style="color:var(--t3);font-size:11px">(opcional — vazio = permanente)</span></label><input id="iBloqExpira" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div>
                   <div><button class="btn" id="btnAplicarBloqueio" style="background:linear-gradient(135deg,#c00030,#f87171)">${this._ico('lock_r',13)} Aplicar Bloqueio</button></div>
                 </div>
               </div>
@@ -2374,14 +2379,14 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
               </div>
               <div class="box mon-section">
-                <div class="bhead"><div class="btitulo">${this._ico('history',14)} Resgate / CorreÃ§Ã£o de Dados</div></div>
+                <div class="bhead"><div class="btitulo">${this._ico('history',14)} Resgate / Correção de Dados</div></div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                  <div style="background:rgba(248,193,0,.06);border:1px solid rgba(248,193,0,.25);border-radius:var(--rs);padding:10px 14px;font-size:11px;color:#fcd34d;display:flex;align-items:flex-start;gap:6px;line-height:1.6">${this._ico('warning',13)}<span><strong>Simular</strong> mostra o que seria alterado sem gravar nada. <strong>Executar</strong> grava os dados corrigidos no banco â€” confirme antes.</span></div>
-                  <div class="mc"><label>PerÃ­odo especÃ­fico (opcional)</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="monDataDe" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"/><span style="color:var(--t3);font-size:12px">atÃ©</span><input id="monDataAte" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"/><button class="btn btn-sm" id="btnLimparDatas" type="button">Limpar</button></div></div>
-                  <div class="mc"><label>Ou janela de dias a reprocessar (usada se nenhum perÃ­odo acima for escolhido)</label><div style="display:flex;gap:8px;align-items:center"><input id="monDias" type="number" min="1" max="90" value="7" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">dias atrÃ¡s</span></div></div>
+                  <div style="background:rgba(248,193,0,.06);border:1px solid rgba(248,193,0,.25);border-radius:var(--rs);padding:10px 14px;font-size:11px;color:#fcd34d;display:flex;align-items:flex-start;gap:6px;line-height:1.6">${this._ico('warning',13)}<span><strong>Simular</strong> mostra o que seria alterado sem gravar nada. <strong>Executar</strong> grava os dados corrigidos no banco — confirme antes.</span></div>
+                  <div class="mc"><label>Período específico (opcional)</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="monDataDe" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"/><span style="color:var(--t3);font-size:12px">até</span><input id="monDataAte" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"/><button class="btn btn-sm" id="btnLimparDatas" type="button">Limpar</button></div></div>
+                  <div class="mc"><label>Ou janela de dias a reprocessar (usada se nenhum período acima for escolhido)</label><div style="display:flex;gap:8px;align-items:center"><input id="monDias" type="number" min="1" max="90" value="7" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">dias atrás</span></div></div>
                   <div style="display:flex;gap:10px;flex-wrap:wrap">
                     <button class="btn btn-o" id="btnSimularResgate">${this._ico('search',13)} Simular (sem gravar)</button>
-                    <button class="btn" id="btnExecutarResgate" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">${this._ico('zap',13)} Executar CorreÃ§Ã£o</button>
+                    <button class="btn" id="btnExecutarResgate" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">${this._ico('zap',13)} Executar Correção</button>
                   </div>
                   <div id="monResgateStatus" style="display:none"></div>
                   <div id="monResgateResult" style="display:none;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);padding:12px;max-height:320px;overflow-y:auto;font-size:11px;font-family:monospace;color:var(--t2);word-break:break-word;white-space:pre-wrap;line-height:1.6"></div>
@@ -2394,55 +2399,55 @@ class DimaiorAdmin extends HTMLElement {
               <div class="box mon-section">
                 <div class="bhead"><div class="btitulo">${this._ico('send',14)} Telegram</div></div>
                 <div style="padding:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-                  <span style="font-size:12px;color:var(--t3);flex:1">Envia uma mensagem de teste para confirmar que o bot estÃ¡ funcionando.</span>
+                  <span style="font-size:12px;color:var(--t3);flex:1">Envia uma mensagem de teste para confirmar que o bot está funcionando.</span>
                   <button class="btn btn-o" id="btnTestarTelegram">${this._ico('send',13)} Testar Bot</button>
                 </div>
               </div>
             </div>
-            <div class="pag" id="pag-logs">${ph('Auditoria','search','Registro de aÃ§Ãµes','btnAtuLog')}<div class="box"><div class="bhead"><div class="btitulo">Logs</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bL" type="text" placeholder="Filtrar..."/></div></div></div><div id="tbL">${this._loading()}</div><div class="pag-bar" id="pgL"></div></div></div>
-            <div class="pag" id="pag-config">${ph('ConfiguraÃ§Ãµes','settings','VariÃ¡veis operacionais','btnAtuCfg')}<div class="box"><div id="tbC">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-logs">${ph('Auditoria','search','Registro de ações','btnAtuLog')}<div class="box"><div class="bhead"><div class="btitulo">Logs</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bL" type="text" placeholder="Filtrar..."/></div></div></div><div id="tbL">${this._loading()}</div><div class="pag-bar" id="pgL"></div></div></div>
+            <div class="pag" id="pag-config">${ph('Configurações','settings','Variáveis operacionais','btnAtuCfg')}<div class="box"><div id="tbC">${this._loading()}</div></div></div>
           </div>
         </div>
       </div>
       <!-- MODAIS -->
       <div class="ov" id="mS"><div class="modal"><div class="m-titulo" id="mSTit">Adicionar</div><div class="mc"><label>Nome</label><input id="mNome" type="text"/></div><div class="mc"><label>Kwai ID</label><input id="mKwai" type="text"/></div><div class="mc"><label>URL da Foto</label><input id="mFoto" type="text"/></div><div class="mc"><label>Status</label><select id="mAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div><div class="mf"><button class="btn btn-o" id="mSCancel">Cancelar</button><button class="btn btn-g" id="mSSave">${this._ico('check',13)} Salvar</button></div></div></div>
       <div class="ov" id="mC"><div class="modal"><div class="m-titulo">${this._ico('warning',16)} Confirmar</div><p id="mCMsg" style="color:var(--t2);font-size:13px;margin-bottom:16px;line-height:1.6"></p><div class="mf"><button class="btn btn-o" id="mCCancel">Cancelar</button><button class="btn btn-g" id="mCOk" style="background:linear-gradient(135deg,#c00030,#f87171)">${this._ico('trash',13)} Confirmar</button></div></div></div>
-      <div class="ov" id="mUID"><div class="modal"><div class="m-titulo">${this._ico('key_uid',16)} Autorizar UID</div><div class="mc"><label>UID Kwai</label><div class="uid-input-row"><input id="uidInputVal" type="number" placeholder="Ex: 11614413" autocomplete="off"/><button class="btn btn-g" id="btnBuscarUID">${this._ico('search',13)} Buscar</button></div></div><div id="uidLookupResult" style="display:none"></div><div class="mc" style="margin-top:12px"><label>AnotaÃ§Ã£o (opcional)</label><input id="uidNomeRef" type="text" placeholder="Ex: JoÃ£o da turma de maio"/></div><div class="mf"><button class="btn btn-o" id="btnCancelarUID">Cancelar</button><button class="btn btn-g" id="btnConfirmarUID" style="display:none">${this._ico('unlock',13)} Confirmar</button></div></div></div>
+      <div class="ov" id="mUID"><div class="modal"><div class="m-titulo">${this._ico('key_uid',16)} Autorizar UID</div><div class="mc"><label>UID Kwai</label><div class="uid-input-row"><input id="uidInputVal" type="number" placeholder="Ex: 11614413" autocomplete="off"/><button class="btn btn-g" id="btnBuscarUID">${this._ico('search',13)} Buscar</button></div></div><div id="uidLookupResult" style="display:none"></div><div class="mc" style="margin-top:12px"><label>Anotação (opcional)</label><input id="uidNomeRef" type="text" placeholder="Ex: João da turma de maio"/></div><div class="mf"><button class="btn btn-o" id="btnCancelarUID">Cancelar</button><button class="btn btn-g" id="btnConfirmarUID" style="display:none">${this._ico('unlock',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mCart"><div class="modal modal-lg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="m-titulo" id="mCartTitulo" style="margin-bottom:0">${this._ico('wallet',16)} Carteira</div><button class="btn btn-o btn-sm" id="btnFecharCart">${this._ico('x_circle',12)} Fechar</button></div><div id="mCartBody">${this._loading()}</div></div></div>
-      <div class="ov" id="mOp"><div class="modal"><div class="m-titulo" id="mOpTitulo">${this._ico('wallet',16)} OperaÃ§Ã£o</div><div class="mc"><label>Valor (R$)</label><input id="mOpValor" type="number" min="0.01" step="0.01" placeholder="0.00"/></div><div class="mc"><label>DescriÃ§Ã£o / Motivo <span style="color:var(--verm)">*</span></label><textarea id="mOpDesc" rows="3" placeholder="Ex: Fechamento maio..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarOp">Cancelar</button><button class="btn btn-g" id="mOpConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
-      <div class="ov" id="mCredito"><div class="modal"><div class="m-titulo">${this._ico('plus',16)} Adicionar Saldo</div><div id="mCrPasso1"><div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="mCrUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none;transition:border-color .2s"/><button class="btn btn-g" id="btnCrBuscar">${this._ico('search',13)} Buscar</button></div></div><div id="mCrInfo" style="display:none;margin-top:12px"></div></div><div id="mCrPasso2" style="display:none"><div id="mCrStreamerCard" style="margin-bottom:14px"></div><div class="mc"><label>Valor (R$) <span style="color:var(--verm)">*</span></label><input id="mCrValor" type="number" min="0.01" step="0.01" placeholder="0.00" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:16px;outline:none;width:100%;transition:border-color .2s"/></div><div class="mc"><label>Motivo <span style="color:var(--verm)">*</span></label><textarea id="mCrDesc" rows="2" placeholder="Ex: PrÃªmio, fechamento..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;resize:none;transition:border-color .2s"></textarea></div></div><div class="mf" style="margin-top:14px"><button class="btn btn-o" id="btnCrCancelar">Cancelar</button><button class="btn btn-g" id="btnCrConfirmar" style="display:none">${this._ico('check',13)} Confirmar CrÃ©dito</button></div></div></div>
-      <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:'Rajdhani',sans-serif;font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose">âœ•</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">â€”</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: â€”</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:'Rajdhani',sans-serif">Valor a pagar</div><div id="mPixValor" style="font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">â€”</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:'Exo 2',sans-serif">â€”</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo apÃ³s o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} JÃ¡ Paguei â€” Confirmar no Sistema</button></div></div></div>
-      <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">ObservaÃ§Ã£o</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
-      <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar PremiaÃ§Ã£o</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>AtenÃ§Ã£o:</strong> ApÃ³s processada, nÃ£o pode ser desfeita automaticamente.</span></div><div class="mc"><label>MÃªs de ReferÃªncia</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"><option value="diamantes">ðŸ’Ž Ranking de Diamantes</option><option value="horas">â± Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar PremiaÃ§Ã£o</button></div></div></div>
+      <div class="ov" id="mOp"><div class="modal"><div class="m-titulo" id="mOpTitulo">${this._ico('wallet',16)} Operação</div><div class="mc"><label>Valor (R$)</label><input id="mOpValor" type="number" min="0.01" step="0.01" placeholder="0.00"/></div><div class="mc"><label>Descrição / Motivo <span style="color:var(--verm)">*</span></label><textarea id="mOpDesc" rows="3" placeholder="Ex: Fechamento maio..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarOp">Cancelar</button><button class="btn btn-g" id="mOpConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
+      <div class="ov" id="mCredito"><div class="modal"><div class="m-titulo">${this._ico('plus',16)} Adicionar Saldo</div><div id="mCrPasso1"><div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="mCrUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:14px;outline:none;transition:border-color .2s"/><button class="btn btn-g" id="btnCrBuscar">${this._ico('search',13)} Buscar</button></div></div><div id="mCrInfo" style="display:none;margin-top:12px"></div></div><div id="mCrPasso2" style="display:none"><div id="mCrStreamerCard" style="margin-bottom:14px"></div><div class="mc"><label>Valor (R$) <span style="color:var(--verm)">*</span></label><input id="mCrValor" type="number" min="0.01" step="0.01" placeholder="0.00" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:16px;outline:none;width:100%;transition:border-color .2s"/></div><div class="mc"><label>Motivo <span style="color:var(--verm)">*</span></label><textarea id="mCrDesc" rows="2" placeholder="Ex: Prêmio, fechamento..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%;resize:none;transition:border-color .2s"></textarea></div></div><div class="mf" style="margin-top:14px"><button class="btn btn-o" id="btnCrCancelar">Cancelar</button><button class="btn btn-g" id="btnCrConfirmar" style="display:none">${this._ico('check',13)} Confirmar Crédito</button></div></div></div>
+      <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:'Rajdhani',sans-serif;font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose">✕</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:'Rajdhani',sans-serif">Valor a pagar</div><div id="mPixValor" style="font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:'Exo 2',sans-serif">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
+      <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">Observação</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
+      <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:'Exo 2',sans-serif;font-size:13px;outline:none"><option value="diamantes">💎 Ranking de Diamantes</option><option value="horas">⏱ Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
       <div class="ov" id="mCom"><div class="modal" style="max-width:500px"><div class="m-titulo" id="mComTit">Novo Aviso</div>
         <div id="mComTipoBadge"></div>
 
-        <!-- â”€â”€ SEÃ‡ÃƒO: AVISO RÃPIDO â”€â”€ -->
+        <!-- ── SEÇÃO: AVISO RÁPIDO ── -->
         <div id="mComSecRapido">
-          <div class="mc"><label>Emoji <span style="color:var(--t3);font-size:11px">(opcional)</span></label><input id="mComEmoji" type="text" placeholder="Ex: âš¡ ðŸ† ðŸ””" maxlength="8" style="font-size:1.3rem;letter-spacing:4px"/></div>
-          <div class="mc"><label>Texto do Aviso <span style="color:var(--verm)">*</span></label><textarea id="mComTexto" rows="3" placeholder="Ex: Os Top 10 streamers do mÃªs participarÃ£o do sorteio de 10K diamantes."></textarea></div>
+          <div class="mc"><label>Emoji <span style="color:var(--t3);font-size:11px">(opcional)</span></label><input id="mComEmoji" type="text" placeholder="Ex: ⚡ 🏆 🔔" maxlength="8" style="font-size:1.3rem;letter-spacing:4px"/></div>
+          <div class="mc"><label>Texto do Aviso <span style="color:var(--verm)">*</span></label><textarea id="mComTexto" rows="3" placeholder="Ex: Os Top 10 streamers do mês participarão do sorteio de 10K diamantes."></textarea></div>
         </div>
 
-        <!-- â”€â”€ SEÃ‡ÃƒO: AVISO IMPORTANTE â”€â”€ -->
+        <!-- ── SEÇÃO: AVISO IMPORTANTE ── -->
         <div id="mComSecImportante" style="display:none">
-          <div class="mc"><label>TÃ­tulo <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: InscriÃ§Ãµes abertas atÃ© 12 de junho!" maxlength="120"/></div>
-          <div class="mc"><label>SubtÃ­tulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do tÃ­tulo)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
-          <div class="mc"><label>DescriÃ§Ã£o / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: NÃ£o perca tempo! Garanta jÃ¡ o seu lugar na Copa Arena."></textarea></div>
-          <div class="mc"><label>Imagem (URL) <span style="color:var(--t3);font-size:11px">(thumbnail â€” cole o link da imagem)</span></label><input id="mComImagem" type="url" placeholder="https://..."/><div id="mComImagemPreview" style="margin-top:6px;display:none"><img id="mComImgEl" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--brd)" alt="preview"/></div></div>
+          <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
+          <div class="mc"><label>Subtítulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
+          <div class="mc"><label>Descrição / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: Não perca tempo! Garanta já o seu lugar na Copa Arena."></textarea></div>
+          <div class="mc"><label>Imagem (URL) <span style="color:var(--t3);font-size:11px">(Wix, Google Drive público ou link direto)</span></label><input id="mComImagem" type="url" placeholder="https://drive.google.com/file/d/.../view"/><div style="font-size:10px;color:var(--t3);margin-top:4px;line-height:1.45">No Google Drive, use arquivo compartilhado como “qualquer pessoa com o link”. O sistema converte automaticamente para thumbnail.</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;max-width:220px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="mc" style="margin:0"><label>BotÃ£o principal â€” Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
-            <div class="mc" style="margin:0"><label>BotÃ£o principal â€” Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
-            <div class="mc" style="margin:0"><label>BotÃ£o secundÃ¡rio â€” Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
-            <div class="mc" style="margin:0"><label>BotÃ£o secundÃ¡rio â€” Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
+            <div class="mc" style="margin:0"><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
+            <div class="mc" style="margin:0"><label>Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
+            <div class="mc" style="margin:0"><label>Botão secundário — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
+            <div class="mc" style="margin:0"><label>Botão secundário — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
           </div>
-          <div class="mc" style="margin-top:10px"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;â­ Destaque â€” exibe como card principal no topo das notificaÃ§Ãµes</label></div>
+          <div class="mc" style="margin-top:10px"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;⭐ Destaque — exibe como card principal no topo das notificações</label></div>
         </div>
 
-        <!-- â”€â”€ CAMPOS COMUNS â”€â”€ -->
+        <!-- ── CAMPOS COMUNS ── -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
           <div class="mc" style="margin:0"><label>Status</label><select id="mComAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div>
         </div>
-        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> ðŸ  Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
+        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> 🏠 Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
         <div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div>
       </div></div>
       <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div>
@@ -2454,26 +2459,26 @@ class DimaiorAdmin extends HTMLElement {
     const wrap=document.createElement('div');wrap.innerHTML=this._html();this.shadowRoot.appendChild(wrap);
   }
 
-  // â”€â”€ CONVITES / CANDIDATURAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── CONVITES / CANDIDATURAS ──────────────────────────────────────────────────
 
   async _atualizarCacheVoyager(){
     const btn=this.shadowRoot.getElementById('btnAtualizarCache');
     const _setBtn=(txt,dis=true)=>{if(btn){btn.disabled=dis;btn.innerHTML=txt;}};
-    _setBtn('Iniciandoâ€¦');
+    _setBtn('Iniciando…');
     const r=await this._api('POST','/admin/cache/atualizar');
     if(!r?.ok){_setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);this._toast(r?.mensagem||'Erro ao iniciar cache','err');return;}
-    this._toast('Rebuild iniciado â€” aguardando conclusÃ£oâ€¦','ok');
+    this._toast('Rebuild iniciado — aguardando conclusão…','ok');
     const t0=Date.now();
     const poll=async()=>{
       if(Date.now()-t0>120000){_setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);this._toast('Timeout aguardando rebuild','err');return;}
       const s=await this._api('GET','/admin/cache/status');
-      if(s?.status==='processando'){_setBtn('Processandoâ€¦');setTimeout(poll,2500);}
+      if(s?.status==='processando'){_setBtn('Processando…');setTimeout(poll,2500);}
       else if(s?.status==='concluido'){
         _setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);
-        this._toast(`Cache atualizado â€” ${s.cache?.total_membros??'?'} membros Â· ${s.cache?.total_convites??'?'} convites`,'ok');
+        this._toast(`Cache atualizado — ${s.cache?.total_membros??'?'} membros · ${s.cache?.total_convites??'?'} convites`,'ok');
       } else {
         _setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);
-        this._toast(s?.status==='sem_cache'?'Cache ainda nÃ£o disponÃ­vel':'Erro desconhecido','err');
+        this._toast(s?.status==='sem_cache'?'Cache ainda não disponível':'Erro desconhecido','err');
       }
     };
     setTimeout(poll,2500);
@@ -2484,7 +2489,7 @@ class DimaiorAdmin extends HTMLElement {
     // Carrega modo atual
     const modoR=await this._api('GET','/admin/convites/modo');
     if(modoR?.modo){const sel=s.getElementById('convModo');if(sel)sel.value=modoR.modo;}
-    // Carrega candidaturas por padrÃ£o
+    // Carrega candidaturas por padrão
     this._carregarCandidaturas();
     // Atualiza badge
     const cands=await this._api('GET','/admin/candidaturas?status=perfil_consultado');
@@ -2510,27 +2515,27 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar candidaturas');return;}
     const lista=d.candidaturas||[];
     if(!lista.length){el.innerHTML=this._empty('clipboard','Nenhuma candidatura encontrada');return;}
-    const BADGE={perfil_consultado:'Aguardando',convite_enviado:'Convite Enviado',em_revisao:'Em RevisÃ£o',confirmado:'Confirmado',vinculado_outra_agencia:'Outra AgÃªncia',migracao_solicitada:'MigraÃ§Ã£o',recusado:'Recusado',expirado:'Expirado',erro:'Erro'};
+    const BADGE={perfil_consultado:'Aguardando',convite_enviado:'Convite Enviado',em_revisao:'Em Revisão',confirmado:'Confirmado',vinculado_outra_agencia:'Outra Agência',migracao_solicitada:'Migração',recusado:'Recusado',expirado:'Expirado',erro:'Erro'};
     const COR={convite_enviado:'var(--cyan)',confirmado:'var(--verde)',recusado:'var(--verm)',erro:'var(--verm)',migracao_solicitada:'var(--gold)',vinculado_outra_agencia:'var(--gold)'};
     el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="border-bottom:1px solid var(--brddim)"><th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Perfil</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Categoria</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Recrutador</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">AÃ§Ãµes</th></tr></thead>
+      <thead><tr style="border-bottom:1px solid var(--brddim)"><th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Perfil</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Categoria</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Recrutador</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ações</th></tr></thead>
       <tbody>${lista.map(c=>{
         const foto=c.foto_url?`<img src="${this._safeImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(c.foto_url)}&w=36&h=36&fit=cover&output=webp`)}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--brd);vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">`:'';
-        const nome=this._esc(c.nome_kwai||c.uid||'â€”');
+        const nome=this._esc(c.nome_kwai||c.uid||'—');
         const wppRaw=String(c.whatsapp||'').replace(/\D/g,'');
         const wppNum=wppRaw?(wppRaw.length<=11?'55'+wppRaw:wppRaw):'';
-        const wppMsg=encodeURIComponent(`OlÃ¡! Sou da DMaior Agency. Vi que vocÃª se candidatou para entrar na nossa agÃªncia, ${c.nome_kwai||c.uid||'streamer'}. Vamos conversar?`);
+        const wppMsg=encodeURIComponent(`Olá! Sou da DMaior Agency. Vi que você se candidatou para entrar na nossa agência, ${c.nome_kwai||c.uid||'streamer'}. Vamos conversar?`);
         const wpp=wppNum?`<br><a href="https://wa.me/${wppNum}?text=${wppMsg}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:3px;font-size:10px;color:#25d366;text-decoration:none;font-weight:600">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           ${wppNum}</a>`:'';
-        const cat=c.categoria==='games'?'ðŸŽ® Games':'ðŸŽ­ Entretenimento';
-        const recrutador=this._esc(c.recrutador_nome||'PadrÃ£o da agÃªncia');
+        const cat=c.categoria==='games'?'🎮 Games':'🎭 Entretenimento';
+        const recrutador=this._esc(c.recrutador_nome||'Padrão da agência');
         const stBadge=`<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:${COR[c.status]||'var(--t2)'}">${BADGE[c.status]||c.status}</span>`;
         let motivoErro=String(c.motivo_bloqueio||'').trim();
         if(!motivoErro&&c.status==='erro'&&c.resposta_voyager){
           try{const rv=typeof c.resposta_voyager==='string'?JSON.parse(c.resposta_voyager):c.resposta_voyager;motivoErro=String(rv?.data?.checkMessage||rv?.message||rv?.msg||'').trim();}catch{}
         }
-        const erroDetalhe=c.status==='erro'?`<div title="${this._esc(motivoErro||'Falha nÃ£o detalhada pelo Voyager')}" style="max-width:230px;margin-top:5px;color:var(--verm);font-size:10px;line-height:1.3;white-space:normal;overflow-wrap:anywhere">${this._esc(motivoErro||'Falha nÃ£o detalhada pelo Voyager')}</div>`:'';
+        const erroDetalhe=c.status==='erro'?`<div title="${this._esc(motivoErro||'Falha não detalhada pelo Voyager')}" style="max-width:230px;margin-top:5px;color:var(--verm);font-size:10px;line-height:1.3;white-space:normal;overflow-wrap:anywhere">${this._esc(motivoErro||'Falha não detalhada pelo Voyager')}</div>`:'';
         const canAprovar=c.status==='perfil_consultado'&&c.member_id;
         return`<tr style="border-bottom:1px solid var(--brddim)">
           <td style="padding:8px 12px">${foto}<strong style="color:var(--t1)">${nome}</strong>${wpp}</td>
@@ -2544,7 +2549,7 @@ class DimaiorAdmin extends HTMLElement {
           </td>
         </tr>`;
       }).join('')}</tbody></table>`;
-    // Bind botÃµes
+    // Bind botões
     el.querySelectorAll('[data-cand-apr]').forEach(b=>b.addEventListener('click',()=>this._aprovarCandidatura(b.dataset.candApr)));
     el.querySelectorAll('[data-cand-rej]').forEach(b=>b.addEventListener('click',()=>this._rejeitarCandidatura(b.dataset.candRej)));
   }
@@ -2552,7 +2557,7 @@ class DimaiorAdmin extends HTMLElement {
   async _aprovarCandidatura(id){
     const modo=this.shadowRoot.getElementById('convModo')?.value||'simular';
     const dry=modo==='simular';
-    const label=dry?`Simular aprovaÃ§Ã£o (modo: ${modo})`:`Enviar convite real (modo: ${modo})`;
+    const label=dry?`Simular aprovação (modo: ${modo})`:`Enviar convite real (modo: ${modo})`;
     if(!confirm(`${label}\n\nCandidatura: ${id}\n\nConfirmar?`))return;
     const r=await this._api('POST',`/admin/candidaturas/${id}/aprovar`,{dry_run:dry});
     const voyagerOk=Number(r?.resposta?.result)===1&&r?.resposta?.data?.checkResult!==false&&r?.resposta?.data?.success!==false;
@@ -2566,7 +2571,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   async _rejeitarCandidatura(id){
-    const motivo=prompt('Motivo da rejeiÃ§Ã£o (opcional):');
+    const motivo=prompt('Motivo da rejeição (opcional):');
     const r=await this._api('POST',`/admin/candidaturas/${id}/rejeitar`,{motivo:motivo||''});
     if(r?.ok){this._toast('Candidatura rejeitada','ok');this._carregarCandidaturas();}
     else this._toast(r?.erro||'Erro ao rejeitar','err');
@@ -2586,21 +2591,21 @@ class DimaiorAdmin extends HTMLElement {
     const total=d.total||0,totalPg=d.total_pages||1;
     const elegiveis=lista.filter(c=>c.reenviavel).length;
 
-    // PaginaÃ§Ã£o
+    // Paginação
     const _pgBtn=(lbl,p,dis=false)=>`<button class="btn btn-sm${dis?' btn-dis':''}" ${dis?'disabled':''} data-conv-pg="${p}" style="min-width:32px">${lbl}</button>`;
     let pgBtns='';
     const maxVis=7,half=Math.floor(maxVis/2);
     let start=Math.max(1,pg-half),end=Math.min(totalPg,start+maxVis-1);
     if(end-start<maxVis-1)start=Math.max(1,end-maxVis+1);
-    if(start>1)pgBtns+=_pgBtn('1',1)+(start>2?'<span style="padding:0 4px;color:var(--t3)">â€¦</span>':'');
+    if(start>1)pgBtns+=_pgBtn('1',1)+(start>2?'<span style="padding:0 4px;color:var(--t3)">…</span>':'');
     for(let i=start;i<=end;i++)pgBtns+=_pgBtn(i,i,i===pg);
-    if(end<totalPg)pgBtns+=(end<totalPg-1?'<span style="padding:0 4px;color:var(--t3)">â€¦</span>':'')+_pgBtn(totalPg,totalPg);
+    if(end<totalPg)pgBtns+=(end<totalPg-1?'<span style="padding:0 4px;color:var(--t3)">…</span>':'')+_pgBtn(totalPg,totalPg);
 
     el.innerHTML=`
     <div style="padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--brddim)">
-      <span style="font-size:11px;color:var(--t3)">${total} convites Â· <span style="color:var(--cyan)">${elegiveis} reenviÃ¡veis nesta pÃ¡gina</span></span>
+      <span style="font-size:11px;color:var(--t3)">${total} convites · <span style="color:var(--cyan)">${elegiveis} reenviáveis nesta página</span></span>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-        <span style="font-size:11px;color:var(--t3)">por pÃ¡gina:</span>
+        <span style="font-size:11px;color:var(--t3)">por página:</span>
         ${[10,20,50].map(n=>`<button class="btn btn-sm${cnt===n?' btn-dis':''}" ${cnt===n?'disabled':''} data-conv-cnt="${n}">${n}</button>`).join('')}
       </div>
     </div>
@@ -2609,28 +2614,28 @@ class DimaiorAdmin extends HTMLElement {
         <th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Membro</th>
         <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th>
         <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Atualizado</th>
-        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">AÃ§Ã£o</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ação</th>
       </tr></thead>
       <tbody>${lista.map(c=>`<tr style="border-bottom:1px solid var(--brddim)">
         <td style="padding:8px 12px">
           <div style="display:flex;align-items:center;gap:8px">
             ${c.foto?`<img src="${this._esc(c.foto)}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy" onerror="this.style.display='none'">`:
-              `<div style="width:30px;height:30px;border-radius:50%;background:var(--brddim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px">ðŸ‘¤</div>`}
-            <div><strong style="color:var(--t1)">${this._esc(c.memberName||c.kwaiId||'â€”')}</strong><br>
-            <span style="color:var(--t3);font-size:10px">${this._esc(c.kwaiId||'')} Â· ID ${this._esc(String(c.id||''))}</span></div>
+              `<div style="width:30px;height:30px;border-radius:50%;background:var(--brddim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px">👤</div>`}
+            <div><strong style="color:var(--t1)">${this._esc(c.memberName||c.kwaiId||'—')}</strong><br>
+            <span style="color:var(--t3);font-size:10px">${this._esc(c.kwaiId||'')} · ID ${this._esc(String(c.id||''))}</span></div>
           </div>
         </td>
-        <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||'â€”')}</td>
-        <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'â€”')}</td>
+        <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||'—')}</td>
+        <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'—')}</td>
         <td style="padding:8px">${c.reenviavel?`<button class="btn btn-sm btn-o" data-conv-reenv="${c.id}">${this._ico('refresh',11)} Reenviar</button>`:''}</td>
       </tr>`).join('')}</tbody>
     </table>
     <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <span style="font-size:11px;color:var(--t3)">PÃ¡gina ${pg} de ${totalPg}</span>
+      <span style="font-size:11px;color:var(--t3)">Página ${pg} de ${totalPg}</span>
       <div style="display:flex;gap:4px;flex-wrap:wrap">
-        ${_pgBtn('â†',pg-1,pg<=1)}
+        ${_pgBtn('←',pg-1,pg<=1)}
         ${pgBtns}
-        ${_pgBtn('â†’',pg+1,pg>=totalPg)}
+        ${_pgBtn('→',pg+1,pg>=totalPg)}
       </div>
     </div>`;
     el.querySelectorAll('[data-conv-reenv]').forEach(b=>b.addEventListener('click',()=>this._reenviarConvite(b.dataset.convReenv)));
@@ -2651,18 +2656,18 @@ class DimaiorAdmin extends HTMLElement {
     const box=s.getElementById('convBulkProgressBox');
     const info=s.getElementById('convBulkProgressInfo');
     if(box)box.style.display='';
-    if(info)info.textContent='Iniciando reenvio em massaâ€¦';
+    if(info)info.textContent='Iniciando reenvio em massa…';
     const r=await this._api('POST','/admin/convites/bulk-reenviar',{dry_run:dry,limite:50,delay_ms:1300});
     if(!r?.ok){this._toast(r?.erro||'Erro no bulk','err');if(box)box.style.display='none';return;}
-    if(info)info.textContent=`ConcluÃ­do: ${r.processados} processados Â· ${r.resultados?.filter(x=>x.ok).length||0} OK${dry?' [DRY RUN]':''}`;
+    if(info)info.textContent=`Concluído: ${r.processados} processados · ${r.resultados?.filter(x=>x.ok).length||0} OK${dry?' [DRY RUN]':''}`;
     this._toast(`Bulk${dry?' simulado':''}: ${r.processados} processados`,'ok');
     // Oferece envio real se era dry run
-    if(dry){this._confirmarDel(`SimulaÃ§Ã£o OK (${r.processados} elegÃ­veis). Enviar de verdade agora?`,()=>this._bulkReenviar(false));}
+    if(dry){this._confirmarDel(`Simulação OK (${r.processados} elegíveis). Enviar de verdade agora?`,()=>this._bulkReenviar(false));}
   }
 
   async _pararBulk(){
     const s=this.shadowRoot;
-    // NÃ£o temos job_id aqui; o endpoint pararÃ¡ qualquer job em andamento via flag genÃ©rica
+    // Não temos job_id aqui; o endpoint parará qualquer job em andamento via flag genérica
     const r=await this._api('POST','/admin/convites/bulk-parar',{job_id:'current'});
     if(r?.ok)this._toast('Sinal de parada enviado','ok');
     const box=s.getElementById('convBulkProgressBox');if(box)box.style.display='none';
@@ -2672,19 +2677,19 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;const el=s.getElementById('tbMigracoes');if(!el)return;
     el.innerHTML=this._loading();
     const d=await this._api('GET','/admin/migracoes');
-    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar migraÃ§Ãµes');return;}
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar migrações');return;}
     const lista=d.migracoes||[];
-    if(!lista.length){el.innerHTML=this._empty('arrow_right','Nenhuma solicitaÃ§Ã£o de migraÃ§Ã£o');return;}
+    if(!lista.length){el.innerHTML=this._empty('arrow_right','Nenhuma solicitação de migração');return;}
     el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="border-bottom:1px solid var(--brddim)">
         <th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">UID</th>
-        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">AgÃªncia Origem</th>
+        <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Agência Origem</th>
         <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th>
         <th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th>
       </tr></thead>
       <tbody>${lista.map(m=>`<tr style="border-bottom:1px solid var(--brddim)">
         <td style="padding:8px 12px"><strong style="color:var(--t1)">${this._esc(m.uid)}</strong><br><span style="color:var(--t3);font-size:10px">${this._esc(m.kwai_id||'')}</span></td>
-        <td style="padding:8px;color:var(--gold)">${this._esc(m.agencia_origem||'â€”')}</td>
+        <td style="padding:8px;color:var(--gold)">${this._esc(m.agencia_origem||'—')}</td>
         <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(m.status||'pendente')}</td>
         <td style="padding:8px;color:var(--t3)">${this._fdtCurto(m.criado_em)}</td>
       </tr>`).join('')}</tbody></table>`;
@@ -2709,7 +2714,7 @@ class DimaiorAdmin extends HTMLElement {
         const opt=document.createElement('option');
         opt.value=r.id;
         const dono=String(r.nome||'').trim().toLowerCase()==='dan';
-        opt.textContent=`${r.nome} â€” ${r.telefone}${r.padrao?' â˜… PadrÃ£o':''}${dono?' Â· Dono da agÃªncia':''}`;
+        opt.textContent=`${r.nome} — ${r.telefone}${r.padrao?' ★ Padrão':''}${dono?' · Dono da agência':''}`;
         sel.appendChild(opt);
       });
       if(!this._convRecrutadores.length){
@@ -2737,11 +2742,11 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div style="display:flex;align-items:center;gap:9px">
       <span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(0,212,212,.1);color:var(--cyan)">${this._ico('users',14)}</span>
       <div style="min-width:0;flex:1"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Dados enviados ao Voyager</div>
-      <strong style="font-size:13px;color:var(--t1)">${this._esc(rec.nome)}</strong>${dono?'<span style="margin-left:6px;font-size:9px;color:var(--gold)">DONO DA AGÃŠNCIA</span>':''}<br>
+      <strong style="font-size:13px;color:var(--t1)">${this._esc(rec.nome)}</strong>${dono?'<span style="margin-left:6px;font-size:9px;color:var(--gold)">DONO DA AGÊNCIA</span>':''}<br>
       <span style="font-size:11px;color:var(--t2)">${this._esc(rec.telefone)}</span></div></div>`;
   }
 
-  // â”€â”€ RECRUTADORES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── RECRUTADORES ─────────────────────────────────────────────────────────────
 
   async _carregarRecrutadores(){
     const s=this.shadowRoot;const el=s.getElementById('tbRecrutadores');if(!el)return;
@@ -2755,12 +2760,12 @@ class DimaiorAdmin extends HTMLElement {
         <th style="padding:10px 16px;text-align:left;color:var(--t3);font-weight:600">Nome</th>
         <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Telefone</th>
         <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Status</th>
-        <th style="padding:10px 8px;text-align:right;color:var(--t3);font-weight:600">AÃ§Ãµes</th>
+        <th style="padding:10px 8px;text-align:right;color:var(--t3);font-weight:600">Ações</th>
       </tr></thead>
       <tbody>${lista.map(r=>`<tr style="border-bottom:1px solid var(--brddim)">
         <td style="padding:10px 16px">
           <strong style="color:var(--t1)">${this._esc(r.nome)}</strong>
-          ${r.padrao?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:10px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);color:var(--cyan)">â˜… PadrÃ£o</span>`:''}
+          ${r.padrao?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:10px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);color:var(--cyan)">★ Padrão</span>`:''}
         </td>
         <td style="padding:10px 8px;color:var(--t2)">${this._esc(r.telefone)}</td>
         <td style="padding:10px 8px">
@@ -2797,7 +2802,7 @@ class DimaiorAdmin extends HTMLElement {
     const nome=s.getElementById('fRecNome')?.value?.trim();
     const telefone=s.getElementById('fRecTel')?.value?.trim();
     const padrao=s.getElementById('fRecPadrao')?.checked||false;
-    if(!nome||!telefone){this._toast('Nome e telefone sÃ£o obrigatÃ³rios','err');return;}
+    if(!nome||!telefone){this._toast('Nome e telefone são obrigatórios','err');return;}
     const btn=s.getElementById('btnSalvarRecrutador');btn.disabled=true;
     const r=id
       ?await this._api('PUT',`/admin/recrutadores/${id}`,{nome,telefone,padrao,ativo:true})
@@ -2814,7 +2819,7 @@ class DimaiorAdmin extends HTMLElement {
 
   async _excluirRecrutador(id){
     const r=await this._api('DELETE',`/admin/recrutadores/${id}`);
-    if(r?.ok){this._toast('Recrutador excluÃ­do','ok');this._carregarRecrutadores();}
+    if(r?.ok){this._toast('Recrutador excluído','ok');this._carregarRecrutadores();}
     else this._toast(r?.erro||'Erro ao excluir','err');
   }
 
@@ -2830,20 +2835,20 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mConvEnvioArea').style.display='none';
     const r=await this._api('POST','/admin/candidaturas/buscar-perfil',{uid});
     if(!r?.ok||!r?.perfil){
-      s.getElementById('mConvPerfilResult').innerHTML=`<div style="color:var(--verm);font-size:12px;padding:8px 0">${this._esc(r?.mensagem||'Perfil nÃ£o encontrado')}</div>`;
+      s.getElementById('mConvPerfilResult').innerHTML=`<div style="color:var(--verm);font-size:12px;padding:8px 0">${this._esc(r?.mensagem||'Perfil não encontrado')}</div>`;
       return;
     }
     const p=r.perfil;
     const foto=p.foto?`<img src="${this._safeImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(p.foto)}&w=60&h=60&fit=cover&output=webp`)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid var(--brd);flex-shrink:0" onerror="this.style.display='none'">`:'';
     const agBadge=p.agencia?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);color:var(--gold)">${this._esc(p.agencia)}</span>`:'';
     const stBadge=r.status==='LIVRE'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80">Livre</span>`:
-      r.status==='VINCULADO_OUTRA_AGENCIA'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)">Outra AgÃªncia</span>`:
+      r.status==='VINCULADO_OUTRA_AGENCIA'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)">Outra Agência</span>`:
       `<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:var(--t3)">${this._esc(r.status)}</span>`;
     s.getElementById('mConvPerfilResult').innerHTML=`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--brddim);margin-top:8px">
       ${foto}
       <div style="flex:1;min-width:0">
-        <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome||p.kwaiId||'â€”')}</div>
-        <div style="font-size:10px;color:var(--t3)">ID: ${this._esc(p.memberId||'â€”')} Â· Kwai: ${this._esc(p.kwaiId||'â€”')}</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome||p.kwaiId||'—')}</div>
+        <div style="font-size:10px;color:var(--t3)">ID: ${this._esc(p.memberId||'—')} · Kwai: ${this._esc(p.kwaiId||'—')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${stBadge}${agBadge}</div>
       </div></div>`;
     if(r.status==='LIVRE'||r.acao==='ENVIAR')s.getElementById('mConvEnvioArea').style.display='';
@@ -2856,7 +2861,7 @@ class DimaiorAdmin extends HTMLElement {
     const categoria=s.getElementById('mConvCategoria')?.value||'entretenimento';
     const recrutador_id=s.getElementById('mConvRecrutador')?.value||null;
     const res=s.getElementById('mConvEnvioResult');
-    if(!uid){this._toast('UID invÃ¡lido','err');return;}
+    if(!uid){this._toast('UID inválido','err');return;}
     s.getElementById('mConvBtnEnviar').disabled=true;s.getElementById('mConvBtnDry').disabled=true;
     const payload={uid,categoria,dry_run:dry};
     if(recrutador_id)payload.recrutador_id=recrutador_id;
@@ -2865,7 +2870,7 @@ class DimaiorAdmin extends HTMLElement {
     const voyagerOk=Number(r?.resposta?.result)===1&&r?.resposta?.data?.checkResult!==false&&r?.resposta?.data?.success!==false;
     const envioOk=r?.ok&&(dry||voyagerOk);
     if(envioOk){
-      if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'SimulaÃ§Ã£o OK â€” sem envio real':'âœ… Convite enviado com sucesso!'}</div>`;
+      if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'Simulação OK — sem envio real':'✅ Convite enviado com sucesso!'}</div>`;
       this._toast(dry?'Simulado OK':'Convite enviado!','ok');
     }else{
       const motivo=r?.checkMessage||r?.motivoBloqueio||r?.mensagem||r?.resposta?.data?.checkMessage||r?.resposta?.data?.message||r?.resposta?.message||r?.erro||'O Kwai recusou o convite.';
