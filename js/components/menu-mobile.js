@@ -186,7 +186,40 @@ class MenuMobileDMaior extends HTMLElement {
       .pref-select option{ background:var(--dm-bg-2); color:var(--dm-text); }
       .pref-select:focus{ color:var(--dm-cyan); }
       @media (prefers-reduced-motion: reduce){ .dd-option:hover .dd-marquee,.dd-option:focus-visible .dd-marquee,.pref-row:hover .dd-marquee,.pref-row:focus-within .dd-marquee{ animation:none; } }
-      @media (max-width:420px){ .layout-dropdown{ right:-46px; width:calc(100vw - 14px); border-radius:24px; padding:12px; } .dd-grid{ gap:8px; } .dd-option,.pref-row{ min-height:62px; padding:11px 12px; font-size:.9rem; } .dd-icon{ width:30px; height:30px; flex-basis:30px; } .dd-arrow{ display:none; } }
+      @media (max-width:520px){
+        .layout-dropdown{
+          position:fixed;
+          top:72px;
+          left:8px;
+          right:8px;
+          width:auto;
+          max-height:calc(100vh - 92px);
+          overflow-y:auto;
+          overscroll-behavior:contain;
+          border-radius:22px;
+          padding:10px;
+          gap:8px;
+        }
+        .layout-dropdown.open{ grid-template-columns:1fr 1fr; }
+        .dd-grid{ display:contents; }
+        .dd-label{ font-size:.54rem; padding:2px 8px 0; }
+        .dd-divider{ margin:0; }
+        .dd-option,.pref-row{
+          min-height:52px;
+          padding:8px 10px;
+          gap:8px;
+          font-size:.78rem;
+          border-radius:999px;
+          letter-spacing:.15px;
+        }
+        .dd-dot{ width:18px; height:18px; box-shadow:0 0 0 4px var(--dm-bw05); }
+        .dd-icon{ width:24px; height:24px; flex-basis:24px; }
+        .dd-icon svg{ width:22px; height:22px; }
+        .dd-arrow{ display:none; }
+        .pref-row label{ font-size:.48rem; letter-spacing:.9px; }
+        .pref-select{ min-height:24px; font-size:.78rem; padding-right:14px; }
+        @keyframes ddMarquee{ 0%,18%{ transform:translateX(0); } 50%,68%{ transform:translateX(calc(-100% + 86px)); } 100%{ transform:translateX(0); } }
+      }
       .overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--dm-overlay); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .3s; z-index:9998; }
       .overlay.on{ opacity:1; pointer-events:auto; }
       .sidebar{ position:fixed; top:0; right:-100%; width:280px; max-width:85vw; height:100vh; background:var(--dm-grad-sidebar); border-left:1px solid var(--dm-cyan-20); box-shadow:-5px 0 30px var(--dm-shadow-lg); transition:right .3s cubic-bezier(.25,.8,.25,1); z-index:9999; display:flex; flex-direction:column; overflow-y:auto; scrollbar-width:none; }

@@ -239,15 +239,15 @@ class DmaiorServicesMenu extends HTMLElement {
           /* ── Dinâmico Pro no desktop — 3 colunas + containers largos ── */
           .dinamico-layout { max-width:860px; width:100%; }
           .dp-grid { grid-template-columns:repeat(3,1fr); gap:14px; padding:0 20px 18px; }
-          .dp-item { min-height:96px; padding:16px 14px; }
-          .dp-item-icon { width:40px; height:40px; border-radius:12px; }
+          .dp-item { min-height:96px; padding:16px 14px; border-radius:24px; }
+          .dp-item-icon { width:40px; height:40px; border-radius:16px; }
           .dp-item-icon svg { width:22px; height:22px; }
           .dp-item-name { font-size:1rem; }
           .dp-item-label { font-size:.68rem; }
-          .dp-banner { margin:0 20px 14px; padding:16px 20px; }
-          .dp-banner-icon { width:50px; height:50px; border-radius:14px; }
+          .dp-banner { margin:0 20px 14px; padding:16px 20px; border-radius:26px; }
+          .dp-banner-icon { width:50px; height:50px; border-radius:18px; }
           .dp-banner-title { font-size:1.1rem; }
-          .dp-agency-btn { margin:0 20px 18px; padding:16px 20px; font-size:1rem; }
+          .dp-agency-btn { margin:0 20px 18px; padding:16px 20px; font-size:1rem; border-radius:24px; }
           .dp-section-title { font-size:.72rem; padding:0 20px 10px; }
         }
 
@@ -255,9 +255,9 @@ class DmaiorServicesMenu extends HTMLElement {
         .dinamico-layout { display:${layout === 'dinamico' ? 'block' : 'none'}; padding:12px 0 4px; }
 
         /* Banner de destaque Recarga */
-        .dp-banner { margin:0 16px 12px; border-radius:16px; overflow:hidden; position:relative; background:var(--dm-grad-card-alt); border:1px solid var(--dm-gold-glow); box-shadow:0 8px 24px var(--dm-shadow-50); text-decoration:none; display:flex; align-items:center; padding:14px 16px; gap:14px; }
+        .dp-banner { margin:0 16px 12px; border-radius:26px; overflow:hidden; position:relative; background:var(--dm-grad-card-alt); border:1px solid var(--dm-gold-glow); box-shadow:0 8px 24px var(--dm-shadow-50); text-decoration:none; display:flex; align-items:center; padding:14px 16px; gap:14px; }
         .dp-banner::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--dm-gold),transparent); }
-        .dp-banner-icon { width:46px; height:46px; border-radius:12px; background:var(--dm-gold-10); border:1px solid var(--dm-gold-glow); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .dp-banner-icon { width:46px; height:46px; border-radius:18px; background:var(--dm-gold-10); border:1px solid var(--dm-gold-glow); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .dp-banner-icon svg { width:26px; height:26px; stroke:var(--dm-gold); animation:pulse-gem 2s infinite ease-in-out; }
         .dp-banner-text { flex:1; min-width:0; }
         .dp-banner-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.05rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.5px; line-height:1.2; }
@@ -266,21 +266,22 @@ class DmaiorServicesMenu extends HTMLElement {
         .dp-banner-arrow svg { width:14px; height:14px; stroke:var(--dm-gold); }
 
         /* Botão Entrar na Agência (Dinâmico) */
-        .dp-agency-btn { display:flex; align-items:center; gap:12px; margin:0 16px 14px; padding:14px 16px; background:linear-gradient(135deg,rgba(59,130,246,.12),var(--dm-cyan-08)); border:1px solid var(--dm-cyan-20); border-radius:14px; text-decoration:none; position:relative; overflow:hidden; }
+        .dp-agency-btn { display:flex; align-items:center; gap:12px; margin:0 16px 14px; padding:14px 16px; background:linear-gradient(135deg,rgba(59,130,246,.12),var(--dm-cyan-08)); border:1px solid var(--dm-cyan-20); border-radius:24px; text-decoration:none; position:relative; overflow:hidden; }
         .dp-agency-btn::before { content:''; position:absolute; top:0; left:0; right:0; height:1.5px; background:linear-gradient(90deg,transparent,var(--dm-cyan),transparent); }
         .dp-agency-btn svg { width:20px; height:20px; stroke:var(--dm-cyan); flex-shrink:0; }
         .dp-agency-btn span { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; text-transform:uppercase; letter-spacing:1px; color:var(--dm-text); }
-        .dp-agency-badge { margin-left:auto; background:var(--dm-cyan-12); border:1px solid var(--dm-cyan-25); border-radius:20px; padding:2px 10px; font-size:.62rem; font-weight:700; color:var(--dm-cyan); font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+        .dp-agency-badge { margin-left:auto; background:var(--dm-cyan-12); border:1px solid var(--dm-cyan-25); border-radius:999px; padding:3px 12px; font-size:.62rem; font-weight:700; color:var(--dm-cyan); font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
 
         /* Título de seção */
         .dp-section-title { font-family:'Rajdhani',sans-serif; font-size:.65rem; font-weight:700; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:2px; padding:0 16px 8px; }
 
         /* Grid 2 colunas */
         .dp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px 14px; }
-        .dp-item { display:flex; flex-direction:row; align-items:center; gap:11px; padding:13px 12px; border-radius:14px; background:var(--dm-grad-card-alt); border:1px solid var(--dm-bw06); text-decoration:none; position:relative; overflow:hidden; transition:transform .18s; min-height:68px; }
+        .dp-item { display:flex; flex-direction:row; align-items:center; gap:11px; padding:13px 12px; border-radius:24px; background:var(--dm-grad-card-alt); border:1px solid var(--dm-bw06); text-decoration:none; position:relative; overflow:hidden; transition:transform .18s, border-color .18s, box-shadow .18s; min-height:68px; }
+        .dp-item:hover { border-color:var(--dm-cyan-20); box-shadow:0 10px 24px var(--dm-shadow-40); }
         .dp-item:active { transform:scale(.97); }
         .dp-item::before { content:''; position:absolute; top:0; left:0; right:0; height:1.5px; }
-        .dp-item-icon { width:38px; height:38px; border-radius:10px; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .dp-item-icon { width:38px; height:38px; border-radius:16px; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .dp-item-icon svg { width:19px; height:19px; }
         .dp-item-text { flex:1; min-width:0; }
         .dp-item-name { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.3px; line-height:1.1; }
