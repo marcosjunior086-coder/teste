@@ -45,6 +45,15 @@
   --dm-rank-cyan-20: rgba(0, 212, 212, 0.20);
   --dm-rank-cyan-35: rgba(0, 212, 212, 0.35);
 
+  /* Acento de interface: segue o tema, diferente do ranking fixo */
+  --dm-effect-blue:   #3b82f6;
+  --dm-effect-accent: #00d4d4;
+  --dm-grad-effect:   linear-gradient(135deg, #3b82f6, #00d4d4);
+  --dm-grad-effect-x: linear-gradient(90deg, #3b82f6, #00d4d4);
+  --dm-effect-glow:   rgba(59, 130, 246, 0.28);
+  --dm-effect-20:     rgba(0, 212, 212, 0.20);
+  --dm-effect-35:     rgba(0, 212, 212, 0.35);
+
   /* Texto */
   --dm-text:        #e2e8f0;
   --dm-text-sub:    #a0b8c8;
@@ -133,6 +142,13 @@
   --dm-grad-deep:     linear-gradient(160deg, #07080a, #000000);
   --dm-grad-bg:       linear-gradient(160deg, #030405 0%, #000000 100%);
   --dm-rank-glow:   transparent;
+  --dm-effect-blue:   #3b82f6;
+  --dm-effect-accent: #00d4d4;
+  --dm-grad-effect:   linear-gradient(135deg, #3b82f6, #00d4d4);
+  --dm-grad-effect-x: linear-gradient(90deg, #3b82f6, #00d4d4);
+  --dm-effect-glow:   transparent;
+  --dm-effect-20:     rgba(0, 212, 212, 0.20);
+  --dm-effect-35:     rgba(0, 212, 212, 0.35);
   --dm-text:      #e8edf5;
   --dm-text-sub:  #8898b0;
   --dm-text-muted:#667890;
@@ -219,6 +235,13 @@
   --dm-bw06: rgba(0,0,0,.06);
   --dm-bw10: rgba(0,0,0,.10);
   --dm-grad-cyan: linear-gradient(90deg, #0095a8, #006678);
+  --dm-effect-blue:   #3b82f6;
+  --dm-effect-accent: #00d4d4;
+  --dm-grad-effect:   linear-gradient(135deg, #3b82f6, #00d4d4);
+  --dm-grad-effect-x: linear-gradient(90deg, #3b82f6, #00d4d4);
+  --dm-effect-glow:   rgba(59, 130, 246, 0.18);
+  --dm-effect-20:     rgba(0, 212, 212, 0.20);
+  --dm-effect-35:     rgba(0, 212, 212, 0.35);
   --dm-red:   #dc2626;
   --dm-green: #16a34a;
 }
@@ -273,6 +296,13 @@
   --dm-bw06: rgba(0,0,0,.06);
   --dm-bw10: rgba(0,0,0,.10);
   --dm-grad-cyan: linear-gradient(90deg, #e91e8c, #c2185b);
+  --dm-effect-blue:   #e91e8c;
+  --dm-effect-accent: #e91e8c;
+  --dm-grad-effect:   linear-gradient(135deg, #e91e8c, #c2185b);
+  --dm-grad-effect-x: linear-gradient(90deg, #e91e8c, #c2185b);
+  --dm-effect-glow:   rgba(233,30,140,.15);
+  --dm-effect-20:     rgba(233,30,140,.20);
+  --dm-effect-35:     rgba(233,30,140,.35);
   --dm-red:   #c2185b;
   --dm-green: #2e7d32;
 }
@@ -327,6 +357,13 @@
   --dm-bw06: rgba(0,0,0,.06);
   --dm-bw10: rgba(0,0,0,.10);
   --dm-grad-cyan: linear-gradient(90deg, #f97316, #ea580c);
+  --dm-effect-blue:   #f97316;
+  --dm-effect-accent: #f97316;
+  --dm-grad-effect:   linear-gradient(135deg, #f97316, #ea580c);
+  --dm-grad-effect-x: linear-gradient(90deg, #f97316, #ea580c);
+  --dm-effect-glow:   rgba(249,115,22,.15);
+  --dm-effect-20:     rgba(249,115,22,.20);
+  --dm-effect-35:     rgba(249,115,22,.35);
   --dm-red:   #dc2626;
   --dm-green: #16a34a;
 }
