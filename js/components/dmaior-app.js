@@ -164,6 +164,9 @@ class DMaiorPainel extends HTMLElement {
 
             .shell {
                 --cyan:#00d4d4; --cyan-d:rgba(0,212,212,.15);
+                --rank-grad:linear-gradient(135deg,#3b82f6,#00d4d4);
+                --rank-border:rgba(0,212,212,.35);
+                --rank-glow:rgba(59,130,246,.28);
                 --gold:#f0c040; --green:#4ade80; --red:#f87171;
                 --border:rgba(0,230,230,.18); --glass:rgba(26,26,26,.92);
                 --text:#fff; --muted:#a0b8c8;
@@ -200,8 +203,8 @@ class DMaiorPainel extends HTMLElement {
             .raaj{font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.08em;}
             svg{fill:currentColor;display:inline-block;vertical-align:middle;flex-shrink:0;}
             .card{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:15px;box-shadow:0 8px 32px rgba(0,0,0,.3);min-width:0;}
-            .btn{width:100%;background:linear-gradient(90deg,var(--cyan),#008c8c);color:#000;border:none;padding:14px;border-radius:12px;font-size:1rem;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;text-transform:uppercase;transition:.3s;display:flex;align-items:center;justify-content:center;gap:8px;}
-            .btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px var(--cyan-d);}
+            .btn{width:100%;background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));color:#000;border:1px solid var(--rank-border,rgba(0,212,212,.35));padding:14px;border-radius:12px;font-size:1rem;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;text-transform:uppercase;transition:.3s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 0 16px var(--rank-glow,rgba(59,130,246,.22));}
+            .btn:hover{transform:translateY(-2px);box-shadow:0 6px 22px var(--rank-glow,rgba(59,130,246,.28));}
             .btn:disabled{background:#333;color:#666;cursor:not-allowed;transform:none;box-shadow:none;}
             .btn-txt{background:none;border:none;color:var(--cyan);padding:0;display:flex;align-items:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;gap:6px;}
             .btn-txt svg{width:20px;height:20px;}
@@ -434,14 +437,14 @@ class DMaiorPainel extends HTMLElement {
 
             /* ══ TEMA DARK — cinza neutro, sem azul ══ */
             [data-theme="dark"] .shell {
-                --glass: rgba(28,28,28,.96);
+                --glass: rgba(12,13,15,.97);
                 --border: rgba(255,255,255,.10);
             }
-            [data-theme="dark"] .shell .card { background: rgba(28,28,28,.97); }
+            [data-theme="dark"] .shell .card { background: rgba(12,13,15,.98); }
             [data-theme="dark"] .shell .mbox { background: rgba(0,0,0,.35); border-color: rgba(255,255,255,.06); }
             [data-theme="dark"] .shell .saque-form { background: rgba(0,0,0,.35); }
             @media(max-width:768px){
-                [data-theme="dark"] .shell .card { background: rgba(28,28,28,.98); }
+                [data-theme="dark"] .shell .card { background: rgba(12,13,15,.99); }
                 [data-theme="dark"] .shell .bnav { background: rgba(18,18,18,.99); border-top-color: rgba(255,255,255,.10); }
             }
 
@@ -1372,7 +1375,7 @@ class DMaiorPainel extends HTMLElement {
                     } else {
                         btnSaque.disabled = false;
                         btnSaque.innerHTML = `<img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0" alt="pix"> SOLICITAR SAQUE`;
-                        btnSaque.style.background = 'linear-gradient(90deg,var(--cyan),#008c8c)';
+                        btnSaque.style.background = 'var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4))';
                         const h3 = this.qs('#cSaqueForm h3');
                         if(h3) h3.textContent = 'SOLICITAR SAQUE';
                         const desc = this.qs('#cSaqueDesc');

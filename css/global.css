@@ -119,19 +119,19 @@
 
 /* ─── Tema Dark (preto grafite) ─────────────────────────────────────────────── */
 [data-theme="dark"] {
-  --dm-bg:   #0c0c0c;
-  --dm-bg-2: #1e1e1e;
-  --dm-bg-1: #171717;
-  --dm-bg-3: #0a0a0a;
-  --dm-bg-4: #141414;
-  --dm-bg-card:  rgba(255,255,255,.06);
-  --dm-bg-panel: rgba(26,26,26,.97);
-  --dm-bg-tint:  rgba(0,0,0,.25);
-  --dm-grad-card:     linear-gradient(160deg, #1e1e1e 0%, #171717 100%);
-  --dm-grad-card-alt: linear-gradient(135deg, #1e1e1e, #171717);
-  --dm-grad-sidebar:  linear-gradient(160deg, #1e1e1e 0%, #171717 60%, #0a0a0a 100%);
-  --dm-grad-deep:     linear-gradient(160deg, #1e1e1e, #0a0a0a);
-  --dm-grad-bg:       linear-gradient(160deg, #1e1e1e 0%, #0a0a0a 100%);
+  --dm-bg:   #000000;
+  --dm-bg-2: #07080a;
+  --dm-bg-1: #050608;
+  --dm-bg-3: #000000;
+  --dm-bg-4: #06070a;
+  --dm-bg-card:  rgba(255,255,255,.035);
+  --dm-bg-panel: rgba(4,5,7,.98);
+  --dm-bg-tint:  rgba(0,0,0,.42);
+  --dm-grad-card:     linear-gradient(160deg, #08090b 0%, #020304 100%);
+  --dm-grad-card-alt: linear-gradient(135deg, #08090b, #020304);
+  --dm-grad-sidebar:  linear-gradient(160deg, #07080a 0%, #030405 62%, #000000 100%);
+  --dm-grad-deep:     linear-gradient(160deg, #07080a, #000000);
+  --dm-grad-bg:       linear-gradient(160deg, #030405 0%, #000000 100%);
   --dm-text:      #e8edf5;
   --dm-text-sub:  #8898b0;
   --dm-text-muted:#667890;
@@ -161,10 +161,10 @@
   --dm-shadow-lg: rgba(0,0,0,.72);
   --dm-shadow-xl: rgba(0,0,0,.82);
   --dm-overlay:   rgba(0,0,0,.82);
-  --dm-bw03: rgba(255,255,255,.04);
-  --dm-bw05: rgba(255,255,255,.07);
-  --dm-bw06: rgba(255,255,255,.09);
-  --dm-bw10: rgba(255,255,255,.13);
+  --dm-bw03: rgba(255,255,255,.03);
+  --dm-bw05: rgba(255,255,255,.05);
+  --dm-bw06: rgba(255,255,255,.065);
+  --dm-bw10: rgba(255,255,255,.10);
   --dm-grad-cyan: linear-gradient(90deg, #00c4c4, #007878);
 }
 

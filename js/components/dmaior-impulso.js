@@ -159,11 +159,14 @@ class DmaiorImpulso extends HTMLElement {
           display: block;
           --cyan: #00d4d4; 
           --cyan-d: rgba(0,212,212,0.15);
+          --rank-cyan: #00d4d4;
+          --rank-grad: linear-gradient(135deg,#3b82f6,#00d4d4);
+          --rank-glow: rgba(59,130,246,0.28);
           --gold: #f0c040; 
           --green: #4ade80; 
           --red: #f87171;
-          --border: rgba(0,230,230,0.18); 
-          --glass: rgba(26,26,46,0.85);
+          --border: rgba(0,212,212,0.28); 
+          --glass: rgba(24,26,40,0.92);
           --text: #fff; 
           --muted: #a0b8c8;
           font-family: 'Exo 2', sans-serif;
@@ -191,9 +194,9 @@ class DmaiorImpulso extends HTMLElement {
 
         .wrap {
           background: var(--glass);
-          border: 1px solid var(--border);
+          border: 1px solid rgba(0,212,212,0.28);
           border-radius: 20px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3),0 0 20px var(--rank-glow);
           padding: 24px 25px;
           width: 100%; max-width: 520px;
         }
@@ -205,17 +208,17 @@ class DmaiorImpulso extends HTMLElement {
           .radio-opt { width: 100%; min-width: unset; }
         }
 
-        .header { display:flex; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid rgba(0,212,212,0.15); }
-        .header-icon { width:42px; height:42px; flex-shrink:0; color:var(--cyan); }
+        .header { display:flex; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid rgba(0,212,212,0.22); }
+        .header-icon { width:42px; height:42px; flex-shrink:0; color:var(--rank-cyan); }
         .header-icon svg { width:100%; height:100%; }
         .header-title { font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700; color:var(--text); letter-spacing:0.08em; text-transform:uppercase; }
-        .header-sub { font-family:'Rajdhani',sans-serif; font-size:0.75rem; font-weight:700; color:var(--gold); letter-spacing:0.06em; text-transform:uppercase; }
+        .header-sub { font-family:'Rajdhani',sans-serif; font-size:0.75rem; font-weight:700; color:var(--rank-cyan); letter-spacing:0.06em; text-transform:uppercase; }
 
         .quota-box { background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:12px 14px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
         .quota-label { font-size:0.72rem; color:var(--muted); font-family:'Rajdhani',sans-serif; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; }
         .quota-dots { display:flex; gap:6px; align-items:center; }
-        .dot { width:12px; height:12px; border-radius:50%; border:1.5px solid rgba(0,212,212,0.3); background:transparent; transition:background 0.25s,border-color 0.25s,box-shadow 0.25s; }
-        .dot.used { background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 8px var(--cyan-d); }
+        .dot { width:12px; height:12px; border-radius:50%; border:1.5px solid rgba(0,212,212,0.35); background:transparent; transition:background 0.25s,border-color 0.25s,box-shadow 0.25s; }
+        .dot.used { background:var(--rank-grad); border-color:var(--rank-cyan); box-shadow:0 0 8px var(--rank-glow); }
         .dot.loading { border-color:rgba(0,212,212,0.15); animation:pulse 1s infinite; }
         @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.8} }
 
@@ -225,7 +228,7 @@ class DmaiorImpulso extends HTMLElement {
         .destaque { color:var(--gold); font-weight:700; }
 
         .field-group { margin-bottom:18px; }
-        .field-label { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:700; color:var(--cyan); font-family:'Rajdhani',sans-serif; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+        .field-label { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:700; color:var(--rank-cyan); font-family:'Rajdhani',sans-serif; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
         .field-input { width:100%; background:rgba(0,0,0,0.5); border:1px solid var(--border); border-radius:10px; padding:14px; color:var(--text); font-family:inherit; font-size:0.95rem; outline:none; transition:0.3s; }
         .field-input::placeholder { color:rgba(255,255,255,0.2); }
         .field-input:focus { border-color:var(--cyan); box-shadow:0 0 10px var(--cyan-d); }
@@ -240,12 +243,12 @@ class DmaiorImpulso extends HTMLElement {
         
         .radio-opt input[type="radio"]:checked + .radio-card, 
         #btn-impulso {
-          background: linear-gradient(135deg, rgba(0,242,255,0.12), rgba(0,100,255,0.12));
-          border: 1px solid #00f2ff;
-          color: #00f2ff;
+          background: linear-gradient(135deg, rgba(59,130,246,0.14), rgba(0,212,212,0.12));
+          border: 1px solid var(--rank-cyan);
+          color: var(--rank-cyan);
         }
-        .radio-opt input[type="radio"]:checked + .radio-card { box-shadow: 0 0 16px rgba(0,242,255,0.15); }
-        .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo { color: #00f2ff; }
+        .radio-opt input[type="radio"]:checked + .radio-card { box-shadow: 0 0 16px var(--rank-glow); }
+        .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo { color: var(--rank-cyan); }
         .radio-opt input[type="radio"]:disabled + .radio-card { opacity:0.4; cursor:not-allowed; background:rgba(0,0,0,0.2); border-color:rgba(255,255,255,0.05); transform:none; box-shadow:none; }
 
         #btn-impulso {
@@ -255,8 +258,8 @@ class DmaiorImpulso extends HTMLElement {
           letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
           display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
         }
-        #btn-impulso:hover:not(:disabled) { box-shadow: 0 0 22px rgba(0,242,255,0.25); transform: translateY(-2px); }
-        #btn-impulso:disabled { opacity:0.35; background:transparent; border-color:rgba(0,242,255,0.3); color:rgba(0,242,255,0.4); cursor: not-allowed; box-shadow: none; transform: none; }
+        #btn-impulso:hover:not(:disabled) { box-shadow: 0 0 22px var(--rank-glow); transform: translateY(-2px); }
+        #btn-impulso:disabled { opacity:0.55; background:rgba(59,130,246,.08); border-color:rgba(0,212,212,0.28); color:rgba(0,212,212,0.55); cursor: not-allowed; box-shadow: none; transform: none; }
 
         .feedback { margin-top:14px; padding:12px 14px; border-radius:9px; font-size:0.82rem; line-height:1.5; display:none; }
         .feedback.ok   { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.3); color:var(--green); display:block; }
@@ -273,7 +276,7 @@ class DmaiorImpulso extends HTMLElement {
         :host-context([data-theme="rosa"]) .imp-comunicado { background:rgba(233,30,140,0.07); border-color:rgba(233,30,140,0.25); }
         :host-context([data-theme="dark"]) .imp-comunicado { background:rgba(240,192,64,0.06); border-color:rgba(240,192,64,0.20); }
 
-        .spinner { width:16px; height:16px; border:2px solid rgba(0,242,255,0.3); border-top-color:#00f2ff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+        .spinner { width:16px; height:16px; border:2px solid rgba(0,212,212,0.3); border-top-color:var(--rank-cyan); border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
         @keyframes spin { to { transform:rotate(360deg); } }
 
         /* ══ TEMA BRANCO — bloom azul-petróleo ══ */

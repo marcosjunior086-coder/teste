@@ -230,9 +230,9 @@ class MenuMobileDMaior extends HTMLElement {
       .close-btn{ background:transparent; border:none; padding:5px; cursor:pointer; display:flex; align-items:center; transition:transform .2s; }
       .close-btn:active{ transform:scale(.8); }
       .auth-area{ padding:16px 20px; border-bottom:1px solid var(--dm-rank-cyan-20,rgba(0,212,212,.20)); background:var(--dm-bg-tint); }
-      .btn-access{ display:flex; align-items:center; justify-content:center; gap:8px; background:var(--dm-grad-cyan, linear-gradient(135deg,var(--dm-cyan,#00d4d4) 0%,var(--dm-gold,#f0c040) 100%)); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; text-transform:uppercase; cursor:pointer; text-decoration:none; width:100%; letter-spacing:.05em; transition:box-shadow .25s,opacity .2s; box-shadow:0 0 14px var(--dm-cyan-20,rgba(0,212,212,.35)); }
+      .btn-access{ display:flex; align-items:center; justify-content:center; gap:8px; background:var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4)); color:#fff; border:1px solid var(--dm-rank-cyan-35,rgba(0,212,212,.35)); padding:12px 20px; border-radius:10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; text-transform:uppercase; cursor:pointer; text-decoration:none; width:100%; letter-spacing:.05em; transition:box-shadow .25s,opacity .2s; box-shadow:0 0 16px var(--dm-rank-glow,rgba(59,130,246,.28)); }
       .btn-access:active{ opacity:.85; }
-      .btn-access:hover{ box-shadow:0 0 22px rgba(0,229,229,.5); }
+      .btn-access:hover{ box-shadow:0 0 24px var(--dm-rank-glow,rgba(59,130,246,.28)); }
       .user-card{ display:flex; align-items:center; gap:12px; }
       .avatar-wrap{ width:46px; height:46px; border-radius:50%; border:2px solid var(--dm-rank-cyan,#00d4d4); overflow:hidden; flex-shrink:0; background:var(--dm-bg-1); display:flex; align-items:center; justify-content:center; box-shadow:0 0 14px var(--dm-rank-glow,rgba(59,130,246,.28)); }
       .avatar-wrap img{ width:100%; height:100%; object-fit:cover; }

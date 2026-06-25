@@ -321,6 +321,48 @@ class DmaiorServicesMenu extends HTMLElement {
         :host-context([data-theme="dark"]) .dp-teal .dp-item-icon svg,
         :host-context([data-theme="dark"]) .dp-gold .dp-item-icon svg { fill:var(--dm-rank-cyan,#00d4d4); stroke:var(--dm-rank-cyan,#00d4d4); }
         :host-context([data-theme="dark"]) .dp-item-icon { background:rgba(59,130,246,.10); border-color:var(--dm-rank-cyan-35,rgba(0,212,212,.35)); }
+        :host-context([data-theme="dark"]) .dp-banner,
+        :host-context([data-theme="dark"]) .dp-agency-btn,
+        :host-context([data-theme="dark"]) .dp-item,
+        :host-context([data-theme="dark"]) .menu-panel,
+        :host-context([data-theme="dark"]) .btn-agency-mobile {
+          background:linear-gradient(145deg,rgba(8,9,11,.96),rgba(0,0,0,.98));
+          border-color:rgba(0,212,212,.22);
+          box-shadow:0 14px 34px rgba(0,0,0,.62),0 0 18px rgba(59,130,246,.14);
+        }
+        :host-context([data-theme="dark"]) .dp-item:hover {
+          border-color:rgba(0,212,212,.42);
+          box-shadow:0 16px 34px rgba(0,0,0,.66),0 0 22px rgba(59,130,246,.20);
+        }
+        :host-context([data-theme="dark"]) .dp-item-icon {
+          background:rgba(0,0,0,.35);
+          border-color:currentColor;
+          box-shadow:0 0 14px currentColor;
+        }
+        :host-context([data-theme="dark"]) .dp-pink .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-pink .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-pink .dp-item-icon svg { color:#e130ff; fill:#ff2ecf; stroke:#ff2ecf; }
+        :host-context([data-theme="dark"]) .dp-green .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-green .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-green .dp-item-icon svg { color:#22e67a; fill:#22e67a; stroke:#22e67a; }
+        :host-context([data-theme="dark"]) .dp-cyan .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-cyan .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-cyan .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-teal .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-teal .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-teal .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-blue .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-blue .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-blue .dp-item-icon svg { color:#00d4d4; fill:#00d4d4; stroke:#00d4d4; }
+        :host-context([data-theme="dark"]) .dp-purple .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-purple .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-purple .dp-item-icon svg { color:#8b5cf6; fill:#8b5cf6; stroke:#8b5cf6; }
+        :host-context([data-theme="dark"]) .dp-orange .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-orange .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-orange .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-gold .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-gold .dp-item-icon,
+        :host-context([data-theme="dark"]) .dp-gold .dp-item-icon svg { color:#f0c040; fill:#f0c040; stroke:#f0c040; }
 
         @keyframes pulse-gem { 0%,100%{transform:scale(1);filter:drop-shadow(0 0 5px #f0c040)} 50%{transform:scale(1.12);filter:drop-shadow(0 0 12px #f0c040)} }
 
