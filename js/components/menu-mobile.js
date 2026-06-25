@@ -162,19 +162,31 @@ class MenuMobileDMaior extends HTMLElement {
       .bell-btn:hover{ color:var(--dm-cyan); }
       .bell-btn:active{ opacity:.7; }
       .bell-dot{ position:absolute; top:7px; right:7px; width:8px; height:8px; border-radius:50%; background:#f87171; border:1.5px solid var(--dm-bg-1,#0a0e27); pointer-events:none; }
-      .layout-dropdown{ position:absolute; top:calc(100% + 6px); right:0; background:var(--dm-bg-2); border:1px solid var(--dm-cyan-25); border-radius:12px; padding:6px; min-width:185px; box-shadow:0 10px 30px var(--dm-shadow-lg); display:none; flex-direction:column; gap:2px; z-index:10001; }
-      .layout-dropdown.open{ display:flex; animation:ddFadeIn .15s ease; }
+      .layout-dropdown{ position:absolute; top:calc(100% + 8px); right:0; width:min(430px,calc(100vw - 18px)); background:var(--dm-bg-2); border:1px solid var(--dm-cyan-25); border-radius:28px; padding:14px; box-shadow:0 18px 46px var(--dm-shadow-lg); display:none; flex-direction:column; gap:12px; z-index:10001; overflow:hidden; }
+      .layout-dropdown.open{ display:grid; grid-template-columns:1fr 1fr; animation:ddFadeIn .15s ease; }
       @keyframes ddFadeIn{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
-      .dd-label{ font-size:.6rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.5px; padding:6px 12px 4px; font-family:'Rajdhani',sans-serif; }
-      .dd-divider{ height:1px; background:linear-gradient(90deg,transparent,var(--dm-cyan-20),transparent); margin:3px 0; }
-      .dd-option{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:.9rem; font-weight:700; color:var(--dm-text); letter-spacing:.5px; text-transform:uppercase; border:none; background:none; width:100%; text-align:left; transition:background .15s; }
-      .dd-option:hover{ background:var(--dm-cyan-08); }
-      .dd-option.active{ background:var(--dm-cyan-12); color:var(--dm-cyan); }
-      .dd-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-      .pref-row{ display:grid; gap:5px; padding:7px 10px 8px; }
-      .pref-row label{ font-size:.62rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.2px; font-family:'Rajdhani',sans-serif; font-weight:700; }
-      .pref-select{ width:100%; min-height:38px; border:1px solid var(--dm-cyan-20); border-radius:8px; background:var(--dm-bg-1); color:var(--dm-text); padding:0 10px; font-family:'Exo 2',sans-serif; font-size:.82rem; outline:none; cursor:pointer; }
-      .pref-select:focus{ border-color:var(--dm-cyan); box-shadow:0 0 0 2px var(--dm-cyan-10); }
+      .dd-label{ grid-column:1/-1; font-size:.62rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.6px; padding:0 8px; font-family:'Rajdhani',sans-serif; font-weight:700; }
+      .dd-divider{ grid-column:1/-1; height:1px; background:linear-gradient(90deg,transparent,var(--dm-cyan-20),transparent); margin:0; }
+      .dd-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .dd-option,.pref-row{ min-width:0; min-height:68px; display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:999px; cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:.98rem; font-weight:700; color:var(--dm-text); letter-spacing:.3px; text-transform:uppercase; border:1px solid var(--dm-cyan-10); background:linear-gradient(135deg,var(--dm-bw06),var(--dm-bg-tint)); width:100%; text-align:left; transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s; overflow:hidden; }
+      .dd-option:hover,.pref-row:hover{ background:var(--dm-cyan-08); border-color:var(--dm-cyan-25); transform:translateY(-1px); }
+      .dd-option.active{ background:var(--dm-cyan-12); border-color:var(--dm-cyan-40); color:var(--dm-cyan); box-shadow:0 0 18px var(--dm-cyan-10); }
+      .dd-icon{ width:34px; height:34px; border-radius:50%; flex:0 0 34px; display:flex; align-items:center; justify-content:center; color:var(--dm-text); }
+      .dd-option.active .dd-icon{ color:var(--dm-cyan); }
+      .dd-dot{ width:22px; height:22px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 5px var(--dm-bw05); }
+      .dd-copy{ min-width:0; flex:1; overflow:hidden; white-space:nowrap; }
+      .dd-marquee{ display:inline-block; max-width:100%; vertical-align:middle; }
+      .dd-option:hover .dd-marquee,.dd-option:focus-visible .dd-marquee,.pref-row:hover .dd-marquee,.pref-row:focus-within .dd-marquee{ animation:ddMarquee 4.6s ease-in-out infinite; }
+      @keyframes ddMarquee{ 0%,18%{ transform:translateX(0); } 50%,68%{ transform:translateX(calc(-100% + 120px)); } 100%{ transform:translateX(0); } }
+      .dd-arrow{ flex:0 0 auto; color:var(--dm-text-sub); font-size:1.5rem; line-height:1; }
+      .pref-row{ cursor:default; text-transform:none; align-items:center; }
+      .pref-main{ min-width:0; flex:1; display:grid; gap:5px; overflow:hidden; }
+      .pref-row label{ font-size:.58rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.2px; font-family:'Rajdhani',sans-serif; font-weight:700; white-space:nowrap; overflow:hidden; }
+      .pref-select{ width:100%; min-height:28px; border:0; border-radius:0; background:transparent; color:var(--dm-text); padding:0 20px 0 0; font-family:'Exo 2',sans-serif; font-size:.83rem; outline:none; cursor:pointer; }
+      .pref-select option{ background:var(--dm-bg-2); color:var(--dm-text); }
+      .pref-select:focus{ color:var(--dm-cyan); }
+      @media (prefers-reduced-motion: reduce){ .dd-option:hover .dd-marquee,.dd-option:focus-visible .dd-marquee,.pref-row:hover .dd-marquee,.pref-row:focus-within .dd-marquee{ animation:none; } }
+      @media (max-width:420px){ .layout-dropdown{ right:-46px; width:calc(100vw - 14px); border-radius:24px; padding:12px; } .dd-grid{ gap:8px; } .dd-option,.pref-row{ min-height:62px; padding:11px 12px; font-size:.9rem; } .dd-icon{ width:30px; height:30px; flex-basis:30px; } .dd-arrow{ display:none; } }
       .overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--dm-overlay); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .3s; z-index:9998; }
       .overlay.on{ opacity:1; pointer-events:auto; }
       .sidebar{ position:fixed; top:0; right:-100%; width:280px; max-width:85vw; height:100vh; background:var(--dm-grad-sidebar); border-left:1px solid var(--dm-cyan-20); box-shadow:-5px 0 30px var(--dm-shadow-lg); transition:right .3s cubic-bezier(.25,.8,.25,1); z-index:9999; display:flex; flex-direction:column; overflow-y:auto; scrollbar-width:none; }
@@ -235,32 +247,32 @@ class MenuMobileDMaior extends HTMLElement {
             <div class="dd-label">Layout</div>
             <div class="dd-divider"></div>
             <button class="dd-option" id="ddOriginal" data-layout="original">
-              <span class="dd-dot" style="background:#00d4d4;"></span> Original
+              <span class="dd-dot" style="background:#00d4d4;"></span><span class="dd-copy"><span class="dd-marquee">Original</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddDinamico" data-layout="dinamico">
-              <span class="dd-dot" style="background:#f0c040;"></span> Dinâmico Pro
+              <span class="dd-dot" style="background:#f0c040;"></span><span class="dd-copy"><span class="dd-marquee">Dinâmico Pro</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <div class="dd-divider"></div>
             <div class="dd-label">Cor</div>
             <button class="dd-option" id="ddThemeOriginal" data-theme-id="original">
-              <span class="dd-dot" style="background:#0a0e27;border:1.5px solid rgba(0,212,212,.5);"></span> Original
+              <span class="dd-dot" style="background:#0a0e27;border:1.5px solid rgba(0,212,212,.5);"></span><span class="dd-copy"><span class="dd-marquee">Original</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddThemeDark" data-theme-id="dark">
-              <span class="dd-dot" style="background:#0d0f14;border:1.5px solid rgba(180,180,200,.3);"></span> Dark
+              <span class="dd-dot" style="background:#0d0f14;border:1.5px solid rgba(180,180,200,.3);"></span><span class="dd-copy"><span class="dd-marquee">Dark</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddThemeBranco" data-theme-id="branco">
-              <span class="dd-dot" style="background:#f0f4f8;border:1.5px solid rgba(0,0,0,.25);"></span> Branco
+              <span class="dd-dot" style="background:#f0f4f8;border:1.5px solid rgba(0,0,0,.25);"></span><span class="dd-copy"><span class="dd-marquee">Branco</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddThemeRosa" data-theme-id="rosa">
-              <span class="dd-dot" style="background:#fce4ec;border:1.5px solid #e91e8c;"></span> Rosa
+              <span class="dd-dot" style="background:#fce4ec;border:1.5px solid #e91e8c;"></span><span class="dd-copy"><span class="dd-marquee">Rosa</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddThemeLaranja" data-theme-id="laranja">
-              <span class="dd-dot" style="background:#fff3e0;border:1.5px solid #f97316;"></span> Laranja
+              <span class="dd-dot" style="background:#fff3e0;border:1.5px solid #f97316;"></span><span class="dd-copy"><span class="dd-marquee">Laranja</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <div class="dd-divider"></div>
             <div class="dd-label" data-i18n="accessibility">Acessibilidade</div>
             <div class="pref-row">
-              <label for="ddFontSize" data-i18n="textSize">Tamanho do texto</label>
+              <label for="ddFontSize"><span class="dd-marquee" data-i18n="textSize">Tamanho do texto</span></label>
               <select class="pref-select" id="ddFontSize" data-pref-font-select>
                 <option value="normal" data-i18n="fontNormal">Normal</option>
                 <option value="grande" data-i18n="fontLarge">Grande</option>
@@ -268,7 +280,7 @@ class MenuMobileDMaior extends HTMLElement {
               </select>
             </div>
             <div class="pref-row">
-              <label for="ddLang" data-i18n="language">Idioma</label>
+              <label for="ddLang"><span class="dd-marquee" data-i18n="language">Idioma</span></label>
               <select class="pref-select" id="ddLang" data-pref-lang-select>
                 <option value="pt-BR">Português BR</option>
                 <option value="en">English</option>
