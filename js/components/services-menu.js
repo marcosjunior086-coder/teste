@@ -300,6 +300,27 @@ class DmaiorServicesMenu extends HTMLElement {
         .dp-gold  { border-color:rgba(240,192,64,.2);  } .dp-gold::before  { background:linear-gradient(90deg,transparent,#f0c040,transparent); } .dp-gold  .dp-item-icon { background:rgba(240,192,64,.1);  border-color:rgba(240,192,64,.25); } .dp-gold  .dp-item-icon svg { stroke:#f0c040; } .dp-gold  .dp-item-label { color:#f0c040; }
         .dp-pink,.dp-green,.dp-cyan,.dp-purple,.dp-orange,.dp-blue,.dp-teal,.dp-gold { border-color:var(--dm-rank-cyan-20,rgba(0,212,212,.20)); }
         .dp-pink::before,.dp-green::before,.dp-cyan::before,.dp-purple::before,.dp-orange::before,.dp-blue::before,.dp-teal::before,.dp-gold::before { background:linear-gradient(90deg,transparent,var(--dm-rank-blue,#3b82f6),var(--dm-rank-cyan,#00d4d4),transparent); opacity:.72; }
+        :host-context([data-theme="dark"]) .item-instagram,
+        :host-context([data-theme="dark"]) .item-whatsapp,
+        :host-context([data-theme="dark"]) .dp-pink .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-green .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-cyan .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-purple .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-orange .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-blue .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-teal .dp-item-label,
+        :host-context([data-theme="dark"]) .dp-gold .dp-item-label { color:var(--dm-rank-cyan,#00d4d4); }
+        :host-context([data-theme="dark"]) .item-instagram svg,
+        :host-context([data-theme="dark"]) .item-whatsapp svg,
+        :host-context([data-theme="dark"]) .dp-pink .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-green .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-cyan .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-purple .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-orange .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-blue .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-teal .dp-item-icon svg,
+        :host-context([data-theme="dark"]) .dp-gold .dp-item-icon svg { fill:var(--dm-rank-cyan,#00d4d4); stroke:var(--dm-rank-cyan,#00d4d4); }
+        :host-context([data-theme="dark"]) .dp-item-icon { background:rgba(59,130,246,.10); border-color:var(--dm-rank-cyan-35,rgba(0,212,212,.35)); }
 
         @keyframes pulse-gem { 0%,100%{transform:scale(1);filter:drop-shadow(0 0 5px #f0c040)} 50%{transform:scale(1.12);filter:drop-shadow(0 0 12px #f0c040)} }
 

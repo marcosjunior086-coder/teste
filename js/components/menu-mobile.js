@@ -291,7 +291,7 @@ class MenuMobileDMaior extends HTMLElement {
               <span class="dd-dot" style="background:#0a0e27;border:1.5px solid rgba(0,212,212,.5);"></span><span class="dd-copy"><span class="dd-marquee">Original</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddThemeDark" data-theme-id="dark">
-              <span class="dd-dot" style="background:#0d0f14;border:1.5px solid rgba(180,180,200,.3);"></span><span class="dd-copy"><span class="dd-marquee">Dark</span></span><span class="dd-arrow">&rsaquo;</span>
+              <span class="dd-dot" style="background:#0d0f14;border:1.5px solid rgba(180,180,200,.3);"></span><span class="dd-copy"><span class="dd-marquee">Escuro</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddThemeBranco" data-theme-id="branco">
               <span class="dd-dot" style="background:#f0f4f8;border:1.5px solid rgba(0,0,0,.25);"></span><span class="dd-copy"><span class="dd-marquee">Branco</span></span><span class="dd-arrow">&rsaquo;</span>
