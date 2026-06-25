@@ -109,13 +109,13 @@ class KwaiLiveWidget extends HTMLElement {
 
         #liveWidget{
           background:var(--dm-grad-sidebar);
-          border-bottom:1px solid var(--dm-cyan-20);
+          border-bottom:1px solid var(--dm-rank-cyan-20, rgba(0,212,212,.20));
           padding:8px 6px 12px;color:var(--dm-text);
           position:relative;width:100%;
           font-family:'Inter',Arial,sans-serif;
           transition:padding .3s ease;
         }
-        #liveWidget::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-cyan),transparent);}
+        #liveWidget::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-rank-blue,#3b82f6),var(--dm-rank-cyan,#00d4d4),transparent);}
         #liveWidget.minimized{padding-bottom:6px;}
 
         #liveTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding:0 8px;}
@@ -127,7 +127,7 @@ class KwaiLiveWidget extends HTMLElement {
         .top-right{display:flex;align-items:center;gap:8px;}
 
         #catFilter{
-          background:var(--dm-bg-3);border:1px solid var(--dm-cyan-40);color:var(--dm-cyan);
+          background:var(--dm-bg-3);border:1px solid var(--dm-rank-cyan-35,rgba(0,212,212,.35));color:var(--dm-rank-cyan,#00d4d4);
           padding:3px 12px;border-radius:20px;
           font-family:'Inter',Arial,sans-serif;
           font-size:.6rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;
@@ -136,13 +136,13 @@ class KwaiLiveWidget extends HTMLElement {
         #catFilter option{background:var(--dm-bg-3);color:var(--dm-text);}
 
         #toggleMin{
-          background:var(--dm-cyan-10);border:1px solid var(--dm-cyan-30);color:var(--dm-cyan);
+          background:rgba(59,130,246,.10);border:1px solid var(--dm-rank-cyan-35,rgba(0,212,212,.35));color:var(--dm-rank-cyan,#00d4d4);
           width:22px;height:22px;border-radius:5px;
           font-size:.85rem;font-weight:700;cursor:pointer;
           display:flex;align-items:center;justify-content:center;
           flex-shrink:0;line-height:1;transition:background .15s;
         }
-        #toggleMin:hover{background:var(--dm-cyan-25);}
+        #toggleMin:hover{background:rgba(0,212,212,.18);}
 
         #liveRow{
           display:flex;gap:8px;overflow-x:auto;overflow-y:visible;

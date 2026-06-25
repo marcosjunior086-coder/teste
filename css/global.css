@@ -36,6 +36,15 @@
   --dm-pink:        #E1306C;
   --dm-whatsapp:    #25D366;
 
+  /* Acento fixo do ranking: usado em brilhos/linhas que devem manter azul -> ciano em todos os temas */
+  --dm-rank-blue:   #3b82f6;
+  --dm-rank-cyan:   #00d4d4;
+  --dm-grad-rank:   linear-gradient(135deg, #3b82f6, #00d4d4);
+  --dm-grad-rank-x: linear-gradient(90deg, #3b82f6, #00d4d4);
+  --dm-rank-glow:   rgba(59, 130, 246, 0.28);
+  --dm-rank-cyan-20: rgba(0, 212, 212, 0.20);
+  --dm-rank-cyan-35: rgba(0, 212, 212, 0.35);
+
   /* Texto */
   --dm-text:        #e2e8f0;
   --dm-text-sub:    #a0b8c8;
