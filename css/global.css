@@ -132,6 +132,7 @@
   --dm-grad-sidebar:  linear-gradient(160deg, #07080a 0%, #030405 62%, #000000 100%);
   --dm-grad-deep:     linear-gradient(160deg, #07080a, #000000);
   --dm-grad-bg:       linear-gradient(160deg, #030405 0%, #000000 100%);
+  --dm-rank-glow:   transparent;
   --dm-text:      #e8edf5;
   --dm-text-sub:  #8898b0;
   --dm-text-muted:#667890;
@@ -155,11 +156,11 @@
   --dm-gold-10:   rgba(232,184,48,.10);
   --dm-gold-20:   rgba(232,184,48,.20);
   --dm-gold-70:   rgba(232,184,48,.70);
-  --dm-shadow-sm: rgba(0,0,0,.38);
-  --dm-shadow-md: rgba(0,0,0,.52);
-  --dm-shadow-50: rgba(0,0,0,.58);
-  --dm-shadow-lg: rgba(0,0,0,.72);
-  --dm-shadow-xl: rgba(0,0,0,.82);
+  --dm-shadow-sm: transparent;
+  --dm-shadow-md: transparent;
+  --dm-shadow-50: transparent;
+  --dm-shadow-lg: transparent;
+  --dm-shadow-xl: transparent;
   --dm-overlay:   rgba(0,0,0,.82);
   --dm-bw03: rgba(255,255,255,.03);
   --dm-bw05: rgba(255,255,255,.05);
@@ -363,7 +364,13 @@ body {
 /* Tema dark — preto puro (html + body para cobrir overscroll no mobile) */
 [data-theme="dark"] html,
 [data-theme="dark"] body {
-  background: #0c0c0c;
+  background: #000;
+  background-image: none;
+  background-attachment: initial;
+}
+
+[data-theme="dark"] .dm-page {
+  background: #000;
 }
 
 /* Temas claros — restaura fundo sólido sem o gradiente escuro */

@@ -328,16 +328,16 @@ class DmaiorServicesMenu extends HTMLElement {
         :host-context([data-theme="dark"]) .btn-agency-mobile {
           background:linear-gradient(145deg,rgba(8,9,11,.96),rgba(0,0,0,.98));
           border-color:rgba(0,212,212,.22);
-          box-shadow:0 14px 34px rgba(0,0,0,.62),0 0 18px rgba(59,130,246,.14);
+          box-shadow:none;
         }
         :host-context([data-theme="dark"]) .dp-item:hover {
           border-color:rgba(0,212,212,.42);
-          box-shadow:0 16px 34px rgba(0,0,0,.66),0 0 22px rgba(59,130,246,.20);
+          box-shadow:none;
         }
         :host-context([data-theme="dark"]) .dp-item-icon {
           background:rgba(0,0,0,.35);
           border-color:currentColor;
-          box-shadow:0 0 14px currentColor;
+          box-shadow:none;
         }
         :host-context([data-theme="dark"]) .dp-pink .dp-item-label,
         :host-context([data-theme="dark"]) .dp-pink .dp-item-icon,

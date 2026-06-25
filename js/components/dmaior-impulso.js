@@ -161,7 +161,7 @@ class DmaiorImpulso extends HTMLElement {
           --cyan-d: rgba(0,212,212,0.15);
           --rank-cyan: #00d4d4;
           --rank-grad: linear-gradient(135deg,#3b82f6,#00d4d4);
-          --rank-glow: rgba(59,130,246,0.28);
+          --rank-glow: transparent;
           --gold: #f0c040; 
           --green: #4ade80; 
           --red: #f87171;
@@ -196,7 +196,7 @@ class DmaiorImpulso extends HTMLElement {
           background: var(--glass);
           border: 1px solid rgba(0,212,212,0.28);
           border-radius: 20px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.3),0 0 20px var(--rank-glow);
+          box-shadow: none;
           padding: 24px 25px;
           width: 100%; max-width: 520px;
         }

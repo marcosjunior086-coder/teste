@@ -166,7 +166,7 @@ class DMaiorPainel extends HTMLElement {
                 --cyan:#00d4d4; --cyan-d:rgba(0,212,212,.15);
                 --rank-grad:linear-gradient(135deg,#3b82f6,#00d4d4);
                 --rank-border:rgba(0,212,212,.35);
-                --rank-glow:rgba(59,130,246,.28);
+                --rank-glow:transparent;
                 --gold:#f0c040; --green:#4ade80; --red:#f87171;
                 --border:rgba(0,230,230,.18); --glass:rgba(26,26,26,.92);
                 --text:#fff; --muted:#a0b8c8;
