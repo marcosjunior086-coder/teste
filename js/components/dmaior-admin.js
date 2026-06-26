@@ -3047,16 +3047,64 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   async _abrirConfigComissaoAgentes() {
-    const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px" id="modalComissaoAgentes">
-      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;max-width:900px;width:100%;max-height:90vh;overflow:auto">
-        <div style="padding:18px 22px;border-bottom:1px solid rgba(0,212,212,.14);display:flex;align-items:center;justify-content:space-between;gap:12px">
+    const html = `<div id="modalComissaoAgentes" class="mc-overlay">
+      <style>
+        #modalComissaoAgentes{--mc-bg:#060b16;--mc-panel:#0b1220;--mc-soft:#10192a;--mc-line:rgba(0,212,212,.18);--mc-line-2:rgba(59,130,246,.22);--mc-text:#e8f2ff;--mc-muted:#8aa3ba;--mc-cyan:#00d4d4;--mc-blue:#3b82f6;--mc-red:#f87171;font-family:'Exo 2',Arial,sans-serif}
+        #modalComissaoAgentes *{box-sizing:border-box}
+        #modalComissaoAgentes.mc-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:18px}
+        #modalComissaoAgentes .mc-panel{width:min(980px,calc(100vw - 28px));max-height:calc(100vh - 36px);overflow:auto;background:linear-gradient(180deg,#0d1627,#07101d);border:1px solid var(--mc-line);border-radius:18px;box-shadow:0 22px 70px rgba(0,0,0,.5)}
+        #modalComissaoAgentes .mc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 22px;border-bottom:1px solid rgba(0,212,212,.12);background:rgba(255,255,255,.015)}
+        #modalComissaoAgentes .mc-title{font-family:'Rajdhani',Arial,sans-serif;font-size:23px;line-height:1;font-weight:800;letter-spacing:.03em;color:var(--mc-text)}
+        #modalComissaoAgentes .mc-sub{font-size:12px;color:var(--mc-muted);margin-top:7px}
+        #modalComissaoAgentes .mc-body{padding:20px 22px 22px}
+        #modalComissaoAgentes .mc-btn{height:38px;border:1px solid var(--mc-line);border-radius:11px;background:rgba(255,255,255,.04);color:#b9cbe0;padding:0 14px;font-family:'Rajdhani',Arial,sans-serif;font-size:14px;font-weight:800;letter-spacing:.03em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+        #modalComissaoAgentes .mc-btn:hover{border-color:rgba(0,212,212,.38);color:#fff}
+        #modalComissaoAgentes .mc-primary{border:0;background:linear-gradient(135deg,var(--mc-blue),var(--mc-cyan));color:#04101c;box-shadow:0 10px 24px rgba(0,212,212,.14)}
+        #modalComissaoAgentes .mc-danger{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#ff9a9a}
+        #modalComissaoAgentes .mc-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-bottom:14px}
+        #modalComissaoAgentes .mc-field{display:grid;gap:7px;min-width:0}
+        #modalComissaoAgentes .mc-label{font-family:'Rajdhani',Arial,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--mc-cyan);font-weight:800}
+        #modalComissaoAgentes .mc-input{width:100%;height:40px;padding:0 12px;border:1px solid rgba(0,212,212,.16);border-radius:10px;background:rgba(0,0,0,.42);color:var(--mc-text);font:600 13px 'Exo 2',Arial,sans-serif;outline:none}
+        #modalComissaoAgentes .mc-input:focus{border-color:rgba(0,212,212,.45);box-shadow:0 0 0 3px rgba(0,212,212,.08)}
+        #modalComissaoAgentes .mc-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 16px;border:1px solid rgba(59,130,246,.18);border-radius:12px;background:rgba(59,130,246,.07);color:#b9cbe0;font-size:12px;line-height:1.45}
+        #modalComissaoAgentes .mc-section-title{font-family:'Rajdhani',Arial,sans-serif;color:var(--mc-text);font-weight:800;font-size:15px;letter-spacing:.06em;margin:0 0 10px}
+        #modalComissaoAgentes .mc-rules{display:grid;gap:9px;margin-bottom:16px}
+        #modalComissaoAgentes .mc-rule{display:grid;grid-template-columns:minmax(170px,1.4fr) repeat(4,minmax(82px,.65fr)) minmax(70px,.45fr) minmax(150px,.7fr);gap:8px;align-items:center;padding:10px;border:1px solid rgba(0,212,212,.12);border-radius:13px;background:rgba(255,255,255,.025)}
+        #modalComissaoAgentes .mc-rule-head{padding:0 10px;background:transparent;border:0;color:var(--mc-muted);font-family:'Rajdhani',Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:800}
+        #modalComissaoAgentes .mc-rule:not(.mc-rule-head) .mc-label{display:none}
+        #modalComissaoAgentes .mc-actions{display:flex;gap:7px;justify-content:flex-end}
+        #modalComissaoAgentes .mc-check{display:flex;align-items:center;gap:8px;color:#cfe7f7;font-size:12px;font-weight:700}
+        #modalComissaoAgentes .mc-check input{width:16px;height:16px;accent-color:var(--mc-cyan)}
+        #modalComissaoAgentes .mc-new{padding:15px;border:1px solid rgba(0,212,212,.18);border-radius:14px;background:rgba(0,212,212,.045)}
+        #modalComissaoAgentes .mc-new-grid{display:grid;grid-template-columns:minmax(150px,1.35fr) repeat(4,minmax(90px,.8fr)) auto;gap:9px}
+        #modalComissaoAgentes .mc-empty{padding:18px;border:1px dashed rgba(0,212,212,.22);border-radius:14px;color:var(--mc-muted);text-align:center}
+        #modalComissaoAgentes .mc-error{padding:16px;border:1px solid rgba(248,113,113,.28);border-radius:12px;background:rgba(248,113,113,.08);color:#ff9a9a}
+        @media(max-width:760px){
+          #modalComissaoAgentes.mc-overlay{align-items:flex-start;padding:10px}
+          #modalComissaoAgentes .mc-panel{width:100%;max-height:calc(100vh - 20px);border-radius:16px}
+          #modalComissaoAgentes .mc-head{padding:16px}
+          #modalComissaoAgentes .mc-body{padding:16px}
+          #modalComissaoAgentes .mc-grid{grid-template-columns:1fr}
+          #modalComissaoAgentes .mc-grid .mc-primary{width:100%}
+          #modalComissaoAgentes .mc-rule-head{display:none}
+          #modalComissaoAgentes .mc-rule{grid-template-columns:1fr 1fr;padding:12px}
+          #modalComissaoAgentes .mc-rule:not(.mc-rule-head) .mc-label{display:block}
+          #modalComissaoAgentes .mc-rule .mc-field:first-child,#modalComissaoAgentes .mc-actions{grid-column:1/-1}
+          #modalComissaoAgentes .mc-actions{justify-content:stretch}
+          #modalComissaoAgentes .mc-actions .mc-btn{flex:1}
+          #modalComissaoAgentes .mc-new-grid{grid-template-columns:1fr 1fr}
+          #modalComissaoAgentes #btnNovaRegraCom{grid-column:1/-1;width:100%}
+        }
+      </style>
+      <div class="mc-panel">
+        <div class="mc-head">
           <div>
-            <div style="font-family:'Rajdhani',sans-serif;font-size:21px;font-weight:700;color:#e2e8f0">Comissões dos Agentes</div>
-            <div style="font-size:12px;color:#7a9ab4;margin-top:2px">Regras flexíveis por dias ativos, horas e percentual.</div>
+            <div class="mc-title">Comissões dos Agentes</div>
+            <div class="mc-sub">Regras flexíveis por dias ativos, horas e percentual.</div>
           </div>
-          <button id="mComAgClose" class="btn btn-sm btn-o">Fechar</button>
+          <button id="mComAgClose" class="mc-btn" type="button">Fechar</button>
         </div>
-        <div id="mComAgBody" style="padding:18px 22px">${this._loading()}</div>
+        <div id="mComAgBody" class="mc-body">${this._loading()}</div>
       </div>
     </div>`;
     const wrap=document.createElement('div');wrap.innerHTML=html;document.body.appendChild(wrap.firstChild);
@@ -3071,38 +3119,43 @@ class DimaiorAdmin extends HTMLElement {
         const cfg=d.config||{};
         const regras=d.regras||[];
         body.innerHTML=`
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px">
-            <label style="display:grid;gap:6px;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px">Koin por dólar
-              <input id="cfgKoin" type="number" min="1" step="1" value="${Number(cfg.koin_por_dolar||100)}" style="padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.18);border-radius:8px;color:#e2e8f0">
+          <div class="mc-grid">
+            <label class="mc-field"><span class="mc-label">Koin por dólar</span>
+              <input id="cfgKoin" class="mc-input" type="number" min="1" step="1" value="${Number(cfg.koin_por_dolar||100)}">
             </label>
-            <label style="display:grid;gap:6px;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px">Cotação dólar
-              <input id="cfgDolar" type="number" min="0.01" step="0.01" value="${Number(cfg.cotacao_dolar||5)}" style="padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.18);border-radius:8px;color:#e2e8f0">
+            <label class="mc-field"><span class="mc-label">Cotação dólar</span>
+              <input id="cfgDolar" class="mc-input" type="number" min="0.01" step="0.01" value="${Number(cfg.cotacao_dolar||5)}">
             </label>
-            <div style="display:flex;align-items:end">
-              <button id="btnSalvarCfgCom" class="btn btn-g" style="width:100%">Salvar Conversão</button>
+            <div>
+              <button id="btnSalvarCfgCom" class="mc-btn mc-primary" type="button">Salvar Conversão</button>
             </div>
           </div>
-          <div style="font-size:12px;color:#a0b8c8;margin-bottom:12px">Fórmula: diamantes × percentual = Koin de comissão; Koin ÷ ${Number(cfg.koin_por_dolar||100)} = US$; US$ × R$ ${Number(cfg.cotacao_dolar||5).toFixed(2)} = comissão em reais.</div>
-          <table class="tb" style="width:100%;margin-bottom:16px"><thead><tr><th>Nome</th><th>Dias</th><th>Horas</th><th>%</th><th>Ordem</th><th>Ativo</th><th>Ações</th></tr></thead><tbody>
-            ${regras.map(r=>`<tr data-regra-id="${r.id}">
-              <td><input data-k="nome" value="${this._esc(r.nome||'')}" style="width:150px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
-              <td><input data-k="dias_minimos" type="number" value="${Number(r.dias_minimos||0)}" style="width:76px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
-              <td><input data-k="horas_minimas" type="number" step="0.01" value="${Number(r.horas_minimas||0)}" style="width:76px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
-              <td><input data-k="percentual" type="number" step="0.01" value="${Number(r.percentual||0)}" style="width:76px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
-              <td><input data-k="ordem" type="number" value="${Number(r.ordem||0)}" style="width:66px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
-              <td><input data-k="ativo" type="checkbox" ${r.ativo?'checked':''}></td>
-              <td style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-sm btn-o" data-save-regra="${r.id}">Salvar</button><button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-del-regra="${r.id}">Excluir</button></td>
-            </tr>`).join('')}
-          </tbody></table>
-          <div style="padding:14px;border:1px solid rgba(0,212,212,.14);border-radius:10px;background:rgba(0,212,212,.04)">
-            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;margin-bottom:10px;color:#e2e8f0">Nova regra</div>
-            <div style="display:grid;grid-template-columns:1.5fr repeat(4,1fr) auto;gap:8px">
-              <input id="novaRegraNome" placeholder="Nome" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
-              <input id="novaRegraDias" type="number" placeholder="Dias" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
-              <input id="novaRegraHoras" type="number" step="0.01" placeholder="Horas" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
-              <input id="novaRegraPct" type="number" step="0.01" placeholder="%" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
-              <input id="novaRegraOrdem" type="number" placeholder="Ordem" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
-              <button id="btnNovaRegraCom" class="btn btn-g">Adicionar</button>
+          <div class="mc-note">
+            <span>Formula:</span>
+            <span>diamantes x percentual = Koin de comissão; Koin / ${Number(cfg.koin_por_dolar||100)} = US$; US$ x R$ ${Number(cfg.cotacao_dolar||5).toFixed(2)} = comissão em reais.</span>
+          </div>
+          <div class="mc-section-title">Regras ativas e metas</div>
+          <div class="mc-rules">
+            <div class="mc-rule mc-rule-head"><span>Nome</span><span>Dias</span><span>Horas</span><span>%</span><span>Ordem</span><span>Ativo</span><span>Ações</span></div>
+            ${regras.length?regras.map(r=>`<div class="mc-rule" data-regra-id="${r.id}">
+              <label class="mc-field"><span class="mc-label">Nome</span><input class="mc-input" data-k="nome" value="${this._esc(r.nome||'')}"></label>
+              <label class="mc-field"><span class="mc-label">Dias</span><input class="mc-input" data-k="dias_minimos" type="number" value="${Number(r.dias_minimos||0)}"></label>
+              <label class="mc-field"><span class="mc-label">Horas</span><input class="mc-input" data-k="horas_minimas" type="number" step="0.01" value="${Number(r.horas_minimas||0)}"></label>
+              <label class="mc-field"><span class="mc-label">%</span><input class="mc-input" data-k="percentual" type="number" step="0.01" value="${Number(r.percentual||0)}"></label>
+              <label class="mc-field"><span class="mc-label">Ordem</span><input class="mc-input" data-k="ordem" type="number" value="${Number(r.ordem||0)}"></label>
+              <label class="mc-check"><input data-k="ativo" type="checkbox" ${r.ativo?'checked':''}> Ativo</label>
+              <div class="mc-actions"><button class="mc-btn" type="button" data-save-regra="${r.id}">Salvar</button><button class="mc-btn mc-danger" type="button" data-del-regra="${r.id}">Excluir</button></div>
+            </div>`).join(''):`<div class="mc-empty">Nenhuma regra de comissão cadastrada.</div>`}
+          </div>
+          <div class="mc-new">
+            <div class="mc-section-title">Nova regra</div>
+            <div class="mc-new-grid">
+              <input id="novaRegraNome" class="mc-input" placeholder="Nome">
+              <input id="novaRegraDias" class="mc-input" type="number" placeholder="Dias">
+              <input id="novaRegraHoras" class="mc-input" type="number" step="0.01" placeholder="Horas">
+              <input id="novaRegraPct" class="mc-input" type="number" step="0.01" placeholder="%">
+              <input id="novaRegraOrdem" class="mc-input" type="number" placeholder="Ordem">
+              <button id="btnNovaRegraCom" class="mc-btn mc-primary" type="button">Adicionar</button>
             </div>
           </div>`;
         body.querySelector('#btnSalvarCfgCom').addEventListener('click',async()=>{
@@ -3131,7 +3184,7 @@ class DimaiorAdmin extends HTMLElement {
           });
           this._toast('Regra criada','ok');render();
         });
-      }catch(e){body.innerHTML=`<div style="color:var(--verm);padding:18px">${this._esc(e.message)}</div>`;}
+      }catch(e){body.innerHTML=`<div class="mc-error">${this._esc(e.message)}</div>`;}
     };
     render();
   }

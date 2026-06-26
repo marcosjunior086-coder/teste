@@ -197,8 +197,19 @@
       display: block; font-family: var(--font-t); font-size: 10px; font-weight: 700;
       letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,.75);
     }
+    .live-settings {
+      min-width: 158px; min-height: 86px; padding: 16px;
+      border-radius: 12px; border: 1px solid rgba(0,212,212,.10);
+      background: rgba(0,0,0,.35); color: var(--sub);
+      display: flex; flex-direction: column; justify-content: center; gap: 8px;
+    }
+    .live-settings .ls-title {
+      display: flex; align-items: center; gap: 7px;
+      font-family: var(--font-t); font-size: 13px; font-weight: 700; color: var(--sub);
+    }
+    .live-settings .ls-sub { font-size: 11px; color: var(--dim); }
     .live-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
       gap: 16px;
     }
     .live-card {
@@ -249,6 +260,7 @@
       margin-bottom: 10px;
     }
     .live-actions { display: grid; gap: 8px; }
+    .live-actions.two { grid-template-columns: 1fr 1fr; }
     .live-actions a {
       width: 100%; min-height: 30px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       border-radius: 999px; border: 1px solid rgba(0,212,212,.28); text-decoration: none;
@@ -256,6 +268,7 @@
       background: rgba(255,255,255,.035);
     }
     .live-actions a.primary { color: #06101a; background: linear-gradient(135deg,#3b82f6,#00d4d4); border-color: transparent; }
+    .live-actions a.is-disabled { opacity: .45; pointer-events: none; }
 
     /* Seção de convites — form buscar */
     .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
@@ -412,6 +425,7 @@
       .perfil-acoes .btn { width: 100%; box-sizing: border-box; }
       .live-summary { align-items: stretch; flex-direction: column; padding: 12px; }
       .live-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .live-settings { min-width: 0; min-height: 64px; }
       .live-stat { min-width: 0; padding: 12px; }
       .live-stat strong { font-size: 26px; }
       .live-grid { grid-template-columns: 1fr; gap: 12px; }
@@ -534,10 +548,12 @@
       <section id="sec-lives" class="section" style="display:none">
         <div class="topbar">
           <div>
-            <h2>Ao Vivo Agora</h2>
+            <h2><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M8.56 8.56a5 5 0 0 0 0 6.88M15.44 8.56a5 5 0 0 1 0 6.88M5.14 5.14a9 9 0 0 0 0 13.72M18.86 5.14a9 9 0 0 1 0 13.72"/></svg>Ao Vivo</h2>
             <p style="color:var(--sub);font-size:13px;margin-top:4px">Streamers vinculados ativos agora</p>
           </div>
-          <button class="btn btn-ghost" id="btn-atualizar-lives" type="button">Atualizar</button>
+          <button class="btn btn-ghost" id="btn-atualizar-lives" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>Atualizar
+          </button>
         </div>
         <div id="grid-lives">
           <div class="loading"><div class="spinner"></div></div>
@@ -738,6 +754,7 @@ function ico(name, size = 16) {
     clock:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
     eye:       `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
     check:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+    settings:  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
   };
   return icons[name] || '';
 }
@@ -791,6 +808,7 @@ function liveCard(l) {
   const duracao = liveDuracao(pick(l, ['duracao_min','duration_min','minutos_live'], 0));
   const assistir = liveAssistirUrl(l);
   const perfil = livePerfilUrl(l);
+  const assistirFinal = assistir || perfil;
   const cover = coverUrl
     ? `<img src="${esc(coverUrl)}" alt="" onerror="this.style.display='none'">`
     : `<div style="height:100%;display:flex;align-items:center;justify-content:center">${foto(fotoUrl,nome)}</div>`;
@@ -817,8 +835,8 @@ function liveCard(l) {
         <div class="live-watch">
           <small>Espectadores</small>
           <strong>${fmtNum(espectadores)}</strong>
-          <div class="live-actions">
-            ${assistir ? `<a class="primary" href="${esc(assistir)}" target="_blank" rel="noopener noreferrer">${ico('live',12)} Assistir</a>` : ''}
+          <div class="live-actions ${assistirFinal && perfil ? 'two' : ''}">
+            ${assistirFinal ? `<a class="primary" href="${esc(assistirFinal)}" target="_blank" rel="noopener noreferrer">${ico('live',12)} Assistir</a>` : `<a class="primary is-disabled" href="#">${ico('live',12)} Assistir</a>`}
             ${perfil ? `<a href="${esc(perfil)}" target="_blank" rel="noopener noreferrer">${ico('live',12)} Kwai</a>` : ''}
           </div>
         </div>
@@ -979,7 +997,10 @@ async function carregarLives() {
           <div class="live-stat live-on"><strong>${fmtNum(list.length)}</strong><span>Ao vivo</span></div>
           <div class="live-stat"><strong>${fmtNum(hoje)}</strong><span>Hoje</span></div>
         </div>
-        <button class="btn btn-ghost" type="button" onclick="carregarLives()">Atualizar</button>
+        <div class="live-settings">
+          <div class="ls-title">${ico('settings',13)} Configurações</div>
+          <div class="ls-sub">Exibindo apenas streamers vinculados a você.</div>
+        </div>
       </div>
       <div class="live-grid">${list.map(liveCard).join('')}</div>`;
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
