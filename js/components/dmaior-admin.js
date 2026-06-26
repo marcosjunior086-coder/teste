@@ -2434,7 +2434,7 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="box">
                   <div class="bhead">
                     <div class="btitulo" id="agenteDetalheTitulo">Agente</div>
-                    <div style="display:flex;gap:6px">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
                       <button class="btn btn-sm" id="btnAgenteVoltarLista">${this._ico('history',13)} Voltar</button>
                       <button class="btn btn-sm btn-o" id="btnAgenteEditar">${this._ico('edit',13)} Editar</button>
                       <button class="btn btn-sm" id="btnAgenteSenha" style="background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('settings',13)} Senha</button>
@@ -2462,8 +2462,8 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="box" id="formVincularBox" style="display:none;margin-top:10px">
                   <div class="bhead"><div class="btitulo">Buscar Streamer por UID</div></div>
                   <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                    <div style="display:flex;gap:10px">
-                      <input id="inpUidVincular" type="text" placeholder="UID ou Kwai ID do streamer" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none">
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                      <input id="inpUidVincular" type="text" placeholder="UID ou Kwai ID do streamer" style="flex:1;min-width:160px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none">
                       <button class="btn btn-o btn-sm" id="btnBuscarUidAgente">${this._ico('search',13)} Buscar</button>
                     </div>
                     <div id="resultadoUidAgente" style="display:none"></div>

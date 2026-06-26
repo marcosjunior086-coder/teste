@@ -215,13 +215,96 @@
     .spinner { width: 36px; height: 36px; border: 3px solid rgba(0,212,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Mobile */
-    @media (max-width: 768px) {
-      .sidebar { width: 60px; }
-      .sidebar-logo span, .sidebar-logo small, .nav-item span, .agente-info, .btn-logout { display: none; }
-      .main { margin-left: 60px; padding: 16px; }
+    /* ── TABLET (≤900px) — sidebar colapsa para ícones ──── */
+    @media (max-width: 900px) {
+      .sidebar { width: 64px; }
+      .sidebar-logo { padding: 18px 0; text-align: center; }
+      .sidebar-logo span, .sidebar-logo small { display: none; }
+      .sidebar-logo::after { content: 'DM'; font-family: var(--font-t); font-size: 16px; color: var(--cyan); letter-spacing: 1px; }
+      .nav-item { padding: 14px 0; justify-content: center; gap: 0; }
+      .nav-item span:not(.ico) { display: none; }
+      .nav-item .ico { width: 22px; }
+      .nav-item.active { border-left-width: 3px; }
+      .agente-info { display: none; }
+      .btn-logout { font-size: 11px; padding: 7px 4px; }
+      .main { margin-left: 64px; padding: 20px; }
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
-      .input-row  { flex-direction: column; }
+    }
+
+    /* Mobile header — oculto por padrão, aparece via media query */
+    .mobile-header { display: none; }
+
+    /* ── MOBILE (≤600px) — bottom nav bar ───────────────── */
+    @media (max-width: 600px) {
+      .mobile-header { display: flex; }
+      /* Sidebar vira barra inferior */
+      .sidebar {
+        width: 100%; height: 58px; min-height: unset;
+        flex-direction: row;
+        position: fixed; bottom: 0; top: auto; left: 0; right: 0;
+        border-right: none; border-top: 1px solid var(--border);
+        z-index: 200;
+      }
+      .sidebar-logo, .sidebar-bottom { display: none; }
+      .sidebar-nav {
+        flex-direction: row; padding: 0;
+        width: 100%; overflow: hidden;
+      }
+      .nav-item {
+        flex: 1; flex-direction: column;
+        padding: 6px 2px; gap: 3px;
+        justify-content: center; align-items: center;
+        border-left: none; border-top: 2px solid transparent;
+        font-size: 9px;
+      }
+      .nav-item span:not(.ico) { display: block; font-size: 9px; line-height: 1; color: inherit; }
+      .nav-item .ico { width: 20px; display: flex; align-items: center; justify-content: center; }
+      .nav-item.active { border-left-color: transparent; border-top-color: var(--cyan); background: rgba(0,212,212,.08); }
+
+      /* Header fixo com nome e logout */
+      .mobile-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 16px; background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+        position: fixed; top: 0; left: 0; right: 0; z-index: 150; height: 52px;
+      }
+      .mobile-header-logo { font-family: var(--font-t); font-size: 18px; color: var(--cyan); letter-spacing: 2px; }
+      .mobile-header-nome { font-size: 12px; color: var(--sub); }
+      .mobile-header-logout {
+        padding: 6px 14px; background: rgba(248,113,113,.12);
+        border: 1px solid rgba(248,113,113,.3); border-radius: 8px;
+        color: var(--red); font-size: 12px; cursor: pointer;
+      }
+
+      /* Main — espaço para header fixo + bottom nav */
+      .main { margin-left: 0; padding: 16px 14px 72px; padding-top: 68px; }
+
+      /* Cards */
+      .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+      .card { padding: 14px 12px; }
+      .card-value { font-size: 22px; }
+      .card-sub   { font-size: 11px; }
+
+      /* Topbar */
+      .topbar { margin-bottom: 16px; }
+      .topbar h2 { font-size: 18px; }
+
+      /* Tabelas — scroll horizontal */
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--r); }
+      table { min-width: 480px; font-size: 13px; }
+      tbody td { padding: 10px 10px; }
+
+      /* Convite */
+      .input-row { flex-direction: column; }
+      .convite-box { padding: 16px; }
+      .perfil-encontrado { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .perfil-acoes { margin-left: 0; width: 100%; flex-direction: column; }
+      .perfil-acoes .sel-categoria,
+      .perfil-acoes .btn { width: 100%; box-sizing: border-box; }
+
+      /* Gráfico */
+      .chart-wrap { padding: 14px; }
+      #canvas-chart { height: 120px; }
     }
   </style>
 </head>
@@ -249,6 +332,12 @@
 
 <!-- ════════════════ PAINEL ════════════════ -->
 <div id="painel">
+  <!-- Header fixo mobile — visível apenas em ≤600px via CSS -->
+  <div class="mobile-header" id="mobile-header">
+    <span class="mobile-header-logo">DMAIOR</span>
+    <span class="mobile-header-nome" id="mobile-header-nome">—</span>
+    <button class="mobile-header-logout" onclick="logout()">Sair</button>
+  </div>
   <div class="layout">
 
     <!-- SIDEBAR -->
@@ -259,22 +348,22 @@
       </div>
       <nav class="sidebar-nav">
         <div class="nav-item active" data-section="dashboard">
-          <span class="ico">🏠</span><span>Dashboard</span>
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span>Dashboard</span>
         </div>
         <div class="nav-item" data-section="streamers">
-          <span class="ico">🎬</span><span>Streamers</span>
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span><span>Streamers</span>
         </div>
         <div class="nav-item" data-section="lives">
-          <span class="ico">📡</span><span>Ao Vivo</span>
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/><path d="M8.56 8.56a5 5 0 0 0 0 6.88M15.44 8.56a5 5 0 0 1 0 6.88M5.14 5.14a9 9 0 0 0 0 13.72M18.86 5.14a9 9 0 0 1 0 13.72"/></svg></span><span>Ao Vivo</span>
         </div>
         <div class="nav-item" data-section="ranking">
-          <span class="ico">🏆</span><span>Ranking</span>
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span><span>Ranking</span>
         </div>
         <div class="nav-item" data-section="desempenho">
-          <span class="ico">📊</span><span>Desempenho</span>
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span>Desempenho</span>
         </div>
         <div class="nav-item" data-section="convites">
-          <span class="ico">✉️</span><span>Convites</span>
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span><span>Convites</span>
         </div>
       </nav>
       <div class="sidebar-bottom">
@@ -446,8 +535,9 @@ async function fazerLogin() {
 function iniciarPainel() {
   const ag = getAgente();
   if (ag) {
-    document.getElementById('sidebar-nome').textContent  = ag.nome  || '—';
-    document.getElementById('sidebar-login').textContent = ag.login || '';
+    document.getElementById('sidebar-nome').textContent       = ag.nome  || '—';
+    document.getElementById('sidebar-login').textContent      = ag.login || '';
+    document.getElementById('mobile-header-nome').textContent = ag.nome  || '—';
   }
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('painel').style.display     = 'block';
@@ -488,6 +578,24 @@ function navegarPara(sec) {
   loaders[sec]?.();
 }
 
+// ── ÍCONES SVG ────────────────────────────────────────────
+function ico(name, size = 16) {
+  const s = size;
+  const icons = {
+    dashboard: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+    mic:       `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>`,
+    live:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/><path d="M8.56 8.56a5 5 0 0 0 0 6.88M15.44 8.56a5 5 0 0 1 0 6.88M5.14 5.14a9 9 0 0 0 0 13.72M18.86 5.14a9 9 0 0 1 0 13.72"/></svg>`,
+    trophy:    `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`,
+    chart:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+    mail:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>`,
+    diamond:   `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9z"/><line x1="2" y1="9" x2="22" y2="9"/></svg>`,
+    clock:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    eye:       `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    check:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+  };
+  return icons[name] || '';
+}
+
 // ── FORMATADORES ──────────────────────────────────────────
 const fmtNum = n => Number(n).toLocaleString('pt-BR');
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -522,8 +630,8 @@ async function carregarDashboard() {
     container.innerHTML = `
       <div class="card"><div class="card-label">Streamers</div><div class="card-value">${r.streamers||0}</div><div class="card-sub">Vinculados a você</div></div>
       <div class="card"><div class="card-label">Ao Vivo Agora</div><div class="card-value green" style="color:var(--green)">${r.ao_vivo||0}</div><div class="card-sub">Lives ativas</div></div>
-      <div class="card"><div class="card-label">💎 Hoje</div><div class="card-value">${fmtNum(r.diamantes_hoje||0)}</div><div class="card-sub">${r.horas_hoje||'0:00'} h hoje</div></div>
-      <div class="card gold"><div class="card-label">💎 Este Mês</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${r.horas_mes||'0:00'} h no mês</div></div>
+      <div class="card"><div class="card-label">${ico('diamond',13)} Hoje</div><div class="card-value">${fmtNum(r.diamantes_hoje||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_hoje||'0:00'} h hoje</div></div>
+      <div class="card gold"><div class="card-label">${ico('diamond',13)} Este Mês</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_mes||'0:00'} h no mês</div></div>
       <div class="card"><div class="card-label">Convites Enviados</div><div class="card-value">${r.convites_enviados||0}</div><div class="card-sub">${r.convites_pendentes||0} pendentes</div></div>
     `;
 
@@ -606,10 +714,10 @@ async function carregarStreamers() {
     const d = await api('/agente/streamers');
     const list = d.streamers || [];
     _streamersCarregado = true;
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">🎬</div><p>Nenhum streamer vinculado a você ainda.</p></div>`; return; }
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('mic',32)}</div><p>Nenhum streamer vinculado a você ainda.</p></div>`; return; }
     container.innerHTML = `
       <table>
-        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>💎 Mês</th><th>⏱ Horas</th><th>Vinculado em</th></tr></thead>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} Mês</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
         <tbody>${list.map(s => `
           <tr>
             <td style="display:flex;align-items:center;gap:10px;padding:12px">
@@ -633,7 +741,7 @@ async function carregarLives() {
   try {
     const d = await api('/agente/lives');
     const list = d.ao_vivo || [];
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">📡</div><p>Nenhum streamer seu ao vivo agora.</p></div>`; return; }
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('live',32)}</div><p>Nenhum streamer seu ao vivo agora.</p></div>`; return; }
     container.innerHTML = `
       <p style="color:var(--sub);font-size:13px;margin-bottom:16px">${list.length} streamer(s) ao vivo</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
@@ -644,7 +752,7 @@ async function carregarLives() {
               <div style="font-size:15px;font-weight:600">${esc(l.nome)}</div>
               <div style="font-size:12px;color:var(--sub);margin-top:2px">${l.kwai_id ? '@'+esc(l.kwai_id) : ''}</div>
               <span class="badge badge-live" style="margin-top:6px;display:inline-block">● Ao vivo</span>
-              ${l.espectadores ? `<div style="font-size:11px;color:var(--dim);margin-top:4px">👁 ${fmtNum(l.espectadores)}</div>` : ''}
+              ${l.espectadores ? `<div style="font-size:11px;color:var(--dim);margin-top:4px;display:flex;align-items:center;gap:3px">${ico('eye',11)} ${fmtNum(l.espectadores)}</div>` : ''}
             </div>
           </div>`).join('')}
       </div>`;
@@ -661,10 +769,10 @@ async function carregarRanking() {
     const list = d.streamers || [];
     _rankingCarregado = true;
     document.getElementById('ranking-titulo').textContent = `Ranking — ${d.mes||''}`;
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">🏆</div><p>Sem dados de ranking ainda.</p></div>`; return; }
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('trophy',32)}</div><p>Sem dados de ranking ainda.</p></div>`; return; }
     container.innerHTML = `
       <table>
-        <thead><tr><th>#</th><th>Streamer</th><th>💎 Diamantes</th><th>⏱ Horas</th><th>Status</th></tr></thead>
+        <thead><tr><th>#</th><th>Streamer</th><th>${ico('diamond',13)} Diamantes</th><th>${ico('clock',13)} Horas</th><th>Status</th></tr></thead>
         <tbody>${list.map(s => `
           <tr>
             <td><div class="pos ${s.posicao<=3?'pos-'+s.posicao:'pos-n'}">${s.posicao}</div></td>
@@ -687,10 +795,10 @@ async function carregarDesempenho() {
     const d = await api('/agente/desempenho');
     const list = d.streamers || [];
     _desemp = true;
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">📊</div><p>Sem dados de desempenho ainda.</p></div>`; return; }
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('chart',32)}</div><p>Sem dados de desempenho ainda.</p></div>`; return; }
     container.innerHTML = `
       <table>
-        <thead><tr><th>Streamer</th><th>💎 Total</th><th>⏱ Horas</th><th>Progresso Horas</th><th>Dias Ativos</th><th>Status</th></tr></thead>
+        <thead><tr><th>Streamer</th><th>${ico('diamond',13)} Total</th><th>${ico('clock',13)} Horas</th><th>Progresso Horas</th><th>Dias Ativos</th><th>Status</th></tr></thead>
         <tbody>${list.map(s => `
           <tr>
             <td style="display:flex;align-items:center;gap:10px;padding:12px">${foto(s.foto,s.nome)}<span>${esc(s.nome)}</span></td>
@@ -722,7 +830,7 @@ async function carregarConvites() {
   try {
     const d = await api('/agente/convites');
     const list = d.convites || [];
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">✉️</div><p>Nenhum convite enviado ainda.</p></div>`; return; }
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; return; }
     container.innerHTML = `
       <table>
         <thead><tr><th>Streamer</th><th>Kwai ID</th><th>Categoria</th><th>Status</th><th>Data</th></tr></thead>
@@ -806,7 +914,7 @@ async function enviarConvite() {
       },
     });
     if (d.ok) {
-      mostrarMsg(msg, '✅ Convite enviado com sucesso!', 'ok');
+      mostrarMsg(msg, 'Convite enviado com sucesso!', 'ok');
       _perfilAtual = null;
       document.getElementById('perfil-resultado').innerHTML = '';
       document.getElementById('inp-uid').value = '';
