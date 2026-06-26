@@ -170,9 +170,12 @@ class MenuMobileDMaior extends HTMLElement {
       .dd-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
       .dd-option,.pref-row{ min-width:0; min-height:68px; display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:999px; cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:.98rem; font-weight:700; color:var(--dm-text); letter-spacing:.3px; text-transform:uppercase; border:1px solid var(--dm-cyan-10); background:linear-gradient(135deg,var(--dm-bw06),var(--dm-bg-tint)); width:100%; text-align:left; transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s; overflow:hidden; }
       .dd-option:hover,.pref-row:hover{ background:var(--dm-cyan-08); border-color:var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); transform:translateY(-1px); }
-      .dd-option.active{ background:var(--dm-grad-effect,linear-gradient(135deg,rgba(59,130,246,.16),rgba(0,212,212,.12))); border-color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); box-shadow:0 0 18px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
+      .dd-option.active{ background:var(--dm-grad-effect,linear-gradient(135deg,rgba(59,130,246,.16),rgba(0,212,212,.12))); border-color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); color:#000; box-shadow:0 0 18px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .dd-icon{ width:34px; height:34px; border-radius:50%; flex:0 0 34px; display:flex; align-items:center; justify-content:center; color:var(--dm-text); }
-      .dd-option.active .dd-icon{ color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
+      .dd-option.active .dd-icon,
+      .dd-option.active .dd-arrow,
+      .dd-option.active .dd-copy,
+      .dd-option.active .dd-marquee{ color:#000; }
       .dd-dot{ width:22px; height:22px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 5px var(--dm-bw05); }
       .dd-copy{ min-width:0; flex:1; overflow:hidden; white-space:nowrap; }
       .dd-marquee{ display:inline-block; max-width:100%; vertical-align:middle; }
@@ -288,7 +291,7 @@ class MenuMobileDMaior extends HTMLElement {
             <div class="dd-divider"></div>
             <div class="dd-label">Cor</div>
             <button class="dd-option" id="ddThemeOriginal" data-theme-id="original">
-              <span class="dd-dot" style="background:#0a0e27;border:1.5px solid rgba(0,212,212,.5);"></span><span class="dd-copy"><span class="dd-marquee">Original</span></span><span class="dd-arrow">&rsaquo;</span>
+              <span class="dd-dot" style="background:#0a0e27;border:1.5px solid rgba(0,212,212,.5);"></span><span class="dd-copy"><span class="dd-marquee">Padrão</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddThemeDark" data-theme-id="dark">
               <span class="dd-dot" style="background:#0d0f14;border:1.5px solid rgba(180,180,200,.3);"></span><span class="dd-copy"><span class="dd-marquee">Escuro</span></span><span class="dd-arrow">&rsaquo;</span>

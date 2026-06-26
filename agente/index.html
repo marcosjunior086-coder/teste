@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base href="/teste/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Agente — DMaior Agency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #060B16;
+      --bg2:      #0e1525;
+      --bg3:      #131d2e;
+      --card:     rgba(255,255,255,.055);
+      --border:   rgba(0,212,212,.15);
+      --cyan:     #00d4d4;
+      --cyan2:    rgba(0,212,212,.65);
+      --cyan-glow:rgba(0,212,212,.18);
+      --gold:     #f0c040;
+      --red:      #f87171;
+      --green:    #4ade80;
+      --text:     #e2e8f0;
+      --sub:      #a0b8c8;
+      --muted:    #7a9ab4;
+      --dim:      #4a6070;
+      --font-t:   'Rajdhani', sans-serif;
+      --font-b:   'Exo 2', sans-serif;
+      --r:        12px;
+      --ease:     .25s ease;
+    }
+
+    html, body { background: var(--bg); min-height: 100%; font-family: var(--font-b); color: var(--text); }
+
+    /* ── TELA DE LOGIN ─────────────────────────────────────────────────────── */
+    #tela-login {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,212,212,.08) 0%, transparent 65%);
+    }
+    .login-box {
+      width: 100%; max-width: 400px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px 36px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 0 40px rgba(0,212,212,.06);
+    }
+    .login-logo { text-align: center; margin-bottom: 32px; }
+    .login-logo h1 { font-family: var(--font-t); font-size: 28px; color: var(--cyan); letter-spacing: 2px; }
+    .login-logo p  { color: var(--sub); font-size: 13px; margin-top: 6px; }
+    .login-field { margin-bottom: 18px; }
+    .login-field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .login-field input {
+      width: 100%; padding: 13px 16px; background: rgba(255,255,255,.05);
+      border: 1px solid var(--border); border-radius: var(--r);
+      color: var(--text); font-family: var(--font-b); font-size: 15px; outline: none;
+      transition: border-color var(--ease);
+    }
+    .login-field input:focus { border-color: var(--cyan); }
+    .btn-login {
+      width: 100%; padding: 14px; margin-top: 8px;
+      background: linear-gradient(135deg, #00b4b4, var(--cyan));
+      border: none; border-radius: var(--r); color: #060B16;
+      font-family: var(--font-t); font-size: 17px; font-weight: 700; letter-spacing: 1px;
+      cursor: pointer; transition: opacity var(--ease);
+    }
+    .btn-login:hover { opacity: .88; }
+    .btn-login:disabled { opacity: .5; cursor: not-allowed; }
+    #login-erro { color: var(--red); font-size: 13px; text-align: center; margin-top: 12px; min-height: 20px; }
+
+    /* ── PAINEL PRINCIPAL ─────────────────────────────────────────────────── */
+    #painel { display: none; min-height: 100vh; }
+
+    /* Sidebar */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 220px; min-height: 100vh; flex-shrink: 0;
+      background: var(--bg2); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo span { font-family: var(--font-t); font-size: 20px; color: var(--cyan); letter-spacing: 2px; }
+    .sidebar-logo small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; font-size: 14px; color: var(--sub);
+      cursor: pointer; border-left: 3px solid transparent;
+      transition: all var(--ease);
+    }
+    .nav-item:hover  { background: rgba(0,212,212,.06); color: var(--text); }
+    .nav-item.active { background: rgba(0,212,212,.10); color: var(--cyan); border-left-color: var(--cyan); }
+    .nav-item .ico { width: 18px; text-align: center; font-size: 16px; }
+    .sidebar-bottom { padding: 16px 20px; border-top: 1px solid var(--border); }
+    .agente-info { font-size: 13px; color: var(--sub); }
+    .agente-info strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 2px; }
+    .btn-logout {
+      margin-top: 12px; width: 100%; padding: 9px;
+      background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3);
+      border-radius: 8px; color: var(--red); font-size: 13px; cursor: pointer;
+      transition: all var(--ease);
+    }
+    .btn-logout:hover { background: rgba(248,113,113,.2); }
+
+    /* Conteúdo principal */
+    .main { flex: 1; margin-left: 220px; padding: 28px; max-width: 1200px; }
+
+    /* Topbar */
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .topbar h2 { font-family: var(--font-t); font-size: 24px; color: var(--text); }
+    .topbar .badge-ao-vivo { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--green); }
+    .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse-dot 1.5s infinite; }
+    @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+
+    /* Cards de métricas */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px 18px;
+    }
+    .card-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .card-value { font-family: var(--font-t); font-size: 28px; font-weight: 700; color: var(--cyan); }
+    .card-sub   { font-size: 12px; color: var(--dim); margin-top: 4px; }
+    .card.gold .card-value { color: var(--gold); }
+    .card.green .card-value { color: var(--green); }
+
+    /* Gráfico */
+    .chart-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px; margin-bottom: 28px;
+    }
+    .chart-title { font-family: var(--font-t); font-size: 16px; color: var(--sub); margin-bottom: 16px; display: flex; gap: 20px; }
+    .chart-legend { display: flex; gap: 16px; margin-bottom: 12px; }
+    .chart-legend span { font-size: 12px; color: var(--sub); display: flex; align-items: center; gap: 6px; }
+    .chart-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+    #canvas-chart { width: 100%; height: 160px; }
+
+    /* Tabelas / Listas */
+    .section-title { font-family: var(--font-t); font-size: 18px; color: var(--text); margin-bottom: 16px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th { padding: 10px 12px; text-align: left; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; border-bottom: 1px solid var(--border); }
+    tbody td { padding: 12px 12px; border-bottom: 1px solid rgba(255,255,255,.04); }
+    tbody tr:hover td { background: rgba(255,255,255,.03); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: var(--bg3); }
+    .no-foto { width: 36px; height: 36px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--dim); }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-live { background: rgba(74,222,128,.15); color: var(--green); }
+    .badge-offline { background: rgba(255,255,255,.05); color: var(--dim); }
+    .badge-ok  { background: rgba(74,222,128,.15); color: var(--green); }
+    .badge-bom { background: rgba(240,192,64,.15); color: var(--gold); }
+    .badge-at  { background: rgba(248,113,113,.15); color: var(--red); }
+    .badge-env { background: rgba(0,212,212,.15); color: var(--cyan); }
+    .badge-err { background: rgba(248,113,113,.15); color: var(--red); }
+    .badge-pend{ background: rgba(255,255,255,.08); color: var(--sub); }
+    .verificado     { display: inline-block; width: 14px; height: 14px; vertical-align: middle; margin-left: 4px; }
+
+    /* Posição ranking */
+    .pos { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-t); font-weight: 700; font-size: 14px; }
+    .pos-1 { background: linear-gradient(135deg,#f0c040,#d4a400); color: #111; }
+    .pos-2 { background: linear-gradient(135deg,#c0c0c0,#888); color: #111; }
+    .pos-3 { background: linear-gradient(135deg,#cd7f32,#8b4513); color: #fff; }
+    .pos-n { background: rgba(255,255,255,.07); color: var(--sub); }
+
+    /* Barra de progresso */
+    .prog-wrap { background: rgba(255,255,255,.06); border-radius: 4px; height: 6px; overflow: hidden; }
+    .prog-bar  { height: 100%; border-radius: 4px; transition: width .5s ease; }
+    .prog-cyan { background: var(--cyan); }
+    .prog-gold { background: var(--gold); }
+
+    /* Seção de convites — form buscar */
+    .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
+    .convite-box h3 { font-family: var(--font-t); font-size: 17px; margin-bottom: 18px; }
+    .input-row { display: flex; gap: 12px; }
+    .input-row input {
+      flex: 1; padding: 11px 14px; background: rgba(255,255,255,.05);
+      border: 1px solid var(--border); border-radius: var(--r);
+      color: var(--text); font-family: var(--font-b); font-size: 14px; outline: none;
+      transition: border-color var(--ease);
+    }
+    .input-row input:focus { border-color: var(--cyan); }
+    .btn { padding: 11px 22px; border: none; border-radius: var(--r); font-family: var(--font-t); font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity var(--ease); }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-cyan  { background: linear-gradient(135deg,#00b4b4,var(--cyan)); color: #060B16; }
+    .btn-green { background: linear-gradient(135deg,#22c55e,#4ade80); color: #060B16; }
+    .btn-ghost { background: rgba(255,255,255,.06); border: 1px solid var(--border); color: var(--sub); }
+    .perfil-encontrado {
+      margin-top: 18px; padding: 18px; background: rgba(0,212,212,.06);
+      border: 1px solid rgba(0,212,212,.2); border-radius: var(--r);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .perfil-encontrado img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
+    .perfil-info h4 { font-size: 16px; color: var(--text); }
+    .perfil-info p  { font-size: 13px; color: var(--sub); margin-top: 2px; }
+    .perfil-acoes   { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .sel-categoria  { padding: 10px 12px; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font-b); font-size: 14px; outline: none; }
+    #msg-convite { margin-top: 14px; font-size: 13px; padding: 12px 16px; border-radius: 8px; display: none; }
+    .msg-ok  { background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.3); color: var(--green); }
+    .msg-err { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
+    .msg-warn{ background: rgba(240,192,64,.12);  border: 1px solid rgba(240,192,64,.3);  color: var(--gold); }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 60px 20px; color: var(--dim); }
+    .empty .ico { font-size: 48px; margin-bottom: 12px; }
+    .empty p    { font-size: 15px; }
+
+    /* Loading spinner */
+    .loading { display: flex; align-items: center; justify-content: center; padding: 60px; }
+    .spinner { width: 36px; height: 36px; border: 3px solid rgba(0,212,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo span, .sidebar-logo small, .nav-item span, .agente-info, .btn-logout { display: none; }
+      .main { margin-left: 60px; padding: 16px; }
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .input-row  { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ LOGIN ════════════════ -->
+<div id="tela-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>DMAIOR</h1>
+      <p>Painel do Agente de Talentos</p>
+    </div>
+    <div class="login-field">
+      <label>Login</label>
+      <input id="inp-login" type="text" placeholder="seu.login" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input id="inp-senha" type="password" placeholder="••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="btn-entrar">Entrar</button>
+    <p id="login-erro"></p>
+  </div>
+</div>
+
+<!-- ════════════════ PAINEL ════════════════ -->
+<div id="painel">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span>DMAIOR</span>
+        <small>Agente</small>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-section="dashboard">
+          <span class="ico">🏠</span><span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-section="streamers">
+          <span class="ico">🎬</span><span>Streamers</span>
+        </div>
+        <div class="nav-item" data-section="lives">
+          <span class="ico">📡</span><span>Ao Vivo</span>
+        </div>
+        <div class="nav-item" data-section="ranking">
+          <span class="ico">🏆</span><span>Ranking</span>
+        </div>
+        <div class="nav-item" data-section="desempenho">
+          <span class="ico">📊</span><span>Desempenho</span>
+        </div>
+        <div class="nav-item" data-section="convites">
+          <span class="ico">✉️</span><span>Convites</span>
+        </div>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="agente-info">
+          <strong id="sidebar-nome">—</strong>
+          <span id="sidebar-login"></span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sair</button>
+      </div>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="main">
+
+      <!-- ─── DASHBOARD ─── -->
+      <section id="sec-dashboard" class="section">
+        <div class="topbar">
+          <h2>Dashboard</h2>
+          <div class="badge-ao-vivo"><div class="dot-live"></div><span id="dash-ao-vivo-badge">— ao vivo</span></div>
+        </div>
+        <div class="cards-grid" id="cards-dashboard">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+        <div class="chart-wrap" id="chart-wrap" style="display:none">
+          <div class="chart-title">
+            Diamantes &amp; Horas — mês atual
+            <div class="chart-legend">
+              <span><div class="dot" style="background:#00d4d4"></div>Diamantes</span>
+              <span><div class="dot" style="background:#f0c040"></div>Horas</span>
+            </div>
+          </div>
+          <canvas id="canvas-chart"></canvas>
+        </div>
+      </section>
+
+      <!-- ─── STREAMERS ─── -->
+      <section id="sec-streamers" class="section" style="display:none">
+        <div class="topbar"><h2>Meus Streamers</h2></div>
+        <div class="table-wrap" id="tabela-streamers">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- ─── AO VIVO ─── -->
+      <section id="sec-lives" class="section" style="display:none">
+        <div class="topbar"><h2>Ao Vivo Agora</h2></div>
+        <div id="grid-lives">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- ─── RANKING ─── -->
+      <section id="sec-ranking" class="section" style="display:none">
+        <div class="topbar"><h2 id="ranking-titulo">Ranking do Mês</h2></div>
+        <div class="table-wrap" id="tabela-ranking">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- ─── DESEMPENHO ─── -->
+      <section id="sec-desempenho" class="section" style="display:none">
+        <div class="topbar"><h2>Desempenho</h2></div>
+        <div class="table-wrap" id="tabela-desempenho">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- ─── CONVITES ─── -->
+      <section id="sec-convites" class="section" style="display:none">
+        <div class="topbar"><h2>Enviar Convite</h2></div>
+
+        <!-- Buscar perfil -->
+        <div class="convite-box">
+          <h3>Buscar Perfil por UID / Kwai ID</h3>
+          <div class="input-row">
+            <input id="inp-uid" type="text" placeholder="Digite o UID ou @kwaiId do streamer">
+            <button class="btn btn-cyan" id="btn-buscar-perfil">Buscar</button>
+          </div>
+          <div id="perfil-resultado"></div>
+          <div id="msg-convite"></div>
+        </div>
+
+        <!-- Histórico de convites -->
+        <p class="section-title">Histórico de Convites</p>
+        <div class="table-wrap" id="tabela-convites">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CONFIGURAÇÃO
+// ════════════════════════════════════════════════════════════
+const WORKER = 'https://agente.agencydmaior.com.br';
+const TOKEN_KEY = 'dm_agente_token';
+const AGENTE_KEY = 'dm_agente_info';
+
+// ── Estado global ─────────────────────────────────────────
+let _token  = null;
+let _agente = null;
+let _perfilAtual = null; // perfil encontrado na busca de convite
+
+// ── Auth helpers ──────────────────────────────────────────
+function getToken()  { return _token  || localStorage.getItem(TOKEN_KEY); }
+function getAgente() { return _agente || JSON.parse(localStorage.getItem(AGENTE_KEY) || 'null'); }
+function salvarSessao(token, agente) {
+  _token = token; _agente = agente;
+  localStorage.setItem(TOKEN_KEY,  token);
+  localStorage.setItem(AGENTE_KEY, JSON.stringify(agente));
+}
+function logout() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(AGENTE_KEY);
+  _token = null; _agente = null;
+  document.getElementById('painel').style.display = 'none';
+  document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('inp-senha').value = '';
+  document.getElementById('login-erro').textContent = '';
+}
+
+// ── Fetch autenticado ──────────────────────────────────────
+async function api(path, { method = 'GET', body } = {}) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    signal: AbortSignal.timeout(25000),
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(WORKER + path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (r.status === 401 || r.status === 403) { logout(); throw new Error('Sessão expirada'); }
+  return data;
+}
+
+// ── LOGIN ─────────────────────────────────────────────────
+document.getElementById('btn-entrar').addEventListener('click', fazerLogin);
+document.getElementById('inp-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+
+async function fazerLogin() {
+  const btn = document.getElementById('btn-entrar');
+  const erroEl = document.getElementById('login-erro');
+  const login  = document.getElementById('inp-login').value.trim();
+  const senha  = document.getElementById('inp-senha').value.trim();
+  erroEl.textContent = '';
+  if (!login || !senha) { erroEl.textContent = 'Preencha login e senha.'; return; }
+  btn.disabled = true; btn.textContent = 'Entrando…';
+  try {
+    const r = await fetch(WORKER + '/agente/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, senha }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!data.ok || !data.token) { erroEl.textContent = data.erro || 'Credenciais inválidas.'; return; }
+    salvarSessao(data.token, data.agente);
+    iniciarPainel();
+  } catch (e) {
+    erroEl.textContent = 'Erro de conexão. Tente novamente.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+// ── INICIALIZAÇÃO ─────────────────────────────────────────
+function iniciarPainel() {
+  const ag = getAgente();
+  if (ag) {
+    document.getElementById('sidebar-nome').textContent  = ag.nome  || '—';
+    document.getElementById('sidebar-login').textContent = ag.login || '';
+  }
+  document.getElementById('tela-login').style.display = 'none';
+  document.getElementById('painel').style.display     = 'block';
+  navegarPara('dashboard');
+}
+
+// Tenta restaurar sessão ao carregar
+window.addEventListener('DOMContentLoaded', () => {
+  const token = getToken();
+  if (token) {
+    _token = token; _agente = getAgente();
+    // Valida sessão no servidor
+    api('/agente/me').then(r => {
+      if (r.ok) iniciarPainel();
+      else logout();
+    }).catch(logout);
+  }
+});
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────
+const SECOES = ['dashboard','streamers','lives','ranking','desempenho','convites'];
+
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => navegarPara(el.dataset.section));
+});
+
+function navegarPara(sec) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.section === sec));
+  SECOES.forEach(s => { document.getElementById(`sec-${s}`).style.display = s === sec ? 'block' : 'none'; });
+  const loaders = {
+    dashboard:  carregarDashboard,
+    streamers:  carregarStreamers,
+    lives:      carregarLives,
+    ranking:    carregarRanking,
+    desempenho: carregarDesempenho,
+    convites:   carregarConvites,
+  };
+  loaders[sec]?.();
+}
+
+// ── FORMATADORES ──────────────────────────────────────────
+const fmtNum = n => Number(n).toLocaleString('pt-BR');
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function foto(url, nome) {
+  if (url) return `<img class="avatar" src="${esc(url)}" alt="${esc(nome)}" onerror="this.outerHTML=sem_foto()">`;
+  return `<div class="no-foto">${esc((nome||'?')[0].toUpperCase())}</div>`;
+}
+function sem_foto() { return `<div class="no-foto">?</div>`; }
+function fmtData(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso); const p = n => String(n).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+function badgeStatus(s) {
+  const m = { convite_enviado:'badge-env Enviado', pendente:'badge-pend Pendente', erro:'badge-err Erro', restricao_live:'badge-err Restrição', dry_run:'badge-pend Simulado' };
+  const [cls, txt] = (m[s]||'badge-pend Pendente').split(' ');
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+let _dashCarregado = false;
+async function carregarDashboard() {
+  if (_dashCarregado) return;
+  const container = document.getElementById('cards-dashboard');
+  try {
+    const d = await api('/agente/dashboard');
+    const r = d.resumo || {};
+    _dashCarregado = true;
+
+    document.getElementById('dash-ao-vivo-badge').textContent = `${r.ao_vivo||0} ao vivo`;
+
+    container.innerHTML = `
+      <div class="card"><div class="card-label">Streamers</div><div class="card-value">${r.streamers||0}</div><div class="card-sub">Vinculados a você</div></div>
+      <div class="card"><div class="card-label">Ao Vivo Agora</div><div class="card-value green" style="color:var(--green)">${r.ao_vivo||0}</div><div class="card-sub">Lives ativas</div></div>
+      <div class="card"><div class="card-label">💎 Hoje</div><div class="card-value">${fmtNum(r.diamantes_hoje||0)}</div><div class="card-sub">${r.horas_hoje||'0:00'} h hoje</div></div>
+      <div class="card gold"><div class="card-label">💎 Este Mês</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${r.horas_mes||'0:00'} h no mês</div></div>
+      <div class="card"><div class="card-label">Convites Enviados</div><div class="card-value">${r.convites_enviados||0}</div><div class="card-sub">${r.convites_pendentes||0} pendentes</div></div>
+    `;
+
+    // Gráfico
+    if ((d.grafico||[]).length > 1) {
+      document.getElementById('chart-wrap').style.display = 'block';
+      renderizarGrafico(d.grafico);
+    }
+  } catch (e) {
+    container.innerHTML = `<div class="empty"><p>Erro ao carregar dashboard: ${e.message}</p></div>`;
+  }
+}
+
+// ── GRÁFICO SIMPLES (Canvas 2D) ───────────────────────────
+function renderizarGrafico(dados) {
+  const canvas = document.getElementById('canvas-chart');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 600, H = 160;
+  canvas.width  = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+
+  const PAD = { t:10, r:16, b:30, l:10 };
+  const cw = W - PAD.l - PAD.r, ch = H - PAD.t - PAD.b;
+
+  const maxD = Math.max(...dados.map(d=>d.diamantes), 1);
+  const maxM = Math.max(...dados.map(d=>d.minutos),   1);
+  const n    = dados.length;
+  const step = cw / (n - 1);
+
+  function pontos(campo, maxVal) {
+    return dados.map((d,i) => ({
+      x: PAD.l + i * step,
+      y: PAD.t + ch - (d[campo] / maxVal) * ch,
+    }));
+  }
+
+  function desenharLinha(pts, cor) {
+    ctx.beginPath();
+    pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+    // Área sob a linha
+    ctx.beginPath();
+    pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.lineTo(pts[pts.length-1].x, PAD.t + ch);
+    ctx.lineTo(PAD.l, PAD.t + ch);
+    ctx.closePath();
+    ctx.fillStyle = cor.replace(')', ', .12)').replace('rgb', 'rgba');
+    ctx.fill();
+  }
+
+  ctx.clearRect(0, 0, W, H);
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 3; i++) {
+    const y = PAD.t + (ch / 3) * i;
+    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(PAD.l + cw, y); ctx.stroke();
+  }
+
+  desenharLinha(pontos('diamantes', maxD), '#00d4d4');
+  desenharLinha(pontos('minutos',   maxM), '#f0c040');
+
+  // Labels do eixo X (datas)
+  ctx.fillStyle = '#4a6070'; ctx.font = '10px Exo 2, sans-serif'; ctx.textAlign = 'center';
+  dados.forEach((d,i) => {
+    if (i % Math.ceil(n/7) === 0 || i === n-1) {
+      const partes = d.data.split('-');
+      ctx.fillText(`${partes[2]}/${partes[1]}`, PAD.l + i*step, H - 6);
+    }
+  });
+}
+
+// ── STREAMERS ─────────────────────────────────────────────
+let _streamersCarregado = false;
+async function carregarStreamers() {
+  if (_streamersCarregado) return;
+  const container = document.getElementById('tabela-streamers');
+  try {
+    const d = await api('/agente/streamers');
+    const list = d.streamers || [];
+    _streamersCarregado = true;
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">🎬</div><p>Nenhum streamer vinculado a você ainda.</p></div>`; return; }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>💎 Mês</th><th>⏱ Horas</th><th>Vinculado em</th></tr></thead>
+        <tbody>${list.map(s => `
+          <tr>
+            <td style="display:flex;align-items:center;gap:10px;padding:12px">
+              ${foto(s.foto, s.nome)}
+              <span>${esc(s.nome)}${s.verificado_premium?'<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="★">':s.verificado?'<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="✔">':''}</span>
+            </td>
+            <td>${s.kwai_id ? '@'+esc(s.kwai_id) : '—'}</td>
+            <td>${fmtNum(s.diamantes_mes)}</td>
+            <td>${s.horas_mes}</td>
+            <td>${fmtData(s.vinculado_em)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
+}
+
+// ── AO VIVO ───────────────────────────────────────────────
+async function carregarLives() {
+  const container = document.getElementById('grid-lives');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const d = await api('/agente/lives');
+    const list = d.ao_vivo || [];
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">📡</div><p>Nenhum streamer seu ao vivo agora.</p></div>`; return; }
+    container.innerHTML = `
+      <p style="color:var(--sub);font-size:13px;margin-bottom:16px">${list.length} streamer(s) ao vivo</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+        ${list.map(l => `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;gap:12px;align-items:center">
+            ${foto(l.foto, l.nome)}
+            <div>
+              <div style="font-size:15px;font-weight:600">${esc(l.nome)}</div>
+              <div style="font-size:12px;color:var(--sub);margin-top:2px">${l.kwai_id ? '@'+esc(l.kwai_id) : ''}</div>
+              <span class="badge badge-live" style="margin-top:6px;display:inline-block">● Ao vivo</span>
+              ${l.espectadores ? `<div style="font-size:11px;color:var(--dim);margin-top:4px">👁 ${fmtNum(l.espectadores)}</div>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
+}
+
+// ── RANKING ───────────────────────────────────────────────
+let _rankingCarregado = false;
+async function carregarRanking() {
+  if (_rankingCarregado) return;
+  const container = document.getElementById('tabela-ranking');
+  try {
+    const d = await api('/agente/ranking');
+    const list = d.streamers || [];
+    _rankingCarregado = true;
+    document.getElementById('ranking-titulo').textContent = `Ranking — ${d.mes||''}`;
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">🏆</div><p>Sem dados de ranking ainda.</p></div>`; return; }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>#</th><th>Streamer</th><th>💎 Diamantes</th><th>⏱ Horas</th><th>Status</th></tr></thead>
+        <tbody>${list.map(s => `
+          <tr>
+            <td><div class="pos ${s.posicao<=3?'pos-'+s.posicao:'pos-n'}">${s.posicao}</div></td>
+            <td style="display:flex;align-items:center;gap:10px;padding:12px">${foto(s.foto,s.nome)}<span>${esc(s.nome)}</span></td>
+            <td>${fmtNum(s.diamantes)}</td>
+            <td>${s.horas}</td>
+            <td>${s.ao_vivo ? '<span class="badge badge-live">● Ao vivo</span>' : '<span class="badge badge-offline">Offline</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
+}
+
+// ── DESEMPENHO ────────────────────────────────────────────
+let _desemp = false;
+async function carregarDesempenho() {
+  if (_desemp) return;
+  const container = document.getElementById('tabela-desempenho');
+  try {
+    const d = await api('/agente/desempenho');
+    const list = d.streamers || [];
+    _desemp = true;
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">📊</div><p>Sem dados de desempenho ainda.</p></div>`; return; }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Streamer</th><th>💎 Total</th><th>⏱ Horas</th><th>Progresso Horas</th><th>Dias Ativos</th><th>Status</th></tr></thead>
+        <tbody>${list.map(s => `
+          <tr>
+            <td style="display:flex;align-items:center;gap:10px;padding:12px">${foto(s.foto,s.nome)}<span>${esc(s.nome)}</span></td>
+            <td>${fmtNum(s.total_diamantes)}</td>
+            <td>${s.total_horas}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-cyan" style="width:${Math.round(s.prog_horas||0)}%"></div></div>
+                <span style="font-size:12px;color:var(--sub);white-space:nowrap">${Math.round(s.prog_horas||0)}%</span>
+              </div>
+            </td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-gold" style="width:${Math.round(s.prog_dias||0)}%"></div></div>
+                <span style="font-size:12px;color:var(--sub);white-space:nowrap">${s.dias_ativos}d</span>
+              </div>
+            </td>
+            <td><span class="badge ${s.status==='aprovado'?'badge-ok':s.status==='bom'?'badge-bom':'badge-at'}">${s.status==='aprovado'?'Aprovado':s.status==='bom'?'Bom':'Atenção'}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
+}
+
+// ── CONVITES ──────────────────────────────────────────────
+async function carregarConvites() {
+  const container = document.getElementById('tabela-convites');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const d = await api('/agente/convites');
+    const list = d.convites || [];
+    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">✉️</div><p>Nenhum convite enviado ainda.</p></div>`; return; }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>Categoria</th><th>Status</th><th>Data</th></tr></thead>
+        <tbody>${list.map(c => `
+          <tr>
+            <td>${esc(c.streamer_nome || c.streamer_uid || '—')}</td>
+            <td>${c.streamer_kwai_id ? '@'+esc(c.streamer_kwai_id) : '—'}</td>
+            <td style="text-transform:capitalize">${esc(c.categoria||'—')}</td>
+            <td>${badgeStatus(c.status)}</td>
+            <td>${fmtData(c.criado_em)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
+}
+
+// ── BUSCAR PERFIL PARA CONVITE ────────────────────────────
+_perfilAtual = null;
+
+document.getElementById('btn-buscar-perfil').addEventListener('click', buscarPerfilConvite);
+document.getElementById('inp-uid').addEventListener('keydown', e => { if(e.key==='Enter') buscarPerfilConvite(); });
+
+async function buscarPerfilConvite() {
+  const btn = document.getElementById('btn-buscar-perfil');
+  const uid = document.getElementById('inp-uid').value.trim();
+  const res = document.getElementById('perfil-resultado');
+  const msg = document.getElementById('msg-convite');
+  msg.style.display = 'none'; res.innerHTML = '';
+  if (!uid) return;
+  _perfilAtual = null;
+  btn.disabled = true; btn.textContent = 'Buscando…';
+  try {
+    const d = await api('/agente/convites/buscar-perfil', { method: 'POST', body: { uid } });
+    if (!d.ok && d.status === 'PERFIL_NAO_ENCONTRADO') {
+      mostrarMsg(msg, 'Perfil não encontrado. Verifique o UID.', 'err'); return;
+    }
+    const p = d.perfil || {};
+    _perfilAtual = { ...p, status: d.status, pode_enviar: d.pode_enviar };
+    const statusClasse = d.pode_enviar ? 'msg-ok' : 'msg-warn';
+    const statusTexto  = d.mensagem || '';
+    res.innerHTML = `
+      <div class="perfil-encontrado">
+        ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome||'?')[0])}</div>`}
+        <div class="perfil-info">
+          <h4>${esc(p.nome)||'—'}</h4>
+          <p>@${esc(p.kwaiId||'')} · ID: ${esc(p.memberId||uid)}</p>
+        </div>
+        ${d.pode_enviar ? `
+          <div class="perfil-acoes">
+            <select class="sel-categoria" id="sel-cat"><option value="entretenimento">Entretenimento</option><option value="games">Games</option></select>
+            <button class="btn btn-green" id="btn-enviar-convite">Enviar Convite</button>
+          </div>` : ''}
+      </div>`;
+    if (statusTexto) mostrarMsg(msg, statusTexto, d.pode_enviar ? 'ok' : 'warn');
+    if (d.pode_enviar) {
+      document.getElementById('btn-enviar-convite').addEventListener('click', enviarConvite);
+    }
+  } catch(e) {
+    mostrarMsg(msg, `Erro: ${e.message}`, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Buscar';
+  }
+}
+
+async function enviarConvite() {
+  if (!_perfilAtual) return;
+  const btn = document.getElementById('btn-enviar-convite');
+  const msg = document.getElementById('msg-convite');
+  const cat = document.getElementById('sel-cat')?.value || 'entretenimento';
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try {
+    const d = await api('/agente/convites/enviar', {
+      method: 'POST',
+      body: {
+        uid:       _perfilAtual.memberId,
+        memberId:  _perfilAtual.memberId,
+        kwaiId:    _perfilAtual.kwaiId,
+        nome:      _perfilAtual.nome,
+        foto:      _perfilAtual.foto,
+        categoria: cat,
+      },
+    });
+    if (d.ok) {
+      mostrarMsg(msg, '✅ Convite enviado com sucesso!', 'ok');
+      _perfilAtual = null;
+      document.getElementById('perfil-resultado').innerHTML = '';
+      document.getElementById('inp-uid').value = '';
+      _desemp = false; // força reload do histórico
+    } else {
+      mostrarMsg(msg, d.mensagem || d.checkMessage || 'Falha ao enviar convite.', 'err');
+    }
+  } catch(e) {
+    mostrarMsg(msg, `Erro: ${e.message}`, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar Convite';
+  }
+}
+
+function mostrarMsg(el, texto, tipo) {
+  el.className = `msg-${tipo}`;
+  el.textContent = texto;
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>

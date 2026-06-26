@@ -190,7 +190,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));s.getElementById('side').classList.remove('open');
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
@@ -1044,6 +1044,17 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnLimparDatas').addEventListener('click',()=>{s.getElementById('monDataDe').value='';s.getElementById('monDataAte').value='';});
     s.getElementById('btnVerBuffer').addEventListener('click',()=>this._verBufferMonitor());
     s.getElementById('btnTestarTelegram').addEventListener('click',()=>this._testarTelegram());
+    // Agentes de Talentos
+    s.getElementById('btnAtuAgentes')?.addEventListener('click',()=>this._carregarAgentes());
+    s.getElementById('btnNovoAgente')?.addEventListener('click',()=>this._abrirModalAgente());
+    s.getElementById('btnAgenteVoltarLista')?.addEventListener('click',()=>this._mostrarListaAgentes());
+    s.getElementById('btnAgenteEditar')?.addEventListener('click',()=>this._editarAgenteAtual());
+    s.getElementById('btnAgenteSenha')?.addEventListener('click',()=>this._alterarSenhaAgenteAtual());
+    s.getElementById('btnVincularStreamer')?.addEventListener('click',()=>{ const fb=s.getElementById('formVincularBox'); if(fb)fb.style.display=fb.style.display==='none'?'':'none'; });
+    s.getElementById('btnCancelarVincular')?.addEventListener('click',()=>{ s.getElementById('formVincularBox').style.display='none'; s.getElementById('resultadoUidAgente').style.display='none'; s.getElementById('inpUidVincular').value=''; s.getElementById('btnConfirmarVincular').style.display='none'; this._buscaVincularStreamer=null; });
+    s.getElementById('btnBuscarUidAgente')?.addEventListener('click',()=>this._buscarStreamerParaVincular());
+    s.getElementById('inpUidVincular')?.addEventListener('keydown',e=>{ if(e.key==='Enter')this._buscarStreamerParaVincular(); });
+    s.getElementById('btnConfirmarVincular')?.addEventListener('click',()=>this._confirmarVincularStreamer());
     // Controle Impulsionamento
     s.getElementById('btnAtuImpulso').addEventListener('click',()=>this._carregarImpulsoCtrl());
     s.getElementById('btnSalvarImpulsoConfig').addEventListener('click',()=>this._salvarImpulsoConfig());
@@ -2194,6 +2205,7 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('metrics','metricas','Métricas')}
             ${ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)}
             ${ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)}
+            ${ni('users','agentes','Agentes')}
             <div class="ns">Financeiro</div>
             ${ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)}
             ${ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)}
@@ -2409,6 +2421,60 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <div class="pag" id="pag-logs">${ph('Auditoria','search','Registro de ações','btnAtuLog')}<div class="box"><div class="bhead"><div class="btitulo">Logs</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bL" type="text" placeholder="Filtrar..."/></div></div></div><div id="tbL">${this._loading()}</div><div class="pag-bar" id="pgL"></div></div></div>
             <div class="pag" id="pag-config">${ph('Configurações','settings','Variáveis operacionais','btnAtuCfg')}<div class="box"><div id="tbC">${this._loading()}</div></div></div>
+            <!-- ── AGENTES DE TALENTOS ── -->
+            <div class="pag" id="pag-agentes">
+              ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
+              <!-- Lista de agentes -->
+              <div class="box" id="agentesListaBox">
+                <div class="bhead"><div class="btitulo">${this._ico('users',14)} Agentes</div></div>
+                <div id="tbAgentes">${this._loading()}</div>
+              </div>
+              <!-- Painel de detalhe do agente (aparece ao clicar em um agente) -->
+              <div id="agenteDetalhe" style="display:none;margin-top:14px">
+                <div class="box">
+                  <div class="bhead">
+                    <div class="btitulo" id="agenteDetalheTitulo">Agente</div>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-sm" id="btnAgenteVoltarLista">${this._ico('history',13)} Voltar</button>
+                      <button class="btn btn-sm btn-o" id="btnAgenteEditar">${this._ico('edit',13)} Editar</button>
+                      <button class="btn btn-sm" id="btnAgenteSenha" style="background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('settings',13)} Senha</button>
+                    </div>
+                  </div>
+                  <div id="agenteDetalheInfo" style="padding:16px;display:flex;gap:24px;flex-wrap:wrap">
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Login</span><div id="aDLogin" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Telefone</span><div id="aDTel" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Status</span><div id="aDStatus" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Streamers</span><div id="aDStreamers" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">💎 Hoje</span><div id="aDDiamHoje" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">💎 Mês</span><div id="aDDiamMes" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Observação</span><div id="aDObs" style="font-size:15px;margin-top:4px"></div></div>
+                  </div>
+                </div>
+                <!-- Streamers do agente -->
+                <div class="box" style="margin-top:14px">
+                  <div class="bhead">
+                    <div class="btitulo">${this._ico('mic',14)} Streamers Vinculados</div>
+                    <button class="btn btn-sm btn-g" id="btnVincularStreamer">${this._ico('plus',12)} Adicionar Streamer</button>
+                  </div>
+                  <div id="tbAgenteStreamers">${this._loading()}</div>
+                </div>
+                <!-- Formulário buscar streamer para vincular -->
+                <div class="box" id="formVincularBox" style="display:none;margin-top:10px">
+                  <div class="bhead"><div class="btitulo">Buscar Streamer por UID</div></div>
+                  <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;gap:10px">
+                      <input id="inpUidVincular" type="text" placeholder="UID ou Kwai ID do streamer" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none">
+                      <button class="btn btn-o btn-sm" id="btnBuscarUidAgente">${this._ico('search',13)} Buscar</button>
+                    </div>
+                    <div id="resultadoUidAgente" style="display:none"></div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end">
+                      <button class="btn btn-sm" id="btnCancelarVincular" style="background:rgba(255,255,255,.05);border:1px solid var(--brd);color:var(--t2)">Cancelar</button>
+                      <button class="btn btn-sm btn-g" id="btnConfirmarVincular" style="display:none">${this._ico('check',13)} Confirmar Vínculo</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2880,6 +2946,284 @@ class DimaiorAdmin extends HTMLElement {
       if(res)res.innerHTML=`<div style="color:var(--verm);font-size:12px;padding:6px 0">${this._esc(motivo)}</div>`;
       this._toast(motivo,'err');
     }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // AGENTES DE TALENTOS
+  // ════════════════════════════════════════════════════════════
+
+  _agenteAtualId = null;
+  _buscaVincularStreamer = null;
+
+  async _carregarAgentes() {
+    const s = this.shadowRoot;
+    const tb = s.getElementById('tbAgentes');
+    if (!tb) return;
+    // Garante que o detalhe esteja escondido e a lista visível
+    s.getElementById('agentesListaBox').style.display = '';
+    s.getElementById('agenteDetalhe').style.display = 'none';
+    tb.innerHTML = this._loading();
+    try {
+      const d = await this._get('/admin/agentes');
+      const lista = d.agentes || [];
+      if (!lista.length) { tb.innerHTML = `<div style="padding:24px;text-align:center;color:var(--t3)">Nenhum agente cadastrado.</div>`; return; }
+      tb.innerHTML = `<table class="tb"><thead><tr><th>Nome</th><th>Login</th><th>Telefone</th><th>Streamers</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+        ${lista.map(a => `<tr>
+          <td style="font-weight:600">${this._esc(a.nome)}</td>
+          <td style="color:var(--t3);font-size:12px">${this._esc(a.login)}</td>
+          <td>${a.telefone ? this._esc(a.telefone) : '—'}</td>
+          <td><span style="color:var(--cyan);font-weight:700">${a.total_streamers||0}</span></td>
+          <td>${a.ativo ? `<span style="color:var(--verde);font-size:12px">● Ativo</span>` : `<span style="color:var(--verm);font-size:12px">● Inativo</span>`}</td>
+          <td><button class="btn btn-sm btn-o" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}">${this._ico('search',12)} Ver</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+      tb.querySelectorAll('[data-agente-id]').forEach(btn => {
+        btn.addEventListener('click', () => this._abrirDetalheAgente(btn.dataset.agenteId));
+      });
+    } catch(e) { tb.innerHTML = `<div style="padding:20px;color:var(--verm)">${e.message}</div>`; }
+  }
+
+  async _abrirDetalheAgente(id) {
+    const s = this.shadowRoot;
+    this._agenteAtualId = id;
+    s.getElementById('agentesListaBox').style.display = 'none';
+    s.getElementById('agenteDetalhe').style.display = '';
+    s.getElementById('formVincularBox').style.display = 'none';
+    s.getElementById('btnConfirmarVincular').style.display = 'none';
+    s.getElementById('inpUidVincular').value = '';
+    s.getElementById('tbAgenteStreamers').innerHTML = this._loading();
+    try {
+      const [detalhe, dash] = await Promise.all([
+        this._get(`/admin/agentes/${id}`),
+        this._get(`/admin/agentes/${id}/dashboard`),
+      ]);
+      const ag = detalhe.agente || {};
+      const resumo = dash.resumo || {};
+      s.getElementById('agenteDetalheTitulo').textContent = ag.nome || 'Agente';
+      s.getElementById('aDLogin').textContent   = ag.login    || '—';
+      s.getElementById('aDTel').textContent     = ag.telefone || '—';
+      s.getElementById('aDStatus').innerHTML    = ag.ativo ? `<span style="color:var(--verde)">Ativo</span>` : `<span style="color:var(--verm)">Inativo</span>`;
+      s.getElementById('aDStreamers').textContent = resumo.streamers  || 0;
+      s.getElementById('aDDiamHoje').textContent  = (resumo.diamantes_hoje  || 0).toLocaleString('pt-BR');
+      s.getElementById('aDDiamMes').textContent   = (resumo.diamantes_mes   || 0).toLocaleString('pt-BR');
+      s.getElementById('aDObs').textContent       = ag.observacao || '—';
+      // Streamers
+      const streamers = detalhe.streamers || [];
+      if (!streamers.length) {
+        s.getElementById('tbAgenteStreamers').innerHTML = `<div style="padding:20px;text-align:center;color:var(--t3)">Nenhum streamer vinculado.</div>`;
+      } else {
+        s.getElementById('tbAgenteStreamers').innerHTML = `<table class="tb"><thead><tr><th>Streamer</th><th>Kwai ID</th><th>UID</th><th>Ação</th></tr></thead><tbody>
+          ${streamers.map(st => `<tr>
+            <td>${this._esc(st.streamer_nome||st.streamer_uid)}</td>
+            <td style="color:var(--t3);font-size:12px">${st.streamer_kwai_id ? '@'+this._esc(st.streamer_kwai_id) : '—'}</td>
+            <td style="color:var(--t3);font-size:11px">${this._esc(st.streamer_uid)}</td>
+            <td><button class="btn btn-sm" data-desvincular-uid="${this._esc(st.streamer_uid)}" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',12)} Desvincular</button></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+        s.getElementById('tbAgenteStreamers').querySelectorAll('[data-desvincular-uid]').forEach(btn => {
+          btn.addEventListener('click', () => this._desvincularStreamer(id, btn.dataset.desvincularUid));
+        });
+      }
+    } catch(e) {
+      s.getElementById('tbAgenteStreamers').innerHTML = `<div style="padding:20px;color:var(--verm)">${e.message}</div>`;
+    }
+  }
+
+  _mostrarListaAgentes() {
+    const s = this.shadowRoot;
+    this._agenteAtualId = null;
+    s.getElementById('agentesListaBox').style.display = '';
+    s.getElementById('agenteDetalhe').style.display = 'none';
+    this._carregarAgentes();
+  }
+
+  _abrirModalAgente(agente = null) {
+    const s = this.shadowRoot;
+    const titulo = agente ? 'Editar Agente' : 'Novo Agente';
+    const campos = agente ? [
+      { l:'Nome',     id:'mAgNome',   v:agente.nome       || '', t:'text' },
+      { l:'Telefone', id:'mAgTel',    v:agente.telefone   || '', t:'text' },
+      { l:'Observação',id:'mAgObs',   v:agente.observacao || '', t:'text' },
+    ] : [
+      { l:'Nome',     id:'mAgNome',   v:'', t:'text' },
+      { l:'Login',    id:'mAgLogin',  v:'', t:'text' },
+      { l:'Senha',    id:'mAgSenha',  v:'', t:'password' },
+      { l:'Telefone', id:'mAgTel',    v:'', t:'text' },
+      { l:'Observação',id:'mAgObs',  v:'', t:'text' },
+    ];
+    const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalAgente">
+      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:340px;max-width:440px;width:90%">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;margin-bottom:20px;color:#e2e8f0">${titulo}</div>
+        ${campos.map(c=>`<div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${c.l}</label>
+          <input id="${c.id}" type="${c.t}" value="${c.v}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:'Exo 2',sans-serif;font-size:14px;outline:none;box-sizing:border-box"></div>`).join('')}
+        ${agente ? `<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8"><input type="checkbox" id="mAgAtivo" ${agente.ativo?'checked':''}> Ativo</label></div>` : ''}
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+          <button id="mAgCancelar" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:'Exo 2',sans-serif;cursor:pointer">Cancelar</button>
+          <button id="mAgSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+        </div>
+        <div id="mAgErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:20px"></div>
+      </div>
+    </div>`;
+    const el = document.createElement('div'); el.innerHTML = html;
+    document.body.appendChild(el.firstChild);
+    const modal = document.getElementById('modalAgente');
+    modal.querySelector('#mAgCancelar').addEventListener('click', () => modal.remove());
+    modal.querySelector('#mAgSalvar').addEventListener('click', async () => {
+      const nome   = modal.querySelector('#mAgNome')?.value.trim();
+      const login  = modal.querySelector('#mAgLogin')?.value.trim();
+      const senha  = modal.querySelector('#mAgSenha')?.value.trim();
+      const tel    = modal.querySelector('#mAgTel')?.value.trim();
+      const obs    = modal.querySelector('#mAgObs')?.value.trim();
+      const ativo  = modal.querySelector('#mAgAtivo')?.checked;
+      const erroEl = modal.querySelector('#mAgErro');
+      erroEl.textContent = '';
+      if (!nome) { erroEl.textContent = 'Nome obrigatório'; return; }
+      if (!agente && (!login || !senha)) { erroEl.textContent = 'Login e senha obrigatórios'; return; }
+      if (!agente && senha.length < 6) { erroEl.textContent = 'Senha mínima de 6 caracteres'; return; }
+      try {
+        if (agente) {
+          await this._patch(`/admin/agentes/${agente.id}`, { nome, telefone: tel, ativo: ativo !== undefined ? ativo : agente.ativo, observacao: obs });
+        } else {
+          await this._post('/admin/agentes', { nome, login, senha, telefone: tel, observacao: obs });
+        }
+        modal.remove(); this._toast(agente ? 'Agente atualizado!' : 'Agente criado!', 'ok');
+        this._carregarAgentes();
+      } catch(e) { erroEl.textContent = e.message || 'Erro ao salvar'; }
+    });
+  }
+
+  async _editarAgenteAtual() {
+    if (!this._agenteAtualId) return;
+    try {
+      const d = await this._get(`/admin/agentes/${this._agenteAtualId}`);
+      this._abrirModalAgente(d.agente);
+    } catch(e) { this._toast(e.message,'err'); }
+  }
+
+  _alterarSenhaAgenteAtual() {
+    if (!this._agenteAtualId) return;
+    const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalSenhaAgente">
+      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:300px;width:90%">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;margin-bottom:20px;color:#e2e8f0">Alterar Senha</div>
+        <div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nova Senha</label>
+          <input id="mSenNova" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:'Exo 2',sans-serif;font-size:14px;outline:none;box-sizing:border-box"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="mSenCancel" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:'Exo 2',sans-serif;cursor:pointer">Cancelar</button>
+          <button id="mSenSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+        </div>
+        <div id="mSenErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:18px"></div>
+      </div>
+    </div>`;
+    const el = document.createElement('div'); el.innerHTML = html;
+    document.body.appendChild(el.firstChild);
+    const modal = document.getElementById('modalSenhaAgente');
+    modal.querySelector('#mSenCancel').addEventListener('click', () => modal.remove());
+    modal.querySelector('#mSenSalvar').addEventListener('click', async () => {
+      const senha = modal.querySelector('#mSenNova').value.trim();
+      const erroEl = modal.querySelector('#mSenErro');
+      erroEl.textContent = '';
+      if (senha.length < 6) { erroEl.textContent = 'Mínimo 6 caracteres'; return; }
+      try {
+        await this._post(`/admin/agentes/${this._agenteAtualId}/senha`, { senha });
+        modal.remove(); this._toast('Senha alterada!', 'ok');
+      } catch(e) { erroEl.textContent = e.message || 'Erro'; }
+    });
+  }
+
+  async _desvincularStreamer(agenteId, uid) {
+    if (!confirm(`Desvincular UID ${uid} deste agente?`)) return;
+    try {
+      await this._delete(`/admin/agentes/${agenteId}/streamers/${encodeURIComponent(uid)}`);
+      this._toast('Streamer desvinculado!', 'ok');
+      this._abrirDetalheAgente(agenteId);
+    } catch(e) { this._toast(e.message, 'err'); }
+  }
+
+  async _buscarStreamerParaVincular() {
+    const s = this.shadowRoot;
+    const uid = s.getElementById('inpUidVincular')?.value.trim();
+    const res = s.getElementById('resultadoUidAgente');
+    const btnConf = s.getElementById('btnConfirmarVincular');
+    this._buscaVincularStreamer = null;
+    btnConf.style.display = 'none';
+    if (!uid) return;
+    res.style.display = '';
+    res.innerHTML = this._loading();
+    try {
+      const d = await this._post('/admin/agentes/buscar-streamer', { uid });
+      const st = d.streamer || {};
+      const agAtual = d.agente_atual;
+      res.innerHTML = `<div style="padding:12px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.15);border-radius:8px">
+        <div style="font-size:15px;font-weight:600">${this._esc(st.nome||st.uid||uid)}</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:4px">${st.kwai_id?'@'+this._esc(st.kwai_id):''} · UID: ${this._esc(st.uid||uid)}</div>
+        ${agAtual ? `<div style="margin-top:8px;font-size:12px;color:var(--verm)">⚠️ Este streamer já está vinculado ao agente <strong>${this._esc(agAtual.nome)}</strong>.</div>` : ''}
+      </div>`;
+      this._buscaVincularStreamer = { uid: st.uid || uid, kwai_id: st.kwai_id || null, nome: st.nome || null, foto: st.foto || null, agente_atual_id: agAtual?.id || null };
+      btnConf.style.display = '';
+    } catch(e) { res.innerHTML = `<div style="color:var(--verm);font-size:13px">${e.message}</div>`; }
+  }
+
+  async _confirmarVincularStreamer() {
+    if (!this._buscaVincularStreamer || !this._agenteAtualId) return;
+    const { uid, kwai_id, nome, foto, agente_atual_id } = this._buscaVincularStreamer;
+    const s = this.shadowRoot;
+    // Se já existe vínculo com outro agente, oferece transferência
+    if (agente_atual_id && agente_atual_id !== this._agenteAtualId) {
+      if (!confirm(`Streamer já vinculado a outro agente. Deseja TRANSFERIR para este agente?`)) return;
+      try {
+        await this._post(`/admin/agentes/${agente_atual_id}/streamers/${encodeURIComponent(uid)}/transferir`, { agente_destino_id: this._agenteAtualId });
+        this._toast('Streamer transferido!', 'ok');
+      } catch(e) { this._toast(e.message,'err'); return; }
+    } else {
+      try {
+        await this._post(`/admin/agentes/${this._agenteAtualId}/streamers`, { streamer_uid: uid, streamer_kwai_id: kwai_id, streamer_nome: nome, streamer_foto: foto });
+        this._toast('Streamer vinculado!', 'ok');
+      } catch(e) { this._toast(e.message,'err'); return; }
+    }
+    s.getElementById('formVincularBox').style.display = 'none';
+    s.getElementById('inpUidVincular').value = '';
+    s.getElementById('btnConfirmarVincular').style.display = 'none';
+    this._buscaVincularStreamer = null;
+    this._abrirDetalheAgente(this._agenteAtualId);
+  }
+
+  // ── Helpers HTTP usados pelos métodos de Agentes ──────────────────────────
+  async _get(path) {
+    const r = await fetch(this.WORKER + path, {
+      headers: { Authorization: `Bearer ${this._token}` },
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.erro || `HTTP ${r.status}`);
+    return d;
+  }
+  async _post(path, body) {
+    const r = await fetch(this.WORKER + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this._token}` },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.erro || `HTTP ${r.status}`);
+    return d;
+  }
+  async _patch(path, body) {
+    const r = await fetch(this.WORKER + path, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this._token}` },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.erro || `HTTP ${r.status}`);
+    return d;
+  }
+  async _delete(path) {
+    const r = await fetch(this.WORKER + path, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${this._token}` },
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.erro || `HTTP ${r.status}`);
+    return d;
   }
 }
 
