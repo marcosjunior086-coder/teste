@@ -1047,6 +1047,7 @@ class DimaiorAdmin extends HTMLElement {
     // Agentes de Talentos
     s.getElementById('btnAtuAgentes')?.addEventListener('click',()=>this._carregarAgentes());
     s.getElementById('btnNovoAgente')?.addEventListener('click',()=>this._abrirModalAgente());
+    s.getElementById('btnConfigComissaoAgentes')?.addEventListener('click',()=>this._abrirConfigComissaoAgentes());
     s.getElementById('btnAgenteVoltarLista')?.addEventListener('click',()=>this._mostrarListaAgentes());
     s.getElementById('btnAgenteEditar')?.addEventListener('click',()=>this._editarAgenteAtual());
     s.getElementById('btnAgenteSenha')?.addEventListener('click',()=>this._alterarSenhaAgenteAtual());
@@ -2423,7 +2424,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-config">${ph('Configurações','settings','Variáveis operacionais','btnAtuCfg')}<div class="box"><div id="tbC">${this._loading()}</div></div></div>
             <!-- ── AGENTES DE TALENTOS ── -->
             <div class="pag" id="pag-agentes">
-              ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
+              ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-o" id="btnConfigComissaoAgentes">${this._ico('settings',13)} Comissões</button><button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
               <!-- Lista de agentes -->
               <div class="box" id="agentesListaBox">
                 <div class="bhead"><div class="btitulo">${this._ico('users',14)} Agentes</div></div>
@@ -2447,6 +2448,8 @@ class DimaiorAdmin extends HTMLElement {
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Streamers</span><div id="aDStreamers" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">💎 Hoje</span><div id="aDDiamHoje" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">💎 Mês</span><div id="aDDiamMes" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Comissão</span><div id="aDComissao" style="font-size:15px;margin-top:4px;color:var(--verde)"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Meta</span><div id="aDComissaoMeta" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Observação</span><div id="aDObs" style="font-size:15px;margin-top:4px"></div></div>
                   </div>
                 </div>
@@ -2993,12 +2996,14 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('inpUidVincular').value = '';
     s.getElementById('tbAgenteStreamers').innerHTML = this._loading();
     try {
-      const [detalhe, dash] = await Promise.all([
+      const [detalhe, dash, comissao] = await Promise.all([
         this._get(`/admin/agentes/${id}`),
         this._get(`/admin/agentes/${id}/dashboard`),
+        this._get(`/admin/agentes/${id}/comissao`),
       ]);
       const ag = detalhe.agente || {};
       const resumo = dash.resumo || {};
+      const calc = comissao || {};
       s.getElementById('agenteDetalheTitulo').textContent = ag.nome || 'Agente';
       s.getElementById('aDLogin').textContent   = ag.login    || '—';
       s.getElementById('aDTel').textContent     = ag.telefone || '—';
@@ -3006,6 +3011,10 @@ class DimaiorAdmin extends HTMLElement {
       s.getElementById('aDStreamers').textContent = resumo.streamers  || 0;
       s.getElementById('aDDiamHoje').textContent  = (resumo.diamantes_hoje  || 0).toLocaleString('pt-BR');
       s.getElementById('aDDiamMes').textContent   = (resumo.diamantes_mes   || 0).toLocaleString('pt-BR');
+      s.getElementById('aDComissao').textContent   = this._brl(calc.comissao?.brl || 0);
+      s.getElementById('aDComissaoMeta').textContent = calc.regra_aplicada
+        ? `${calc.regra_aplicada.nome} · ${Number(calc.comissao?.percentual||0)}%`
+        : 'Sem meta atingida';
       s.getElementById('aDObs').textContent       = ag.observacao || '—';
       // Streamers
       const streamers = detalhe.streamers || [];
@@ -3035,6 +3044,96 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('agentesListaBox').style.display = '';
     s.getElementById('agenteDetalhe').style.display = 'none';
     this._carregarAgentes();
+  }
+
+  async _abrirConfigComissaoAgentes() {
+    const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px" id="modalComissaoAgentes">
+      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;max-width:900px;width:100%;max-height:90vh;overflow:auto">
+        <div style="padding:18px 22px;border-bottom:1px solid rgba(0,212,212,.14);display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:21px;font-weight:700;color:#e2e8f0">Comissões dos Agentes</div>
+            <div style="font-size:12px;color:#7a9ab4;margin-top:2px">Regras flexíveis por dias ativos, horas e percentual.</div>
+          </div>
+          <button id="mComAgClose" class="btn btn-sm btn-o">Fechar</button>
+        </div>
+        <div id="mComAgBody" style="padding:18px 22px">${this._loading()}</div>
+      </div>
+    </div>`;
+    const wrap=document.createElement('div');wrap.innerHTML=html;document.body.appendChild(wrap.firstChild);
+    const modal=document.getElementById('modalComissaoAgentes');
+    const body=modal.querySelector('#mComAgBody');
+    modal.querySelector('#mComAgClose').addEventListener('click',()=>modal.remove());
+
+    const render=async()=>{
+      body.innerHTML=this._loading();
+      try{
+        const d=await this._get('/admin/agentes/comissao');
+        const cfg=d.config||{};
+        const regras=d.regras||[];
+        body.innerHTML=`
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px">
+            <label style="display:grid;gap:6px;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px">Koin por dólar
+              <input id="cfgKoin" type="number" min="1" step="1" value="${Number(cfg.koin_por_dolar||100)}" style="padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.18);border-radius:8px;color:#e2e8f0">
+            </label>
+            <label style="display:grid;gap:6px;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px">Cotação dólar
+              <input id="cfgDolar" type="number" min="0.01" step="0.01" value="${Number(cfg.cotacao_dolar||5)}" style="padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.18);border-radius:8px;color:#e2e8f0">
+            </label>
+            <div style="display:flex;align-items:end">
+              <button id="btnSalvarCfgCom" class="btn btn-g" style="width:100%">Salvar Conversão</button>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#a0b8c8;margin-bottom:12px">Fórmula: diamantes × percentual = Koin de comissão; Koin ÷ ${Number(cfg.koin_por_dolar||100)} = US$; US$ × R$ ${Number(cfg.cotacao_dolar||5).toFixed(2)} = comissão em reais.</div>
+          <table class="tb" style="width:100%;margin-bottom:16px"><thead><tr><th>Nome</th><th>Dias</th><th>Horas</th><th>%</th><th>Ordem</th><th>Ativo</th><th>Ações</th></tr></thead><tbody>
+            ${regras.map(r=>`<tr data-regra-id="${r.id}">
+              <td><input data-k="nome" value="${this._esc(r.nome||'')}" style="width:150px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
+              <td><input data-k="dias_minimos" type="number" value="${Number(r.dias_minimos||0)}" style="width:76px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
+              <td><input data-k="horas_minimas" type="number" step="0.01" value="${Number(r.horas_minimas||0)}" style="width:76px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
+              <td><input data-k="percentual" type="number" step="0.01" value="${Number(r.percentual||0)}" style="width:76px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
+              <td><input data-k="ordem" type="number" value="${Number(r.ordem||0)}" style="width:66px;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)"></td>
+              <td><input data-k="ativo" type="checkbox" ${r.ativo?'checked':''}></td>
+              <td style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-sm btn-o" data-save-regra="${r.id}">Salvar</button><button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-del-regra="${r.id}">Excluir</button></td>
+            </tr>`).join('')}
+          </tbody></table>
+          <div style="padding:14px;border:1px solid rgba(0,212,212,.14);border-radius:10px;background:rgba(0,212,212,.04)">
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;margin-bottom:10px;color:#e2e8f0">Nova regra</div>
+            <div style="display:grid;grid-template-columns:1.5fr repeat(4,1fr) auto;gap:8px">
+              <input id="novaRegraNome" placeholder="Nome" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
+              <input id="novaRegraDias" type="number" placeholder="Dias" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
+              <input id="novaRegraHoras" type="number" step="0.01" placeholder="Horas" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
+              <input id="novaRegraPct" type="number" step="0.01" placeholder="%" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
+              <input id="novaRegraOrdem" type="number" placeholder="Ordem" style="padding:9px;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:8px;color:var(--t1)">
+              <button id="btnNovaRegraCom" class="btn btn-g">Adicionar</button>
+            </div>
+          </div>`;
+        body.querySelector('#btnSalvarCfgCom').addEventListener('click',async()=>{
+          await this._patch('/admin/agentes/comissao',{koin_por_dolar:Number(body.querySelector('#cfgKoin').value),cotacao_dolar:Number(body.querySelector('#cfgDolar').value),ativo:true});
+          this._toast('Configuração salva','ok');render();
+        });
+        body.querySelectorAll('[data-save-regra]').forEach(btn=>btn.addEventListener('click',async()=>{
+          const tr=btn.closest('[data-regra-id]');const payload={};
+          tr.querySelectorAll('[data-k]').forEach(inp=>payload[inp.dataset.k]=inp.type==='checkbox'?inp.checked:inp.value);
+          await this._patch(`/admin/agentes/comissao/regras/${btn.dataset.saveRegra}`,payload);
+          this._toast('Regra salva','ok');render();
+        }));
+        body.querySelectorAll('[data-del-regra]').forEach(btn=>btn.addEventListener('click',async()=>{
+          if(!confirm('Excluir esta regra de comissão?'))return;
+          await this._delete(`/admin/agentes/comissao/regras/${btn.dataset.delRegra}`);
+          this._toast('Regra excluída','ok');render();
+        }));
+        body.querySelector('#btnNovaRegraCom').addEventListener('click',async()=>{
+          await this._post('/admin/agentes/comissao/regras',{
+            nome:body.querySelector('#novaRegraNome').value,
+            dias_minimos:body.querySelector('#novaRegraDias').value,
+            horas_minimas:body.querySelector('#novaRegraHoras').value,
+            percentual:body.querySelector('#novaRegraPct').value,
+            ordem:body.querySelector('#novaRegraOrdem').value,
+            ativo:true,
+          });
+          this._toast('Regra criada','ok');render();
+        });
+      }catch(e){body.innerHTML=`<div style="color:var(--verm);padding:18px">${this._esc(e.message)}</div>`;}
+    };
+    render();
   }
 
   _abrirModalAgente(agente = null) {

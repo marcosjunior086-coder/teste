@@ -173,6 +173,90 @@
     .prog-cyan { background: var(--cyan); }
     .prog-gold { background: var(--gold); }
 
+    /* Cards de lives no padrao do admin */
+    .live-summary {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      background: rgba(0,212,212,.035); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px;
+    }
+    .live-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+    .live-stat {
+      min-width: 110px; padding: 14px 16px; border-radius: 14px;
+      border: 1px solid rgba(0,212,212,.32);
+      background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(0,212,212,.16));
+    }
+    .live-stat.live-on {
+      border-color: rgba(248,113,113,.55);
+      background: linear-gradient(135deg, rgba(185,28,28,.9), rgba(194,65,12,.72));
+    }
+    .live-stat strong {
+      display: block; font-family: var(--font-t); font-size: 30px; line-height: 1;
+      color: #fff; margin-bottom: 8px;
+    }
+    .live-stat span {
+      display: block; font-family: var(--font-t); font-size: 10px; font-weight: 700;
+      letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,.75);
+    }
+    .live-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .live-card {
+      min-height: 284px; overflow: hidden; display: grid; grid-template-columns: 46% 54%;
+      background: rgba(255,255,255,.045); border: 1px solid rgba(0,212,212,.22);
+      border-radius: 14px;
+    }
+    .live-cover { position: relative; min-height: 284px; background: #020611; overflow: hidden; }
+    .live-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .live-cover::after {
+      content: ""; position: absolute; inset: 45% 0 0;
+      background: linear-gradient(to top, rgba(0,0,0,.62), transparent);
+      pointer-events: none;
+    }
+    .live-tag, .live-time {
+      position: absolute; z-index: 1; top: 8px; padding: 3px 8px;
+      border-radius: 999px; color: #fff; font-size: 10px; font-weight: 700;
+    }
+    .live-tag { left: 8px; background: rgba(0,0,0,.58); }
+    .live-time { right: 8px; background: rgba(248,113,113,.9); }
+    .live-info { padding: 16px 14px; min-width: 0; display: flex; flex-direction: column; }
+    .live-head {
+      display: grid; grid-template-columns: 38px minmax(0,1fr); gap: 10px; align-items: center;
+      padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .live-head .avatar, .live-head .no-foto { width: 38px; height: 38px; }
+    .live-name {
+      font-family: var(--font-t); font-size: 16px; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .live-id {
+      margin-top: 2px; color: var(--muted); font-size: 11px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .live-metrics {
+      display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .live-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      color: var(--sub); font-size: 12px;
+    }
+    .live-row span:first-child { display: inline-flex; align-items: center; gap: 6px; }
+    .live-row strong { color: var(--text); font-size: 13px; }
+    .live-watch { margin-top: auto; padding-top: 12px; }
+    .live-watch small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .live-watch strong {
+      display: block; font-family: var(--font-t); font-size: 24px; color: var(--text);
+      margin-bottom: 10px;
+    }
+    .live-actions { display: grid; gap: 8px; }
+    .live-actions a {
+      width: 100%; min-height: 30px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      border-radius: 999px; border: 1px solid rgba(0,212,212,.28); text-decoration: none;
+      font-family: var(--font-t); font-weight: 700; font-size: 12px; color: var(--text);
+      background: rgba(255,255,255,.035);
+    }
+    .live-actions a.primary { color: #06101a; background: linear-gradient(135deg,#3b82f6,#00d4d4); border-color: transparent; }
+
     /* Seção de convites — form buscar */
     .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
     .convite-box h3 { font-family: var(--font-t); font-size: 17px; margin-bottom: 18px; }
@@ -326,6 +410,16 @@
       .perfil-acoes { margin-left: 0; width: 100%; flex-direction: column; }
       .perfil-acoes .sel-categoria,
       .perfil-acoes .btn { width: 100%; box-sizing: border-box; }
+      .live-summary { align-items: stretch; flex-direction: column; padding: 12px; }
+      .live-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .live-stat { min-width: 0; padding: 12px; }
+      .live-stat strong { font-size: 26px; }
+      .live-grid { grid-template-columns: 1fr; gap: 12px; }
+      .live-card { grid-template-columns: minmax(120px, 38%) minmax(0,1fr); min-height: 230px; }
+      .live-cover { min-height: 230px; }
+      .live-info { padding: 12px; }
+      .live-metrics { gap: 6px; padding: 10px 0; }
+      .live-watch strong { font-size: 21px; }
 
       /* Gráfico */
       .chart-wrap { padding: 14px; }
@@ -438,7 +532,13 @@
 
       <!-- ─── AO VIVO ─── -->
       <section id="sec-lives" class="section" style="display:none">
-        <div class="topbar"><h2>Ao Vivo Agora</h2></div>
+        <div class="topbar">
+          <div>
+            <h2>Ao Vivo Agora</h2>
+            <p style="color:var(--sub);font-size:13px;margin-top:4px">Streamers vinculados ativos agora</p>
+          </div>
+          <button class="btn btn-ghost" id="btn-atualizar-lives" type="button">Atualizar</button>
+        </div>
         <div id="grid-lives">
           <div class="loading"><div class="spinner"></div></div>
         </div>
@@ -601,6 +701,7 @@ function abrirMenuMobile() {
 
 document.getElementById('mobile-menu-btn')?.addEventListener('click', abrirMenuMobile);
 document.getElementById('mobile-menu-backdrop')?.addEventListener('click', fecharMenuMobile);
+document.getElementById('btn-atualizar-lives')?.addEventListener('click', () => carregarLives());
 
 document.querySelectorAll('.nav-item').forEach(el => {
   el.addEventListener('click', () => {
@@ -643,12 +744,87 @@ function ico(name, size = 16) {
 
 // ── FORMATADORES ──────────────────────────────────────────
 const fmtNum = n => Number(n).toLocaleString('pt-BR');
+const fmtBRL = n => 'R$ ' + Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 function foto(url, nome) {
   if (url) return `<img class="avatar" src="${esc(url)}" alt="${esc(nome)}" onerror="this.outerHTML=sem_foto()">`;
   return `<div class="no-foto">${esc((nome||'?')[0].toUpperCase())}</div>`;
 }
 function sem_foto() { return `<div class="no-foto">?</div>`; }
+function pick(obj, keys, fallback = '') {
+  for (const k of keys) {
+    const v = obj?.[k];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+  }
+  return fallback;
+}
+function normalizarUrl(url) {
+  if (!url) return '';
+  const s = String(url).trim();
+  return s.startsWith('http://') ? 'https://' + s.slice(7) : s;
+}
+function liveDuracao(min) {
+  const n = Number(min || 0);
+  if (!n) return '';
+  if (n < 60) return `${Math.round(n)}m`;
+  const h = Math.floor(n / 60);
+  const m = Math.round(n % 60);
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+function livePerfilUrl(l) {
+  const kwai = String(pick(l, ['kwai_id','kwaiId','streamer_kwai_id','kwai_uid'], '')).replace(/^@/, '');
+  return kwai ? `https://www.kwai.com/@${encodeURIComponent(kwai)}` : '';
+}
+function liveAssistirUrl(l) {
+  return normalizarUrl(pick(l, ['watch_url','watchUrl','url','liveUrl','hlsUrl','hls_url','playUrl'], ''));
+}
+function liveCard(l) {
+  const nome = pick(l, ['nome','memberName','authorName','streamer_nome'], 'Streamer');
+  const kwai = pick(l, ['kwai_id','kwaiId','streamer_kwai_id','kwai_uid'], '');
+  const uid = pick(l, ['uid','memberId','member_id','authorId','author_id','userId'], '');
+  const fotoUrl = normalizarUrl(pick(l, ['foto','headImg','avatar','streamer_foto'], ''));
+  const coverUrl = normalizarUrl(pick(l, ['coverUrl','cover_url','cover','capa','thumbnail','foto','headImg','streamer_foto'], ''));
+  const espectadores = Number(pick(l, ['espectadores','viewerCount','onlineCount','audience','pcu'], 0));
+  const seguidores = Number(pick(l, ['seguidores','followers','fansNum','fanNum'], 0));
+  const curtidas = Number(pick(l, ['curtidas','likeCnt','likes'], 0));
+  const presentes = Number(pick(l, ['diamantes','gifts','totalRewardAmount','authorReceiveGiftDiamond'], 0));
+  const duracao = liveDuracao(pick(l, ['duracao_min','duration_min','minutos_live'], 0));
+  const assistir = liveAssistirUrl(l);
+  const perfil = livePerfilUrl(l);
+  const cover = coverUrl
+    ? `<img src="${esc(coverUrl)}" alt="" onerror="this.style.display='none'">`
+    : `<div style="height:100%;display:flex;align-items:center;justify-content:center">${foto(fotoUrl,nome)}</div>`;
+  return `
+    <article class="live-card">
+      <div class="live-cover">
+        ${cover}
+        ${uid ? `<span class="live-tag">Studio: ${esc(uid)}</span>` : ''}
+        ${duracao ? `<span class="live-time">${esc(duracao)}</span>` : ''}
+      </div>
+      <div class="live-info">
+        <div class="live-head">
+          ${foto(fotoUrl, nome)}
+          <div style="min-width:0">
+            <div class="live-name">${esc(nome)}</div>
+            <div class="live-id">ID:${esc(kwai || uid || '')}</div>
+          </div>
+        </div>
+        <div class="live-metrics">
+          <div class="live-row"><span>${ico('mic',12)} Seguidores</span><strong>${fmtNum(seguidores)}</strong></div>
+          <div class="live-row"><span>${ico('check',12)} Curtidas</span><strong>${fmtNum(curtidas)}</strong></div>
+          <div class="live-row"><span>${ico('diamond',12)} Presentes</span><strong style="color:var(--gold)">${fmtNum(presentes)}</strong></div>
+        </div>
+        <div class="live-watch">
+          <small>Espectadores</small>
+          <strong>${fmtNum(espectadores)}</strong>
+          <div class="live-actions">
+            ${assistir ? `<a class="primary" href="${esc(assistir)}" target="_blank" rel="noopener noreferrer">${ico('live',12)} Assistir</a>` : ''}
+            ${perfil ? `<a href="${esc(perfil)}" target="_blank" rel="noopener noreferrer">${ico('live',12)} Kwai</a>` : ''}
+          </div>
+        </div>
+      </div>
+    </article>`;
+}
 function fmtData(iso) {
   if (!iso) return '—';
   const d = new Date(iso); const p = n => String(n).padStart(2,'0');
@@ -666,8 +842,15 @@ async function carregarDashboard() {
   if (_dashCarregado) return;
   const container = document.getElementById('cards-dashboard');
   try {
-    const d = await api('/agente/dashboard');
+    const [d, c] = await Promise.all([
+      api('/agente/dashboard'),
+      api('/agente/comissao').catch(() => ({ ok:false })),
+    ]);
     const r = d.resumo || {};
+    const com = c.comissao || {};
+    const totaisCom = c.totais || {};
+    const regra = c.regra_aplicada || null;
+    const prox = c.proxima_regra || null;
     _dashCarregado = true;
 
     document.getElementById('dash-ao-vivo-badge').textContent = `${r.ao_vivo||0} ao vivo`;
@@ -678,6 +861,8 @@ async function carregarDashboard() {
       <div class="card"><div class="card-label">${ico('diamond',13)} Hoje</div><div class="card-value">${fmtNum(r.diamantes_hoje||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_hoje||'0:00'} h hoje</div></div>
       <div class="card gold"><div class="card-label">${ico('diamond',13)} Este Mês</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_mes||'0:00'} h no mês</div></div>
       <div class="card"><div class="card-label">Convites Enviados</div><div class="card-value">${r.convites_enviados||0}</div><div class="card-sub">${r.convites_pendentes||0} pendentes</div></div>
+      <div class="card green"><div class="card-label">Comissão Estimada</div><div class="card-value">${fmtBRL(com.brl||0)}</div><div class="card-sub">${Number(com.percentual||0)}% aplicado · ${fmtNum(com.koin||0)} Koin</div></div>
+      <div class="card"><div class="card-label">Meta de Comissão</div><div class="card-value" style="font-size:22px">${regra ? esc(regra.nome) : 'Sem meta'}</div><div class="card-sub">${totaisCom.dias_ativos||0} dias · ${Number(totaisCom.horas||0).toFixed(1)}h${prox&&!regra?` · próx.: ${esc(prox.nome)}`:''}</div></div>
     `;
 
     // Gráfico
@@ -786,21 +971,17 @@ async function carregarLives() {
   try {
     const d = await api('/agente/lives');
     const list = d.ao_vivo || [];
+    const hoje = Number(d.hoje || d.total_hoje || list.length || 0);
     if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('live',32)}</div><p>Nenhum streamer seu ao vivo agora.</p></div>`; return; }
     container.innerHTML = `
-      <p style="color:var(--sub);font-size:13px;margin-bottom:16px">${list.length} streamer(s) ao vivo</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
-        ${list.map(l => `
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;gap:12px;align-items:center">
-            ${foto(l.foto, l.nome)}
-            <div>
-              <div style="font-size:15px;font-weight:600">${esc(l.nome)}</div>
-              <div style="font-size:12px;color:var(--sub);margin-top:2px">${l.kwai_id ? '@'+esc(l.kwai_id) : ''}</div>
-              <span class="badge badge-live" style="margin-top:6px;display:inline-block">● Ao vivo</span>
-              ${l.espectadores ? `<div style="font-size:11px;color:var(--dim);margin-top:4px;display:flex;align-items:center;gap:3px">${ico('eye',11)} ${fmtNum(l.espectadores)}</div>` : ''}
-            </div>
-          </div>`).join('')}
-      </div>`;
+      <div class="live-summary">
+        <div class="live-stats">
+          <div class="live-stat live-on"><strong>${fmtNum(list.length)}</strong><span>Ao vivo</span></div>
+          <div class="live-stat"><strong>${fmtNum(hoje)}</strong><span>Hoje</span></div>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="carregarLives()">Atualizar</button>
+      </div>
+      <div class="live-grid">${list.map(liveCard).join('')}</div>`;
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
