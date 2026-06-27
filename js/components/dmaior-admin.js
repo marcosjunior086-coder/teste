@@ -3080,10 +3080,10 @@ class DimaiorAdmin extends HTMLElement {
         #modalComissaoAgentes .mc-empty{padding:18px;border:1px dashed rgba(0,212,212,.22);border-radius:14px;color:var(--mc-muted);text-align:center}
         #modalComissaoAgentes .mc-error{padding:16px;border:1px solid rgba(248,113,113,.28);border-radius:12px;background:rgba(248,113,113,.08);color:#ff9a9a}
         @media(max-width:760px){
-          #modalComissaoAgentes.mc-overlay{align-items:flex-start;padding:10px}
-          #modalComissaoAgentes .mc-panel{width:100%;max-height:calc(100vh - 20px);border-radius:16px}
+          #modalComissaoAgentes.mc-overlay{align-items:flex-start;padding:10px 10px max(28px,env(safe-area-inset-bottom))}
+          #modalComissaoAgentes .mc-panel{width:100%;max-height:calc(100vh - 56px);max-height:calc(100dvh - 56px);border-radius:16px}
           #modalComissaoAgentes .mc-head{padding:16px}
-          #modalComissaoAgentes .mc-body{padding:16px}
+          #modalComissaoAgentes .mc-body{padding:16px 16px max(42px,calc(env(safe-area-inset-bottom) + 28px))}
           #modalComissaoAgentes .mc-grid{grid-template-columns:1fr}
           #modalComissaoAgentes .mc-grid .mc-primary{width:100%}
           #modalComissaoAgentes .mc-rule-head{display:none}
@@ -3093,7 +3093,7 @@ class DimaiorAdmin extends HTMLElement {
           #modalComissaoAgentes .mc-actions{justify-content:stretch}
           #modalComissaoAgentes .mc-actions .mc-btn{flex:1}
           #modalComissaoAgentes .mc-new-grid{grid-template-columns:1fr 1fr}
-          #modalComissaoAgentes #btnNovaRegraCom{grid-column:1/-1;width:100%}
+          #modalComissaoAgentes #btnNovaRegraCom{grid-column:1/-1;width:100%;min-height:46px;margin-top:4px}
         }
       </style>
       <div class="mc-panel">

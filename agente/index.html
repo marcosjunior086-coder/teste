@@ -269,6 +269,36 @@
     }
     .live-actions a.primary { color: #06101a; background: linear-gradient(135deg,#3b82f6,#00d4d4); border-color: transparent; }
     .live-actions a.is-disabled { opacity: .45; pointer-events: none; }
+    .live-actions button {
+      width: 100%; min-height: 30px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      border-radius: 999px; border: 0; text-decoration: none;
+      font-family: var(--font-t); font-weight: 700; font-size: 12px; color: #06101a;
+      background: linear-gradient(135deg,#3b82f6,#00d4d4); cursor: pointer;
+    }
+    .live-actions button:disabled { opacity: .45; cursor: not-allowed; }
+    .live-player-modal {
+      position: fixed; inset: 0; z-index: 9998; display: none;
+      align-items: center; justify-content: center; padding: 18px;
+      background: rgba(0,0,0,.92);
+    }
+    .live-player-box { width: min(860px, 100%); }
+    .live-player-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 12px;
+    }
+    .live-player-title { font-family: var(--font-t); font-size: 18px; font-weight: 700; color: #fff; }
+    .live-player-close {
+      border: 1px solid rgba(248,113,113,.4); border-radius: 8px;
+      background: rgba(248,113,113,.14); color: var(--red);
+      padding: 7px 14px; cursor: pointer; font-family: var(--font-b); font-size: 12px;
+    }
+    .live-player-media {
+      position: relative; aspect-ratio: 16 / 9; background: #000;
+      border: 1px solid rgba(0,212,212,.18); border-radius: 14px; overflow: hidden;
+    }
+    .live-player-media video,
+    .live-player-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    .live-player-status { color: var(--sub); font-size: 12px; text-align: center; margin-top: 9px; }
 
     /* Seção de convites — form buscar */
     .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
@@ -434,6 +464,7 @@
       .live-info { padding: 12px; }
       .live-metrics { gap: 6px; padding: 10px 0; }
       .live-watch strong { font-size: 21px; }
+      .live-player-modal { align-items: flex-start; padding: 70px 12px 20px; }
 
       /* Gráfico */
       .chart-wrap { padding: 14px; }
@@ -755,6 +786,9 @@ function ico(name, size = 16) {
     eye:       `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
     check:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
     settings:  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    users:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    heart:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`,
+    gift:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg>`,
   };
   return icons[name] || '';
 }
@@ -789,11 +823,13 @@ function liveDuracao(min) {
   return m ? `${h}h ${m}m` : `${h}h`;
 }
 function livePerfilUrl(l) {
+  const jump = normalizarUrl(pick(l, ['jump_url','jumpUrl','shortUrl'], ''));
+  if (jump) return jump;
   const kwai = String(pick(l, ['kwai_id','kwaiId','streamer_kwai_id','kwai_uid'], '')).replace(/^@/, '');
   return kwai ? `https://www.kwai.com/@${encodeURIComponent(kwai)}` : '';
 }
 function liveAssistirUrl(l) {
-  return normalizarUrl(pick(l, ['watch_url','watchUrl','url','liveUrl','hlsUrl','hls_url','playUrl'], ''));
+  return normalizarUrl(pick(l, ['stream_url','streamUrl','hlsUrl','hls_url','playUrl','liveUrl','watch_url','watchUrl'], ''));
 }
 function liveCard(l) {
   const nome = pick(l, ['nome','memberName','authorName','streamer_nome'], 'Streamer');
@@ -802,13 +838,12 @@ function liveCard(l) {
   const fotoUrl = normalizarUrl(pick(l, ['foto','headImg','avatar','streamer_foto'], ''));
   const coverUrl = normalizarUrl(pick(l, ['coverUrl','cover_url','cover','capa','thumbnail','foto','headImg','streamer_foto'], ''));
   const espectadores = Number(pick(l, ['espectadores','viewerCount','onlineCount','audience','pcu'], 0));
-  const seguidores = Number(pick(l, ['seguidores','followers','fansNum','fanNum'], 0));
-  const curtidas = Number(pick(l, ['curtidas','likeCnt','likes'], 0));
-  const presentes = Number(pick(l, ['diamantes','gifts','totalRewardAmount','authorReceiveGiftDiamond'], 0));
+  const seguidores = Number(pick(l, ['fans','seguidores','followers','fansNum','fanNum'], 0));
+  const curtidas = Number(pick(l, ['likes','curtidas','likeCnt'], 0));
+  const presentes = Number(pick(l, ['gifts','diamantes','totalRewardAmount','authorReceiveGiftDiamond'], 0));
   const duracao = liveDuracao(pick(l, ['duracao_min','duration_min','minutos_live'], 0));
   const assistir = liveAssistirUrl(l);
   const perfil = livePerfilUrl(l);
-  const assistirFinal = assistir || perfil;
   const cover = coverUrl
     ? `<img src="${esc(coverUrl)}" alt="" onerror="this.style.display='none'">`
     : `<div style="height:100%;display:flex;align-items:center;justify-content:center">${foto(fotoUrl,nome)}</div>`;
@@ -828,21 +863,109 @@ function liveCard(l) {
           </div>
         </div>
         <div class="live-metrics">
-          <div class="live-row"><span>${ico('mic',12)} Seguidores</span><strong>${fmtNum(seguidores)}</strong></div>
-          <div class="live-row"><span>${ico('check',12)} Curtidas</span><strong>${fmtNum(curtidas)}</strong></div>
-          <div class="live-row"><span>${ico('diamond',12)} Presentes</span><strong style="color:var(--gold)">${fmtNum(presentes)}</strong></div>
+          <div class="live-row"><span>${ico('users',12)} Seguidores</span><strong>${fmtNum(seguidores)}</strong></div>
+          <div class="live-row"><span>${ico('heart',12)} Curtidas</span><strong>${fmtNum(curtidas)}</strong></div>
+          <div class="live-row"><span>${ico('gift',12)} Presentes</span><strong style="color:var(--gold)">${fmtNum(presentes)}</strong></div>
         </div>
         <div class="live-watch">
           <small>Espectadores</small>
           <strong>${fmtNum(espectadores)}</strong>
-          <div class="live-actions ${assistirFinal && perfil ? 'two' : ''}">
-            ${assistirFinal ? `<a class="primary" href="${esc(assistirFinal)}" target="_blank" rel="noopener noreferrer">${ico('live',12)} Assistir</a>` : `<a class="primary is-disabled" href="#">${ico('live',12)} Assistir</a>`}
+          <div class="live-actions ${assistir && perfil ? 'two' : ''}">
+            ${assistir ? `<button type="button" data-live-play="${esc(assistir)}" data-live-nome="${esc(nome)}" data-live-capa="${esc(coverUrl)}">${ico('live',12)} Assistir</button>` : `<button type="button" disabled>${ico('live',12)} Assistir</button>`}
             ${perfil ? `<a href="${esc(perfil)}" target="_blank" rel="noopener noreferrer">${ico('live',12)} Kwai</a>` : ''}
           </div>
         </div>
       </div>
     </article>`;
 }
+
+function abrirPlayerLive(url, nome, capa) {
+  if (!url) return;
+  let modal = document.getElementById('live-player-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'live-player-modal';
+    modal.className = 'live-player-modal';
+    modal.innerHTML = `
+      <div class="live-player-box">
+        <div class="live-player-head">
+          <div id="live-player-title" class="live-player-title"></div>
+          <button id="live-player-close" class="live-player-close" type="button">Fechar</button>
+        </div>
+        <div class="live-player-media">
+          <video id="live-player-video" controls autoplay muted playsinline></video>
+          <img id="live-player-capa" alt="">
+        </div>
+        <div id="live-player-status" class="live-player-status">Carregando stream...</div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('#live-player-close').addEventListener('click', fecharPlayerLive);
+    modal.addEventListener('click', e => { if (e.target === modal) fecharPlayerLive(); });
+  }
+
+  modal.style.display = 'flex';
+  modal.querySelector('#live-player-title').textContent = nome || 'Live';
+  const video = modal.querySelector('#live-player-video');
+  const img = modal.querySelector('#live-player-capa');
+  const status = modal.querySelector('#live-player-status');
+  if (window._agenteHlsInstance) { window._agenteHlsInstance.destroy(); window._agenteHlsInstance = null; }
+  video.pause(); video.removeAttribute('src'); video.load();
+  img.style.display = capa ? 'block' : 'none';
+  if (capa) img.src = capa;
+  status.textContent = 'Carregando stream...';
+
+  const iniciar = () => {
+    const HlsLib = window.Hls;
+    if (HlsLib && HlsLib.isSupported()) {
+      window._agenteHlsInstance = new HlsLib({ maxBufferLength: 10 });
+      window._agenteHlsInstance.loadSource(url);
+      window._agenteHlsInstance.attachMedia(video);
+      window._agenteHlsInstance.on(HlsLib.Events.MANIFEST_PARSED, () => {
+        img.style.display = 'none';
+        video.play().catch(() => {});
+        status.textContent = 'Reproduzindo ao vivo';
+      });
+      window._agenteHlsInstance.on(HlsLib.Events.ERROR, (_, data) => {
+        if (data?.fatal) status.textContent = 'Erro ao carregar stream.';
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      img.style.display = 'none';
+      video.play().catch(() => {});
+      status.textContent = 'Reproduzindo ao vivo';
+    } else {
+      status.textContent = 'HLS não suportado neste navegador.';
+    }
+  };
+
+  if (!document.getElementById('hls-js-cdn')) {
+    const sc = document.createElement('script');
+    sc.id = 'hls-js-cdn';
+    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+    sc.onload = iniciar;
+    document.head.appendChild(sc);
+  } else {
+    iniciar();
+  }
+}
+
+function fecharPlayerLive() {
+  const modal = document.getElementById('live-player-modal');
+  if (!modal) return;
+  const video = modal.querySelector('#live-player-video');
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
+  if (window._agenteHlsInstance) { window._agenteHlsInstance.destroy(); window._agenteHlsInstance = null; }
+  modal.style.display = 'none';
+}
+
+function bindLivePlayer(container) {
+  container.querySelectorAll('[data-live-play]').forEach(btn => {
+    btn.addEventListener('click', () => abrirPlayerLive(btn.dataset.livePlay, btn.dataset.liveNome, btn.dataset.liveCapa));
+  });
+}
+
 function fmtData(iso) {
   if (!iso) return '—';
   const d = new Date(iso); const p = n => String(n).padStart(2,'0');
@@ -943,10 +1066,14 @@ function renderizarGrafico(dados) {
   desenharLinha(pontos('diamantes', maxD), '#00d4d4');
   desenharLinha(pontos('minutos',   maxM), '#f0c040');
 
-  // Labels do eixo X (datas)
+  // Labels do eixo X (datas) — máx. 7 labels, sem sobreposição
   ctx.fillStyle = '#4a6070'; ctx.font = '10px Exo 2, sans-serif'; ctx.textAlign = 'center';
+  const tick = Math.ceil(n / 7);
   dados.forEach((d,i) => {
-    if (i % Math.ceil(n/7) === 0 || i === n-1) {
+    const isRegular = i % tick === 0;
+    const isLast    = i === n - 1;
+    const prevTick  = Math.floor((n - 1) / tick) * tick;
+    if (isRegular || (isLast && i - prevTick >= 2)) {
       const partes = d.data.split('-');
       ctx.fillText(`${partes[2]}/${partes[1]}`, PAD.l + i*step, H - 6);
     }
@@ -1003,6 +1130,7 @@ async function carregarLives() {
         </div>
       </div>
       <div class="live-grid">${list.map(liveCard).join('')}</div>`;
+    bindLivePlayer(container);
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
