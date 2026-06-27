@@ -283,7 +283,7 @@ class MenuMobileDMaior extends HTMLElement {
             <div class="dd-label">Layout</div>
             <div class="dd-divider"></div>
             <button class="dd-option" id="ddOriginal" data-layout="original">
-              <span class="dd-dot" style="background:#00d4d4;"></span><span class="dd-copy"><span class="dd-marquee">Original</span></span><span class="dd-arrow">&rsaquo;</span>
+              <span class="dd-dot" style="background:#00d4d4;"></span><span class="dd-copy"><span class="dd-marquee">Padrão</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <button class="dd-option" id="ddDinamico" data-layout="dinamico">
               <span class="dd-dot" style="background:#f0c040;"></span><span class="dd-copy"><span class="dd-marquee">Dinâmico Pro</span></span><span class="dd-arrow">&rsaquo;</span>
