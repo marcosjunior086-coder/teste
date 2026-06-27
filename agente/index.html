@@ -142,7 +142,7 @@
 
     /* Tabelas / Listas */
     .section-title { font-family: var(--font-t); font-size: 18px; color: var(--text); margin-bottom: 16px; }
-    .table-wrap { overflow-x: auto; }
+    .table-wrap { overflow: visible; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     thead th { padding: 10px 12px; text-align: left; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; border-bottom: 1px solid var(--border); }
     tbody td { padding: 12px 12px; border-bottom: 1px solid rgba(255,255,255,.04); }
@@ -159,6 +159,27 @@
     .badge-err { background: rgba(248,113,113,.15); color: var(--red); }
     .badge-pend{ background: rgba(255,255,255,.08); color: var(--sub); }
     .verificado     { display: inline-block; width: 14px; height: 14px; vertical-align: middle; margin-left: 4px; }
+
+    /* Listas expansivas no mobile */
+    .ag-table { width: 100%; }
+    .ag-acc-list { display: none; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; background: var(--card); }
+    .ag-item { border-bottom: 1px solid rgba(255,255,255,.06); }
+    .ag-item:last-child { border-bottom: none; }
+    .ag-preview { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; cursor: pointer; user-select: none; background: rgba(255,255,255,.015); border: 0; color: inherit; font: inherit; text-align: left; }
+    .ag-preview:active { background: rgba(0,212,212,.08); }
+    .ag-main { flex: 1; min-width: 0; }
+    .ag-title { display: block; font-family: var(--font-t); font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ag-sub { display: block; margin-top: 2px; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ag-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .ag-value { font-family: var(--font-t); font-size: 15px; font-weight: 700; color: var(--cyan); white-space: nowrap; }
+    .ag-chevron { color: var(--dim); transition: transform .2s ease; flex-shrink: 0; }
+    .ag-item.open .ag-chevron { transform: rotate(180deg); }
+    .ag-body { display: none; padding: 0 14px 14px; border-top: 1px solid rgba(255,255,255,.055); }
+    .ag-item.open .ag-body { display: block; }
+    .ag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .ag-cell { min-width: 0; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.06); border-radius: 9px; padding: 9px 10px; }
+    .ag-cell-label { font-family: var(--font-t); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .ag-cell-value { font-size: 13px; color: var(--text); word-break: break-word; }
 
     /* Posição ranking */
     .pos { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-t); font-weight: 700; font-size: 14px; }
@@ -202,23 +223,50 @@
       border-radius: 12px; border: 1px solid rgba(0,212,212,.10);
       background: rgba(0,0,0,.35); color: var(--sub);
       display: flex; flex-direction: column; justify-content: center; gap: 8px;
+      cursor: pointer; font: inherit; text-align: left;
     }
+    .live-settings:hover { border-color: rgba(0,212,212,.32); background: rgba(0,212,212,.055); }
     .live-settings .ls-title {
       display: flex; align-items: center; gap: 7px;
       font-family: var(--font-t); font-size: 13px; font-weight: 700; color: var(--sub);
     }
     .live-settings .ls-sub { font-size: 11px; color: var(--dim); }
+    .live-config-panel {
+      display: none; margin-bottom: 16px; padding: 14px;
+      border: 1px solid rgba(0,212,212,.16); border-radius: var(--r);
+      background: rgba(0,0,0,.26);
+    }
+    .live-config-panel.open { display: grid; gap: 12px; }
+    .live-cfg-row { display: grid; grid-template-columns: 86px 1fr; gap: 10px; align-items: center; }
+    .live-cfg-label { font-family: var(--font-t); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .live-cfg-opts { display: flex; gap: 7px; flex-wrap: wrap; }
+    .live-cfg-btn {
+      border: 1px solid rgba(0,212,212,.18); border-radius: 999px;
+      background: rgba(255,255,255,.035); color: var(--sub);
+      padding: 7px 11px; font-family: var(--font-t); font-size: 12px; font-weight: 700;
+      cursor: pointer;
+    }
+    .live-cfg-btn.on { background: linear-gradient(135deg,#3b82f6,#00d4d4); color: #06101a; border-color: transparent; }
     .live-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
       gap: 16px;
     }
+    .live-grid.cols-1 { grid-template-columns: 1fr; }
+    .live-grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .live-grid.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .live-grid.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
     .live-card {
       min-height: 284px; overflow: hidden; display: grid; grid-template-columns: 46% 54%;
       background: rgba(255,255,255,.045); border: 1px solid rgba(0,212,212,.22);
       border-radius: 14px;
     }
+    .live-card.estilo2 { display: flex; flex-direction: column; min-height: 0; }
+    .live-card.estilo2 .live-cover { min-height: 170px; height: 170px; }
+    .live-card.estilo2 .live-info { padding: 12px; }
+    .live-card.estilo2 .live-watch { border-top: 1px solid rgba(255,255,255,.06); }
     .live-cover { position: relative; min-height: 284px; background: #020611; overflow: hidden; }
-    .live-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .live-cover img,
+    .live-cover video { width: 100%; height: 100%; object-fit: cover; display: block; background: #020611; }
     .live-cover::after {
       content: ""; position: absolute; inset: 45% 0 0;
       background: linear-gradient(to top, rgba(0,0,0,.62), transparent);
@@ -442,8 +490,10 @@
       .topbar h2 { font-size: 18px; }
 
       /* Tabelas — scroll horizontal */
-      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--r); }
-      table { min-width: 480px; font-size: 13px; }
+      .table-wrap { overflow: visible; border-radius: var(--r); }
+      .table-wrap.has-accordion table { display: none; }
+      .table-wrap.has-accordion .ag-acc-list { display: block; }
+      table { font-size: 13px; }
       tbody td { padding: 10px 10px; }
 
       /* Convite */
@@ -456,17 +506,23 @@
       .live-summary { align-items: stretch; flex-direction: column; padding: 12px; }
       .live-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       .live-settings { min-width: 0; min-height: 64px; }
+      .live-cfg-row { grid-template-columns: 1fr; gap: 6px; }
+      .live-cfg-opts { display: grid; grid-template-columns: repeat(2,1fr); }
+      .live-cfg-btn { width: 100%; }
       .live-stat { min-width: 0; padding: 12px; }
       .live-stat strong { font-size: 26px; }
-      .live-grid { grid-template-columns: 1fr; gap: 12px; }
+      .live-grid, .live-grid.cols-1, .live-grid.cols-2, .live-grid.cols-3, .live-grid.cols-4 { grid-template-columns: 1fr; gap: 12px; }
       .live-card { grid-template-columns: minmax(120px, 38%) minmax(0,1fr); min-height: 230px; }
+      .live-card.estilo2 { display: flex; }
       .live-cover { min-height: 230px; }
+      .live-card.estilo2 .live-cover { min-height: 150px; height: 150px; }
       .live-info { padding: 12px; }
       .live-metrics { gap: 6px; padding: 10px 0; }
       .live-watch strong { font-size: 21px; }
       .live-player-modal { align-items: flex-start; padding: 70px 12px 20px; }
 
       /* Gráfico */
+      .ag-grid { grid-template-columns: 1fr; }
       .chart-wrap { padding: 14px; }
       #canvas-chart { height: 120px; }
     }
@@ -772,6 +828,64 @@ function navegarPara(sec) {
 }
 
 // ── ÍCONES SVG ────────────────────────────────────────────
+function carregarLiveOpts() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('dm_agente_lives_opts') || '{}');
+    return {
+      cols: Number(raw.cols || 2),
+      modo: raw.modo || 'capa',
+      estilo: Number(raw.estilo || 1),
+      ordenar: raw.ordenar || 'padrao',
+    };
+  } catch {
+    return { cols: 2, modo: 'capa', estilo: 1, ordenar: 'padrao' };
+  }
+}
+let _agenteLivesOpts = carregarLiveOpts();
+let _agenteLivesData = null;
+
+function salvarLiveOpts() {
+  try { localStorage.setItem('dm_agente_lives_opts', JSON.stringify(_agenteLivesOpts)); } catch {}
+}
+
+function liveConfigHtml() {
+  const o = _agenteLivesOpts;
+  const btn = (key, val, txt) => `<button class="live-cfg-btn ${String(o[key])===String(val)?'on':''}" data-live-opt="${key}" data-live-val="${val}" type="button">${txt}</button>`;
+  return `
+    <div class="live-config-panel" id="live-config-panel">
+      <div class="live-cfg-row"><span class="live-cfg-label">Layout</span><div class="live-cfg-opts">${[1,2,3,4].map(n=>btn('cols',n,`${n} coluna${n>1?'s':''}`)).join('')}</div></div>
+      <div class="live-cfg-row"><span class="live-cfg-label">Modo</span><div class="live-cfg-opts">${btn('modo','capa','Capa')}${btn('modo','video','Vídeo')}</div></div>
+      <div class="live-cfg-row"><span class="live-cfg-label">Estilo</span><div class="live-cfg-opts">${btn('estilo',1,'Horizontal')}${btn('estilo',2,'Vertical')}</div></div>
+      <div class="live-cfg-row"><span class="live-cfg-label">Ordenar</span><div class="live-cfg-opts">${btn('ordenar','padrao','Padrão')}${btn('ordenar','espectadores','Espectadores')}${btn('ordenar','presentes','Presentes')}${btn('ordenar','horas','Tempo')}</div></div>
+    </div>`;
+}
+
+function aplicarLiveOrdenacao(lista) {
+  const arr = [...lista];
+  const n = v => Number(v || 0);
+  const dur = l => n(pick(l, ['duracao_min','duration_min','minutos_live'], 0));
+  if (_agenteLivesOpts.ordenar === 'espectadores') arr.sort((a,b)=>n(b.espectadores)-n(a.espectadores));
+  else if (_agenteLivesOpts.ordenar === 'presentes') arr.sort((a,b)=>n(pick(b,['gifts','diamantes'],0))-n(pick(a,['gifts','diamantes'],0)));
+  else if (_agenteLivesOpts.ordenar === 'horas') arr.sort((a,b)=>dur(b)-dur(a));
+  return arr;
+}
+
+function bindLiveConfig(container) {
+  const toggle = container.querySelector('#live-settings-toggle');
+  const panel = container.querySelector('#live-config-panel');
+  toggle?.addEventListener('click', () => panel?.classList.toggle('open'));
+  container.querySelectorAll('[data-live-opt]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.liveOpt;
+      const val = btn.dataset.liveVal;
+      _agenteLivesOpts[key] = ['cols','estilo'].includes(key) ? Number(val) : val;
+      if (_agenteLivesOpts.estilo === 1 && window.innerWidth <= 600) _agenteLivesOpts.cols = 1;
+      salvarLiveOpts();
+      if (_agenteLivesData) renderLives(_agenteLivesData, container);
+    });
+  });
+}
+
 function ico(name, size = 16) {
   const s = size;
   const icons = {
@@ -789,6 +903,7 @@ function ico(name, size = 16) {
     users:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
     heart:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`,
     gift:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg>`,
+    down:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`,
   };
   return icons[name] || '';
 }
@@ -844,11 +959,15 @@ function liveCard(l) {
   const duracao = liveDuracao(pick(l, ['duracao_min','duration_min','minutos_live'], 0));
   const assistir = liveAssistirUrl(l);
   const perfil = livePerfilUrl(l);
-  const cover = coverUrl
+  const inlineVideo = _agenteLivesOpts.modo === 'video' && assistir;
+  const classe = _agenteLivesOpts.estilo === 2 ? 'live-card estilo2' : 'live-card';
+  const cover = inlineVideo
+    ? `<video muted autoplay playsinline preload="metadata" data-inline-stream="${esc(assistir)}" poster="${esc(coverUrl)}"></video>`
+    : coverUrl
     ? `<img src="${esc(coverUrl)}" alt="" onerror="this.style.display='none'">`
     : `<div style="height:100%;display:flex;align-items:center;justify-content:center">${foto(fotoUrl,nome)}</div>`;
   return `
-    <article class="live-card">
+    <article class="${classe}">
       <div class="live-cover">
         ${cover}
         ${uid ? `<span class="live-tag">Studio: ${esc(uid)}</span>` : ''}
@@ -966,6 +1085,40 @@ function bindLivePlayer(container) {
   });
 }
 
+function iniciarVideosInline(container) {
+  const videos = [...container.querySelectorAll('[data-inline-stream]')];
+  if (!videos.length) return;
+
+  const iniciar = () => {
+    const HlsLib = window.Hls;
+    videos.forEach(video => {
+      const url = video.dataset.inlineStream;
+      if (!url || video.dataset.ready === '1') return;
+      video.dataset.ready = '1';
+      if (HlsLib && HlsLib.isSupported()) {
+        const hls = new HlsLib({ maxBufferLength: 8, lowLatencyMode: false });
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        video._agenteInlineHls = hls;
+        hls.on(HlsLib.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.play().catch(() => {});
+      }
+    });
+  };
+
+  if (!document.getElementById('hls-js-cdn')) {
+    const sc = document.createElement('script');
+    sc.id = 'hls-js-cdn';
+    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+    sc.onload = iniciar;
+    document.head.appendChild(sc);
+  } else {
+    iniciar();
+  }
+}
+
 function fmtData(iso) {
   if (!iso) return '—';
   const d = new Date(iso); const p = n => String(n).padStart(2,'0');
@@ -975,6 +1128,33 @@ function badgeStatus(s) {
   const m = { convite_enviado:'badge-env Enviado', pendente:'badge-pend Pendente', erro:'badge-err Erro', restricao_live:'badge-err Restrição', dry_run:'badge-pend Simulado' };
   const [cls, txt] = (m[s]||'badge-pend Pendente').split(' ');
   return `<span class="badge ${cls}">${txt}</span>`;
+}
+
+function setAccordion(container, on = true) {
+  container?.classList.toggle('has-accordion', !!on);
+}
+
+function agCell(label, value) {
+  return `<div class="ag-cell"><div class="ag-cell-label">${esc(label)}</div><div class="ag-cell-value">${value ?? '—'}</div></div>`;
+}
+
+function agItem({ avatar = '', title = '', sub = '', value = '', badge = '', body = '' }) {
+  return `
+    <div class="ag-item">
+      <button class="ag-preview" type="button" onclick="this.closest('.ag-item').classList.toggle('open')">
+        ${avatar}
+        <span class="ag-main">
+          <span class="ag-title">${title}</span>
+          ${sub ? `<span class="ag-sub">${sub}</span>` : ''}
+        </span>
+        <span class="ag-right">
+          ${value ? `<span class="ag-value">${value}</span>` : ''}
+          ${badge}
+          <span class="ag-chevron">${ico('down',14)}</span>
+        </span>
+      </button>
+      <div class="ag-body"><div class="ag-grid">${body}</div></div>
+    </div>`;
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────
@@ -1089,23 +1269,44 @@ async function carregarStreamers() {
     const d = await api('/agente/streamers');
     const list = d.streamers || [];
     _streamersCarregado = true;
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('mic',32)}</div><p>Nenhum streamer vinculado a você ainda.</p></div>`; return; }
-    container.innerHTML = `
-      <table>
-        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} Mês</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
-        <tbody>${list.map(s => `
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mic',32)}</div><p>Nenhum streamer vinculado a você ainda.</p></div>`; return; }
+    setAccordion(container, true);
+    const rows = list.map(s => {
+      const badge = s.verificado_premium ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="*">' : s.verificado ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="ok">' : '';
+      const title = `${esc(s.nome)}${badge}`;
+      const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : '—';
+      return {
+        table: `
           <tr>
             <td style="display:flex;align-items:center;gap:10px;padding:12px">
               ${foto(s.foto, s.nome)}
-              <span>${esc(s.nome)}${s.verificado_premium?'<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="★">':s.verificado?'<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="✔">':''}</span>
+              <span>${title}</span>
             </td>
-            <td>${s.kwai_id ? '@'+esc(s.kwai_id) : '—'}</td>
+            <td>${kwai}</td>
             <td>${fmtNum(s.diamantes_mes)}</td>
-            <td>${s.horas_mes}</td>
+            <td>${esc(s.horas_mes || '0:00')}</td>
             <td>${fmtData(s.vinculado_em)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
+          </tr>`,
+        card: agItem({
+          avatar: foto(s.foto, s.nome),
+          title,
+          sub: kwai,
+          value: fmtNum(s.diamantes_mes || 0),
+          body: [
+            agCell('Kwai ID', kwai),
+            agCell('Diamantes mês', fmtNum(s.diamantes_mes || 0)),
+            agCell('Horas mês', esc(s.horas_mes || '0:00')),
+            agCell('Vinculado em', fmtData(s.vinculado_em)),
+          ].join('')
+        })
+      };
+    });
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} Mês</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
+        <tbody>${rows.map(r => r.table).join('')}</tbody>
+      </table>
+      <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
@@ -1117,21 +1318,36 @@ async function carregarLives() {
     const d = await api('/agente/lives');
     const list = d.ao_vivo || [];
     const hoje = Number(d.hoje || d.total_hoje || list.length || 0);
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('live',32)}</div><p>Nenhum streamer seu ao vivo agora.</p></div>`; return; }
-    container.innerHTML = `
-      <div class="live-summary">
-        <div class="live-stats">
-          <div class="live-stat live-on"><strong>${fmtNum(list.length)}</strong><span>Ao vivo</span></div>
-          <div class="live-stat"><strong>${fmtNum(hoje)}</strong><span>Hoje</span></div>
-        </div>
-        <div class="live-settings">
-          <div class="ls-title">${ico('settings',13)} Configurações</div>
-          <div class="ls-sub">Exibindo apenas streamers vinculados a você.</div>
-        </div>
-      </div>
-      <div class="live-grid">${list.map(liveCard).join('')}</div>`;
-    bindLivePlayer(container);
+    _agenteLivesData = { list, hoje };
+    renderLives(_agenteLivesData, container);
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
+}
+
+function renderLives(data, container = document.getElementById('grid-lives')) {
+  const list = aplicarLiveOrdenacao(data?.list || []);
+  const hoje = Number(data?.hoje || list.length || 0);
+  if (!list.length) {
+    container.innerHTML = `<div class="empty"><div class="ico">${ico('live',32)}</div><p>Nenhum streamer seu ao vivo agora.</p></div>`;
+    return;
+  }
+
+  const cols = Math.max(1, Math.min(4, Number(_agenteLivesOpts.cols || 2)));
+  container.innerHTML = `
+    <div class="live-summary">
+      <div class="live-stats">
+        <div class="live-stat live-on"><strong>${fmtNum(list.length)}</strong><span>Ao vivo</span></div>
+        <div class="live-stat"><strong>${fmtNum(hoje)}</strong><span>Hoje</span></div>
+      </div>
+      <button class="live-settings" id="live-settings-toggle" type="button">
+        <div class="ls-title">${ico('settings',13)} Configurações</div>
+        <div class="ls-sub">Layout, vídeo e ordenação das lives.</div>
+      </button>
+    </div>
+    ${liveConfigHtml()}
+    <div class="live-grid cols-${cols}">${list.map(liveCard).join('')}</div>`;
+  bindLiveConfig(container);
+  bindLivePlayer(container);
+  iniciarVideosInline(container);
 }
 
 // ── RANKING ───────────────────────────────────────────────
@@ -1144,20 +1360,41 @@ async function carregarRanking() {
     const list = d.streamers || [];
     _rankingCarregado = true;
     document.getElementById('ranking-titulo').textContent = `Ranking — ${d.mes||''}`;
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('trophy',32)}</div><p>Sem dados de ranking ainda.</p></div>`; return; }
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('trophy',32)}</div><p>Sem dados de ranking ainda.</p></div>`; return; }
+    setAccordion(container, true);
+    const rows = list.map(s => {
+      const status = s.ao_vivo ? '<span class="badge badge-live">● Ao vivo</span>' : '<span class="badge badge-offline">Offline</span>';
+      const pos = `<div class="pos ${s.posicao<=3?'pos-'+s.posicao:'pos-n'}">${s.posicao}</div>`;
+      return {
+        table: `
+          <tr>
+            <td>${pos}</td>
+            <td style="display:flex;align-items:center;gap:10px;padding:12px">${foto(s.foto,s.nome)}<span>${esc(s.nome)}</span></td>
+            <td>${fmtNum(s.diamantes)}</td>
+            <td>${esc(s.horas || '0:00')}</td>
+            <td>${status}</td>
+          </tr>`,
+        card: agItem({
+          avatar: foto(s.foto, s.nome),
+          title: esc(s.nome),
+          sub: `Posição #${esc(s.posicao || '')}`,
+          value: fmtNum(s.diamantes || 0),
+          badge: status,
+          body: [
+            agCell('Posição', pos),
+            agCell('Diamantes', fmtNum(s.diamantes || 0)),
+            agCell('Horas', esc(s.horas || '0:00')),
+            agCell('Status', status),
+          ].join('')
+        })
+      };
+    });
     container.innerHTML = `
       <table>
         <thead><tr><th>#</th><th>Streamer</th><th>${ico('diamond',13)} Diamantes</th><th>${ico('clock',13)} Horas</th><th>Status</th></tr></thead>
-        <tbody>${list.map(s => `
-          <tr>
-            <td><div class="pos ${s.posicao<=3?'pos-'+s.posicao:'pos-n'}">${s.posicao}</div></td>
-            <td style="display:flex;align-items:center;gap:10px;padding:12px">${foto(s.foto,s.nome)}<span>${esc(s.nome)}</span></td>
-            <td>${fmtNum(s.diamantes)}</td>
-            <td>${s.horas}</td>
-            <td>${s.ao_vivo ? '<span class="badge badge-live">● Ao vivo</span>' : '<span class="badge badge-offline">Offline</span>'}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
+        <tbody>${rows.map(r => r.table).join('')}</tbody>
+      </table>
+      <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
@@ -1170,31 +1407,53 @@ async function carregarDesempenho() {
     const d = await api('/agente/desempenho');
     const list = d.streamers || [];
     _desemp = true;
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('chart',32)}</div><p>Sem dados de desempenho ainda.</p></div>`; return; }
-    container.innerHTML = `
-      <table>
-        <thead><tr><th>Streamer</th><th>${ico('diamond',13)} Total</th><th>${ico('clock',13)} Horas</th><th>Progresso Horas</th><th>Dias Ativos</th><th>Status</th></tr></thead>
-        <tbody>${list.map(s => `
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('chart',32)}</div><p>Sem dados de desempenho ainda.</p></div>`; return; }
+    setAccordion(container, true);
+    const rows = list.map(s => {
+      const progHoras = Math.round(s.prog_horas || 0);
+      const progDias = Math.round(s.prog_dias || 0);
+      const horasHtml = `
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-cyan" style="width:${progHoras}%"></div></div>
+          <span style="font-size:12px;color:var(--sub);white-space:nowrap">${progHoras}%</span>
+        </div>`;
+      const diasHtml = `
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-gold" style="width:${progDias}%"></div></div>
+          <span style="font-size:12px;color:var(--sub);white-space:nowrap">${esc(s.dias_ativos || 0)}d</span>
+        </div>`;
+      const status = `<span class="badge ${s.status==='aprovado'?'badge-ok':s.status==='bom'?'badge-bom':'badge-at'}">${s.status==='aprovado'?'Aprovado':s.status==='bom'?'Bom':'Atenção'}</span>`;
+      return {
+        table: `
           <tr>
             <td style="display:flex;align-items:center;gap:10px;padding:12px">${foto(s.foto,s.nome)}<span>${esc(s.nome)}</span></td>
             <td>${fmtNum(s.total_diamantes)}</td>
-            <td>${s.total_horas}</td>
-            <td>
-              <div style="display:flex;align-items:center;gap:8px">
-                <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-cyan" style="width:${Math.round(s.prog_horas||0)}%"></div></div>
-                <span style="font-size:12px;color:var(--sub);white-space:nowrap">${Math.round(s.prog_horas||0)}%</span>
-              </div>
-            </td>
-            <td>
-              <div style="display:flex;align-items:center;gap:8px">
-                <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-gold" style="width:${Math.round(s.prog_dias||0)}%"></div></div>
-                <span style="font-size:12px;color:var(--sub);white-space:nowrap">${s.dias_ativos}d</span>
-              </div>
-            </td>
-            <td><span class="badge ${s.status==='aprovado'?'badge-ok':s.status==='bom'?'badge-bom':'badge-at'}">${s.status==='aprovado'?'Aprovado':s.status==='bom'?'Bom':'Atenção'}</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
+            <td>${esc(s.total_horas || '0:00')}</td>
+            <td>${horasHtml}</td>
+            <td>${diasHtml}</td>
+            <td>${status}</td>
+          </tr>`,
+        card: agItem({
+          avatar: foto(s.foto, s.nome),
+          title: esc(s.nome),
+          sub: `${esc(s.total_horas || '0:00')} h`,
+          value: fmtNum(s.total_diamantes || 0),
+          badge: status,
+          body: [
+            agCell('Diamantes', fmtNum(s.total_diamantes || 0)),
+            agCell('Horas', esc(s.total_horas || '0:00')),
+            agCell('Progresso horas', horasHtml),
+            agCell('Dias ativos', diasHtml),
+          ].join('')
+        })
+      };
+    });
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Streamer</th><th>${ico('diamond',13)} Total</th><th>${ico('clock',13)} Horas</th><th>Progresso Horas</th><th>Dias Ativos</th><th>Status</th></tr></thead>
+        <tbody>${rows.map(r => r.table).join('')}</tbody>
+      </table>
+      <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
@@ -1205,20 +1464,42 @@ async function carregarConvites() {
   try {
     const d = await api('/agente/convites');
     const list = d.convites || [];
-    if (!list.length) { container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; return; }
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; return; }
+    setAccordion(container, true);
+    const rows = list.map(c => {
+      const nome = esc(c.streamer_nome || c.streamer_uid || '—');
+      const kwai = c.streamer_kwai_id ? '@' + esc(c.streamer_kwai_id) : '—';
+      const categoria = esc(c.categoria || '—');
+      const status = badgeStatus(c.status);
+      const data = fmtData(c.criado_em);
+      return {
+        table: `
+          <tr>
+            <td>${nome}</td>
+            <td>${kwai}</td>
+            <td style="text-transform:capitalize">${categoria}</td>
+            <td>${status}</td>
+            <td>${data}</td>
+          </tr>`,
+        card: agItem({
+          title: nome,
+          sub: kwai,
+          badge: status,
+          body: [
+            agCell('Kwai ID', kwai),
+            agCell('Categoria', `<span style="text-transform:capitalize">${categoria}</span>`),
+            agCell('Status', status),
+            agCell('Data', data),
+          ].join('')
+        })
+      };
+    });
     container.innerHTML = `
       <table>
         <thead><tr><th>Streamer</th><th>Kwai ID</th><th>Categoria</th><th>Status</th><th>Data</th></tr></thead>
-        <tbody>${list.map(c => `
-          <tr>
-            <td>${esc(c.streamer_nome || c.streamer_uid || '—')}</td>
-            <td>${c.streamer_kwai_id ? '@'+esc(c.streamer_kwai_id) : '—'}</td>
-            <td style="text-transform:capitalize">${esc(c.categoria||'—')}</td>
-            <td>${badgeStatus(c.status)}</td>
-            <td>${fmtData(c.criado_em)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
+        <tbody>${rows.map(r => r.table).join('')}</tbody>
+      </table>
+      <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
