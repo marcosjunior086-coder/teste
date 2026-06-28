@@ -85,7 +85,7 @@ class MenuMobileDMaior extends HTMLElement {
           { label: 'Políticas Host',     link: 'politicas-host.html' },
           { label: 'Políticas Premium',  link: 'politicas-premium.html' },
       ]},
-      { label: 'Cursos',      disabled: true,                 icon: SVG_BOOK   },
+      { label: 'Cursos',      link: 'cursos.html',            icon: SVG_BOOK   },
       { label: 'Eventos',     icon: SVG_EVENT, subItems: [
           { label: 'PK Interno', link: 'pk-interno.html' },
       ]},

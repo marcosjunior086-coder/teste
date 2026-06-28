@@ -66,7 +66,7 @@ class MenuDesktopDMaior extends HTMLElement {
           { label: 'Central Kwai',          link: '/material.html' },
           { label: 'Academia do Streamer',  link: '/academia-streamer.html' },
       ]},
-      { label: 'Cursos',      link: '/cursos.html',   icon: SVG_BOOK   },
+      { label: 'Cursos',      link: 'cursos.html',    icon: SVG_BOOK   },
       { label: 'Eventos',     link: '#',              icon: SVG_EVENT,  subItems: [
           { label: 'PK Interno', link: '/pk-interno.html' },
       ]},
