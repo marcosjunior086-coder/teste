@@ -186,9 +186,21 @@ class DimaiorAdmin extends HTMLElement {
   }
   _doLogout(){this._token='';localStorage.removeItem(this.TK_KEY);const s=this.shadowRoot;s.getElementById('app').classList.remove('on');s.getElementById('login').style.display='flex';s.getElementById('iP').value='';}
   _abrirApp(){const s=this.shadowRoot;s.getElementById('login').style.display='none';s.getElementById('app').classList.add('on');this._ir('dashboard');this._carregarLives();}
+  _fecharMenuMobile(){
+    const s=this.shadowRoot;
+    s.getElementById('side')?.classList.remove('open');
+    s.getElementById('sideBackdrop')?.classList.remove('on');
+    s.getElementById('btnHam')?.setAttribute('aria-expanded','false');
+  }
+  _abrirMenuMobile(){
+    const s=this.shadowRoot;
+    s.getElementById('side')?.classList.add('open');
+    s.getElementById('sideBackdrop')?.classList.add('on');
+    s.getElementById('btnHam')?.setAttribute('aria-expanded','true');
+  }
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
-    s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));s.getElementById('side').classList.remove('open');
+    s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
     const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
@@ -555,7 +567,7 @@ class DimaiorAdmin extends HTMLElement {
     const medalCor=pos=>pos===1?'var(--gold)':pos===2?'#94a3b8':pos===3?'#a86c31':'var(--t3)';
     const pager=`<div class="pag-bar rank-local-pg"><button ${this._pg.rank<=1?'disabled':''} data-pg="prev">Anterior</button><span class="pn">Pag ${this._pg.rank} / ${totalPags}</span><button ${this._pg.rank>=totalPags?'disabled':''} data-pg="next">Proxima</button></div>`;
     const tabelaHtml=`<div class="rank-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>${this._ico('diamond',12)} Diamantes</th><th>Dolar</th><th>Horas</th><th>Dias</th><th>Premio</th></tr></thead><tbody>${pagina.map(sv=>{const pos=sv.posicao,cor=medalCor(pos),pv=premios[pos-1];return`<tr><td style="color:${cor};font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px">${pos}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td><div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;color:var(--t1)">${this._esc(sv.nome||'-')}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(sv.kwai_uid||sv.kwai_id||'-')}</div></td><td style="color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700">${this._num(this._diam(sv))}</td><td style="color:var(--verde);font-size:11px">${sv.dolar?'$'+Number(sv.dolar).toFixed(2):'-'}</td><td style="color:var(--t2)">${sv.horas||'-'}</td><td style="color:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'};font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px">${sv.dias_validos||'-'}</td><td>${pv?.valor_premio?`<span class="prize-tag">${this._brl(pv.valor_premio)}</span>`:''}</td></tr>`;}).join('')}</tbody></table></div>`;
-    const mobileHtml=`<div class="rank-mobile-only">${pagina.map(sv=>{const pos=sv.posicao,cor=medalCor(pos),pv=premios[pos-1];return`<div class="rk-item"><div class="rk-preview"><span class="rk-pos" style="color:${cor}">${pos}</span><div class="rk-av">${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</div><div class="rk-info"><div class="rk-nome">${this._esc(sv.nome||'-')}</div><div class="rk-uid">${this._esc(sv.kwai_uid||sv.kwai_id||'-')}</div><div class="rk-diam">${this._ico('diamond',11)} ${this._num(this._diam(sv))}</div></div><div class="rk-right"><div class="rk-val" style="color:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}">${sv.dias_validos||'-'}/20 dias</div><div class="rk-val">${sv.horas||'-'}</div>${pv?.valor_premio?`<span class="prize-tag" style="font-size:9px">${this._brl(pv.valor_premio)}</span>`:''}</div></div></div>`;}).join('')}</div>`;
+    const mobileHtml=`<div class="rank-mobile-only">${pagina.map(sv=>{const pos=sv.posicao,cor=medalCor(pos),pv=premios[pos-1];const uidNum=sv.kwai_uid||sv.uid||sv.member_id||sv.memberId||'';const kwaiId=sv.kwai_id||sv.kwaiId||'';const nome=sv.nome||kwaiId||uidNum||'-';const idLinha=[kwaiId?`@${this._esc(kwaiId)}`:'',uidNum?`ID: ${this._esc(uidNum)}`:''].filter(Boolean).join(' · ')||'-';return`<div class="rk-item"><div class="rk-preview"><span class="rk-pos" style="color:${cor}">${pos}</span><div class="rk-av">${this._avatar(this._proxyFoto(sv.foto||''),nome)}</div><div class="rk-info"><div class="rk-nome">${this._esc(nome)}</div><div class="rk-uid">${idLinha}</div><div class="rk-diam">${this._ico('diamond',11)} ${this._num(this._diam(sv))}</div></div><div class="rk-right"><div class="rk-val" style="color:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}">${sv.dias_validos||'-'}/20 dias</div><div class="rk-val">${sv.horas||'-'}</div>${pv?.valor_premio?`<span class="prize-tag" style="font-size:9px">${this._brl(pv.valor_premio)}</span>`:''}</div></div></div>`;}).join('')}</div>`;
     const root=s.getElementById('root');
     const isMobile=root?.classList.contains('narrow')||window.matchMedia('(max-width:700px)').matches;
     el.innerHTML=(isMobile?mobileHtml:tabelaHtml)+pager;
@@ -1013,8 +1025,9 @@ class DimaiorAdmin extends HTMLElement {
     const _bind=(id,ev,fn)=>{const el=s.getElementById(id);if(el)el.addEventListener(ev,fn);else console.warn('[admin] elemento não encontrado no _bindEvents:',id);};
     s.getElementById('btnL').addEventListener('click',()=>this._doLogin());s.getElementById('iP').addEventListener('keydown',e=>{if(e.key==='Enter')this._doLogin();});s.getElementById('iU').addEventListener('keydown',e=>{if(e.key==='Enter')s.getElementById('iP').focus();});
     s.getElementById('btnSair').addEventListener('click',()=>this._doLogout());
-    s.getElementById('btnHam').addEventListener('click',()=>s.getElementById('side').classList.toggle('open'));
-    s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))side.classList.remove('open');});
+    s.getElementById('btnHam').addEventListener('click',e=>{e.stopPropagation();const side=s.getElementById('side');side?.classList.contains('open')?this._fecharMenuMobile():this._abrirMenuMobile();});
+    s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
+    s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
     s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
@@ -1867,7 +1880,8 @@ class DimaiorAdmin extends HTMLElement {
       #root{background:#04040e !important;min-width:0;max-width:100vw;overflow:visible;}
       *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-sizing:border-box;}
       .glass,.box,.card,.modal,.modal-box,.side,.top,.content{background-color:#0b0b1a !important;}
-      .side{background:#060614 !important;position:absolute;left:-220px;top:52px;bottom:0;z-index:200;transition:left .25s;max-height:none;}.side.open{left:0;}
+      .side{background:#060614 !important;position:fixed;left:0;top:52px;bottom:0;width:min(82vw,320px);max-width:320px;z-index:260;transform:translateX(-105%);transition:transform .25s ease;max-height:none;box-shadow:18px 0 40px rgba(0,0,0,.42);border-right:1px solid rgba(0,212,212,.28);}.side.open{transform:translateX(0);}
+      .side-backdrop{display:none;position:fixed;inset:52px 0 0 0;background:rgba(0,0,0,.55);z-index:240;}.side-backdrop.on{display:block;}
       .top{background:#060614 !important;flex-wrap:nowrap;gap:6px;}
       .top-chip{font-size:8px;padding:2px 7px;letter-spacing:1px;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       .btn-ham{display:flex;flex-shrink:0;}
@@ -2096,7 +2110,7 @@ class DimaiorAdmin extends HTMLElement {
     .rk-av{flex-shrink:0}
     .rk-info{flex:1;min-width:0}
     .rk-nome{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .rk-uid{font-size:9px;color:var(--t3)}
+    .rk-uid{font-size:9px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .rk-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
     .rk-diam{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--cyan);display:flex;align-items:center;gap:3px}
     .rk-chevron{flex-shrink:0;color:var(--t3);transition:transform .2s;margin-left:4px}.rk-item.open .rk-chevron{transform:rotate(180deg)}
@@ -2209,7 +2223,8 @@ class DimaiorAdmin extends HTMLElement {
     return`<div id="root">
       <div id="login"><div class="glass lbox"><h2>DMAIOR<br>ADMIN MASTER</h2><div style="text-align:center"><span class="lchip"><span class="ldot"></span>ACESSO RESTRITO</span></div><div class="campo"><label>Usuário</label><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="campo"><label>Senha</label><input id="iP" type="password" placeholder="••••••••" autocomplete="current-password"/></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
       <div id="app">
-        <div class="top"><button class="btn-ham" id="btnHam">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
+        <div class="top"><button class="btn-ham" id="btnHam" aria-label="Abrir menu" aria-expanded="false">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
+        <div class="side-backdrop" id="sideBackdrop"></div>
         <div class="shell">
           <div class="side" id="side">
             <div class="ns">Principal</div>

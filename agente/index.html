@@ -351,6 +351,28 @@
     /* Seção de convites — form buscar */
     .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
     .convite-box h3 { font-family: var(--font-t); font-size: 17px; margin-bottom: 18px; }
+    .conv-history-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      width: 100%; margin: 4px 0 12px; padding: 0; border: 0; background: transparent;
+      color: var(--text); cursor: pointer; text-align: left; font: inherit;
+    }
+    .conv-history-title {
+      display: flex; align-items: center; gap: 10px; min-width: 0;
+      font-family: var(--font-t); font-size: 18px; font-weight: 700; color: var(--text);
+    }
+    .conv-history-count {
+      flex-shrink: 0; padding: 3px 9px; border-radius: 999px;
+      border: 1px solid rgba(0,212,212,.22); background: rgba(0,212,212,.08);
+      color: var(--cyan); font-family: var(--font-t); font-size: 11px; font-weight: 700;
+    }
+    .conv-history-chevron {
+      display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0;
+      border: 1px solid rgba(0,212,212,.18); border-radius: 999px; color: var(--sub);
+      background: rgba(255,255,255,.025); transition: transform .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .conv-history-head:hover .conv-history-chevron { color: var(--cyan); border-color: rgba(0,212,212,.4); }
+    .conv-history-head.is-collapsed .conv-history-chevron { transform: rotate(-90deg); }
+    .conv-history-wrap.is-collapsed { display: none; }
     .input-row { display: flex; gap: 12px; }
     .input-row input {
       flex: 1; padding: 11px 14px; background: rgba(255,255,255,.05);
@@ -679,8 +701,14 @@
         </div>
 
         <!-- Histórico de convites -->
-        <p class="section-title">Histórico de Convites</p>
-        <div class="table-wrap" id="tabela-convites">
+        <button class="conv-history-head" id="conv-history-toggle" type="button" aria-expanded="true">
+          <span class="conv-history-title">
+            Histórico de Convites
+            <span class="conv-history-count" id="conv-history-count">0</span>
+          </span>
+          <span class="conv-history-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="table-wrap conv-history-wrap" id="tabela-convites">
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </section>
@@ -805,6 +833,21 @@ function abrirMenuMobile() {
 document.getElementById('mobile-menu-btn')?.addEventListener('click', abrirMenuMobile);
 document.getElementById('mobile-menu-backdrop')?.addEventListener('click', fecharMenuMobile);
 document.getElementById('btn-atualizar-lives')?.addEventListener('click', () => carregarLives());
+
+const convHistoryToggle = document.getElementById('conv-history-toggle');
+const convHistoryWrap = document.getElementById('tabela-convites');
+function aplicarEstadoHistoricoConvites() {
+  const collapsed = localStorage.getItem('dm_agente_convites_hist_collapsed') === '1';
+  convHistoryToggle?.classList.toggle('is-collapsed', collapsed);
+  convHistoryWrap?.classList.toggle('is-collapsed', collapsed);
+  convHistoryToggle?.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+}
+convHistoryToggle?.addEventListener('click', () => {
+  const collapsed = !convHistoryWrap?.classList.contains('is-collapsed');
+  localStorage.setItem('dm_agente_convites_hist_collapsed', collapsed ? '1' : '0');
+  aplicarEstadoHistoricoConvites();
+});
+aplicarEstadoHistoricoConvites();
 
 document.querySelectorAll('.nav-item').forEach(el => {
   el.addEventListener('click', () => {
@@ -1464,7 +1507,9 @@ async function carregarConvites() {
   try {
     const d = await api('/agente/convites');
     const list = d.convites || [];
-    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; return; }
+    const countEl = document.getElementById('conv-history-count');
+    if (countEl) countEl.textContent = fmtNum(list.length);
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; aplicarEstadoHistoricoConvites(); return; }
     setAccordion(container, true);
     const rows = list.map(c => {
       const nome = esc(c.streamer_nome || c.streamer_uid || '—');
@@ -1500,6 +1545,7 @@ async function carregarConvites() {
         <tbody>${rows.map(r => r.table).join('')}</tbody>
       </table>
       <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
+    aplicarEstadoHistoricoConvites();
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
