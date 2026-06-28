@@ -15,7 +15,7 @@
         this.render();
         this.applyPreferences();
         this.loadChartJS();
-        // Guarda referÃªncia antes de setupNavigation para poder remover depois
+        // Guarda referência antes de setupNavigation para poder remover depois
         this._avisosHandler = () => this.goAvisos();
         this.setupNavigation();
         this.setupActionListeners();
@@ -93,7 +93,7 @@
                 const uidEl = this.qs('#dUid'); if(uidEl) uidEl.textContent = `UID: ${uid}`;
 
                 if (loading) loading.style.display = 'none';
-                // Verifica deeplink â€” sino no site pÃºblico redireciona com #avisos
+                // Verifica deeplink — sino no site público redireciona com #avisos
                 if (window.location.hash === '#avisos') {
                     history.replaceState(null, '', window.location.pathname);
                     this.goAvisos();
@@ -128,7 +128,7 @@
         }
     }
 
-    // â”€â”€ SVG library â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── SVG library ─────────────────────────────────────────────────
     svgUser()    { return `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`; }
     svgLock()    { return `<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>`; }
     svgMail()    { return `<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`; }
@@ -153,7 +153,7 @@
     svgWallet()  { return `<svg viewBox="0 0 24 24"><path d="M21 7H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H3V9h18v10zm-9-1c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM1 5h20V3H1v2z"/></svg>`; }
     svgSend()    { return `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`; }
 
-    // â”€â”€ FormataÃ§Ã£o BRL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Formatação BRL ───────────────────────────────────────────────
     brl(n) { return 'R$ ' + Number(n||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 
     render() {
@@ -292,11 +292,11 @@
             .fEmail-box .fe-lbl{font-size:.7rem;color:var(--muted);font-family:'Rajdhani';text-transform:uppercase;margin-bottom:4px;}
             .fEmail-box .fe-val{font-size:1rem;color:var(--cyan);font-family:'Rajdhani';font-weight:700;word-break:break-all;}
 
-            /* â”€â”€ CARTEIRA v2 â”€â”€ */
+            /* ── CARTEIRA v2 ── */
             .cart-view{max-width:620px;margin:0 auto;}
             .cart-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px;}
 
-            /* Hero card saldo â€” gradiente azul escuro â†’ ciano (de cima pra baixo) */
+            /* Hero card saldo — gradiente azul escuro → ciano (de cima pra baixo) */
             .cart-hero{
                 width:100%;
                 background:linear-gradient(0deg,#05051a 0%,#003f4f 55%,#00d4d4 100%);
@@ -330,7 +330,7 @@
                 font-size:.75rem;color:rgba(255,255,255,.55);
                 font-family:'Rajdhani',sans-serif;
             }
-            /* BotÃ£o HistÃ³rico no canto superior direito */
+            /* Botão Histórico no canto superior direito */
             .cart-hist-btn{
                 position:absolute;top:18px;right:16px;
                 background:rgba(255,255,255,.12);
@@ -346,7 +346,7 @@
             .cart-hist-btn:hover{background:rgba(255,255,255,.22);}
             .cart-hist-btn svg{width:13px;height:13px;fill:#fff;flex-shrink:0;}
 
-            /* Sub-view histÃ³rico */
+            /* Sub-view histórico */
             .hist-panel{display:none;animation:fi .3s ease;}
             .hist-panel.on{display:block;}
             .hist-back{
@@ -386,12 +386,12 @@
             .valor-input-wrap .prefix{position:absolute;left:14px;color:var(--muted);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;pointer-events:none;}
             .valor-input-wrap input{padding-left:46px!important;}
 
-            /* â”€â”€ BotÃ£o voltar nas views inline (rank / impulso) â”€â”€ */
+            /* ── Botão voltar nas views inline (rank / impulso) ── */
             .iframe-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;padding:0 0 14px;text-transform:uppercase;}
             .iframe-back svg{width:20px;height:20px;fill:var(--cyan);}
             .molduras-frame{display:block;width:100%;height:calc(100vh - 48px);min-height:720px;border:0;border-radius:8px;background:transparent;}
 
-            /* â”€â”€ Banners de comunicados â”€â”€ */
+            /* ── Banners de comunicados ── */
             .dm-comunicado{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border-radius:12px;background:rgba(240,192,64,0.08);border:1px solid rgba(240,192,64,0.30);animation:fi .4s ease both;width:100%;}
             .dm-comunicado-ico{font-size:1.2rem;line-height:1;flex-shrink:0;}
             .dm-comunicado-txt{font-size:0.78rem;color:var(--muted);line-height:1.55;flex:1;}
@@ -402,7 +402,7 @@
             /* Dark */
             [data-theme="dark"] .dm-comunicado{background:rgba(240,192,64,0.06);border-color:rgba(240,192,64,0.22);}
 
-            /* â”€â”€ View Avisos â”€â”€ */
+            /* ── View Avisos ── */
             .avisos-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px;flex-wrap:wrap;}
             .avisos-topbar .iframe-back{padding:0;}
             .btn-mark-all{display:flex;align-items:center;gap:6px;background:none;border:1.5px solid var(--border);color:var(--cyan);border-radius:20px;padding:7px 14px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:background .2s,border-color .2s;white-space:nowrap;}
@@ -420,7 +420,7 @@
             .aviso-btn-sec:hover{border-color:var(--cyan);}
             .aviso-btn-pri{background:var(--cyan);border:none;color:#000;border-radius:8px;padding:9px 18px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:opacity .2s;}
             .aviso-btn-pri:hover{opacity:.85;}
-            /* SeÃ§Ã£o lista */
+            /* Seção lista */
             .avisos-sec-titulo{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;}
             .avisos-list{display:flex;flex-direction:column;gap:8px;}
             /* Card item */
@@ -435,7 +435,7 @@
             .avisos-empty{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
             .avisos-loading{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
 
-            /* â•â• TEMA DARK â€” cinza neutro, sem azul â•â• */
+            /* ══ TEMA DARK — cinza neutro, sem azul ══ */
             [data-theme="dark"] .shell {
                 --glass: rgba(12,13,15,.97);
                 --border: rgba(255,255,255,.10);
@@ -448,7 +448,7 @@
                 [data-theme="dark"] .shell .bnav { background: rgba(18,18,18,.99); border-top-color: rgba(255,255,255,.10); }
             }
 
-            /* â•â• TEMA BRANCO â€” bloom azul-petrÃ³leo (padrÃ£o do ranking) â•â• */
+            /* ══ TEMA BRANCO — bloom azul-petróleo (padrão do ranking) ══ */
             [data-theme="branco"] .shell {
                 --cyan:#0095a8; --cyan-d:rgba(0,149,168,0.15);
                 --gold:#b8860b; --red:#dc2626; --green:#15803d;
@@ -456,7 +456,7 @@
                 --text:#0d1117; --muted:#4a5568;
                 --bloom: linear-gradient(135deg,#0369a1 0%,#0095a8 100%);
             }
-            /* â•â• TEMA ROSA â€” bloom pink/magenta â•â• */
+            /* ══ TEMA ROSA — bloom pink/magenta ══ */
             [data-theme="rosa"] .shell {
                 --cyan:#e91e8c; --cyan-d:rgba(233,30,140,0.15);
                 --gold:#c2185b; --red:#b71c1c; --green:#2e7d32;
@@ -464,7 +464,7 @@
                 --text:#1a0010; --muted:#80004a;
                 --bloom: linear-gradient(135deg,#e91e8c 0%,#ff6090 100%);
             }
-            /* â•â• TEMA LARANJA â€” bloom laranja/Ã¢mbar â•â• */
+            /* ══ TEMA LARANJA — bloom laranja/âmbar ══ */
             [data-theme="laranja"] .shell {
                 --cyan:#f97316; --cyan-d:rgba(249,115,22,0.15);
                 --gold:#ea580c; --red:#dc2626; --green:#15803d;
@@ -472,7 +472,7 @@
                 --text:#1a0a00; --muted:#7c3a00;
                 --bloom: linear-gradient(135deg,#f97316 0%,#fbbf24 100%);
             }
-            /* â•â• Cards, inputs, nav â€” todos os temas claros â•â• */
+            /* ══ Cards, inputs, nav — todos os temas claros ══ */
             [data-theme="branco"] .shell .card,
             [data-theme="rosa"] .shell .card,
             [data-theme="laranja"] .shell .card {
@@ -496,7 +496,7 @@
                 border-color: var(--border);
                 color: var(--text);
             }
-            /* BotÃµes toggle (Diamantes/Horas, 7dias/30dias) */
+            /* Botões toggle (Diamantes/Horas, 7dias/30dias) */
             [data-theme="branco"] .shell .tbtn,
             [data-theme="rosa"] .shell .tbtn,
             [data-theme="laranja"] .shell .tbtn {
@@ -511,7 +511,7 @@
                 border-color: transparent;
                 color: #fff;
             }
-            /* BotÃ£o principal (ENTRAR, ATUALIZAR etc.) */
+            /* Botão principal (ENTRAR, ATUALIZAR etc.) */
             [data-theme="branco"] .shell .btn,
             [data-theme="rosa"] .shell .btn,
             [data-theme="laranja"] .shell .btn {
@@ -537,7 +537,7 @@
                     backdrop-filter: blur(12px);
                 }
             }
-            /* Cart-hero â€” saldo disponÃ­vel â€” segue bloom do tema */
+            /* Cart-hero — saldo disponível — segue bloom do tema */
             [data-theme="branco"] .shell .cart-hero {
                 background: linear-gradient(0deg,#0d1a2e 0%,#0369a1 55%,#0095a8 100%);
                 border-color: rgba(0,149,168,0.4);
@@ -560,14 +560,14 @@
         </style>
 
         <div class="shell">
-            <!-- â•â•â•â•â•â• LOADING INICIAL â•â•â•â•â•â• -->
+            <!-- ══════ LOADING INICIAL ══════ -->
             <div id="vLoading" style="position:absolute;inset:0;background:rgba(4,4,20,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;min-height:100vh">
                 <div style="width:48px;height:48px;border-radius:50%;border:3px solid rgba(0,212,212,.15);border-top-color:var(--cyan);animation:spinC .7s linear infinite"></div>
                 <span style="font-family:'Rajdhani',sans-serif;font-size:.85rem;color:var(--muted);letter-spacing:2px">CARREGANDO...</span>
             </div>
             <style>@keyframes spinC{to{transform:rotate(360deg)}}</style>
 
-            <!-- â•â•â•â•â•â• MENU â•â•â•â•â•â• -->
+            <!-- ══════ MENU ══════ -->
             <nav class="bnav" id="bNav">
                 <button class="nit on" id="nD">${this.svgGrid()} <span data-i18n="dashboard">RESUMO</span></button>
                 <button class="nit" id="nS">${this.svgUser()} <span data-i18n="profile">PERFIL</span></button>
@@ -580,7 +580,7 @@
 
             <div class="content">
 
-                <!-- â•â•â•â•â•â• LOGIN â•â•â•â•â•â• -->
+                <!-- ══════ LOGIN ══════ -->
                 <div id="vL" class="view auth-view">
                     <div class="card" style="margin-top:10vh;text-align:center;padding:40px 25px;">
                         <p class="raaj" style="font-size:1rem;color:var(--cyan);margin-bottom:30px;">ACESSO STREAMER</p>
@@ -606,7 +606,7 @@
                     </div>
                 </div>
 
-                <!-- â•â•â•â•â•â• CADASTRO â•â•â•â•â•â• -->
+                <!-- ══════ CADASTRO ══════ -->
                 <div id="vR" class="view auth-view">
                     <div class="hd" style="justify-content:flex-start;">
                         <button class="btn-txt" id="backL"><span>${this.svgBack()}</span> Voltar</button>
@@ -642,8 +642,8 @@
                                     <span class="eye" id="eyeR1">${this.svgEyeOn()}</span>
                                 </div>
                                 <div class="prules">
-                                    <span class="prule fail" id="rm1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Letra MaiÃºscula</span>
-                                    <span class="prule fail" id="rn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 NÃºmero</span>
+                                    <span class="prule fail" id="rm1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Letra Maiúscula</span>
+                                    <span class="prule fail" id="rn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Número</span>
                                 </div>
                             </div>
                             <div class="ig"><label class="raaj">CONFIRMAR SENHA</label>
@@ -657,7 +657,7 @@
                     </div>
                 </div>
 
-                <!-- â•â•â•â•â•â• RECUPERAR SENHA â•â•â•â•â•â• -->
+                <!-- ══════ RECUPERAR SENHA ══════ -->
                 <div id="vF" class="view auth-view">
                     <div class="hd" style="justify-content:flex-start;">
                         <button class="btn-txt" id="backForgot"><span>${this.svgBack()}</span> Voltar</button>
@@ -670,29 +670,29 @@
                         <div id="fs1" class="rst on">
                             <div class="ig"><label class="raaj">SEU UID KWAI</label>
                                 <div class="iw"><span class="ico">${this.svgUser()}</span>
-                                    <input type="number" id="fUid" placeholder="Digite seu UID numÃ©rico">
+                                    <input type="number" id="fUid" placeholder="Digite seu UID numérico">
                                 </div>
                             </div>
                             <button class="btn" id="btnFind">BUSCAR CONTA</button>
                         </div>
                         <div id="fs2" class="rst">
-                            <p style="font-size:.85rem;color:var(--muted);margin-bottom:15px;">Conta encontrada. Enviaremos o cÃ³digo para:</p>
+                            <p style="font-size:.85rem;color:var(--muted);margin-bottom:15px;">Conta encontrada. Enviaremos o código para:</p>
                             <div class="fEmail-box">
                                 <div class="fe-lbl">E-mail vinculado</div>
                                 <div class="fe-val" id="fEmailMask">---</div>
                             </div>
-                            <button class="btn" id="btnSendReset">ENVIAR CÃ“DIGO</button>
+                            <button class="btn" id="btnSendReset">ENVIAR CÓDIGO</button>
                             <button class="btn-txt" id="btnBackFs1" style="margin:14px auto 0;justify-content:center;">
                                 <span>${this.svgBack()}</span> UID diferente
                             </button>
                         </div>
                         <div id="fs3" class="rst">
-                            <p style="font-size:.85rem;color:var(--text);margin-bottom:6px;">Insira o cÃ³digo de 6 dÃ­gitos recebido no e-mail.</p>
-                            <p style="font-size:.75rem;color:var(--muted);margin-bottom:18px;">Verifique tambÃ©m a caixa de spam.</p>
+                            <p style="font-size:.85rem;color:var(--text);margin-bottom:6px;">Insira o código de 6 dígitos recebido no e-mail.</p>
+                            <p style="font-size:.75rem;color:var(--muted);margin-bottom:18px;">Verifique também a caixa de spam.</p>
                             <div class="ig"><div class="iw">
                                 <input type="text" id="fOtp" maxlength="6" style="text-align:center;font-size:1.5rem;letter-spacing:12px;padding-left:14px;" placeholder="------">
                             </div></div>
-                            <button class="btn" id="btnCheckOtp">VALIDAR CÃ“DIGO</button>
+                            <button class="btn" id="btnCheckOtp">VALIDAR CÓDIGO</button>
                         </div>
                         <div id="fs4" class="rst">
                             <div class="ig"><label class="raaj">NOVA SENHA</label>
@@ -701,8 +701,8 @@
                                     <span class="eye" id="eyeF1">${this.svgEyeOn()}</span>
                                 </div>
                                 <div class="prules">
-                                    <span class="prule fail" id="fm1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Letra MaiÃºscula</span>
-                                    <span class="prule fail" id="fn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 NÃºmero</span>
+                                    <span class="prule fail" id="fm1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Letra Maiúscula</span>
+                                    <span class="prule fail" id="fn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Número</span>
                                 </div>
                             </div>
                             <div class="ig"><label class="raaj">CONFIRMAR SENHA</label>
@@ -716,7 +716,7 @@
                     </div>
                 </div>
 
-                <!-- â•â•â•â•â•â• DASHBOARD â•â•â•â•â•â• -->
+                <!-- ══════ DASHBOARD ══════ -->
                 <div id="vD" class="view dash-view">
                     <div class="hd">
                         <button class="btn-sm" id="btnRef"><span id="refIco">${this.svgRefresh()}</span> ATUALIZAR</button>
@@ -745,13 +745,13 @@
                                     <span class="mlbl">${this.svgClock()} TEMPO TRANSMITIDO</span>
                                     <span class="val" id="dHrTot">00:00</span>
                                     <div class="hsub">
-                                        <div class="hrow"><span class="tag">${this.svgClock()} VÃ­deo</span><span class="hv" style="color:var(--cyan);" id="dHrVid">00:00</span></div>
-                                        <div class="hrow"><span class="tag">${this.svgClock()} Ãudio</span><span class="hv" style="color:var(--gold);" id="dHrAud">00:00</span></div>
+                                        <div class="hrow"><span class="tag">${this.svgClock()} Vídeo</span><span class="hv" style="color:var(--cyan);" id="dHrVid">00:00</span></div>
+                                        <div class="hrow"><span class="tag">${this.svgClock()} Áudio</span><span class="hv" style="color:var(--gold);" id="dHrAud">00:00</span></div>
                                     </div>
                                 </div>
                                 <div class="mbox" style="grid-column:span 2;">
                                     <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-                                        <div><span class="mlbl">${this.svgClock()} HORAS VÃLIDAS</span><span class="val" id="dHrTxt">0h <span style="font-size:.7rem;color:var(--muted);font-weight:normal">/ 40h</span></span></div>
+                                        <div><span class="mlbl">${this.svgClock()} HORAS VÁLIDAS</span><span class="val" id="dHrTxt">0h <span style="font-size:.7rem;color:var(--muted);font-weight:normal">/ 40h</span></span></div>
                                         <span style="font-size:.8rem;color:var(--cyan);" id="dHrPct">0%</span>
                                     </div>
                                     <div class="prog"><div class="progf" id="pH" style="width:0%"></div></div>
@@ -784,8 +784,8 @@
                             </div>
                             <div class="card">
                                 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-                                    <h3 class="raaj" style="font-size:.9rem;color:var(--muted);">HISTÃ“RICO DIÃRIO</h3>
-                                    <span class="raaj" style="font-size:.7rem;color:var(--muted);" id="hRes">â€” dias â€¢ â€” diamantes</span>
+                                    <h3 class="raaj" style="font-size:.9rem;color:var(--muted);">HISTÓRICO DIÁRIO</h3>
+                                    <span class="raaj" style="font-size:.7rem;color:var(--muted);" id="hRes">— dias • — diamantes</span>
                                 </div>
                                 <table class="htbl">
                                     <thead><tr>
@@ -808,15 +808,15 @@
                                         <div class="disc-inner">
                                             <div class="disc-item">
                                                 <svg class="radar" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-5h2v2h-2zm0-8h2v6h-2z"/></svg>
-                                                <span><strong>AtualizaÃ§Ã£o em Tempo Real:</strong> Os dados sÃ£o sincronizados a cada <strong>1 minuto</strong> diretamente da plataforma Kwai. Por conta dessa frequÃªncia, pode haver uma variaÃ§Ã£o de atÃ© <strong>2%</strong> em relaÃ§Ã£o aos dados oficiais â€” normal para sistemas de monitoramento em tempo real.</span>
+                                                <span><strong>Atualização em Tempo Real:</strong> Os dados são sincronizados a cada <strong>1 minuto</strong> diretamente da plataforma Kwai. Por conta dessa frequência, pode haver uma variação de até <strong>2%</strong> em relação aos dados oficiais — normal para sistemas de monitoramento em tempo real.</span>
                                             </div>
                                             <div class="disc-item">
                                                 <svg class="tool" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                                                <span><strong>Auto-CorreÃ§Ã£o a cada 48h:</strong> O sistema realiza automaticamente uma reconciliaÃ§Ã£o completa dos dados a cada <strong>48 horas</strong>, corrigindo qualquer divergÃªncia e alinhando os totais ao padrÃ£o oficial da plataforma.</span>
+                                                <span><strong>Auto-Correção a cada 48h:</strong> O sistema realiza automaticamente uma reconciliação completa dos dados a cada <strong>48 horas</strong>, corrigindo qualquer divergência e alinhando os totais ao padrão oficial da plataforma.</span>
                                             </div>
                                             <div class="disc-item">
                                                 <svg class="chart" viewBox="0 0 24 24"><path d="M19 3H5L2 9l10 12L22 9l-3-6zm-7 14.5L4.5 9.5l2-4h11l2 4L12 17.5z"/></svg>
-                                                <span><strong>RelatÃ³rio Oficial:</strong> Os resultados definitivos sÃ£o validados e consolidados no mÃªs seguinte com base no relatÃ³rio oficial da plataforma Kwai, que prevalece sobre qualquer dado exibido aqui.</span>
+                                                <span><strong>Relatório Oficial:</strong> Os resultados definitivos são validados e consolidados no mês seguinte com base no relatório oficial da plataforma Kwai, que prevalece sobre qualquer dado exibido aqui.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -826,7 +826,7 @@
                     </div>
                 </div>
 
-                <!-- â•â•â•â•â•â• PERFIL â•â•â•â•â•â• -->
+                <!-- ══════ PERFIL ══════ -->
                 <div id="vS" class="view auth-view">
                     <div class="hd"><h1 class="raaj" style="font-size:1.3rem;color:var(--text);" data-i18n="profileControl">CONTROLE DE PERFIL</h1></div>
                     <div class="card">
@@ -845,7 +845,7 @@
                         <div class="ig"><label>ENDERECO RESIDENCIAL</label>
                             <div class="iw"><span class="ico">${this.svgPin()}</span><input type="text" id="sAddr" placeholder="Endereco completo"></div>
                         </div>
-                        <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--cyan);border-bottom:1px solid var(--border);padding-bottom:8px;" data-i18n="appearanceAccess">APARÃŠNCIA E ACESSIBILIDADE</h2>
+                        <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--cyan);border-bottom:1px solid var(--border);padding-bottom:8px;" data-i18n="appearanceAccess">APARÊNCIA E ACESSIBILIDADE</h2>
                         <div class="pref-grid">
                             <div class="ig">
                                 <label data-i18n="textSize">TAMANHO DO TEXTO</label>
@@ -858,14 +858,14 @@
                             <div class="ig">
                                 <label data-i18n="language">IDIOMA</label>
                                 <select id="sLang" data-pref-lang-select>
-                                    <option value="pt-BR">PortuguÃªs BR</option>
+                                    <option value="pt-BR">Português BR</option>
                                     <option value="en">English</option>
-                                    <option value="es">EspaÃ±ol</option>
-                                    <option value="zh">ä¸­æ–‡</option>
+                                    <option value="es">Español</option>
+                                    <option value="zh">中文</option>
                                 </select>
                             </div>
                         </div>
-                        <p class="pref-note" data-i18n="appearanceHelp">Essas opÃ§Ãµes ficam salvas neste aparelho e ajudam na leitura sem alterar seus dados.</p>
+                        <p class="pref-note" data-i18n="appearanceHelp">Essas opções ficam salvas neste aparelho e ajudam na leitura sem alterar seus dados.</p>
                         <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;">DADOS DE RECEBIMENTO</h2>
                         <div class="ig"><label>TIPO DE CHAVE PIX</label>
                             <div class="iw"><span class="ico">${this.svgPix()}</span>
@@ -875,14 +875,14 @@
                                     <option value="CNPJ">CNPJ</option>
                                     <option value="Email">E-mail</option>
                                     <option value="Celular">Celular</option>
-                                    <option value="Aleatoria">Chave AleatÃ³ria</option>
+                                    <option value="Aleatoria">Chave Aleatória</option>
                                 </select>
                             </div>
                         </div>
                         <div class="ig"><label>CHAVE PIX</label>
                             <div class="iw"><span class="ico">${this.svgPix()}</span><input type="text" id="sPixChave" placeholder="Informe sua chave Pix"></div>
                         </div>
-                        <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--red);border-bottom:1px solid var(--border);padding-bottom:8px;">SEGURANÃ‡A</h2>
+                        <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--red);border-bottom:1px solid var(--border);padding-bottom:8px;">SEGURANÇA</h2>
                         <div class="ig">
                             <label style="color:var(--red);">MODIFICAR SENHA <span style="color:var(--muted);font-size:.65rem;">(opcional)</span></label>
                             <div class="iw"><span class="ico">${this.svgLock()}</span>
@@ -890,30 +890,30 @@
                                 <span class="eye" id="eyeS">${this.svgEyeOn()}</span>
                             </div>
                             <div class="prules">
-                                <span class="prule fail" id="sm1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Letra MaiÃºscula</span>
-                                <span class="prule fail" id="sn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 NÃºmero</span>
+                                <span class="prule fail" id="sm1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Letra Maiúscula</span>
+                                <span class="prule fail" id="sn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Número</span>
                             </div>
                         </div>
                         <button class="btn" id="btnSave" style="margin-top:20px;" data-i18n="updateData">ATUALIZAR DADOS</button>
                     </div>
                 </div>
 
-                <!-- â•â•â•â•â•â• CARTEIRA â•â•â•â•â•â• -->
+                <!-- ══════ CARTEIRA ══════ -->
                 <div id="vC" class="view cart-view">
                     <div class="hd">
                         <button class="btn-sm" id="btnRefCart"><span>${this.svgRefresh()}</span> ATUALIZAR</button>
                     </div>
 
-                    <!-- â”€â”€ Painel principal â”€â”€ -->
+                    <!-- ── Painel principal ── -->
                     <div id="cMain">
 
-                        <!-- Hero card saldo com botÃ£o HistÃ³rico -->
+                        <!-- Hero card saldo com botão Histórico -->
                         <div class="cart-hero">
-                            <div class="hero-lbl">Saldo DisponÃ­vel</div>
+                            <div class="hero-lbl">Saldo Disponível</div>
                             <div class="hero-valor" id="cSaldo">R$ 0,00</div>
                             <div class="hero-sub" id="cPendente">Nenhum saque pendente</div>
                             <button class="cart-hist-btn" id="btnHistorico">
-                                ${this.svgClock()} HISTÃ“RICO
+                                ${this.svgClock()} HISTÓRICO
                             </button>
                         </div>
 
@@ -933,13 +933,13 @@
                             </div>
                         </div>
 
-                        <!-- Aviso PIX invÃ¡lido -->
+                        <!-- Aviso PIX inválido -->
                         <div id="cPixWarn" class="pix-warn" style="display:none;">
                             ${this.svgInfo()}
-                            <span>Para solicitar saque, cadastre uma chave PIX do tipo <strong>CPF</strong> ou <strong>Celular</strong> na aba <strong>PERFIL</strong>. Chaves do tipo E-mail, CNPJ e AleatÃ³ria nÃ£o sÃ£o aceitas para saque.</span>
+                            <span>Para solicitar saque, cadastre uma chave PIX do tipo <strong>CPF</strong> ou <strong>Celular</strong> na aba <strong>PERFIL</strong>. Chaves do tipo E-mail, CNPJ e Aleatória não são aceitas para saque.</span>
                         </div>
 
-                        <!-- FormulÃ¡rio de saque -->
+                        <!-- Formulário de saque -->
                         <div class="saque-form" id="cSaqueForm" style="display:none;">
                             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                                 <img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp"
@@ -958,36 +958,36 @@
 
                     </div><!-- /cMain -->
 
-                    <!-- â”€â”€ Sub-view HistÃ³rico de movimentaÃ§Ãµes â”€â”€ -->
+                    <!-- ── Sub-view Histórico de movimentações ── -->
                     <div id="cHistPanel" class="hist-panel">
                         <button class="hist-back" id="btnHistBack">
                             ${this.svgBack()} VOLTAR
                         </button>
                         <div class="card">
-                            <h3 class="raaj" style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">HISTÃ“RICO DE MOVIMENTAÃ‡Ã•ES</h3>
+                            <h3 class="raaj" style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">HISTÓRICO DE MOVIMENTAÇÕES</h3>
                             <div id="cTxLista"><p style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0;">Carregando...</p></div>
                         </div>
                     </div>
 
                 </div><!-- /vC -->
 
-                <!-- â•â•â•â•â•â• RANKING (componente nativo) â•â•â•â•â•â• -->
+                <!-- ══════ RANKING (componente nativo) ══════ -->
                 <div id="vRank" class="view" style="width:100%;">
                     <button class="iframe-back" id="btnBackRank">${this.svgBack()} VOLTAR AO PAINEL</button>
                     <ranking-dmaior id="rankingEl" style="display:block;width:100%;min-height:80vh;"></ranking-dmaior>
                 </div>
 
-                <!-- â•â•â•â•â•â• IMPULSO (componente nativo) â•â•â•â•â•â• -->
+                <!-- ══════ IMPULSO (componente nativo) ══════ -->
                 <div id="vImpulso" class="view" style="width:100%;">
-                    <dmaior-impulso id="impulsoEl"></dmaior-impulso>
+                    <dmaior-impulso id="impulsoEl" worker-url="https://dashboard.agencydmaior.com.br"></dmaior-impulso>
                 </div>
 
-                <!-- Gerador local de molduras, carregado somente apÃ³s autenticaÃ§Ã£o -->
+                <!-- Gerador local de molduras, carregado somente após autenticação -->
                 <div id="vMolduras" class="view" style="width:100%;">
                     <iframe id="moldurasFrame" class="molduras-frame" title="Gerador de molduras da DMaior Agency" allow="clipboard-write"></iframe>
                 </div>
 
-                <!-- â•â•â•â•â•â• AVISOS â•â•â•â•â•â• -->
+                <!-- ══════ AVISOS ══════ -->
                 <div id="vAvisos" class="view" style="width:100%;">
                     <div class="avisos-topbar">
                         <button class="iframe-back" id="btnBackAvisos">${this.svgBack()} VOLTAR</button>
@@ -1003,7 +1003,7 @@
         </div><!-- /shell -->`;
     }
 
-    // â”€â”€ Utils â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Utils ───────────────────────────────────────────────────────
     qs(s){ return this.querySelector(s); }
 
     applyPreferences(){
@@ -1098,12 +1098,12 @@
     }
 
     fdt(v){
-        if(!v) return 'â€”';
+        if(!v) return '—';
         const d = new Date(v);
         return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     }
 
-    // â”€â”€ Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Setup ───────────────────────────────────────────────────────
     setupNavigation(){
         this.qs('#goReg').addEventListener('click',e=>{e.preventDefault();this.navigate('vR');});
         this.qs('#backL').addEventListener('click',()=>this.navigate('vL'));
@@ -1119,7 +1119,7 @@
         this.qs('#btnBackRank').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');this.loadDash();});
         this.qs('#btnBackAvisos').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#btnMarkAllRead').addEventListener('click',()=>this._marcarTodosLidos());
-        // Escuta o clique no sino do menu â€” navega para a view de avisos
+        // Escuta o clique no sino do menu — navega para a view de avisos
         window.addEventListener('dmaior:avisos', this._avisosHandler);
     }
 
@@ -1133,13 +1133,13 @@
         this.qs('#btnRefCart').addEventListener('click',()=>this.loadCarteira());
         this.qs('#btnSaque').addEventListener('click',()=>this.doSolicSaque());
 
-        // HistÃ³rico: abrir sub-view
+        // Histórico: abrir sub-view
         this.qs('#btnHistorico').addEventListener('click',()=>{
             this.qs('#cMain').style.display = 'none';
             this.qs('#cHistPanel').classList.add('on');
             setTimeout(()=>{ if(this._sendHeight) this._sendHeight(); }, 100);
         });
-        // HistÃ³rico: voltar ao painel principal
+        // Histórico: voltar ao painel principal
         this.qs('#btnHistBack').addEventListener('click',()=>{
             this.qs('#cHistPanel').classList.remove('on');
             this.qs('#cMain').style.display = 'block';
@@ -1187,7 +1187,7 @@
         this.qs('#btnResetPass').addEventListener('click',()=>this.doConfirmReset());
     }
 
-    // â”€â”€ Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Login ───────────────────────────────────────────────────────
     async doLogin(){
         const uid=this.qs('#lUid').value, pass=this.qs('#lPass').value;
         const btn=this.qs('#btnL');
@@ -1217,7 +1217,7 @@
         finally{ btn.textContent='ENTRAR NO PAINEL'; btn.disabled=false; }
     }
 
-    // â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Dashboard ───────────────────────────────────────────────────
     async loadDash(){
         const btn=this.qs('#btnRef');
         if(btn){ btn.disabled=true; btn.innerHTML=`<span style="display:inline-block;animation:spin .8s linear infinite;">${this.svgRefresh()}</span> ...`; }
@@ -1231,10 +1231,10 @@
             if(res.status === 401){
                 this._clearSession();
                 this.navigate('vL');
-                this.showAlert('#alL','Sua sessÃ£o expirou. FaÃ§a login novamente.');
+                this.showAlert('#alL','Sua sessão expirou. Faça login novamente.');
                 return;
             }
-            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Falha de integraÃ§Ã£o.'); }
+            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Falha de integração.'); }
             const data=await res.json();
             const t=data.totais_mes||{}, p=data.perfil||{};
             const nomeExibir = t.nome_streamer || p.nome || localStorage.getItem('dm_nome') || 'Streamer DMaior';
@@ -1280,7 +1280,7 @@
         finally{ if(btn){ btn.disabled=false; btn.innerHTML=`<span>${this.svgRefresh()}</span> ATUALIZAR`; } }
     }
 
-    // â”€â”€ GrÃ¡fico â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Gráfico ─────────────────────────────────────────────────────
     renderChart(){
         if(!window.Chart) return setTimeout(()=>this.renderChart(),500);
         if(!this.historicoCompleto.length) return;
@@ -1296,14 +1296,14 @@
         this.chartInstance=new window.Chart(ctx,{type:'line',data:{labels,datasets:[{data:vals,borderColor:cor,backgroundColor:grad,borderWidth:2,pointBackgroundColor:'#fff',pointRadius:3,fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#a0b8c8',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#a0b8c8',font:{size:10}}}}}});
     }
 
-    // â”€â”€ HistÃ³rico â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Histórico ────────────────────────────────────────────────────
     renderHist(){
-        const dows=['Dom','Seg','Ter','Qua','Qui','Sex','SÃ¡b'];
+        const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
         const tb=this.qs('#hBody');
         if(!this.historicoCompleto.length){ tb.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;font-size:.8rem;">Nenhum registro.</td></tr>`; return; }
         const validos=this.historicoCompleto.filter(d=>d.minutos>=60).length;
         const totDia=this.historicoCompleto.reduce((s,d)=>s+d.diamantes,0);
-        this.qs('#hRes').textContent=`${validos} vÃ¡lidos â€¢ ${totDia.toLocaleString('pt-BR')} diamantes`;
+        this.qs('#hRes').textContent=`${validos} válidos • ${totDia.toLocaleString('pt-BR')} diamantes`;
         tb.innerHTML=this.historicoCompleto.map(dia=>{
             const dt=new Date(dia.data+'T12:00:00');
             const dd=String(dt.getDate()).padStart(2,'0');
@@ -1311,11 +1311,11 @@
             const dow=dows[dt.getDay()];
             const h=Math.floor(dia.minutos/60), m=dia.minutos%60;
             const ok=dia.minutos>=60;
-            return `<tr><td class="dc"><span class="dd">${dd}/${mm}</span><br><span class="dw">${dow}</span></td><td style="font-family:'Rajdhani';font-weight:700;color:${ok?'var(--cyan)':'var(--muted)'};">${h}h ${String(m).padStart(2,'0')}m</td><td style="font-family:'Rajdhani';font-weight:700;">${dia.diamantes.toLocaleString('pt-BR')}</td><td class="r"><span class="badge ${ok?'ok':'nok'}">${ok?'VÃ¡lido':'InvÃ¡lido'}</span></td></tr>`;
+            return `<tr><td class="dc"><span class="dd">${dd}/${mm}</span><br><span class="dw">${dow}</span></td><td style="font-family:'Rajdhani';font-weight:700;color:${ok?'var(--cyan)':'var(--muted)'};">${h}h ${String(m).padStart(2,'0')}m</td><td style="font-family:'Rajdhani';font-weight:700;">${dia.diamantes.toLocaleString('pt-BR')}</td><td class="r"><span class="badge ${ok?'ok':'nok'}">${ok?'Válido':'Inválido'}</span></td></tr>`;
         }).join('');
     }
 
-    // â”€â”€ Carteira â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Carteira ─────────────────────────────────────────────────────
     async loadCarteira(){
         const btn=this.qs('#btnRefCart');
         if(btn){ btn.disabled=true; }
@@ -1341,7 +1341,7 @@
             this.qs('#cRecebido').textContent = this.brl(recebido);
             this.qs('#cSacado').textContent   = this.brl(sacado);
             this.qs('#cPendente').textContent = pendente > 0
-                ? `${this.brl(pendente)} em anÃ¡lise`
+                ? `${this.brl(pendente)} em análise`
                 : 'Nenhum saque pendente';
 
             const pixTipo  = this.qs('#sPixTipo').value  || localStorage.getItem('dm_pix_tipo')  || '';
@@ -1358,7 +1358,7 @@
                 if (btnSaque) {
                     if (saldo <= 0) {
                         btnSaque.disabled = true;
-                        btnSaque.textContent = 'SALDO INDISPONÃVEL';
+                        btnSaque.textContent = 'SALDO INDISPONÍVEL';
                         btnSaque.style.background = '#333';
                     } else {
                         btnSaque.disabled = false;
@@ -1367,24 +1367,24 @@
                         const h3 = this.qs('#cSaqueForm h3');
                         if(h3) h3.textContent = 'SOLICITAR SAQUE';
                         const desc = this.qs('#cSaqueDesc');
-                        if(desc) desc.innerHTML = `<span style="color:var(--muted);font-size:.75rem">SerÃ¡ processado pela agÃªncia em breve</span>`;
+                        if(desc) desc.innerHTML = `<span style="color:var(--muted);font-size:.75rem">Será processado pela agência em breve</span>`;
                     }
                 }
             }
 
-            // TransaÃ§Ãµes (ficam na sub-view HistÃ³rico)
+            // Transações (ficam na sub-view Histórico)
             const txs = cart.transacoes || [];
             if (!txs.length) {
-                this.qs('#cTxLista').innerHTML = `<p style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0;">Nenhuma movimentaÃ§Ã£o ainda.</p>`;
+                this.qs('#cTxLista').innerHTML = `<p style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0;">Nenhuma movimentação ainda.</p>`;
             } else {
                 const tipoLabel = {
-                    credito:         '+ CrÃ©dito',
-                    debito:          'âˆ’ DÃ©bito',
-                    saque_solicitado:'â†’ Saque Solicitado',
-                    saque_aprovado:  'âœ“ Saque Aprovado',
-                    saque_rejeitado: 'âœ— Saque Recusado',
-                    premio_ranking:  'ðŸ† PrÃªmio Ranking',
-                    estorno:         'â†© Estorno',
+                    credito:         '+ Crédito',
+                    debito:          '− Débito',
+                    saque_solicitado:'→ Saque Solicitado',
+                    saque_aprovado:  '✓ Saque Aprovado',
+                    saque_rejeitado: '✗ Saque Recusado',
+                    premio_ranking:  '🏆 Prêmio Ranking',
+                    estorno:         '↩ Estorno',
                 };
                 const isEntrada = t => ['credito','premio_ranking','estorno','saque_rejeitado'].includes(t);
                 this.qs('#cTxLista').innerHTML = txs.map(tx => `
@@ -1394,10 +1394,10 @@
                         </div>
                         <div class="tx-info">
                             <div class="tx-tipo">${tipoLabel[tx.tipo]||tx.tipo}</div>
-                            <div class="tx-desc">${tx.descricao||'â€”'}</div>
+                            <div class="tx-desc">${tx.descricao||'—'}</div>
                         </div>
                         <div>
-                            <div class="tx-val ${isEntrada(tx.tipo)?'in':'out'}">${isEntrada(tx.tipo)?'+':'âˆ’'} ${this.brl(tx.valor)}</div>
+                            <div class="tx-val ${isEntrada(tx.tipo)?'in':'out'}">${isEntrada(tx.tipo)?'+':'−'} ${this.brl(tx.valor)}</div>
                             <div class="tx-data">${this.fdt(tx.criado_em)}</div>
                         </div>
                     </div>`).join('');
@@ -1416,8 +1416,8 @@
         const pixTipo  = this.qs('#sPixTipo').value;
         const pixChave = this.qs('#sPixChave').value;
 
-        if (!valor || valor <= 0) return this.showAlert('#alC','Informe um valor vÃ¡lido.');
-        if (!['CPF','Celular'].includes(pixTipo)) return this.showAlert('#alC','Chave PIX invÃ¡lida. Use CPF ou Celular.');
+        if (!valor || valor <= 0) return this.showAlert('#alC','Informe um valor válido.');
+        if (!['CPF','Celular'].includes(pixTipo)) return this.showAlert('#alC','Chave PIX inválida. Use CPF ou Celular.');
         if (!pixChave) return this.showAlert('#alC','Cadastre sua chave PIX no Perfil primeiro.');
 
         const btn=this.qs('#btnSaque');
@@ -1433,9 +1433,9 @@
             if (!res.ok) throw new Error(data.erro || 'Erro ao solicitar saque.');
             this.qs('#cValor').value = '';
             if (data.pago) {
-                this.showAlert('#alC', `âœ“ ${data.mensagem}`, false);
+                this.showAlert('#alC', `✓ ${data.mensagem}`, false);
             } else {
-                this.showAlert('#alC','Saque solicitado! A agÃªncia processarÃ¡ em breve.',false);
+                this.showAlert('#alC','Saque solicitado! A agência processará em breve.',false);
             }
             setTimeout(()=>this.loadCarteira(), 1500);
         } catch(e) {
@@ -1445,14 +1445,14 @@
         }
     }
 
-    // â”€â”€ Cadastro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Cadastro ─────────────────────────────────────────────────────
     async doOtpReq(){
         const uid=this.qs('#rUid').value, email=this.qs('#rEmail').value;
         if(!uid||!email) return this.showAlert('#alR','Preencha UID e e-mail.');
         const btn=this.qs('#btnCode'); btn.disabled=true;
         try{
             const res=await fetch(`${this.apiUrl}/api/auth/enviar-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,email})});
-            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Erro ao enviar cÃ³digo.'); }
+            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Erro ao enviar código.'); }
             this.qs('#rs1').classList.remove('on');
             this.qs('#rs2').classList.add('on');
         } catch(e){ this.showAlert('#alR',e.message); }
@@ -1481,7 +1481,7 @@
         } catch(e){ this.showAlert('#alR',e.message); btn.disabled=false; }
     }
 
-    // â”€â”€ Salvar perfil â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Salvar perfil ─────────────────────────────────────────────────
     async doSave(){
         const nova=this.qs('#sPass').value;
         const rx=/^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
@@ -1497,14 +1497,14 @@
         finally{ btn.disabled=false; btn.textContent='ATUALIZAR DADOS'; this.qs('#sPass').value=''; this.checkPass('#sPass','#sm1','#sn1'); }
     }
 
-    // â”€â”€ Recuperar Senha â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Recuperar Senha ───────────────────────────────────────────────
     async doFindAccount(){
         const uid=this.qs('#fUid').value.trim();
         if(!uid) return this.showAlert('#alF','Informe seu UID Kwai.');
         const btn=this.qs('#btnFind'); btn.disabled=true; btn.textContent='BUSCANDO...';
         try{
             const res=await fetch(`${this.apiUrl}/api/auth/buscar-email`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid})});
-            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'UID nÃ£o encontrado.'); }
+            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'UID não encontrado.'); }
             const data=await res.json();
             this.qs('#fEmailMask').textContent=data.email_mascarado;
             this.qs('#fs1').classList.remove('on');
@@ -1518,16 +1518,16 @@
         const btn=this.qs('#btnSendReset'); btn.disabled=true; btn.textContent='ENVIANDO...';
         try{
             const res=await fetch(`${this.apiUrl}/api/auth/recuperar-senha`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid})});
-            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Erro ao enviar cÃ³digo.'); }
+            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Erro ao enviar código.'); }
             this.qs('#fs2').classList.remove('on');
             this.qs('#fs3').classList.add('on');
         } catch(e){ this.showAlert('#alF',e.message); }
-        finally{ btn.disabled=false; btn.textContent='ENVIAR CÃ“DIGO'; }
+        finally{ btn.disabled=false; btn.textContent='ENVIAR CÓDIGO'; }
     }
 
     doCheckResetOtp(){
         const otp=this.qs('#fOtp').value.trim();
-        if(otp.length!==6) return this.showAlert('#alF','CÃ³digo deve ter 6 dÃ­gitos.');
+        if(otp.length!==6) return this.showAlert('#alF','Código deve ter 6 dígitos.');
         this.qs('#fs3').classList.remove('on');
         this.qs('#fs4').classList.add('on');
     }
@@ -1536,25 +1536,25 @@
         const uid=this.qs('#fUid').value.trim(), otp=this.qs('#fOtp').value.trim();
         const p1=this.qs('#fP1').value, p2=this.qs('#fP2').value;
         const rx=/^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
-        if(p1!==p2)      return this.showAlert('#alF','As senhas nÃ£o conferem.');
-        if(!rx.test(p1)) return this.showAlert('#alF','Senha fraca: 1 maiÃºscula e 1 nÃºmero.');
+        if(p1!==p2)      return this.showAlert('#alF','As senhas não conferem.');
+        if(!rx.test(p1)) return this.showAlert('#alF','Senha fraca: 1 maiúscula e 1 número.');
         const btn=this.qs('#btnResetPass'); btn.disabled=true; btn.textContent='SALVANDO...';
         try{
             const res=await fetch(`${this.apiUrl}/api/auth/confirmar-reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,otp,nova_senha:p1})});
-            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'CÃ³digo invÃ¡lido ou expirado.'); }
+            if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Código inválido ou expirado.'); }
             this.qs('#lUid').value=uid; this.qs('#lPass').value=p1;
             await this.doLogin();
         } catch(e){ this.showAlert('#alF',e.message); }
         finally{ btn.disabled=false; btn.textContent='SALVAR NOVA SENHA'; }
     }
 
-    // â”€â”€ Comunicados do painel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Comunicados do painel ────────────────────────────────────────
     async fetchComunicados() {
         try {
             const data = await window.DmaiorAPI.rank.getComunicados('painel');
             const todos = data.comunicados || [];
 
-            // Dashboard: sÃ³ avisos rÃ¡pidos (tipo = 'rapido' ou sem tipo â€” compatibilidade)
+            // Dashboard: só avisos rápidos (tipo = 'rapido' ou sem tipo — compatibilidade)
             const rapidos = todos.filter(c => !c.tipo || c.tipo === 'rapido');
             const el = this.qs('#painelComunicados');
             if (el) {
@@ -1568,7 +1568,7 @@
                 }
             }
 
-            // Atualiza ponto do sino: verifica se hÃ¡ importantes nÃ£o lidos
+            // Atualiza ponto do sino: verifica se há importantes não lidos
             const importantes = todos.filter(c => c.tipo === 'importante');
             if (importantes.length) {
                 try {
@@ -1583,12 +1583,12 @@
                     }
                 } catch {}
             }
-        } catch { /* silencia erro â€” comunicados sÃ£o opcionais */ }
+        } catch { /* silencia erro — comunicados são opcionais */ }
     }
 
-    // â”€â”€ Ranking / Impulsionamento / Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Ranking / Impulsionamento / Logout ───────────────────────────
     goRanking(){
-        // Sinaliza ao componente ranking que o acesso Ã© autenticado via painel
+        // Sinaliza ao componente ranking que o acesso é autenticado via painel
         try { localStorage.setItem('agencia_auth', 'true'); } catch(e){}
         this.navigate('vRank');
         this.navActive('nRank');
@@ -1602,7 +1602,7 @@
             const workerUrl = window.DmaiorConfig?.workers?.dashboard || 'https://dashboard.agencydmaior.com.br';
             el.setAttribute('worker-url', workerUrl);
 
-            // Nav interno do componente removido â€” painel pai jÃ¡ tem menu
+            // Nav interno do componente removido — painel pai já tem menu
         }
         this.navigate('vImpulso');
         this.navActive('nImpulso');
@@ -1615,7 +1615,7 @@
     }
     goAvisos(){
         this.navigate('vAvisos');
-        // Sem item no menu inferior â€” remove o active de todos
+        // Sem item no menu inferior — remove o active de todos
         this.querySelectorAll('.nit').forEach(e=>{
             e.classList.remove('on');
             if(e.id!=='nO') e.style.color='var(--muted)';
@@ -1629,7 +1629,7 @@
         el.innerHTML = '<div class="avisos-loading">Carregando avisos...</div>';
         try {
             const data  = await window.DmaiorAPI.rank.getComunicados('painel');
-            // NotificaÃ§Ãµes mostram apenas avisos importantes
+            // Notificações mostram apenas avisos importantes
             const lista = (data.comunicados || []).filter(c => c.tipo === 'importante');
 
             // Armazena para uso em _marcarTodosLidos
@@ -1649,7 +1649,7 @@
 
             let html = '';
 
-            // â”€â”€ Card destaque â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Card destaque ────────────────────────────────────────
             if(destaque){
                 const imgHtml = destaque.imagem_url
                     ? `<img class="aviso-destaque-img" src="${this._escHtml(this._normalizarImagemUrl(destaque.imagem_url))}" alt="${this._escHtml(destaque.titulo||destaque.texto)}" loading="lazy">`
@@ -1672,9 +1672,9 @@
                 </div>`;
             }
 
-            // â”€â”€ Lista de avisos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Lista de avisos ──────────────────────────────────────
             if(demais.length){
-                html += `<div class="avisos-sec-titulo">Ãšltimos avisos</div>
+                html += `<div class="avisos-sec-titulo">Últimos avisos</div>
                 <div class="avisos-list">${demais.map(c=>{
                     const thumbHtml = c.imagem_url
                         ? `<img class="aviso-card-thumb" src="${this._escHtml(this._normalizarImagemUrl(c.imagem_url))}" alt="" loading="lazy">`
@@ -1695,7 +1695,7 @@
 
             el.innerHTML = html;
         } catch {
-            el.innerHTML = '<div class="avisos-empty">NÃ£o foi possÃ­vel carregar os avisos.</div>';
+            el.innerHTML = '<div class="avisos-empty">Não foi possível carregar os avisos.</div>';
         }
     }
 
@@ -1714,7 +1714,7 @@
     }
 
     _marcarTodosLidos(){
-        // Salva os IDs da lista ATUALMENTE carregada (nÃ£o reler os mesmos do localStorage)
+        // Salva os IDs da lista ATUALMENTE carregada (não reler os mesmos do localStorage)
         if(this._avisosLista?.length) {
             this._salvarIdsLidos(this._avisosLista);
         }
@@ -1728,7 +1728,7 @@
         if(btn){ btn.style.opacity='.4'; btn.style.pointerEvents='none'; }
     }
 
-    // Escapa HTML para evitar XSS em conteÃºdo vindo da API
+    // Escapa HTML para evitar XSS em conteúdo vindo da API
     _escHtml(str){
         if(str==null) return '';
         return String(str)

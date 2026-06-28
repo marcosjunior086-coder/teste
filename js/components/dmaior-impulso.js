@@ -31,21 +31,47 @@ class DmaiorImpulso extends HTMLElement {
     this._quota          = 0;
     this._quotaMax       = QUOTA_MAX_DEFAULT;
     this._quotaCarregada = false;
+    this._bloqueado      = false;
+    this._shellPronto    = false;
+    this._iniciado       = false;
+  }
+
+  static get observedAttributes() { return ['worker-url']; }
+
+  attributeChangedCallback(name, oldVal, newVal) {
+    if (name === 'worker-url' && newVal && newVal !== oldVal) {
+      this._workerUrl = newVal.replace(/\/+$/, '');
+      // Se o shell já foi renderizado e ainda não iniciou, inicia agora
+      if (this._shellPronto && !this._iniciado && this._uid && this._token) {
+        this._iniciarUmaVez();
+      }
+    }
   }
 
   connectedCallback() {
-    this._workerUrl    = (this.getAttribute('worker-url') || '').replace(/\/+$/, '');
     this._uid          = localStorage.getItem('dm_uid')      || '';
     this._token        = localStorage.getItem('dm_token')    || '';
     this._refreshToken = localStorage.getItem('dm_refresh')  || '';
+    // worker-url pode já estar setado ou chegar depois via attributeChangedCallback
+    this._workerUrl    = (this.getAttribute('worker-url') || '').replace(/\/+$/, '');
 
     this._renderShell();
+    this._shellPronto = true;
 
     if (!this._uid || !this._token) {
       this._mostrarSessaoExpirada();
       return;
     }
 
+    if (this._workerUrl) {
+      this._iniciarUmaVez();
+    }
+    // Se worker-url ainda não veio, aguarda attributeChangedCallback
+  }
+
+  _iniciarUmaVez() {
+    if (this._iniciado) return;
+    this._iniciado = true;
     this._iniciar();
   }
 
@@ -91,7 +117,7 @@ class DmaiorImpulso extends HTMLElement {
   async _iniciar() {
     await this._renovarToken();
     await this._carregarConfig();
-    this._carregarQuota(false);
+    if (!this._bloqueado) this._carregarQuota(false);
     this._fetchComunicados();
   }
 
@@ -126,6 +152,7 @@ class DmaiorImpulso extends HTMLElement {
       if (this._uid) {
         const check = await window.DmaiorAPI.rank.checkImpulsoBlock(this._uid);
         if (check.bloqueado) {
+          this._bloqueado = true;
           const fb = this.shadowRoot.getElementById('feedback');
           if (fb) {
             fb.className = 'feedback erro';
