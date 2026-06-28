@@ -916,9 +916,20 @@ class DimaiorAdmin extends HTMLElement {
     const l=labels[acao]||labels.aprovar;s.getElementById('mSaqueTitulo').textContent=`${l.titulo} — ${nome}`;s.getElementById('mSaqueInfo').textContent=`Valor: ${this._brl(valor)}`;s.getElementById('mSaqueObs').value='';s.getElementById('mSaqueConfirmar').textContent=l.btn;s.getElementById('mSaqueConfirmar').style.background=l.cor;s.getElementById('mSaqueObsLabel').textContent=l.obs;this._abrirModal('mSaque');
   }
   async _confirmarSaqueAcao(){
-    const s=this.shadowRoot;const observacao=s.getElementById('mSaqueObs').value.trim();const btn=s.getElementById('mSaqueConfirmar');btn.disabled=true;btn.textContent='Processando...';
-    const d=await this._api('POST',`/admin/saques/${this._saqueId}/processar`,{acao:this._saqueAcao,observacao});btn.disabled=false;btn.textContent=this._saqueAcao==='aprovar'?'Confirmar Aprovação':'Confirmar Rejeição';
-    if(d?.ok){this._fechaModal('mSaque');this._toast(`Saque ${this._saqueAcao==='aprovar'?'aprovado':'rejeitado'}!`);this._carregarSaques();}else{this._toast(d?.erro||'Erro','err');}
+    try{
+      const s=this.shadowRoot;
+      const observacao=s.getElementById('mSaqueObs')?.value.trim()||'';
+      const btn=s.getElementById('mSaqueConfirmar');
+      console.log('[confirmarSaqueAcao] id=',this._saqueId,'acao=',this._saqueAcao);
+      if(!this._saqueId){this._toast('ID do saque não definido','err');return;}
+      if(btn){btn.disabled=true;btn.textContent='Processando...';}
+      const d=await this._api('POST',`/admin/saques/${this._saqueId}/processar`,{acao:this._saqueAcao,observacao});
+      console.log('[confirmarSaqueAcao] resposta=',d);
+      const labelAcao=this._saqueAcao==='aprovar'?'Confirmar Aprovação':this._saqueAcao==='marcar_pago'?'Confirmar Pagamento':'Confirmar Rejeição';
+      if(btn){btn.disabled=false;btn.textContent=labelAcao;}
+      if(d?.ok){this._fechaModal('mSaque');this._toast(`Saque ${this._saqueAcao==='aprovar'?'aprovado':this._saqueAcao==='marcar_pago'?'marcado como pago':'rejeitado'}!`);this._carregarSaques();}
+      else{this._toast(d?.erro||d?.mensagem||'Erro ao processar saque','err');}
+    }catch(e){console.error('[confirmarSaqueAcao] erro:',e);this._toast('Erro interno: '+e.message,'err');}
   }
 
   async _carregarPremios(){
@@ -999,6 +1010,7 @@ class DimaiorAdmin extends HTMLElement {
 
   _bindEvents(){
     const s=this.shadowRoot;const dbc=this._dbc.bind(this);
+    const _bind=(id,ev,fn)=>{const el=s.getElementById(id);if(el)el.addEventListener(ev,fn);else console.warn('[admin] elemento não encontrado no _bindEvents:',id);};
     s.getElementById('btnL').addEventListener('click',()=>this._doLogin());s.getElementById('iP').addEventListener('keydown',e=>{if(e.key==='Enter')this._doLogin();});s.getElementById('iU').addEventListener('keydown',e=>{if(e.key==='Enter')s.getElementById('iP').focus();});
     s.getElementById('btnSair').addEventListener('click',()=>this._doLogout());
     s.getElementById('btnHam').addEventListener('click',()=>s.getElementById('side').classList.toggle('open'));
@@ -1016,12 +1028,20 @@ class DimaiorAdmin extends HTMLElement {
     // v2: Saques
     s.getElementById('btnAtuSaques').addEventListener('click',()=>this._carregarSaques());s.getElementById('saqueFiltro').addEventListener('change',()=>{this._pg.saques=1;this._carregarSaques();});s.getElementById('btnCancelarSaque').addEventListener('click',()=>this._fechaModal('mSaque'));s.getElementById('mSaqueConfirmar').addEventListener('click',()=>this._confirmarSaqueAcao());
     // Modal PIX
-    s.getElementById('mPixClose').addEventListener('click',()=>this._fechaModal('mPix'));
-    s.getElementById('mPixConfirmar').addEventListener('click',async()=>{
-      const saqueId=s.getElementById('mPixSaqueId').value;if(!saqueId){this._toast('ID inválido','err');return;}
-      const btn=s.getElementById('mPixConfirmar');btn.disabled=true;btn.textContent='Confirmando...';
-      const r=await this._api('POST',`/admin/saques/${saqueId}/processar`,{acao:'marcar_pago',observacao:'PIX pago manualmente'});btn.disabled=false;btn.innerHTML=`${this._ico('check_c',15)} Já Paguei — Confirmar`;
-      if(r?.ok){this._fechaModal('mPix');this._toast('✓ Saque marcado como pago!');setTimeout(()=>this._carregarSaques(),1000);}else{this._toast(r?.erro||'Erro','err');}
+    _bind('mPixClose','click',()=>this._fechaModal('mPix'));
+    _bind('mPixConfirmar','click',async()=>{
+      try{
+        const saqueId=s.getElementById('mPixSaqueId')?.value||'';
+        console.log('[mPixConfirmar] saqueId=',saqueId);
+        if(!saqueId){this._toast('ID inválido','err');return;}
+        const btn=s.getElementById('mPixConfirmar');
+        if(btn){btn.disabled=true;btn.textContent='Confirmando...';}
+        const r=await this._api('POST',`/admin/saques/${saqueId}/processar`,{acao:'marcar_pago',observacao:'PIX pago manualmente'});
+        console.log('[mPixConfirmar] resposta=',r);
+        if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('check_c',15)} Já Paguei — Confirmar`;}
+        if(r?.ok){this._fechaModal('mPix');this._toast('✓ Saque marcado como pago!');setTimeout(()=>this._carregarSaques(),1000);}
+        else{this._toast(r?.erro||r?.mensagem||'Erro ao confirmar pagamento','err');}
+      }catch(e){console.error('[mPixConfirmar] erro:',e);this._toast('Erro interno: '+e.message,'err');}
     });
     // v2: Prêmios
     s.getElementById('btnAtuPremios').addEventListener('click',()=>this._carregarPremios());s.getElementById('btnProcessarPremios').addEventListener('click',()=>this._abrirModalProcessar());s.getElementById('btnCancelarProc').addEventListener('click',()=>this._fechaModal('mProc'));s.getElementById('mProcConfirmar').addEventListener('click',()=>this._confirmarProcessarPremios());
@@ -1086,9 +1106,9 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtualizarCache').addEventListener('click',()=>this._atualizarCacheVoyager());
     s.getElementById('mConvPerfil').addEventListener('click',e=>{if(e.target===s.getElementById('mConvPerfil'))this._fechaModalConvPerfil();});
     // Recrutadores
-    s.getElementById('btnNovoRecrutador').addEventListener('click',()=>this._abrirFormRecrutador(null));
-    s.getElementById('btnSalvarRecrutador').addEventListener('click',()=>this._salvarRecrutador());
-    s.getElementById('btnCancelarRecrutador').addEventListener('click',()=>s.getElementById('formRecrutadorBox').style.display='none');
+    _bind('btnNovoRecrutador','click',()=>this._abrirFormRecrutador(null));
+    _bind('btnSalvarRecrutador','click',()=>this._salvarRecrutador());
+    _bind('btnCancelarRecrutador','click',()=>{const fb=s.getElementById('formRecrutadorBox');if(fb)fb.style.display='none';});
   }
 
   // ── COMUNICADOS ─────────────────────────────────────────────────────────────
