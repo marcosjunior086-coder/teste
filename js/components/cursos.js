@@ -4,6 +4,7 @@ const DMAIOR_COURSES = [
   {
     id: 'guia-streamer',
     title: 'Guia de Streamer',
+    coverImage: 'https://static.wixstatic.com/media/ac74b3_eb0e517db9c34147b3f7b9ae7e1e2e4c~mv2.png',
     coverLabel: 'Guia de Streamers',
     duration: '1h',
     deadline: '1 dia',
@@ -280,11 +281,7 @@ class DMaiorCursos extends HTMLElement {
         </div>
         <button class="course-card" data-action="course" type="button" aria-label="${this.course.title}">
           <div class="course-cover">
-            <span class="brand-mark">DM</span>
-            <span class="cover-pill">Curso</span>
-            <strong>${this.course.coverLabel}</strong>
-            <small>Carga horária: ${this.course.duration}</small>
-            <div class="cover-shapes"><span></span><span></span></div>
+            <img src="${this.course.coverImage}" alt="${this.course.coverLabel}" loading="lazy">
           </div>
           <div class="course-foot">
             <strong>${this.course.title}</strong>
@@ -399,14 +396,8 @@ class DMaiorCursos extends HTMLElement {
       :host-context([data-theme="branco"]) .hero-copy h1,:host-context([data-theme="branco"]) .hero-copy p,:host-context([data-theme="rosa"]) .hero-copy h1,:host-context([data-theme="rosa"]) .hero-copy p,:host-context([data-theme="laranja"]) .hero-copy h1,:host-context([data-theme="laranja"]) .hero-copy p{color:var(--dm-text)}
       .course-card{border:1px solid var(--dm-bw10);background:var(--dm-grad-card);border-radius:18px;overflow:hidden;color:var(--dm-text);padding:0;text-align:left;box-shadow:0 24px 60px var(--dm-shadow-md);transition:transform .25s ease,border-color .25s ease;width:100%}
       .course-card:hover{transform:translateY(-4px);border-color:var(--dm-effect-accent)}
-      .course-cover{min-height:192px;background:linear-gradient(135deg,#ff5a1f 0 36%,#f7f2ed 36% 100%);position:relative;padding:18px;color:#171717;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
-      .brand-mark{position:absolute;top:18px;left:18px;background:#fff;color:#ff5a1f;border-radius:8px;padding:3px 7px;font-family:var(--dm-font-title);font-weight:700}
-      .cover-pill{width:max-content;background:#ff5a1f;color:#fff;border-radius:99px;padding:2px 12px;font:700 .75rem var(--dm-font-title);text-transform:uppercase}
-      .course-cover strong{font-family:var(--dm-font-title);font-size:1.35rem;margin-top:4px}
-      .course-cover small{font-weight:700;color:#ff5a1f}
-      .cover-shapes{position:absolute;right:18px;top:34px;width:130px;height:118px;background:rgba(255,255,255,.86);border-radius:14px;display:flex;align-items:end;justify-content:center;gap:10px;padding:18px}
-      .cover-shapes span{width:42px;height:74px;border-radius:24px 24px 18px 18px;background:#f72585}
-      .cover-shapes span+span{height:86px;background:#f5c542}
+      .course-cover{aspect-ratio:16/9;background:#050505;overflow:hidden}
+      .course-cover img{width:100%;height:100%;object-fit:cover;display:block}
       .course-foot{padding:18px;display:grid;gap:10px;text-align:center}
       .course-foot strong{font:700 1.25rem var(--dm-font-title)}
       .course-foot em{font-style:normal;color:var(--dm-text-muted);font-size:.82rem}
@@ -439,7 +430,7 @@ class DMaiorCursos extends HTMLElement {
       .video-shell iframe{width:100%;height:100%;border:0;display:block}
       .video-empty{display:grid;place-items:center;gap:14px;color:var(--dm-text-muted);text-align:center;padding:30px}.video-empty svg{width:54px;height:54px;color:var(--dm-effect-accent)}
       .lesson-actions{display:grid;grid-template-columns:1fr 1fr;gap:14px}.outline-btn{min-height:44px;border:1px solid var(--dm-border);border-radius:999px;color:var(--dm-text);background:var(--dm-bg-card);font-weight:800;font-family:var(--dm-font-title);text-transform:uppercase}.outline-btn.done{color:var(--dm-green);border-color:rgba(74,222,128,.45)}
-      @media(max-width:820px){.wrap{padding:22px 0 48px}.hero{grid-template-columns:1fr;gap:26px}.course-grid{grid-template-columns:1fr;gap:24px}.hero-copy h1{font-size:clamp(2.7rem,14vw,4rem)}.hero-copy p{text-align:left}.certificate{grid-template-columns:1fr}.certificate small{grid-column:auto}.lesson-row{grid-template-columns:1fr;gap:6px}.lesson-row strong{text-align:left}.lesson-row em{justify-self:start}.lesson-actions{grid-template-columns:1fr}.info-panel{grid-template-columns:1fr}.course-card{max-width:360px}.course-cover{min-height:180px}.cover-shapes{opacity:.9;transform:scale(.86);transform-origin:top right}}
+      @media(max-width:820px){.wrap{padding:22px 0 48px}.hero{grid-template-columns:1fr;gap:26px}.course-grid{grid-template-columns:1fr;gap:24px}.hero-copy h1{font-size:clamp(2.7rem,14vw,4rem)}.hero-copy p{text-align:left}.certificate{grid-template-columns:1fr}.certificate small{grid-column:auto}.lesson-row{grid-template-columns:1fr;gap:6px}.lesson-row strong{text-align:left}.lesson-row em{justify-self:start}.lesson-actions{grid-template-columns:1fr}.info-panel{grid-template-columns:1fr}.course-card{max-width:360px}}
     `;
   }
 
