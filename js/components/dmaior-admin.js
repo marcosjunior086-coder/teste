@@ -1970,7 +1970,7 @@ class DimaiorAdmin extends HTMLElement {
       .glass,.box,.card,.modal,.modal-box,.side,.top,.content{background-color:#0b0b1a !important;}
       .side{background:#060614 !important;position:fixed;left:0;top:52px;bottom:0;width:min(82vw,320px);max-width:320px;z-index:260;transform:translateX(-105%);transition:transform .25s ease;max-height:none;box-shadow:18px 0 40px rgba(0,0,0,.42);border-right:1px solid rgba(0,212,212,.28);}.side.open{transform:translateX(0);}
       .side-backdrop{display:none;position:fixed;inset:52px 0 0 0;background:rgba(0,0,0,.55);z-index:240;}.side-backdrop.on{display:block;}
-      .top{background:#060614 !important;flex-wrap:nowrap;gap:6px;}
+      .top{background:#060614 !important;flex-wrap:nowrap;gap:6px;position:sticky;top:0;z-index:300;}
       .top-chip{font-size:8px;padding:2px 7px;letter-spacing:1px;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       .btn-ham{display:flex;flex-shrink:0;}
       .btn-sair{font-size:10px;padding:4px 8px;flex-shrink:0;}
