@@ -646,25 +646,113 @@ class DimaiorAdmin extends HTMLElement {
   async _carregarStreamers(){
     const s=this.shadowRoot;s.getElementById('tbS').innerHTML=this._loading();
     const busca=s.getElementById('bS')?.value||'';
-    const d=await this._api('GET',`/admin/streamers?pagina=${this._pg.s}&busca=${encodeURIComponent(busca)}`);
-    const el=s.getElementById('tbS');const lista=d?.perfis||d?.streamers||[];
-    if(!d?.ok||!lista.length){el.innerHTML=this._empty('users','Nenhum cadastrado');this._renderPg('pgS',this._pg.s,0,20,n=>{this._pg.s=n;this._carregarStreamers();});return;}
+    const [d,dExt]=await Promise.all([
+      this._api('GET',`/admin/streamers?pagina=${this._pg.s}&busca=${encodeURIComponent(busca)}`),
+      this._pg.s===1?this._api('GET','/admin/streamers/externos'):Promise.resolve({ok:true,externos:[]}),
+    ]);
+    const el=s.getElementById('tbS');
+    const lista=d?.perfis||d?.streamers||[];
+    const externos=(dExt?.externos||[]).filter(e=>!lista.some(p=>p.kwai_uid===e.kwai_uid));
+    const uidExternos=new Set((dExt?.externos||[]).map(e=>e.kwai_uid));
+    if(!d?.ok&&!externos.length){el.innerHTML=this._empty('users','Nenhum cadastrado');this._renderPg('pgS',this._pg.s,0,20,n=>{this._pg.s=n;this._carregarStreamers();});return;}
+    const _badge=(isVerif,isPremium)=>isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:#ff9800;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ VERIFICADO</span>`:'';
+    const _extTag=`<span style="font-size:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:var(--t3);border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif">SEM CONTA</span>`;
+    const _renderItem=(sv,isExterno)=>{
+      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';
+      const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;
+      const rotaBase=isExterno?`/admin/streamers/externos/${encodeURIComponent(uid)}`:`/admin/streamers/${encodeURIComponent(uid)}`;
+      const acoesBtns=isExterno
+        ?`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" data-externo="1" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" data-externo="1" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-sm" data-uid="${this._esc(uid)}" data-externo-del="1" style="border-color:rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',12)} Remover</button>`
+        :`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button>`;
+      const campos=isExterno
+        ?[['UID',uid],['Kwai ID',sv.kwai_id||'—'],['Adicionado em',this._fdt(sv.adicionado_em)]]
+        :[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]];
+      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px;flex-wrap:wrap">${this._esc(nome)} ${_badge(isVerif,isPremium)} ${isExterno?_extTag:''}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${campos.map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">${acoesBtns}<button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
+    };
     el.innerHTML=`<div id="listaUsers"></div>`;
     const lu=s.getElementById('listaUsers');
-    lu.innerHTML=lista.map(sv=>{
-      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;const verifBadge=isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:#ff9800;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:'Rajdhani',sans-serif;font-weight:700">✓ VERIFICADO</span>`:'';
-      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px">${this._esc(nome)} ${verifBadge}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]].map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-verif="${isVerif?'true':'false'}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-premium="${isPremium?'true':'false'}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
-    }).join('');
+    const externосomMerge=externos.map(e=>({...e,_ext:true}));
+    const listaComExt=[...lista.map(p=>({...p,_ext:false,_jaVerifExt:uidExternos.has(p.kwai_uid)})),...externосomMerge];
+    if(!listaComExt.length){el.innerHTML=this._empty('users','Nenhum cadastrado');this._renderPg('pgS',this._pg.s,0,20,n=>{this._pg.s=n;this._carregarStreamers();});return;}
+    lu.innerHTML=listaComExt.map(sv=>_renderItem(sv,sv._ext)).join('');
     this._renderPg('pgS',this._pg.s,lista.length,20,n=>{this._pg.s=n;this._carregarStreamers();});
-    lu.querySelectorAll('.sv-toggle-verif').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();this._toggleVerificado(btn.dataset.uid,'verificado',btn.dataset.verif==='true');});});
-    lu.querySelectorAll('.sv-toggle-premium').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();this._toggleVerificado(btn.dataset.uid,'verificado_premium',btn.dataset.premium==='true');});});
+    lu.querySelectorAll('.sv-toggle-verif,.sv-toggle-premium').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        const isExt=btn.dataset.externo==='1';
+        this._toggleVerificado(btn.dataset.uid,btn.dataset.campo,btn.dataset.val==='true',isExt);
+      });
+    });
+    lu.querySelectorAll('[data-externo-del]').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(!confirm(`Remover ${btn.dataset.uid} dos externos verificados?`))return;
+        this._api('DELETE',`/admin/streamers/externos/${encodeURIComponent(btn.dataset.uid)}`).then(r=>{
+          if(r?.ok){this._toast('Removido!');this._carregarStreamers();}else this._toast(r?.erro||'Erro','err');
+        });
+      });
+    });
   }
-  async _toggleVerificado(uid,campo,isAtivo){
+  async _toggleVerificado(uid,campo,isAtivo,isExterno=false){
     const isPremium=campo==='verificado_premium';const tipo=isPremium?'premium':'verificado';
     const acao=isAtivo?`Remover ${tipo}`:`Dar ${tipo}`;if(!confirm(`${acao} para o streamer ${uid}?`))return;
-    const rota=isPremium?`/admin/streamers/${encodeURIComponent(uid)}/verificado-premium`:`/admin/streamers/${encodeURIComponent(uid)}/verificado`;
+    const base=isExterno?`/admin/streamers/externos/${encodeURIComponent(uid)}`:`/admin/streamers/${encodeURIComponent(uid)}`;
+    const rota=isPremium?`${base}/verificado-premium`:`${base}/verificado`;
     const d=await this._api('PATCH',rota,{[campo]:!isAtivo});
     if(d?.ok){this._toast(isAtivo?`${tipo.charAt(0).toUpperCase()+tipo.slice(1)} removido`:`Streamer ${tipo}!`);this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
+  }
+  async _abrirModalVerifExterno(){
+    const s=this.shadowRoot;
+    let over=s.getElementById('mVerifExtOver');
+    if(!over){
+      over=document.createElement('div');over.id='mVerifExtOver';
+      over.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+      over.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;width:100%;max-width:460px;padding:24px;position:relative">
+        <button id="mVerifExtFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px">✕</button>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--t1);margin-bottom:16px">${this._ico('check_c',16)} Verificar Streamer Externo</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Digite o UID ou o Kwai ID do streamer (sem conta no sistema).</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input id="mVerifExtInput" type="text" placeholder="UID ou Kwai ID..." style="flex:1;background:rgba(0,0,0,.4);border:1px solid var(--brd);border-radius:8px;color:var(--t1);padding:9px 12px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none"/>
+          <button id="mVerifExtBuscar" class="btn btn-o" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('search',13)} Buscar</button>
+        </div>
+        <div id="mVerifExtPreview" style="display:none;border:1px solid var(--brd);border-radius:8px;padding:14px;margin-bottom:16px;background:rgba(0,0,0,.25)"></div>
+        <div id="mVerifExtAcoes" style="display:none;gap:8px;flex-wrap:wrap"></div>
+      </div>`;
+      s.appendChild(over);
+      s.getElementById('mVerifExtFechar').addEventListener('click',()=>over.remove());
+      over.addEventListener('click',e=>{if(e.target===over)over.remove();});
+      s.getElementById('mVerifExtBuscar').addEventListener('click',()=>this._buscarExterno());
+      s.getElementById('mVerifExtInput').addEventListener('keydown',e=>{if(e.key==='Enter')this._buscarExterno();});
+    } else {
+      over.style.display='flex';
+    }
+    s.getElementById('mVerifExtInput')?.focus();
+  }
+  async _buscarExterno(){
+    const s=this.shadowRoot;
+    const q=(s.getElementById('mVerifExtInput')?.value||'').trim();
+    if(!q){this._toast('Digite um UID ou Kwai ID','err');return;}
+    const btn=s.getElementById('mVerifExtBuscar');
+    if(btn){btn.disabled=true;btn.textContent='Buscando...';}
+    const prev=s.getElementById('mVerifExtPreview');const acoes=s.getElementById('mVerifExtAcoes');
+    prev.style.display='none';acoes.style.display='none';
+    const d=await this._api('GET',`/admin/streamers/externos/buscar?q=${encodeURIComponent(q)}`);
+    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('search',13)} Buscar`;}
+    if(!d?.ok){this._toast(d?.erro||'Erro ao buscar','err');return;}
+    if(!d.encontrado){prev.style.display='block';prev.innerHTML=`<div style="color:var(--t3);font-size:13px;text-align:center">Nenhum streamer encontrado com esse UID / Kwai ID.<br><span style="font-size:11px">Verifique se o streamer já apareceu na planilha de resultados.</span></div>`;return;}
+    const sv=d.streamer;const foto=this._proxyFoto(sv.foto||'');
+    prev.style.display='block';
+    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'—')}</div>${d.ja_cadastrado?`<div style="font-size:10px;color:#ff9800;margin-top:4px">Já cadastrado nos externos</div>`:''}</div></div>`;
+    acoes.style.display='flex';
+    acoes.innerHTML=`<button id="mVerifExtSalvar" class="btn btn-o" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Marcar Verificado</button><button id="mVerifExtPremium" class="btn btn-o" style="border-color:rgba(255,152,0,.5);color:#ff9800">${this._ico('check_c',13)} Marcar Premium</button>`;
+    s.getElementById('mVerifExtSalvar').addEventListener('click',async()=>{
+      const r=await this._api('POST','/admin/streamers/externos',{kwai_uid:sv.kwai_uid,kwai_id:sv.kwai_id,nome:sv.nome,foto_url:sv.foto,verificado:true,verificado_premium:false});
+      if(r?.ok){s.getElementById('mVerifExtOver')?.remove();this._toast('Streamer verificado!');this._carregarStreamers();}else this._toast(r?.erro||'Erro','err');
+    });
+    s.getElementById('mVerifExtPremium').addEventListener('click',async()=>{
+      const r=await this._api('POST','/admin/streamers/externos',{kwai_uid:sv.kwai_uid,kwai_id:sv.kwai_id,nome:sv.nome,foto_url:sv.foto,verificado:true,verificado_premium:true});
+      if(r?.ok){s.getElementById('mVerifExtOver')?.remove();this._toast('Streamer verificado Premium!');this._carregarStreamers();}else this._toast(r?.erro||'Erro','err');
+    });
   }
   async _carregarMetricas(){
     const s=this.shadowRoot;s.getElementById('gMet').innerHTML=this._loading('grid-column:1/-1');
@@ -1030,7 +1118,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
     s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());
-    s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
+    s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
     s.querySelectorAll('.ov').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)this._fechaModal(ov.id);}));
@@ -2260,7 +2348,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
             <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
             <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
-            <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r"><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
+            <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
             <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulário','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
