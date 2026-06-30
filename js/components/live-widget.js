@@ -23,9 +23,8 @@ class KwaiLiveWidget extends HTMLElement {
 
     // ── Configurações de cache e lote ──────────────────────────────────────
     this.CACHE_KEY     = 'widget_live_v6';
-    this.CACHE_TTL     = 50000;   // ms — validade do cache localStorage
-    this.BATCH_SIZE    = 5;       // streamers processados por lote
-    this.BUFFER_TARGET = 1.5;     // segundos de buffer antes de exibir modal
+    this.CACHE_TTL     = 50000;
+    this.BATCH_SIZE    = 5;
     this.ENABLE_MINI_PREVIEW = true;
 
     // Ícones SVG para o botão de mute/som
@@ -40,11 +39,7 @@ class KwaiLiveWidget extends HTMLElement {
     this.isMinimized    = false;
     this.userMinimized  = false;
 
-    this.hlsModal      = null;
-    this.modalWatchdog = null;
-    this.modalLastTime = -1;
-    this.bufferTimer   = null;
-    this.modalLoadTimer = null;
+    this.hlsModal        = null;
     this.hlsReadyPromise = null;
   }
 
@@ -697,71 +692,28 @@ class KwaiLiveWidget extends HTMLElement {
     if (!circleEl) return;
     const vid = circleEl.querySelector('video');
     if (!vid)  return;
-    this._startHls(vid, entry.streamer.playUrl, false, entry, url);
+    this._startHls(vid, entry.streamer.playUrl, entry);
   }
 
-  /**
-   * Inicia HLS no elemento <video> indicado.
-   * useProxy=true → prefixo com this._proxyBase (vem de DmaiorConfig, sem hardcode)
-   */
-  _startHls(vid, playUrl, useProxy, entry, url) {
-    let lastT = -1;
-
-    // Watchdog: relança play se o vídeo travar
-    const startWatchdog = () => {
-      clearInterval(entry.watchdog);
-      entry.watchdog = setInterval(() => {
-        if (!vid.paused && vid.currentTime === lastT) vid.play().catch(() => {});
-        lastT = vid.currentTime;
-      }, 8000);
-    };
-
-    // Vídeo está reproduzindo — inicia watchdog e marca como ativo
-    const onPlaying = () => {
-      if (entry.playing) return;
-      entry.playing = true;
-      startWatchdog();
-    };
-
-    const onFatal = () => {
-      try { entry.hlsInst?.destroy(); } catch (_) {}
-      entry.hlsInst = null;
-      entry.playing = false;
-      entry.retries = (entry.retries || 0) + 1;
-      if (entry.retries < 3)
-        setTimeout(() => this.startMiniPlayer(url), 5000);
-    };
-
-    const src = playUrl;
-
-    // Safari — HLS nativo
+  _startHls(vid, playUrl, entry) {
     if (vid.canPlayType('application/vnd.apple.mpegurl')) {
-      vid.src = src;
-      vid.addEventListener('playing', onPlaying, { once: true });
-      vid.addEventListener('error',   onFatal,   { once: true });
+      vid.src = playUrl;
+      vid.addEventListener('playing', () => { entry.playing = true; }, { once: true });
+      vid.addEventListener('error',   () => { entry.hlsInst = null; entry.playing = false; }, { once: true });
       vid.play().catch(() => {});
-
     } else if (window.Hls && window.Hls.isSupported()) {
-      let fatalNetworkRetries = 0;
-      const hlsCfg = {
-        enableWorker:    true,
-        lowLatencyMode:  false,
-        autoLevelCapping: 0,
-        maxBufferLength:  5,
-        maxMaxBufferLength: 10,
-        maxLoadingRetry: 2,
-        fragLoadingRetryDelay: 500,
-      };
-
-      const hls = new window.Hls(hlsCfg);
-      hls.loadSource(src);
+      const hls = new window.Hls({ maxBufferLength: 8, autoStartLoad: true });
+      hls.loadSource(playUrl);
       hls.attachMedia(vid);
-      hls.on(window.Hls.Events.MANIFEST_PARSED, () => vid.play().catch(() => {}));
-      vid.addEventListener('playing', onPlaying, { once: true });
+      hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        entry.playing = true;
+        vid.play().catch(() => {});
+      });
       hls.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
-        if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-        else onFatal();
+        try { hls.destroy(); } catch (_) {}
+        entry.hlsInst = null;
+        entry.playing = false;
       });
       entry.hlsInst = hls;
     }
@@ -811,9 +763,6 @@ class KwaiLiveWidget extends HTMLElement {
 
   closeModal() {
     this.shadowRoot.getElementById('modalOverlay').classList.remove('open');
-    this.clearBufferTimer();
-    this.clearModalLoadTimer();
-    clearInterval(this.modalWatchdog);
     this.destroyHLSModal();
     const v = this.shadowRoot.getElementById('modalVideo');
     v.pause(); v.src = '';
@@ -821,8 +770,6 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   destroyHLSModal() { try { this.hlsModal?.destroy(); } catch (_) {} this.hlsModal = null; }
-  clearBufferTimer() { clearInterval(this.bufferTimer); this.bufferTimer = null; }
-  clearModalLoadTimer() { clearTimeout(this.modalLoadTimer); this.modalLoadTimer = null; }
 
   setMuteIcon(muted) {
     this.shadowRoot.getElementById('muteBadge').innerHTML =
@@ -835,108 +782,47 @@ class KwaiLiveWidget extends HTMLElement {
     this.setMuteIcon(v.muted);
   }
 
-  // Aguarda buffer antes de exibir o vídeo (barra de progresso)
-  waitForBuffer(video, sec, onReady) {
-    this.clearBufferTimer();
-    const bar  = this.shadowRoot.getElementById('bufferBar');
-    const fill = this.shadowRoot.getElementById('bufferFill');
-    bar.style.display = 'block';
-    const fb = setTimeout(() => {
-      this.clearBufferTimer(); bar.style.display = 'none'; onReady();
-    }, 3500);
-    this.bufferTimer = setInterval(() => {
-      if (!video.buffered.length) return;
-      const buffered = video.buffered.end(0) - (video.currentTime || 0);
-      fill.style.width = Math.min(100, (buffered / sec) * 100) + '%';
-      if (buffered >= sec) {
-        clearInterval(this.bufferTimer); clearTimeout(fb);
-        bar.style.display = 'none'; fill.style.width = '0%';
-        onReady();
-      }
-    }, 300);
-  }
-
-  startModalWatchdog(video) {
-    clearInterval(this.modalWatchdog);
-    this.modalLastTime = -1;
-    this.modalWatchdog = setInterval(() => {
-      if (video.style.opacity !== '1') return;
-      if (!video.paused && video.currentTime === this.modalLastTime) video.play().catch(() => {});
-      this.modalLastTime = video.currentTime;
-    }, 7000);
-  }
-
   playM3U8(url) {
     this.destroyHLSModal();
-    this.clearModalLoadTimer();
-    clearInterval(this.modalWatchdog);
     const video = this.shadowRoot.getElementById('modalVideo');
     if (!window.Hls && !video.canPlayType('application/vnd.apple.mpegurl')) {
       this.shadowRoot.getElementById('spinnerText').textContent = 'Carregando player...';
       this.hlsReadyPromise = this.hlsReadyPromise || this.loadHlsLib();
-      this.hlsReadyPromise.then(() => this._playM3U8WithMode(url, false));
+      this.hlsReadyPromise.then(() => this._playM3U8WithMode(url));
       return;
     }
-    this._playM3U8WithMode(url, false);
+    this._playM3U8WithMode(url);
   }
 
-  /**
-   * Reproduz stream M3U8 no modal.
-   * useProxy=true → todos os segmentos passam pelo Worker de live (this._proxyBase)
-   */
-  _playM3U8WithMode(url, useProxy) {
+  _playM3U8WithMode(url) {
     this.destroyHLSModal();
-    this.clearModalLoadTimer();
     const video = this.shadowRoot.getElementById('modalVideo');
     video.pause(); video.removeAttribute('src'); video.load();
 
     const onReady = () => {
-      this.clearModalLoadTimer();
       this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
       this.shadowRoot.getElementById('modalCover').style.opacity   = '0';
       video.style.opacity = '1';
       this.shadowRoot.getElementById('muteBadge').style.display = 'flex';
       video.play().catch(() => {});
-      this.startModalWatchdog(video);
     };
 
-    this.modalLoadTimer = setTimeout(() => {
-      if (video.style.opacity === '1') return;
-      this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
-      this.shadowRoot.getElementById('bufferBar').style.display = 'none';
-      this.shadowRoot.getElementById('modalCover').style.opacity = '1';
-      this.shadowRoot.getElementById('spinnerText').textContent = 'Abra no Kwai se o player nao iniciar.';
-    }, 6500);
-
     const onFatal = () => {
-      this.clearModalLoadTimer();
       this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
       this.shadowRoot.getElementById('modalCover').style.opacity = '1';
       this.shadowRoot.getElementById('spinnerText').textContent = 'Stream indisponível. Abra no Kwai.';
     };
 
-    const src = url;
-
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = src;
+      video.src = url;
       video.addEventListener('canplay', () => onReady(), { once: true });
       video.addEventListener('error',   () => onFatal(), { once: true });
       video.load();
     } else if (window.Hls && window.Hls.isSupported()) {
-      const hlsCfg = {
-        enableWorker:          true,
-        lowLatencyMode:        false,
-        autoLevelCapping:      0,
-        maxBufferLength:       10,
-        maxMaxBufferLength:    20,
-        maxLoadingRetry:       1,
-        fragLoadingRetryDelay: 300,
-      };
-      this.hlsModal = new window.Hls(hlsCfg);
-      this.hlsModal.loadSource(src);
+      this.hlsModal = new window.Hls({ maxBufferLength: 10, autoStartLoad: true });
+      this.hlsModal.loadSource(url);
       this.hlsModal.attachMedia(video);
       this.hlsModal.on(window.Hls.Events.MANIFEST_PARSED, () => {
-        video.currentTime = 0;
         video.play().catch(() => {});
         onReady();
       });
