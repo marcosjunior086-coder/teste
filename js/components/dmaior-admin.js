@@ -3097,6 +3097,7 @@ class DimaiorAdmin extends HTMLElement {
 
   _agenteAtualId = null;
   _buscaVincularStreamer = null;
+  _agentesLocaisLista = [];
 
   async _carregarAgentes() {
     const s = this.shadowRoot;
@@ -3109,6 +3110,7 @@ class DimaiorAdmin extends HTMLElement {
     try {
       const d = await this._get('/admin/agentes');
       const lista = d.agentes || [];
+      this._agentesLocaisLista = lista;
       if (!lista.length) { tb.innerHTML = `<div style="padding:24px;text-align:center;color:var(--t3)">Nenhum agente cadastrado.</div>`; return; }
       tb.innerHTML = `<table class="tb"><thead><tr><th>Nome</th><th>Login</th><th>Telefone</th><th>Streamers</th><th>Status</th><th>Ações</th></tr></thead><tbody>
         ${lista.map(a => `<tr>
@@ -3142,6 +3144,12 @@ class DimaiorAdmin extends HTMLElement {
     box.style.display = '';
     tb.innerHTML = this._loading();
     try {
+      if (!Array.isArray(this._agentesLocaisLista) || !this._agentesLocaisLista.length) {
+        try {
+          const locais = await this._get('/admin/agentes');
+          this._agentesLocaisLista = locais.agentes || [];
+        } catch {}
+      }
       const d = await this._get('/admin/agentes/kwai');
       const lista = d.agentes || d.agentes_kwai || d.maps?.agents || d.data?.agentes || [];
       const resumo = d.resumo || d.dashboard || {};
@@ -3159,6 +3167,11 @@ class DimaiorAdmin extends HTMLElement {
     const tb = this.shadowRoot.getElementById('tbAgentesKwai');
     if (!tb) return;
     const arr = Array.isArray(lista) ? lista : [];
+    const agentesLocais = Array.isArray(this._agentesLocaisLista) ? this._agentesLocaisLista : [];
+    const agenteOptions = agentesLocais
+      .filter(a => a?.id)
+      .map(a => `<option value="${this._esc(a.id)}">${this._esc(a.nome || a.login || 'Agente')}${a.login ? ` (${this._esc(a.login)})` : ''}</option>`)
+      .join('');
     const totalStreamers = Number(resumo.total_streamers ?? resumo.totalMembers ?? arr.reduce((n, a) => n + Number(a.members || a.total_streamers || a.streamers?.length || 0), 0));
     const totalDiamantes = Number(resumo.diamantes ?? resumo.gifts ?? resumo.giftAmtOfCurMonth ?? arr.reduce((n, a) => n + Number(a.gifts || a.diamantes || a.giftAmtOfCurMonth || 0), 0));
     const totalDias = Number(resumo.dias ?? resumo.days ?? arr.reduce((n, a) => n + Number(a.days || a.dias || a.validDaysOfCurMonth || 0), 0));
@@ -3179,9 +3192,23 @@ class DimaiorAdmin extends HTMLElement {
         <div class="card cy" style="margin:0"><div class="card-val">${this._num(totalDiamantes)}</div><div class="card-lbl">Diamantes mês</div></div>
         <div class="card vd" style="margin:0"><div class="card-val">${this._num(totalDias)}</div><div class="card-lbl">Dias válidos</div></div>
       </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;align-items:end;padding:14px;border-bottom:1px solid var(--brddim);background:rgba(0,212,212,.025)">
+        <label style="display:grid;gap:6px;min-width:0">
+          <span style="font-size:10px;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:800;text-transform:uppercase;letter-spacing:.16em">Direcionar para agente local</span>
+          <select id="selAgenteKwaiLocal" style="height:38px;width:100%;background:rgba(0,0,0,.45);border:1px solid var(--brd);border-radius:10px;color:var(--t1);padding:0 11px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
+            <option value="">Escolha um agente criado no admin...</option>
+            ${agenteOptions}
+          </select>
+        </label>
+        <div id="kwaiBrokerSelCount" style="font-size:11px;color:var(--t3);white-space:nowrap;padding-bottom:11px">0 selecionados</div>
+        <button class="btn btn-g btn-sm" id="btnVincularBrokersKwai" type="button" style="min-height:38px">${this._ico('check',12)} Vincular selecionados</button>
+        <div style="grid-column:1/-1;color:var(--t3);font-size:11px;line-height:1.45">
+          Marque os <strong>brokerName</strong> exatos do Kwai e escolha o agente local. Ex.: pode marcar “Dan”, “dan” e “Dann” para apontar todos ao mesmo agente, sem mesclar automaticamente.
+        </div>
+      </div>
       <div class="rank-table-wrap">
         <table class="tb">
-          <thead><tr><th>Agente Kwai</th><th>Local</th><th>Streamers</th><th>Diamantes</th><th>Horas</th><th>Dias</th><th>Detalhes</th></tr></thead>
+          <thead><tr><th style="width:42px"><input type="checkbox" id="chkTodosBrokersKwai" title="Selecionar todos"></th><th>Agente Kwai</th><th>Local</th><th>Streamers</th><th>Diamantes</th><th>Horas</th><th>Dias</th><th>Detalhes</th></tr></thead>
           <tbody>
             ${arr.map(a => {
               const broker = a.brokerName || a.broker_name || a.nome || 'Sem agente';
@@ -3191,7 +3218,9 @@ class DimaiorAdmin extends HTMLElement {
               const duration = a.duration ?? a.horas_ms ?? a.liveDurationOfCurMonth ?? a.horas ?? 0;
               const days = Number(a.days || a.dias || a.validDaysOfCurMonth || 0);
               const local = a.local_agente_nome || a.agente_local_nome || a.agente_nome || '';
+              const bloqueado = String(broker).trim().toLowerCase() === 'sem agente';
               return `<tr>
+                <td><input type="checkbox" class="chkBrokerKwai" data-broker="${this._esc(broker)}" ${bloqueado ? 'disabled title="Sem agente não deve ser vinculado por brokerName"' : ''}></td>
                 <td><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(broker)}</div><div style="font-size:10px;color:var(--t3)">brokerName</div></td>
                 <td>${local ? `<span style="color:var(--verde)">● ${this._esc(local)}</span>` : `<span style="color:var(--gold)">Não vinculado</span>`}</td>
                 <td style="color:var(--cyan);font-weight:700">${this._num(members)}</td>
@@ -3219,6 +3248,53 @@ class DimaiorAdmin extends HTMLElement {
       <div style="padding:10px 14px;color:var(--t3);font-size:11px;border-top:1px solid var(--brddim)">
         Fonte: ${this._esc(raw.fonte || 'Voyager / member/list')} · Atualizado: ${this._esc(raw.atualizado_em || raw.refreshedAtText || 'agora')}
       </div>`;
+    this._bindAgentesKwaiSelection();
+  }
+
+  _bindAgentesKwaiSelection() {
+    const s = this.shadowRoot;
+    const checks = Array.from(s.querySelectorAll('.chkBrokerKwai:not(:disabled)'));
+    const all = s.getElementById('chkTodosBrokersKwai');
+    const count = s.getElementById('kwaiBrokerSelCount');
+    const update = () => {
+      const total = checks.filter(ch => ch.checked).length;
+      if (count) count.textContent = `${total} selecionado${total === 1 ? '' : 's'}`;
+      if (all) {
+        all.checked = total > 0 && total === checks.length;
+        all.indeterminate = total > 0 && total < checks.length;
+      }
+    };
+    checks.forEach(ch => ch.addEventListener('change', update));
+    all?.addEventListener('change', () => {
+      checks.forEach(ch => { ch.checked = all.checked; });
+      update();
+    });
+    s.getElementById('btnVincularBrokersKwai')?.addEventListener('click', () => this._vincularBrokersKwaiSelecionados());
+    update();
+  }
+
+  async _vincularBrokersKwaiSelecionados() {
+    const s = this.shadowRoot;
+    const agenteId = s.getElementById('selAgenteKwaiLocal')?.value || '';
+    const brokers = Array.from(s.querySelectorAll('.chkBrokerKwai:checked'))
+      .map(ch => String(ch.dataset.broker || '').trim())
+      .filter(Boolean);
+    if (!agenteId) { this._toast('Escolha o agente local primeiro.', 'err'); return; }
+    if (!brokers.length) { this._toast('Selecione pelo menos um brokerName do Kwai.', 'err'); return; }
+    const agenteNome = s.getElementById('selAgenteKwaiLocal')?.selectedOptions?.[0]?.textContent || 'agente selecionado';
+    if (!confirm(`Vincular ${brokers.length} brokerName(s) ao ${agenteNome}?`)) return;
+    const btn = s.getElementById('btnVincularBrokersKwai');
+    const old = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Vinculando...'; }
+    try {
+      await this._post('/admin/agentes/kwai/vincular-massa', { agente_id: agenteId, brokers });
+      this._toast('BrokerName vinculado ao agente.', 'ok');
+      await this._carregarAgentesKwai();
+    } catch (e) {
+      this._toast(e.message || 'Erro ao vincular brokerName.', 'err');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = old; }
+    }
   }
 
   async _abrirDetalheAgente(id) {
