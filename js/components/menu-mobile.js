@@ -126,7 +126,7 @@ class MenuMobileDMaior extends HTMLElement {
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600&display=swap');
       *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-      :host{ display:block; font-family:'Exo 2',sans-serif; width:100%; }
+      :host{ display:block; font-family:var(--dm-font-body,'Exo 2',sans-serif); width:100%; }
       .topbar{ display:flex; align-items:center; justify-content:space-between; width:100%; padding:12px 20px; background:var(--dm-grad-card); border-bottom:1px solid var(--dm-border); box-shadow:0 4px 15px var(--dm-shadow-md); }
       .logo{ height:38px; width:auto; max-width:150px; object-fit:contain; display:block; flex-shrink:1; min-width:0; transition:filter .3s; }
       .hamburger{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .2s,opacity .2s; margin-right:-8px; flex-shrink:0; }
@@ -165,10 +165,10 @@ class MenuMobileDMaior extends HTMLElement {
       .layout-dropdown{ position:absolute; top:calc(100% + 8px); right:0; width:min(430px,calc(100vw - 18px)); background:var(--dm-bg-2); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); border-radius:28px; padding:14px; box-shadow:0 18px 46px var(--dm-shadow-lg),0 0 26px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); display:none; flex-direction:column; gap:12px; z-index:10001; overflow:hidden; }
       .layout-dropdown.open{ display:grid; grid-template-columns:1fr 1fr; animation:ddFadeIn .15s ease; }
       @keyframes ddFadeIn{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
-      .dd-label{ grid-column:1/-1; font-size:.62rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.6px; padding:0 8px; font-family:'Rajdhani',sans-serif; font-weight:700; }
+      .dd-label{ grid-column:1/-1; font-size:.62rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.6px; padding:0 8px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; }
       .dd-divider{ grid-column:1/-1; height:1px; background:linear-gradient(90deg,transparent,var(--dm-effect-blue,var(--dm-rank-blue,#3b82f6)),var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)),transparent); margin:0; opacity:.55; }
       .dd-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-      .dd-option,.pref-row{ min-width:0; min-height:68px; display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:999px; cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:.98rem; font-weight:700; color:var(--dm-text); letter-spacing:.3px; text-transform:uppercase; border:1px solid var(--dm-cyan-10); background:linear-gradient(135deg,var(--dm-bw06),var(--dm-bg-tint)); width:100%; text-align:left; transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s; overflow:hidden; }
+      .dd-option,.pref-row{ min-width:0; min-height:68px; display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:999px; cursor:pointer; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.98rem; font-weight:700; color:var(--dm-text); letter-spacing:.3px; text-transform:uppercase; border:1px solid var(--dm-cyan-10); background:linear-gradient(135deg,var(--dm-bw06),var(--dm-bg-tint)); width:100%; text-align:left; transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s; overflow:hidden; }
       .dd-option:hover,.pref-row:hover{ background:var(--dm-cyan-08); border-color:var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); transform:translateY(-1px); }
       .dd-option.active{ background:var(--dm-grad-effect,linear-gradient(135deg,rgba(59,130,246,.16),rgba(0,212,212,.12))); border-color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); box-shadow:0 0 18px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .dd-icon{ width:34px; height:34px; border-radius:50%; flex:0 0 34px; display:flex; align-items:center; justify-content:center; color:var(--dm-text); }
@@ -185,8 +185,8 @@ class MenuMobileDMaior extends HTMLElement {
       .dd-arrow{ flex:0 0 auto; color:var(--dm-text-sub); font-size:1.5rem; line-height:1; }
       .pref-row{ cursor:default; text-transform:none; align-items:center; }
       .pref-main{ min-width:0; flex:1; display:grid; gap:5px; overflow:hidden; }
-      .pref-row label{ font-size:.58rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.2px; font-family:'Rajdhani',sans-serif; font-weight:700; white-space:nowrap; overflow:hidden; }
-      .pref-select{ width:100%; min-height:28px; border:0; border-radius:0; background:transparent; color:var(--dm-text); padding:0 20px 0 0; font-family:'Exo 2',sans-serif; font-size:.83rem; outline:none; cursor:pointer; }
+      .pref-row label{ font-size:.58rem; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:1.2px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; white-space:nowrap; overflow:hidden; }
+      .pref-select{ width:100%; min-height:28px; border:0; border-radius:0; background:transparent; color:var(--dm-text); padding:0 20px 0 0; font-family:var(--dm-font-body,'Exo 2',sans-serif); font-size:.83rem; outline:none; cursor:pointer; }
       .pref-select option{ background:var(--dm-bg-2); color:var(--dm-text); }
       .pref-select:focus{ color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
       @media (prefers-reduced-motion: reduce){ .dd-option:hover .dd-marquee,.dd-option:focus-visible .dd-marquee,.pref-row:hover .dd-marquee,.pref-row:focus-within .dd-marquee{ animation:none; } }
@@ -231,7 +231,7 @@ class MenuMobileDMaior extends HTMLElement {
       .sidebar::-webkit-scrollbar{ display:none; }
       .sidebar.on{ right:0; }
       .sb-header{ display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--dm-border); position:sticky; top:0; background:var(--dm-bg-panel); backdrop-filter:blur(5px); z-index:10; }
-      .sb-title{ font-family:'Rajdhani',sans-serif; font-size:1.4rem; font-weight:700; color:var(--dm-text); letter-spacing:1px; text-transform:uppercase; text-shadow:0 0 10px var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); }
+      .sb-title{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:1.4rem; font-weight:700; color:var(--dm-text); letter-spacing:1px; text-transform:uppercase; text-shadow:0 0 10px var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); }
       .close-btn{ background:transparent; border:none; padding:5px; cursor:pointer; display:flex; align-items:center; transition:transform .2s; }
       .close-btn:active{ transform:scale(.8); }
       .auth-area{ padding:16px 20px; border-bottom:1px solid var(--dm-effect-20,var(--dm-rank-cyan-20,rgba(0,212,212,.20))); background:var(--dm-bg-tint); }
@@ -242,10 +242,10 @@ class MenuMobileDMaior extends HTMLElement {
       .avatar-wrap{ width:46px; height:46px; border-radius:50%; border:2px solid var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); overflow:hidden; flex-shrink:0; background:var(--dm-bg-1); display:flex; align-items:center; justify-content:center; box-shadow:0 0 14px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .avatar-wrap img{ width:100%; height:100%; object-fit:cover; }
       .user-info{ display:flex; flex-direction:column; gap:2px; }
-      .user-name{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.05em; }
-      .user-tag{ font-size:.7rem; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); font-family:'Rajdhani'; }
+      .user-name{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.05em; }
+      .user-tag{ font-size:.7rem; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); font-family:var(--dm-font-title,'Rajdhani',sans-serif); }
       .auth-actions{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
-      .auth-link{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; text-decoration:none; font-size:.9rem; font-weight:600; color:var(--dm-text-sub); transition:background .2s,color .2s; border:none; background:none; cursor:pointer; font-family:'Exo 2',sans-serif; width:100%; }
+      .auth-link{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; text-decoration:none; font-size:.9rem; font-weight:600; color:var(--dm-text-sub); transition:background .2s,color .2s; border:none; background:none; cursor:pointer; font-family:var(--dm-font-body,'Exo 2',sans-serif); width:100%; }
       .auth-link:hover{ background:var(--dm-cyan-08); color:var(--dm-text); }
       .auth-link.danger{ color:var(--dm-red, #f87171); }
       .auth-link.danger:hover{ background:rgba(248,113,113,.08); }
@@ -255,7 +255,7 @@ class MenuMobileDMaior extends HTMLElement {
       .direct,.menu-acc{ width:100%; background:transparent; border:none; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; text-decoration:none; transition:background .2s; }
       .direct:hover,.menu-acc:hover{ background:var(--dm-cyan-05); }
       .direct:active,.menu-acc:active{ background:var(--dm-cyan-10); }
-      .menu-content{ display:flex; align-items:center; gap:14px; font-family:'Rajdhani',sans-serif; font-size:1.15rem; font-weight:700; color:var(--dm-text); text-transform:uppercase; letter-spacing:.5px; }
+      .menu-content{ display:flex; align-items:center; gap:14px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:1.15rem; font-weight:700; color:var(--dm-text); text-transform:uppercase; letter-spacing:.5px; }
       .chevron{ transition:transform .3s; }
       .has-sub.open .chevron{ transform:rotate(180deg); color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
       .has-sub.open .menu-content{ color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
@@ -330,9 +330,13 @@ class MenuMobileDMaior extends HTMLElement {
               <label for="ddFontFamily"><span class="dd-marquee">Fonte</span></label>
               <select class="pref-select" id="ddFontFamily">
                 <option value="dmaior">DMaior (Padrão)</option>
-                <option value="inter">Inter (Moderna)</option>
-                <option value="poppins">Poppins (Arredondada)</option>
-                <option value="sistema">Sistema (Rápida)</option>
+                <option value="inter">Inter</option>
+                <option value="manrope">Manrope</option>
+                <option value="montserrat">Montserrat</option>
+                <option value="opensans">Open Sans</option>
+                <option value="plusjakarta">Plus Jakarta Sans</option>
+                <option value="poppins">Poppins</option>
+                <option value="sistema">Sistema</option>
               </select>
             </div>
           </div>

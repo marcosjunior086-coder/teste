@@ -480,19 +480,35 @@
   const fontFamilies = {
     dmaior: {
       title: "'Rajdhani', sans-serif",
-      body: "'Exo 2', sans-serif"
+      body:  "'Exo 2', sans-serif"
     },
     inter: {
-      title: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
-      body: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"
+      title: "'Inter', system-ui, sans-serif",
+      body:  "'Inter', system-ui, sans-serif"
+    },
+    manrope: {
+      title: "'Manrope', system-ui, sans-serif",
+      body:  "'Manrope', system-ui, sans-serif"
+    },
+    montserrat: {
+      title: "'Montserrat', system-ui, sans-serif",
+      body:  "'Montserrat', system-ui, sans-serif"
+    },
+    opensans: {
+      title: "'Open Sans', system-ui, sans-serif",
+      body:  "'Open Sans', system-ui, sans-serif"
+    },
+    plusjakarta: {
+      title: "'Plus Jakarta Sans', system-ui, sans-serif",
+      body:  "'Plus Jakarta Sans', system-ui, sans-serif"
     },
     poppins: {
-      title: "'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif",
-      body: "'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif"
+      title: "'Poppins', system-ui, sans-serif",
+      body:  "'Poppins', system-ui, sans-serif"
     },
     sistema: {
       title: "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
-      body: "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif"
+      body:  "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif"
     }
   };
 
@@ -1221,8 +1237,12 @@
     if (!_loadedFonts.has(chosen)) {
       _loadedFonts.add(chosen);
       const fontMap = {
-        inter:   'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap',
-        poppins: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap',
+        inter:       'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap',
+        manrope:     'https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap',
+        montserrat:  'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap',
+        opensans:    'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap',
+        plusjakarta: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap',
+        poppins:     'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap',
       };
       const url = fontMap[chosen];
       if (url && !document.querySelector(`link[href*="${chosen}"]`)) {
