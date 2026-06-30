@@ -2195,6 +2195,53 @@ class DimaiorAdmin extends HTMLElement {
       .rank-table-wrap{display:none !important}
       .rank-mobile-only{display:block !important}
     }
+    /* ── Agentes locais: tabela desktop / cards mobile ── */
+    .ag-local-table-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .ag-local-table-wrap table{min-width:620px;width:100%}
+    .ag-local-mobile-only{display:none !important}
+    .ag-local-card{padding:12px 14px;border-bottom:1px solid var(--brddim);display:grid;gap:10px}
+    .ag-local-card:last-child{border-bottom:none}
+    .ag-local-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .ag-local-name{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:800;color:var(--t1)}
+    .ag-local-login{font-size:11px;color:var(--t3);margin-top:2px}
+    .ag-local-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .ag-local-metric{background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:10px;padding:8px 10px;min-width:0}
+    .ag-local-lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;margin-bottom:3px}
+    .ag-local-val{font-size:13px;color:var(--t2);font-weight:700;overflow-wrap:anywhere}
+    @media(max-width:700px){
+      .ag-local-table-wrap{display:none !important}
+      .ag-local-mobile-only{display:block !important}
+    }
+    /* ── Agentes Kwai: tabela desktop / cards mobile ── */
+    .ag-kwai-table-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .ag-kwai-table-wrap table{min-width:760px;width:100%}
+    .ag-kwai-mobile-only{display:none !important}
+    .ag-kwai-card{padding:12px 14px;border-bottom:1px solid var(--brddim);display:grid;gap:10px}
+    .ag-kwai-card:last-child{border-bottom:none}
+    .ag-kwai-top{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start}
+    .ag-kwai-name{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:800;color:var(--t1);line-height:1.1}
+    .ag-kwai-sub{font-size:10px;color:var(--t3);margin-top:2px}
+    .ag-kwai-status{font-size:11px;white-space:nowrap}
+    .ag-kwai-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .ag-kwai-metric{background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:10px;padding:8px 10px}
+    .ag-kwai-lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;margin-bottom:3px}
+    .ag-kwai-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:800;color:var(--cyan)}
+    .ag-kwai-details summary{cursor:pointer;color:var(--cyan);font-size:12px;font-weight:800;font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
+    .ag-kwai-streamers{margin-top:8px;display:grid;gap:6px;max-height:240px;overflow:auto}
+    .ag-kwai-streamer{padding:8px;border:1px solid var(--brddim);border-radius:9px;background:rgba(0,0,0,.22);font-size:11px;color:var(--t2)}
+    @media(max-width:700px){
+      .ag-kwai-table-wrap{display:none !important}
+      .ag-kwai-mobile-only{display:block !important}
+      .ag-kwai-top{grid-template-columns:auto 1fr}
+      .ag-kwai-status{grid-column:2;white-space:normal;overflow-wrap:anywhere}
+      .ag-kwai-name{overflow-wrap:anywhere}
+      .ag-kwai-card,.ag-local-card{min-width:0}
+      .ag-local-top{display:grid;grid-template-columns:1fr auto}
+      .ag-local-name,.ag-local-login{overflow-wrap:anywhere}
+    }
+    @media(max-width:380px){
+      .ag-kwai-grid,.ag-local-grid{grid-template-columns:1fr}
+    }
     /* Cards accordion Ranking/Diário */
     .rk-item{border-bottom:1px solid var(--brddim)}.rk-item:last-child{border-bottom:none}
     .rk-preview{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
@@ -3112,7 +3159,7 @@ class DimaiorAdmin extends HTMLElement {
       const lista = d.agentes || [];
       this._agentesLocaisLista = lista;
       if (!lista.length) { tb.innerHTML = `<div style="padding:24px;text-align:center;color:var(--t3)">Nenhum agente cadastrado.</div>`; return; }
-      tb.innerHTML = `<table class="tb"><thead><tr><th>Nome</th><th>Login</th><th>Telefone</th><th>Streamers</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+      tb.innerHTML = `<div class="ag-local-table-wrap"><table class="tb"><thead><tr><th>Nome</th><th>Login</th><th>Telefone</th><th>Streamers</th><th>Status</th><th>Ações</th></tr></thead><tbody>
         ${lista.map(a => `<tr>
           <td style="font-weight:600">${this._esc(a.nome)}</td>
           <td style="color:var(--t3);font-size:12px">${this._esc(a.login)}</td>
@@ -3121,7 +3168,23 @@ class DimaiorAdmin extends HTMLElement {
           <td>${a.ativo ? `<span style="color:var(--verde);font-size:12px">● Ativo</span>` : `<span style="color:var(--verm);font-size:12px">● Inativo</span>`}</td>
           <td><button class="btn btn-sm btn-o" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}">${this._ico('search',12)} Ver</button></td>
         </tr>`).join('')}
-      </tbody></table>`;
+      </tbody></table></div>
+      <div class="ag-local-mobile-only">
+        ${lista.map(a => `<div class="ag-local-card">
+          <div class="ag-local-top">
+            <div style="min-width:0">
+              <div class="ag-local-name">${this._esc(a.nome || 'Agente')}</div>
+              <div class="ag-local-login">${this._esc(a.login || '—')}</div>
+            </div>
+            <div>${a.ativo ? `<span style="color:var(--verde);font-size:12px">● Ativo</span>` : `<span style="color:var(--verm);font-size:12px">● Inativo</span>`}</div>
+          </div>
+          <div class="ag-local-grid">
+            <div class="ag-local-metric"><div class="ag-local-lbl">Telefone</div><div class="ag-local-val">${a.telefone ? this._esc(a.telefone) : '—'}</div></div>
+            <div class="ag-local-metric"><div class="ag-local-lbl">Streamers</div><div class="ag-local-val" style="color:var(--cyan)">${a.total_streamers || 0}</div></div>
+          </div>
+          <button class="btn btn-o btn-sm" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}" style="width:100%;justify-content:center">${this._ico('search',12)} Ver agente</button>
+        </div>`).join('')}
+      </div>`;
       tb.querySelectorAll('[data-agente-id]').forEach(btn => {
         btn.addEventListener('click', () => this._abrirDetalheAgente(btn.dataset.agenteId));
       });
@@ -3206,7 +3269,7 @@ class DimaiorAdmin extends HTMLElement {
           Marque os <strong>brokerName</strong> exatos do Kwai e escolha o agente local. Ex.: pode marcar “Dan”, “dan” e “Dann” para apontar todos ao mesmo agente, sem mesclar automaticamente.
         </div>
       </div>
-      <div class="rank-table-wrap">
+      <div class="ag-kwai-table-wrap">
         <table class="tb">
           <thead><tr><th style="width:42px"><input type="checkbox" id="chkTodosBrokersKwai" title="Selecionar todos"></th><th>Agente Kwai</th><th>Local</th><th>Streamers</th><th>Diamantes</th><th>Horas</th><th>Dias</th><th>Detalhes</th></tr></thead>
           <tbody>
@@ -3245,6 +3308,44 @@ class DimaiorAdmin extends HTMLElement {
           </tbody>
         </table>
       </div>
+      <div class="ag-kwai-mobile-only">
+        ${arr.map(a => {
+          const broker = a.brokerName || a.broker_name || a.nome || 'Sem agente';
+          const streamers = Array.isArray(a.streamers) ? a.streamers : [];
+          const members = Number(a.members || a.total_streamers || streamers.length || 0);
+          const gifts = Number(a.gifts || a.diamantes || a.giftAmtOfCurMonth || 0);
+          const duration = a.duration ?? a.horas_ms ?? a.liveDurationOfCurMonth ?? a.horas ?? 0;
+          const days = Number(a.days || a.dias || a.validDaysOfCurMonth || 0);
+          const local = a.local_agente_nome || a.agente_local_nome || a.agente_nome || '';
+          const bloqueado = String(broker).trim().toLowerCase() === 'sem agente';
+          return `<div class="ag-kwai-card">
+            <div class="ag-kwai-top">
+              <input type="checkbox" class="chkBrokerKwai" data-broker="${this._esc(broker)}" ${bloqueado ? 'disabled title="Sem agente não deve ser vinculado por brokerName"' : ''}>
+              <div style="min-width:0">
+                <div class="ag-kwai-name">${this._esc(broker)}</div>
+                <div class="ag-kwai-sub">brokerName</div>
+              </div>
+              <div class="ag-kwai-status">${local ? `<span style="color:var(--verde)">● ${this._esc(local)}</span>` : `<span style="color:var(--gold)">Não vinculado</span>`}</div>
+            </div>
+            <div class="ag-kwai-grid">
+              <div class="ag-kwai-metric"><div class="ag-kwai-lbl">Streamers</div><div class="ag-kwai-val">${this._num(members)}</div></div>
+              <div class="ag-kwai-metric"><div class="ag-kwai-lbl">Diamantes</div><div class="ag-kwai-val">${this._num(gifts)}</div></div>
+              <div class="ag-kwai-metric"><div class="ag-kwai-lbl">Horas</div><div class="ag-kwai-val">${fmtHoras(duration)}</div></div>
+              <div class="ag-kwai-metric"><div class="ag-kwai-lbl">Dias</div><div class="ag-kwai-val">${this._num(days)}</div></div>
+            </div>
+            <details class="ag-kwai-details">
+              <summary>Ver streamers</summary>
+              <div class="ag-kwai-streamers">
+                ${streamers.length ? streamers.slice(0, 80).map(st => `<div class="ag-kwai-streamer">
+                  <strong style="color:var(--t1)">${this._esc(st.memberName || st.nome || st.kwaiId || st.memberId || '—')}</strong>
+                  <div style="color:var(--t3);margin-top:2px">${st.kwaiId ? '@'+this._esc(st.kwaiId) : this._esc(st.kwai_id || '')}</div>
+                  <div style="color:var(--cyan);margin-top:2px">${this._num(st.giftAmtOfCurMonth || st.diamantes || 0)} diamantes</div>
+                </div>`).join('') : `<div style="padding:10px;color:var(--t3);font-size:12px">Worker ainda não enviou a lista de streamers deste agente.</div>`}
+              </div>
+            </details>
+          </div>`;
+        }).join('')}
+      </div>
       <div style="padding:10px 14px;color:var(--t3);font-size:11px;border-top:1px solid var(--brddim)">
         Fonte: ${this._esc(raw.fonte || 'Voyager / member/list')} · Atualizado: ${this._esc(raw.atualizado_em || raw.refreshedAtText || 'agora')}
       </div>`;
@@ -3256,12 +3357,14 @@ class DimaiorAdmin extends HTMLElement {
     const checks = Array.from(s.querySelectorAll('.chkBrokerKwai:not(:disabled)'));
     const all = s.getElementById('chkTodosBrokersKwai');
     const count = s.getElementById('kwaiBrokerSelCount');
+    const totalBrokers = new Set(checks.map(ch => String(ch.dataset.broker || '').trim()).filter(Boolean)).size;
     const update = () => {
-      const total = checks.filter(ch => ch.checked).length;
+      const selected = new Set(checks.filter(ch => ch.checked).map(ch => String(ch.dataset.broker || '').trim()).filter(Boolean));
+      const total = selected.size;
       if (count) count.textContent = `${total} selecionado${total === 1 ? '' : 's'}`;
       if (all) {
-        all.checked = total > 0 && total === checks.length;
-        all.indeterminate = total > 0 && total < checks.length;
+        all.checked = total > 0 && total === totalBrokers;
+        all.indeterminate = total > 0 && total < totalBrokers;
       }
     };
     checks.forEach(ch => ch.addEventListener('change', update));
@@ -3276,9 +3379,9 @@ class DimaiorAdmin extends HTMLElement {
   async _vincularBrokersKwaiSelecionados() {
     const s = this.shadowRoot;
     const agenteId = s.getElementById('selAgenteKwaiLocal')?.value || '';
-    const brokers = Array.from(s.querySelectorAll('.chkBrokerKwai:checked'))
+    const brokers = [...new Set(Array.from(s.querySelectorAll('.chkBrokerKwai:checked'))
       .map(ch => String(ch.dataset.broker || '').trim())
-      .filter(Boolean);
+      .filter(Boolean))];
     if (!agenteId) { this._toast('Escolha o agente local primeiro.', 'err'); return; }
     if (!brokers.length) { this._toast('Selecione pelo menos um brokerName do Kwai.', 'err'); return; }
     const agenteNome = s.getElementById('selAgenteKwaiLocal')?.selectedOptions?.[0]?.textContent || 'agente selecionado';
