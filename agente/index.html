@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <base href="/teste/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Agente — DMaior Agency</title>
+  <title>Painel do Agente â€” DMaior Agency</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -34,7 +34,7 @@
 
     html, body { background: var(--bg); min-height: 100%; font-family: var(--font-b); color: var(--text); }
 
-    /* ── TELA DE LOGIN ─────────────────────────────────────────────────────── */
+    /* â”€â”€ TELA DE LOGIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     #tela-login {
       display: flex; align-items: center; justify-content: center;
       min-height: 100vh; padding: 24px;
@@ -69,7 +69,7 @@
     .btn-login:disabled { opacity: .5; cursor: not-allowed; }
     #login-erro { color: var(--red); font-size: 13px; text-align: center; margin-top: 12px; min-height: 20px; }
 
-    /* ── PAINEL PRINCIPAL ─────────────────────────────────────────────────── */
+    /* â”€â”€ PAINEL PRINCIPAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     #painel { display: none; min-height: 100vh; }
 
     /* Sidebar */
@@ -107,7 +107,7 @@
     }
     .btn-logout:hover { background: rgba(248,113,113,.2); }
 
-    /* Conteúdo principal */
+    /* ConteÃºdo principal */
     .main { flex: 1; margin-left: 220px; padding: 28px; max-width: 1200px; }
 
     /* Topbar */
@@ -117,7 +117,7 @@
     .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse-dot 1.5s infinite; }
     @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:.3; } }
 
-    /* Cards de métricas */
+    /* Cards de mÃ©tricas */
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .card {
       background: var(--card); border: 1px solid var(--border);
@@ -129,15 +129,22 @@
     .card.gold .card-value { color: var(--gold); }
     .card.green .card-value { color: var(--green); }
 
-    /* Gráfico */
+    /* GrÃ¡fico */
     .chart-wrap {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--r); padding: 20px; margin-bottom: 28px;
     }
-    .chart-title { font-family: var(--font-t); font-size: 16px; color: var(--sub); margin-bottom: 16px; display: flex; gap: 20px; }
-    .chart-legend { display: flex; gap: 16px; margin-bottom: 12px; }
-    .chart-legend span { font-size: 12px; color: var(--sub); display: flex; align-items: center; gap: 6px; }
-    .chart-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .chart-title { font-family: var(--font-t); font-size: 16px; color: var(--sub); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .chart-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chart-tab {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 32px; padding: 7px 12px; border-radius: 999px;
+      border: 1px solid var(--border); background: rgba(255,255,255,.03);
+      color: var(--sub); font: 700 12px var(--font-t); cursor: pointer;
+    }
+    .chart-tab.active { color: #061019; border-color: transparent; background: linear-gradient(135deg, #3b82f6, #00d4d4); }
+    .chart-tab[data-chart-metric="horas"].active { background: linear-gradient(135deg, #f0b429, #ffd65a); }
+    .chart-tab .dot { width: 10px; height: 10px; border-radius: 50%; }
     #canvas-chart { width: 100%; height: 160px; }
 
     /* Tabelas / Listas */
@@ -181,7 +188,7 @@
     .ag-cell-label { font-family: var(--font-t); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
     .ag-cell-value { font-size: 13px; color: var(--text); word-break: break-word; }
 
-    /* Posição ranking */
+    /* PosiÃ§Ã£o ranking */
     .pos { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-t); font-weight: 700; font-size: 14px; }
     .pos-1 { background: linear-gradient(135deg,#f0c040,#d4a400); color: #111; }
     .pos-2 { background: linear-gradient(135deg,#c0c0c0,#888); color: #111; }
@@ -348,7 +355,7 @@
     .live-player-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
     .live-player-status { color: var(--sub); font-size: 12px; text-align: center; margin-top: 9px; }
 
-    /* Seção de convites — form buscar */
+    /* SeÃ§Ã£o de convites â€” form buscar */
     .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
     .convite-box h3 { font-family: var(--font-t); font-size: 17px; margin-bottom: 18px; }
     .conv-history-head {
@@ -412,7 +419,7 @@
     .spinner { width: 36px; height: 36px; border: 3px solid rgba(0,212,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── TABLET (≤900px) — sidebar colapsa para ícones ──── */
+    /* â”€â”€ TABLET (â‰¤900px) â€” sidebar colapsa para Ã­cones â”€â”€â”€â”€ */
     @media (max-width: 900px) {
       .sidebar { width: 64px; }
       .sidebar-logo { padding: 18px 0; text-align: center; }
@@ -428,11 +435,11 @@
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* Mobile header — oculto por padrão, aparece via media query */
+    /* Mobile header â€” oculto por padrÃ£o, aparece via media query */
     .mobile-header { display: none; }
     .mobile-menu-btn, .mobile-menu-backdrop { display: none; }
 
-    /* ── MOBILE (≤600px) — bottom nav bar ───────────────── */
+    /* â”€â”€ MOBILE (â‰¤600px) â€” bottom nav bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     @media (max-width: 600px) {
       .mobile-header { display: flex; }
       .mobile-menu-btn {
@@ -448,7 +455,7 @@
       }
       .mobile-menu-backdrop.on { display: block; }
 
-      /* Sidebar vira gaveta lateral no padrão do admin */
+      /* Sidebar vira gaveta lateral no padrÃ£o do admin */
       .sidebar {
         width: 260px; height: calc(100dvh - 52px); min-height: unset;
         flex-direction: column;
@@ -498,7 +505,7 @@
         color: var(--red); font-size: 12px; cursor: pointer; flex-shrink: 0;
       }
 
-      /* Main — espaço para header fixo + bottom nav */
+      /* Main â€” espaÃ§o para header fixo + bottom nav */
       .main { margin-left: 0; padding: 16px 14px 28px; padding-top: 68px; }
 
       /* Cards */
@@ -511,7 +518,7 @@
       .topbar { margin-bottom: 16px; }
       .topbar h2 { font-size: 18px; }
 
-      /* Tabelas — scroll horizontal */
+      /* Tabelas â€” scroll horizontal */
       .table-wrap { overflow: visible; border-radius: var(--r); }
       .table-wrap.has-accordion table { display: none; }
       .table-wrap.has-accordion .ag-acc-list { display: block; }
@@ -543,16 +550,19 @@
       .live-watch strong { font-size: 21px; }
       .live-player-modal { align-items: flex-start; padding: 70px 12px 20px; }
 
-      /* Gráfico */
+      /* GrÃ¡fico */
       .ag-grid { grid-template-columns: 1fr; }
       .chart-wrap { padding: 14px; }
+      .chart-title { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .chart-tabs { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+      .chart-tab { width: 100%; min-height: 36px; }
       #canvas-chart { height: 120px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ════════════════ LOGIN ════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOGIN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="tela-login">
   <div class="login-box">
     <div class="login-logo">
@@ -565,22 +575,22 @@
     </div>
     <div class="login-field">
       <label>Senha</label>
-      <input id="inp-senha" type="password" placeholder="••••••" autocomplete="current-password">
+      <input id="inp-senha" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password">
     </div>
     <button class="btn-login" id="btn-entrar">Entrar</button>
     <p id="login-erro"></p>
   </div>
 </div>
 
-<!-- ════════════════ PAINEL ════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PAINEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="painel">
-  <!-- Header fixo mobile — visível apenas em ≤600px via CSS -->
+  <!-- Header fixo mobile â€” visÃ­vel apenas em â‰¤600px via CSS -->
   <div class="mobile-header" id="mobile-header">
     <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Abrir menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <span class="mobile-header-logo">DMAIOR</span>
-    <span class="mobile-header-nome" id="mobile-header-nome">—</span>
+    <span class="mobile-header-nome" id="mobile-header-nome">â€”</span>
     <button class="mobile-header-logout" onclick="logout()">Sair</button>
   </div>
   <div class="mobile-menu-backdrop" id="mobile-menu-backdrop"></div>
@@ -614,38 +624,38 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="agente-info">
-          <strong id="sidebar-nome">—</strong>
+          <strong id="sidebar-nome">â€”</strong>
           <span id="sidebar-login"></span>
         </div>
         <button class="btn-logout" onclick="logout()">Sair</button>
       </div>
     </aside>
 
-    <!-- CONTEÚDO -->
+    <!-- CONTEÃšDO -->
     <main class="main">
 
-      <!-- ─── DASHBOARD ─── -->
+      <!-- â”€â”€â”€ DASHBOARD â”€â”€â”€ -->
       <section id="sec-dashboard" class="section">
         <div class="topbar">
           <h2>Dashboard</h2>
-          <div class="badge-ao-vivo"><div class="dot-live"></div><span id="dash-ao-vivo-badge">— ao vivo</span></div>
+          <div class="badge-ao-vivo"><div class="dot-live"></div><span id="dash-ao-vivo-badge">â€” ao vivo</span></div>
         </div>
         <div class="cards-grid" id="cards-dashboard">
           <div class="loading"><div class="spinner"></div></div>
         </div>
         <div class="chart-wrap" id="chart-wrap" style="display:none">
           <div class="chart-title">
-            Diamantes &amp; Horas — mês atual
-            <div class="chart-legend">
-              <span><div class="dot" style="background:#00d4d4"></div>Diamantes</span>
-              <span><div class="dot" style="background:#f0c040"></div>Horas</span>
+            <span id="chart-title-text">Diamantes - mes atual</span>
+            <div class="chart-tabs" role="group" aria-label="Metrica do grafico">
+              <button type="button" class="chart-tab active" data-chart-metric="diamantes"><span class="dot" style="background:#00d4d4"></span>Diamantes</button>
+              <button type="button" class="chart-tab" data-chart-metric="horas"><span class="dot" style="background:#f0c040"></span>Horas</button>
             </div>
           </div>
           <canvas id="canvas-chart"></canvas>
         </div>
       </section>
 
-      <!-- ─── STREAMERS ─── -->
+      <!-- â”€â”€â”€ STREAMERS â”€â”€â”€ -->
       <section id="sec-streamers" class="section" style="display:none">
         <div class="topbar"><h2>Meus Streamers</h2></div>
         <div class="table-wrap" id="tabela-streamers">
@@ -653,7 +663,7 @@
         </div>
       </section>
 
-      <!-- ─── AO VIVO ─── -->
+      <!-- â”€â”€â”€ AO VIVO â”€â”€â”€ -->
       <section id="sec-lives" class="section" style="display:none">
         <div class="topbar">
           <div>
@@ -669,15 +679,15 @@
         </div>
       </section>
 
-      <!-- ─── RANKING ─── -->
+      <!-- â”€â”€â”€ RANKING â”€â”€â”€ -->
       <section id="sec-ranking" class="section" style="display:none">
-        <div class="topbar"><h2 id="ranking-titulo">Ranking do Mês</h2></div>
+        <div class="topbar"><h2 id="ranking-titulo">Ranking do MÃªs</h2></div>
         <div class="table-wrap" id="tabela-ranking">
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </section>
 
-      <!-- ─── DESEMPENHO ─── -->
+      <!-- â”€â”€â”€ DESEMPENHO â”€â”€â”€ -->
       <section id="sec-desempenho" class="section" style="display:none">
         <div class="topbar"><h2>Desempenho</h2></div>
         <div class="table-wrap" id="tabela-desempenho">
@@ -685,7 +695,7 @@
         </div>
       </section>
 
-      <!-- ─── CONVITES ─── -->
+      <!-- â”€â”€â”€ CONVITES â”€â”€â”€ -->
       <section id="sec-convites" class="section" style="display:none">
         <div class="topbar"><h2>Enviar Convite</h2></div>
 
@@ -700,10 +710,10 @@
           <div id="msg-convite"></div>
         </div>
 
-        <!-- Histórico de convites -->
+        <!-- HistÃ³rico de convites -->
         <button class="conv-history-head" id="conv-history-toggle" type="button" aria-expanded="true">
           <span class="conv-history-title">
-            Histórico de Convites
+            HistÃ³rico de Convites
             <span class="conv-history-count" id="conv-history-count">0</span>
           </span>
           <span class="conv-history-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
@@ -718,19 +728,19 @@
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════
-// CONFIGURAÇÃO
-// ════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// CONFIGURAÃ‡ÃƒO
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const WORKER = 'https://agente.agencydmaior.com.br';
 const TOKEN_KEY = 'dm_agente_token';
 const AGENTE_KEY = 'dm_agente_info';
 
-// ── Estado global ─────────────────────────────────────────
+// â”€â”€ Estado global â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _token  = null;
 let _agente = null;
 let _perfilAtual = null; // perfil encontrado na busca de convite
 
-// ── Auth helpers ──────────────────────────────────────────
+// â”€â”€ Auth helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getToken()  { return _token  || localStorage.getItem(TOKEN_KEY); }
 function getAgente() { return _agente || JSON.parse(localStorage.getItem(AGENTE_KEY) || 'null'); }
 function salvarSessao(token, agente) {
@@ -748,7 +758,7 @@ function logout() {
   document.getElementById('login-erro').textContent = '';
 }
 
-// ── Fetch autenticado ──────────────────────────────────────
+// â”€â”€ Fetch autenticado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function api(path, { method = 'GET', body } = {}) {
   const opts = {
     method,
@@ -758,12 +768,12 @@ async function api(path, { method = 'GET', body } = {}) {
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(WORKER + path, opts);
   const data = await r.json().catch(() => ({}));
-  if (r.status === 401 || r.status === 403) { logout(); throw new Error('Sessão expirada'); }
+  if (r.status === 401 || r.status === 403) { logout(); throw new Error('SessÃ£o expirada'); }
   if (!r.ok) throw new Error(data.erro || data.mensagem || `Erro ${r.status}`);
   return data;
 }
 
-// ── LOGIN ─────────────────────────────────────────────────
+// â”€â”€ LOGIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.getElementById('btn-entrar').addEventListener('click', fazerLogin);
 document.getElementById('inp-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
 
@@ -774,42 +784,42 @@ async function fazerLogin() {
   const senha  = document.getElementById('inp-senha').value.trim();
   erroEl.textContent = '';
   if (!login || !senha) { erroEl.textContent = 'Preencha login e senha.'; return; }
-  btn.disabled = true; btn.textContent = 'Entrando…';
+  btn.disabled = true; btn.textContent = 'Entrandoâ€¦';
   try {
     const r = await fetch(WORKER + '/agente/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ login, senha }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!data.ok || !data.token) { erroEl.textContent = data.erro || 'Credenciais inválidas.'; return; }
+    if (!data.ok || !data.token) { erroEl.textContent = data.erro || 'Credenciais invÃ¡lidas.'; return; }
     salvarSessao(data.token, data.agente);
     iniciarPainel();
   } catch (e) {
-    erroEl.textContent = 'Erro de conexão. Tente novamente.';
+    erroEl.textContent = 'Erro de conexÃ£o. Tente novamente.';
   } finally {
     btn.disabled = false; btn.textContent = 'Entrar';
   }
 }
 
-// ── INICIALIZAÇÃO ─────────────────────────────────────────
+// â”€â”€ INICIALIZAÃ‡ÃƒO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function iniciarPainel() {
   const ag = getAgente();
   if (ag) {
-    document.getElementById('sidebar-nome').textContent       = ag.nome  || '—';
+    document.getElementById('sidebar-nome').textContent       = ag.nome  || 'â€”';
     document.getElementById('sidebar-login').textContent      = ag.login || '';
-    document.getElementById('mobile-header-nome').textContent = ag.nome  || '—';
+    document.getElementById('mobile-header-nome').textContent = ag.nome  || 'â€”';
   }
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('painel').style.display     = 'block';
   navegarPara('dashboard');
 }
 
-// Tenta restaurar sessão ao carregar
+// Tenta restaurar sessÃ£o ao carregar
 window.addEventListener('DOMContentLoaded', () => {
   const token = getToken();
   if (token) {
     _token = token; _agente = getAgente();
-    // Valida sessão no servidor
+    // Valida sessÃ£o no servidor
     api('/agente/me').then(r => {
       if (r.ok) iniciarPainel();
       else logout();
@@ -817,7 +827,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ── NAVEGAÇÃO ─────────────────────────────────────────────
+// â”€â”€ NAVEGAÃ‡ÃƒO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SECOES = ['dashboard','streamers','lives','ranking','desempenho','convites'];
 
 function fecharMenuMobile() {
@@ -870,7 +880,7 @@ function navegarPara(sec) {
   loaders[sec]?.();
 }
 
-// ── ÍCONES SVG ────────────────────────────────────────────
+// â”€â”€ ÃCONES SVG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function carregarLiveOpts() {
   try {
     const raw = JSON.parse(localStorage.getItem('dm_agente_lives_opts') || '{}');
@@ -897,9 +907,9 @@ function liveConfigHtml() {
   return `
     <div class="live-config-panel" id="live-config-panel">
       <div class="live-cfg-row"><span class="live-cfg-label">Layout</span><div class="live-cfg-opts">${[1,2,3,4].map(n=>btn('cols',n,`${n} coluna${n>1?'s':''}`)).join('')}</div></div>
-      <div class="live-cfg-row"><span class="live-cfg-label">Modo</span><div class="live-cfg-opts">${btn('modo','capa','Capa')}${btn('modo','video','Vídeo')}</div></div>
+      <div class="live-cfg-row"><span class="live-cfg-label">Modo</span><div class="live-cfg-opts">${btn('modo','capa','Capa')}${btn('modo','video','VÃ­deo')}</div></div>
       <div class="live-cfg-row"><span class="live-cfg-label">Estilo</span><div class="live-cfg-opts">${btn('estilo',1,'Horizontal')}${btn('estilo',2,'Vertical')}</div></div>
-      <div class="live-cfg-row"><span class="live-cfg-label">Ordenar</span><div class="live-cfg-opts">${btn('ordenar','padrao','Padrão')}${btn('ordenar','espectadores','Espectadores')}${btn('ordenar','presentes','Presentes')}${btn('ordenar','horas','Tempo')}</div></div>
+      <div class="live-cfg-row"><span class="live-cfg-label">Ordenar</span><div class="live-cfg-opts">${btn('ordenar','padrao','PadrÃ£o')}${btn('ordenar','espectadores','Espectadores')}${btn('ordenar','presentes','Presentes')}${btn('ordenar','horas','Tempo')}</div></div>
     </div>`;
 }
 
@@ -951,7 +961,7 @@ function ico(name, size = 16) {
   return icons[name] || '';
 }
 
-// ── FORMATADORES ──────────────────────────────────────────
+// â”€â”€ FORMATADORES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const fmtNum = n => Number(n).toLocaleString('pt-BR');
 const fmtBRL = n => 'R$ ' + Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -1096,7 +1106,7 @@ function abrirPlayerLive(url, nome, capa) {
       video.play().catch(() => {});
       status.textContent = 'Reproduzindo ao vivo';
     } else {
-      status.textContent = 'HLS não suportado neste navegador.';
+      status.textContent = 'HLS nÃ£o suportado neste navegador.';
     }
   };
 
@@ -1163,12 +1173,12 @@ function iniciarVideosInline(container) {
 }
 
 function fmtData(iso) {
-  if (!iso) return '—';
+  if (!iso) return 'â€”';
   const d = new Date(iso); const p = n => String(n).padStart(2,'0');
   return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
 }
 function badgeStatus(s) {
-  const m = { convite_enviado:'badge-env Enviado', pendente:'badge-pend Pendente', erro:'badge-err Erro', restricao_live:'badge-err Restrição', dry_run:'badge-pend Simulado' };
+  const m = { convite_enviado:'badge-env Enviado', pendente:'badge-pend Pendente', erro:'badge-err Erro', restricao_live:'badge-err RestriÃ§Ã£o', dry_run:'badge-pend Simulado' };
   const [cls, txt] = (m[s]||'badge-pend Pendente').split(' ');
   return `<span class="badge ${cls}">${txt}</span>`;
 }
@@ -1178,7 +1188,7 @@ function setAccordion(container, on = true) {
 }
 
 function agCell(label, value) {
-  return `<div class="ag-cell"><div class="ag-cell-label">${esc(label)}</div><div class="ag-cell-value">${value ?? '—'}</div></div>`;
+  return `<div class="ag-cell"><div class="ag-cell-label">${esc(label)}</div><div class="ag-cell-value">${value ?? 'â€”'}</div></div>`;
 }
 
 function agItem({ avatar = '', title = '', sub = '', value = '', badge = '', body = '' }) {
@@ -1200,8 +1210,10 @@ function agItem({ avatar = '', title = '', sub = '', value = '', badge = '', bod
     </div>`;
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────
+// â”€â”€ DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _dashCarregado = false;
+let _graficoDados = [];
+let _graficoMetrica = localStorage.getItem('dm_agente_grafico_metrica') || 'diamantes';
 async function carregarDashboard() {
   if (_dashCarregado) return;
   const container = document.getElementById('cards-dashboard');
@@ -1220,30 +1232,59 @@ async function carregarDashboard() {
     document.getElementById('dash-ao-vivo-badge').textContent = `${r.ao_vivo||0} ao vivo`;
 
     container.innerHTML = `
-      <div class="card"><div class="card-label">Streamers</div><div class="card-value">${r.streamers||0}</div><div class="card-sub">Vinculados a você</div></div>
+      <div class="card"><div class="card-label">Streamers</div><div class="card-value">${r.streamers||0}</div><div class="card-sub">Vinculados a vocÃª</div></div>
       <div class="card"><div class="card-label">Ao Vivo Agora</div><div class="card-value green" style="color:var(--green)">${r.ao_vivo||0}</div><div class="card-sub">Lives ativas</div></div>
       <div class="card"><div class="card-label">${ico('diamond',13)} Hoje</div><div class="card-value">${fmtNum(r.diamantes_hoje||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_hoje||'0:00'} h hoje</div></div>
-      <div class="card gold"><div class="card-label">${ico('diamond',13)} Este Mês</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_mes||'0:00'} h no mês</div></div>
+      <div class="card gold"><div class="card-label">${ico('diamond',13)} Este MÃªs</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_mes||'0:00'} h no mÃªs</div></div>
       <div class="card"><div class="card-label">Convites Enviados</div><div class="card-value">${r.convites_enviados||0}</div><div class="card-sub">${r.convites_pendentes||0} pendentes</div></div>
-      <div class="card green"><div class="card-label">Comissão Estimada</div><div class="card-value">${fmtBRL(com.brl||0)}</div><div class="card-sub">${Number(com.percentual||0)}% aplicado · ${fmtNum(com.koin||0)} Koin</div></div>
-      <div class="card"><div class="card-label">Meta de Comissão</div><div class="card-value" style="font-size:22px">${regra ? esc(regra.nome) : 'Sem meta'}</div><div class="card-sub">${totaisCom.dias_ativos||0} dias · ${Number(totaisCom.horas||0).toFixed(1)}h${prox&&!regra?` · próx.: ${esc(prox.nome)}`:''}</div></div>
+      <div class="card green"><div class="card-label">ComissÃ£o Estimada</div><div class="card-value">${fmtBRL(com.brl||0)}</div><div class="card-sub">${Number(com.percentual||0)}% aplicado Â· ${fmtNum(com.koin||0)} Koin</div></div>
+      <div class="card"><div class="card-label">Meta de ComissÃ£o</div><div class="card-value" style="font-size:22px">${regra ? esc(regra.nome) : 'Sem meta'}</div><div class="card-sub">${totaisCom.dias_ativos||0} dias Â· ${Number(totaisCom.horas||0).toFixed(1)}h${prox&&!regra?` Â· prÃ³x.: ${esc(prox.nome)}`:''}</div></div>
     `;
 
-    // Gráfico
+    // GrÃ¡fico
     if ((d.grafico||[]).length > 1) {
+      _graficoDados = d.grafico || [];
       document.getElementById('chart-wrap').style.display = 'block';
-      renderizarGrafico(d.grafico);
+      bindGraficoTabs();
+      renderizarGrafico(_graficoDados);
     }
   } catch (e) {
     container.innerHTML = `<div class="empty"><p>Erro ao carregar dashboard: ${e.message}</p></div>`;
   }
 }
 
-// ── GRÁFICO SIMPLES (Canvas 2D) ───────────────────────────
+// â”€â”€ GRÃFICO SIMPLES (Canvas 2D) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function bindGraficoTabs() {
+  if (!['diamantes', 'horas'].includes(_graficoMetrica)) _graficoMetrica = 'diamantes';
+  document.querySelectorAll('[data-chart-metric]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.chartMetric === _graficoMetrica);
+    btn.onclick = () => {
+      _graficoMetrica = btn.dataset.chartMetric === 'horas' ? 'horas' : 'diamantes';
+      localStorage.setItem('dm_agente_grafico_metrica', _graficoMetrica);
+      bindGraficoTabs();
+      renderizarGrafico(_graficoDados);
+    };
+  });
+  const titulo = document.getElementById('chart-title-text');
+  if (titulo) titulo.textContent = `${_graficoMetrica === 'horas' ? 'Horas' : 'Diamantes'} - mes atual`;
+}
+
+function corAlpha(hex, alpha) {
+  const clean = String(hex).replace('#', '');
+  const value = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+  const n = parseInt(value, 16);
+  if (Number.isNaN(n)) return `rgba(255,255,255,${alpha})`;
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
 function renderizarGrafico(dados) {
+  if (!dados || dados.length < 2) return;
   const canvas = document.getElementById('canvas-chart');
   const ctx    = canvas.getContext('2d');
   const dpr    = window.devicePixelRatio || 1;
+  const metrica = _graficoMetrica === 'horas' ? 'horas' : 'diamantes';
+  const campo = metrica === 'horas' ? 'minutos' : 'diamantes';
+  const cor = metrica === 'horas' ? '#f0c040' : '#00d4d4';
   const W = canvas.offsetWidth || 600, H = 160;
   canvas.width  = W * dpr; canvas.height = H * dpr;
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
@@ -1252,15 +1293,14 @@ function renderizarGrafico(dados) {
   const PAD = { t:10, r:16, b:30, l:10 };
   const cw = W - PAD.l - PAD.r, ch = H - PAD.t - PAD.b;
 
-  const maxD = Math.max(...dados.map(d=>d.diamantes), 1);
-  const maxM = Math.max(...dados.map(d=>d.minutos),   1);
+  const maxVal = Math.max(...dados.map(d=>Number(d[campo] || 0)), 1);
   const n    = dados.length;
   const step = cw / (n - 1);
 
   function pontos(campo, maxVal) {
     return dados.map((d,i) => ({
       x: PAD.l + i * step,
-      y: PAD.t + ch - (d[campo] / maxVal) * ch,
+      y: PAD.t + ch - (Number(d[campo] || 0) / maxVal) * ch,
     }));
   }
 
@@ -1268,13 +1308,13 @@ function renderizarGrafico(dados) {
     ctx.beginPath();
     pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
     ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-    // Área sob a linha
+    // Ãrea sob a linha
     ctx.beginPath();
     pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
     ctx.lineTo(pts[pts.length-1].x, PAD.t + ch);
     ctx.lineTo(PAD.l, PAD.t + ch);
     ctx.closePath();
-    ctx.fillStyle = cor.replace(')', ', .12)').replace('rgb', 'rgba');
+    ctx.fillStyle = corAlpha(cor, .16);
     ctx.fill();
   }
 
@@ -1286,10 +1326,9 @@ function renderizarGrafico(dados) {
     ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(PAD.l + cw, y); ctx.stroke();
   }
 
-  desenharLinha(pontos('diamantes', maxD), '#00d4d4');
-  desenharLinha(pontos('minutos',   maxM), '#f0c040');
+  desenharLinha(pontos(campo, maxVal), cor);
 
-  // Labels do eixo X (datas) — máx. 7 labels, sem sobreposição
+  // Labels do eixo X (datas) â€” mÃ¡x. 7 labels, sem sobreposiÃ§Ã£o
   ctx.fillStyle = '#4a6070'; ctx.font = '10px Exo 2, sans-serif'; ctx.textAlign = 'center';
   const tick = Math.ceil(n / 7);
   dados.forEach((d,i) => {
@@ -1303,7 +1342,7 @@ function renderizarGrafico(dados) {
   });
 }
 
-// ── STREAMERS ─────────────────────────────────────────────
+// â”€â”€ STREAMERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _streamersCarregado = false;
 async function carregarStreamers() {
   if (_streamersCarregado) return;
@@ -1312,12 +1351,12 @@ async function carregarStreamers() {
     const d = await api('/agente/streamers');
     const list = d.streamers || [];
     _streamersCarregado = true;
-    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mic',32)}</div><p>Nenhum streamer vinculado a você ainda.</p></div>`; return; }
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mic',32)}</div><p>Nenhum streamer vinculado a vocÃª ainda.</p></div>`; return; }
     setAccordion(container, true);
     const rows = list.map(s => {
       const badge = s.verificado_premium ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="*">' : s.verificado ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="ok">' : '';
       const title = `${esc(s.nome)}${badge}`;
-      const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : '—';
+      const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : 'â€”';
       return {
         table: `
           <tr>
@@ -1337,8 +1376,8 @@ async function carregarStreamers() {
           value: fmtNum(s.diamantes_mes || 0),
           body: [
             agCell('Kwai ID', kwai),
-            agCell('Diamantes mês', fmtNum(s.diamantes_mes || 0)),
-            agCell('Horas mês', esc(s.horas_mes || '0:00')),
+            agCell('Diamantes mÃªs', fmtNum(s.diamantes_mes || 0)),
+            agCell('Horas mÃªs', esc(s.horas_mes || '0:00')),
             agCell('Vinculado em', fmtData(s.vinculado_em)),
           ].join('')
         })
@@ -1346,14 +1385,14 @@ async function carregarStreamers() {
     });
     container.innerHTML = `
       <table>
-        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} Mês</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} MÃªs</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
         <tbody>${rows.map(r => r.table).join('')}</tbody>
       </table>
       <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
-// ── AO VIVO ───────────────────────────────────────────────
+// â”€â”€ AO VIVO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarLives() {
   const container = document.getElementById('grid-lives');
   container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -1382,8 +1421,8 @@ function renderLives(data, container = document.getElementById('grid-lives')) {
         <div class="live-stat"><strong>${fmtNum(hoje)}</strong><span>Hoje</span></div>
       </div>
       <button class="live-settings" id="live-settings-toggle" type="button">
-        <div class="ls-title">${ico('settings',13)} Configurações</div>
-        <div class="ls-sub">Layout, vídeo e ordenação das lives.</div>
+        <div class="ls-title">${ico('settings',13)} ConfiguraÃ§Ãµes</div>
+        <div class="ls-sub">Layout, vÃ­deo e ordenaÃ§Ã£o das lives.</div>
       </button>
     </div>
     ${liveConfigHtml()}
@@ -1393,7 +1432,7 @@ function renderLives(data, container = document.getElementById('grid-lives')) {
   iniciarVideosInline(container);
 }
 
-// ── RANKING ───────────────────────────────────────────────
+// â”€â”€ RANKING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _rankingCarregado = false;
 async function carregarRanking() {
   if (_rankingCarregado) return;
@@ -1402,11 +1441,11 @@ async function carregarRanking() {
     const d = await api('/agente/ranking');
     const list = d.streamers || [];
     _rankingCarregado = true;
-    document.getElementById('ranking-titulo').textContent = `Ranking — ${d.mes||''}`;
+    document.getElementById('ranking-titulo').textContent = `Ranking â€” ${d.mes||''}`;
     if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('trophy',32)}</div><p>Sem dados de ranking ainda.</p></div>`; return; }
     setAccordion(container, true);
     const rows = list.map(s => {
-      const status = s.ao_vivo ? '<span class="badge badge-live">● Ao vivo</span>' : '<span class="badge badge-offline">Offline</span>';
+      const status = s.ao_vivo ? '<span class="badge badge-live">â— Ao vivo</span>' : '<span class="badge badge-offline">Offline</span>';
       const pos = `<div class="pos ${s.posicao<=3?'pos-'+s.posicao:'pos-n'}">${s.posicao}</div>`;
       return {
         table: `
@@ -1420,11 +1459,11 @@ async function carregarRanking() {
         card: agItem({
           avatar: foto(s.foto, s.nome),
           title: esc(s.nome),
-          sub: `Posição #${esc(s.posicao || '')}`,
+          sub: `PosiÃ§Ã£o #${esc(s.posicao || '')}`,
           value: fmtNum(s.diamantes || 0),
           badge: status,
           body: [
-            agCell('Posição', pos),
+            agCell('PosiÃ§Ã£o', pos),
             agCell('Diamantes', fmtNum(s.diamantes || 0)),
             agCell('Horas', esc(s.horas || '0:00')),
             agCell('Status', status),
@@ -1441,7 +1480,7 @@ async function carregarRanking() {
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
-// ── DESEMPENHO ────────────────────────────────────────────
+// â”€â”€ DESEMPENHO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _desemp = false;
 async function carregarDesempenho() {
   if (_desemp) return;
@@ -1465,7 +1504,7 @@ async function carregarDesempenho() {
           <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-gold" style="width:${progDias}%"></div></div>
           <span style="font-size:12px;color:var(--sub);white-space:nowrap">${esc(s.dias_ativos || 0)}d</span>
         </div>`;
-      const status = `<span class="badge ${s.status==='aprovado'?'badge-ok':s.status==='bom'?'badge-bom':'badge-at'}">${s.status==='aprovado'?'Aprovado':s.status==='bom'?'Bom':'Atenção'}</span>`;
+      const status = `<span class="badge ${s.status==='aprovado'?'badge-ok':s.status==='bom'?'badge-bom':'badge-at'}">${s.status==='aprovado'?'Aprovado':s.status==='bom'?'Bom':'AtenÃ§Ã£o'}</span>`;
       return {
         table: `
           <tr>
@@ -1500,7 +1539,7 @@ async function carregarDesempenho() {
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
-// ── CONVITES ──────────────────────────────────────────────
+// â”€â”€ CONVITES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarConvites() {
   const container = document.getElementById('tabela-convites');
   container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -1512,9 +1551,9 @@ async function carregarConvites() {
     if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; aplicarEstadoHistoricoConvites(); return; }
     setAccordion(container, true);
     const rows = list.map(c => {
-      const nome = esc(c.streamer_nome || c.streamer_uid || '—');
-      const kwai = c.streamer_kwai_id ? '@' + esc(c.streamer_kwai_id) : '—';
-      const categoria = esc(c.categoria || '—');
+      const nome = esc(c.streamer_nome || c.streamer_uid || 'â€”');
+      const kwai = c.streamer_kwai_id ? '@' + esc(c.streamer_kwai_id) : 'â€”';
+      const categoria = esc(c.categoria || 'â€”');
       const status = badgeStatus(c.status);
       const data = fmtData(c.criado_em);
       return {
@@ -1549,7 +1588,7 @@ async function carregarConvites() {
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 
-// ── BUSCAR PERFIL PARA CONVITE ────────────────────────────
+// â”€â”€ BUSCAR PERFIL PARA CONVITE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _perfilAtual = null;
 
 document.getElementById('btn-buscar-perfil').addEventListener('click', buscarPerfilConvite);
@@ -1563,11 +1602,11 @@ async function buscarPerfilConvite() {
   msg.style.display = 'none'; res.innerHTML = '';
   if (!uid) return;
   _perfilAtual = null;
-  btn.disabled = true; btn.textContent = 'Buscando…';
+  btn.disabled = true; btn.textContent = 'Buscandoâ€¦';
   try {
     const d = await api('/agente/convites/buscar-perfil', { method: 'POST', body: { uid } });
     if (!d.ok && d.status === 'PERFIL_NAO_ENCONTRADO') {
-      mostrarMsg(msg, 'Perfil não encontrado. Verifique o UID.', 'err'); return;
+      mostrarMsg(msg, 'Perfil nÃ£o encontrado. Verifique o UID.', 'err'); return;
     }
     const p = d.perfil || {};
     _perfilAtual = { ...p, status: d.status, pode_enviar: d.pode_enviar };
@@ -1577,8 +1616,8 @@ async function buscarPerfilConvite() {
       <div class="perfil-encontrado">
         ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome||'?')[0])}</div>`}
         <div class="perfil-info">
-          <h4>${esc(p.nome)||'—'}</h4>
-          <p>@${esc(p.kwaiId||'')} · ID: ${esc(p.memberId||uid)}</p>
+          <h4>${esc(p.nome)||'â€”'}</h4>
+          <p>@${esc(p.kwaiId||'')} Â· ID: ${esc(p.memberId||uid)}</p>
         </div>
         ${d.pode_enviar ? `
           <div class="perfil-acoes">
@@ -1602,7 +1641,7 @@ async function enviarConvite() {
   const btn = document.getElementById('btn-enviar-convite');
   const msg = document.getElementById('msg-convite');
   const cat = document.getElementById('sel-cat')?.value || 'entretenimento';
-  btn.disabled = true; btn.textContent = 'Enviando…';
+  btn.disabled = true; btn.textContent = 'Enviandoâ€¦';
   try {
     const d = await api('/agente/convites/enviar', {
       method: 'POST',
@@ -1620,7 +1659,7 @@ async function enviarConvite() {
       _perfilAtual = null;
       document.getElementById('perfil-resultado').innerHTML = '';
       document.getElementById('inp-uid').value = '';
-      _desemp = false; // força reload do histórico
+      _desemp = false; // forÃ§a reload do histÃ³rico
     } else {
       mostrarMsg(msg, d.mensagem || d.checkMessage || 'Falha ao enviar convite.', 'err');
     }
