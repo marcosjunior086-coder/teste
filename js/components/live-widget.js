@@ -26,7 +26,7 @@ class KwaiLiveWidget extends HTMLElement {
     this.CACHE_TTL     = 50000;   // ms — validade do cache localStorage
     this.BATCH_SIZE    = 5;       // streamers processados por lote
     this.BUFFER_TARGET = 1.5;     // segundos de buffer antes de exibir modal
-    this.ENABLE_MINI_PREVIEW = false;
+    this.ENABLE_MINI_PREVIEW = true;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
@@ -752,16 +752,13 @@ class KwaiLiveWidget extends HTMLElement {
     } else if (window.Hls && window.Hls.isSupported()) {
       let fatalNetworkRetries = 0;
       const hlsCfg = {
-        enableWorker:              true,
-        lowLatencyMode:            false,
-        autoLevelCapping:          0,
-        maxBufferLength:           30,
-        maxMaxBufferLength:        60,
-        liveSyncDurationCount:     6,
-        startFragPrefetch:         true,
-        maxLoadingRetry:           8,
-        fragLoadingRetryDelay:     1000,
-        manifestLoadingRetryDelay: 1000,
+        enableWorker:    true,
+        lowLatencyMode:  false,
+        autoLevelCapping: 0,
+        maxBufferLength:  5,
+        maxMaxBufferLength: 10,
+        maxLoadingRetry: 2,
+        fragLoadingRetryDelay: 500,
       };
 
       // Modo proxy: redireciona todos os segmentos HLS pelo Worker
@@ -953,13 +950,11 @@ class KwaiLiveWidget extends HTMLElement {
       const hlsCfg = {
         enableWorker:          true,
         lowLatencyMode:        false,
-        autoLevelCapping:      1,
-        maxBufferLength:       15,
-        maxMaxBufferLength:    30,
-        backBufferLength:      10,
-        startFragPrefetch:     true,
-        maxLoadingRetry:       6,
-        fragLoadingRetryDelay: 1000,
+        autoLevelCapping:      0,
+        maxBufferLength:       10,
+        maxMaxBufferLength:    20,
+        maxLoadingRetry:       1,
+        fragLoadingRetryDelay: 300,
       };
       // Modo proxy: redireciona segmentos pelo Worker de live
       // URL do proxy vem de this._proxyBase (getter que lê DmaiorConfig)
@@ -973,15 +968,12 @@ class KwaiLiveWidget extends HTMLElement {
       this.hlsModal.attachMedia(video);
       this.hlsModal.on(window.Hls.Events.MANIFEST_PARSED, () => {
         video.currentTime = 0;
-        this.waitForBuffer(video, this.BUFFER_TARGET, onReady);
+        video.play().catch(() => {});
+        onReady();
       });
       this.hlsModal.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
-        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && fatalNetworkRetries < 2) {
-          fatalNetworkRetries += 1;
-          this.hlsModal.startLoad();
-        }
-        else onFatal();
+        onFatal();
       });
     } else {
       this.shadowRoot.getElementById('spinnerText').textContent = 'Navegador sem suporte a HLS.';
