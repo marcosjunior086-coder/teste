@@ -726,21 +726,13 @@ class KwaiLiveWidget extends HTMLElement {
     const onFatal = () => {
       try { entry.hlsInst?.destroy(); } catch (_) {}
       entry.hlsInst = null;
-
-      if (!useProxy) {
-        // Tenta via proxy como fallback
-        this._startHls(vid, playUrl, true, entry, url);
-      } else {
-        // Ambos falharam — backoff com retry
-        entry.playing = false;
-        entry.retries = (entry.retries || 0) + 1;
-        if (entry.retries < 6)
-          setTimeout(() => this.startMiniPlayer(url), Math.min(5000 * entry.retries, 50000));
-      }
+      entry.playing = false;
+      entry.retries = (entry.retries || 0) + 1;
+      if (entry.retries < 3)
+        setTimeout(() => this.startMiniPlayer(url), 5000);
     };
 
-    // URL de origem: direto ou via proxy (URL vem de DmaiorConfig via getter)
-    const src = useProxy ? this._proxyBase + encodeURIComponent(playUrl) : playUrl;
+    const src = playUrl;
 
     // Safari — HLS nativo
     if (vid.canPlayType('application/vnd.apple.mpegurl')) {
@@ -761,14 +753,6 @@ class KwaiLiveWidget extends HTMLElement {
         fragLoadingRetryDelay: 500,
       };
 
-      // Modo proxy: redireciona todos os segmentos HLS pelo Worker
-      // URL do proxy vem de this._proxyBase (getter que lê DmaiorConfig)
-      if (useProxy) {
-        hlsCfg.xhrSetup = (xhr, reqUrl) => {
-          xhr.open('GET', this._proxyBase + encodeURIComponent(reqUrl), true);
-        };
-      }
-
       const hls = new window.Hls(hlsCfg);
       hls.loadSource(src);
       hls.attachMedia(vid);
@@ -776,8 +760,7 @@ class KwaiLiveWidget extends HTMLElement {
       vid.addEventListener('playing', onPlaying, { once: true });
       hls.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
-        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-        else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+        if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
         else onFatal();
       });
       entry.hlsInst = hls;
@@ -927,26 +910,19 @@ class KwaiLiveWidget extends HTMLElement {
 
     const onFatal = () => {
       this.clearModalLoadTimer();
-      if (!useProxy) {
-        this.shadowRoot.getElementById('spinnerText').textContent = 'Tentando via proxy...';
-        this._playM3U8WithMode(url, true);
-      } else {
-        this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
-        this.shadowRoot.getElementById('modalCover').style.opacity = '1';
-        this.shadowRoot.getElementById('spinnerText').textContent = 'Live indisponivel neste navegador.';
-      }
+      this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
+      this.shadowRoot.getElementById('modalCover').style.opacity = '1';
+      this.shadowRoot.getElementById('spinnerText').textContent = 'Stream indisponível. Abra no Kwai.';
     };
 
-    // URL de origem: direto ou via proxy (URL vem de DmaiorConfig via getter)
-    const src = useProxy ? this._proxyBase + encodeURIComponent(url) : url;
+    const src = url;
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src;
-      video.addEventListener('canplay', () => this.waitForBuffer(video, 4, onReady), { once: true });
+      video.addEventListener('canplay', () => onReady(), { once: true });
       video.addEventListener('error',   () => onFatal(), { once: true });
       video.load();
     } else if (window.Hls && window.Hls.isSupported()) {
-      let fatalNetworkRetries = 0;
       const hlsCfg = {
         enableWorker:          true,
         lowLatencyMode:        false,
@@ -956,13 +932,6 @@ class KwaiLiveWidget extends HTMLElement {
         maxLoadingRetry:       1,
         fragLoadingRetryDelay: 300,
       };
-      // Modo proxy: redireciona segmentos pelo Worker de live
-      // URL do proxy vem de this._proxyBase (getter que lê DmaiorConfig)
-      if (useProxy) {
-        hlsCfg.xhrSetup = (xhr, reqUrl) => {
-          xhr.open('GET', this._proxyBase + encodeURIComponent(reqUrl), true);
-        };
-      }
       this.hlsModal = new window.Hls(hlsCfg);
       this.hlsModal.loadSource(src);
       this.hlsModal.attachMedia(video);
