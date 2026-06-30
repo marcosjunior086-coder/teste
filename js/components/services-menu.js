@@ -421,7 +421,7 @@ class DmaiorServicesMenu extends HTMLElement {
         <div class="dinamico-layout">
 
           <!-- Banner destaque: Recarga de Diamantes -->
-          <a href="recarga.html" class="dp-banner">
+          <a href="https://rocketbunny.club/@DMAIOR_AGENCY" target="_blank" rel="noopener noreferrer" class="dp-banner">
             <div class="dp-banner-icon">${SVG_DIAMOND}</div>
             <div class="dp-banner-text">
               <div class="dp-banner-title" data-i18n="homeDiamondTopup">Recarga de Diamantes</div>

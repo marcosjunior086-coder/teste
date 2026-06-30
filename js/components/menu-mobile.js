@@ -170,12 +170,22 @@ class MenuMobileDMaior extends HTMLElement {
       .dd-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
       .dd-option,.pref-row{ min-width:0; min-height:68px; display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:999px; cursor:pointer; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.98rem; font-weight:700; color:var(--dm-text); letter-spacing:.3px; text-transform:uppercase; border:1px solid var(--dm-cyan-10); background:linear-gradient(135deg,var(--dm-bw06),var(--dm-bg-tint)); width:100%; text-align:left; transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s; overflow:hidden; }
       .dd-option:hover,.pref-row:hover{ background:var(--dm-cyan-08); border-color:var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); transform:translateY(-1px); }
-      .dd-option.active{ background:var(--dm-grad-effect,linear-gradient(135deg,rgba(59,130,246,.16),rgba(0,212,212,.12))); border-color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); box-shadow:0 0 18px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
+      .dd-option.active{ background:var(--dm-grad-effect,linear-gradient(135deg,rgba(59,130,246,.16),rgba(0,212,212,.12))); border-color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); color:#06121c; text-shadow:none; box-shadow:0 0 18px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .dd-icon{ width:34px; height:34px; border-radius:50%; flex:0 0 34px; display:flex; align-items:center; justify-content:center; color:var(--dm-text); }
       .dd-option.active .dd-icon,
       .dd-option.active .dd-arrow,
       .dd-option.active .dd-copy,
-      .dd-option.active .dd-marquee{ color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
+      .dd-option.active .dd-marquee{ color:#06121c; }
+      :host-context([data-theme="rosa"]) .dd-option.active,
+      :host-context([data-theme="laranja"]) .dd-option.active{ color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.22); }
+      :host-context([data-theme="rosa"]) .dd-option.active .dd-icon,
+      :host-context([data-theme="rosa"]) .dd-option.active .dd-arrow,
+      :host-context([data-theme="rosa"]) .dd-option.active .dd-copy,
+      :host-context([data-theme="rosa"]) .dd-option.active .dd-marquee,
+      :host-context([data-theme="laranja"]) .dd-option.active .dd-icon,
+      :host-context([data-theme="laranja"]) .dd-option.active .dd-arrow,
+      :host-context([data-theme="laranja"]) .dd-option.active .dd-copy,
+      :host-context([data-theme="laranja"]) .dd-option.active .dd-marquee{ color:#fff; }
       .dd-dot{ width:22px; height:22px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 5px var(--dm-bw05); }
       .dd-option.active .dd-dot{ box-shadow:0 0 0 3px var(--dm-bg-2),0 0 0 5.5px var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
       .dd-copy{ min-width:0; flex:1; overflow:hidden; white-space:nowrap; }

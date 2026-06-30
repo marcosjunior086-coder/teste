@@ -14,7 +14,7 @@ const Router = {
   routes: {
     '/':                '/index.html',
     '/rank-geral':      '/ranking.html',
-    '/recarga':         '/recarga.html',
+    '/recarga':         'https://rocketbunny.club/@DMAIOR_AGENCY',
     '/politicas':       '/politicas.html',
     '/tutoriais':       '/tutoriais.html',
     '/formulario':      '/recrutamento.html',

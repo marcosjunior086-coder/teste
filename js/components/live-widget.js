@@ -208,7 +208,7 @@ class KwaiLiveWidget extends HTMLElement {
         #modalOverlay.open{display:flex;animation:fadeIn .2s ease;}
         @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 
-        #modalBox{position:relative;width:min(340px,93vw);background:var(--dm-bg-3);
+        #modalBox{position:relative;width:min(330px,92vw);background:var(--dm-bg-3);
           border:1px solid var(--dm-cyan-30);border-radius:16px;overflow:hidden;
           box-shadow:0 0 40px var(--dm-cyan-12),0 16px 48px var(--dm-shadow-xl);
           animation:slideDown .22s ease;}
@@ -217,7 +217,8 @@ class KwaiLiveWidget extends HTMLElement {
           background:linear-gradient(90deg,transparent,var(--dm-cyan),transparent);z-index:5;}
 
         /* Proporção portrait 3:4 — Kwai é plataforma vertical */
-        .modal-video-wrap{position:relative;width:100%;padding-top:min(133.33%, 55vh);background:#000;overflow:hidden;}
+        .modal-video-wrap{position:relative;width:100%;padding-top:min(116%, 46vh);background:#000;overflow:hidden;}
+        @media(max-width:480px){.modal-video-wrap{padding-top:min(108%, 43vh);}}
         #modalVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s;}
         #modalCover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;transition:opacity .5s;}
 
@@ -251,7 +252,8 @@ class KwaiLiveWidget extends HTMLElement {
         .modal-sub{font-size:.62rem;color:var(--dm-text-muted);margin-top:2px;}
 
         .modal-actions{display:flex;gap:8px;flex-wrap:wrap;}
-        .btn-kwai{flex:1;background:var(--dm-grad-cyan);color:#000;border:none;
+        .btn-kwai{flex:1;background:var(--dm-grad-effect,var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4)));color:#000;border:1px solid var(--dm-effect-35,rgba(0,212,212,.35));
+          box-shadow:0 10px 24px var(--dm-effect-glow,rgba(59,130,246,.22));
           padding:10px 0;border-radius:8px;font-size:.72rem;font-weight:700;letter-spacing:.8px;cursor:pointer;
           min-width:90px;}
         .btn-kwai:hover{opacity:.85;}
