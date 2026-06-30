@@ -79,7 +79,7 @@ class DmaiorCookieConsent extends HTMLElement {
       <div class="banner" role="dialog" aria-label="Aviso de cookies">
         <p class="txt">
           Usamos cookies e armazenamento local para melhorar sua experiência, manter sessão e personalizar conteúdo.
-          Ao continuar navegando, você concorda com nossa <a href="/teste/politicas.html">Política de Privacidade</a>.
+          Ao continuar navegando, você concorda com nossa <a href="politicas.html">Política de Privacidade</a>.
         </p>
         <div class="actions">
           <button class="btn-decline" id="btnDecline">Recusar</button>

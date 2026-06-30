@@ -509,7 +509,7 @@ class RankingDmaior extends HTMLElement {
         if (!res.ok) throw new Error(`Worker retornou ${res.status}`);
         const data = await res.json();
         if (data.erro) throw new Error(data.erro);
-        const _safeBadge = u => { try { const p = new URL(u).protocol; return (p==='https:'||p==='http:') ? u : ''; } catch { return ''; } };
+        const _safeBadge = u => this.normalizeImageUrl(u);
         const _safeV = _safeBadge(data.badge_verificado_url || '');
         const _safeP = _safeBadge(data.badge_premium_url    || '');
         if (_safeV) this.VERIFICADO_SVG         = `<img class="verified-badge" src="${_safeV.replace(/"/g,'&quot;')}" width="15" height="15" title="Verificado">`;

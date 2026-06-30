@@ -662,7 +662,7 @@ class RankingDmaior extends HTMLElement {
           verificado:         s.verificado         || false,
           verificado_premium: s.verificado_premium || false,
         }));
-        const _safeBadge = u => { try { const p = new URL(u).protocol; return (p==='https:'||p==='http:') ? u : ''; } catch { return ''; } };
+        const _safeBadge = u => this.normalizeImageUrl(u);
         const _safeV = _safeBadge(data.badge_verificado_url || '');
         const _safeP = _safeBadge(data.badge_premium_url    || '');
         if (_safeV) this.VERIFICADO_SVG         = `<img class="verified-badge" src="${this.esc(_safeV)}" width="15" height="15" title="Verificado">`;

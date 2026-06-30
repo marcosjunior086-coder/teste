@@ -25,7 +25,8 @@ class KwaiLiveWidget extends HTMLElement {
     this.CACHE_KEY     = 'widget_live_v6';
     this.CACHE_TTL     = 50000;   // ms — validade do cache localStorage
     this.BATCH_SIZE    = 5;       // streamers processados por lote
-    this.BUFFER_TARGET = 8;       // segundos de buffer antes de exibir modal
+    this.BUFFER_TARGET = 1.5;     // segundos de buffer antes de exibir modal
+    this.ENABLE_MINI_PREVIEW = false;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
@@ -43,6 +44,8 @@ class KwaiLiveWidget extends HTMLElement {
     this.modalWatchdog = null;
     this.modalLastTime = -1;
     this.bufferTimer   = null;
+    this.modalLoadTimer = null;
+    this.hlsReadyPromise = null;
   }
 
   // ── Getter: URL base do proxy (vem de DmaiorConfig — sem hardcode) ─────────
@@ -73,7 +76,7 @@ class KwaiLiveWidget extends HTMLElement {
   async connectedCallback() {
     this.render();
     this.setupListeners();
-    await this.loadHlsLib();
+    this.hlsReadyPromise = this.loadHlsLib();
     this.initObserver();
     this.init();
     // Atualiza as lives a cada 30 segundos — timer guardado para limpeza
@@ -301,7 +304,7 @@ class KwaiLiveWidget extends HTMLElement {
               </div>
               <div id="modalSpinner">
                 <div class="spinner-ring"></div>
-                <div id="spinnerText">A CARREGAR LIVE...</div>
+                <div id="spinnerText">CARREGANDO LIVE...</div>
               </div>
               <div id="bufferBar"><div id="bufferFill"></div></div>
               <video id="modalVideo" playsinline muted></video>
@@ -361,6 +364,10 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   initObserver() {
+    if (!this.ENABLE_MINI_PREVIEW) {
+      this.cardObserver = { observe() {}, unobserve() {} };
+      return;
+    }
     // IntersectionObserver: inicia mini player quando o card entra na tela
     this.cardObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -743,6 +750,7 @@ class KwaiLiveWidget extends HTMLElement {
       vid.play().catch(() => {});
 
     } else if (window.Hls && window.Hls.isSupported()) {
+      let fatalNetworkRetries = 0;
       const hlsCfg = {
         enableWorker:              true,
         lowLatencyMode:            false,
@@ -793,7 +801,7 @@ class KwaiLiveWidget extends HTMLElement {
     this.shadowRoot.getElementById('bufferBar').style.display    = 'none';
     this.shadowRoot.getElementById('modalCover').style.opacity   = '1';
     video.style.opacity = '0';
-    this.shadowRoot.getElementById('spinnerText').textContent  = 'A CARREGAR LIVE...';
+    this.shadowRoot.getElementById('spinnerText').textContent  = 'CARREGANDO LIVE...';
     this.shadowRoot.getElementById('modalName').textContent    = s.name;
     this.shadowRoot.getElementById('modalAvatar').src          = this._safeUrl(s.image) || '';
     this.shadowRoot.getElementById('modalCover').src           = this._safeUrl(s.image) || '';
@@ -824,6 +832,7 @@ class KwaiLiveWidget extends HTMLElement {
   closeModal() {
     this.shadowRoot.getElementById('modalOverlay').classList.remove('open');
     this.clearBufferTimer();
+    this.clearModalLoadTimer();
     clearInterval(this.modalWatchdog);
     this.destroyHLSModal();
     const v = this.shadowRoot.getElementById('modalVideo');
@@ -833,6 +842,7 @@ class KwaiLiveWidget extends HTMLElement {
 
   destroyHLSModal() { try { this.hlsModal?.destroy(); } catch (_) {} this.hlsModal = null; }
   clearBufferTimer() { clearInterval(this.bufferTimer); this.bufferTimer = null; }
+  clearModalLoadTimer() { clearTimeout(this.modalLoadTimer); this.modalLoadTimer = null; }
 
   setMuteIcon(muted) {
     this.shadowRoot.getElementById('muteBadge').innerHTML =
@@ -853,7 +863,7 @@ class KwaiLiveWidget extends HTMLElement {
     bar.style.display = 'block';
     const fb = setTimeout(() => {
       this.clearBufferTimer(); bar.style.display = 'none'; onReady();
-    }, 15000);
+    }, 3500);
     this.bufferTimer = setInterval(() => {
       if (!video.buffered.length) return;
       const buffered = video.buffered.end(0) - (video.currentTime || 0);
@@ -878,7 +888,15 @@ class KwaiLiveWidget extends HTMLElement {
 
   playM3U8(url) {
     this.destroyHLSModal();
+    this.clearModalLoadTimer();
     clearInterval(this.modalWatchdog);
+    const video = this.shadowRoot.getElementById('modalVideo');
+    if (!window.Hls && !video.canPlayType('application/vnd.apple.mpegurl')) {
+      this.shadowRoot.getElementById('spinnerText').textContent = 'Carregando player...';
+      this.hlsReadyPromise = this.hlsReadyPromise || this.loadHlsLib();
+      this.hlsReadyPromise.then(() => this._playM3U8WithMode(url, false));
+      return;
+    }
     this._playM3U8WithMode(url, false);
   }
 
@@ -888,10 +906,12 @@ class KwaiLiveWidget extends HTMLElement {
    */
   _playM3U8WithMode(url, useProxy) {
     this.destroyHLSModal();
+    this.clearModalLoadTimer();
     const video = this.shadowRoot.getElementById('modalVideo');
     video.pause(); video.removeAttribute('src'); video.load();
 
     const onReady = () => {
+      this.clearModalLoadTimer();
       this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
       this.shadowRoot.getElementById('modalCover').style.opacity   = '0';
       video.style.opacity = '1';
@@ -900,12 +920,23 @@ class KwaiLiveWidget extends HTMLElement {
       this.startModalWatchdog(video);
     };
 
+    this.modalLoadTimer = setTimeout(() => {
+      if (video.style.opacity === '1') return;
+      this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
+      this.shadowRoot.getElementById('bufferBar').style.display = 'none';
+      this.shadowRoot.getElementById('modalCover').style.opacity = '1';
+      this.shadowRoot.getElementById('spinnerText').textContent = 'Abra no Kwai se o player nao iniciar.';
+    }, 6500);
+
     const onFatal = () => {
+      this.clearModalLoadTimer();
       if (!useProxy) {
         this.shadowRoot.getElementById('spinnerText').textContent = 'Tentando via proxy...';
         this._playM3U8WithMode(url, true);
       } else {
-        this.shadowRoot.getElementById('spinnerText').textContent = 'Live indisponível neste navegador.';
+        this.shadowRoot.getElementById('modalSpinner').style.display = 'none';
+        this.shadowRoot.getElementById('modalCover').style.opacity = '1';
+        this.shadowRoot.getElementById('spinnerText').textContent = 'Live indisponivel neste navegador.';
       }
     };
 
@@ -918,11 +949,12 @@ class KwaiLiveWidget extends HTMLElement {
       video.addEventListener('error',   () => onFatal(), { once: true });
       video.load();
     } else if (window.Hls && window.Hls.isSupported()) {
+      let fatalNetworkRetries = 0;
       const hlsCfg = {
         enableWorker:          false,
         lowLatencyMode:        false,
-        maxBufferLength:       30,
-        maxMaxBufferLength:    60,
+        maxBufferLength:       10,
+        maxMaxBufferLength:    20,
         backBufferLength:      10,
         startFragPrefetch:     true,
         maxLoadingRetry:       6,
@@ -944,7 +976,10 @@ class KwaiLiveWidget extends HTMLElement {
       });
       this.hlsModal.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
-        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR) this.hlsModal.startLoad();
+        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && fatalNetworkRetries < 2) {
+          fatalNetworkRetries += 1;
+          this.hlsModal.startLoad();
+        }
         else onFatal();
       });
     } else {

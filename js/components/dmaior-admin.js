@@ -794,17 +794,20 @@ class DimaiorAdmin extends HTMLElement {
       taxa_saque_mp:{label:'Taxa fixa por saque (R$)',hint:'Deixe 0.00 para não cobrar taxa.'},
       taxa_saque_perc:{label:'Taxa percentual (%)',hint:'Ex: 0.99 = 0,99%.'},
       aviso_financeiro:{label:'Aviso no painel',hint:'Texto na aba Carteira.'},
-      badge_verificado_url:{label:'Badge Verificado — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = ícone padrão azul.',preview:true},
-      badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG). Vazio = ícone padrão laranja.',preview:true},
+      badge_verificado_url:{label:'Badge Verificado — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão azul.',preview:true},
+      badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão laranja.',preview:true},
     };
-    const _prevHtml=(chave,val)=>val?`<img src="${this._esc(val)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;
+    const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;};
     el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`}${isRO?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
     d.config.filter(c=>!labels[c.chave]?.readonly).forEach(c=>{
       s.getElementById(`cfgSave_${c.chave}`)?.addEventListener('click',async()=>{
-        const val=s.getElementById(`cfg_${c.chave}`)?.value||'';
+        const rawVal=s.getElementById(`cfg_${c.chave}`)?.value||'';
+        const val=labels[c.chave]?.preview?this._normalizarImagemUrl(rawVal):rawVal;
+        if(labels[c.chave]?.preview&&rawVal.trim()&&!val){this._toast('URL de imagem inválida','err');return;}
         const r=await this._api('POST','/admin/config',{chave:c.chave,valor:val});
         if(r?.ok){
           this._toast('Salvo!');
+          if(labels[c.chave]?.preview){const inp=s.getElementById(`cfg_${c.chave}`);if(inp)inp.value=val;}
           if(c.chave==='taxa_saque_mp')this._taxaSaque=parseFloat(val)||0;
           if(c.chave==='taxa_saque_perc')this._taxaPerc=parseFloat(val)||0;
           const prev=s.getElementById(`cfgPrev_${c.chave}`);
