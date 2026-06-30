@@ -1171,6 +1171,8 @@ class DimaiorAdmin extends HTMLElement {
     // Agentes de Talentos
     s.getElementById('btnAtuAgentes')?.addEventListener('click',()=>this._carregarAgentes());
     s.getElementById('btnNovoAgente')?.addEventListener('click',()=>this._abrirModalAgente());
+    s.getElementById('btnAgentesKwai')?.addEventListener('click',()=>this._toggleAgentesKwai());
+    s.getElementById('btnAtuAgentesKwai')?.addEventListener('click',()=>this._carregarAgentesKwai());
     s.getElementById('btnConfigComissaoAgentes')?.addEventListener('click',()=>this._abrirConfigComissaoAgentes());
     s.getElementById('btnAgenteVoltarLista')?.addEventListener('click',()=>this._mostrarListaAgentes());
     s.getElementById('btnAgenteEditar')?.addEventListener('click',()=>this._editarAgenteAtual());
@@ -2549,11 +2551,24 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-config">${ph('Configurações','settings','Variáveis operacionais','btnAtuCfg')}<div class="box"><div id="tbC">${this._loading()}</div></div></div>
             <!-- ── AGENTES DE TALENTOS ── -->
             <div class="pag" id="pag-agentes">
-              ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-o" id="btnConfigComissaoAgentes">${this._ico('settings',13)} Comissões</button><button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
+              ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-o" id="btnAgentesKwai">${this._ico('refresh',13)} Visão Kwai</button><button class="btn btn-o" id="btnConfigComissaoAgentes">${this._ico('settings',13)} Comissões</button><button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
               <!-- Lista de agentes -->
               <div class="box" id="agentesListaBox">
                 <div class="bhead"><div class="btitulo">${this._ico('users',14)} Agentes</div></div>
                 <div id="tbAgentes">${this._loading()}</div>
+              </div>
+              <!-- Visão externa do Kwai/Voyager (somente leitura até o Worker sincronizar) -->
+              <div class="box" id="agentesKwaiBox" style="display:none">
+                <div class="bhead">
+                  <div>
+                    <div class="btitulo">${this._ico('search',14)} Agentes no Kwai / Voyager</div>
+                    <div style="font-size:11px;color:var(--t3);margin-top:3px">Espelho externo por brokerName. Não altera vínculos locais automaticamente.</div>
+                  </div>
+                  <div class="bacoes">
+                    <button class="btn btn-o btn-sm" id="btnAtuAgentesKwai">${this._ico('refresh',12)} Atualizar</button>
+                  </div>
+                </div>
+                <div id="tbAgentesKwai">${this._loading()}</div>
               </div>
               <!-- Painel de detalhe do agente (aparece ao clicar em um agente) -->
               <div id="agenteDetalhe" style="display:none;margin-top:14px">
@@ -3109,6 +3124,101 @@ class DimaiorAdmin extends HTMLElement {
         btn.addEventListener('click', () => this._abrirDetalheAgente(btn.dataset.agenteId));
       });
     } catch(e) { tb.innerHTML = `<div style="padding:20px;color:var(--verm)">${e.message}</div>`; }
+  }
+
+  _toggleAgentesKwai() {
+    const box = this.shadowRoot.getElementById('agentesKwaiBox');
+    if (!box) return;
+    const abrir = box.style.display === 'none';
+    box.style.display = abrir ? '' : 'none';
+    if (abrir) this._carregarAgentesKwai();
+  }
+
+  async _carregarAgentesKwai() {
+    const s = this.shadowRoot;
+    const box = s.getElementById('agentesKwaiBox');
+    const tb = s.getElementById('tbAgentesKwai');
+    if (!box || !tb) return;
+    box.style.display = '';
+    tb.innerHTML = this._loading();
+    try {
+      const d = await this._get('/admin/agentes/kwai');
+      const lista = d.agentes || d.agentes_kwai || d.maps?.agents || d.data?.agentes || [];
+      const resumo = d.resumo || d.dashboard || {};
+      this._renderAgentesKwai(lista, resumo, d);
+    } catch (e) {
+      tb.innerHTML = `<div style="padding:18px;display:grid;gap:10px;color:var(--t2);font-size:12px;line-height:1.55">
+        <div style="color:var(--gold);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;letter-spacing:.04em">${this._ico('warning',14)} Rota do Voyager ainda não configurada</div>
+        <div>O painel já está preparado para exibir agentes oficiais do Kwai por <strong>brokerName</strong>, mas o Worker precisa implementar <code style="color:var(--cyan)">GET /admin/agentes/kwai</code>.</div>
+        <div style="color:var(--t3)">Erro retornado: ${this._esc(e.message || 'sem detalhes')}</div>
+      </div>`;
+    }
+  }
+
+  _renderAgentesKwai(lista, resumo = {}, raw = {}) {
+    const tb = this.shadowRoot.getElementById('tbAgentesKwai');
+    if (!tb) return;
+    const arr = Array.isArray(lista) ? lista : [];
+    const totalStreamers = Number(resumo.total_streamers ?? resumo.totalMembers ?? arr.reduce((n, a) => n + Number(a.members || a.total_streamers || a.streamers?.length || 0), 0));
+    const totalDiamantes = Number(resumo.diamantes ?? resumo.gifts ?? resumo.giftAmtOfCurMonth ?? arr.reduce((n, a) => n + Number(a.gifts || a.diamantes || a.giftAmtOfCurMonth || 0), 0));
+    const totalDias = Number(resumo.dias ?? resumo.days ?? arr.reduce((n, a) => n + Number(a.days || a.dias || a.validDaysOfCurMonth || 0), 0));
+    const fmtHoras = (ms) => {
+      const n = Number(ms || 0);
+      if (!Number.isFinite(n) || n <= 0) return '0h';
+      const horas = n > 10000 ? n / 3600000 : n;
+      return `${horas.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}h`;
+    };
+    if (!arr.length) {
+      tb.innerHTML = `<div style="padding:22px;text-align:center;color:var(--t3)">Nenhum agente retornado pelo Voyager.</div>`;
+      return;
+    }
+    tb.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:14px;border-bottom:1px solid var(--brddim)">
+        <div class="card cy" style="margin:0"><div class="card-val">${arr.length}</div><div class="card-lbl">Agentes Kwai</div></div>
+        <div class="card az" style="margin:0"><div class="card-val">${this._num(totalStreamers)}</div><div class="card-lbl">Streamers</div></div>
+        <div class="card cy" style="margin:0"><div class="card-val">${this._num(totalDiamantes)}</div><div class="card-lbl">Diamantes mês</div></div>
+        <div class="card vd" style="margin:0"><div class="card-val">${this._num(totalDias)}</div><div class="card-lbl">Dias válidos</div></div>
+      </div>
+      <div class="rank-table-wrap">
+        <table class="tb">
+          <thead><tr><th>Agente Kwai</th><th>Local</th><th>Streamers</th><th>Diamantes</th><th>Horas</th><th>Dias</th><th>Detalhes</th></tr></thead>
+          <tbody>
+            ${arr.map(a => {
+              const broker = a.brokerName || a.broker_name || a.nome || 'Sem agente';
+              const streamers = Array.isArray(a.streamers) ? a.streamers : [];
+              const members = Number(a.members || a.total_streamers || streamers.length || 0);
+              const gifts = Number(a.gifts || a.diamantes || a.giftAmtOfCurMonth || 0);
+              const duration = a.duration ?? a.horas_ms ?? a.liveDurationOfCurMonth ?? a.horas ?? 0;
+              const days = Number(a.days || a.dias || a.validDaysOfCurMonth || 0);
+              const local = a.local_agente_nome || a.agente_local_nome || a.agente_nome || '';
+              return `<tr>
+                <td><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(broker)}</div><div style="font-size:10px;color:var(--t3)">brokerName</div></td>
+                <td>${local ? `<span style="color:var(--verde)">● ${this._esc(local)}</span>` : `<span style="color:var(--gold)">Não vinculado</span>`}</td>
+                <td style="color:var(--cyan);font-weight:700">${this._num(members)}</td>
+                <td style="color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._num(gifts)}</td>
+                <td>${fmtHoras(duration)}</td>
+                <td>${this._num(days)}</td>
+                <td>
+                  <details>
+                    <summary style="cursor:pointer;color:var(--cyan);font-weight:700">Ver streamers</summary>
+                    <div style="margin-top:8px;max-height:260px;overflow:auto;border:1px solid var(--brddim);border-radius:10px">
+                      ${streamers.length ? `<table><tbody>${streamers.slice(0, 120).map(st => `<tr>
+                        <td>${this._esc(st.memberName || st.nome || st.kwaiId || st.memberId || '—')}</td>
+                        <td style="color:var(--t3)">${st.kwaiId ? '@'+this._esc(st.kwaiId) : this._esc(st.kwai_id || '')}</td>
+                        <td style="color:var(--t3);font-size:11px">${this._esc(st.memberId || st.kwai_uid || st.uid || '')}</td>
+                        <td style="color:var(--cyan)">${this._num(st.giftAmtOfCurMonth || st.diamantes || 0)}</td>
+                      </tr>`).join('')}</tbody></table>` : `<div style="padding:12px;color:var(--t3)">Worker ainda não enviou a lista de streamers deste agente.</div>`}
+                    </div>
+                  </details>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:10px 14px;color:var(--t3);font-size:11px;border-top:1px solid var(--brddim)">
+        Fonte: ${this._esc(raw.fonte || 'Voyager / member/list')} · Atualizado: ${this._esc(raw.atualizado_em || raw.refreshedAtText || 'agora')}
+      </div>`;
   }
 
   async _abrirDetalheAgente(id) {
