@@ -379,6 +379,8 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   font-size: calc(16px * var(--dm-font-scale, 1));
+  /* Cobre overscroll no mobile (evita fundo branco ao rolar além do limite) */
+  background-color: #060B16;
 }
 
 body {
@@ -398,10 +400,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Mobile: background-attachment:fixed causa flash branco no iOS ao rolar */
+@media (max-width: 768px) {
+  body { background-attachment: scroll; }
+}
+
 /* Tema dark — preto puro (html + body para cobrir overscroll no mobile) */
 [data-theme="dark"] html,
 [data-theme="dark"] body {
   background: #000;
+  background-color: #000;
   background-image: none;
   background-attachment: initial;
 }
@@ -411,6 +419,11 @@ body {
 }
 
 /* Temas claros — restaura fundo sólido sem o gradiente escuro */
+[data-theme="branco"] html,
+[data-theme="rosa"]   html,
+[data-theme="laranja"] html {
+  background-color: var(--dm-bg);
+}
 [data-theme="branco"] body,
 [data-theme="rosa"]   body,
 [data-theme="laranja"] body {

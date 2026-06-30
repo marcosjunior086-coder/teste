@@ -3,8 +3,10 @@
 
   const LANG_KEY = 'dm_idioma';
   const FONT_KEY = 'dm_tamanho_texto';
+  const FONT_FAMILY_KEY = 'dm_familia_fonte';
   const DEFAULT_LANG = 'pt-BR';
   const DEFAULT_FONT = 'normal';
+  const DEFAULT_FONT_FAMILY = 'dmaior';
 
   const dict = {
     'pt-BR': {
@@ -473,6 +475,25 @@
     normal: { scale: '1' },
     grande: { scale: '1.12' },
     extra: { scale: '1.22' }
+  };
+
+  const fontFamilies = {
+    dmaior: {
+      title: "'Rajdhani', sans-serif",
+      body: "'Exo 2', sans-serif"
+    },
+    inter: {
+      title: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+      body: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"
+    },
+    poppins: {
+      title: "'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif",
+      body: "'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif"
+    },
+    sistema: {
+      title: "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
+      body: "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif"
+    }
   };
 
   const textOriginals = new WeakMap();
@@ -1181,6 +1202,45 @@
     window.dispatchEvent(new CustomEvent('dmaior:preferences', { detail: getState() }));
   }
 
+  function getFontFamily() {
+    try {
+      const family = localStorage.getItem(FONT_FAMILY_KEY) || DEFAULT_FONT_FAMILY;
+      return fontFamilies[family] ? family : DEFAULT_FONT_FAMILY;
+    } catch (_) {
+      return DEFAULT_FONT_FAMILY;
+    }
+  }
+
+  const _loadedFonts = new Set(['dmaior', 'sistema']);
+  function applyFontFamily(family) {
+    const chosen = fontFamilies[family] ? family : getFontFamily();
+    const fam = fontFamilies[chosen];
+    document.documentElement.dataset.fontFamily = chosen;
+    document.documentElement.style.setProperty('--dm-font-title', fam.title);
+    document.documentElement.style.setProperty('--dm-font-body',  fam.body);
+    if (!_loadedFonts.has(chosen)) {
+      _loadedFonts.add(chosen);
+      const fontMap = {
+        inter:   'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap',
+        poppins: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap',
+      };
+      const url = fontMap[chosen];
+      if (url && !document.querySelector(`link[href*="${chosen}"]`)) {
+        const link = document.createElement('link');
+        link.rel  = 'stylesheet';
+        link.href = url;
+        document.head.appendChild(link);
+      }
+    }
+  }
+
+  function setFontFamily(family) {
+    const chosen = fontFamilies[family] ? family : DEFAULT_FONT_FAMILY;
+    try { localStorage.setItem(FONT_FAMILY_KEY, chosen); } catch (_) {}
+    applyFontFamily(chosen);
+    window.dispatchEvent(new CustomEvent('dmaior:preferences', { detail: getState() }));
+  }
+
   function setLanguage(lang) {
     const chosen = dict[lang] ? lang : DEFAULT_LANG;
     try { localStorage.setItem(LANG_KEY, chosen); } catch (_) {}
@@ -1224,11 +1284,12 @@
   }
 
   function getState() {
-    return { language: getLang(), fontSize: getFontSize() };
+    return { language: getLang(), fontSize: getFontSize(), fontFamily: getFontFamily() };
   }
 
   function init() {
     applyFontSize(getFontSize());
+    applyFontFamily(getFontFamily());
     document.documentElement.lang = getLang();
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
@@ -1240,8 +1301,9 @@
       startObserver();
     }
     window.addEventListener('storage', event => {
-      if (event.key === FONT_KEY) applyFontSize(getFontSize());
-      if (event.key === LANG_KEY) bindTree(document);
+      if (event.key === FONT_KEY)        applyFontSize(getFontSize());
+      if (event.key === FONT_FAMILY_KEY) applyFontFamily(getFontFamily());
+      if (event.key === LANG_KEY)        bindTree(document);
     });
   }
 
@@ -1274,10 +1336,13 @@
     getState,
     getLang,
     getFontSize,
+    getFontFamily,
     setLanguage,
     setFontSize,
+    setFontFamily,
     languages: Object.keys(dict).map(code => ({ code, name: dict[code].languageName })),
-    fontSizes: Object.keys(fonts)
+    fontSizes: Object.keys(fonts),
+    fontFamilyOptions: Object.keys(fontFamilies)
   };
 
   init();

@@ -951,10 +951,11 @@ class KwaiLiveWidget extends HTMLElement {
     } else if (window.Hls && window.Hls.isSupported()) {
       let fatalNetworkRetries = 0;
       const hlsCfg = {
-        enableWorker:          false,
+        enableWorker:          true,
         lowLatencyMode:        false,
-        maxBufferLength:       10,
-        maxMaxBufferLength:    20,
+        autoLevelCapping:      1,
+        maxBufferLength:       15,
+        maxMaxBufferLength:    30,
         backBufferLength:      10,
         startFragPrefetch:     true,
         maxLoadingRetry:       6,
