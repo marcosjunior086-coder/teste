@@ -28,7 +28,7 @@ class DmaiorCookieConsent extends HTMLElement {
         .txt {
           flex: 1;
           min-width: 220px;
-          font-family: 'Exo 2', sans-serif;
+          font-family: var(--dm-font-body,'Exo 2',sans-serif);
           font-size: .85rem;
           color: var(--dm-text-sub, #a0aec0);
           line-height: 1.5;
@@ -49,7 +49,7 @@ class DmaiorCookieConsent extends HTMLElement {
           border: none;
           border-radius: 8px;
           padding: 10px 22px;
-          font-family: 'Rajdhani', sans-serif;
+          font-family: var(--dm-font-title,'Rajdhani',sans-serif);
           font-size: .95rem;
           font-weight: 700;
           text-transform: uppercase;
@@ -64,7 +64,7 @@ class DmaiorCookieConsent extends HTMLElement {
           border: 1px solid var(--dm-border, rgba(255,255,255,.1));
           border-radius: 8px;
           padding: 10px 16px;
-          font-family: 'Rajdhani', sans-serif;
+          font-family: var(--dm-font-title,'Rajdhani',sans-serif);
           font-size: .9rem;
           cursor: pointer;
           transition: border-color .2s, color .2s;

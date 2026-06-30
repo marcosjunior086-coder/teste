@@ -115,7 +115,7 @@ class KwaiLiveWidget extends HTMLElement {
           border-bottom:1px solid var(--dm-effect-20, var(--dm-rank-cyan-20, rgba(0,212,212,.20)));
           padding:8px 6px 12px;color:var(--dm-text);
           position:relative;width:100%;
-          font-family:'Inter',Arial,sans-serif;
+          font-family:var(--dm-font-body,'Inter',Arial,sans-serif);
           transition:padding .3s ease;
         }
         #liveWidget::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-effect-blue,var(--dm-rank-blue,#3b82f6)),var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)),transparent);}
@@ -132,7 +132,7 @@ class KwaiLiveWidget extends HTMLElement {
         #catFilter{
           background:var(--dm-bg-3);border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35)));color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4));
           padding:3px 12px;border-radius:20px;
-          font-family:'Inter',Arial,sans-serif;
+          font-family:var(--dm-font-body,'Inter',Arial,sans-serif);
           font-size:.6rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;
           cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;display:none;
         }
@@ -209,7 +209,7 @@ class KwaiLiveWidget extends HTMLElement {
         /* ── Modal ── */
         #modalOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;
           background:transparent;justify-content:center;align-items:flex-start;padding-top:10px;
-          font-family:'Inter',Arial,sans-serif;}
+          font-family:var(--dm-font-body,'Inter',Arial,sans-serif);}
         #modalOverlay.open{display:flex;animation:fadeIn .2s ease;}
         @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 

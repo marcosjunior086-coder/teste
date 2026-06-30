@@ -73,7 +73,7 @@ class DmaiorRecarga extends HTMLElement {
         .dm-wrap * { box-sizing:border-box; margin:0; padding:0; }
 
         .dm-wrap {
-          font-family:'Exo 2',sans-serif; background:var(--rc-bg);
+          font-family:var(--dm-font-body,'Exo 2',sans-serif); background:var(--rc-bg);
           border-radius:20px; width:100%; max-width:420px; height:640px;
           display:flex; flex-direction:column; overflow:hidden; position:relative;
           box-shadow: 0 0 0 1px var(--rc-cyan-15), 0 25px 60px rgba(0,0,0,0.7), 0 0 40px var(--rc-cyan-08);
@@ -99,7 +99,7 @@ class DmaiorRecarga extends HTMLElement {
           box-shadow:0 0 12px var(--rc-cyan-15);
         }
         .dm-brand-text { display:flex; flex-direction:column; }
-        .dm-brand-name { font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; letter-spacing:2px; color:var(--rc-text); text-transform:uppercase; }
+        .dm-brand-name { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:15px; font-weight:700; letter-spacing:2px; color:var(--rc-text); text-transform:uppercase; }
         .dm-brand-sub  { font-size:10px; color:var(--rc-sub); letter-spacing:1.5px; text-transform:uppercase; }
         .dm-status     { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--rc-sub); }
         .dm-dot        { width:7px; height:7px; border-radius:50%; background:var(--rc-cyan); box-shadow:0 0 6px var(--rc-cyan); animation:dm-pulse 2s infinite; }
@@ -123,13 +123,13 @@ class DmaiorRecarga extends HTMLElement {
 
         .dm-card-perfil { background:var(--rc-cyan-08); border:1px solid var(--rc-cyan-25); border-radius:14px; padding:14px; display:flex; align-items:center; gap:13px; align-self:flex-start; max-width:88%; animation:dm-fadein .35s ease; }
         .dm-card-perfil img { width:52px; height:52px; border-radius:50%; border:2px solid var(--rc-cyan-25); object-fit:cover; }
-        .dm-perfil-nome { font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; color:var(--rc-text); margin-bottom:2px; }
+        .dm-perfil-nome { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:15px; font-weight:700; color:var(--rc-text); margin-bottom:2px; }
         .dm-perfil-id   { font-size:11px; color:var(--rc-sub); margin-bottom:4px; }
         .dm-perfil-link { font-size:11px; color:var(--rc-cyan); text-decoration:none; }
         .dm-perfil-link:hover { text-decoration:underline; }
 
         .dm-btns { display:flex; gap:8px; flex-wrap:wrap; align-self:flex-start; max-width:100%; animation:dm-fadein .35s ease; }
-        .dm-btn  { font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; letter-spacing:1px; padding:9px 22px; border-radius:10px; cursor:pointer; transition:all .25s; border:none; text-transform:uppercase; }
+        .dm-btn  { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:14px; font-weight:700; letter-spacing:1px; padding:9px 22px; border-radius:10px; cursor:pointer; transition:all .25s; border:none; text-transform:uppercase; }
         .dm-btn.primary   { background:var(--dm-grad-cyan,linear-gradient(135deg,#00b4d8,#00f2ff)); color:#000; box-shadow:0 0 14px var(--rc-cyan-25); }
         .dm-btn.primary:hover { transform:scale(1.04); filter:brightness(1.1); }
         .dm-btn.secondary { background:var(--rc-card); color:var(--rc-sub); border:1px solid var(--rc-border); }
@@ -142,21 +142,21 @@ class DmaiorRecarga extends HTMLElement {
         .dm-calc { background:var(--rc-cyan-08); border:1px solid var(--rc-cyan-15); border-radius:14px; padding:14px; }
         .dm-calc-label { font-size:11px; color:var(--rc-sub); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
         .dm-calc-input-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-        .dm-calc-input { flex:1; background:rgba(0,0,0,0.35); border:1px solid var(--rc-cyan-25); border-radius:8px; padding:9px 12px; color:var(--rc-text); font-size:16px; font-weight:600; font-family:'Rajdhani',sans-serif; outline:none; transition:.25s; -moz-appearance:textfield; }
+        .dm-calc-input { flex:1; background:rgba(0,0,0,0.35); border:1px solid var(--rc-cyan-25); border-radius:8px; padding:9px 12px; color:var(--rc-text); font-size:16px; font-weight:600; font-family:var(--dm-font-title,'Rajdhani',sans-serif); outline:none; transition:.25s; -moz-appearance:textfield; }
         .dm-calc-input::-webkit-outer-spin-button, .dm-calc-input::-webkit-inner-spin-button { -webkit-appearance:none; }
         .dm-calc-input:focus { border-color:var(--rc-cyan); box-shadow:0 0 8px var(--rc-cyan-15); }
         .dm-calc-unit { font-size:11px; color:var(--rc-sub); white-space:nowrap; }
         .dm-calc-preview { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:8px; }
         .dm-calc-label-sm { font-size:12px; color:var(--rc-sub); }
-        .dm-calc-valor { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:var(--rc-cyan); transition:.2s; }
+        .dm-calc-valor { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:20px; font-weight:700; color:var(--rc-cyan); transition:.2s; }
         .dm-calc-aviso { font-size:11px; color:#ff9060; margin-top:6px; display:none; }
 
         .dm-form-wrap { align-self:flex-start; max-width:90%; animation:dm-fadein .35s ease; }
         .dm-form { background:var(--rc-cyan-08); border:1px solid var(--rc-cyan-15); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; }
-        .dm-form-titulo { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:600; color:var(--rc-sub); letter-spacing:.8px; text-transform:uppercase; border-bottom:1px solid var(--rc-cyan-08); padding-bottom:8px; }
+        .dm-form-titulo { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:13px; font-weight:600; color:var(--rc-sub); letter-spacing:.8px; text-transform:uppercase; border-bottom:1px solid var(--rc-cyan-08); padding-bottom:8px; }
         .dm-form-field { display:flex; flex-direction:column; gap:4px; }
         .dm-form-field label { font-size:11px; color:var(--rc-sub); letter-spacing:1px; text-transform:uppercase; }
-        .dm-form-field input { background:rgba(0,0,0,0.35); border:1px solid var(--rc-cyan-15); border-radius:8px; padding:9px 12px; color:var(--rc-text); font-size:14px; font-family:'Exo 2',sans-serif; outline:none; transition:.25s; }
+        .dm-form-field input { background:rgba(0,0,0,0.35); border:1px solid var(--rc-cyan-15); border-radius:8px; padding:9px 12px; color:var(--rc-text); font-size:14px; font-family:var(--dm-font-body,'Exo 2',sans-serif); outline:none; transition:.25s; }
         .dm-form-field input:focus { border-color:var(--rc-cyan); box-shadow:0 0 8px var(--rc-cyan-15); }
         .dm-form-field input.erro { border-color:#ff6060 !important; }
 
@@ -166,12 +166,12 @@ class DmaiorRecarga extends HTMLElement {
           border-radius:14px 14px 0 0; padding:10px 14px;
           display:flex; align-items:center; justify-content:space-between;
         }
-        .dm-pix-frame-titulo { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; color:var(--rc-cyan); letter-spacing:.8px; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
-        .dm-pix-frame-timer  { font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:600; color:var(--rc-gold); }
+        .dm-pix-frame-titulo { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:13px; font-weight:700; color:var(--rc-cyan); letter-spacing:.8px; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+        .dm-pix-frame-timer  { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:12px; font-weight:600; color:var(--rc-gold); }
         .dm-pix-iframe { width:100%; height:420px; border:1px solid var(--rc-cyan-15); border-top:none; border-radius:0 0 14px 14px; background:#fff; display:block; }
         .dm-pix-fallback { background:rgba(0,0,0,0.3); border:1px solid var(--rc-cyan-15); border-top:none; border-radius:0 0 14px 14px; padding:16px; text-align:center; display:none; flex-direction:column; gap:10px; }
         .dm-pix-fallback p { font-size:12px; color:var(--rc-sub); line-height:1.5; }
-        .dm-pagar-ext-btn { background:var(--dm-grad-cyan,linear-gradient(135deg,#00b4d8,#00f2ff)); color:#000; font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; border:none; border-radius:10px; padding:12px; cursor:pointer; text-transform:uppercase; width:100%; transition:all .25s; box-shadow:0 4px 18px var(--rc-cyan-25); -webkit-tap-highlight-color:transparent; }
+        .dm-pagar-ext-btn { background:var(--dm-grad-cyan,linear-gradient(135deg,#00b4d8,#00f2ff)); color:#000; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:15px; font-weight:700; letter-spacing:1px; border:none; border-radius:10px; padding:12px; cursor:pointer; text-transform:uppercase; width:100%; transition:all .25s; box-shadow:0 4px 18px var(--rc-cyan-25); -webkit-tap-highlight-color:transparent; }
         .dm-pagar-ext-btn:hover { transform:scale(1.02); filter:brightness(1.1); }
 
         .dm-typing { display:flex; align-items:center; gap:5px; padding:10px 14px; background:var(--rc-card); border:1px solid var(--rc-border); border-radius:14px; border-bottom-left-radius:4px; align-self:flex-start; animation:dm-fadein .2s ease; }
@@ -180,7 +180,7 @@ class DmaiorRecarga extends HTMLElement {
         @keyframes dm-blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 
         .dm-input-area { position:relative; z-index:1; padding:12px 14px; background:rgba(0,0,0,0.4); border-top:1px solid var(--rc-cyan-08); display:flex; gap:8px; align-items:center; flex-shrink:0; }
-        .dm-input { flex:1; background:var(--rc-card); border:1px solid var(--rc-cyan-15); border-radius:10px; padding:11px 14px; color:var(--rc-text); font-size:14px; font-family:'Exo 2',sans-serif; outline:none; transition:.25s; height:42px; }
+        .dm-input { flex:1; background:var(--rc-card); border:1px solid var(--rc-cyan-15); border-radius:10px; padding:11px 14px; color:var(--rc-text); font-size:14px; font-family:var(--dm-font-body,'Exo 2',sans-serif); outline:none; transition:.25s; height:42px; }
         .dm-input:focus { border-color:var(--rc-cyan); box-shadow:0 0 8px var(--rc-cyan-08); }
         .dm-input:disabled { opacity:.4; cursor:not-allowed; }
         .dm-input::placeholder { color:var(--rc-sub); opacity:.5; }
@@ -188,13 +188,13 @@ class DmaiorRecarga extends HTMLElement {
         .dm-send:hover { transform:scale(1.08); filter:brightness(1.1); }
         .dm-send:disabled { opacity:.4; cursor:not-allowed; transform:none; }
         .dm-input-wrap { flex:1; display:flex; flex-direction:column; gap:5px; min-width:0; }
-        .dm-ajuda-btn { display:flex; align-items:center; gap:5px; background:none; border:none; padding:0 2px; color:var(--rc-sub); font-size:11px; font-family:'Exo 2',sans-serif; cursor:pointer; transition:.2s; width:fit-content; -webkit-tap-highlight-color:transparent; opacity:.6; }
+        .dm-ajuda-btn { display:flex; align-items:center; gap:5px; background:none; border:none; padding:0 2px; color:var(--rc-sub); font-size:11px; font-family:var(--dm-font-body,'Exo 2',sans-serif); cursor:pointer; transition:.2s; width:fit-content; -webkit-tap-highlight-color:transparent; opacity:.6; }
         .dm-ajuda-btn:hover { opacity:1; color:var(--rc-cyan); }
 
         .dm-ajuda-modal { display:none; position:absolute; inset:0; z-index:100; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; backdrop-filter:blur(4px); padding:20px; }
         .dm-ajuda-modal.aberto { display:flex; animation:dm-fadein .25s ease; }
         .dm-ajuda-inner { background:var(--rc-bg); border:1px solid var(--rc-cyan-25); border-radius:16px; overflow:hidden; width:100%; max-width:340px; box-shadow:0 20px 60px rgba(0,0,0,0.8); }
-        .dm-ajuda-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--rc-cyan-08); font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:600; color:var(--rc-text); }
+        .dm-ajuda-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--rc-cyan-08); font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:14px; font-weight:600; color:var(--rc-text); }
         .dm-ajuda-fechar { background:var(--rc-card); border:1px solid var(--rc-border); border-radius:6px; width:28px; height:28px; color:var(--rc-sub); cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center; transition:.2s; }
         .dm-ajuda-fechar:hover { background:rgba(255,60,60,0.15); color:#ff8888; }
         .dm-ajuda-img { width:100%; display:block; max-height:320px; object-fit:contain; background:var(--rc-bg); }
@@ -216,7 +216,7 @@ class DmaiorRecarga extends HTMLElement {
         .dm-footer-badge { flex-shrink:0; display:flex; justify-content:center; align-items:center; padding:5px; background:rgba(0,0,0,0.25); font-size:9px; color:rgba(255,255,255,0.18); letter-spacing:1px; text-transform:uppercase; border-top:1px solid rgba(255,255,255,0.03); pointer-events:none; z-index:1; }
 
         .dm-pos-conclusao { display:flex; gap:8px; flex-wrap:wrap; align-self:flex-start; animation:dm-fadein .4s ease; }
-        .dm-btn-suporte { display:flex; align-items:center; gap:6px; font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; letter-spacing:.8px; padding:10px 18px; border-radius:10px; cursor:pointer; text-transform:uppercase; text-decoration:none; transition:all .22s; -webkit-tap-highlight-color:transparent; }
+        .dm-btn-suporte { display:flex; align-items:center; gap:6px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:13px; font-weight:700; letter-spacing:.8px; padding:10px 18px; border-radius:10px; cursor:pointer; text-transform:uppercase; text-decoration:none; transition:all .22s; -webkit-tap-highlight-color:transparent; }
         .dm-btn-nova-recarga { background:linear-gradient(135deg,#00b4d8,#00f2ff); color:#000; border:none; box-shadow:0 4px 14px rgba(0,242,255,0.25); }
         .dm-btn-nova-recarga:hover { transform:scale(1.04); filter:brightness(1.08); }
         .dm-btn-whatsapp { background:rgba(37,211,102,0.12); color:#25d366; border:1px solid rgba(37,211,102,0.3); }

@@ -57,25 +57,25 @@ class DMaiorPolicies extends HTMLElement {
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap');
       /* Mapeia vars locais para as globais — adapta-se automaticamente ao tema ativo */
-      :host{display:block;width:100%;box-sizing:border-box;font-family:'Exo 2',sans-serif;--cyan:var(--dm-cyan);--cyan-dim:var(--dm-cyan-dim);--cyan-glow:var(--dm-cyan-08);--cyan-border:var(--dm-border);--bg-deep:var(--dm-bg-1);--bg-card:var(--dm-bg-card);--text-main:var(--dm-text);--text-muted:var(--dm-text-sub);--text-dim:var(--dm-text-muted);--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
+      :host{display:block;width:100%;box-sizing:border-box;font-family:var(--dm-font-body,'Exo 2',sans-serif);--cyan:var(--dm-cyan);--cyan-dim:var(--dm-cyan-dim);--cyan-glow:var(--dm-cyan-08);--cyan-border:var(--dm-border);--bg-deep:var(--dm-bg-1);--bg-card:var(--dm-bg-card);--text-main:var(--dm-text);--text-muted:var(--dm-text-sub);--text-dim:var(--dm-text-muted);--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
       .root{background:var(--bg-deep);border:1px solid var(--cyan-border);border-radius:20px;box-shadow:0 8px 60px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.035);max-width:980px;margin:10px auto;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
       .header{padding:clamp(26px,5vw,52px) clamp(22px,5vw,56px) clamp(18px,3vw,34px);border-bottom:1px solid var(--cyan-border);background:linear-gradient(135deg,rgba(0,242,255,0.04) 0%,transparent 55%)}
       .header-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,242,255,0.07);border:1px solid var(--cyan-border);border-radius:20px;padding:4px 13px;margin-bottom:14px;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cyan-dim)}
       .badge-dot{width:6px;height:6px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);animation:pdot 2.2s ease-in-out infinite}
       @keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.65)}}
-      .header h1{font-family:'Rajdhani',sans-serif;font-size:clamp(1.85rem,5vw,3rem);font-weight:700;color:var(--text-main);text-transform:uppercase;letter-spacing:0.07em;line-height:1.1;text-shadow:0 0 40px var(--cyan-glow)}
+      .header h1{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1.85rem,5vw,3rem);font-weight:700;color:var(--text-main);text-transform:uppercase;letter-spacing:0.07em;line-height:1.1;text-shadow:0 0 40px var(--cyan-glow)}
       .header h1 em{font-style:normal;color:var(--cyan)}
       .header-sub{margin-top:10px;font-size:0.8rem;color:var(--text-dim);letter-spacing:0.04em}
       .header-sub span{color:var(--text-muted)}
       .body{display:grid;grid-template-columns:230px 1fr}
       .toc{border-right:1px solid var(--cyan-border);padding:28px 18px;}
       .toc::-webkit-scrollbar{width:2px}.toc::-webkit-scrollbar-thumb{background:var(--cyan-border);border-radius:2px}
-      .toc-label{font-family:'Rajdhani',sans-serif;font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;padding-left:10px}
+      .toc-label{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;padding-left:10px}
       .toc-link{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:8px;color:var(--text-muted);font-size:0.82rem;font-weight:500;cursor:pointer;transition:var(--ease);border:1px solid transparent;margin-bottom:3px;background:none;text-align:left;width:100%;line-height:1.35}
       .toc-link:hover{color:var(--text-main);background:rgba(0,242,255,0.05);border-color:var(--cyan-border)}
       .toc-link.active{color:var(--cyan);background:rgba(0,242,255,0.08);border-color:rgba(0,242,255,0.28)}
-      .toc-num{font-family:'Rajdhani',sans-serif;font-size:0.7rem;font-weight:700;color:var(--text-dim);min-width:18px;padding-top:1px;transition:color var(--ease)}
+      .toc-num{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:0.7rem;font-weight:700;color:var(--text-dim);min-width:18px;padding-top:1px;transition:color var(--ease)}
       .toc-link.active .toc-num{color:var(--cyan)}
       .scroll-area{padding:clamp(28px,4vw,48px) clamp(22px,4vw,52px);}
       .scroll-area::-webkit-scrollbar{width:3px}.scroll-area::-webkit-scrollbar-thumb{background:var(--cyan-border);border-radius:3px}
@@ -85,9 +85,9 @@ class DMaiorPolicies extends HTMLElement {
       .sec-title{display:flex;align-items:center;gap:13px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--cyan-border);position:relative}
       .sec-title::after{content:'';position:absolute;bottom:-1px;left:0;width:55px;height:1px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
       .sec-icon{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(0,242,255,0.07);border:1px solid var(--cyan-border);flex-shrink:0;color:var(--cyan)}
-      .sec-title h2{font-family:'Rajdhani',sans-serif;font-size:clamp(1.05rem,2.5vw,1.35rem);font-weight:700;color:var(--text-main);text-transform:uppercase;letter-spacing:0.06em}
+      .sec-title h2{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1.05rem,2.5vw,1.35rem);font-weight:700;color:var(--text-main);text-transform:uppercase;letter-spacing:0.06em}
       .sub{margin-top:26px}
-      .sub h3{font-family:'Rajdhani',sans-serif;font-size:.95rem;font-weight:600;color:var(--cyan-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+      .sub h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:600;color:var(--cyan-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
       .sub h3::before{content:'';display:inline-block;width:3px;height:13px;background:var(--cyan);border-radius:2px;box-shadow:0 0 5px var(--cyan)}
       p{color:var(--text-muted);font-size:clamp(.87rem,1.8vw,.96rem);line-height:1.78;margin-bottom:12px;font-weight:300}
       strong{color:var(--text-main);font-weight:600}
@@ -104,13 +104,13 @@ class DMaiorPolicies extends HTMLElement {
       .rights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-top:14px}
       .right-card{padding:14px 15px;background:var(--bg-card);border:1px solid var(--cyan-border);border-radius:10px;transition:var(--ease)}
       .right-card:hover{border-color:rgba(0,242,255,.35);background:rgba(0,242,255,0.04)}
-      .rc-title{font-family:'Rajdhani',sans-serif;font-size:.9rem;font-weight:700;color:var(--cyan-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+      .rc-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.9rem;font-weight:700;color:var(--cyan-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
       .right-card p{font-size:.82rem;margin-bottom:0}
       .divider{height:1px;background:linear-gradient(90deg,transparent,var(--cyan-border),transparent);margin:48px 0}
       .contact-card{margin-top:44px;padding:clamp(18px,4vw,34px);background:linear-gradient(135deg,rgba(0,242,255,0.05) 0%,rgba(0,242,255,0.02) 100%);border:1px dashed rgba(0,242,255,.35);border-radius:var(--radius);text-align:center}
       .contact-card svg{color:var(--cyan);margin-bottom:12px}
       .contact-label{font-size:.87rem;color:var(--text-muted);margin-bottom:8px}
-      .contact-email{display:inline-block;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:clamp(.95rem,3vw,1.15rem);color:var(--cyan);letter-spacing:.05em;word-break:break-all;text-decoration:none}
+      .contact-email{display:inline-block;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:clamp(.95rem,3vw,1.15rem);color:var(--cyan);letter-spacing:.05em;word-break:break-all;text-decoration:none}
       .contact-email:hover{text-decoration:underline}
       .contact-note{margin-top:14px;font-size:.78rem;color:var(--text-dim)}
       .footer-note{margin-top:48px;padding:16px 20px;background:rgba(255,255,255,0.02);border:1px solid var(--cyan-border);border-radius:10px;font-size:.8rem;color:var(--text-dim);line-height:1.65}

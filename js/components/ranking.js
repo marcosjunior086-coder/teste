@@ -194,26 +194,26 @@ class RankingDmaior extends HTMLElement {
       .login-box{padding:40px;width:90%;max-width:400px;text-align:center}
       .login-box h2{font-size:var(--t-title-lg);background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
       .input-group{position:relative;margin-bottom:20px}
-      .input-group input{width:100%;padding:15px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.6);color:var(--text);font-family:'Exo 2';font-size:var(--t-info);outline:none;text-align:center;letter-spacing:2px}
+      .input-group input{width:100%;padding:15px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.6);color:var(--text);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:var(--t-info);outline:none;text-align:center;letter-spacing:2px}
       .input-group input:focus{border-color:var(--roxo);box-shadow:0 0 10px var(--border)}
       #toggle-pw{position:absolute;right:15px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted)}
       #toggle-pw svg{width:22px;height:22px;fill:currentColor}
       .remember-me{display:flex;align-items:center;justify-content:center;gap:8px;font-size:var(--t-info);color:var(--text-sub);margin-bottom:20px;cursor:pointer}
-      .btn-submit{width:100%;padding:15px;background:var(--bloom-grad);border:none;border-radius:10px;color:#fff;font-family:'Rajdhani';font-size:var(--t-title-md);font-weight:700;cursor:pointer}
+      .btn-submit{width:100%;padding:15px;background:var(--bloom-grad);border:none;border-radius:10px;color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:var(--t-title-md);font-weight:700;cursor:pointer}
       .btn-submit:hover{box-shadow:0 0 20px var(--border);transform:translateY(-1px)}
       #login-error{color:var(--red);font-size:var(--t-info);margin-top:15px;display:none}
       #dashboard{display:none;width:100%;max-width:600px;margin:0 auto}
       .header{text-align:center;margin-bottom:20px}
       .header h1{font-size:var(--t-title-lg);color:var(--text);margin-bottom:10px;text-shadow:0 0 15px var(--border)}
-      .time-counter{font-size:var(--t-info);color:var(--gold);font-family:'Rajdhani';letter-spacing:1px;margin-bottom:12px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;min-height:20px}
+      .time-counter{font-size:var(--t-info);color:var(--gold);font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;min-height:20px}
       .period-wrapper{position:relative;width:100%;max-width:300px;margin:0 auto}
       .period-wrapper::after{content:"▼";position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--roxo);pointer-events:none;font-size:0.8rem}
       /* MÊS ATUAL — fundo usa var(--bg-card) para ficar claro nos temas claros */
-      .period-select{width:100%;padding:12px 35px 12px 15px;background:var(--bg-card);color:var(--text);border:1px solid var(--border);border-radius:10px;font-family:'Rajdhani';font-size:var(--t-title-md);outline:none;cursor:pointer;appearance:none;text-align:center;text-transform:uppercase;box-shadow:0 2px 8px var(--border-dim);transition:border-color .2s,box-shadow .2s}
+      .period-select{width:100%;padding:12px 35px 12px 15px;background:var(--bg-card);color:var(--text);border:1px solid var(--border);border-radius:10px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:var(--t-title-md);outline:none;cursor:pointer;appearance:none;text-align:center;text-transform:uppercase;box-shadow:0 2px 8px var(--border-dim);transition:border-color .2s,box-shadow .2s}
       .period-select:focus{border-color:var(--roxo);box-shadow:0 0 0 3px var(--border-dim)}
       /* Barra DIAMANTES/HORAS — fundo usa var(--bg-card2) para adaptar ao tema */
       .tabs{display:flex;gap:10px;margin-bottom:15px;margin-top:15px;background:var(--bg-card2);padding:5px;border-radius:12px;border:1px solid var(--border-dim)}
-      .tab-btn{flex:1;padding:12px;border:none;background:transparent;color:var(--text-muted);font-family:'Rajdhani';font-size:var(--t-info);border-radius:8px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+      .tab-btn{flex:1;padding:12px;border:none;background:transparent;color:var(--text-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:var(--t-info);border-radius:8px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
       .tab-btn:hover{background:var(--border-dim);color:var(--text-sub);}
       .tab-btn.active{background:var(--bloom-grad);color:#fff;box-shadow:0 0 15px var(--border)}
       .tab-btn svg{width:16px;height:16px}
@@ -245,25 +245,25 @@ class RankingDmaior extends HTMLElement {
       .first .avatar{width:75px;height:75px;border-color:var(--azul);border-width:3.5px}
       .second .avatar{border-color:var(--roxo)}
       .third .avatar{border-color:var(--bronze)}
-      .badge{position:absolute;top:-5px;right:-5px;width:24px;height:24px;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:12px;font-weight:900;font-family:'Rajdhani';border:2px solid #000;z-index:3}
+      .badge{position:absolute;top:-5px;right:-5px;width:24px;height:24px;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:12px;font-weight:900;font-family:var(--dm-font-title,'Rajdhani',sans-serif);border:2px solid #000;z-index:3}
       .first .badge{background:var(--gold);color:#000;width:28px;height:28px;top:-8px;right:-8px}
       .second .badge{background:var(--roxo);color:#fff}
       .third .badge{background:var(--bronze);color:#fff}
       /* Valores: todos usam var(--azul) do tema atual para consistência visual */
-      .podium-val{font-size:1.2rem;font-weight:800;font-family:'Rajdhani';display:flex;align-items:center;gap:5px;margin-top:2px;color:var(--azul)}
+      .podium-val{font-size:1.2rem;font-weight:800;font-family:var(--dm-font-title,'Rajdhani',sans-serif);display:flex;align-items:center;gap:5px;margin-top:2px;color:var(--azul)}
       .first .podium-val{font-size:1.5rem}
       .crown-emoji{position:absolute;top:-42px;left:50%;transform:translateX(-50%) rotate(-10deg);font-size:36px;filter:drop-shadow(0 2px 8px rgba(240,192,64,0.7));z-index:5}
       .podium-item .name{width:95%;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:visible;text-align:center;margin-bottom:0;font-size:13px}
-      .podium-id{font-size:10px;color:var(--text-muted);margin-bottom:4px;font-family:'Exo 2',sans-serif}
+      .podium-id{font-size:10px;color:var(--text-muted);margin-bottom:4px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
       /* Tag de prêmio: verde sólido preenchido + texto branco — igual ao design de referência */
-      .prize-tag{font-size:0.9rem;color:#fff;background:#166534;padding:6px 16px;border-radius:20px;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:700;border:none;display:flex;align-items:center;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(22,101,52,0.35)}
+      .prize-tag{font-size:0.9rem;color:#fff;background:#166534;padding:6px 16px;border-radius:20px;margin-top:8px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;border:none;display:flex;align-items:center;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(22,101,52,0.35)}
       .first .prize-tag{font-size:1.1rem;padding:7px 18px}
-      .list-prize-tag{font-size:0.75rem;color:#fff;background:#166534;padding:3px 9px;border-radius:12px;font-family:'Rajdhani',sans-serif;font-weight:700;border:none;display:inline-flex;align-items:center;margin-top:4px;box-shadow:0 1px 5px rgba(22,101,52,0.3)}
+      .list-prize-tag{font-size:0.75rem;color:#fff;background:#166534;padding:3px 9px;border-radius:12px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;border:none;display:inline-flex;align-items:center;margin-top:4px;box-shadow:0 1px 5px rgba(22,101,52,0.3)}
       .currency-symbol{margin-right:4px;font-size:0.9em;opacity:0.9}
       .ranking-list{display:flex;flex-direction:column;gap:10px;width:100%;animation:fadeUp 0.8s ease both}
       .list-item{display:flex;align-items:center;padding:12px 18px;background:var(--bg-card);border-radius:16px;border:1px solid var(--border-dim);transition:transform 0.2s}
       .list-item:hover{transform:translateX(5px);background:var(--podium-2);border-color:var(--border)}
-      .list-rank{width:35px;font-size:var(--t-title-md);font-family:'Rajdhani';font-weight:700;color:var(--text-muted);text-align:center}
+      .list-rank{width:35px;font-size:var(--t-title-md);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--text-muted);text-align:center}
       .list-avatar-wrap{position:relative;width:45px;height:45px;margin-right:15px;flex-shrink:0}
       .list-avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid var(--border-dim);display:block}
       /* ── Live: sem borda azul, sem texto LIVE — só bolinha com barrinhas animadas ── */
@@ -285,19 +285,19 @@ class RankingDmaior extends HTMLElement {
       :host-context([data-theme="laranja"]) .live-dot span{background:var(--azul);}
       .list-name-col{display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;margin-right:10px}
       .list-name{font-size:var(--t-info);color:var(--text);font-weight:600;display:flex;align-items:center;justify-content:flex-start;gap:4px;white-space:nowrap;overflow:visible;min-width:0}
-      .list-id{font-size:0.7rem;color:var(--text-muted);font-family:'Exo 2',sans-serif}
+      .list-id{font-size:0.7rem;color:var(--text-muted);font-family:var(--dm-font-body,'Exo 2',sans-serif)}
       /* Valor do score na lista — estilo idêntico ao panel-value do painel admin: gradiente de texto + letter-spacing */
-      .list-score{font-size:var(--t-val);font-weight:700;font-family:'Rajdhani';margin-left:auto;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-      .state-msg{text-align:center;padding:40px;color:var(--roxo);font-family:'Rajdhani'}
+      .list-score{font-size:var(--t-val);font-weight:700;font-family:var(--dm-font-title,'Rajdhani',sans-serif);margin-left:auto;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+      .state-msg{text-align:center;padding:40px;color:var(--roxo);font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
       .spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border-dim);border-top-color:var(--roxo);animation:spin 0.8s linear infinite;margin:0 auto 15px}
       .logout-btn{background:var(--bg-card);border:1px solid var(--border-dim);color:var(--red);cursor:pointer;margin-top:35px;padding:8px 16px;border-radius:8px;transition:0.3s}
-      .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:'Rajdhani';font-weight:700}
+      .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700}
       @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
       @keyframes spin{100%{transform:rotate(360deg)}}
       .panel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:298;}
       .panel-overlay.show{display:block}
       /* Botão "Regras" lateral — box-shadow usa var(--roxo) para seguir o tema */
-      .info-tab-btn{position:fixed;right:0;bottom:28%;background:var(--bloom-grad);color:#fff;border:none;border-radius:10px 0 0 10px;padding:22px 10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-lr;z-index:299;box-shadow:-4px 0 22px var(--border);display:flex;align-items:center;gap:10px;line-height:1;opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.25s ease,visibility 0.25s ease,box-shadow 0.3s;}
+      .info-tab-btn{position:fixed;right:0;bottom:28%;background:var(--bloom-grad);color:#fff;border:none;border-radius:10px 0 0 10px;padding:22px 10px;cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-lr;z-index:299;box-shadow:-4px 0 22px var(--border);display:flex;align-items:center;gap:10px;line-height:1;opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.25s ease,visibility 0.25s ease,box-shadow 0.3s;}
       .info-tab-btn:hover{box-shadow:-4px 0 32px var(--azul)}
       .info-tab-btn .tab-icon{display:block;transform:rotate(90deg);width:15px;height:15px;flex-shrink:0;}
       .info-panel{position:fixed;right:-290px;bottom:10%;width:255px;max-height:82vh;overflow-y:auto;overflow-x:hidden;padding:20px 18px 22px;z-index:299;border-radius:16px 0 0 16px !important;transition:right 0.35s cubic-bezier(0.4,0,0.2,1);scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
@@ -306,17 +306,17 @@ class RankingDmaior extends HTMLElement {
       .info-panel::after{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;right:auto !important;background:linear-gradient(180deg,transparent,var(--roxo),var(--azul),transparent);height:100% !important;}
       .info-panel.open{right:40px}
       .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border-dim)}
-      .panel-title{font-size:1rem;font-family:'Rajdhani',sans-serif;letter-spacing:2px;text-transform:uppercase;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+      .panel-title{font-size:1rem;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;text-transform:uppercase;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
       .close-panel{background:var(--border-dim);border:1px solid var(--border-dim);color:var(--text-muted);cursor:pointer;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:0.2s;flex-shrink:0}
       .close-panel:hover{color:var(--red);border-color:rgba(248,113,113,0.4);background:rgba(248,113,113,0.08)}
       .panel-row{display:flex;flex-direction:column;gap:3px;margin-bottom:13px}
-      .panel-label{font-size:0.6rem;color:var(--text-muted);font-family:'Rajdhani',sans-serif;letter-spacing:2px;text-transform:uppercase}
-      .panel-value{font-size:0.82rem;color:var(--azul);font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:0.5px}
+      .panel-label{font-size:0.6rem;color:var(--text-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;text-transform:uppercase}
+      .panel-value{font-size:0.82rem;color:var(--azul);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:0.5px}
       .panel-value.highlight{color:var(--gold)}
       .panel-divider{height:1px;background:var(--border-dim);margin:14px 0}
       #rule-text{font-size:0.75rem;color:var(--text-sub);line-height:1.5;text-align:left;padding:0;margin-bottom:0}
       #rule-text b{color:var(--azul)}
-      .btn-refresh{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:'Rajdhani';font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px}
+      .btn-refresh{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px}
       .btn-refresh:hover{border-color:var(--azul);color:var(--azul);background:var(--border-dim)}
       .btn-refresh:disabled{opacity:0.35;cursor:not-allowed}
       .btn-refresh svg{width:15px;height:15px;fill:currentColor;transition:transform 0.4s}
@@ -360,7 +360,7 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .ctrls-row .tabs{order:0;width:auto;flex-shrink:0;margin:0;padding:4px;border-radius:10px}
       :host(.dinamico) .ctrls-row .tab-btn{padding:8px 14px;font-size:.78rem;gap:5px}
       :host(.dinamico) .ctrls-row .tab-btn svg{width:13px;height:13px}
-      :host(.dinamico) .dyn-rules-btn{order:3;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card2);color:var(--text-muted);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:border-color .2s,color .2s}
+      :host(.dinamico) .dyn-rules-btn{order:3;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card2);color:var(--text-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:border-color .2s,color .2s}
       :host(.dinamico) .dyn-rules-btn:hover{border-color:var(--azul);color:var(--azul)}
       /* ── Pódio dinâmico ── */
       :host(.dinamico) .podium{height:auto;margin-top:80px;margin-bottom:20px;gap:8px}
@@ -375,8 +375,8 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .first .avatar{border-color:#f0c040!important;box-shadow:0 0 14px rgba(240,192,64,.55)!important}
       :host(.dinamico) .third .avatar{border-color:#d040c8!important;box-shadow:0 0 12px rgba(200,60,200,.5)!important}
       :host(.dinamico) .crown-emoji{top:-42px}
-      :host(.dinamico) .pod-pos-num{position:absolute;font-family:'Rajdhani',sans-serif;font-weight:900;font-size:5.5rem;opacity:.14;bottom:6px;right:8px;line-height:1;user-select:none;pointer-events:none;color:#fff;z-index:1}
-      :host(.dinamico) .pod-live-badge{position:absolute;top:9px;left:50%;transform:translateX(-50%);background:#166534;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;padding:3px 9px;border-radius:6px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+      :host(.dinamico) .pod-pos-num{position:absolute;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:900;font-size:5.5rem;opacity:.14;bottom:6px;right:8px;line-height:1;user-select:none;pointer-events:none;color:#fff;z-index:1}
+      :host(.dinamico) .pod-live-badge{position:absolute;top:9px;left:50%;transform:translateX(-50%);background:#166534;color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.7rem;letter-spacing:1px;padding:3px 9px;border-radius:6px;display:flex;align-items:center;gap:4px;white-space:nowrap}
       :host(.dinamico) .pod-live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulsedot 1.5s infinite}
       @keyframes pulsedot{0%,100%{opacity:1}50%{opacity:.4}}
       :host(.dinamico) .podium-item .name,:host(.dinamico) .podium-item .podium-val,:host(.dinamico) .podium-item .podium-id,:host(.dinamico) .podium-item .prize-tag{position:relative;z-index:2}

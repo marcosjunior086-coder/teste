@@ -203,17 +203,17 @@ class DmaiorServicesMenu extends HTMLElement {
         @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Rajdhani:wght@700&display=swap');
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         :host { display:block; width:100%; }
-        .container { background-color:transparent; font-family:'Exo 2',sans-serif; display:flex; justify-content:center; align-items:center; padding:30px 10px; width:100%; }
+        .container { background-color:transparent; font-family:var(--dm-font-body,'Exo 2',sans-serif); display:flex; justify-content:center; align-items:center; padding:30px 10px; width:100%; }
         .mobile-layout { display:flex; flex-direction:column; align-items:center; gap:30px; width:100%; max-width:450px; }
         .btn-agency-mobile { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; background:var(--dm-grad-deep); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); border-radius:16px; padding:16px 15px; text-decoration:none; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); position:relative; box-shadow:0 10px 25px var(--dm-shadow-50),0 0 20px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))),inset 0 1px 0 var(--dm-bw05); transition:all .3s ease; overflow:hidden; cursor:pointer; }
         .btn-agency-mobile::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--dm-grad-effect-x,var(--dm-grad-rank-x,linear-gradient(90deg,#3b82f6,#00d4d4))); opacity:.68; }
-        .btn-agency-mobile span { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--dm-text); white-space:nowrap; }
+        .btn-agency-mobile span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:1rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--dm-text); white-space:nowrap; }
         .btn-agency-mobile svg { width:24px; height:24px; stroke:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); flex-shrink:0; }
         .menu-panel { position:relative; width:100%; background:var(--dm-grad-deep); border:1px solid var(--dm-effect-20,var(--dm-rank-cyan-20,rgba(0,212,212,.20))); border-radius:25px; display:flex; justify-content:space-around; align-items:center; padding:15px 10px; box-shadow:0 15px 35px var(--dm-shadow-lg),0 0 22px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))),inset 0 1px 0 var(--dm-bw05); }
         .menu-panel::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--dm-effect-blue,var(--dm-rank-blue,#3b82f6)),var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)),transparent); opacity:.68; border-radius:25px 25px 0 0; }
         .nav-item { display:flex; flex-direction:column; align-items:center; text-decoration:none; width:80px; gap:8px; cursor:pointer; }
         .nav-item svg { width:28px; height:28px; transition:all .3s ease; }
-        .nav-item span { font-family:'Rajdhani',sans-serif; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--dm-text); transition:all .3s ease; }
+        .nav-item span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--dm-text); transition:all .3s ease; }
         .item-instagram { color:#E1306C; }
         .item-instagram svg { fill:#E1306C; }
         .item-whatsapp { color:#25D366; }
@@ -230,7 +230,7 @@ class DmaiorServicesMenu extends HTMLElement {
         :host-context(:not([data-theme])) .floating-btn svg,
         :host-context([data-theme="dark"]) .floating-btn svg,
         :host-context([data-theme="branco"]) .floating-btn svg { color:#00d4d4; stroke:#00d4d4; }
-        .nav-item-center span { font-family:'Rajdhani',sans-serif; font-size:.8rem; font-weight:700; color:var(--gem-accent); text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 7px color-mix(in srgb,var(--gem-accent) 35%,transparent); }
+        .nav-item-center span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.8rem; font-weight:700; color:var(--gem-accent); text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 7px color-mix(in srgb,var(--gem-accent) 35%,transparent); }
         @keyframes pulse-gem { 0%{transform:scale(1);opacity:.9} 50%{transform:scale(1.08);opacity:1} 100%{transform:scale(1);opacity:.9} }
         /* Desktop usa o mesmo layout do mobile — menu unificado */
         .mobile-layout { max-width:520px; }
@@ -269,7 +269,7 @@ class DmaiorServicesMenu extends HTMLElement {
         .dp-banner-icon { width:46px; height:46px; border-radius:18px; background:var(--dm-cyan-10); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .dp-banner-icon svg { width:26px; height:26px; stroke:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); animation:pulse-gem 2s infinite ease-in-out; }
         .dp-banner-text { flex:1; min-width:0; }
-        .dp-banner-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.05rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.5px; line-height:1.2; }
+        .dp-banner-title { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1.05rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.5px; line-height:1.2; }
         .dp-banner-sub { font-size:.72rem; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); margin-top:2px; }
         .dp-banner-arrow { width:30px; height:30px; border-radius:50%; background:var(--dm-cyan-10); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .dp-banner-arrow svg { width:14px; height:14px; stroke:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
@@ -278,11 +278,11 @@ class DmaiorServicesMenu extends HTMLElement {
         .dp-agency-btn { display:flex; align-items:center; gap:12px; margin:0 16px 14px; padding:14px 16px; background:linear-gradient(135deg,var(--dm-cyan-12),var(--dm-cyan-08)); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); border-radius:24px; text-decoration:none; position:relative; overflow:hidden; }
         .dp-agency-btn::before { content:''; position:absolute; top:0; left:0; right:0; height:1.5px; background:linear-gradient(90deg,transparent,var(--dm-effect-blue,var(--dm-rank-blue,#3b82f6)),var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)),transparent); }
         .dp-agency-btn svg { width:20px; height:20px; stroke:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); flex-shrink:0; }
-        .dp-agency-btn span { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; text-transform:uppercase; letter-spacing:1px; color:var(--dm-text); }
-        .dp-agency-badge { margin-left:auto; background:var(--dm-cyan-12); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); border-radius:999px; padding:3px 12px; font-size:.62rem; font-weight:700; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+        .dp-agency-btn span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.95rem; text-transform:uppercase; letter-spacing:1px; color:var(--dm-text); }
+        .dp-agency-badge { margin-left:auto; background:var(--dm-cyan-12); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); border-radius:999px; padding:3px 12px; font-size:.62rem; font-weight:700; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); font-family:var(--dm-font-title,'Rajdhani',sans-serif); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
 
         /* Título de seção */
-        .dp-section-title { font-family:'Rajdhani',sans-serif; font-size:.65rem; font-weight:700; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:2px; padding:0 16px 8px; }
+        .dp-section-title { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.65rem; font-weight:700; color:var(--dm-text-sub); text-transform:uppercase; letter-spacing:2px; padding:0 16px 8px; }
 
         /* Grid 2 colunas */
         .dp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px 14px; }
@@ -293,7 +293,7 @@ class DmaiorServicesMenu extends HTMLElement {
         .dp-item-icon { width:38px; height:38px; border-radius:16px; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .dp-item-icon svg { width:19px; height:19px; }
         .dp-item-text { flex:1; min-width:0; }
-        .dp-item-name { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.3px; line-height:1.1; }
+        .dp-item-name { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.95rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.3px; line-height:1.1; }
         .dp-item-label { font-size:.62rem; font-weight:600; margin-top:2px; opacity:.75; }
         .dp-item-arrow { width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex-shrink:0; opacity:.4; margin-left:auto; color:var(--dm-text); }
         .dp-item-arrow svg { width:14px; height:14px; }
@@ -383,7 +383,7 @@ class DmaiorServicesMenu extends HTMLElement {
         a.bc-slide { cursor:pointer; }
         .bc-slide img { display:block; width:100%; aspect-ratio:32/9; object-fit:cover; border-radius:16px; }
         .bc-caption { position:absolute; bottom:0; left:0; right:0; padding:8px 14px 10px; background:linear-gradient(to top,rgba(0,0,0,.65),transparent); border-radius:0 0 16px 16px; pointer-events:none; }
-        .bc-caption span { font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+        .bc-caption span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.85rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,.6); }
         .bc-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }
         .bc-dot { width:7px; height:7px; border-radius:50%; border:none; background:rgba(255,255,255,.4); cursor:pointer; padding:0; transition:background .25s,transform .25s; }
         .bc-dot-active { background:#fff; transform:scale(1.25); }

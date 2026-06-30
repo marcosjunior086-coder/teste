@@ -97,7 +97,7 @@ class MenuDesktopDMaior extends HTMLElement {
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;500;600&display=swap');
       *{ box-sizing:border-box; margin:0; padding:0; }
-      :host{ display:block; font-family:'Exo 2',sans-serif; width:100%; height:80px; }
+      :host{ display:block; font-family:var(--dm-font-body,'Exo 2',sans-serif); width:100%; height:80px; }
       .hd{ display:flex; align-items:center; width:100%; height:80px; padding:0 40px; background:transparent; }
       .logo{ height:38px; width:auto; object-fit:contain; margin-right:40px; transition:transform .2s; }
       .logo:hover{ transform:scale(1.02); }
@@ -113,18 +113,18 @@ class MenuDesktopDMaior extends HTMLElement {
       .dd-link{ padding:12px 24px; text-decoration:none; color:#a0b8c8; font-size:.9rem; font-weight:500; transition:all .2s; }
       .dd-link:hover{ background:rgba(0,212,212,.1); color:#fff; padding-left:30px; border-left:3px solid #00d4d4; }
       .auth-zone{ margin-left:auto; display:flex; align-items:center; min-width:220px; justify-content:flex-end; }
-      .btn-access{ display:flex; align-items:center; gap:8px; background:linear-gradient(90deg,#00d4d4,#008c8c); color:#000; border:none; padding:9px 18px; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.9rem; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all .2s; letter-spacing:.05em; }
+      .btn-access{ display:flex; align-items:center; gap:8px; background:linear-gradient(90deg,#00d4d4,#008c8c); color:#000; border:none; padding:9px 18px; border-radius:8px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.9rem; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all .2s; letter-spacing:.05em; }
       .btn-access:hover{ transform:translateY(-1px); box-shadow:0 4px 15px rgba(0,212,212,.3); }
       .user-zone{ position:relative; display:flex; align-items:center; gap:10px; cursor:pointer; }
       .avatar-wrap{ width:38px; height:38px; border-radius:50%; border:2px solid #00d4d4; overflow:hidden; background:#12121f; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:box-shadow .2s; }
       .avatar-wrap:hover{ box-shadow:0 0 12px rgba(0,212,212,.5); }
       .avatar-wrap img{ width:100%; height:100%; object-fit:cover; }
-      .user-name{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.9rem; color:#e2e8f0; text-transform:uppercase; letter-spacing:.05em; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .user-name{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.9rem; color:#e2e8f0; text-transform:uppercase; letter-spacing:.05em; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .user-chev{ transition:transform .3s; }
       .user-dd{ display:none; position:absolute; top:52px; right:0; background:rgba(20,20,32,.98); backdrop-filter:blur(8px); border:1px solid rgba(0,212,212,.15); border-top:2px solid #00d4d4; border-radius:0 0 8px 8px; min-width:200px; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,.5); padding:8px 0; z-index:200; }
       .user-zone:hover .user-dd{ display:flex; animation:fadePop .25s ease forwards; }
       .user-zone:hover .user-chev{ transform:rotate(180deg); }
-      .ud-link{ display:flex; align-items:center; gap:10px; padding:12px 20px; text-decoration:none; color:#a0b8c8; font-size:.9rem; font-weight:500; transition:all .2s; border:none; background:none; width:100%; cursor:pointer; font-family:'Exo 2',sans-serif; }
+      .ud-link{ display:flex; align-items:center; gap:10px; padding:12px 20px; text-decoration:none; color:#a0b8c8; font-size:.9rem; font-weight:500; transition:all .2s; border:none; background:none; width:100%; cursor:pointer; font-family:var(--dm-font-body,'Exo 2',sans-serif); }
       .ud-link:hover{ background:rgba(0,212,212,.1); color:#fff; }
       .ud-link.danger{ color:#f87171; }
       .ud-link.danger:hover{ background:rgba(248,113,113,.1); color:#f87171; }

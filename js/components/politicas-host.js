@@ -35,7 +35,7 @@ class PoliticasHost extends HTMLElement {
                 --sub:      var(--dm-text-sub);
                 --border:   var(--dm-border);
                 width: 100%;
-                font-family: 'Exo 2', sans-serif;
+                font-family: var(--dm-font-body,'Exo 2',sans-serif);
                 color: var(--text);
             }
 
@@ -65,7 +65,7 @@ class PoliticasHost extends HTMLElement {
                 width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--cyan), transparent);
             }
             .header-title { 
-                font-family: 'Rajdhani', sans-serif; 
+                font-family: var(--dm-font-title,'Rajdhani',sans-serif); 
                 font-size: clamp(1rem, 3.5vw, 1.2rem); 
                 font-weight: 700; text-transform: uppercase; 
                 letter-spacing: 0.5px; margin-bottom: 2px; 
@@ -94,7 +94,7 @@ class PoliticasHost extends HTMLElement {
             .audio-btn svg { fill: #000; }
             
             .audio-info { display: flex; flex-direction: column; align-items: flex-start; }
-            .audio-label { font-family: 'Rajdhani', sans-serif; font-size: 0.65rem; font-weight: 700; color: #fff; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+            .audio-label { font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 0.65rem; font-weight: 700; color: #fff; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
             .audio-time { font-size: 0.6rem; color: var(--cyan); font-variant-numeric: tabular-nums; }
             .progress-container { width: 80px; height: 2px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin-top: 2px; overflow: hidden; position: relative; }
             .progress-bar { height: 100%; width: 0%; background: var(--cyan); border-radius: 2px; transition: width 0.1s linear; }
@@ -108,7 +108,7 @@ class PoliticasHost extends HTMLElement {
             .tab-btn {
                 background: rgba(26, 26, 46, 0.7); border: 1px solid rgba(0, 212, 212, 0.2);
                 color: var(--sub); padding: 8px; border-radius: 8px;
-                font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; font-weight: 700;
+                font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 0.75rem; font-weight: 700;
                 text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
                 white-space: nowrap; transition: all 0.2s ease; flex: 1; text-align: center;
                 user-select: none;
@@ -127,7 +127,7 @@ class PoliticasHost extends HTMLElement {
                 padding: 14px 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
             }
             .box-title {
-                display: flex; align-items: center; gap: 6px; font-family: 'Rajdhani', sans-serif;
+                display: flex; align-items: center; gap: 6px; font-family: var(--dm-font-title,'Rajdhani',sans-serif);
                 font-size: 0.95rem; font-weight: 700; color: var(--cyan); text-transform: uppercase;
                 border-bottom: 1px solid rgba(0,212,212,0.15); padding-bottom: 6px; margin-bottom: 10px;
             }
@@ -421,7 +421,7 @@ class PoliticasHost extends HTMLElement {
                     </table>
 
                     <div class="text-block" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
-                        <div style="font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700; color: var(--cyan); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid rgba(0,212,212,0.15); padding-bottom: 4px;">
+                        <div style="font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 1rem; font-weight: 700; color: var(--cyan); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid rgba(0,212,212,0.15); padding-bottom: 4px;">
                             Cálculo da Baseline de Diamantes
                         </div>
                         

@@ -23,7 +23,7 @@ class WidgetBeneficios extends HTMLElement {
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap');
       *{margin:0;padding:0;box-sizing:border-box;max-width:100%}
-      :host{display:block;width:100%;font-family:'Exo 2',sans-serif;color:var(--dm-text);background:transparent}
+      :host{display:block;width:100%;font-family:var(--dm-font-body,'Exo 2',sans-serif);color:var(--dm-text);background:transparent}
 
       /* ── Containers ── */
       .benefits-container{max-width:1000px;margin:0 auto;padding:40px 20px}
@@ -31,7 +31,7 @@ class WidgetBeneficios extends HTMLElement {
 
       /* ── Cabeçalhos ── */
       .header-benefits,.faq-header{text-align:center;margin-bottom:35px}
-      .main-title,.faq-title{font-family:'Rajdhani',sans-serif;font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+      .main-title,.faq-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
       .subtitle,.faq-subtitle{font-size:clamp(.85rem,2vw,1rem);color:var(--dm-text-sub);font-weight:300;max-width:520px;margin:0 auto;line-height:1.6}
       .gradient-text{color:var(--dm-cyan)}
 
@@ -44,7 +44,7 @@ class WidgetBeneficios extends HTMLElement {
       .card-header{display:flex;align-items:center;gap:15px;margin-bottom:12px}
       .icon-container{width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--dm-cyan-08);border-radius:12px;border:1px solid var(--dm-cyan-20)}
       .icon{width:28px;height:28px}
-      .benefit-title{font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px;margin:0}
+      .benefit-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.05rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px;margin:0}
       .benefit-text{font-size:.88rem;color:var(--dm-text-sub);line-height:1.65}
 
       /* ── Tips grid ── */
@@ -53,7 +53,7 @@ class WidgetBeneficios extends HTMLElement {
       .tip-card:hover{transform:translateY(-4px);border-color:var(--dm-cyan-25);box-shadow:0 10px 20px var(--dm-shadow-md)}
       .tip-icon{width:44px;height:44px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:50%;border:1px solid var(--dm-cyan-20)}
       .tip-icon svg{width:24px;height:24px}
-      .tip-text{font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px;line-height:1.3}
+      .tip-text{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.85rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px;line-height:1.3}
 
       /* ── Acordeão ── */
       .accordion-wrapper{display:flex;flex-direction:column;gap:14px}
@@ -64,7 +64,7 @@ class WidgetBeneficios extends HTMLElement {
       .acc-title-wrapper{display:flex;align-items:center}
       .acc-icon-left{width:38px;height:38px;margin-right:14px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:10px;border:1px solid var(--dm-cyan-20);flex-shrink:0}
       .acc-icon-left svg{width:22px;height:22px}
-      .acc-title{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px}
+      .acc-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.1rem;font-weight:700;color:var(--dm-text);text-transform:uppercase;letter-spacing:.5px}
       .acc-icon-right{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:50%;border:1px solid var(--dm-cyan-20);color:var(--dm-cyan);transition:transform .3s;flex-shrink:0}
       .acc-icon-right svg{width:18px;height:18px;stroke:var(--dm-cyan)}
       .acc-icon-right.rotated{transform:rotate(45deg)}
@@ -78,7 +78,7 @@ class WidgetBeneficios extends HTMLElement {
       .alert-cyan{border-left-color:var(--dm-cyan)}
       .alert-green{border-left-color:var(--dm-green,#10b981)}
       .alert-red{border-left-color:var(--dm-red,#ef4444)}
-      .alert-title{font-family:'Rajdhani',sans-serif;font-weight:700;margin-bottom:8px;font-size:.95rem;text-transform:uppercase;letter-spacing:.5px}
+      .alert-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;margin-bottom:8px;font-size:.95rem;text-transform:uppercase;letter-spacing:.5px}
       .alert-blue .alert-title,.alert-cyan .alert-title{color:var(--dm-cyan)}
       .alert-green .alert-title{color:var(--dm-green,#10b981)}
       .alert-red .alert-title{color:var(--dm-red,#ef4444)}
@@ -89,12 +89,12 @@ class WidgetBeneficios extends HTMLElement {
 
       /* ── Bônus ── */
       .bonus-wrapper{background:var(--dm-cyan-05);border:1px solid var(--dm-cyan-20);border-radius:12px;padding:22px}
-      .bonus-header{font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--dm-gold);margin-bottom:16px;display:flex;align-items:center;font-size:1rem;text-transform:uppercase;letter-spacing:.5px}
+      .bonus-header{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--dm-gold);margin-bottom:16px;display:flex;align-items:center;font-size:1rem;text-transform:uppercase;letter-spacing:.5px}
       .bonus-header svg{width:22px;height:22px;margin-right:8px}
       .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
       .bonus-card{padding:16px;border-radius:10px;text-align:center;border:1px solid var(--dm-gold-10);background:var(--dm-gold-10);transition:all .3s}
       .bonus-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px var(--dm-shadow-md)}
-      .bonus-val{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;color:var(--dm-gold);display:flex;align-items:center;justify-content:center;gap:8px}
+      .bonus-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.4rem;font-weight:700;color:var(--dm-gold);display:flex;align-items:center;justify-content:center;gap:8px}
       .bonus-val svg{width:22px;height:22px}
       .bonus-sub{font-size:.82rem;color:var(--dm-text-muted);margin-top:4px}
 
@@ -103,7 +103,7 @@ class WidgetBeneficios extends HTMLElement {
       .support-item{display:flex;flex-direction:column;align-items:center;text-align:center}
       .support-icon{width:44px;height:44px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08);border-radius:50%;border:1px solid var(--dm-cyan-20)}
       .support-icon svg{width:24px;height:24px}
-      .support-text{font-size:.82rem;color:var(--dm-text-muted);line-height:1.3;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.3px}
+      .support-text{font-size:.82rem;color:var(--dm-text-muted);line-height:1.3;font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.3px}
 
       @media(max-width:1024px){.benefits-grid{grid-template-columns:repeat(2,1fr)}.tips-grid,.support-grid{grid-template-columns:repeat(2,1fr)}}
       @media(max-width:768px){.benefits-container,.faq-container{padding:28px 14px}.benefits-grid{grid-template-columns:1fr}.bonus-grid{grid-template-columns:1fr}.acc-title{font-size:1rem}.accordion-header{padding:14px 16px}.acc-body{padding:0 14px 18px}}

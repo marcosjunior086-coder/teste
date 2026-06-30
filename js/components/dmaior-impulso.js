@@ -196,7 +196,7 @@ class DmaiorImpulso extends HTMLElement {
           --glass: rgba(24,26,40,0.92);
           --text: #fff; 
           --muted: #a0b8c8;
-          font-family: 'Exo 2', sans-serif;
+          font-family: var(--dm-font-body,'Exo 2',sans-serif);
           color: var(--text);
         }
 
@@ -238,11 +238,11 @@ class DmaiorImpulso extends HTMLElement {
         .header { display:flex; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid rgba(0,212,212,0.22); }
         .header-icon { width:42px; height:42px; flex-shrink:0; color:var(--rank-cyan); }
         .header-icon svg { width:100%; height:100%; }
-        .header-title { font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700; color:var(--text); letter-spacing:0.08em; text-transform:uppercase; }
-        .header-sub { font-family:'Rajdhani',sans-serif; font-size:0.75rem; font-weight:700; color:var(--rank-cyan); letter-spacing:0.06em; text-transform:uppercase; }
+        .header-title { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:1.2rem; font-weight:700; color:var(--text); letter-spacing:0.08em; text-transform:uppercase; }
+        .header-sub { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:0.75rem; font-weight:700; color:var(--rank-cyan); letter-spacing:0.06em; text-transform:uppercase; }
 
         .quota-box { background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:12px 14px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-        .quota-label { font-size:0.72rem; color:var(--muted); font-family:'Rajdhani',sans-serif; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; }
+        .quota-label { font-size:0.72rem; color:var(--muted); font-family:var(--dm-font-title,'Rajdhani',sans-serif); letter-spacing:0.06em; text-transform:uppercase; font-weight:600; }
         .quota-dots { display:flex; gap:6px; align-items:center; }
         .dot { width:12px; height:12px; border-radius:50%; border:1.5px solid rgba(0,212,212,0.35); background:transparent; transition:background 0.25s,border-color 0.25s,box-shadow 0.25s; }
         .dot.used { background:var(--rank-grad); border-color:var(--rank-cyan); box-shadow:0 0 8px var(--rank-glow); }
@@ -255,7 +255,7 @@ class DmaiorImpulso extends HTMLElement {
         .destaque { color:var(--gold); font-weight:700; }
 
         .field-group { margin-bottom:18px; }
-        .field-label { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:700; color:var(--rank-cyan); font-family:'Rajdhani',sans-serif; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+        .field-label { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:700; color:var(--rank-cyan); font-family:var(--dm-font-title,'Rajdhani',sans-serif); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
         .field-input { width:100%; background:rgba(0,0,0,0.5); border:1px solid var(--border); border-radius:10px; padding:14px; color:var(--text); font-family:inherit; font-size:0.95rem; outline:none; transition:0.3s; }
         .field-input::placeholder { color:rgba(255,255,255,0.2); }
         .field-input:focus { border-color:var(--cyan); box-shadow:0 0 10px var(--cyan-d); }
@@ -266,7 +266,7 @@ class DmaiorImpulso extends HTMLElement {
         .radio-opt input[type="radio"] { display:none; }
         .radio-card { display:flex; align-items:center; justify-content:center; padding:14px 10px; border:1px solid var(--border); border-radius:10px; cursor:pointer; background:rgba(0,0,0,0.3); transition:all 0.3s; user-select:none; }
         .radio-card:hover { background:var(--cyan-d); border-color:var(--cyan); }
-        .radio-card .rc-tempo { font-family:'Rajdhani',sans-serif; font-size:1.05rem; font-weight:700; color:var(--muted); letter-spacing:0.05em; text-align:center; text-transform:uppercase; transition:color 0.3s; }
+        .radio-card .rc-tempo { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:1.05rem; font-weight:700; color:var(--muted); letter-spacing:0.05em; text-align:center; text-transform:uppercase; transition:color 0.3s; }
         
         .radio-opt input[type="radio"]:checked + .radio-card, 
         #btn-impulso {
@@ -281,7 +281,7 @@ class DmaiorImpulso extends HTMLElement {
         #btn-impulso {
           width: 100%; margin-top: 22px; padding: 14px;
           border-radius: 12px;
-          font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700;
+          font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 1rem; font-weight: 700;
           letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
           display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
         }

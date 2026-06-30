@@ -235,7 +235,7 @@ class MenuMobileDMaior extends HTMLElement {
       .close-btn{ background:transparent; border:none; padding:5px; cursor:pointer; display:flex; align-items:center; transition:transform .2s; }
       .close-btn:active{ transform:scale(.8); }
       .auth-area{ padding:16px 20px; border-bottom:1px solid var(--dm-effect-20,var(--dm-rank-cyan-20,rgba(0,212,212,.20))); background:var(--dm-bg-tint); }
-      .btn-access{ display:flex; align-items:center; justify-content:center; gap:8px; background:var(--dm-grad-effect,var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4))); color:#fff; border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); padding:12px 20px; border-radius:10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; text-transform:uppercase; cursor:pointer; text-decoration:none; width:100%; letter-spacing:.05em; transition:box-shadow .25s,opacity .2s; box-shadow:0 0 16px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
+      .btn-access{ display:flex; align-items:center; justify-content:center; gap:8px; background:var(--dm-grad-effect,var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4))); color:#fff; border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); padding:12px 20px; border-radius:10px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1rem; text-transform:uppercase; cursor:pointer; text-decoration:none; width:100%; letter-spacing:.05em; transition:box-shadow .25s,opacity .2s; box-shadow:0 0 16px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .btn-access:active{ opacity:.85; }
       .btn-access:hover{ box-shadow:0 0 24px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .user-card{ display:flex; align-items:center; gap:12px; }
@@ -266,7 +266,7 @@ class MenuMobileDMaior extends HTMLElement {
       .sub-link:active,.sub-link:hover{ color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
       /* ── Itens "em breve": desabilitados visualmente ── */
       .disabled-item{ opacity:.45; cursor:default; pointer-events:none; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
-      .em-breve-tag{ font-family:'Rajdhani',sans-serif; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--dm-gold); background:var(--dm-gold-10,rgba(240,192,64,.12)); border:1px solid var(--dm-gold-20,rgba(240,192,64,.25)); border-radius:20px; padding:2px 8px; }
+      .em-breve-tag{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--dm-gold); background:var(--dm-gold-10,rgba(240,192,64,.12)); border:1px solid var(--dm-gold-20,rgba(240,192,64,.25)); border-radius:20px; padding:2px 8px; }
     </style>
 
     <div class="topbar">

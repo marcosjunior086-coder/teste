@@ -40,7 +40,7 @@ class DmaiorFooter extends HTMLElement {
         .footer {
           background: var(--dm-grad-card, linear-gradient(160deg,#1a1a2e 0%,#12121f 100%));
           border-top: 1px solid var(--dm-border, rgba(0,212,212,.15));
-          font-family: 'Exo 2', sans-serif;
+          font-family: var(--dm-font-body,'Exo 2',sans-serif);
           color: var(--dm-text-sub, #a0b8c8);
           padding: 36px 24px 0;
         }
@@ -94,7 +94,7 @@ class DmaiorFooter extends HTMLElement {
           min-width: 120px;
         }
         .col-title {
-          font-family: 'Rajdhani', sans-serif;
+          font-family: var(--dm-font-title,'Rajdhani',sans-serif);
           font-size: .72rem;
           font-weight: 700;
           color: var(--dm-text, #e0e8f0);
