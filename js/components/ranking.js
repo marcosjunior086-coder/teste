@@ -792,7 +792,7 @@ class RankingDmaior extends HTMLElement {
       if (host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')) {
         const fileMatch = u.pathname.match(/\/file\/d\/([^/]+)/);
         const id = fileMatch?.[1] || u.searchParams.get('id');
-        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}`;
+        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w128`;
       }
       return u.href;
     } catch { return ''; }
@@ -801,7 +801,7 @@ class RankingDmaior extends HTMLElement {
   proxyImg(url) {
     const safe = this.normalizeImageUrl(url);
     if (!safe) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-    if (/^https:\/\/drive\.google\.com\/uc\?/i.test(safe)) return safe;
+    if (/^https:\/\/drive\.google\.com\/(uc\?|thumbnail\?)/i.test(safe)) return safe;
     return `https://images.weserv.nl/?url=${encodeURIComponent(safe)}&w=80&h=80&fit=cover&output=webp`;
   }
 

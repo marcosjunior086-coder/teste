@@ -9,6 +9,7 @@
         this.chartInstance  = null;
         this.chartMetrica   = 'diamantes';
         this.chartPeriodo   = 'semanal';
+        this.mesSelecionado = 'atual';
     }
 
     connectedCallback() {
@@ -768,7 +769,13 @@
                         <div class="dash-right">
                             <div class="card">
                                 <div class="ctogs">
-                                    <h3 class="raaj" style="font-size:.9rem;color:var(--muted);">DESEMPENHO</h3>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                        <h3 class="raaj" style="font-size:.9rem;color:var(--muted);">DESEMPENHO</h3>
+                                        <div class="tgrp">
+                                            <button class="tbtn on" id="tMesAtual">Mês Atual</button>
+                                            <button class="tbtn" id="tMesAnt">Mês Anterior</button>
+                                        </div>
+                                    </div>
                                     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
                                         <div class="tgrp">
                                             <button class="tbtn on" id="tDi">Diamantes</button>
@@ -1062,8 +1069,35 @@
     }
 
     setToggle(g, activeId){
-        const m=['tDi','tHo'], p=['t7d','t30d'];
-        (g==='m'?m:p).forEach(id=>this.qs(`#${id}`).classList.toggle('on',id===activeId));
+        const m=['tDi','tHo'], p=['t7d','t30d'], mes=['tMesAtual','tMesAnt'];
+        (g==='m'?m:g==='p'?p:mes).forEach(id=>this.qs(`#${id}`)?.classList.toggle('on',id===activeId));
+    }
+
+    _mesStr(offset=0){
+        const d=new Date();
+        d.setDate(1);
+        d.setMonth(d.getMonth()-offset);
+        return d.toISOString().substring(0,7);
+    }
+
+    _allDaysOfMonth(mesStr){
+        const [y,m]=mesStr.split('-').map(Number);
+        const hoje=new Date().toISOString().split('T')[0];
+        const total=new Date(y,m,0).getDate();
+        const days=[];
+        for(let d=1;d<=total;d++){
+            const dd=`${mesStr}-${String(d).padStart(2,'0')}`;
+            if(dd>hoje) break;
+            days.push(dd);
+        }
+        return days.reverse();
+    }
+
+    _historicoDoMes(){
+        const mesStr=this.mesSelecionado==='anterior'?this._mesStr(1):this._mesStr(0);
+        const map={};
+        this.historicoCompleto.filter(d=>d.data.startsWith(mesStr)).forEach(d=>{map[d.data]=d;});
+        return this._allDaysOfMonth(mesStr).map(d=>map[d]||{data:d,diamantes:0,minutos:0});
     }
 
     h2dec(str){
@@ -1153,6 +1187,8 @@
         this.qs('#tHo').addEventListener('click',()=>{this.chartMetrica='horas';this.setToggle('m','tHo');this.renderChart();});
         this.qs('#t7d').addEventListener('click',()=>{this.chartPeriodo='semanal';this.setToggle('p','t7d');this.renderChart();});
         this.qs('#t30d').addEventListener('click',()=>{this.chartPeriodo='mensal';this.setToggle('p','t30d');this.renderChart();});
+        this.qs('#tMesAtual').addEventListener('click',()=>{this.mesSelecionado='atual';this.setToggle('mes','tMesAtual');this.renderChart();this.renderHist();});
+        this.qs('#tMesAnt').addEventListener('click',()=>{this.mesSelecionado='anterior';this.setToggle('mes','tMesAnt');this.renderChart();this.renderHist();});
 
         this.setupEye('#eyeL','#lPass');
         this.setupEye('#eyeR1','#rP1');
@@ -1283,10 +1319,12 @@
     // ── Gráfico ─────────────────────────────────────────────────────
     renderChart(){
         if(!window.Chart) return setTimeout(()=>this.renderChart(),500);
-        if(!this.historicoCompleto.length) return;
-        const slice=this.chartPeriodo==='semanal'?this.historicoCompleto.slice(0,7):this.historicoCompleto.slice(0,30);
-        const labels=slice.map(d=>d.data.substring(5,10).replace('-','/')).reverse();
-        const vals=this.chartMetrica==='diamantes'?slice.map(d=>d.diamantes).reverse():slice.map(d=>parseFloat((d.minutos/60).toFixed(2))).reverse();
+        const hist=this._historicoDoMes();
+        if(!hist.length) return;
+        // hist: newest-first. slice(0,7) = últimos 7 dias do mês. Reverse p/ exibir cronológico.
+        const slice=(this.chartPeriodo==='semanal'?hist.slice(0,7):hist).slice().reverse();
+        const labels=slice.map(d=>d.data.substring(5,10).replace('-','/'));
+        const vals=this.chartMetrica==='diamantes'?slice.map(d=>d.diamantes):slice.map(d=>parseFloat((d.minutos/60).toFixed(2)));
         const ctx=this.qs('#pChart').getContext('2d');
         if(this.chartInstance) this.chartInstance.destroy();
         const cor=this.chartMetrica==='diamantes'?'#00d4d4':'#f0c040';
@@ -1300,18 +1338,24 @@
     renderHist(){
         const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
         const tb=this.qs('#hBody');
-        if(!this.historicoCompleto.length){ tb.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;font-size:.8rem;">Nenhum registro.</td></tr>`; return; }
-        const validos=this.historicoCompleto.filter(d=>d.minutos>=60).length;
-        const totDia=this.historicoCompleto.reduce((s,d)=>s+d.diamantes,0);
+        const hist=this._historicoDoMes();
+        if(!hist.length){ tb.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;font-size:.8rem;">Nenhum registro.</td></tr>`; return; }
+        const validos=hist.filter(d=>d.minutos>=60).length;
+        const totDia=hist.reduce((s,d)=>s+d.diamantes,0);
         this.qs('#hRes').textContent=`${validos} válidos • ${totDia.toLocaleString('pt-BR')} diamantes`;
-        tb.innerHTML=this.historicoCompleto.map(dia=>{
+        tb.innerHTML=hist.map(dia=>{
             const dt=new Date(dia.data+'T12:00:00');
             const dd=String(dt.getDate()).padStart(2,'0');
             const mm=String(dt.getMonth()+1).padStart(2,'0');
             const dow=dows[dt.getDay()];
             const h=Math.floor(dia.minutos/60), m=dia.minutos%60;
+            const semLive=dia.minutos===0&&dia.diamantes===0;
             const ok=dia.minutos>=60;
-            return `<tr><td class="dc"><span class="dd">${dd}/${mm}</span><br><span class="dw">${dow}</span></td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:${ok?'var(--cyan)':'var(--muted)'};">${h}h ${String(m).padStart(2,'0')}m</td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;">${dia.diamantes.toLocaleString('pt-BR')}</td><td class="r"><span class="badge ${ok?'ok':'nok'}">${ok?'Válido':'Inválido'}</span></td></tr>`;
+            const badgeCls=semLive?'nok':ok?'ok':'nok';
+            const badgeTxt=semLive?'Sem live':ok?'Válido':'Inválido';
+            const horasStr=semLive?'—':`${h}h ${String(m).padStart(2,'0')}m`;
+            const diamStr=semLive?'—':dia.diamantes.toLocaleString('pt-BR');
+            return `<tr style="${semLive?'opacity:.45':''}"><td class="dc"><span class="dd">${dd}/${mm}</span><br><span class="dw">${dow}</span></td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:${semLive?'var(--muted)':ok?'var(--cyan)':'var(--muted)'};">${horasStr}</td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;">${diamStr}</td><td class="r"><span class="badge ${badgeCls}">${badgeTxt}</span></td></tr>`;
         }).join('');
     }
 
