@@ -6,7 +6,9 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Agente ó DMaior Agency</title>
+  <meta name="theme-color" content="#07111f">
+  <meta name="color-scheme" content="dark">
+  <title>Painel do Agente ‚Äî DMaior Agency</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -109,7 +111,7 @@
     }
     .btn-logout:hover { background: rgba(248,113,113,.2); }
 
-    /* Conte˙do principal */
+    /* Conte√∫do principal */
     .main { flex: 1; margin-left: 220px; padding: 28px; max-width: 1200px; }
 
     /* Topbar */
@@ -119,7 +121,7 @@
     .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse-dot 1.5s infinite; }
     @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:.3; } }
 
-    /* Cards de mÈtricas */
+    /* Cards de m√©tricas */
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .card {
       background: var(--card); border: 1px solid var(--border);
@@ -131,7 +133,7 @@
     .card.gold .card-value { color: var(--gold); }
     .card.green .card-value { color: var(--green); }
 
-    /* Gr·fico */
+    /* Gr√°fico */
     .chart-wrap {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--r); padding: 20px; margin-bottom: 28px;
@@ -190,7 +192,7 @@
     .ag-cell-label { font-family: var(--font-t); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
     .ag-cell-value { font-size: 13px; color: var(--text); word-break: break-word; }
 
-    /* PosiÁ„o ranking */
+    /* Posi√ß√£o ranking */
     .pos { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-t); font-weight: 700; font-size: 14px; }
     .pos-1 { background: linear-gradient(135deg,#f0c040,#d4a400); color: #111; }
     .pos-2 { background: linear-gradient(135deg,#c0c0c0,#888); color: #111; }
@@ -357,7 +359,7 @@
     .live-player-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
     .live-player-status { color: var(--sub); font-size: 12px; text-align: center; margin-top: 9px; }
 
-    /* SeÁ„o de convites ó form buscar */
+    /* Se√ß√£o de convites ‚Äî form buscar */
     .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
     .convite-box h3 { font-family: var(--font-t); font-size: 17px; margin-bottom: 18px; }
     .conv-history-head {
@@ -421,7 +423,7 @@
     .spinner { width: 36px; height: 36px; border: 3px solid rgba(0,212,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* -- TABLET (=900px) ó sidebar colapsa para Ìcones ---- */
+    /* -- TABLET (=900px) ‚Äî sidebar colapsa para √≠cones ---- */
     @media (max-width: 900px) {
       .sidebar { width: 64px; }
       .sidebar-logo { padding: 18px 0; text-align: center; }
@@ -437,11 +439,11 @@
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* Mobile header ó oculto por padr„o, aparece via media query */
+    /* Mobile header ‚Äî oculto por padr√£o, aparece via media query */
     .mobile-header { display: none; }
     .mobile-menu-btn, .mobile-menu-backdrop { display: none; }
 
-    /* -- MOBILE (=600px) ó bottom nav bar ----------------- */
+    /* -- MOBILE (=600px) ‚Äî bottom nav bar ----------------- */
     @media (max-width: 600px) {
       .mobile-header { display: flex; }
       .mobile-menu-btn {
@@ -457,7 +459,7 @@
       }
       .mobile-menu-backdrop.on { display: block; }
 
-      /* Sidebar vira gaveta lateral no padr„o do admin */
+      /* Sidebar vira gaveta lateral no padr√£o do admin */
       .sidebar {
         width: 260px; height: calc(100dvh - 52px); min-height: unset;
         flex-direction: column;
@@ -507,7 +509,7 @@
         color: var(--red); font-size: 12px; cursor: pointer; flex-shrink: 0;
       }
 
-      /* Main ó espaÁo para header fixo + bottom nav */
+      /* Main ‚Äî espa√ßo para header fixo + bottom nav */
       .main { margin-left: 0; padding: 16px 14px 28px; padding-top: 68px; }
 
       /* Cards */
@@ -520,7 +522,7 @@
       .topbar { margin-bottom: 16px; }
       .topbar h2 { font-size: 18px; }
 
-      /* Tabelas ó scroll horizontal */
+      /* Tabelas ‚Äî scroll horizontal */
       .table-wrap { overflow: visible; border-radius: var(--r); }
       .table-wrap.has-accordion table { display: none; }
       .table-wrap.has-accordion .ag-acc-list { display: block; }
@@ -552,7 +554,7 @@
       .live-watch strong { font-size: 21px; }
       .live-player-modal { align-items: flex-start; padding: 70px 12px 20px; }
 
-      /* Gr·fico */
+      /* Gr√°fico */
       .ag-grid { grid-template-columns: 1fr; }
       .chart-wrap { padding: 14px; }
       .chart-title { align-items: flex-start; flex-direction: column; gap: 10px; }
@@ -577,7 +579,7 @@
     </div>
     <div class="login-field">
       <label>Senha</label>
-      <input id="inp-senha" type="password" placeholder="ïïïïïï" autocomplete="current-password">
+      <input id="inp-senha" type="password" placeholder="‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢" autocomplete="current-password">
     </div>
     <button class="btn-login" id="btn-entrar">Entrar</button>
     <p id="login-erro"></p>
@@ -586,13 +588,13 @@
 
 <!-- ---------------- PAINEL ---------------- -->
 <div id="painel">
-  <!-- Header fixo mobile ó visÌvel apenas em =600px via CSS -->
+  <!-- Header fixo mobile ‚Äî vis√≠vel apenas em =600px via CSS -->
   <div class="mobile-header" id="mobile-header">
     <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Abrir menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <span class="mobile-header-logo">DMAIOR</span>
-    <span class="mobile-header-nome" id="mobile-header-nome">ó</span>
+    <span class="mobile-header-nome" id="mobile-header-nome">‚Äî</span>
     <button class="mobile-header-logout" onclick="logout()">Sair</button>
   </div>
   <div class="mobile-menu-backdrop" id="mobile-menu-backdrop"></div>
@@ -626,29 +628,29 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="agente-info">
-          <strong id="sidebar-nome">ó</strong>
+          <strong id="sidebar-nome">‚Äî</strong>
           <span id="sidebar-login"></span>
         </div>
         <button class="btn-logout" onclick="logout()">Sair</button>
       </div>
     </aside>
 
-    <!-- CONTE⁄DO -->
+    <!-- CONTE√öDO -->
     <main class="main">
 
       <!-- --- DASHBOARD --- -->
       <section id="sec-dashboard" class="section">
         <div class="topbar">
           <h2>Dashboard</h2>
-          <div class="badge-ao-vivo"><div class="dot-live"></div><span id="dash-ao-vivo-badge">ó ao vivo</span></div>
+          <div class="badge-ao-vivo"><div class="dot-live"></div><span id="dash-ao-vivo-badge">‚Äî ao vivo</span></div>
         </div>
         <div class="cards-grid" id="cards-dashboard">
           <div class="loading"><div class="spinner"></div></div>
         </div>
         <div class="chart-wrap" id="chart-wrap" style="display:none">
           <div class="chart-title">
-            <span id="chart-title-text">Diamantes - mÍs atual</span>
-            <div class="chart-tabs" role="group" aria-label="MÈtrica do gr·fico">
+            <span id="chart-title-text">Diamantes - m√™s atual</span>
+            <div class="chart-tabs" role="group" aria-label="M√©trica do gr√°fico">
               <button type="button" class="chart-tab active" data-chart-metric="diamantes"><span class="dot" style="background:#00d4d4"></span>Diamantes</button>
               <button type="button" class="chart-tab" data-chart-metric="horas"><span class="dot" style="background:#f0c040"></span>Horas</button>
             </div>
@@ -683,7 +685,7 @@
 
       <!-- --- RANKING --- -->
       <section id="sec-ranking" class="section" style="display:none">
-        <div class="topbar"><h2 id="ranking-titulo">Ranking do MÍs</h2></div>
+        <div class="topbar"><h2 id="ranking-titulo">Ranking do M√™s</h2></div>
         <div class="table-wrap" id="tabela-ranking">
           <div class="loading"><div class="spinner"></div></div>
         </div>
@@ -712,10 +714,10 @@
           <div id="msg-convite"></div>
         </div>
 
-        <!-- HistÛrico de convites -->
+        <!-- Hist√≥rico de convites -->
         <button class="conv-history-head" id="conv-history-toggle" type="button" aria-expanded="true">
           <span class="conv-history-title">
-            HistÛrico de Convites
+            Hist√≥rico de Convites
             <span class="conv-history-count" id="conv-history-count">0</span>
           </span>
           <span class="conv-history-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
@@ -731,7 +733,7 @@
 
 <script>
 // ------------------------------------------------------------
-// CONFIGURA«√O
+// CONFIGURA√á√ÉO
 // ------------------------------------------------------------
 const WORKER = 'https://agente.agencydmaior.com.br';
 const TOKEN_KEY = 'dm_agente_token';
@@ -770,7 +772,7 @@ async function api(path, { method = 'GET', body } = {}) {
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(WORKER + path, opts);
   const data = await r.json().catch(() => ({}));
-  if (r.status === 401 || r.status === 403) { logout(); throw new Error('Sess„o expirada'); }
+  if (r.status === 401 || r.status === 403) { logout(); throw new Error('Sess√£o expirada'); }
   if (!r.ok) throw new Error(data.erro || data.mensagem || `Erro ${r.status}`);
   return data;
 }
@@ -786,42 +788,42 @@ async function fazerLogin() {
   const senha  = document.getElementById('inp-senha').value.trim();
   erroEl.textContent = '';
   if (!login || !senha) { erroEl.textContent = 'Preencha login e senha.'; return; }
-  btn.disabled = true; btn.textContent = 'EntrandoÖ';
+  btn.disabled = true; btn.textContent = 'Entrando‚Ä¶';
   try {
     const r = await fetch(WORKER + '/agente/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ login, senha }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!data.ok || !data.token) { erroEl.textContent = data.erro || 'Credenciais inv·lidas.'; return; }
+    if (!data.ok || !data.token) { erroEl.textContent = data.erro || 'Credenciais inv√°lidas.'; return; }
     salvarSessao(data.token, data.agente);
     iniciarPainel();
   } catch (e) {
-    erroEl.textContent = 'Erro de conex„o. Tente novamente.';
+    erroEl.textContent = 'Erro de conex√£o. Tente novamente.';
   } finally {
     btn.disabled = false; btn.textContent = 'Entrar';
   }
 }
 
-// -- INICIALIZA«√O -----------------------------------------
+// -- INICIALIZA√á√ÉO -----------------------------------------
 function iniciarPainel() {
   const ag = getAgente();
   if (ag) {
-    document.getElementById('sidebar-nome').textContent       = ag.nome  || 'ó';
+    document.getElementById('sidebar-nome').textContent       = ag.nome  || '‚Äî';
     document.getElementById('sidebar-login').textContent      = ag.login || '';
-    document.getElementById('mobile-header-nome').textContent = ag.nome  || 'ó';
+    document.getElementById('mobile-header-nome').textContent = ag.nome  || '‚Äî';
   }
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('painel').style.display     = 'block';
   navegarPara('dashboard');
 }
 
-// Tenta restaurar sess„o ao carregar
+// Tenta restaurar sess√£o ao carregar
 window.addEventListener('DOMContentLoaded', () => {
   const token = getToken();
   if (token) {
     _token = token; _agente = getAgente();
-    // Valida sess„o no servidor
+    // Valida sess√£o no servidor
     api('/agente/me').then(r => {
       if (r.ok) iniciarPainel();
       else logout();
@@ -829,7 +831,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// -- NAVEGA«√O ---------------------------------------------
+// -- NAVEGA√á√ÉO ---------------------------------------------
 const SECOES = ['dashboard','streamers','lives','ranking','desempenho','convites'];
 
 function fecharMenuMobile() {
@@ -882,7 +884,7 @@ function navegarPara(sec) {
   loaders[sec]?.();
 }
 
-// -- ÕCONES SVG --------------------------------------------
+// -- √çCONES SVG --------------------------------------------
 function carregarLiveOpts() {
   try {
     const raw = JSON.parse(localStorage.getItem('dm_agente_lives_opts') || '{}');
@@ -909,9 +911,9 @@ function liveConfigHtml() {
   return `
     <div class="live-config-panel" id="live-config-panel">
       <div class="live-cfg-row"><span class="live-cfg-label">Layout</span><div class="live-cfg-opts">${[1,2,3,4].map(n=>btn('cols',n,`${n} coluna${n>1?'s':''}`)).join('')}</div></div>
-      <div class="live-cfg-row"><span class="live-cfg-label">Modo</span><div class="live-cfg-opts">${btn('modo','capa','Capa')}${btn('modo','video','VÌdeo')}</div></div>
+      <div class="live-cfg-row"><span class="live-cfg-label">Modo</span><div class="live-cfg-opts">${btn('modo','capa','Capa')}${btn('modo','video','V√≠deo')}</div></div>
       <div class="live-cfg-row"><span class="live-cfg-label">Estilo</span><div class="live-cfg-opts">${btn('estilo',1,'Horizontal')}${btn('estilo',2,'Vertical')}</div></div>
-      <div class="live-cfg-row"><span class="live-cfg-label">Ordenar</span><div class="live-cfg-opts">${btn('ordenar','padrao','Padr„o')}${btn('ordenar','espectadores','Espectadores')}${btn('ordenar','presentes','Presentes')}${btn('ordenar','horas','Tempo')}</div></div>
+      <div class="live-cfg-row"><span class="live-cfg-label">Ordenar</span><div class="live-cfg-opts">${btn('ordenar','padrao','Padr√£o')}${btn('ordenar','espectadores','Espectadores')}${btn('ordenar','presentes','Presentes')}${btn('ordenar','horas','Tempo')}</div></div>
     </div>`;
 }
 
@@ -1108,7 +1110,7 @@ function abrirPlayerLive(url, nome, capa) {
       video.play().catch(() => {});
       status.textContent = 'Reproduzindo ao vivo';
     } else {
-      status.textContent = 'HLS n„o suportado neste navegador.';
+      status.textContent = 'HLS n√£o suportado neste navegador.';
     }
   };
 
@@ -1175,12 +1177,12 @@ function iniciarVideosInline(container) {
 }
 
 function fmtData(iso) {
-  if (!iso) return 'ó';
+  if (!iso) return '‚Äî';
   const d = new Date(iso); const p = n => String(n).padStart(2,'0');
   return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
 }
 function badgeStatus(s) {
-  const m = { convite_enviado:'badge-env Enviado', pendente:'badge-pend Pendente', erro:'badge-err Erro', restricao_live:'badge-err RestriÁ„o', dry_run:'badge-pend Simulado' };
+  const m = { convite_enviado:'badge-env Enviado', pendente:'badge-pend Pendente', erro:'badge-err Erro', restricao_live:'badge-err Restri√ß√£o', dry_run:'badge-pend Simulado' };
   const [cls, txt] = (m[s]||'badge-pend Pendente').split(' ');
   return `<span class="badge ${cls}">${txt}</span>`;
 }
@@ -1190,7 +1192,7 @@ function setAccordion(container, on = true) {
 }
 
 function agCell(label, value) {
-  return `<div class="ag-cell"><div class="ag-cell-label">${esc(label)}</div><div class="ag-cell-value">${value ?? 'ó'}</div></div>`;
+  return `<div class="ag-cell"><div class="ag-cell-label">${esc(label)}</div><div class="ag-cell-value">${value ?? '‚Äî'}</div></div>`;
 }
 
 function agItem({ avatar = '', title = '', sub = '', value = '', badge = '', body = '' }) {
@@ -1234,16 +1236,16 @@ async function carregarDashboard() {
     document.getElementById('dash-ao-vivo-badge').textContent = `${r.ao_vivo||0} ao vivo`;
 
     container.innerHTML = `
-      <div class="card"><div class="card-label">Streamers</div><div class="card-value">${r.streamers||0}</div><div class="card-sub">Vinculados a vocÍ</div></div>
+      <div class="card"><div class="card-label">Streamers</div><div class="card-value">${r.streamers||0}</div><div class="card-sub">Vinculados a voc√™</div></div>
       <div class="card"><div class="card-label">Ao Vivo Agora</div><div class="card-value green" style="color:var(--green)">${r.ao_vivo||0}</div><div class="card-sub">Lives ativas</div></div>
       <div class="card"><div class="card-label">${ico('diamond',13)} Hoje</div><div class="card-value">${fmtNum(r.diamantes_hoje||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_hoje||'0:00'} h hoje</div></div>
-      <div class="card gold"><div class="card-label">${ico('diamond',13)} Este MÍs</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_mes||'0:00'} h no mÍs</div></div>
+      <div class="card gold"><div class="card-label">${ico('diamond',13)} Este M√™s</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_mes||'0:00'} h no m√™s</div></div>
       <div class="card"><div class="card-label">Convites Enviados</div><div class="card-value">${r.convites_enviados||0}</div><div class="card-sub">${r.convites_pendentes||0} pendentes</div></div>
-      <div class="card green"><div class="card-label">Comiss„o Estimada</div><div class="card-value">${fmtBRL(com.brl||0)}</div><div class="card-sub">${Number(com.percentual||0)}% aplicado ∑ ${fmtNum(com.koin||0)} Koin</div></div>
-      <div class="card"><div class="card-label">Meta de Comiss„o</div><div class="card-value" style="font-size:22px">${regra ? esc(regra.nome) : 'Sem meta'}</div><div class="card-sub">${totaisCom.dias_ativos||0} dias ∑ ${Number(totaisCom.horas||0).toFixed(1)}h${prox&&!regra?` ∑ prÛx.: ${esc(prox.nome)}`:''}</div></div>
+      <div class="card green"><div class="card-label">Comiss√£o Estimada</div><div class="card-value">${fmtBRL(com.brl||0)}</div><div class="card-sub">${Number(com.percentual||0)}% aplicado ¬∑ ${fmtNum(com.koin||0)} Koin</div></div>
+      <div class="card"><div class="card-label">Meta de Comiss√£o</div><div class="card-value" style="font-size:22px">${regra ? esc(regra.nome) : 'Sem meta'}</div><div class="card-sub">${totaisCom.dias_ativos||0} dias ¬∑ ${Number(totaisCom.horas||0).toFixed(1)}h${prox&&!regra?` ¬∑ pr√≥x.: ${esc(prox.nome)}`:''}</div></div>
     `;
 
-    // Gr·fico
+    // Gr√°fico
     if ((d.grafico||[]).length > 1) {
       _graficoDados = d.grafico || [];
       document.getElementById('chart-wrap').style.display = 'block';
@@ -1255,7 +1257,7 @@ async function carregarDashboard() {
   }
 }
 
-// -- GR¡FICO SIMPLES (Canvas 2D) ---------------------------
+// -- GR√ÅFICO SIMPLES (Canvas 2D) ---------------------------
 function bindGraficoTabs() {
   if (!['diamantes', 'horas'].includes(_graficoMetrica)) _graficoMetrica = 'diamantes';
   document.querySelectorAll('[data-chart-metric]').forEach(btn => {
@@ -1268,7 +1270,7 @@ function bindGraficoTabs() {
     };
   });
   const titulo = document.getElementById('chart-title-text');
-  if (titulo) titulo.textContent = `${_graficoMetrica === 'horas' ? 'Horas' : 'Diamantes'} - mÍs atual`;
+  if (titulo) titulo.textContent = `${_graficoMetrica === 'horas' ? 'Horas' : 'Diamantes'} - m√™s atual`;
 }
 
 function corAlpha(hex, alpha) {
@@ -1310,7 +1312,7 @@ function renderizarGrafico(dados) {
     ctx.beginPath();
     pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
     ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-    // ¡rea sob a linha
+    // √Årea sob a linha
     ctx.beginPath();
     pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
     ctx.lineTo(pts[pts.length-1].x, PAD.t + ch);
@@ -1330,7 +1332,7 @@ function renderizarGrafico(dados) {
 
   desenharLinha(pontos(campo, maxVal), cor);
 
-  // Labels do eixo X (datas) ó m·x. 7 labels, sem sobreposiÁ„o
+  // Labels do eixo X (datas) ‚Äî m√°x. 7 labels, sem sobreposi√ß√£o
   ctx.fillStyle = '#4a6070'; ctx.font = '10px Exo 2, sans-serif'; ctx.textAlign = 'center';
   const tick = Math.ceil(n / 7);
   dados.forEach((d,i) => {
@@ -1353,12 +1355,12 @@ async function carregarStreamers() {
     const d = await api('/agente/streamers');
     const list = d.streamers || [];
     _streamersCarregado = true;
-    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mic',32)}</div><p>Nenhum streamer vinculado a vocÍ ainda.</p></div>`; return; }
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mic',32)}</div><p>Nenhum streamer vinculado a voc√™ ainda.</p></div>`; return; }
     setAccordion(container, true);
     const rows = list.map(s => {
       const badge = s.verificado_premium ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="*">' : s.verificado ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="ok">' : '';
       const title = `${esc(s.nome)}${badge}`;
-      const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : 'ó';
+      const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : '‚Äî';
       return {
         table: `
           <tr>
@@ -1378,8 +1380,8 @@ async function carregarStreamers() {
           value: fmtNum(s.diamantes_mes || 0),
           body: [
             agCell('Kwai ID', kwai),
-            agCell('Diamantes mÍs', fmtNum(s.diamantes_mes || 0)),
-            agCell('Horas mÍs', esc(s.horas_mes || '0:00')),
+            agCell('Diamantes m√™s', fmtNum(s.diamantes_mes || 0)),
+            agCell('Horas m√™s', esc(s.horas_mes || '0:00')),
             agCell('Vinculado em', fmtData(s.vinculado_em)),
           ].join('')
         })
@@ -1387,7 +1389,7 @@ async function carregarStreamers() {
     });
     container.innerHTML = `
       <table>
-        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} MÍs</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} M√™s</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
         <tbody>${rows.map(r => r.table).join('')}</tbody>
       </table>
       <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
@@ -1423,8 +1425,8 @@ function renderLives(data, container = document.getElementById('grid-lives')) {
         <div class="live-stat"><strong>${fmtNum(hoje)}</strong><span>Hoje</span></div>
       </div>
       <button class="live-settings" id="live-settings-toggle" type="button">
-        <div class="ls-title">${ico('settings',13)} ConfiguraÁıes</div>
-        <div class="ls-sub">Layout, vÌdeo e ordenaÁ„o das lives.</div>
+        <div class="ls-title">${ico('settings',13)} Configura√ß√µes</div>
+        <div class="ls-sub">Layout, v√≠deo e ordena√ß√£o das lives.</div>
       </button>
     </div>
     ${liveConfigHtml()}
@@ -1443,7 +1445,7 @@ async function carregarRanking() {
     const d = await api('/agente/ranking');
     const list = d.streamers || [];
     _rankingCarregado = true;
-    document.getElementById('ranking-titulo').textContent = `Ranking ó ${d.mes||''}`;
+    document.getElementById('ranking-titulo').textContent = `Ranking ‚Äî ${d.mes||''}`;
     if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('trophy',32)}</div><p>Sem dados de ranking ainda.</p></div>`; return; }
     setAccordion(container, true);
     const rows = list.map(s => {
@@ -1461,11 +1463,11 @@ async function carregarRanking() {
         card: agItem({
           avatar: foto(s.foto, s.nome),
           title: esc(s.nome),
-          sub: `PosiÁ„o #${esc(s.posicao || '')}`,
+          sub: `Posi√ß√£o #${esc(s.posicao || '')}`,
           value: fmtNum(s.diamantes || 0),
           badge: status,
           body: [
-            agCell('PosiÁ„o', pos),
+            agCell('Posi√ß√£o', pos),
             agCell('Diamantes', fmtNum(s.diamantes || 0)),
             agCell('Horas', esc(s.horas || '0:00')),
             agCell('Status', status),
@@ -1506,7 +1508,7 @@ async function carregarDesempenho() {
           <div class="prog-wrap" style="flex:1"><div class="prog-bar prog-gold" style="width:${progDias}%"></div></div>
           <span style="font-size:12px;color:var(--sub);white-space:nowrap">${esc(s.dias_ativos || 0)}d</span>
         </div>`;
-      const status = `<span class="badge ${s.status==='aprovado'?'badge-ok':s.status==='bom'?'badge-bom':'badge-at'}">${s.status==='aprovado'?'Aprovado':s.status==='bom'?'Bom':'AtenÁ„o'}</span>`;
+      const status = `<span class="badge ${s.status==='aprovado'?'badge-ok':s.status==='bom'?'badge-bom':'badge-at'}">${s.status==='aprovado'?'Aprovado':s.status==='bom'?'Bom':'Aten√ß√£o'}</span>`;
       return {
         table: `
           <tr>
@@ -1553,9 +1555,9 @@ async function carregarConvites() {
     if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; aplicarEstadoHistoricoConvites(); return; }
     setAccordion(container, true);
     const rows = list.map(c => {
-      const nome = esc(c.streamer_nome || c.streamer_uid || 'ó');
-      const kwai = c.streamer_kwai_id ? '@' + esc(c.streamer_kwai_id) : 'ó';
-      const categoria = esc(c.categoria || 'ó');
+      const nome = esc(c.streamer_nome || c.streamer_uid || '‚Äî');
+      const kwai = c.streamer_kwai_id ? '@' + esc(c.streamer_kwai_id) : '‚Äî';
+      const categoria = esc(c.categoria || '‚Äî');
       const status = badgeStatus(c.status);
       const data = fmtData(c.criado_em);
       return {
@@ -1604,11 +1606,11 @@ async function buscarPerfilConvite() {
   msg.style.display = 'none'; res.innerHTML = '';
   if (!uid) return;
   _perfilAtual = null;
-  btn.disabled = true; btn.textContent = 'BuscandoÖ';
+  btn.disabled = true; btn.textContent = 'Buscando‚Ä¶';
   try {
     const d = await api('/agente/convites/buscar-perfil', { method: 'POST', body: { uid } });
     if (!d.ok && d.status === 'PERFIL_NAO_ENCONTRADO') {
-      mostrarMsg(msg, 'Perfil n„o encontrado. Verifique o UID.', 'err'); return;
+      mostrarMsg(msg, 'Perfil n√£o encontrado. Verifique o UID.', 'err'); return;
     }
     const p = d.perfil || {};
     _perfilAtual = { ...p, status: d.status, pode_enviar: d.pode_enviar };
@@ -1618,8 +1620,8 @@ async function buscarPerfilConvite() {
       <div class="perfil-encontrado">
         ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome||'?')[0])}</div>`}
         <div class="perfil-info">
-          <h4>${esc(p.nome)||'ó'}</h4>
-          <p>@${esc(p.kwaiId||'')} ∑ ID: ${esc(p.memberId||uid)}</p>
+          <h4>${esc(p.nome)||'‚Äî'}</h4>
+          <p>@${esc(p.kwaiId||'')} ¬∑ ID: ${esc(p.memberId||uid)}</p>
         </div>
         ${d.pode_enviar ? `
           <div class="perfil-acoes">
@@ -1643,7 +1645,7 @@ async function enviarConvite() {
   const btn = document.getElementById('btn-enviar-convite');
   const msg = document.getElementById('msg-convite');
   const cat = document.getElementById('sel-cat')?.value || 'entretenimento';
-  btn.disabled = true; btn.textContent = 'EnviandoÖ';
+  btn.disabled = true; btn.textContent = 'Enviando‚Ä¶';
   try {
     const d = await api('/agente/convites/enviar', {
       method: 'POST',
@@ -1661,7 +1663,7 @@ async function enviarConvite() {
       _perfilAtual = null;
       document.getElementById('perfil-resultado').innerHTML = '';
       document.getElementById('inp-uid').value = '';
-      _desemp = false; // forÁa reload do histÛrico
+      _desemp = false; // for√ßa reload do hist√≥rico
     } else {
       mostrarMsg(msg, d.mensagem || d.checkMessage || 'Falha ao enviar convite.', 'err');
     }

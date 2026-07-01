@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#060B16">
+<meta name="color-scheme" content="dark light">
 <title>Gerador de Molduras — DMaior Agency</title>
 <script>
   (() => {
@@ -28,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="js/preferences.js?v=20260624-3"></script>
+<script charset=utf-8 src="js/preferences.js?v=20260701-ios-1"></script>
 <style>
   :root{
     --bg:#050611; --bg2:#0b0c1b; --panel:#101120; --panel2:#17192a;
@@ -149,7 +151,7 @@
     border:1px solid var(--line2);transition:background .15s,color .15s,border-color .15s;
   }
   .dl:hover:not(:disabled) .ultra{background:rgba(255,255,255,.22);color:#fff;border-color:transparent}
-  .dl.selected{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 14%,var(--panel2));box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 18%,transparent)}
+  .dl.selected{border-color:var(--blue);background:var(--panel2);box-shadow:0 0 0 2px var(--line2)}
   .dl.selected::after{content:"✓";position:absolute;right:10px;bottom:9px;color:var(--blue);font-size:15px;font-weight:700}
   .dl.selected .dl-px{color:var(--text)}
   .download-action{width:100%;margin-top:14px;min-height:48px;border-radius:8px;background:var(--grad);color:#061016;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:9px;transition:filter .15s,transform .15s,opacity .15s}

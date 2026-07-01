@@ -1,22 +1,53 @@
-# ── Headers de segurança — aplicados em todas as páginas ──────────────
+# Global security headers
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
-# ── Cache de HTML — curto para refletir atualizações ──────────────────
-/*.html
-  Cache-Control: public, max-age=3600
+# HTML routes served by Cloudflare Pages
+/
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
 
-# ── Cache de JS/CSS — longo com immutable (hash no nome do arquivo) ───
+/*.html
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/admin
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/admin/
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/painel
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/painel/
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/agente
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/agente/
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Static text assets
 /js/*
+  Content-Type: application/javascript; charset=utf-8
   Cache-Control: public, max-age=2592000, immutable
 
 /css/*
+  Content-Type: text/css; charset=utf-8
   Cache-Control: public, max-age=2592000, immutable
 
-# ── Cache de imagens ──────────────────────────────────────────────────
+# Images
 /*.png
   Cache-Control: public, max-age=15552000, immutable
 
@@ -32,7 +63,7 @@
 /*.svg
   Cache-Control: public, max-age=15552000, immutable
 
-# ── Cache de fontes — muito longo ─────────────────────────────────────
+# Fonts
 /*.woff2
   Cache-Control: public, max-age=31536000, immutable
 

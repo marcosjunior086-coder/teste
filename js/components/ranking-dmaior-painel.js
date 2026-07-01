@@ -608,25 +608,33 @@ class RankingDmaior extends HTMLElement {
         if (!config || config.tipo !== 'sheets') return { rows: [], time: '', date: '' };
         const url      = `${this.CLOUDFLARE_API}/planilha?gid=${config.gid}`;
         const cacheKey = 'dmaior_sheet_data_' + config.gid;
+        const _isValidCsv = t => t && !t.trimStart().startsWith('{') && !t.trimStart().startsWith('<') && t.includes('\n');
         try {
             const localData = localStorage.getItem(cacheKey);
-            if (localData) {
+            if (localData && _isValidCsv(localData)) {
                 fetch(url, { headers: { ...this._authHeader() } })
-                    .then(r => r.text())
-                    .then(raw => { if (raw.length > 50) localStorage.setItem(cacheKey, raw); })
+                    .then(r => r.ok ? r.text() : Promise.reject(r.status))
+                    .then(raw => { if (_isValidCsv(raw)) localStorage.setItem(cacheKey, raw); })
                     .catch(() => {});
                 const parsed = this.parseRows(localData);
                 this.cache[nomeAba] = parsed; return parsed;
             }
             const res = await fetch(url, { headers: { ...this._authHeader() } });
             const raw = await res.text();
-            if (raw.length > 50) localStorage.setItem(cacheKey, raw);
+            if (!res.ok) {
+                let msg = `Worker retornou ${res.status}`;
+                try { msg = JSON.parse(raw)?.erro || msg; } catch (_) {}
+                throw new Error(msg);
+            }
+            if (!_isValidCsv(raw)) throw new Error('Planilha retornou conteúdo inválido — verifique se está pública e se o PLANILHA_ID está correto no Worker');
+            localStorage.setItem(cacheKey, raw);
             const data = this.parseRows(raw);
             this.cache[nomeAba] = data; return data;
-        } catch (_) {
-            const fallback = localStorage.getItem(cacheKey);
+        } catch (e) {
+            localStorage.removeItem(cacheKey);
+            const fallback = null;
             if (fallback) return this.parseRows(fallback);
-            return { rows: [], time: '', date: '' };
+            throw e;
         }
     }
 

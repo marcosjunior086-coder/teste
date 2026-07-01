@@ -57,7 +57,7 @@ class RankingDmaior extends HTMLElement {
 
   _isLoggedIn() {
     if (typeof window === 'undefined') return false;
-    try { return !!this._getToken() || localStorage.getItem('agencia_auth') === 'true'; } catch { return false; }
+    try { return !!this._getToken(); } catch { return false; }
   }
 
   connectedCallback() {
@@ -764,11 +764,11 @@ class RankingDmaior extends HTMLElement {
       const data = this.parseRows(raw);
       this.cache[nomeAba] = data;
       return data;
-    } catch {
+    } catch (e) {
       let fallback = null;
       if (typeof window !== 'undefined') { try { fallback = localStorage.getItem(cacheKey); } catch {} }
       if (fallback) return this.parseRows(fallback);
-      return { rows: [], time: '', date: '' };
+      throw e;
     }
   }
 

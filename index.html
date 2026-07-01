@@ -6,27 +6,29 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DMaior Agency — Agência de Streamers Kwai</title>
-  <meta name="description" content="A maior agência de streamers do Kwai. Suporte exclusivo, método próprio e premiações reais.">
+  <meta name="theme-color" content="#060B16">
+  <meta name="color-scheme" content="dark light">
+  <title>DMaior Agency â€” AgÃªncia de Streamers Kwai</title>
+  <meta name="description" content="A maior agÃªncia de streamers do Kwai. Suporte exclusivo, mÃ©todo prÃ³prio e premiaÃ§Ãµes reais.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css?v=20260625-5">
+  <link rel="stylesheet" href="css/global.css?v=20260701-ios-1">
   <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-  <!-- Menu unificado — funciona em mobile e desktop -->
+  <!-- Menu unificado â€” funciona em mobile e desktop -->
   <menu-mobile-dmaior></menu-mobile-dmaior>
 
   <main class="dm-main">
 
-    <!-- 1º — Widget de live (abaixo da barra de menu) -->
+    <!-- 1Âº â€” Widget de live (abaixo da barra de menu) -->
     <kwai-live-widget></kwai-live-widget>
 
-    <!-- 2º — Menu de serviços -->
+    <!-- 2Âº â€” Menu de serviÃ§os -->
     <dmaior-services-menu></dmaior-services-menu>
 
-    <!-- 3º — Benefícios e FAQ (oculto no tema Dinâmico Pro) -->
+    <!-- 3Âº â€” BenefÃ­cios e FAQ (oculto no tema DinÃ¢mico Pro) -->
     <div id="section-beneficios" class="dm-container">
       <widget-beneficios></widget-beneficios>
     </div>
@@ -34,31 +36,31 @@
   </main>
 
   <!-- Scripts na ordem correta: API ? Auth ? componentes -->
-  <script src="js/preferences.js?v=20260624-3"></script>
-  <script src="js/utils/helpers.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/router.js"></script>
-  <script src="js/components/menu-mobile.js?v=20260630-menu-contrast-1"></script>
-  <script src="js/components/live-widget.js?v=20260630-live-modal-short-1"></script>
-  <script src="js/components/services-menu.js?v=20260630-rocket-recarga-1"></script>
-  <script src="js/components/beneficios.js?v=20260624-3"></script>
+  <script charset=utf-8 src="js/preferences.js?v=20260701-ios-1"></script>
+  <script charset=utf-8 src="js/utils/helpers.js"></script>
+  <script charset=utf-8 src="js/api.js"></script>
+  <script charset=utf-8 src="js/auth.js"></script>
+  <script charset=utf-8 src="js/router.js"></script>
+  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260630-menu-contrast-1"></script>
+  <script charset=utf-8 src="js/components/live-widget.js?v=20260630-live-modal-short-1"></script>
+  <script charset=utf-8 src="js/components/services-menu.js?v=20260701-ios-1"></script>
+  <script charset=utf-8 src="js/components/beneficios.js?v=20260624-3"></script>
 
   <script>
-    // -- Controle de layout — oculta benefícios no tema Dinâmico Pro ----------
+    // -- Controle de layout â€” oculta benefÃ­cios no tema DinÃ¢mico Pro ----------
     function aplicarLayout(layout) {
       var sec = document.getElementById('section-beneficios');
       if (!sec) return;
-      // Dinâmico Pro: esconde seção de benefícios; Original: mostra
+      // DinÃ¢mico Pro: esconde seÃ§Ã£o de benefÃ­cios; Original: mostra
       sec.style.display = (layout === 'dinamico') ? 'none' : '';
     }
 
-    // Aplica o tema salvo imediatamente ao carregar a página
+    // Aplica o tema salvo imediatamente ao carregar a pÃ¡gina
     try {
       aplicarLayout(localStorage.getItem('dm_layout') || 'original');
-    } catch (e) { /* localStorage bloqueado — mantém padrão */ }
+    } catch (e) { /* localStorage bloqueado â€” mantÃ©m padrÃ£o */ }
 
-    // Reage em tempo real quando o usuário troca o tema via engrenagem
+    // Reage em tempo real quando o usuÃ¡rio troca o tema via engrenagem
     window.addEventListener('dmaior:layout', function(e) {
       try { aplicarLayout(e.detail && e.detail.layout ? e.detail.layout : 'original'); }
       catch (e) {}
@@ -66,8 +68,8 @@
   </script>
 
   <dmaior-footer></dmaior-footer>
-  <script src="js/components/footer.js?v=20260624-3"></script>
+  <script charset=utf-8 src="js/components/footer.js?v=20260624-3"></script>
   <dmaior-cookie-consent></dmaior-cookie-consent>
-  <script src="js/components/cookie-consent.js?v=20260624-3"></script>
+  <script charset=utf-8 src="js/components/cookie-consent.js?v=20260624-3"></script>
 </body>
 </html>

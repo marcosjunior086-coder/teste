@@ -377,10 +377,11 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   font-size: calc(16px * var(--dm-font-scale, 1));
   /* Cobre overscroll no mobile (evita fundo branco ao rolar além do limite) */
-  background-color: #060B16;
+  background-color: var(--dm-bg);
 }
 
 body {
@@ -391,11 +392,13 @@ body {
     linear-gradient(180deg, #060B16 0%, #070912 45%, #05050A 100%);
   background-attachment: fixed;
   background-size: cover;
+  background-color: var(--dm-bg);
   color: var(--dm-text);
   font-family: var(--dm-font-body);
   font-size: 1rem;
   line-height: 1.5;
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -416,6 +419,12 @@ body {
 
 [data-theme="dark"] .dm-page {
   background: #000;
+}
+
+[data-theme="branco"],
+[data-theme="rosa"],
+[data-theme="laranja"] {
+  color-scheme: light;
 }
 
 /* Temas claros — restaura fundo sólido sem o gradiente escuro */
@@ -456,12 +465,17 @@ button {
   font-family: var(--dm-font-body);
   border: none;
   background: none;
+  color: inherit;
   -webkit-tap-highlight-color: transparent;
 }
 
 input, select, textarea {
   font-family: var(--dm-font-body);
   outline: none;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  background-clip: padding-box;
 }
 
 [data-font-size="grande"] {

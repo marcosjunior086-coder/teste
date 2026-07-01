@@ -218,19 +218,21 @@ class DmaiorServicesMenu extends HTMLElement {
         .item-instagram svg { fill:#E1306C; }
         .item-whatsapp { color:#25D366; }
         .item-whatsapp svg { fill:#25D366; transform:scale(.92); transform-origin:center; overflow:visible; }
-        .nav-item-center { --gem-accent:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); position:relative; top:-25px; text-decoration:none; display:flex; flex-direction:column; align-items:center; cursor:pointer; isolation:isolate; }
+        .nav-item-center { --gem-accent:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); --gem-soft:rgba(0,212,212,.12); --gem-ring:rgba(0,212,212,.20); --gem-glow:rgba(0,212,212,.16); --gem-shadow:rgba(0,212,212,.55); --gem-text-shadow:rgba(0,212,212,.35); position:relative; top:-25px; text-decoration:none; display:flex; flex-direction:column; align-items:center; cursor:pointer; isolation:isolate; }
         .nav-item-center::before { content:''; position:absolute; top:36px; left:50%; width:132px; height:2px; transform:translateX(-50%); background:linear-gradient(90deg,transparent,var(--gem-accent),transparent); opacity:.55; z-index:-1; }
-        .floating-btn { position:relative; width:75px; height:75px; background:radial-gradient(circle at 50% 48%,rgba(0,0,0,.08) 0%,var(--dm-bg-2,#101113) 52%,var(--dm-bg-3,#000) 100%); border:2px solid var(--gem-accent); border-radius:50%; display:flex; justify-content:center; align-items:center; box-shadow:0 0 0 10px color-mix(in srgb,var(--gem-accent) 12%,transparent),inset 0 0 18px color-mix(in srgb,var(--gem-accent) 16%,transparent); margin-bottom:8px; transition:all .3s ease; overflow:visible; }
+        .floating-btn { position:relative; width:75px; height:75px; background:radial-gradient(circle at 50% 48%,rgba(0,0,0,.08) 0%,var(--dm-bg-2,#101113) 52%,var(--dm-bg-3,#000) 100%); border:2px solid var(--gem-accent); border-radius:50%; display:flex; justify-content:center; align-items:center; box-shadow:0 0 0 10px var(--gem-soft),inset 0 0 18px var(--gem-glow); margin-bottom:8px; transition:all .3s ease; overflow:visible; }
         .floating-btn::before { display:none; }
-        .floating-btn::after { content:''; position:absolute; inset:-8px; border:1px solid color-mix(in srgb,var(--gem-accent) 20%,transparent); border-radius:50%; opacity:.55; pointer-events:none; }
-        .floating-btn svg { position:relative; z-index:1; width:34px; height:34px; color:var(--gem-accent); stroke:var(--gem-accent); fill:none; filter:drop-shadow(0 0 7px color-mix(in srgb,var(--gem-accent) 55%,transparent)); animation:pulse-gem 2.4s infinite ease-in-out; }
+        .floating-btn::after { content:''; position:absolute; inset:-8px; border:1px solid var(--gem-ring); border-radius:50%; opacity:.55; pointer-events:none; }
+        .floating-btn svg { position:relative; z-index:1; width:34px; height:34px; color:var(--gem-accent); stroke:var(--gem-accent); fill:none; filter:drop-shadow(0 0 7px var(--gem-shadow)); animation:pulse-gem 2.4s infinite ease-in-out; }
         :host-context(:not([data-theme])) .nav-item-center,
         :host-context([data-theme="dark"]) .nav-item-center,
-        :host-context([data-theme="branco"]) .nav-item-center { --gem-accent:#00d4d4; }
+        :host-context([data-theme="branco"]) .nav-item-center { --gem-accent:#00d4d4; --gem-soft:rgba(0,212,212,.12); --gem-ring:rgba(0,212,212,.20); --gem-glow:rgba(0,212,212,.16); --gem-shadow:rgba(0,212,212,.55); --gem-text-shadow:rgba(0,212,212,.35); }
+        :host-context([data-theme="rosa"]) .nav-item-center { --gem-soft:rgba(233,30,140,.12); --gem-ring:rgba(233,30,140,.20); --gem-glow:rgba(233,30,140,.16); --gem-shadow:rgba(233,30,140,.55); --gem-text-shadow:rgba(233,30,140,.35); }
+        :host-context([data-theme="laranja"]) .nav-item-center { --gem-soft:rgba(249,115,22,.12); --gem-ring:rgba(249,115,22,.20); --gem-glow:rgba(249,115,22,.16); --gem-shadow:rgba(249,115,22,.55); --gem-text-shadow:rgba(249,115,22,.35); }
         :host-context(:not([data-theme])) .floating-btn svg,
         :host-context([data-theme="dark"]) .floating-btn svg,
         :host-context([data-theme="branco"]) .floating-btn svg { color:#00d4d4; stroke:#00d4d4; }
-        .nav-item-center span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.8rem; font-weight:700; color:var(--gem-accent); text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 7px color-mix(in srgb,var(--gem-accent) 35%,transparent); }
+        .nav-item-center span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.8rem; font-weight:700; color:var(--gem-accent); text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 7px var(--gem-text-shadow); }
         @keyframes pulse-gem { 0%{transform:scale(1);opacity:.9} 50%{transform:scale(1.08);opacity:1} 100%{transform:scale(1);opacity:.9} }
         /* Desktop usa o mesmo layout do mobile — menu unificado */
         .mobile-layout { max-width:520px; }

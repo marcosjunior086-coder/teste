@@ -4,9 +4,17 @@
   const LANG_KEY = 'dm_idioma';
   const FONT_KEY = 'dm_tamanho_texto';
   const FONT_FAMILY_KEY = 'dm_familia_fonte';
+  const THEME_KEY = 'dm_tema';
   const DEFAULT_LANG = 'pt-BR';
   const DEFAULT_FONT = 'normal';
   const DEFAULT_FONT_FAMILY = 'dmaior';
+  const THEME_META = {
+    original: { color: '#060B16', scheme: 'dark' },
+    dark:     { color: '#000000', scheme: 'dark' },
+    branco:   { color: '#f0f4f8', scheme: 'light' },
+    rosa:     { color: '#fff5f8', scheme: 'light' },
+    laranja:  { color: '#fff8f0', scheme: 'light' }
+  };
 
   const dict = {
     'pt-BR': {
@@ -1058,6 +1066,33 @@
     }
   }
 
+  function getTheme() {
+    try {
+      const theme = localStorage.getItem(THEME_KEY) || 'original';
+      return THEME_META[theme] ? theme : 'original';
+    } catch (_) {
+      return 'original';
+    }
+  }
+
+  function upsertMeta(name, content) {
+    if (!document.head) return;
+    let meta = document.querySelector(`meta[name="${name}"]`);
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', name);
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', content);
+  }
+
+  function applyThemeMeta() {
+    const meta = THEME_META[getTheme()] || THEME_META.original;
+    upsertMeta('theme-color', meta.color);
+    upsertMeta('color-scheme', meta.scheme === 'light' ? 'light dark' : 'dark light');
+    document.documentElement.style.colorScheme = meta.scheme;
+  }
+
   function t(key, params) {
     const lang = getLang();
     let value = (dict[lang] && dict[lang][key]) || dict[DEFAULT_LANG][key] || key;
@@ -1304,12 +1339,13 @@
   }
 
   function getState() {
-    return { language: getLang(), fontSize: getFontSize(), fontFamily: getFontFamily() };
+    return { language: getLang(), fontSize: getFontSize(), fontFamily: getFontFamily(), theme: getTheme() };
   }
 
   function init() {
     applyFontSize(getFontSize());
     applyFontFamily(getFontFamily());
+    applyThemeMeta();
     document.documentElement.lang = getLang();
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
@@ -1324,7 +1360,9 @@
       if (event.key === FONT_KEY)        applyFontSize(getFontSize());
       if (event.key === FONT_FAMILY_KEY) applyFontFamily(getFontFamily());
       if (event.key === LANG_KEY)        bindTree(document);
+      if (event.key === THEME_KEY)       applyThemeMeta();
     });
+    window.addEventListener('dmaior:tema', applyThemeMeta);
   }
 
   function startObserver() {
@@ -1357,9 +1395,11 @@
     getLang,
     getFontSize,
     getFontFamily,
+    getTheme,
     setLanguage,
     setFontSize,
     setFontFamily,
+    applyThemeMeta,
     languages: Object.keys(dict).map(code => ({ code, name: dict[code].languageName })),
     fontSizes: Object.keys(fonts),
     fontFamilyOptions: Object.keys(fontFamilies)
