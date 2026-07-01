@@ -27,6 +27,7 @@ class DimaiorAdmin extends HTMLElement {
     this._edtCom    = null;
     this.DRIVE_FOTOS_URL = 'https://drive.google.com/drive/folders/1ckE8nNbnu-m53WfJJ32nA8zZ81sO38Ek?usp=drive_link';
     this._creditoRapidoUid = null;
+    this._rankMeses = [];
     // Lives — layout e modo (persistido em localStorage)
     const _lo = (() => { try { return JSON.parse(localStorage.getItem('dm_lives_opts')||'{}'); } catch { return {}; } })();
     this._livesOpts = { cols: _lo.cols||2, modo: _lo.modo||'capa', ordenar: _lo.ordenar||'padrao', estilo: _lo.estilo||1, dashboardAoVivo: _lo.dashboardAoVivo!==false };
@@ -202,7 +203,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
@@ -641,6 +642,100 @@ class DimaiorAdmin extends HTMLElement {
       if(total>POR_PAG){s.getElementById('hPrev')?.addEventListener('click',()=>{pgHist[idx]--;renderMes(idx);});s.getElementById('hNext')?.addEventListener('click',()=>{pgHist[idx]++;renderMes(idx);});}
     };
     renderMes(0);s.getElementById('monthTabs').addEventListener('click',e=>{const btn=e.target.closest('.month-tab');if(btn)renderMes(parseInt(btn.dataset.idx));});
+  }
+
+  _fallbackMesesRanking(){
+    return [
+      {id:'maio',nome:'Maio',gid:'291423187',compararCom:'Abril',ativo:true,ordem:1},
+      {id:'abril',nome:'Abril',gid:'1754974993',compararCom:'Março',ativo:true,ordem:2},
+      {id:'marco',nome:'Março',gid:'1675182517',compararCom:'Fevereiro',ativo:true,ordem:3},
+      {id:'fevereiro',nome:'Fevereiro',gid:'0',compararCom:'Janeiro',ativo:true,ordem:4},
+      {id:'janeiro',nome:'Janeiro',gid:'1749572638',compararCom:'',ativo:true,ordem:5},
+    ];
+  }
+  _slugMesRanking(nome,gid){
+    const base=String(nome||'mes').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'mes';
+    return `${base}-${String(gid||Date.now()).replace(/[^a-zA-Z0-9_-]/g,'')}`;
+  }
+  async _carregarMesesRanking(){
+    const s=this.shadowRoot,area=s.getElementById('rankMesesArea'),status=s.getElementById('rankMesesStatus');
+    if(!area)return;
+    area.innerHTML=this._loading();
+    if(status)status.textContent='';
+    const d=await this._api('GET','/admin/ranking/meses');
+    if(d?.ok){
+      this._rankMeses=(d.meses||[]).map((m,i)=>({
+        id:m.id||this._slugMesRanking(m.nome,m.gid),
+        nome:m.nome||'',
+        gid:m.gid||'',
+        compararCom:m.compararCom??m.comparar_com??'',
+        ativo:m.ativo!==false,
+        ordem:Number(m.ordem||i+1),
+      })).sort((a,b)=>Number(a.ordem)-Number(b.ordem));
+      if(!this._rankMeses.length)this._rankMeses=this._fallbackMesesRanking();
+    }else{
+      this._rankMeses=this._fallbackMesesRanking();
+      if(status)status.textContent='Worker ainda não retornou os meses. Exibindo base antiga para salvar no KV.';
+    }
+    this._renderMesesRanking();
+  }
+  _renderMesesRanking(){
+    const s=this.shadowRoot,area=s.getElementById('rankMesesArea');
+    if(!area)return;
+    const rows=(this._rankMeses||[]).map((m,i)=>`
+      <div class="rank-mes-row" data-i="${i}">
+        <input class="rank-mes-id" type="hidden" value="${this._esc(m.id||'')}">
+        <label><span>Mês</span><input class="rank-mes-nome" value="${this._esc(m.nome||'')}" placeholder="Ex: Junho"></label>
+        <label><span>GID da aba</span><input class="rank-mes-gid" value="${this._esc(m.gid||'')}" placeholder="123456789"></label>
+        <label><span>Comparar com</span><input class="rank-mes-comp" value="${this._esc(m.compararCom||'')}" placeholder="Ex: Maio"></label>
+        <label><span>Ordem</span><input class="rank-mes-ordem" type="number" min="1" value="${Number(m.ordem||i+1)}"></label>
+        <label class="rank-mes-check"><input class="rank-mes-ativo" type="checkbox" ${m.ativo!==false?'checked':''}> <span>Ativo</span></label>
+        <button class="btn btn-o btn-d rank-mes-del" type="button" data-i="${i}">${this._ico('trash',12)} Remover</button>
+      </div>`).join('');
+    area.innerHTML=rows||this._empty('calendar','Nenhum mês cadastrado');
+    area.querySelectorAll('.rank-mes-del').forEach(btn=>btn.addEventListener('click',()=>this._removerMesRanking(Number(btn.dataset.i))));
+  }
+  _coletarMesesRanking(){
+    return [...this.shadowRoot.querySelectorAll('.rank-mes-row')].map((row,i)=>{
+      const nome=row.querySelector('.rank-mes-nome')?.value.trim()||'';
+      const gid=row.querySelector('.rank-mes-gid')?.value.trim()||'';
+      const id=row.querySelector('.rank-mes-id')?.value.trim()||this._slugMesRanking(nome,gid);
+      return {
+        id,nome,gid,
+        compararCom:row.querySelector('.rank-mes-comp')?.value.trim()||null,
+        ativo:!!row.querySelector('.rank-mes-ativo')?.checked,
+        ordem:Number(row.querySelector('.rank-mes-ordem')?.value||i+1),
+      };
+    }).filter(m=>m.nome&&m.gid).sort((a,b)=>Number(a.ordem)-Number(b.ordem));
+  }
+  _adicionarMesRanking(){
+    this._rankMeses=this._coletarMesesRanking();
+    this._rankMeses.push({id:'',nome:'',gid:'',compararCom:'',ativo:true,ordem:this._rankMeses.length+1});
+    this._renderMesesRanking();
+    setTimeout(()=>this.shadowRoot.querySelector('.rank-mes-row:last-child .rank-mes-nome')?.focus(),50);
+  }
+  _removerMesRanking(idx){
+    this._rankMeses=this._coletarMesesRanking();
+    this._rankMeses.splice(idx,1);
+    this._rankMeses=this._rankMeses.map((m,i)=>({...m,ordem:i+1}));
+    this._renderMesesRanking();
+  }
+  async _salvarMesesRanking(){
+    const s=this.shadowRoot,status=s.getElementById('rankMesesStatus'),btn=s.getElementById('btnSalvarRankMeses');
+    const meses=this._coletarMesesRanking();
+    if(!meses.length){this._toast('Adicione pelo menos um mês com GID.','err');return;}
+    if(btn){btn.disabled=true;btn.innerHTML=`${this._ico('refresh',13)} Salvando...`;}
+    const d=await this._api('POST','/admin/ranking/meses',{meses});
+    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('check',13)} Salvar Meses`;}
+    if(d?.ok){
+      this._rankMeses=d.meses?.length?d.meses:meses;
+      this._renderMesesRanking();
+      if(status)status.textContent=`Salvo no KV às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}.`;
+      this._toast('Meses do ranking salvos!');
+    }else{
+      this._toast(d?.erro||'Erro ao salvar meses','err');
+      if(status)status.textContent=d?.erro||'Erro ao salvar. Verifique se a rota /admin/ranking/meses já foi publicada no Worker.';
+    }
   }
 
   async _carregarStreamers(){
@@ -1120,7 +1215,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
-    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());
+    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
@@ -1894,6 +1989,13 @@ class DimaiorAdmin extends HTMLElement {
     .premio-tipo-tabs{display:flex;gap:8px;margin-bottom:16px}.premio-tipo-tab{padding:8px 20px;border-radius:var(--rs);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--brddim);background:transparent;color:var(--t3);transition:all .2s;display:flex;align-items:center;gap:6px}.premio-tipo-tab:hover{color:var(--t1)}.premio-tipo-tab.on{background:var(--cyan-d);border-color:var(--brd);color:var(--cyan)}
     .premio-table{width:100%;border-collapse:collapse;margin-bottom:14px}.premio-pos{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap}
     .premio-info-box{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:11px;color:var(--cyan);margin-bottom:14px;line-height:1.5}
+    .rank-mes-row{display:grid;grid-template-columns:minmax(130px,1.2fr) minmax(120px,1fr) minmax(120px,1fr) 82px 82px auto;gap:8px;align-items:end;padding:10px;border:1px solid var(--brddim);border-radius:var(--rs);background:rgba(0,0,0,.18);margin-bottom:10px}
+    .rank-mes-row label{display:flex;flex-direction:column;gap:4px;min-width:0}
+    .rank-mes-row label span{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
+    .rank-mes-row input[type="text"],.rank-mes-row input[type="number"],.rank-mes-row input:not([type]){width:100%;min-width:0;padding:8px 10px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none}
+    .rank-mes-row input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-d)}
+    .rank-mes-check{height:35px;justify-content:center;align-items:center;flex-direction:row!important;border:1px solid var(--brddim);border-radius:var(--rs);background:rgba(255,255,255,.02)}
+    .rank-mes-check input{accent-color:var(--cyan)}
     .mproc-sucesso{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3);border-radius:var(--rs);color:var(--verde);font-size:13px;margin-bottom:10px}
     .mproc-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 12px;background:rgba(0,0,0,.3);border-radius:var(--rs);font-size:12px;margin-bottom:4px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
     /* ── Accordion histórico premiações ── */
@@ -2132,6 +2234,9 @@ class DimaiorAdmin extends HTMLElement {
       .premio-info-box{flex-direction:column;align-items:flex-start;gap:4px;font-size:10px;padding:8px 10px;line-height:1.5;}
       .premio-table th:last-child,.premio-table td:last-child{width:36px;}
       .premio-val-inp{width:130px !important;}
+      .rank-mes-row{grid-template-columns:1fr;padding:12px}
+      .rank-mes-check{height:auto;min-height:38px;justify-content:flex-start;padding:0 10px}
+      .rank-mes-row .btn{width:100%;justify-content:center}
 
       /* ── Config ── */
       .cfg-row{flex-wrap:wrap;gap:8px;}
@@ -2374,6 +2479,7 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('chart','diario','Resultado Diário')}
             ${ni('trend','desempenho','Desempenho')}
             ${ni('history','historico','Histórico')}
+            ${ni('calendar','mesesRanking','Meses Ranking')}
             <div class="ns">Gestão</div>
             ${ni('users','streamers','Streamers')}
             ${ni('key_uid','uids','Autorização UIDs')}
@@ -2399,6 +2505,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
             <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
             <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
+            <div class="pag" id="pag-mesesRanking">${ph('Meses do Ranking','calendar','Configuração das abas históricas','btnAtuRankMeses',`<button class="btn btn-g" id="btnSalvarRankMeses">${this._ico('check',13)} Salvar Meses</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Meses Históricos via Google Planilhas</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAddRankMes">${this._ico('plus',12)} Adicionar</button></div></div><div style="padding:16px"><div class="premio-info-box">${this._ico('warning',13)} Cadastre aqui o nome do mês e o GID da aba do Google Planilhas. O ranking público passa a montar as abas automaticamente pelo KV do Worker Rank.</div><div id="rankMesesArea">${this._loading()}</div><div id="rankMesesStatus" style="font-size:11px;color:var(--t3);margin-top:10px"></div></div></div></div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>

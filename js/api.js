@@ -212,6 +212,19 @@ window.DmaiorAPI = {
     },
 
     /**
+     * Busca a lista dinâmica de meses históricos do ranking.
+     * A configuração fica no KV do Worker Rank.
+     * @param {string} token - Bearer token
+     */
+    async getMeses(token) {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.rank,
+        '/api/ranking/meses',
+        window.DmaiorAPI.rank._auth(token),
+      );
+    },
+
+    /**
      * Busca comunicados ativos filtrados por local (sem auth — público).
      * @param {string} local - 'ranking' | 'painel' | 'impulsionamento'
      */

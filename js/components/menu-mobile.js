@@ -87,7 +87,7 @@ class MenuMobileDMaior extends HTMLElement {
       ]},
       { label: 'Cursos',      link: 'cursos.html',            icon: SVG_BOOK   },
       { label: 'Eventos',     icon: SVG_EVENT, subItems: [
-          { label: 'PK Interno', link: 'pk-interno.html' },
+          { label: 'PK Interno', link: 'pk-interno.html', comingSoon: true },
       ]},
       { label: 'Ferramentas', disabled: true,                 icon: SVG_TOOL   },
       { label: 'Portfólio',   icon: SVG_INFO, subItems: [
@@ -98,7 +98,9 @@ class MenuMobileDMaior extends HTMLElement {
     let menuHTML = '';
     menuData.forEach((item, i) => {
       if (item.subItems) {
-        const subs = item.subItems.map(s => `<a href="${s.link}" class="sub-link">${s.label}</a>`).join('');
+        const subs = item.subItems.map(s => s.comingSoon
+            ? `<span class="sub-link sub-soon">${s.label}<span class="em-breve-tag">Em breve</span></span>`
+            : `<a href="${s.link}" class="sub-link">${s.label}</a>`).join('');
         menuHTML += `
           <div class="menu-item has-sub">
             <button class="menu-acc" data-index="${i}">
@@ -277,6 +279,7 @@ class MenuMobileDMaior extends HTMLElement {
       /* ── Itens "em breve": desabilitados visualmente ── */
       .disabled-item{ opacity:.45; cursor:default; pointer-events:none; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
       .em-breve-tag{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--dm-gold); background:var(--dm-gold-10,rgba(240,192,64,.12)); border:1px solid var(--dm-gold-20,rgba(240,192,64,.25)); border-radius:20px; padding:2px 8px; }
+      .sub-soon{ cursor:default; opacity:.65; display:flex; align-items:center; gap:8px; pointer-events:none; }
     </style>
 
     <div class="topbar">

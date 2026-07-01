@@ -17,8 +17,8 @@ class RankingDmaior extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
 
-    // Configuração das abas — mês atual via Supabase, histórico via Google Sheets
-    this.ABAS_CONFIG = [
+    // Fallback local. A lista oficial dos meses históricos vem do KV via Worker Rank.
+    this.FALLBACK_ABAS_CONFIG = [
       { nome: 'Mês Atual', tipo: 'supabase_mes',  compararCom: null },
       { nome: 'Maio',      tipo: 'sheets', gid: '291423187',  compararCom: 'Abril' },
       { nome: 'Abril',     tipo: 'sheets', gid: '1754974993', compararCom: 'Março' },
@@ -26,6 +26,7 @@ class RankingDmaior extends HTMLElement {
       { nome: 'Fevereiro', tipo: 'sheets', gid: '0',          compararCom: 'Janeiro' },
       { nome: 'Janeiro',   tipo: 'sheets', gid: '1749572638', compararCom: null },
     ];
+    this.ABAS_CONFIG = [...this.FALLBACK_ABAS_CONFIG];
 
     this.currentTab    = 'diamonds';
     this.currentPage   = 1;
@@ -570,9 +571,10 @@ class RankingDmaior extends HTMLElement {
     location.reload();
   }
 
-  initDashboard() {
+  async initDashboard() {
     this.shadowRoot.getElementById('login-screen').style.display = 'none';
     this.shadowRoot.getElementById('dashboard').style.display    = 'block';
+    await this.loadHistoricalTabs();
     const sel = this.shadowRoot.getElementById('sheet-selector');
     sel.innerHTML = '';
     this.ABAS_CONFIG.forEach(aba => {
@@ -583,6 +585,28 @@ class RankingDmaior extends HTMLElement {
     this.updateRuleText();
     this.loadTabData();
     this.fetchComunicados();
+  }
+
+  async loadHistoricalTabs() {
+    const fallback = () => { this.ABAS_CONFIG = [...this.FALLBACK_ABAS_CONFIG]; };
+    try {
+      const data = await window.DmaiorAPI.rank.getMeses(this._getToken());
+      const meses = Array.isArray(data) ? data : (data?.meses || data?.items || []);
+      const historicos = meses
+        .filter(m => m && m.ativo !== false && m.gid && m.nome)
+        .sort((a, b) => Number(a.ordem ?? 999) - Number(b.ordem ?? 999))
+        .map(m => ({
+          nome: String(m.nome).trim(),
+          tipo: 'sheets',
+          gid: String(m.gid).trim(),
+          compararCom: m.compararCom ?? m.comparar_com ?? null,
+        }));
+      this.ABAS_CONFIG = historicos.length
+        ? [{ nome: 'Mês Atual', tipo: 'supabase_mes', compararCom: null }, ...historicos]
+        : [...this.FALLBACK_ABAS_CONFIG];
+    } catch {
+      fallback();
+    }
   }
 
   _isMesAtual() {

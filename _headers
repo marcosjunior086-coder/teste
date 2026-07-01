@@ -1,0 +1,40 @@
+# ── Headers de segurança — aplicados em todas as páginas ──────────────
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# ── Cache de HTML — curto para refletir atualizações ──────────────────
+/*.html
+  Cache-Control: public, max-age=3600
+
+# ── Cache de JS/CSS — longo com immutable (hash no nome do arquivo) ───
+/js/*
+  Cache-Control: public, max-age=2592000, immutable
+
+/css/*
+  Cache-Control: public, max-age=2592000, immutable
+
+# ── Cache de imagens ──────────────────────────────────────────────────
+/*.png
+  Cache-Control: public, max-age=15552000, immutable
+
+/*.jpg
+  Cache-Control: public, max-age=15552000, immutable
+
+/*.jpeg
+  Cache-Control: public, max-age=15552000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=15552000, immutable
+
+/*.svg
+  Cache-Control: public, max-age=15552000, immutable
+
+# ── Cache de fontes — muito longo ─────────────────────────────────────
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable

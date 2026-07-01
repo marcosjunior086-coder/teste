@@ -68,7 +68,7 @@ class MenuDesktopDMaior extends HTMLElement {
       ]},
       { label: 'Cursos',      link: 'cursos.html',    icon: SVG_BOOK   },
       { label: 'Eventos',     link: '#',              icon: SVG_EVENT,  subItems: [
-          { label: 'PK Interno', link: '/pk-interno.html' },
+          { label: 'PK Interno', link: '/pk-interno.html', comingSoon: true },
       ]},
       { label: 'Ferramentas', link: '/aplicativos.html', icon: SVG_TOOL },
       { label: 'Portfólio',   link: '#',              icon: SVG_INFO,   subItems: [
@@ -79,7 +79,9 @@ class MenuDesktopDMaior extends HTMLElement {
     let navHTML = '';
     menuData.forEach(item => {
       if (item.subItems) {
-        const subHTML = item.subItems.map(s => `<a href="${s.link}" class="dd-link">${s.label}</a>`).join('');
+        const subHTML = item.subItems.map(s => s.comingSoon
+            ? `<span class="dd-link dd-soon">${s.label}<span class="dd-breve">Em breve</span></span>`
+            : `<a href="${s.link}" class="dd-link">${s.label}</a>`).join('');
         navHTML += `
           <div class="nav-item has-dd">
             <a href="${item.link}" class="nav-link">${item.icon}<span>${item.label}</span>${SVG_CHEV}</a>
@@ -112,6 +114,9 @@ class MenuDesktopDMaior extends HTMLElement {
       .has-dd:hover .chevron{ transform:rotate(180deg); }
       .dd-link{ padding:12px 24px; text-decoration:none; color:#a0b8c8; font-size:.9rem; font-weight:500; transition:all .2s; }
       .dd-link:hover{ background:rgba(0,212,212,.1); color:#fff; padding-left:30px; border-left:3px solid #00d4d4; }
+      .dd-soon{ cursor:default; opacity:.6; display:flex; align-items:center; gap:8px; }
+      .dd-soon:hover{ background:none!important; color:#a0b8c8!important; padding-left:24px!important; border-left:none!important; }
+      .dd-breve{ font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#f0c040; background:rgba(240,192,64,.12); border:1px solid rgba(240,192,64,.25); border-radius:20px; padding:2px 7px; }
       .auth-zone{ margin-left:auto; display:flex; align-items:center; min-width:220px; justify-content:flex-end; }
       .btn-access{ display:flex; align-items:center; gap:8px; background:linear-gradient(90deg,#00d4d4,#008c8c); color:#000; border:none; padding:9px 18px; border-radius:8px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.9rem; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all .2s; letter-spacing:.05em; }
       .btn-access:hover{ transform:translateY(-1px); box-shadow:0 4px 15px rgba(0,212,212,.3); }
