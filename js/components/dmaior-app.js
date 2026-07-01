@@ -1725,7 +1725,7 @@
                         : (c.emoji ? `<div class="aviso-card-emoji">${c.emoji}</div>` : '');
                     const titulo = this._escHtml(c.titulo || c.texto);
                     const desc   = c.titulo && c.texto ? `<div class="aviso-card-desc">${this._escHtml(c.texto)}</div>` : '';
-                    const data   = c.criado_em ? this._fdt(c.criado_em) : '';
+                    const data   = c.criado_em ? this.fdt(c.criado_em) : '';
                     const dataHtml = data ? `<div class="aviso-card-data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${data}</div>` : '';
                     return `<div class="aviso-card">
                         ${thumbHtml}
