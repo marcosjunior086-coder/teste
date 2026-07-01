@@ -49,6 +49,7 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   connectedCallback() {
+    this._syncThemeHost();
     this._uid          = localStorage.getItem('dm_uid')      || '';
     this._token        = localStorage.getItem('dm_token')    || '';
     this._refreshToken = localStorage.getItem('dm_refresh')  || '';
@@ -67,6 +68,23 @@ class DmaiorImpulso extends HTMLElement {
       this._iniciarUmaVez();
     }
     // Se worker-url ainda não veio, aguarda attributeChangedCallback
+
+    this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
+    this._themeHandler = () => this._syncThemeHost();
+    window.addEventListener('storage', this._storageThemeHandler);
+    window.addEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('storage', this._storageThemeHandler);
+    window.removeEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  _syncThemeHost() {
+    let tema = 'original';
+    try { tema = localStorage.getItem('dm_tema') || 'original'; } catch (_) {}
+    if (tema === 'original') this.removeAttribute('data-theme');
+    else this.setAttribute('data-theme', tema);
   }
 
   _iniciarUmaVez() {
@@ -298,110 +316,110 @@ class DmaiorImpulso extends HTMLElement {
         .imp-comunicado-ico { font-size:1.1rem; line-height:1; flex-shrink:0; }
         .imp-comunicado-txt { font-size:0.76rem; color:var(--muted); line-height:1.55; flex:1; }
         .imp-comunicado-txt strong, .imp-comunicado-txt b { color:var(--gold); }
-        :host-context([data-theme="branco"]) .imp-comunicado,
-        :host-context([data-theme="laranja"]) .imp-comunicado { background:rgba(180,130,0,0.07); border-color:rgba(180,130,0,0.28); }
-        :host-context([data-theme="rosa"]) .imp-comunicado { background:rgba(233,30,140,0.07); border-color:rgba(233,30,140,0.25); }
-        :host-context([data-theme="dark"]) .imp-comunicado { background:rgba(240,192,64,0.06); border-color:rgba(240,192,64,0.20); }
+        :host-context([data-theme="branco"]) .imp-comunicado, :host([data-theme="branco"]) .imp-comunicado,
+        :host-context([data-theme="laranja"]) .imp-comunicado , :host([data-theme="laranja"]) .imp-comunicado { background:rgba(180,130,0,0.07); border-color:rgba(180,130,0,0.28); }
+        :host-context([data-theme="rosa"]) .imp-comunicado , :host([data-theme="rosa"]) .imp-comunicado { background:rgba(233,30,140,0.07); border-color:rgba(233,30,140,0.25); }
+        :host-context([data-theme="dark"]) .imp-comunicado , :host([data-theme="dark"]) .imp-comunicado { background:rgba(240,192,64,0.06); border-color:rgba(240,192,64,0.20); }
 
         .spinner { width:16px; height:16px; border:2px solid rgba(0,212,212,0.3); border-top-color:var(--rank-cyan); border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
         @keyframes spin { to { transform:rotate(360deg); } }
 
         /* ══ TEMA BRANCO — bloom azul-petróleo ══ */
-        :host-context([data-theme="branco"]) {
+        :host-context([data-theme="branco"]) , :host([data-theme="branco"]) {
           --cyan:#0095a8; --cyan-d:rgba(0,149,168,0.15);
           --gold:#b8860b; --text:#0d1117; --muted:#4a5568;
           --border:rgba(0,149,168,0.35); --glass:rgba(255,255,255,0.95);
           --bloom:linear-gradient(135deg,#0369a1 0%,#0095a8 100%);
         }
-        :host-context([data-theme="branco"]) .wrap {
+        :host-context([data-theme="branco"]) .wrap , :host([data-theme="branco"]) .wrap {
           background: var(--glass);
           border-color: var(--border);
           box-shadow: 0 6px 24px rgba(0,149,168,0.1);
         }
 
         /* ══ TEMA ROSA — bloom pink/magenta ══ */
-        :host-context([data-theme="rosa"]) {
+        :host-context([data-theme="rosa"]) , :host([data-theme="rosa"]) {
           --cyan:#e91e8c; --cyan-d:rgba(233,30,140,0.15);
           --gold:#c2185b; --text:#1a0010; --muted:#80004a;
           --border:rgba(233,30,140,0.35); --glass:rgba(255,255,255,0.95);
           --bloom:linear-gradient(135deg,#e91e8c 0%,#ff6090 100%);
         }
-        :host-context([data-theme="rosa"]) .wrap {
+        :host-context([data-theme="rosa"]) .wrap , :host([data-theme="rosa"]) .wrap {
           background: var(--glass);
           border-color: var(--border);
           box-shadow: 0 6px 24px rgba(233,30,140,0.1);
         }
 
         /* ══ TEMA LARANJA — bloom laranja/âmbar ══ */
-        :host-context([data-theme="laranja"]) {
+        :host-context([data-theme="laranja"]) , :host([data-theme="laranja"]) {
           --cyan:#f97316; --cyan-d:rgba(249,115,22,0.15);
           --gold:#ea580c; --text:#1a0a00; --muted:#7c3a00;
           --border:rgba(249,115,22,0.35); --glass:rgba(255,255,255,0.95);
           --bloom:linear-gradient(135deg,#f97316 0%,#fbbf24 100%);
         }
-        :host-context([data-theme="laranja"]) .wrap {
+        :host-context([data-theme="laranja"]) .wrap , :host([data-theme="laranja"]) .wrap {
           background: var(--glass);
           border-color: var(--border);
           box-shadow: 0 6px 24px rgba(249,115,22,0.1);
         }
 
         /* ══ Campos, radio e quota — todos os temas claros ══ */
-        :host-context([data-theme="branco"]) .quota-box,
-        :host-context([data-theme="rosa"]) .quota-box,
-        :host-context([data-theme="laranja"]) .quota-box {
+        :host-context([data-theme="branco"]) .quota-box, :host([data-theme="branco"]) .quota-box,
+        :host-context([data-theme="rosa"]) .quota-box, :host([data-theme="rosa"]) .quota-box,
+        :host-context([data-theme="laranja"]) .quota-box , :host([data-theme="laranja"]) .quota-box {
           background: rgba(0,0,0,0.04);
           border-color: var(--border);
         }
-        :host-context([data-theme="branco"]) .quota-label,
-        :host-context([data-theme="rosa"]) .quota-label,
-        :host-context([data-theme="laranja"]) .quota-label { color: var(--text); }
-        :host-context([data-theme="branco"]) .field-input,
-        :host-context([data-theme="rosa"]) .field-input,
-        :host-context([data-theme="laranja"]) .field-input {
+        :host-context([data-theme="branco"]) .quota-label, :host([data-theme="branco"]) .quota-label,
+        :host-context([data-theme="rosa"]) .quota-label, :host([data-theme="rosa"]) .quota-label,
+        :host-context([data-theme="laranja"]) .quota-label , :host([data-theme="laranja"]) .quota-label { color: var(--text); }
+        :host-context([data-theme="branco"]) .field-input, :host([data-theme="branco"]) .field-input,
+        :host-context([data-theme="rosa"]) .field-input, :host([data-theme="rosa"]) .field-input,
+        :host-context([data-theme="laranja"]) .field-input , :host([data-theme="laranja"]) .field-input {
           background: rgba(0,0,0,0.05);
           border-color: var(--border);
           color: var(--text);
         }
-        :host-context([data-theme="branco"]) .field-input::placeholder,
-        :host-context([data-theme="rosa"]) .field-input::placeholder,
-        :host-context([data-theme="laranja"]) .field-input::placeholder { color: var(--muted); }
+        :host-context([data-theme="branco"]) .field-input::placeholder, :host([data-theme="branco"]) .field-input::placeholder,
+        :host-context([data-theme="rosa"]) .field-input::placeholder, :host([data-theme="rosa"]) .field-input::placeholder,
+        :host-context([data-theme="laranja"]) .field-input::placeholder , :host([data-theme="laranja"]) .field-input::placeholder { color: var(--muted); }
         /* Radio cards inativos */
-        :host-context([data-theme="branco"]) .radio-card,
-        :host-context([data-theme="rosa"]) .radio-card,
-        :host-context([data-theme="laranja"]) .radio-card {
+        :host-context([data-theme="branco"]) .radio-card, :host([data-theme="branco"]) .radio-card,
+        :host-context([data-theme="rosa"]) .radio-card, :host([data-theme="rosa"]) .radio-card,
+        :host-context([data-theme="laranja"]) .radio-card , :host([data-theme="laranja"]) .radio-card {
           background: rgba(0,0,0,0.04);
           border-color: var(--border);
         }
-        :host-context([data-theme="branco"]) .radio-card .rc-tempo,
-        :host-context([data-theme="rosa"]) .radio-card .rc-tempo,
-        :host-context([data-theme="laranja"]) .radio-card .rc-tempo { color: var(--text); }
+        :host-context([data-theme="branco"]) .radio-card .rc-tempo, :host([data-theme="branco"]) .radio-card .rc-tempo,
+        :host-context([data-theme="rosa"]) .radio-card .rc-tempo, :host([data-theme="rosa"]) .radio-card .rc-tempo,
+        :host-context([data-theme="laranja"]) .radio-card .rc-tempo , :host([data-theme="laranja"]) .radio-card .rc-tempo { color: var(--text); }
         /* Radio card selecionado + botão impulso — usa bloom do tema */
-        :host-context([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card,
-        :host-context([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card,
-        :host-context([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card,
-        :host-context([data-theme="branco"]) #btn-impulso,
-        :host-context([data-theme="rosa"])   #btn-impulso,
-        :host-context([data-theme="laranja"]) #btn-impulso {
+        :host-context([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card,
+        :host-context([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card,
+        :host-context([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card,
+        :host-context([data-theme="branco"]) #btn-impulso, :host([data-theme="branco"]) #btn-impulso,
+        :host-context([data-theme="rosa"])   #btn-impulso, :host([data-theme="rosa"])   #btn-impulso,
+        :host-context([data-theme="laranja"]) #btn-impulso , :host([data-theme="laranja"]) #btn-impulso {
           background: var(--bloom);
           border-color: transparent;
           color: #fff;
         }
-        :host-context([data-theme="branco"]) #btn-impulso:disabled,
-        :host-context([data-theme="rosa"])   #btn-impulso:disabled,
-        :host-context([data-theme="laranja"]) #btn-impulso:disabled {
+        :host-context([data-theme="branco"]) #btn-impulso:disabled, :host([data-theme="branco"]) #btn-impulso:disabled,
+        :host-context([data-theme="rosa"])   #btn-impulso:disabled, :host([data-theme="rosa"])   #btn-impulso:disabled,
+        :host-context([data-theme="laranja"]) #btn-impulso:disabled , :host([data-theme="laranja"]) #btn-impulso:disabled {
           background: rgba(0,0,0,0.08);
           color: var(--muted);
         }
         /* Labels de campo */
-        :host-context([data-theme="branco"]) .field-label,
-        :host-context([data-theme="rosa"]) .field-label,
-        :host-context([data-theme="laranja"]) .field-label { color: var(--cyan); }
-        :host-context([data-theme="branco"]) .header-sub,
-        :host-context([data-theme="rosa"]) .header-sub,
-        :host-context([data-theme="laranja"]) .header-sub { color: var(--cyan); }
-        :host-context([data-theme="branco"]) .header-title,
-        :host-context([data-theme="rosa"]) .header-title,
-        :host-context([data-theme="laranja"]) .header-title { color: var(--text); }
+        :host-context([data-theme="branco"]) .field-label, :host([data-theme="branco"]) .field-label,
+        :host-context([data-theme="rosa"]) .field-label, :host([data-theme="rosa"]) .field-label,
+        :host-context([data-theme="laranja"]) .field-label , :host([data-theme="laranja"]) .field-label { color: var(--cyan); }
+        :host-context([data-theme="branco"]) .header-sub, :host([data-theme="branco"]) .header-sub,
+        :host-context([data-theme="rosa"]) .header-sub, :host([data-theme="rosa"]) .header-sub,
+        :host-context([data-theme="laranja"]) .header-sub , :host([data-theme="laranja"]) .header-sub { color: var(--cyan); }
+        :host-context([data-theme="branco"]) .header-title, :host([data-theme="branco"]) .header-title,
+        :host-context([data-theme="rosa"]) .header-title, :host([data-theme="rosa"]) .header-title,
+        :host-context([data-theme="laranja"]) .header-title , :host([data-theme="laranja"]) .header-title { color: var(--text); }
       </style>
 
       <div class="shell">

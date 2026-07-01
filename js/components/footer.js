@@ -15,7 +15,24 @@ class DmaiorFooter extends HTMLElement {
   }
 
   connectedCallback() {
+    this._syncThemeHost();
     this.render();
+    this._storageHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
+    this._themeHandler = () => this._syncThemeHost();
+    window.addEventListener('storage', this._storageHandler);
+    window.addEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('storage', this._storageHandler);
+    window.removeEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  _syncThemeHost() {
+    let tema = 'original';
+    try { tema = localStorage.getItem('dm_tema') || 'original'; } catch (_) {}
+    if (tema === 'original') this.removeAttribute('data-theme');
+    else this.setAttribute('data-theme', tema);
   }
 
   render() {
@@ -75,12 +92,12 @@ class DmaiorFooter extends HTMLElement {
         }
         .footer-logo:hover { filter: brightness(1.15); }
         /* Temas claros: logo fica escura */
-        :host-context([data-theme="branco"]) .footer-logo,
-        :host-context([data-theme="rosa"]) .footer-logo,
-        :host-context([data-theme="laranja"]) .footer-logo { filter: brightness(0); }
-        :host-context([data-theme="branco"]) .footer-logo:hover,
-        :host-context([data-theme="rosa"]) .footer-logo:hover,
-        :host-context([data-theme="laranja"]) .footer-logo:hover { filter: brightness(0.2); }
+        :host-context([data-theme="branco"]) .footer-logo, :host([data-theme="branco"]) .footer-logo,
+        :host-context([data-theme="rosa"]) .footer-logo, :host([data-theme="rosa"]) .footer-logo,
+        :host-context([data-theme="laranja"]) .footer-logo , :host([data-theme="laranja"]) .footer-logo { filter: brightness(0); }
+        :host-context([data-theme="branco"]) .footer-logo:hover, :host([data-theme="branco"]) .footer-logo:hover,
+        :host-context([data-theme="rosa"]) .footer-logo:hover, :host([data-theme="rosa"]) .footer-logo:hover,
+        :host-context([data-theme="laranja"]) .footer-logo:hover , :host([data-theme="laranja"]) .footer-logo:hover { filter: brightness(0.2); }
         .col-logo p {
           font-size: .68rem;
           color: var(--dm-text-muted, #7a9ab4);

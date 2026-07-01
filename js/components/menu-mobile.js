@@ -29,6 +29,7 @@ class MenuMobileDMaior extends HTMLElement {
         document.documentElement.setAttribute('data-theme', temasSalvo);
       }
     } catch (_) {}
+    this._syncThemeHost();
 
     this.render();
     this.bindEvents();
@@ -37,15 +38,26 @@ class MenuMobileDMaior extends HTMLElement {
     // Guarda referências para poder remover corretamente no disconnectedCallback
     this._storageHandler = (e) => {
       if (['dm_token', 'dm_foto', 'dm_nome'].includes(e.key)) this.checkAuth();
+      if (e.key === 'dm_tema') this._syncThemeHost();
     };
     this._authHandler = (e) => this.updateAuthUI(e.detail);
+    this._themeHandler = () => this._syncThemeHost();
     window.addEventListener('storage', this._storageHandler);
     window.addEventListener('dmaior:auth', this._authHandler);
+    window.addEventListener('dmaior:tema', this._themeHandler);
   }
 
   disconnectedCallback() {
     window.removeEventListener('storage',     this._storageHandler);
     window.removeEventListener('dmaior:auth', this._authHandler);
+    window.removeEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  _syncThemeHost() {
+    let tema = 'original';
+    try { tema = localStorage.getItem('dm_tema') || 'original'; } catch (_) {}
+    if (tema === 'original') this.removeAttribute('data-theme');
+    else this.setAttribute('data-theme', tema);
   }
 
   checkAuth() {
@@ -144,12 +156,21 @@ class MenuMobileDMaior extends HTMLElement {
       .auth-link svg { color: var(--dm-text-sub); }
       .auth-link.danger svg { color: var(--dm-red, #f87171); }
       /* ── Temas claros: logo preta, hambúrguer e X escuros ── */
+      :host([data-theme="branco"]) .logo,
+      :host([data-theme="rosa"]) .logo,
+      :host([data-theme="laranja"]) .logo,
       :host-context([data-theme="branco"]) .logo,
       :host-context([data-theme="rosa"]) .logo,
       :host-context([data-theme="laranja"]) .logo { filter: brightness(0); }
+      :host([data-theme="branco"]) .hamburger svg,
+      :host([data-theme="rosa"]) .hamburger svg,
+      :host([data-theme="laranja"]) .hamburger svg,
       :host-context([data-theme="branco"]) .hamburger svg,
       :host-context([data-theme="rosa"]) .hamburger svg,
       :host-context([data-theme="laranja"]) .hamburger svg { color: #1a1a1a; }
+      :host([data-theme="branco"]) .close-btn svg,
+      :host([data-theme="rosa"]) .close-btn svg,
+      :host([data-theme="laranja"]) .close-btn svg,
       :host-context([data-theme="branco"]) .close-btn svg,
       :host-context([data-theme="rosa"]) .close-btn svg,
       :host-context([data-theme="laranja"]) .close-btn svg { color: #1a1a1a; }
@@ -178,8 +199,18 @@ class MenuMobileDMaior extends HTMLElement {
       .dd-option.active .dd-arrow,
       .dd-option.active .dd-copy,
       .dd-option.active .dd-marquee{ color:#06121c; }
+      :host([data-theme="rosa"]) .dd-option.active,
+      :host([data-theme="laranja"]) .dd-option.active,
       :host-context([data-theme="rosa"]) .dd-option.active,
       :host-context([data-theme="laranja"]) .dd-option.active{ color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.22); }
+      :host([data-theme="rosa"]) .dd-option.active .dd-icon,
+      :host([data-theme="rosa"]) .dd-option.active .dd-arrow,
+      :host([data-theme="rosa"]) .dd-option.active .dd-copy,
+      :host([data-theme="rosa"]) .dd-option.active .dd-marquee,
+      :host([data-theme="laranja"]) .dd-option.active .dd-icon,
+      :host([data-theme="laranja"]) .dd-option.active .dd-arrow,
+      :host([data-theme="laranja"]) .dd-option.active .dd-copy,
+      :host([data-theme="laranja"]) .dd-option.active .dd-marquee,
       :host-context([data-theme="rosa"]) .dd-option.active .dd-icon,
       :host-context([data-theme="rosa"]) .dd-option.active .dd-arrow,
       :host-context([data-theme="rosa"]) .dd-option.active .dd-copy,
@@ -528,6 +559,7 @@ class MenuMobileDMaior extends HTMLElement {
         } else {
           document.documentElement.setAttribute('data-theme', tema);
         }
+        this._syncThemeHost();
         updateThemeActive();
         layoutDropdown.classList.remove('open');
         gearBtn.classList.remove('open');

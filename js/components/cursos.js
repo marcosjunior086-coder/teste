@@ -47,13 +47,27 @@ class DMaiorCursos extends HTMLElement {
   }
 
   connectedCallback() {
+    this._syncThemeHost();
     this.render();
     window.addEventListener('dmaior:preferences', this._prefsHandler);
+    this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
+    this._themeHandler = () => this._syncThemeHost();
+    window.addEventListener('storage', this._storageThemeHandler);
+    window.addEventListener('dmaior:tema', this._themeHandler);
   }
 
   disconnectedCallback() {
     window.removeEventListener('dmaior:preferences', this._prefsHandler);
+    window.removeEventListener('storage', this._storageThemeHandler);
+    window.removeEventListener('dmaior:tema', this._themeHandler);
     this._destroyPlayer();
+  }
+
+  _syncThemeHost() {
+    let tema = 'original';
+    try { tema = localStorage.getItem('dm_tema') || 'original'; } catch (_) {}
+    if (tema === 'original') this.removeAttribute('data-theme');
+    else this.setAttribute('data-theme', tema);
   }
 
   _t(key) {
@@ -393,7 +407,7 @@ class DMaiorCursos extends HTMLElement {
       .hero-copy h1{font-family:var(--dm-font-title);font-size:clamp(3rem,8vw,5.5rem);line-height:.9;letter-spacing:.01em;text-transform:none;color:#fff;margin:0 0 26px;max-width:680px}
       .hero-copy h1::after{content:'';display:block;width:180px;height:10px;border-radius:99px;background:var(--dm-effect-accent);margin-top:-4px}
       .hero-copy p{font-size:clamp(1rem,2vw,1.25rem);line-height:1.7;color:#fff;max-width:850px;text-align:justify}
-      :host-context([data-theme="branco"]) .hero-copy h1,:host-context([data-theme="branco"]) .hero-copy p,:host-context([data-theme="rosa"]) .hero-copy h1,:host-context([data-theme="rosa"]) .hero-copy p,:host-context([data-theme="laranja"]) .hero-copy h1,:host-context([data-theme="laranja"]) .hero-copy p{color:var(--dm-text)}
+      :host-context([data-theme="branco"]) .hero-copy h1, :host([data-theme="branco"]) .hero-copy h1,:host-context([data-theme="branco"]) .hero-copy p, :host([data-theme="branco"]) .hero-copy p,:host-context([data-theme="rosa"]) .hero-copy h1, :host([data-theme="rosa"]) .hero-copy h1,:host-context([data-theme="rosa"]) .hero-copy p, :host([data-theme="rosa"]) .hero-copy p,:host-context([data-theme="laranja"]) .hero-copy h1, :host([data-theme="laranja"]) .hero-copy h1,:host-context([data-theme="laranja"]) .hero-copy p, :host([data-theme="laranja"]) .hero-copy p{color:var(--dm-text)}
       .course-card{border:1px solid var(--dm-bw10);background:var(--dm-grad-card);border-radius:18px;overflow:hidden;color:var(--dm-text);padding:0;text-align:left;box-shadow:0 24px 60px var(--dm-shadow-md);transition:transform .25s ease,border-color .25s ease;width:100%}
       .course-card:hover{transform:translateY(-4px);border-color:var(--dm-effect-accent)}
       .course-cover{aspect-ratio:16/9;background:#050505;overflow:hidden}
@@ -416,12 +430,12 @@ class DMaiorCursos extends HTMLElement {
       .text-panel{background:transparent;border:none;box-shadow:none;padding:0}
       .text-panel h2,.lessons-block h2,.certificate h2,.lesson-title h1{font-family:var(--dm-font-title);font-size:clamp(2rem,5vw,3rem);line-height:1;margin:0 0 10px;text-transform:none;color:#fff}
       .text-panel p,.certificate p,.lesson-title p{color:#fff;line-height:1.8;font-weight:600;max-width:680px}
-      :host-context([data-theme="branco"]) .text-panel h2,:host-context([data-theme="branco"]) .certificate h2,:host-context([data-theme="branco"]) .lesson-title h1,:host-context([data-theme="branco"]) .text-panel p,:host-context([data-theme="branco"]) .certificate p,:host-context([data-theme="branco"]) .lesson-title p,:host-context([data-theme="rosa"]) .text-panel h2,:host-context([data-theme="rosa"]) .certificate h2,:host-context([data-theme="rosa"]) .lesson-title h1,:host-context([data-theme="rosa"]) .text-panel p,:host-context([data-theme="rosa"]) .certificate p,:host-context([data-theme="rosa"]) .lesson-title p,:host-context([data-theme="laranja"]) .text-panel h2,:host-context([data-theme="laranja"]) .certificate h2,:host-context([data-theme="laranja"]) .lesson-title h1,:host-context([data-theme="laranja"]) .text-panel p,:host-context([data-theme="laranja"]) .certificate p,:host-context([data-theme="laranja"]) .lesson-title p{color:var(--dm-text)}
+      :host-context([data-theme="branco"]) .text-panel h2, :host([data-theme="branco"]) .text-panel h2,:host-context([data-theme="branco"]) .certificate h2, :host([data-theme="branco"]) .certificate h2,:host-context([data-theme="branco"]) .lesson-title h1, :host([data-theme="branco"]) .lesson-title h1,:host-context([data-theme="branco"]) .text-panel p, :host([data-theme="branco"]) .text-panel p,:host-context([data-theme="branco"]) .certificate p, :host([data-theme="branco"]) .certificate p,:host-context([data-theme="branco"]) .lesson-title p, :host([data-theme="branco"]) .lesson-title p,:host-context([data-theme="rosa"]) .text-panel h2, :host([data-theme="rosa"]) .text-panel h2,:host-context([data-theme="rosa"]) .certificate h2, :host([data-theme="rosa"]) .certificate h2,:host-context([data-theme="rosa"]) .lesson-title h1, :host([data-theme="rosa"]) .lesson-title h1,:host-context([data-theme="rosa"]) .text-panel p, :host([data-theme="rosa"]) .text-panel p,:host-context([data-theme="rosa"]) .certificate p, :host([data-theme="rosa"]) .certificate p,:host-context([data-theme="rosa"]) .lesson-title p, :host([data-theme="rosa"]) .lesson-title p,:host-context([data-theme="laranja"]) .text-panel h2, :host([data-theme="laranja"]) .text-panel h2,:host-context([data-theme="laranja"]) .certificate h2, :host([data-theme="laranja"]) .certificate h2,:host-context([data-theme="laranja"]) .lesson-title h1, :host([data-theme="laranja"]) .lesson-title h1,:host-context([data-theme="laranja"]) .text-panel p, :host([data-theme="laranja"]) .text-panel p,:host-context([data-theme="laranja"]) .certificate p, :host([data-theme="laranja"]) .certificate p,:host-context([data-theme="laranja"]) .lesson-title p, :host([data-theme="laranja"]) .lesson-title p{color:var(--dm-text)}
       .lesson-list{display:grid;gap:14px}
       .lesson-row{display:grid;grid-template-columns:120px minmax(0,1fr) 120px;align-items:center;gap:16px;width:100%;border:1px solid var(--dm-bw10);border-radius:14px;background:var(--dm-bg-tint);color:var(--dm-text);padding:14px 18px;text-align:left}
       .lesson-row span{font:700 1.5rem var(--dm-font-title);color:#fff}.lesson-row strong{font:700 1rem var(--dm-font-title);letter-spacing:.08em;text-align:center}.lesson-row em{justify-self:end;font-style:normal;color:var(--dm-text-muted);font-size:.78rem}
       .lesson-row.done{border-color:var(--dm-effect-accent);background:var(--dm-effect-20)}.lesson-row.done em{color:var(--dm-green)}
-      :host-context([data-theme="branco"]) .lesson-row span,:host-context([data-theme="rosa"]) .lesson-row span,:host-context([data-theme="laranja"]) .lesson-row span{color:var(--dm-text)}
+      :host-context([data-theme="branco"]) .lesson-row span, :host([data-theme="branco"]) .lesson-row span,:host-context([data-theme="rosa"]) .lesson-row span, :host([data-theme="rosa"]) .lesson-row span,:host-context([data-theme="laranja"]) .lesson-row span, :host([data-theme="laranja"]) .lesson-row span{color:var(--dm-text)}
       .certificate{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:28px;align-items:center;background:linear-gradient(135deg,var(--dm-effect-blue),var(--dm-effect-accent))}
       .certificate p,.certificate li,.certificate h2{color:#fff}.certificate ul{margin:8px 0 20px 18px;color:#fff}.certificate small{grid-column:2;color:#fff;text-align:center;font-size:.82rem}
       .cert-btn{background:#050505;color:#fff;border-color:rgba(255,255,255,.22)}.cert-btn.disabled{opacity:.45;pointer-events:auto;cursor:not-allowed}

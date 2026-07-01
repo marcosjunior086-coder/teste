@@ -73,6 +73,7 @@ class KwaiLiveWidget extends HTMLElement {
   // ──────────────────────────────────────────────────────────────────────────
 
   async connectedCallback() {
+    this._syncThemeHost();
     this.render();
     this.setupListeners();
     this.hlsReadyPromise = this.loadHlsLib();
@@ -80,6 +81,10 @@ class KwaiLiveWidget extends HTMLElement {
     this.init();
     // Atualiza as lives a cada 30 segundos — timer guardado para limpeza
     this.refreshTimer = setInterval(() => this.init(), 30000);
+    this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
+    this._themeHandler = () => this._syncThemeHost();
+    window.addEventListener('storage', this._storageThemeHandler);
+    window.addEventListener('dmaior:tema', this._themeHandler);
   }
 
   disconnectedCallback() {
@@ -88,6 +93,15 @@ class KwaiLiveWidget extends HTMLElement {
       clearInterval(this.refreshTimer);
       this.refreshTimer = null;
     }
+    window.removeEventListener('storage', this._storageThemeHandler);
+    window.removeEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  _syncThemeHost() {
+    let tema = 'original';
+    try { tema = localStorage.getItem('dm_tema') || 'original'; } catch (_) {}
+    if (tema === 'original') this.removeAttribute('data-theme');
+    else this.setAttribute('data-theme', tema);
   }
 
   // Carrega HLS.js do CDN de forma assíncrona (não bloqueia se CDN falhar)
@@ -196,9 +210,9 @@ class KwaiLiveWidget extends HTMLElement {
           box-shadow:0 0 8px var(--dm-cyan-30);}
         @media(min-width:600px){.live-badge{font-size:.46rem;padding:1px 6px;}}
         /* Temas claros — texto branco sobre fundo saturado */
-        :host-context([data-theme="branco"]) .live-badge,
-        :host-context([data-theme="rosa"]) .live-badge,
-        :host-context([data-theme="laranja"]) .live-badge{color:#fff;}
+        :host-context([data-theme="branco"]) .live-badge, :host([data-theme="branco"]) .live-badge,
+        :host-context([data-theme="rosa"]) .live-badge, :host([data-theme="rosa"]) .live-badge,
+        :host-context([data-theme="laranja"]) .live-badge, :host([data-theme="laranja"]) .live-badge{color:#fff;}
 
         .live-name{margin-top:5px;font-size:.54rem;font-weight:600;color:var(--dm-text-sub);
           white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
