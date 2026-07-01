@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cursos Online Gratuitos — DMaior Agency</title>

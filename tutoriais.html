@@ -1,11 +1,13 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tutoriais â€” DMaior Agency</title>
-  <meta name="description" content="Tutoriais em vÃ­deo: como aceitar o convite e efetuar saque no Kwai. DMaior Agency.">
+  <title>Tutoriais — DMaior Agency</title>
+  <meta name="description" content="Tutoriais em vídeo: como aceitar o convite e efetuar saque no Kwai. DMaior Agency.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
@@ -18,7 +20,7 @@
   <main class="dm-main">
     <div class="dm-container">
       <h1 style="font-family:var(--dm-font-title);color:var(--dm-cyan);text-align:center;margin:40px 0 10px;font-size:2rem;text-transform:uppercase;letter-spacing:2px;">Tutoriais</h1>
-      <p style="text-align:center;color:var(--dm-text-muted);margin-bottom:30px;">Aprenda o passo a passo para comeÃ§ar na DMaior Agency</p>
+      <p style="text-align:center;color:var(--dm-text-muted);margin-bottom:30px;">Aprenda o passo a passo para começar na DMaior Agency</p>
       <dmaior-tutoriais></dmaior-tutoriais>
     </div>
   </main>

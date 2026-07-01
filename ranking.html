@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ranking Geral — DMaior Agency</title>
+  <title>Ranking Geral � DMaior Agency</title>
   <meta name="description" content="Ranking geral de diamantes e horas dos streamers DMaior Agency.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

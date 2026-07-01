@@ -1,12 +1,14 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin â€” DMaior Agency</title>
+  <title>Admin — DMaior Agency</title>
   <style>
-    /* Fundo escuro fixo para o admin â€” nÃ£o depende de temas globais */
+    /* Fundo escuro fixo para o admin — não depende de temas globais */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       background: #0a0e27;
@@ -21,15 +23,15 @@
   </style>
 </head>
 <body>
-  <!-- Componente admin completo â€” login + painel embutidos no custom element -->
+  <!-- Componente admin completo — login + painel embutidos no custom element -->
   <dmaior-admin></dmaior-admin>
 
-  <!-- api.js expÃµe DmaiorConfig (URLs dos workers) para o componente usar -->
+  <!-- api.js expõe DmaiorConfig (URLs dos workers) para o componente usar -->
   <script src="js/utils/helpers.js"></script>
   <script src="js/api.js?v=20260701-ranking-meses-1"></script>
-  <!-- Componente admin original â€” contÃ©m todo visual e lÃ³gica de login/painel -->
+  <!-- Componente admin original — contém todo visual e lógica de login/painel -->
   <script src="js/components/dmaior-admin.js?v=20260701-ranking-meses-1"></script>
-  <!-- router.js NÃƒO Ã© carregado aqui: o admin tem login prÃ³prio embutido -->
+  <!-- router.js NÃO é carregado aqui: o admin tem login próprio embutido -->
   <dmaior-cookie-consent></dmaior-cookie-consent>
   <script src="js/components/cookie-consent.js"></script>
 </body>

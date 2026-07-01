@@ -1,11 +1,13 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PolÃ­tica de Host â€” DMaior Agency</title>
-  <meta name="description" content="Pagamentos, metas e polÃ­ticas Kwai para streamers hospedados na DMaior Agency.">
+  <title>Política de Host — DMaior Agency</title>
+  <meta name="description" content="Pagamentos, metas e políticas Kwai para streamers hospedados na DMaior Agency.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
@@ -13,7 +15,7 @@
   <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-  <!-- Menu unificado â€” funciona em mobile e desktop -->
+  <!-- Menu unificado — funciona em mobile e desktop -->
   <menu-mobile-dmaior></menu-mobile-dmaior>
 
   <main class="dm-main">

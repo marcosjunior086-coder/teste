@@ -1,11 +1,13 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DMaior Agency â€” AgÃªncia de Streamers Kwai</title>
-  <meta name="description" content="A maior agÃªncia de streamers do Kwai. Suporte exclusivo, mÃ©todo prÃ³prio e premiaÃ§Ãµes reais.">
+  <title>DMaior Agency — Agência de Streamers Kwai</title>
+  <meta name="description" content="A maior agência de streamers do Kwai. Suporte exclusivo, método próprio e premiações reais.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
@@ -13,25 +15,25 @@
   <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-  <!-- Menu unificado â€” funciona em mobile e desktop -->
+  <!-- Menu unificado — funciona em mobile e desktop -->
   <menu-mobile-dmaior></menu-mobile-dmaior>
 
   <main class="dm-main">
 
-    <!-- 1Âº â€” Widget de live (abaixo da barra de menu) -->
+    <!-- 1º — Widget de live (abaixo da barra de menu) -->
     <kwai-live-widget></kwai-live-widget>
 
-    <!-- 2Âº â€” Menu de serviÃ§os -->
+    <!-- 2º — Menu de serviços -->
     <dmaior-services-menu></dmaior-services-menu>
 
-    <!-- 3Âº â€” BenefÃ­cios e FAQ (oculto no tema DinÃ¢mico Pro) -->
+    <!-- 3º — Benefícios e FAQ (oculto no tema Dinâmico Pro) -->
     <div id="section-beneficios" class="dm-container">
       <widget-beneficios></widget-beneficios>
     </div>
 
   </main>
 
-  <!-- Scripts na ordem correta: API â†’ Auth â†’ componentes -->
+  <!-- Scripts na ordem correta: API ? Auth ? componentes -->
   <script src="js/preferences.js?v=20260624-3"></script>
   <script src="js/utils/helpers.js"></script>
   <script src="js/api.js"></script>
@@ -43,20 +45,20 @@
   <script src="js/components/beneficios.js?v=20260624-3"></script>
 
   <script>
-    // â”€â”€ Controle de layout â€” oculta benefÃ­cios no tema DinÃ¢mico Pro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Controle de layout — oculta benefícios no tema Dinâmico Pro ----------
     function aplicarLayout(layout) {
       var sec = document.getElementById('section-beneficios');
       if (!sec) return;
-      // DinÃ¢mico Pro: esconde seÃ§Ã£o de benefÃ­cios; Original: mostra
+      // Dinâmico Pro: esconde seção de benefícios; Original: mostra
       sec.style.display = (layout === 'dinamico') ? 'none' : '';
     }
 
-    // Aplica o tema salvo imediatamente ao carregar a pÃ¡gina
+    // Aplica o tema salvo imediatamente ao carregar a página
     try {
       aplicarLayout(localStorage.getItem('dm_layout') || 'original');
-    } catch (e) { /* localStorage bloqueado â€” mantÃ©m padrÃ£o */ }
+    } catch (e) { /* localStorage bloqueado — mantém padrão */ }
 
-    // Reage em tempo real quando o usuÃ¡rio troca o tema via engrenagem
+    // Reage em tempo real quando o usuário troca o tema via engrenagem
     window.addEventListener('dmaior:layout', function(e) {
       try { aplicarLayout(e.detail && e.detail.layout ? e.detail.layout : 'original'); }
       catch (e) {}

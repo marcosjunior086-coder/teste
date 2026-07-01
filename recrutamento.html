@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entrar para a Agência — DMaior Agency</title>
+  <title>Entrar para a Ag�ncia � DMaior Agency</title>
   <meta name="description" content="Candidate-se para ser agenciado pela DMaior Agency. Processo 100% gratuito.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,35 +18,35 @@
     .rc-prefbar { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
     .rc-prefbar select { width: auto; min-width: 132px; padding: 9px 30px 9px 11px; background: rgba(0,0,0,.45); border: 1px solid var(--dm-border); border-radius: 8px; color: var(--dm-text); font-family: var(--dm-font-body); font-size: .82rem; outline: none; }
 
-    /* ── Cabeçalho ── */
+    /* -- Cabe�alho -- */
     .rc-hero { text-align: center; margin-bottom: 28px; }
     .rc-hero h1 { font-family: var(--dm-font-title); font-size: clamp(1.6rem,5vw,2.2rem); color: var(--dm-cyan); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
     .rc-hero p  { color: var(--dm-text-muted); font-size: .92rem; line-height: 1.6; }
 
-    /* ── Steps ── */
+    /* -- Steps -- */
     .rc-steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
     .rc-step  { width: 28px; height: 4px; border-radius: 2px; background: var(--dm-border); transition: background .3s; }
     .rc-step.active { background: var(--dm-cyan); }
     .rc-step.done   { background: rgba(0,212,212,.35); }
 
-    /* ── Card ── */
+    /* -- Card -- */
     .rc-card { padding: 28px 24px; background: var(--dm-grad-card); color: var(--dm-text); }
     @media(max-width:480px){ .rc-card { padding: 20px 16px; } }
 
-    /* ── Formulário ── */
+    /* -- Formul�rio -- */
     .rc-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
     .rc-group label { font-family: var(--dm-font-title); font-size: .78rem; color: var(--dm-text-muted); text-transform: uppercase; letter-spacing: .1em; }
     .rc-group select { width: 100%; padding: 12px 14px; background: rgba(0,0,0,.5); border: 1px solid var(--dm-border); border-radius: 8px; color: var(--dm-text); font-family: var(--dm-font-body); font-size: .95rem; outline: none; cursor: pointer; appearance: none; }
     .rc-group select:focus { border-color: var(--dm-cyan); }
     .rc-hint { font-size: .78rem; color: var(--dm-text-muted); margin-top: 4px; }
 
-    /* ── Botões ── */
+    /* -- Bot�es -- */
     .rc-btn-row { display: flex; gap: 10px; margin-top: 6px; }
     .rc-btn-row .dm-btn-primary  { flex: 1; justify-content: center; padding: 13px; font-size: .95rem; }
     .rc-btn-row .dm-btn-secondary { flex: 1; justify-content: center; padding: 13px; font-size: .95rem; background: none; border: 1.5px solid var(--dm-border); color: var(--dm-text); border-radius: 8px; cursor: pointer; font-family: var(--dm-font-title); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; transition: border-color .2s; }
     .rc-btn-row .dm-btn-secondary:hover { border-color: var(--dm-cyan); color: var(--dm-cyan); }
 
-    /* ── Perfil card ── */
+    /* -- Perfil card -- */
     .rc-perfil { display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(0,212,212,.04); border: 1px solid rgba(0,212,212,.2); border-radius: 12px; margin-bottom: 20px; }
     .rc-perfil-foto { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(0,212,212,.3); flex-shrink: 0; background: var(--dm-card); }
     .rc-perfil-foto-placeholder { width: 60px; height: 60px; border-radius: 50%; background: var(--dm-card); border: 2px solid var(--dm-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -58,7 +60,7 @@
     .rc-badge-free { background: rgba(74,222,128,.1); color: #4ade80; border: 1px solid rgba(74,222,128,.25); }
     .rc-badge-warn { background: rgba(248,113,113,.1); color: #f87171; border: 1px solid rgba(248,113,113,.25); }
 
-    /* ── Status / alertas ── */
+    /* -- Status / alertas -- */
     .rc-alert { display: none; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; font-size: .88rem; line-height: 1.5; }
     .rc-alert.visible { display: block; }
     .rc-alert.info    { background: rgba(0,212,212,.07); border: 1px solid rgba(0,212,212,.25); color: var(--dm-cyan); }
@@ -73,13 +75,13 @@
     .rc-eligibility-copy span { display: block; color: var(--dm-text); }
     .rc-eligibility-copy small { display: block; color: var(--dm-text-muted); font-size: .78rem; margin-top: 5px; }
 
-    /* ── Migração ── */
+    /* -- Migra��o -- */
     .rc-migracao { text-align: center; padding: 8px 0 4px; }
     .rc-migracao p { font-size: .9rem; color: var(--dm-text-muted); margin-bottom: 16px; line-height: 1.6; }
     .rc-wpp-btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 24px; background: #25d366; border: none; border-radius: 10px; color: #fff; font-family: var(--dm-font-title); font-weight: 700; font-size: .95rem; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; text-decoration: none; transition: opacity .2s; }
     .rc-wpp-btn:hover { opacity: .88; }
 
-    /* ── Resultado final ── */
+    /* -- Resultado final -- */
     .rc-resultado { text-align: center; padding: 8px 0; }
     .rc-resultado .rc-icon { width: 56px; height: 56px; margin: 0 auto 14px; display: grid; place-items: center; border: 1px solid var(--dm-border); border-radius: 50%; background: var(--dm-cyan-08); color: var(--dm-cyan); }
     .rc-resultado .rc-icon svg { width: 32px; height: 32px; display: block; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -99,22 +101,22 @@
     .rc-result-link.whatsapp { border-color: rgba(37,211,102,.4); color: #25d366; }
     @media(max-width:480px){ .rc-result-actions { grid-template-columns: 1fr; } }
 
-    /* ── Termos ── */
+    /* -- Termos -- */
     .rc-termos { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 20px; }
     .rc-termos input[type=checkbox] { margin-top: 3px; flex-shrink: 0; accent-color: var(--dm-cyan); width: 16px; height: 16px; cursor: pointer; }
     .rc-termos label { font-size: .83rem; color: var(--dm-text-muted); line-height: 1.5; cursor: pointer; }
 
-    /* ── Info chips ── */
+    /* -- Info chips -- */
     .rc-info-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
     .rc-info-item { display: flex; align-items: flex-start; gap: 10px; font-size: .85rem; color: var(--dm-text-muted); }
     .rc-info-item svg { flex-shrink: 0; margin-top: 1px; stroke: var(--dm-cyan); }
 
-    /* ── Loading ── */
+    /* -- Loading -- */
     .rc-loading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 24px 0; color: var(--dm-text-muted); font-size: .9rem; }
     .rc-spinner { width: 22px; height: 22px; border: 2px solid rgba(0,212,212,.2); border-top-color: var(--dm-cyan); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Oculto ── */
+    /* -- Oculto -- */
     .rc-hidden { display: none !important; }
     [data-font-size="grande"] .rc-perfil-nome,
     [data-font-size="extra"] .rc-perfil-nome { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.15; }
@@ -127,12 +129,12 @@
 
   <main class="dm-main">
     <div class="rc-page">
-      <div class="rc-prefbar" aria-label="Preferências">
+      <div class="rc-prefbar" aria-label="Prefer�ncias">
         <select id="pref-lang" data-pref-lang-select aria-label="Idioma">
-          <option value="pt-BR">Português BR</option>
+          <option value="pt-BR">Portugu�s BR</option>
           <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="zh">中文</option>
+          <option value="es">Espa�ol</option>
+          <option value="zh">??</option>
         </select>
         <select id="pref-font" data-pref-font-select aria-label="Tamanho do texto">
           <option value="normal" data-i18n="fontNormal">Normal</option>
@@ -141,7 +143,7 @@
         </select>
       </div>
       <div class="rc-hero">
-        <h1 data-i18n="enterAgency">Entrar para a Agência</h1>
+        <h1 data-i18n="enterAgency">Entrar para a Ag�ncia</h1>
         <p data-i18n="recruitmentSubtitle">Processo gratuito. Consulte seu perfil, confirme e envie sua candidatura.</p>
       </div>
 
@@ -155,27 +157,27 @@
 
       <div class="dm-glass-card rc-card">
 
-        <!-- ── ETAPA 1: buscar perfil ── -->
+        <!-- -- ETAPA 1: buscar perfil -- -->
         <div id="etapa-1">
           <div class="rc-info-list">
             <div class="rc-info-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span data-i18n="infoKwaiId">Informe seu Kwai ID (nome de usuário ou número de ID) para consultarmos sua situação.</span>
+              <span data-i18n="infoKwaiId">Informe seu Kwai ID (nome de usu�rio ou n�mero de ID) para consultarmos sua situa��o.</span>
             </div>
             <div class="rc-info-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span data-i18n="infoFree">O processo é totalmente gratuito e sem compromisso.</span>
+              <span data-i18n="infoFree">O processo � totalmente gratuito e sem compromisso.</span>
             </div>
             <div class="rc-info-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span data-i18n="infoData">Seus dados são usados apenas para o processo de agenciamento.</span>
+              <span data-i18n="infoData">Seus dados s�o usados apenas para o processo de agenciamento.</span>
             </div>
           </div>
 
           <div class="rc-group">
-            <label for="f-uid" data-i18n="kwaiIdLabel">Kwai ID ou número de membro</label>
+            <label for="f-uid" data-i18n="kwaiIdLabel">Kwai ID ou n�mero de membro</label>
             <input id="f-uid" class="dm-input-field" type="text" placeholder="Ex: seu_usuario ou 123456789" data-i18n-placeholder="kwaiIdPlaceholder" maxlength="80" autocomplete="off" autocorrect="off" spellcheck="false">
-            <span class="rc-hint" data-i18n="kwaiIdHint">Encontre seu ID no perfil do Kwai → três pontos → Copiar ID.</span>
+            <span class="rc-hint" data-i18n="kwaiIdHint">Encontre seu ID no perfil do Kwai ? tr�s pontos ? Copiar ID.</span>
           </div>
 
           <div id="alerta-1" class="rc-alert"></div>
@@ -189,11 +191,11 @@
 
           <div id="loading-1" class="rc-loading rc-hidden">
             <div class="rc-spinner"></div>
-            <span data-i18n="loadingProfile">Consultando perfil no Kwai…</span>
+            <span data-i18n="loadingProfile">Consultando perfil no Kwai�</span>
           </div>
         </div>
 
-        <!-- ── ETAPA 2: confirmar perfil ── -->
+        <!-- -- ETAPA 2: confirmar perfil -- -->
         <div id="etapa-2" class="rc-hidden">
           <div id="alerta-2" class="rc-alert"></div>
 
@@ -203,21 +205,21 @@
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,212,.5)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             </div>
             <div class="rc-perfil-info">
-              <div class="rc-perfil-nome" id="perfil-nome">—</div>
-              <div class="rc-perfil-id"   id="perfil-id">—</div>
+              <div class="rc-perfil-nome" id="perfil-nome">�</div>
+              <div class="rc-perfil-id"   id="perfil-id">�</div>
               <div class="rc-perfil-stats" id="perfil-stats"></div>
             </div>
           </div>
 
-          <p style="font-size:.9rem;color:var(--dm-text-muted);margin-bottom:18px;text-align:center;" data-i18n="confirmProfile">Este é o seu perfil no Kwai?</p>
+          <p style="font-size:.9rem;color:var(--dm-text-muted);margin-bottom:18px;text-align:center;" data-i18n="confirmProfile">Este � o seu perfil no Kwai?</p>
 
           <div class="rc-btn-row">
-            <button class="dm-btn-secondary" id="btn-nao" data-i18n="noCorrect">Não, corrigir</button>
-            <button class="dm-btn-primary"   id="btn-sim" data-i18n="yesMine">Sim, é o meu</button>
+            <button class="dm-btn-secondary" id="btn-nao" data-i18n="noCorrect">N�o, corrigir</button>
+            <button class="dm-btn-primary"   id="btn-sim" data-i18n="yesMine">Sim, � o meu</button>
           </div>
         </div>
 
-        <!-- ── ETAPA 3a: form candidatura (livre) ── -->
+        <!-- -- ETAPA 3a: form candidatura (livre) -- -->
         <div id="etapa-3" class="rc-hidden">
           <div id="alerta-3" class="rc-alert"></div>
 
@@ -230,25 +232,25 @@
             <input id="f-whatsapp" class="dm-input-field" type="tel" placeholder="(00) 90000-0000" maxlength="15" inputmode="numeric" autocomplete="tel">
           </div>
           <div class="rc-group">
-            <label for="f-categoria" data-i18n="contentCategory">Categoria de conteúdo</label>
+            <label for="f-categoria" data-i18n="contentCategory">Categoria de conte�do</label>
             <select id="f-categoria">
-              <option value="" data-i18n="select">Selecione…</option>
+              <option value="" data-i18n="select">Selecione�</option>
               <option value="entretenimento" data-i18n="entertainment">Entretenimento</option>
               <option value="games" data-i18n="games">Games</option>
             </select>
           </div>
           <select id="f-recrutador" style="display:none" aria-hidden="true">
-            <option value="">Dan — padrão da agência (dono)</option>
+            <option value="">Dan � padr�o da ag�ncia (dono)</option>
           </select>
 
           <div class="rc-termos">
             <input type="checkbox" id="f-aceite">
-            <label for="f-aceite" data-i18n="consent">Autorizo o contato pela DMaior Agency e concordo que minhas informações sejam usadas exclusivamente para o processo de agenciamento.</label>
+            <label for="f-aceite" data-i18n="consent">Autorizo o contato pela DMaior Agency e concordo que minhas informa��es sejam usadas exclusivamente para o processo de agenciamento.</label>
           </div>
 
           <div id="loading-3" class="rc-loading rc-hidden">
             <div class="rc-spinner"></div>
-            <span data-i18n="sendingApplication">Enviando candidatura…</span>
+            <span data-i18n="sendingApplication">Enviando candidatura�</span>
           </div>
 
           <div class="rc-btn-row">
@@ -257,27 +259,27 @@
           </div>
         </div>
 
-        <!-- ── ETAPA 3b: migração (vinculado a outra agência) ── -->
+        <!-- -- ETAPA 3b: migra��o (vinculado a outra ag�ncia) -- -->
         <div id="etapa-migracao" class="rc-hidden">
           <div class="rc-alert warn visible" id="alerta-migracao">
-            <strong data-i18n="migrationTitle">Perfil vinculado a outra agência</strong><br>
+            <strong data-i18n="migrationTitle">Perfil vinculado a outra ag�ncia</strong><br>
             <span id="migracao-agencia-texto"></span>
           </div>
 
           <div class="rc-migracao">
-            <p data-i18n="migrationCopy">Para entrar na DMaior Agency você precisará solicitar sua liberação. Clique abaixo para iniciar o processo via WhatsApp — nossa equipe vai orientar você.</p>
+            <p data-i18n="migrationCopy">Para entrar na DMaior Agency voc� precisar� solicitar sua libera��o. Clique abaixo para iniciar o processo via WhatsApp � nossa equipe vai orientar voc�.</p>
             <a id="btn-wpp-migracao" href="#" target="_blank" rel="noopener" class="rc-wpp-btn" id="btn-wpp">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              <span data-i18n="requestMigration">Solicitar migração de agência</span>
+              <span data-i18n="requestMigration">Solicitar migra��o de ag�ncia</span>
             </a>
           </div>
 
           <div style="margin-top:20px;">
-            <button class="dm-btn-secondary" id="btn-voltar-mig" style="width:100%;padding:12px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;" data-i18n="backStart">Voltar ao início</button>
+            <button class="dm-btn-secondary" id="btn-voltar-mig" style="width:100%;padding:12px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;" data-i18n="backStart">Voltar ao in�cio</button>
           </div>
         </div>
 
-        <!-- ── ETAPA 4: resultado ── -->
+        <!-- -- ETAPA 4: resultado -- -->
         <div id="etapa-resultado" class="rc-hidden">
           <div class="rc-resultado" id="resultado-content">
             <div class="rc-icon" id="resultado-icon" aria-hidden="true"></div>
@@ -285,25 +287,25 @@
             <p id="resultado-desc" data-i18n="resultDefault">Nossa equipe vai analisar seu perfil e entrar em contato pelo WhatsApp em breve.</p>
             <div class="rc-protocolo" id="resultado-protocolo"></div>
             <div class="rc-pos-envio rc-hidden" id="bloco-pos-envio">
-              <h3 data-i18n="nextSteps">Próximos passos</h3>
-              <p data-i18n="inviteDelay">O convite foi enviado pelo chat do Kwai e pode levar até 30 minutos para aparecer. Ao aceitar, informe o ID da agência abaixo quando solicitado.</p>
+              <h3 data-i18n="nextSteps">Pr�ximos passos</h3>
+              <p data-i18n="inviteDelay">O convite foi enviado pelo chat do Kwai e pode levar at� 30 minutos para aparecer. Ao aceitar, informe o ID da ag�ncia abaixo quando solicitado.</p>
               <div class="rc-agencia-id">
-                <div><span data-i18n="agencyId">ID da agência</span><strong id="agencia-kwai-id">KWAIRES</strong></div>
+                <div><span data-i18n="agencyId">ID da ag�ncia</span><strong id="agencia-kwai-id">KWAIRES</strong></div>
                 <button type="button" class="rc-copy-btn" id="btn-copiar-agencia" data-i18n="copy">Copiar</button>
               </div>
               <div style="margin-bottom:14px;padding:10px 14px;border:1px solid var(--dm-border);border-radius:8px;font-size:.82rem;color:var(--dm-text-muted);line-height:1.6">
-                <strong style="color:var(--dm-text);display:block;margin-bottom:2px" data-i18n="recruiterResponsible">Responsável pelo convite</strong>
-                Dan · (17) 99717-6407
-                <span style="display:block;margin-top:4px;font-size:.75rem;font-style:italic;color:var(--dm-text-muted)" data-i18n="recruiterSoon">Informações de recrutador em breve.</span>
+                <strong style="color:var(--dm-text);display:block;margin-bottom:2px" data-i18n="recruiterResponsible">Respons�vel pelo convite</strong>
+                Dan � (17) 99717-6407
+                <span style="display:block;margin-top:4px;font-size:.75rem;font-style:italic;color:var(--dm-text-muted)" data-i18n="recruiterSoon">Informa��es de recrutador em breve.</span>
               </div>
               <div class="rc-result-actions">
                 <a class="rc-result-link" href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" rel="noopener noreferrer" data-i18n="howAcceptInvite">Como aceitar o convite</a>
-                <a class="rc-result-link whatsapp" id="btn-wpp-resultado" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" data-i18n="talkAgency">Falar com a agência</a>
+                <a class="rc-result-link whatsapp" id="btn-wpp-resultado" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" data-i18n="talkAgency">Falar com a ag�ncia</a>
               </div>
             </div>
             <div class="rc-pos-envio" id="bloco-candidatura">
               <div class="rc-result-actions" style="margin-top:0">
-                <a class="rc-result-link whatsapp" id="btn-wpp-resultado-b" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" data-i18n="talkAgency">Falar com a agência</a>
+                <a class="rc-result-link whatsapp" id="btn-wpp-resultado-b" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" data-i18n="talkAgency">Falar com a ag�ncia</a>
               </div>
             </div>
           </div>
@@ -324,7 +326,7 @@
   <script src="js/components/menu-mobile.js?v=20260628-cursos-1"></script>
   <script>
   (function () {
-    /* ── Estado ── */
+    /* -- Estado -- */
     let _etapa = 1;
     let _perfil = null;
     let _verificacao = null;
@@ -345,14 +347,14 @@
       const nome = _perfil.nome || _perfil.kwaiId || 'streamer';
       const kwaiId = _perfil.kwaiId || $('f-uid').value.trim();
       $('btn-wpp-migracao').href = linkWhatsApp(
-        `Olá! Sou ${nome}, meu Kwai ID é ${kwaiId} e quero solicitar orientação para migrar de agência e entrar para a DMaior Agency.`
+        `Ol�! Sou ${nome}, meu Kwai ID � ${kwaiId} e quero solicitar orienta��o para migrar de ag�ncia e entrar para a DMaior Agency.`
       );
     }
 
     function configurarWhatsAppResultado() {
       const nome = $('f-nome').value.trim() || _perfil?.nome || 'streamer';
       const kwaiId = _perfil?.kwaiId || $('f-uid').value.trim();
-      const msg = `Olá! Sou ${nome}, meu Kwai ID é ${kwaiId} e solicitei entrada na DMaior Agency. Preciso de orientação sobre o convite.`;
+      const msg = `Ol�! Sou ${nome}, meu Kwai ID � ${kwaiId} e solicitei entrada na DMaior Agency. Preciso de orienta��o sobre o convite.`;
       const link = linkWhatsApp(msg);
       const a = $('btn-wpp-resultado'); if (a) a.href = link;
       const b = $('btn-wpp-resultado-b'); if (b) b.href = link;
@@ -374,7 +376,7 @@
         select.innerHTML = lista.map(rec => {
           const nome = String(rec.nome || 'Recrutador');
           const sufixo = rec.padrao
-            ? (nome.trim().toLowerCase() === 'dan' ? ' — padrão (dono da agência)' : ' — padrão da agência')
+            ? (nome.trim().toLowerCase() === 'dan' ? ' � padr�o (dono da ag�ncia)' : ' � padr�o da ag�ncia')
             : '';
           return `<option value="${String(rec.id).replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">${nome.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}${sufixo}</option>`;
         }).join('');
@@ -386,7 +388,7 @@
       }
     }
 
-    /* ── Utilitários ── */
+    /* -- Utilit�rios -- */
     function maskPhone(v) {
       v = v.replace(/\D/g, '').substring(0, 11);
       return v.length > 10
@@ -434,8 +436,8 @@
     }
 
     function mostrarPerfil(perfil) {
-      $('perfil-nome').textContent = perfil.nome || perfil.kwaiId || '—';
-      $('perfil-id').textContent   = `Kwai ID: ${perfil.kwaiId || '—'} · ID: ${perfil.memberId || '—'}`;
+      $('perfil-nome').textContent = perfil.nome || perfil.kwaiId || '�';
+      $('perfil-id').textContent   = `Kwai ID: ${perfil.kwaiId || '�'} � ID: ${perfil.memberId || '�'}`;
 
       const foto = $('perfil-foto'), fotoPh = $('perfil-foto-ph');
       if (perfil.foto) {
@@ -448,13 +450,13 @@
       }
 
       const stats = [];
-      if (perfil.agencia)     stats.push(`<span class="rc-badge rc-badge-ag">🏢 ${perfil.agencia}</span>`);
-      if (perfil.liveDuration) stats.push(`<span class="rc-badge rc-badge-live">⏱ ${Math.round(perfil.liveDuration / 60)}h live (30d)</span>`);
-      if (perfil.diamantes)   stats.push(`<span class="rc-badge rc-badge-live">💎 ${perfil.diamantes.toLocaleString('pt-BR')}</span>`);
+      if (perfil.agencia)     stats.push(`<span class="rc-badge rc-badge-ag">?? ${perfil.agencia}</span>`);
+      if (perfil.liveDuration) stats.push(`<span class="rc-badge rc-badge-live">? ${Math.round(perfil.liveDuration / 60)}h live (30d)</span>`);
+      if (perfil.diamantes)   stats.push(`<span class="rc-badge rc-badge-live">?? ${perfil.diamantes.toLocaleString('pt-BR')}</span>`);
       $('perfil-stats').innerHTML = stats.join('');
     }
 
-    /* ── ETAPA 1 → buscar perfil ── */
+    /* -- ETAPA 1 ? buscar perfil -- */
     inicializarPreferencias();
     $('f-uid').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-buscar').click(); });
 
@@ -488,7 +490,7 @@
         }
         if (r.status === 'JA_MEMBRO_DMAIOR' && r.perfil) {
           _verificacao = r; _perfil = r.perfil; mostrarPerfil(_perfil);
-          alerta('alerta-2', 'success', '<strong>✓ Perfil verificado</strong><br>Este streamer já está vinculado à DMaior Agency.');
+          alerta('alerta-2', 'success', '<strong>? Perfil verificado</strong><br>Este streamer j� est� vinculado � DMaior Agency.');
           $('btn-sim').disabled = true;
           $('btn-sim').textContent = tt('alreadyMember');
           irParaEtapa(2); return;
@@ -511,11 +513,11 @@
 
         limparAlerta('alerta-2');
         $('btn-sim').disabled = false;
-        $('btn-sim').textContent = 'Sim, é o meu';
+        $('btn-sim').textContent = 'Sim, � o meu';
 
         irParaEtapa(2);
       } catch (e) {
-        const msg = e?.message || 'Erro de conexão. Verifique sua internet e tente novamente.';
+        const msg = e?.message || 'Erro de conex�o. Verifique sua internet e tente novamente.';
         alerta('alerta-1', 'error', msg);
         console.error('[buscarPerfil]', e);
       } finally {
@@ -524,13 +526,13 @@
       }
     });
 
-    /* ── ETAPA 2 → confirmar ── */
+    /* -- ETAPA 2 ? confirmar -- */
     $('btn-nao').addEventListener('click', () => { irParaEtapa(1); limparAlerta('alerta-1'); });
 
     $('btn-sim').addEventListener('click', () => {
       if (!_verificacao || !_perfil) return;
       if (_verificacao.status === 'VINCULADO_OUTRA_AGENCIA') {
-        $('migracao-agencia-texto').textContent = `Seu perfil está vinculado à agência: ${_perfil.agencia || 'outra agência'}. Para entrar na DMaior, será necessário solicitar migração.`;
+        $('migracao-agencia-texto').textContent = `Seu perfil est� vinculado � ag�ncia: ${_perfil.agencia || 'outra ag�ncia'}. Para entrar na DMaior, ser� necess�rio solicitar migra��o.`;
         configurarWhatsAppMigracao();
         irParaEtapa('migracao');
       } else {
@@ -539,7 +541,7 @@
       }
     });
 
-    /* ── ETAPA 3 → enviar candidatura ── */
+    /* -- ETAPA 3 ? enviar candidatura -- */
     $('btn-voltar-3').addEventListener('click', () => irParaEtapa(2));
 
     $('f-whatsapp').addEventListener('input', function () { this.value = maskPhone(this.value); });
@@ -636,9 +638,9 @@
       }
     });
 
-    /* ── Migração ── */
+    /* -- Migra��o -- */
     $('btn-wpp-migracao').addEventListener('click', function () {
-      // Registra migração antes de abrir o WhatsApp
+      // Registra migra��o antes de abrir o WhatsApp
       if (_perfil) {
         window.DmaiorAPI.candidatura.registrarMigracao({
             uid:          $('f-uid').value.trim(),
@@ -672,7 +674,7 @@
       irParaEtapa(1);
     });
 
-    /* ── Resultado → nova consulta ── */
+    /* -- Resultado ? nova consulta -- */
     $('btn-nova').addEventListener('click', () => {
       _perfil = null; _verificacao = null; _candidaturaId = null;
       $('f-uid').value = ''; $('f-nome').value = '';

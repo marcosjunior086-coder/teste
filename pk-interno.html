@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base href="/teste/">
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PK Interno — DMaior Agency</title>
+  <title>PK Interno � DMaior Agency</title>
   <meta name="description" content="Confrontos e ranking de PK interno da DMaior Agency.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,11 +15,11 @@
   <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-  <!-- Menu unificado — funciona em mobile e desktop -->
+  <!-- Menu unificado � funciona em mobile e desktop -->
   <menu-mobile-dmaior></menu-mobile-dmaior>
 
   <main class="dm-main" style="padding:0;">
-    <!-- Componente PK Interno — recebe dados via atributo estado-painel -->
+    <!-- Componente PK Interno � recebe dados via atributo estado-painel -->
     <painel-pk id="pk-widget"></painel-pk>
   </main>
 
@@ -31,12 +33,12 @@
   <dmaior-cookie-consent></dmaior-cookie-consent>
   <script src="js/components/cookie-consent.js?v=20260624-3"></script>
   <script>
-    // ── Integração PK Interno ────────────────────────────────────────────────
+    // -- Integra��o PK Interno ------------------------------------------------
     // Busca dados do Worker PK + Supabase e alimenta o componente <painel-pk>
 
     const pkWidget = document.getElementById('pk-widget');
 
-    // Estado inicial — mostra spinner enquanto carrega
+    // Estado inicial � mostra spinner enquanto carrega
     const estadoInicial = {
       carregando: true,
       abaAtiva: 'confrontos',
@@ -50,7 +52,7 @@
     };
     pkWidget.setAttribute('estado-painel', JSON.stringify(estadoInicial));
 
-    // Escuta ações disparadas pelo componente (troca de aba, rodada, data)
+    // Escuta a��es disparadas pelo componente (troca de aba, rodada, data)
     pkWidget.addEventListener('acaoui', async (e) => {
       const { acao, valor } = e.detail;
       const estadoAtual = JSON.parse(pkWidget.getAttribute('estado-painel') || '{}');
@@ -67,7 +69,7 @@
       }
     });
 
-    // Busca dados do Worker dashboard (PK) — via DmaiorAPI se disponível
+    // Busca dados do Worker dashboard (PK) � via DmaiorAPI se dispon�vel
     async function carregarDadosPK() {
       try {
         const workerPk = (window.DmaiorConfig && window.DmaiorConfig.workers && window.DmaiorConfig.workers.pk)
@@ -86,7 +88,7 @@
             ...dados,
           }));
         } else {
-          // Worker não retornou dados — exibe estado vazio
+          // Worker n�o retornou dados � exibe estado vazio
           pkWidget.setAttribute('estado-painel', JSON.stringify({
             carregando: false,
             abaAtiva: 'confrontos',
@@ -100,7 +102,7 @@
           }));
         }
       } catch (err) {
-        // Erro de rede — mostra estado vazio
+        // Erro de rede � mostra estado vazio
         pkWidget.setAttribute('estado-painel', JSON.stringify({
           carregando: false,
           abaAtiva: 'confrontos',
