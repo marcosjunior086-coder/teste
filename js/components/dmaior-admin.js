@@ -657,6 +657,16 @@ class DimaiorAdmin extends HTMLElement {
     const base=String(nome||'mes').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'mes';
     return `${base}-${String(gid||Date.now()).replace(/[^a-zA-Z0-9_-]/g,'')}`;
   }
+  _pesoMesRanking(nome){
+    const n=String(nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    if(/\b(mes\s+atual|atual)\b/.test(n))return 99;
+    const meses=[
+      ['janeiro',1],['fevereiro',2],['marco',3],['abril',4],['maio',5],['junho',6],
+      ['julho',7],['agosto',8],['setembro',9],['outubro',10],['novembro',11],['dezembro',12],
+    ];
+    const achou=meses.find(([m])=>new RegExp(`\\b${m}\\b`).test(n));
+    return achou?achou[1]:-1;
+  }
   async _carregarMesesRanking(){
     const s=this.shadowRoot,area=s.getElementById('rankMesesArea'),status=s.getElementById('rankMesesStatus');
     if(!area)return;
@@ -719,6 +729,23 @@ class DimaiorAdmin extends HTMLElement {
     this._rankMeses.splice(idx,1);
     this._rankMeses=this._rankMeses.map((m,i)=>({...m,ordem:i+1}));
     this._renderMesesRanking();
+  }
+  _reordenarMesesRanking(){
+    const status=this.shadowRoot.getElementById('rankMesesStatus');
+    this._rankMeses=this._coletarMesesRanking()
+      .map((m,i)=>({...m,_old:i,_peso:this._pesoMesRanking(m.nome)}))
+      .sort((a,b)=>{
+        if(a._peso!==b._peso)return b._peso-a._peso;
+        return Number(a.ordem||a._old+1)-Number(b.ordem||b._old+1);
+      })
+      .map((m,i,arr)=>{
+        const prox=arr[i+1];
+        const compararCom=(prox&&prox._peso>0&&prox._peso<99)?prox.nome:null;
+        const {_old,_peso,...limpo}=m;
+        return {...limpo,ordem:i+1,compararCom};
+      });
+    this._renderMesesRanking();
+    if(status)status.textContent='Meses reordenados. Confira e clique em Salvar Meses para gravar no KV.';
   }
   async _salvarMesesRanking(){
     const s=this.shadowRoot,status=s.getElementById('rankMesesStatus'),btn=s.getElementById('btnSalvarRankMeses');
@@ -1215,7 +1242,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
-    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());
+    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
@@ -2505,7 +2532,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
             <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
             <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
-            <div class="pag" id="pag-mesesRanking">${ph('Meses do Ranking','calendar','Configuração das abas históricas','btnAtuRankMeses',`<button class="btn btn-g" id="btnSalvarRankMeses">${this._ico('check',13)} Salvar Meses</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Meses Históricos via Google Planilhas</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAddRankMes">${this._ico('plus',12)} Adicionar</button></div></div><div style="padding:16px"><div class="premio-info-box">${this._ico('warning',13)} Cadastre aqui o nome do mês e o GID da aba do Google Planilhas. O ranking público passa a montar as abas automaticamente pelo KV do Worker Rank.</div><div id="rankMesesArea">${this._loading()}</div><div id="rankMesesStatus" style="font-size:11px;color:var(--t3);margin-top:10px"></div></div></div></div>
+            <div class="pag" id="pag-mesesRanking">${ph('Meses do Ranking','calendar','Configuração das abas históricas','btnAtuRankMeses',`<button class="btn btn-g" id="btnSalvarRankMeses">${this._ico('check',13)} Salvar Meses</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Meses Históricos via Google Planilhas</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnReordenarRankMeses">${this._ico('refresh',12)} Reordenar</button><button class="btn btn-o btn-sm" id="btnAddRankMes">${this._ico('plus',12)} Adicionar</button></div></div><div style="padding:16px"><div class="premio-info-box">${this._ico('warning',13)} Cadastre aqui o nome do mês e o GID da aba do Google Planilhas. O ranking público passa a montar as abas automaticamente pelo KV do Worker Rank.</div><div id="rankMesesArea">${this._loading()}</div><div id="rankMesesStatus" style="font-size:11px;color:var(--t3);margin-top:10px"></div></div></div></div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
