@@ -1,0 +1,27 @@
+{
+  "id": "/admin/",
+  "name": "DMaior Admin",
+  "short_name": "DMaior Admin",
+  "description": "Painel administrativo da DMaior Agency.",
+  "start_url": "/admin/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0a0e27",
+  "theme_color": "#0a0e27",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icons/dmaior-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/dmaior-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
