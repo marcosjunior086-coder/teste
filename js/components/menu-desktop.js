@@ -22,7 +22,7 @@ class MenuDesktopDMaior extends HTMLElement {
     this.checkAuth();
     // Atualiza quando outra aba mudar o token
     window.addEventListener('storage', (e) => {
-      if (['dm_token', 'dm_foto', 'dm_nome'].includes(e.key)) this.checkAuth();
+      if (['dm_token', 'dm_foto', 'dm_nome', 'dm_atalho_admin', 'dm_atalho_agente'].includes(e.key)) this.checkAuth();
     });
     // Atualiza quando auth.js disparar o evento de login/logout
     window.addEventListener('dmaior:auth', (e) => this.updateAuthUI(e.detail));
@@ -36,10 +36,12 @@ class MenuDesktopDMaior extends HTMLElement {
   checkAuth() {
     if (typeof window === 'undefined') return;
     try {
-      const token = localStorage.getItem('dm_token') || '';
-      const foto  = localStorage.getItem('dm_foto')  || '';
-      const nome  = localStorage.getItem('dm_nome')  || '';
-      this.updateAuthUI({ logado: !!token, foto, nome });
+      const token        = localStorage.getItem('dm_token') || '';
+      const foto         = localStorage.getItem('dm_foto')  || '';
+      const nome         = localStorage.getItem('dm_nome')  || '';
+      const atalhoAdmin  = localStorage.getItem('dm_atalho_admin')  === 'true';
+      const atalhoAgente = localStorage.getItem('dm_atalho_agente') === 'true';
+      this.updateAuthUI({ logado: !!token, foto, nome, atalhoAdmin, atalhoAgente });
     } catch {}
   }
 
@@ -57,6 +59,8 @@ class MenuDesktopDMaior extends HTMLElement {
     const SVG_LOGOUT = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
     const SVG_USER   = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
     const SVG_ACCESS = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>`;
+    const SVG_SHIELD = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>`;
+    const SVG_AGENTE = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
 
     // Estrutura de navegação (links relativos para Hostinger)
     const menuData = [
@@ -150,6 +154,9 @@ class MenuDesktopDMaior extends HTMLElement {
           <svg class="user-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           <div class="user-dd">
             <a href="/painel/index.html" class="ud-link">${SVG_PAINEL} Painel do Host</a>
+            <div class="ud-sep hidden" id="adminSep"></div>
+            <a href="/admin/index.html" class="ud-link hidden" id="linkAdmin">${SVG_SHIELD} Painel Admin</a>
+            <a href="/agente/index.html" class="ud-link hidden" id="linkAgente">${SVG_AGENTE} Painel Agente</a>
             <div class="ud-sep"></div>
             <button class="ud-link danger" id="btnLogout">${SVG_LOGOUT} Sair</button>
           </div>
@@ -166,10 +173,16 @@ class MenuDesktopDMaior extends HTMLElement {
     const userZone  = root.getElementById('userZone');
     const avatarWrap = root.getElementById('avatarWrap');
     const userName  = root.getElementById('userName');
+    const adminSep   = root.getElementById('adminSep');
+    const linkAdmin  = root.getElementById('linkAdmin');
+    const linkAgente = root.getElementById('linkAgente');
     if (!btnAccess || !userZone) return;
     if (detail.logado) {
       btnAccess.classList.add('hidden');
       userZone.classList.remove('hidden');
+      if (linkAdmin)  linkAdmin.classList.toggle('hidden', !detail.atalhoAdmin);
+      if (linkAgente) linkAgente.classList.toggle('hidden', !detail.atalhoAgente);
+      if (adminSep)   adminSep.classList.toggle('hidden', !(detail.atalhoAdmin || detail.atalhoAgente));
       if (detail.foto) avatarWrap.innerHTML = `<img src="${detail.foto}" alt="Avatar">`;
       if (detail.nome) userName.textContent = detail.nome.split(' ')[0];
     } else {

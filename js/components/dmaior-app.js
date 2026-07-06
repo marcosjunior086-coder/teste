@@ -116,7 +116,7 @@
         this.sessionUid = ''; this.sessionToken = ''; this.sessionEmail = '';
         this.historicoCompleto = [];
         try {
-            ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome','agencia_auth']
+            ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome','dm_atalho_admin','dm_atalho_agente','agencia_auth']
                 .forEach(k => localStorage.removeItem(k));
         } catch(e) {}
     }
@@ -1241,8 +1241,10 @@
                 localStorage.setItem('dm_email',data.email||'');
                 localStorage.setItem('dm_foto',data.foto_url||'');
                 localStorage.setItem('dm_nome',data.nome||'');
+                localStorage.setItem('dm_atalho_admin',data.atalho_admin?'true':'false');
+                localStorage.setItem('dm_atalho_agente',data.atalho_agente?'true':'false');
                 localStorage.setItem('agencia_auth','true');
-                window.dispatchEvent(new CustomEvent('dmaior:auth',{detail:{logado:true,foto:data.foto_url||'',nome:data.nome||'',uid}}));
+                window.dispatchEvent(new CustomEvent('dmaior:auth',{detail:{logado:true,foto:data.foto_url||'',nome:data.nome||'',uid,atalhoAdmin:!!data.atalho_admin,atalhoAgente:!!data.atalho_agente}}));
             } catch(e){}
             await this.loadDash();
             this.qs('#lPass').value='';

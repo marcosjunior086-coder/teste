@@ -782,10 +782,12 @@ class DimaiorAdmin extends HTMLElement {
     const _renderItem=(sv,isExterno)=>{
       const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';
       const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;
+      const isAtalhoAdmin=sv.atalho_admin===true;const isAtalhoAgente=sv.atalho_agente===true;
       const rotaBase=isExterno?`/admin/streamers/externos/${encodeURIComponent(uid)}`:`/admin/streamers/${encodeURIComponent(uid)}`;
+      const atalhosBtns=isExterno?'':`<button class="btn btn-sm sv-toggle-atalho ${isAtalhoAdmin?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="atalho_admin" data-val="${isAtalhoAdmin}" style="${isAtalhoAdmin?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(129,140,248,.5);color:#818cf8'}">${this._ico(isAtalhoAdmin?'x_circle':'check_c',12)} ${isAtalhoAdmin?'Remover Atalho Admin':'Atalho Admin'}</button><button class="btn btn-sm sv-toggle-atalho ${isAtalhoAgente?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="atalho_agente" data-val="${isAtalhoAgente}" style="${isAtalhoAgente?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(129,140,248,.5);color:#818cf8'}">${this._ico(isAtalhoAgente?'x_circle':'check_c',12)} ${isAtalhoAgente?'Remover Atalho Agente':'Atalho Agente'}</button>`;
       const acoesBtns=isExterno
         ?`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" data-externo="1" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" data-externo="1" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-sm" data-uid="${this._esc(uid)}" data-externo-del="1" style="border-color:rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',12)} Remover</button>`
-        :`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button>`;
+        :`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:#ff9800'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button>${atalhosBtns}`;
       const campos=isExterno
         ?[['UID',uid],['Kwai ID',sv.kwai_id||'—'],['Adicionado em',this._fdt(sv.adicionado_em)]]
         :[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]];
@@ -805,6 +807,12 @@ class DimaiorAdmin extends HTMLElement {
         this._toggleVerificado(btn.dataset.uid,btn.dataset.campo,btn.dataset.val==='true',isExt);
       });
     });
+    lu.querySelectorAll('.sv-toggle-atalho').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        this._toggleAtalho(btn.dataset.uid,btn.dataset.campo,btn.dataset.val==='true');
+      });
+    });
     lu.querySelectorAll('[data-externo-del]').forEach(btn=>{
       btn.addEventListener('click',e=>{
         e.stopPropagation();
@@ -822,6 +830,14 @@ class DimaiorAdmin extends HTMLElement {
     const rota=isPremium?`${base}/verificado-premium`:`${base}/verificado`;
     const d=await this._api('PATCH',rota,{[campo]:!isAtivo});
     if(d?.ok){this._toast(isAtivo?`${tipo.charAt(0).toUpperCase()+tipo.slice(1)} removido`:`Streamer ${tipo}!`);this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
+  }
+  async _toggleAtalho(uid,campo,isAtivo){
+    const label=campo==='atalho_admin'?'Atalho Admin':'Atalho Agente';
+    const acao=isAtivo?`Remover ${label}`:`Liberar ${label}`;
+    if(!confirm(`${acao} para o streamer ${uid}?`))return;
+    const rota=campo==='atalho_admin'?`/admin/streamers/${encodeURIComponent(uid)}/atalho-admin`:`/admin/streamers/${encodeURIComponent(uid)}/atalho-agente`;
+    const d=await this._api('PATCH',rota,{[campo]:!isAtivo});
+    if(d?.ok){this._toast(isAtivo?`${label} removido`:`${label} liberado!`);this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
   }
   async _abrirModalVerifExterno(){
     const s=this.shadowRoot;
@@ -918,6 +934,9 @@ class DimaiorAdmin extends HTMLElement {
       aviso_financeiro:{label:'Aviso no painel',hint:'Texto na aba Carteira.'},
       badge_verificado_url:{label:'Badge Verificado — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão azul.',preview:true},
       badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão laranja.',preview:true},
+      revisao_modo:{label:'Revisão de lives — modo',hint:'Digite "automatico" (roda sozinha todo dia às 03h) ou "manual" (só roda quando você clicar em Streamers > Monitor Kwai > Corrigir). O monitor ao vivo continua rodando normalmente nos dois modos.'},
+      revisao_diamantes:{label:'Revisão pode corrigir diamantes?',hint:'Digite "true" ou "false". Se false, a revisão nunca muda diamantes já gravados — só preenche lives novas.'},
+      revisao_horas:{label:'Revisão pode corrigir horas/minutos?',hint:'Digite "true" ou "false". Se false, a revisão nunca muda minutos já gravados — só preenche lives novas.'},
     };
     const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;};
     el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`}${isRO?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;

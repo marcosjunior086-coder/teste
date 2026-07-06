@@ -4,18 +4,20 @@
  * Centraliza leitura, escrita e limpeza das chaves de sessão no localStorage.
  * Todas as operações são protegidas com verificação de window (SSR-safe).
  *
- * Chaves utilizadas: dm_uid, dm_token, dm_email, dm_foto, dm_nome
+ * Chaves utilizadas: dm_uid, dm_token, dm_email, dm_foto, dm_nome, dm_atalho_admin, dm_atalho_agente
  */
 
 const Auth = {
 
   // Chaves do localStorage — altere aqui se precisar renomear
   KEYS: {
-    uid:   'dm_uid',
-    token: 'dm_token',
-    email: 'dm_email',
-    foto:  'dm_foto',
-    nome:  'dm_nome',
+    uid:          'dm_uid',
+    token:        'dm_token',
+    email:        'dm_email',
+    foto:         'dm_foto',
+    nome:         'dm_nome',
+    atalhoAdmin:  'dm_atalho_admin',
+    atalhoAgente: 'dm_atalho_agente',
   },
 
   /**
@@ -28,11 +30,13 @@ const Auth = {
       const token = localStorage.getItem(this.KEYS.token);
       if (!token) return null;
       return {
-        uid:   localStorage.getItem(this.KEYS.uid)   || '',
+        uid:          localStorage.getItem(this.KEYS.uid)   || '',
         token,
-        email: localStorage.getItem(this.KEYS.email) || '',
-        foto:  localStorage.getItem(this.KEYS.foto)  || '',
-        nome:  localStorage.getItem(this.KEYS.nome)  || '',
+        email:        localStorage.getItem(this.KEYS.email) || '',
+        foto:         localStorage.getItem(this.KEYS.foto)  || '',
+        nome:         localStorage.getItem(this.KEYS.nome)  || '',
+        atalhoAdmin:  localStorage.getItem(this.KEYS.atalhoAdmin)  === 'true',
+        atalhoAgente: localStorage.getItem(this.KEYS.atalhoAgente) === 'true',
       };
     } catch { return null; }
   },
@@ -48,9 +52,9 @@ const Auth = {
   /**
    * Salva a sessão no localStorage após login bem-sucedido.
    * Dispara o evento 'dmaior:auth' para atualizar os menus.
-   * @param {object} dados - { uid, token, email, foto, nome }
+   * @param {object} dados - { uid, token, email, foto, nome, atalhoAdmin, atalhoAgente }
    */
-  saveSession({ uid, token, email, foto, nome }) {
+  saveSession({ uid, token, email, foto, nome, atalhoAdmin, atalhoAgente }) {
     if (typeof window === 'undefined') return;
     try {
       if (uid)   localStorage.setItem(this.KEYS.uid, uid);
@@ -58,10 +62,12 @@ const Auth = {
       if (email) localStorage.setItem(this.KEYS.email, email);
       if (foto)  localStorage.setItem(this.KEYS.foto, foto);
       if (nome)  localStorage.setItem(this.KEYS.nome, nome);
+      localStorage.setItem(this.KEYS.atalhoAdmin,  atalhoAdmin  ? 'true' : 'false');
+      localStorage.setItem(this.KEYS.atalhoAgente, atalhoAgente ? 'true' : 'false');
 
       // Notifica menus e componentes que o usuário logou
       window.dispatchEvent(new CustomEvent('dmaior:auth', {
-        detail: { logado: true, foto: foto || '', nome: nome || '' },
+        detail: { logado: true, foto: foto || '', nome: nome || '', atalhoAdmin: !!atalhoAdmin, atalhoAgente: !!atalhoAgente },
       }));
     } catch {}
   },
