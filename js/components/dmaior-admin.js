@@ -927,6 +927,9 @@ class DimaiorAdmin extends HTMLElement {
   }
   async _carregarConfig(){
     const s=this.shadowRoot;s.getElementById('tbC').innerHTML=this._loading();const d=await this._api('GET','/admin/config');const el=s.getElementById('tbC');
+    // revisao_* tem tela própria com botões em Monitor Kwai — não repete aqui como texto livre
+    const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas']);
+    if(d?.config)d.config=d.config.filter(c=>!NAO_LISTAR.has(c.chave));
     if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configurações');return;}
     const labels={
       taxa_saque_mp:{label:'Taxa fixa por saque (R$)',hint:'Deixe 0.00 para não cobrar taxa.'},
@@ -934,9 +937,6 @@ class DimaiorAdmin extends HTMLElement {
       aviso_financeiro:{label:'Aviso no painel',hint:'Texto na aba Carteira.'},
       badge_verificado_url:{label:'Badge Verificado — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão azul.',preview:true},
       badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão laranja.',preview:true},
-      revisao_modo:{label:'Revisão de lives — modo',hint:'Digite "automatico" (roda sozinha todo dia às 03h) ou "manual" (só roda quando você clicar em Streamers > Monitor Kwai > Corrigir). O monitor ao vivo continua rodando normalmente nos dois modos.'},
-      revisao_diamantes:{label:'Revisão pode corrigir diamantes?',hint:'Digite "true" ou "false". Se false, a revisão nunca muda diamantes já gravados — só preenche lives novas.'},
-      revisao_horas:{label:'Revisão pode corrigir horas/minutos?',hint:'Digite "true" ou "false". Se false, a revisão nunca muda minutos já gravados — só preenche lives novas.'},
     };
     const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;};
     el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`}${isRO?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
@@ -1301,9 +1301,12 @@ class DimaiorAdmin extends HTMLElement {
     // Preview ao colar/digitar URL de imagem
     s.getElementById('mComImagem').addEventListener('input',e=>this._atualizarPreviewImagem(e.target.value));
     // Monitor Kwai
-    s.getElementById('btnAtuMonitor').addEventListener('click',()=>this._verificarCookieStatus());
+    s.getElementById('btnAtuMonitor').addEventListener('click',()=>this._carregarMonitor());
     s.getElementById('btnVerificarCookie').addEventListener('click',()=>this._verificarCookieStatus());
     s.getElementById('btnSalvarCookie').addEventListener('click',()=>this._atualizarCookie());
+    s.querySelectorAll('#revModoBtns [data-grupo],#revDiamantesBtns [data-grupo],#revHorasBtns [data-grupo]').forEach(btn=>{
+      btn.addEventListener('click',()=>this._salvarRevisaoConfig(btn.dataset.grupo,btn.dataset.valor));
+    });
     s.getElementById('btnSimularResgate').addEventListener('click',()=>this._executarResgate(true));
     s.getElementById('btnExecutarResgate').addEventListener('click',()=>this._confirmarDel('Executar correção e gravar dados no banco?',()=>this._executarResgate(false)));
     s.getElementById('btnLimparDatas').addEventListener('click',()=>{s.getElementById('monDataDe').value='';s.getElementById('monDataAte').value='';});
@@ -1557,6 +1560,25 @@ class DimaiorAdmin extends HTMLElement {
   // ── MONITOR KWAI ────────────────────────────────────────────
   async _carregarMonitor(){
     this._verificarCookieStatus();
+    this._carregarRevisaoConfig();
+  }
+  _marcarRevisaoAtiva(grupo,valorAtivo){
+    this.shadowRoot.querySelectorAll(`[data-grupo="${grupo}"]`).forEach(btn=>{
+      btn.classList.toggle('btn-g',btn.dataset.valor===valorAtivo);
+      btn.classList.toggle('btn-o',btn.dataset.valor!==valorAtivo);
+    });
+  }
+  async _carregarRevisaoConfig(){
+    const d=await this._api('GET','/admin/config');
+    const mapa=Object.fromEntries((d?.config||[]).map(c=>[c.chave,c.valor]));
+    this._marcarRevisaoAtiva('revisao_modo',mapa.revisao_modo==='manual'?'manual':'automatico');
+    this._marcarRevisaoAtiva('revisao_diamantes',mapa.revisao_diamantes==='false'?'false':'true');
+    this._marcarRevisaoAtiva('revisao_horas',mapa.revisao_horas==='false'?'false':'true');
+  }
+  async _salvarRevisaoConfig(grupo,valor){
+    this._marcarRevisaoAtiva(grupo,valor);
+    const r=await this._api('POST','/admin/config',{chave:grupo,valor});
+    if(r?.ok)this._toast('Salvo!');else this._toast(r?.erro||'Erro ao salvar','err');
   }
   async _verificarCookieStatus(){
     const el=this.shadowRoot.getElementById('monCookieStatus');
@@ -2718,6 +2740,35 @@ class DimaiorAdmin extends HTMLElement {
                     <label style="font-size:12px;color:var(--t3);display:block;margin-bottom:6px">Novo cookie (cole aqui para atualizar)</label>
                     <textarea id="monCookieInput" rows="3" placeholder="Cole o cookie completo aqui..." style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none;resize:vertical;transition:border-color .2s;word-break:break-all"></textarea>
                     <div style="margin-top:8px"><button class="btn btn-g" id="btnSalvarCookie">${this._ico('check',13)} Salvar Cookie</button></div>
+                  </div>
+                </div>
+              </div>
+              <div class="box mon-section">
+                <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Revisão Automática</div></div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:16px">
+                  <div class="mc">
+                    <label>Modo</label>
+                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Automático roda sozinho todo dia às 03h (corrige D-2). Manual só roda quando você clicar em Executar Correção abaixo — o monitor ao vivo continua normal nos dois modos.</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap" id="revModoBtns">
+                      <button class="btn btn-sm" data-grupo="revisao_modo" data-valor="automatico">${this._ico('check_c',12)} Automático</button>
+                      <button class="btn btn-sm" data-grupo="revisao_modo" data-valor="manual">${this._ico('lock_r',12)} Manual</button>
+                    </div>
+                  </div>
+                  <div class="mc">
+                    <label>Corrigir diamantes</label>
+                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Se desligado, a revisão nunca muda diamantes já gravados — só preenche lives novas.</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap" id="revDiamantesBtns">
+                      <button class="btn btn-sm" data-grupo="revisao_diamantes" data-valor="true">${this._ico('check_c',12)} Ligado</button>
+                      <button class="btn btn-sm" data-grupo="revisao_diamantes" data-valor="false">${this._ico('x_circle',12)} Desligado</button>
+                    </div>
+                  </div>
+                  <div class="mc">
+                    <label>Corrigir horas/minutos</label>
+                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Se desligado, a revisão nunca muda minutos já gravados — só preenche lives novas.</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap" id="revHorasBtns">
+                      <button class="btn btn-sm" data-grupo="revisao_horas" data-valor="true">${this._ico('check_c',12)} Ligado</button>
+                      <button class="btn btn-sm" data-grupo="revisao_horas" data-valor="false">${this._ico('x_circle',12)} Desligado</button>
+                    </div>
                   </div>
                 </div>
               </div>
