@@ -145,6 +145,8 @@
     svgPix()     { return `<svg viewBox="0 0 24 24"><path d="M17.06 10.94l-3-3A3 3 0 0 0 12 7.17a3 3 0 0 0-2.12.88l-3 3a3 3 0 0 0 0 4.24l3 3A3 3 0 0 0 12 19.17a3 3 0 0 0 2.12-.88l3-3a3 3 0 0 0 0-4.24zm-1.41 2.83l-3 3a1 1 0 0 1-1.41 0l-3-3a1 1 0 0 1 0-1.41l3-3a1 1 0 0 1 1.41 0l3 3a1 1 0 0 1 0 1.41z"/></svg>`; }
     svgBack()    { return `<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`; }
     svgGrid()    { return `<svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>`; }
+    svgChevron() { return `<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>`; }
+    svgVote()    { return `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`; }
     svgLogout()  { return `<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>`; }
     svgInfo()    { return `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`; }
     svgRank()    { return `<svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>`; }
@@ -186,6 +188,12 @@
             .nit.sair { margin-top:auto; color:var(--red); }
             .nit.sair:hover { background:rgba(248,113,113,.1); }
 
+            /* No desktop o menu já é uma lista vertical com espaço de sobra —
+               o wrapper "mais" fica transparente (display:contents) e o botão
+               de seta some, pra tudo continuar visível de uma vez só. */
+            .nav-more { display:contents; }
+            .nit.nav-toggle { display:none; }
+
             @media(max-width:768px){
                 .shell { flex-direction:column; }
                 .content { padding:15px 10px 90px; }
@@ -198,6 +206,25 @@
                 .nit:hover,.nit.sair:hover { background:none; }
                 .nit.on { background:none; }
                 .nit.sair { margin-top:0; }
+
+                /* Só 3 abas fixas + a seta no mobile — o resto vira um
+                   grid que abre por cima da barra, em vez de espremer
+                   7 botões numa linha só. */
+                .nit.nav-toggle { display:flex; }
+                .nit.nav-toggle svg { transition:transform .25s ease; }
+                .bnav.expanded .nit.nav-toggle svg { transform:rotate(180deg); }
+                .bnav.expanded .nit.nav-toggle { color:var(--cyan); }
+
+                .nav-more {
+                    display:none; position:absolute; left:10px; right:10px; bottom:78px;
+                    grid-template-columns:1fr 1fr; gap:8px;
+                    background:rgba(18,18,18,0.97); border:1px solid var(--border); border-radius:16px;
+                    padding:12px; backdrop-filter:blur(10px); box-shadow:0 -10px 30px rgba(0,0,0,.4);
+                }
+                .bnav.expanded .nav-more { display:grid; animation:fi .2s ease; }
+                .nav-more .nit { background:rgba(255,255,255,.04); border-radius:12px; padding:12px 6px; }
+                .nav-more .nit.sair { background:rgba(248,113,113,.06); }
+
                 .molduras-frame{height:calc(100vh - 98px);min-height:620px;border-radius:0;}
             }
 
@@ -447,6 +474,8 @@
             @media(max-width:768px){
                 [data-theme="dark"] .shell .card { background: rgba(12,13,15,.99); }
                 [data-theme="dark"] .shell .bnav { background: rgba(18,18,18,.99); border-top-color: rgba(255,255,255,.10); }
+                [data-theme="dark"] .shell .nav-more { background: rgba(12,13,15,.99); border-color: rgba(255,255,255,.10); }
+                [data-theme="dark"] .shell .nav-more .nit { background: rgba(255,255,255,.04); }
             }
 
             /* ══ TEMA BRANCO — bloom azul-petróleo (padrão do ranking) ══ */
@@ -537,6 +566,17 @@
                     border-top-color: var(--border);
                     backdrop-filter: blur(12px);
                 }
+                [data-theme="branco"] .shell .nav-more,
+                [data-theme="rosa"] .shell .nav-more,
+                [data-theme="laranja"] .shell .nav-more {
+                    background: rgba(255,255,255,0.97);
+                    border-color: var(--border);
+                }
+                [data-theme="branco"] .shell .nav-more .nit,
+                [data-theme="rosa"] .shell .nav-more .nit,
+                [data-theme="laranja"] .shell .nav-more .nit {
+                    background: rgba(0,0,0,0.04);
+                }
             }
             /* Cart-hero — saldo disponível — segue bloom do tema */
             [data-theme="branco"] .shell .cart-hero {
@@ -571,12 +611,16 @@
             <!-- ══════ MENU ══════ -->
             <nav class="bnav" id="bNav">
                 <button class="nit on" id="nD">${this.svgGrid()} <span data-i18n="dashboard">RESUMO</span></button>
-                <button class="nit" id="nS">${this.svgUser()} <span data-i18n="profile">PERFIL</span></button>
                 <button class="nit" id="nC">${this.svgWallet()} <span data-i18n="wallet">CARTEIRA</span></button>
                 <button class="nit" id="nImpulso">${this.svgBoost()} <span data-i18n="boost">IMPULSO</span></button>
-                <button class="nit" id="nMolduras">${this.svgFrame()} <span data-i18n="frames">MOLDURAS</span></button>
-                <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
-                <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
+                <button class="nit nav-toggle" id="nMore" type="button">${this.svgChevron()} <span data-i18n="more">MAIS</span></button>
+                <div class="nav-more" id="navMore">
+                    <button class="nit" id="nS">${this.svgUser()} <span data-i18n="profile">PERFIL</span></button>
+                    <button class="nit" id="nMolduras">${this.svgFrame()} <span data-i18n="frames">MOLDURAS</span></button>
+                    <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
+                    <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
+                    <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
+                </div>
             </nav>
 
             <div class="content">
@@ -989,6 +1033,14 @@
                     <dmaior-impulso id="impulsoEl" worker-url="https://dashboard.agencydmaior.com.br"></dmaior-impulso>
                 </div>
 
+                <!-- ══════ VOTAÇÃO (componente nativo) ══════ -->
+                <!-- dmaior-votacao detecta sozinho dm_uid/dm_token no localStorage —
+                     rodando aqui dentro do painel já autenticado, pula direto pra
+                     lista de votações sem pedir UID de novo. -->
+                <div id="vVotacao" class="view" style="width:100%;">
+                    <dmaior-votacao id="votacaoEl"></dmaior-votacao>
+                </div>
+
                 <!-- Gerador local de molduras, carregado somente após autenticação -->
                 <div id="vMolduras" class="view" style="width:100%;">
                     <iframe id="moldurasFrame" class="molduras-frame" title="Gerador de molduras da DMaior Agency" allow="clipboard-write"></iframe>
@@ -1036,6 +1088,9 @@
     navigate(id){
         const loading = this.qs('#vLoading');
         if (loading) loading.style.display = 'none';
+
+        // Fecha o grid "mais" do menu mobile sempre que uma navegação acontece
+        this.qs('#bNav')?.classList.remove('expanded');
 
         this.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
         this.qs(`#${id}`)?.classList.add('on');
@@ -1150,6 +1205,15 @@
         this.qs('#nRank').addEventListener('click',()=>this.goRanking());
         this.qs('#nImpulso').addEventListener('click',()=>this.goImpulsionamento());
         this.qs('#nMolduras').addEventListener('click',()=>this.goMolduras());
+        this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
+        this.qs('#nMore').addEventListener('click',()=>{
+            this.qs('#bNav').classList.toggle('expanded');
+        });
+        // Clique fora do menu fecha o grid "mais" (mobile)
+        document.addEventListener('click',e=>{
+            const nav = this.qs('#bNav');
+            if(nav && nav.classList.contains('expanded') && !nav.contains(e.target)) nav.classList.remove('expanded');
+        });
         this.qs('#btnBackRank').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');this.loadDash();});
         this.qs('#btnBackAvisos').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#btnMarkAllRead').addEventListener('click',()=>this._marcarTodosLidos());
@@ -1652,6 +1716,13 @@
         }
         this.navigate('vImpulso');
         this.navActive('nImpulso');
+    }
+    goVotacao(){
+        // dmaior-votacao já lê dm_uid/dm_token do localStorage sozinho — só
+        // precisa navegar, sem passar atributo nenhum (diferente do impulso,
+        // que precisa do worker-url porque fala com um worker diferente).
+        this.navigate('vVotacao');
+        this.navActive('nVotacao');
     }
     goMolduras(){
         const frame = this.qs('#moldurasFrame');

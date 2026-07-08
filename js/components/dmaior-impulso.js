@@ -16,7 +16,7 @@ const SVG_ROCKET = `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.or
 
 const SVG_CLOCK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
 const SVG_LINK  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
-const SVG_GRID  = `<svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>`;
+const SVG_GRID  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>`;
 const SVG_BOOST = `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`;
 const SVG_LOGOUT= `<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>`;
 
@@ -34,6 +34,10 @@ class DmaiorImpulso extends HTMLElement {
     this._bloqueado      = false;
     this._shellPronto    = false;
     this._iniciado       = false;
+    this._agendamentoAtivo = false;
+    this._diasSalvos       = [];
+    this._tempoSalvo       = '30min';
+    this._modoTocado       = false; // usuário já clicou numa aba manualmente?
   }
 
   static get observedAttributes() { return ['worker-url']; }
@@ -135,8 +139,162 @@ class DmaiorImpulso extends HTMLElement {
   async _iniciar() {
     await this._renovarToken();
     await this._carregarConfig();
-    if (!this._bloqueado) this._carregarQuota(false);
+    if (!this._bloqueado) {
+      this._carregarQuota(false);
+      this._detectarLiveAtual();
+      this._carregarAgendamento();
+    }
     this._fetchComunicados();
+  }
+
+  // Carrega a preferência de agendamento (dias da semana + tempo) e decide
+  // em qual aba (Manual/Automático) abrir o painel.
+  async _carregarAgendamento(retry = false) {
+    const sr = this.shadowRoot;
+    const status = sr.getElementById('agenda-status');
+
+    try {
+      const res = await fetch(`${this._workerUrl}/api/agendamento?uid=${encodeURIComponent(this._uid)}`, {
+        headers: { 'Authorization': `Bearer ${this._token}` },
+      });
+
+      if (res.status === 401 && !retry) {
+        const renovado = await this._renovarToken();
+        if (renovado) return this._carregarAgendamento(true);
+        return;
+      }
+      if (!res.ok) throw new Error('falha');
+
+      const data = await res.json();
+      const dias = Array.isArray(data.dias_semana) ? data.dias_semana : [];
+
+      this._agendamentoAtivo = !!data.ativo;
+      this._diasSalvos       = dias;
+      this._tempoSalvo       = data.tempo_escolhido === '1hora' ? '1hora' : '30min';
+
+      sr.querySelectorAll('.chk-dia').forEach(chk => {
+        chk.checked  = dias.includes(Number(chk.value));
+        chk.disabled = false;
+      });
+      const tempoAuto = sr.querySelector(`input[name="tempo-auto"][value="${data.tempo_escolhido === '1hora' ? '1hora' : '30min'}"]`);
+      if (tempoAuto) tempoAuto.checked = true;
+      sr.querySelectorAll('input[name="tempo-auto"]').forEach(r => r.disabled = false);
+
+      const btn = sr.getElementById('btn-agendamento');
+      if (btn) { btn.disabled = false; sr.getElementById('btn-agendamento-texto').textContent = 'Salvar Agendamento'; }
+
+      if (status) {
+        status.innerHTML = data.ativo
+          ? 'Impulso automático <strong>ativado</strong> para os dias marcados abaixo.'
+          : 'Marque os dias em que a live costuma acontecer e ative o impulso automático.';
+      }
+
+      if (!this._modoTocado) {
+        // Usuário ainda não mexeu em nenhuma aba — decide sozinho com base no servidor.
+        this._trocarModo(data.ativo ? 'automatico' : 'manual');
+      } else if (!sr.getElementById('btn-modo-automatico').classList.contains('active') && this._agendamentoAtivo) {
+        // Usuário já tinha clicado em "Manual" antes desta resposta chegar, e só agora
+        // descobrimos que o servidor estava com o automático ativo — desativa de verdade
+        // pra UI e servidor não ficarem incoerentes (aba mostrando Manual, mas cron ainda ativo).
+        this._desativarAutomatico();
+      }
+    } catch (_) {
+      if (status) status.textContent = 'Não foi possível carregar o agendamento. Recarregue a página.';
+    }
+  }
+
+  async _salvarAgendamento(retry = false) {
+    const sr        = this.shadowRoot;
+    const btn       = sr.getElementById('btn-agendamento');
+    const spinner   = sr.getElementById('spinner-agendamento');
+    const btnTexto  = sr.getElementById('btn-agendamento-texto');
+    const feedback  = sr.getElementById('feedback-agendamento');
+    const diasMarcados = Array.from(sr.querySelectorAll('.chk-dia:checked')).map(c => Number(c.value));
+    const tempo = sr.querySelector('input[name="tempo-auto"]:checked')?.value || '30min';
+
+    feedback.className   = 'feedback';
+    feedback.textContent = '';
+
+    if (!diasMarcados.length) {
+      feedback.className = 'feedback erro';
+      feedback.textContent = 'Selecione ao menos um dia da semana.';
+      return;
+    }
+
+    btn.disabled           = true;
+    spinner.style.display  = 'block';
+    btnTexto.textContent   = 'Salvando...';
+
+    try {
+      const res = await fetch(`${this._workerUrl}/api/agendamento`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this._token}` },
+        body: JSON.stringify({ uid: this._uid, ativo: true, dias_semana: diasMarcados, tempo_escolhido: tempo }),
+      });
+
+      if (res.status === 401 && !retry) {
+        const renovado = await this._renovarToken();
+        if (renovado) return this._salvarAgendamento(true);
+      }
+
+      const data = await res.json();
+      if (res.ok && data.sucesso) {
+        this._agendamentoAtivo = true;
+        this._diasSalvos       = diasMarcados;
+        this._tempoSalvo       = tempo;
+        feedback.className   = 'feedback ok';
+        feedback.textContent = 'Agendamento automático ativado com sucesso!';
+        const status = sr.getElementById('agenda-status');
+        if (status) status.innerHTML = 'Impulso automático <strong>ativado</strong> para os dias marcados abaixo.';
+      } else {
+        feedback.className   = 'feedback erro';
+        feedback.textContent = data.erro || 'Erro ao salvar o agendamento. Tente novamente.';
+      }
+    } catch (_) {
+      feedback.className   = 'feedback erro';
+      feedback.textContent = 'Falha de conexão com o servidor. Verifique sua internet.';
+    } finally {
+      btn.disabled          = false;
+      spinner.style.display = 'none';
+      btnTexto.textContent  = 'Salvar Agendamento';
+    }
+  }
+
+  // Tenta preencher o link automaticamente cruzando o uid logado com o
+  // radar de lives ao vivo. Se não detectar (streamer ainda não capturado
+  // pelo monitor, fora do ar, ou erro de rede), o campo simplesmente
+  // continua vazio e editável — nada muda para quem preenche manualmente.
+  async _detectarLiveAtual(retry = false) {
+    const sr = this.shadowRoot;
+    const linkInput = sr.getElementById('inp-link');
+    const linkStatus = sr.getElementById('link-status');
+    if (!linkInput) return;
+
+    try {
+      const res = await fetch(`${this._workerUrl}/api/live-atual?uid=${encodeURIComponent(this._uid)}`, {
+        headers: { 'Authorization': `Bearer ${this._token}` },
+      });
+
+      if (res.status === 401 && !retry) {
+        const renovado = await this._renovarToken();
+        if (renovado) return this._detectarLiveAtual(true);
+        return;
+      }
+
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data.ao_vivo && data.link) {
+        linkInput.value = data.link;
+        if (linkStatus) {
+          linkStatus.textContent = 'Link detectado automaticamente da sua live ao vivo.';
+          linkStatus.style.display = 'block';
+        }
+      } else if (linkStatus) {
+        linkStatus.textContent = 'Não detectamos uma live sua ao vivo agora — cole o link manualmente.';
+        linkStatus.style.display = 'block';
+      }
+    } catch (_) { /* mantém o campo manual, sem exibir erro */ }
   }
 
   async _carregarConfig() {
@@ -251,6 +409,8 @@ class DmaiorImpulso extends HTMLElement {
           .wrap { padding: 20px 15px; }
           .radio-group { flex-direction: column; }
           .radio-opt { width: 100%; min-width: unset; }
+          .modo-btn { font-size: 0.74rem; padding: 9px 6px; }
+          .dia-card { padding: 8px 2px; font-size: 0.66rem; }
         }
 
         .header { display:flex; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid rgba(0,212,212,0.22); }
@@ -278,6 +438,23 @@ class DmaiorImpulso extends HTMLElement {
         .field-input::placeholder { color:rgba(255,255,255,0.2); }
         .field-input:focus { border-color:var(--cyan); box-shadow:0 0 10px var(--cyan-d); }
         .field-input:disabled { opacity:0.5; cursor:not-allowed; }
+        .link-status { display:none; margin-top:6px; font-size:0.72rem; color:var(--muted); line-height:1.4; }
+
+        .modo-switch { display:flex; gap:8px; margin-bottom:20px; background:rgba(0,0,0,0.3); border-radius:12px; padding:4px; }
+        .modo-btn { flex:1; padding:10px 8px; border:none; border-radius:9px; background:transparent; color:var(--muted); font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:0.82rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; transition:0.25s; }
+        .modo-btn.active { background:var(--rank-grad); color:#fff; }
+
+        .dias-grid { display:flex; gap:6px; flex-wrap:wrap; }
+        .dia-opt { flex:1; min-width:40px; }
+        .dia-opt input[type="checkbox"] { display:none; }
+        .dia-card { display:flex; align-items:center; justify-content:center; padding:10px 4px; border:1px solid var(--border); border-radius:9px; cursor:pointer; background:rgba(0,0,0,0.3); font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; transition:0.25s; user-select:none; }
+        .dia-opt input[type="checkbox"]:checked + .dia-card { background:var(--rank-grad); border-color:var(--rank-cyan); color:#fff; }
+        .dia-opt input[type="checkbox"]:disabled + .dia-card { opacity:0.4; cursor:not-allowed; }
+
+        .agenda-status { font-size:0.78rem; color:var(--muted); margin-bottom:14px; line-height:1.5; }
+        .agenda-status strong { color:var(--gold); }
+
+        #painel-automatico { display:none; }
 
         .radio-group { display:flex; gap:10px; flex-wrap:wrap; }
         .radio-opt { flex:1; min-width:120px; }
@@ -286,8 +463,8 @@ class DmaiorImpulso extends HTMLElement {
         .radio-card:hover { background:var(--cyan-d); border-color:var(--cyan); }
         .radio-card .rc-tempo { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:1.05rem; font-weight:700; color:var(--muted); letter-spacing:0.05em; text-align:center; text-transform:uppercase; transition:color 0.3s; }
         
-        .radio-opt input[type="radio"]:checked + .radio-card, 
-        #btn-impulso {
+        .radio-opt input[type="radio"]:checked + .radio-card,
+        #btn-impulso, #btn-agendamento {
           background: linear-gradient(135deg, rgba(59,130,246,0.14), rgba(0,212,212,0.12));
           border: 1px solid var(--rank-cyan);
           color: var(--rank-cyan);
@@ -296,15 +473,15 @@ class DmaiorImpulso extends HTMLElement {
         .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo { color: var(--rank-cyan); }
         .radio-opt input[type="radio"]:disabled + .radio-card { opacity:0.4; cursor:not-allowed; background:rgba(0,0,0,0.2); border-color:rgba(255,255,255,0.05); transform:none; box-shadow:none; }
 
-        #btn-impulso {
+        #btn-impulso, #btn-agendamento {
           width: 100%; margin-top: 22px; padding: 14px;
           border-radius: 12px;
           font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 1rem; font-weight: 700;
           letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
           display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
         }
-        #btn-impulso:hover:not(:disabled) { box-shadow: 0 0 22px var(--rank-glow); transform: translateY(-2px); }
-        #btn-impulso:disabled { opacity:0.55; background:rgba(59,130,246,.08); border-color:rgba(0,212,212,0.28); color:rgba(0,212,212,0.55); cursor: not-allowed; box-shadow: none; transform: none; }
+        #btn-impulso:hover:not(:disabled), #btn-agendamento:hover:not(:disabled) { box-shadow: 0 0 22px var(--rank-glow); transform: translateY(-2px); }
+        #btn-impulso:disabled, #btn-agendamento:disabled { opacity:0.55; background:rgba(59,130,246,.08); border-color:rgba(0,212,212,0.28); color:rgba(0,212,212,0.55); cursor: not-allowed; box-shadow: none; transform: none; }
 
         .feedback { margin-top:14px; padding:12px 14px; border-radius:9px; font-size:0.82rem; line-height:1.5; display:none; }
         .feedback.ok   { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.3); color:var(--green); display:block; }
@@ -386,20 +563,41 @@ class DmaiorImpulso extends HTMLElement {
         /* Radio cards inativos */
         :host-context([data-theme="branco"]) .radio-card, :host([data-theme="branco"]) .radio-card,
         :host-context([data-theme="rosa"]) .radio-card, :host([data-theme="rosa"]) .radio-card,
-        :host-context([data-theme="laranja"]) .radio-card , :host([data-theme="laranja"]) .radio-card {
+        :host-context([data-theme="laranja"]) .radio-card , :host([data-theme="laranja"]) .radio-card,
+        :host-context([data-theme="branco"]) .dia-card, :host([data-theme="branco"]) .dia-card,
+        :host-context([data-theme="rosa"]) .dia-card, :host([data-theme="rosa"]) .dia-card,
+        :host-context([data-theme="laranja"]) .dia-card , :host([data-theme="laranja"]) .dia-card,
+        :host-context([data-theme="branco"]) .modo-switch, :host([data-theme="branco"]) .modo-switch,
+        :host-context([data-theme="rosa"]) .modo-switch, :host([data-theme="rosa"]) .modo-switch,
+        :host-context([data-theme="laranja"]) .modo-switch , :host([data-theme="laranja"]) .modo-switch {
           background: rgba(0,0,0,0.04);
           border-color: var(--border);
         }
         :host-context([data-theme="branco"]) .radio-card .rc-tempo, :host([data-theme="branco"]) .radio-card .rc-tempo,
         :host-context([data-theme="rosa"]) .radio-card .rc-tempo, :host([data-theme="rosa"]) .radio-card .rc-tempo,
-        :host-context([data-theme="laranja"]) .radio-card .rc-tempo , :host([data-theme="laranja"]) .radio-card .rc-tempo { color: var(--text); }
+        :host-context([data-theme="laranja"]) .radio-card .rc-tempo , :host([data-theme="laranja"]) .radio-card .rc-tempo,
+        :host-context([data-theme="branco"]) .dia-card, :host([data-theme="branco"]) .dia-card,
+        :host-context([data-theme="rosa"]) .dia-card, :host([data-theme="rosa"]) .dia-card,
+        :host-context([data-theme="laranja"]) .dia-card , :host([data-theme="laranja"]) .dia-card,
+        :host-context([data-theme="branco"]) .modo-btn, :host([data-theme="branco"]) .modo-btn,
+        :host-context([data-theme="rosa"]) .modo-btn, :host([data-theme="rosa"]) .modo-btn,
+        :host-context([data-theme="laranja"]) .modo-btn , :host([data-theme="laranja"]) .modo-btn { color: var(--text); }
         /* Radio card selecionado + botão impulso — usa bloom do tema */
         :host-context([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card,
         :host-context([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card,
         :host-context([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card,
+        :host-context([data-theme="branco"]) .dia-opt input[type="checkbox"]:checked + .dia-card, :host([data-theme="branco"]) .dia-opt input[type="checkbox"]:checked + .dia-card,
+        :host-context([data-theme="rosa"])   .dia-opt input[type="checkbox"]:checked + .dia-card, :host([data-theme="rosa"])   .dia-opt input[type="checkbox"]:checked + .dia-card,
+        :host-context([data-theme="laranja"]) .dia-opt input[type="checkbox"]:checked + .dia-card, :host([data-theme="laranja"]) .dia-opt input[type="checkbox"]:checked + .dia-card,
+        :host-context([data-theme="branco"]) .modo-btn.active, :host([data-theme="branco"]) .modo-btn.active,
+        :host-context([data-theme="rosa"])   .modo-btn.active, :host([data-theme="rosa"])   .modo-btn.active,
+        :host-context([data-theme="laranja"]) .modo-btn.active, :host([data-theme="laranja"]) .modo-btn.active,
         :host-context([data-theme="branco"]) #btn-impulso, :host([data-theme="branco"]) #btn-impulso,
         :host-context([data-theme="rosa"])   #btn-impulso, :host([data-theme="rosa"])   #btn-impulso,
-        :host-context([data-theme="laranja"]) #btn-impulso , :host([data-theme="laranja"]) #btn-impulso {
+        :host-context([data-theme="laranja"]) #btn-impulso , :host([data-theme="laranja"]) #btn-impulso,
+        :host-context([data-theme="branco"]) #btn-agendamento, :host([data-theme="branco"]) #btn-agendamento,
+        :host-context([data-theme="rosa"])   #btn-agendamento, :host([data-theme="rosa"])   #btn-agendamento,
+        :host-context([data-theme="laranja"]) #btn-agendamento , :host([data-theme="laranja"]) #btn-agendamento {
           background: var(--bloom);
           border-color: transparent;
           color: #fff;
@@ -436,6 +634,11 @@ class DmaiorImpulso extends HTMLElement {
 
             <div id="imp-comunicados"></div>
 
+            <div class="modo-switch">
+              <button type="button" class="modo-btn active" id="btn-modo-manual" data-modo="manual">Manual</button>
+              <button type="button" class="modo-btn" id="btn-modo-automatico" data-modo="automatico">Automático</button>
+            </div>
+
             <div class="quota-box">
               <div class="quota-label">Usos esta semana</div>
               <div class="quota-dots" id="quota-dots">
@@ -456,31 +659,72 @@ class DmaiorImpulso extends HTMLElement {
               Não foi possível verificar sua cota. Recarregue a página.
             </div>
 
-            <div class="field-group">
-              <label class="field-label">${SVG_LINK} Link da Live</label>
-              <input type="url" id="inp-link" class="field-input" placeholder="https://www.kwai.com/..." autocomplete="off" spellcheck="false" disabled/>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
-              <div class="radio-group">
-                <label class="radio-opt radio-opt-30min">
-                  <input type="radio" name="tempo" value="30min" checked disabled/>
-                  <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
-                </label>
-                <label class="radio-opt radio-opt-1hora">
-                  <input type="radio" name="tempo" value="1hora" disabled/>
-                  <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
-                </label>
+            <div id="painel-manual">
+              <div class="field-group">
+                <label class="field-label">${SVG_LINK} Link da Live</label>
+                <input type="url" id="inp-link" class="field-input" placeholder="https://www.kwai.com/..." autocomplete="off" spellcheck="false" disabled/>
+                <div class="link-status" id="link-status"></div>
               </div>
+
+              <div class="field-group">
+                <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
+                <div class="radio-group">
+                  <label class="radio-opt radio-opt-30min">
+                    <input type="radio" name="tempo" value="30min" checked disabled/>
+                    <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
+                  </label>
+                  <label class="radio-opt radio-opt-1hora">
+                    <input type="radio" name="tempo" value="1hora" disabled/>
+                    <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
+                  </label>
+                </div>
+              </div>
+
+              <button id="btn-impulso" disabled>
+                <div class="spinner" id="spinner"></div>
+                <span id="btn-texto">Verificando...</span>
+              </button>
+
+              <div class="feedback" id="feedback"></div>
             </div>
 
-            <button id="btn-impulso" disabled>
-              <div class="spinner" id="spinner"></div>
-              <span id="btn-texto">Verificando...</span>
-            </button>
+            <div id="painel-automatico">
+              <div class="agenda-status" id="agenda-status">Carregando agendamento...</div>
 
-            <div class="feedback" id="feedback"></div>
+              <div class="field-group">
+                <label class="field-label">${SVG_GRID} Dias da Semana</label>
+                <div class="dias-grid">
+                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="0" disabled/><div class="dia-card">Dom</div></label>
+                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="1" disabled/><div class="dia-card">Seg</div></label>
+                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="2" disabled/><div class="dia-card">Ter</div></label>
+                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="3" disabled/><div class="dia-card">Qua</div></label>
+                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="4" disabled/><div class="dia-card">Qui</div></label>
+                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="5" disabled/><div class="dia-card">Sex</div></label>
+                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="6" disabled/><div class="dia-card">Sáb</div></label>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
+                <div class="radio-group">
+                  <label class="radio-opt radio-opt-30min">
+                    <input type="radio" name="tempo-auto" value="30min" checked disabled/>
+                    <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
+                  </label>
+                  <label class="radio-opt radio-opt-1hora">
+                    <input type="radio" name="tempo-auto" value="1hora" disabled/>
+                    <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
+                  </label>
+                </div>
+              </div>
+
+              <button id="btn-agendamento" disabled>
+                <div class="spinner" id="spinner-agendamento"></div>
+                <span id="btn-agendamento-texto">Carregando...</span>
+              </button>
+
+              <div class="feedback" id="feedback-agendamento"></div>
+            </div>
           </div>
         </div>
 
@@ -489,6 +733,52 @@ class DmaiorImpulso extends HTMLElement {
     window.DMaiorPrefs?.bind(this.shadowRoot);
 
     this.shadowRoot.getElementById('btn-impulso').addEventListener('click', () => this._enviar());
+    this.shadowRoot.getElementById('btn-agendamento').addEventListener('click', () => this._salvarAgendamento());
+    this.shadowRoot.getElementById('btn-modo-manual').addEventListener('click', () => this._onModoClick('manual'));
+    this.shadowRoot.getElementById('btn-modo-automatico').addEventListener('click', () => this._onModoClick('automatico'));
+  }
+
+  // Troca puramente visual — usada tanto no clique do usuário quanto para
+  // refletir o estado carregado do servidor, sem efeito colateral no backend.
+  _trocarModo(modo) {
+    const sr = this.shadowRoot;
+    sr.getElementById('btn-modo-manual').classList.toggle('active', modo === 'manual');
+    sr.getElementById('btn-modo-automatico').classList.toggle('active', modo === 'automatico');
+    sr.getElementById('painel-manual').style.display      = modo === 'manual'      ? 'block' : 'none';
+    sr.getElementById('painel-automatico').style.display  = modo === 'automatico'  ? 'block' : 'none';
+  }
+
+  // Clique do usuário na aba: troca a visual e, se estava com o automático
+  // ativo e o streamer voltou pro Manual, desativa de verdade no servidor
+  // (senão o motor automático continuaria disparando por trás da aba Manual).
+  _onModoClick(modo) {
+    this._modoTocado = true;
+    this._trocarModo(modo);
+    if (modo === 'manual' && this._agendamentoAtivo) {
+      this._desativarAutomatico();
+    }
+  }
+
+  async _desativarAutomatico(retry = false) {
+    const status = this.shadowRoot.getElementById('agenda-status');
+    try {
+      const res = await fetch(`${this._workerUrl}/api/agendamento`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this._token}` },
+        body: JSON.stringify({
+          uid: this._uid, ativo: false,
+          dias_semana: this._diasSalvos, tempo_escolhido: this._tempoSalvo,
+        }),
+      });
+      if (res.status === 401 && !retry) {
+        const renovado = await this._renovarToken();
+        if (renovado) return this._desativarAutomatico(true);
+      }
+      if (res.ok) {
+        this._agendamentoAtivo = false;
+        if (status) status.innerHTML = 'Impulso automático desativado. Marque os dias e ative novamente quando quiser.';
+      }
+    } catch (_) { /* se falhar, a aba Automático ainda mostra o estado real ao reabrir */ }
   }
 
   async _carregarQuota(retry = false) {
@@ -548,6 +838,8 @@ class DmaiorImpulso extends HTMLElement {
     sr.getElementById('btn-impulso').disabled = true;
     sr.getElementById('inp-link').disabled    = true;
     sr.querySelectorAll('input[name="tempo"]').forEach(r => r.disabled = true);
+    sr.getElementById('btn-agendamento').disabled = true;
+    sr.querySelectorAll('.chk-dia, input[name="tempo-auto"]').forEach(r => r.disabled = true);
   }
 
   async _enviar() {

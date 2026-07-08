@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <script>
@@ -7,7 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#060B16">
-  <link rel="manifest" href="painel.webmanifest?v=20260703-favicon-1">
+  <link rel="manifest" href="manifest.webmanifest?v=20260703-favicon-1">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=20260703-favicon-1">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=20260703-favicon-1">
   <link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon.png?v=20260703-favicon-1">
@@ -16,62 +16,31 @@
   <meta name="apple-mobile-web-app-title" content="DMaior">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="color-scheme" content="dark light">
-  <title>Painel do Streamer — DMaior Agency</title>
-  <!-- CSS global — define variáveis de tema usadas pelo menu-mobile e componentes -->
+  <title>Votação — DMaior Agency</title>
+  <meta name="description" content="Participe das votações abertas da DMaior Agency.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/global.css?v=20260701-ios-1">
   <link rel="stylesheet" href="css/components.css">
-  <style>
-    /* Base mínima — o próprio componente define todo o visual */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      background: var(--dm-bg, #0c0c0c);
-      min-height: 100%;
-      width: 100%;
-    }
-    dmaior-app {
-      display: block;
-      width: 100%;
-      min-height: 100vh;
-    }
-  </style>
 </head>
 <body>
-  <!-- Menu público do site (tema/login compartilhado) -->
   <menu-mobile-dmaior></menu-mobile-dmaior>
 
-  <!-- Componente painel completo — login + dashboard + carteira + perfil embutidos -->
-  <dmaior-app></dmaior-app>
+  <main class="dm-main">
+    <dmaior-votacao></dmaior-votacao>
+  </main>
 
-  <!-- api.js centraliza URLs dos workers -->
   <script charset=utf-8 src="js/preferences.js?v=20260701-ios-1"></script>
   <script charset=utf-8 src="js/utils/helpers.js"></script>
   <script charset=utf-8 src="js/api.js?v=20260701-ranking-meses-1"></script>
-  <!-- auth.js para sessão compartilhada com o menu -->
   <script charset=utf-8 src="js/auth.js"></script>
-  <!-- Componente impulso — carregado antes do painel para estar definido quando usado -->
-  <script charset=utf-8 src="js/components/dmaior-impulso.js?v=20260625-2"></script>
-  <!-- Componente votação — carregado antes do painel para estar definido quando usado -->
-  <script charset=utf-8 src="js/components/dmaior-votacao.js?v=20260707-1"></script>
-  <!-- Componente ranking inline — carregado antes do painel -->
-  <script charset=utf-8 src="js/components/ranking-dmaior-painel.js?v=20260701-ranking-meses-1"></script>
-  <!-- Componente painel original — todo visual e fluxo completo -->
-  <script charset=utf-8 src="js/components/dmaior-app.js?v=20260707-atalhos-1"></script>
-  <!-- Menu mobile (inicializa tema e área de login no topo) -->
   <script charset=utf-8 src="js/components/menu-mobile.js?v=20260707-atalhos-1"></script>
-  <!-- router.js NÃO é carregado aqui: o painel tem fluxo de login próprio -->
+  <script charset=utf-8 src="js/components/dmaior-votacao.js?v=20260707-1"></script>
+  <dmaior-footer></dmaior-footer>
+  <script charset=utf-8 src="js/components/footer.js?v=20260624-3"></script>
   <dmaior-cookie-consent></dmaior-cookie-consent>
   <script charset=utf-8 src="js/components/cookie-consent.js?v=20260624-3"></script>
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-

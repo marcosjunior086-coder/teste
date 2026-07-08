@@ -319,6 +319,27 @@ window.DmaiorAPI = {
     },
   },
 
+  // ── Módulo: Votação ────────────────────────────────────────────────────────
+
+  votacao: {
+    /** Valida o UID informado (público ou já logado no painel) antes de mostrar as votações. */
+    async verificarId(uid) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/votacao/verificar-id', { uid });
+    },
+    /** Lista votações disponíveis. modo: 'publico' (só publica=true) ou 'privado' (todas as ativas). */
+    async listar(uid, modo = 'publico') {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/votacao/listar?uid=${encodeURIComponent(uid)}&modo=${modo}`);
+    },
+    /** Detalhe de uma votação (pergunta + alternativas) e se o uid já votou. */
+    async detalhe(votacaoId, uid) {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/votacao/detalhe?id=${encodeURIComponent(votacaoId)}&uid=${encodeURIComponent(uid)}`);
+    },
+    /** Registra o voto. alternativaIds é sempre um array, mesmo pra seleção única. */
+    async votar({ votacao_id, uid, alternativa_ids }) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/votacao/votar', { votacao_id, uid, alternativa_ids });
+    },
+  },
+
   // ── Módulo: Widget de Live ────────────────────────────────────────────────
 
   live: {

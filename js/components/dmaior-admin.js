@@ -25,6 +25,9 @@ class DimaiorAdmin extends HTMLElement {
     this._taxaSaque = 0;
     this._taxaPerc  = 0;
     this._edtCom    = null;
+    this._edtVot    = null;
+    this._votAlternativas = [];
+    this._votChart  = null;
     this.DRIVE_FOTOS_URL = 'https://drive.google.com/drive/folders/1ckE8nNbnu-m53WfJJ32nA8zZ81sO38Ek?usp=drive_link';
     this._creditoRapidoUid = null;
     this._rankMeses = [];
@@ -105,6 +108,8 @@ class DimaiorAdmin extends HTMLElement {
       settings:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
       history:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>`,
       logout:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+      vote:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`,
+      home:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
       menu:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
       refresh:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
       plus:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
@@ -137,6 +142,7 @@ class DimaiorAdmin extends HTMLElement {
       bell:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
       user_plus:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
       arrow_right:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+      download:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
       eye:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
     };
     return icons[name]||icons.search;
@@ -203,7 +209,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
@@ -254,8 +260,9 @@ class DimaiorAdmin extends HTMLElement {
       {ico:'trophy',  val:m.streamers_mes||0,    lbl:'No Ranking',    cor:'indigo', fmt:'num'},
       ...(this._livesOpts.dashboardAoVivo!==false?[{ico:'live',val:m.ao_vivo,lbl:'Ao Vivo Agora',cor:'verm',fmt:'num',blink:true}]:[]),
       {ico:'bolt',    val:m.impulsionamentos,    lbl:'Boosts',        cor:'verde',  fmt:'num'},
-      {ico:'diamond', val:m.total_diamantes||0,  lbl:'Diamantes Mês', cor:'cyan',   fmt:'num'},
+      {ico:'diamond', val:m.total_diamantes||0,  lbl:'Diamantes Mês', cor:'cyan',   fmt:'num', prev:m.total_diamantes_mes_anterior},
       {ico:'diamond', val:diamantesDia,          lbl:'Diamantes do Dia', cor:'cyan', fmt:'num'},
+      {ico:'users',   val:m.streamers_ao_vivo_mes||0, lbl:'Streamer(s) ao Vivo', cor:'roxo', fmt:'num', prev:m.streamers_ao_vivo_mes_anterior},
       {ico:'metrics', val:m.registros_hoje||0,   lbl:'Registros Hoje',cor:'gold',   fmt:'num'},
       {ico:'server',  val:new Date(m.horario).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), lbl:'Horário Servidor', cor:'slate', fmt:'str'},
     ];
@@ -264,6 +271,7 @@ class DimaiorAdmin extends HTMLElement {
         <div class="dc2-ico ${c.blink?'dc2-blink':''}">${this._ico(c.ico,26)}</div>
         <div class="dc2-val">${c.fmt==='num'?this._numK(Number(c.val||0)):c.val}</div>
         <div class="dc2-lbl">${c.lbl}</div>
+        ${c.prev!==undefined?`<div class="dc2-prev">Mês anterior: ${this._numK(Number(c.prev||0))}</div>`:''}
       </div>`).join('');
 
     // Ações Rápidas — estilo lista colorida (referência imagem 1)
@@ -335,7 +343,8 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){if(el)el.innerHTML=this._empty('warning','Erro ao buscar lives');return;}
     if(badge)badge.textContent=d.total??0;if(!el)return;
     this._livesData=d;
-    if(!d.ao_vivo?.length){el.innerHTML=this._empty('live','Nenhum streamer ao vivo agora');return;}
+    // Sempre renderiza o header (ao vivo/hoje/ontem) mesmo com 0 streamers agora —
+    // só a lista de cards fica vazia (ver _renderLives).
     this._renderLives(d,el);
   }
 
@@ -383,7 +392,7 @@ class DimaiorAdmin extends HTMLElement {
       <button class="lv-cfg-opt-btn lv-cfg-dash ${!dashboardAoVivo?'on':''}" data-dash="off">${this._ico('x_circle',12)} Ocultar card</button>`;
 
     el.innerHTML=`
-      <!-- Header: cards dc2 compactos + botão cfg -->
+      <!-- Header: cards dc2 compactos (config foi para o topo, ao lado de Atualizar) -->
       <div class="lv-header">
         <div class="lv-dc2 lv-dc2-verm">
           <div class="lv-dc2-ico">${this._ico('live',20)}</div>
@@ -399,12 +408,13 @@ class DimaiorAdmin extends HTMLElement {
             <div class="lv-dc2-lbl">hoje</div>
           </div>
         </div>
-        <div style="flex:1"></div>
-        <button class="lv-cfg-btn" id="btnLvCfg">
-          ${this._ico('settings',14)}
-          <span>Configurações</span>
-          <span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span>
-        </button>
+        <div class="lv-dc2 lv-dc2-verde">
+          <div class="lv-dc2-ico">${this._ico('chart',20)}</div>
+          <div class="lv-dc2-body">
+            <div class="lv-dc2-val">${d.ontem_total||0}</div>
+            <div class="lv-dc2-lbl">ontem</div>
+          </div>
+        </div>
       </div>
 
       <!-- Painel de configurações (toggle) -->
@@ -441,18 +451,9 @@ class DimaiorAdmin extends HTMLElement {
       </div>
 
       <!-- Grid das lives -->
-      <div class="lives-lista" id="livesLista" style="grid-template-columns:repeat(${cols},1fr);gap:14px">
-        ${lista.map((sv,i)=>this._livesCard(sv,i,modo,estiloEfetivo)).join('')}
-      </div>`;
-
-    // ── Bind botão de configurações ──────────────────────────────────────────
-    s.getElementById('btnLvCfg')?.addEventListener('click',()=>{
-      const p=s.getElementById('lvCfgPainel');
-      const a=s.getElementById('lvCfgArrow');
-      const open=p.style.display==='none';
-      p.style.display=open?'':'none';
-      if(a) a.style.transform=open?'rotate(180deg)':'';
-    });
+      ${lista.length
+        ? `<div class="lives-lista" id="livesLista" style="grid-template-columns:repeat(${cols},1fr);gap:14px">${lista.map((sv,i)=>this._livesCard(sv,i,modo,estiloEfetivo)).join('')}</div>`
+        : this._empty('live','Nenhum streamer ao vivo agora')}`;
 
     // ── Bind colunas ─────────────────────────────────────────────────────────
     el.querySelectorAll('.lv-cfg-col').forEach(btn=>{
@@ -1257,11 +1258,12 @@ class DimaiorAdmin extends HTMLElement {
     const _bind=(id,ev,fn)=>{const el=s.getElementById(id);if(el)el.addEventListener(ev,fn);else console.warn('[admin] elemento não encontrado no _bindEvents:',id);};
     s.getElementById('btnL').addEventListener('click',()=>this._doLogin());s.getElementById('iP').addEventListener('keydown',e=>{if(e.key==='Enter')this._doLogin();});s.getElementById('iU').addEventListener('keydown',e=>{if(e.key==='Enter')s.getElementById('iP').focus();});
     s.getElementById('btnSair').addEventListener('click',()=>this._doLogout());
+    s.getElementById('btnVoltarSite').addEventListener('click',()=>{ try{ window.top.location.href='https://www.agencydmaior.com.br'; }catch{ window.location.href='https://www.agencydmaior.com.br'; } });
     s.getElementById('btnHam').addEventListener('click',e=>{e.stopPropagation();const side=s.getElementById('side');side?.classList.contains('open')?this._fecharMenuMobile():this._abrirMenuMobile();});
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
-    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());
+    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
@@ -1300,6 +1302,14 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mComCancel').addEventListener('click',()=>this._fechaModal('mCom'));
     // Preview ao colar/digitar URL de imagem
     s.getElementById('mComImagem').addEventListener('input',e=>this._atualizarPreviewImagem(e.target.value));
+    // Votações
+    s.getElementById('btnAtuVot').addEventListener('click',()=>this._carregarVotacoes());
+    s.getElementById('btnNovaVotacao').addEventListener('click',()=>this._abrirModalVotacao(null));
+    s.getElementById('mVotSave').addEventListener('click',()=>this._salvarVotacao());
+    s.getElementById('mVotCancel').addEventListener('click',()=>this._fechaModal('mVotacao'));
+    s.getElementById('mVotAddAlt').addEventListener('click',()=>this._adicionarAltVotacao());
+    s.getElementById('mVotBanner').addEventListener('input',e=>this._atualizarPreviewBannerVotacao(e.target.value));
+    s.getElementById('mVotResFechar').addEventListener('click',()=>this._fechaModal('mVotResultado'));
     // Monitor Kwai
     s.getElementById('btnAtuMonitor').addEventListener('click',()=>this._carregarMonitor());
     s.getElementById('btnVerificarCookie').addEventListener('click',()=>this._verificarCookieStatus());
@@ -1310,6 +1320,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSimularResgate').addEventListener('click',()=>this._executarResgate(true));
     s.getElementById('btnExecutarResgate').addEventListener('click',()=>this._confirmarDel('Executar correção e gravar dados no banco?',()=>this._executarResgate(false)));
     s.getElementById('btnLimparDatas').addEventListener('click',()=>{s.getElementById('monDataDe').value='';s.getElementById('monDataAte').value='';});
+    s.getElementById('btnBaixarDados').addEventListener('click',()=>this._baixarDadosMonitor());
     s.getElementById('btnVerBuffer').addEventListener('click',()=>this._verBufferMonitor());
     s.getElementById('btnTestarTelegram').addEventListener('click',()=>this._testarTelegram());
     // Agentes de Talentos
@@ -1557,6 +1568,234 @@ class DimaiorAdmin extends HTMLElement {
     else this._toast(r?.erro||'Erro','err');
   }
 
+  // ── VOTAÇÕES (Fase 1) ─────────────────────────────────────────────────────────
+
+  async _carregarVotacoes(){
+    const s=this.shadowRoot;const el=s.getElementById('tbVot');if(el)el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/votacoes');
+    if(!d?.ok){if(el)el.innerHTML=this._empty('warning','Erro ao carregar votações');return;}
+    this._renderVotacoes(d.votacoes||[]);
+  }
+
+  _renderVotacoes(lista){
+    const s=this.shadowRoot;const el=s.getElementById('tbVot');if(!el)return;
+    if(!lista.length){el.innerHTML=this._empty('vote','Nenhuma votação criada ainda');return;}
+    el.innerHTML=`<div class="com-lista">${lista.map(v=>{
+      const statusBadge=v.ativa?`<span class="com-status ativo">Ativa</span>`:`<span class="com-status inativo">Inativa</span>`;
+      const visBadge=v.publica
+        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">🌐 Pública</span>`
+        :`<span class="com-status" style="background:rgba(168,85,247,.1);color:#a855f7;border-color:rgba(168,85,247,.3)">🔒 Privada</span>`;
+      const tipoBadge=v.tipo==='foto'?`<span class="com-local">📷 Foto</span>`:`<span class="com-local">📝 Texto</span>`;
+      return`<div class="com-item is-fast">
+        <div class="com-preview"><div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1);margin-bottom:2px">${this._esc(v.titulo)}</strong></div></div>
+        <div class="com-meta">
+          <div class="com-meta-esq">${statusBadge}${visBadge}${tipoBadge}</div>
+          <div class="com-data">Encerra ${this._fdtCurto(v.data_fim)}</div>
+        </div>
+        <div class="com-acoes">
+          <button class="btn btn-o btn-sm" data-vot-edit="${v.id}">${this._ico('edit',12)} Editar</button>
+          <button class="btn btn-sm com-toggle ${v.ativa?'btn-o':'btn-g'}" data-vot-toggle="${v.id}" data-vot-ativa="${v.ativa}">${v.ativa?`${this._ico('x_circle',12)} Desativar`:`${this._ico('check',12)} Ativar`}</button>
+          <button class="btn btn-o btn-sm" data-vot-res="${v.id}">${this._ico('chart',12)} Resultado</button>
+          <button class="btn btn-sm" style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--verm)" data-vot-del="${v.id}">${this._ico('trash',12)} Excluir</button>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+
+    el.querySelectorAll('[data-vot-edit]').forEach(btn=>btn.addEventListener('click',()=>this._abrirModalVotacaoEditar(btn.dataset.votEdit)));
+    el.querySelectorAll('[data-vot-toggle]').forEach(btn=>btn.addEventListener('click',()=>{
+      const ativa=btn.dataset.votAtiva==='true';this._toggleVotacaoAtiva(btn.dataset.votToggle,!ativa);
+    }));
+    el.querySelectorAll('[data-vot-res]').forEach(btn=>btn.addEventListener('click',()=>this._abrirResultadoVotacao(btn.dataset.votRes)));
+    el.querySelectorAll('[data-vot-del]').forEach(btn=>btn.addEventListener('click',()=>{
+      this._confirmarDel('Excluir esta votação permanentemente? Todos os votos registrados serão perdidos.',()=>this._excluirVotacao(btn.dataset.votDel));
+    }));
+  }
+
+  _toDatetimeLocal(iso){
+    try{
+      const d=new Date(iso);
+      const pad=n=>String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }catch{return'';}
+  }
+
+  _abrirModalVotacao(v=null,pergunta=null,alternativas=null){
+    const s=this.shadowRoot;
+    s.getElementById('mVotTit').textContent = v?'Editar Votação':'Nova Votação';
+    s.getElementById('mVotTitulo').value = v?.titulo||'';
+    s.getElementById('mVotDescricao').value = v?.descricao||'';
+    s.getElementById('mVotPergunta').value = pergunta?.texto||'';
+    s.getElementById('mVotBanner').value = v?.banner_url||'';
+    s.getElementById('mVotTipo').value = v?.tipo||'foto';
+    s.getElementById('mVotPublica').value = v?(v.publica?'true':'false'):'false';
+    s.getElementById('mVotInicio').value = this._toDatetimeLocal(v?.data_inicio||new Date().toISOString());
+    s.getElementById('mVotFim').value = v?.data_fim?this._toDatetimeLocal(v.data_fim):'';
+    s.getElementById('mVotMaxSelecoes').value = pergunta?.max_selecoes||1;
+    this._atualizarPreviewBannerVotacao(v?.banner_url||'');
+    s.getElementById('mVotAviso').style.display='none';
+
+    this._votAlternativas=(alternativas||[]).map(a=>({titulo:a.titulo||'',descricao:a.descricao||'',imagem_url:a.imagem_url||''}));
+    while(this._votAlternativas.length<2) this._votAlternativas.push({titulo:'',descricao:'',imagem_url:''});
+    this._renderAltVotacao();
+
+    this._edtVot=v?.id||null;
+    this._abrirModal('mVotacao');
+  }
+
+  async _abrirModalVotacaoEditar(id){
+    const d=await this._api('GET',`/admin/votacoes/${id}`);
+    if(!d?.ok){this._toast(d?.erro||'Erro ao carregar votação','err');return;}
+    this._abrirModalVotacao(d.votacao,d.pergunta,d.alternativas);
+  }
+
+  _renderAltVotacao(){
+    const s=this.shadowRoot;const area=s.getElementById('mVotAltArea');if(!area)return;
+    area.innerHTML=this._votAlternativas.map((a,i)=>`
+      <div class="vot-alt-row" data-i="${i}">
+        <label><span>Título</span><input class="vot-alt-titulo" value="${this._esc(a.titulo)}" placeholder="Ex: Opção ${i+1}"></label>
+        <label><span>Descrição</span><input class="vot-alt-desc" value="${this._esc(a.descricao)}" placeholder="Opcional"></label>
+        <label><span>Imagem (URL)</span><input class="vot-alt-img" value="${this._esc(a.imagem_url)}" placeholder="Link do Drive (só p/ tipo foto)"></label>
+        <button class="btn btn-o btn-d vot-alt-del" type="button" data-i="${i}">${this._ico('trash',12)}</button>
+      </div>`).join('');
+    area.querySelectorAll('.vot-alt-del').forEach(btn=>btn.addEventListener('click',()=>{
+      this._coletarAltVotacao();
+      this._votAlternativas.splice(Number(btn.dataset.i),1);
+      if(this._votAlternativas.length<2) this._votAlternativas.push({titulo:'',descricao:'',imagem_url:''});
+      this._renderAltVotacao();
+    }));
+  }
+
+  _coletarAltVotacao(){
+    const s=this.shadowRoot;
+    this._votAlternativas=[...s.querySelectorAll('#mVotAltArea .vot-alt-row')].map(row=>({
+      titulo: row.querySelector('.vot-alt-titulo').value.trim(),
+      descricao: row.querySelector('.vot-alt-desc').value.trim(),
+      imagem_url: row.querySelector('.vot-alt-img').value.trim(),
+    }));
+  }
+
+  _adicionarAltVotacao(){
+    this._coletarAltVotacao();
+    this._votAlternativas.push({titulo:'',descricao:'',imagem_url:''});
+    this._renderAltVotacao();
+  }
+
+  _atualizarPreviewBannerVotacao(url){
+    const s=this.shadowRoot;
+    const wrap=s.getElementById('mVotBannerPreview');const img=s.getElementById('mVotBannerImg');
+    if(!wrap||!img)return;
+    const safe=this._normalizarImagemUrl(url);
+    if(safe){img.src=safe;img.onerror=()=>{wrap.style.display='none';};img.onload=()=>{wrap.style.display='block';};wrap.style.display='block';}
+    else{wrap.style.display='none';img.src='';}
+  }
+
+  async _salvarVotacao(){
+    const s=this.shadowRoot;
+    this._coletarAltVotacao();
+    const titulo=s.getElementById('mVotTitulo').value.trim();
+    const descricao=s.getElementById('mVotDescricao').value.trim();
+    const pergunta=s.getElementById('mVotPergunta').value.trim();
+    const banner_url=this._normalizarImagemUrl(s.getElementById('mVotBanner').value.trim())||s.getElementById('mVotBanner').value.trim();
+    const tipo=s.getElementById('mVotTipo').value;
+    const publica=s.getElementById('mVotPublica').value==='true';
+    const inicioVal=s.getElementById('mVotInicio').value;
+    const fimVal=s.getElementById('mVotFim').value;
+    const max_selecoes=Math.max(1,parseInt(s.getElementById('mVotMaxSelecoes').value)||1);
+    const alternativas=this._votAlternativas.filter(a=>a.titulo).map(a=>({
+      titulo:a.titulo,
+      descricao:a.descricao||null,
+      imagem_url:this._normalizarImagemUrl(a.imagem_url)||a.imagem_url||null,
+    }));
+
+    if(!titulo){this._toast('Título é obrigatório','err');return;}
+    if(!fimVal){this._toast('Data de encerramento é obrigatória','err');return;}
+    if(alternativas.length<2){this._toast('Informe pelo menos 2 alternativas com título','err');return;}
+
+    const payload={
+      titulo,descricao,pergunta,banner_url,tipo,publica,max_selecoes,alternativas,
+      data_inicio: inicioVal?new Date(inicioVal).toISOString():new Date().toISOString(),
+      data_fim: new Date(fimVal).toISOString(),
+    };
+
+    const btn=s.getElementById('mVotSave');btn.disabled=true;
+    const r=this._edtVot
+      ? await this._api('PUT',`/admin/votacoes/${this._edtVot}`,payload)
+      : await this._api('POST','/admin/votacoes',payload);
+    btn.disabled=false;
+
+    if(r?.ok){
+      if(r.aviso) this._toast(r.aviso,'err');
+      else this._toast(this._edtVot?'Votação atualizada!':'Votação criada!');
+      this._fechaModal('mVotacao');
+      this._carregarVotacoes();
+    }else{
+      this._toast(r?.erro||'Erro ao salvar','err');
+    }
+  }
+
+  async _excluirVotacao(id){
+    const r=await this._api('DELETE',`/admin/votacoes/${id}`);
+    if(r?.ok){this._toast('Votação excluída');this._carregarVotacoes();}
+    else this._toast(r?.erro||'Erro ao excluir','err');
+  }
+
+  async _toggleVotacaoAtiva(id,novaAtiva){
+    const r=await this._api('PATCH',`/admin/votacoes/${id}/ativa`,{ativa:novaAtiva});
+    if(r?.ok){this._toast(novaAtiva?'Votação ativada':'Votação desativada');this._carregarVotacoes();}
+    else this._toast(r?.erro||'Erro','err');
+  }
+
+  async _abrirResultadoVotacao(id){
+    const d=await this._api('GET',`/admin/votacoes/${id}/resultado`);
+    if(!d?.ok){this._toast(d?.erro||'Erro ao carregar resultado','err');return;}
+    await this._renderResultadoVotacao(d);
+    this._abrirModal('mVotResultado');
+  }
+
+  // Carrega Chart.js sob demanda — só quando o admin abre um resultado.
+  // Nenhuma outra página do admin usa gráfico de canvas hoje.
+  async _loadChartJS(){
+    if(typeof Chart!=='undefined') return;
+    await new Promise(resolve=>{
+      const script=document.createElement('script');
+      script.src='https://cdn.jsdelivr.net/npm/chart.js';
+      script.onload=resolve; script.onerror=resolve;
+      document.head.appendChild(script);
+    });
+  }
+
+  async _renderResultadoVotacao(d){
+    const s=this.shadowRoot;
+    s.getElementById('mVotResTit').textContent=`Resultado — ${d.votacao.titulo}`;
+    s.getElementById('mVotResCards').innerHTML=`
+      <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('users',22)}</div><div class="dc2-val">${d.total_participantes}</div><div class="dc2-lbl">Participantes</div></div>
+      <div class="dc2 dc2-verde"><div class="dc2-ico">${this._ico('vote',22)}</div><div class="dc2-val">${d.total_votos}</div><div class="dc2-lbl">Votos</div></div>
+    `;
+
+    s.getElementById('mVotResAlternativas').innerHTML = (d.alternativas||[]).map(a=>{
+      const pct = d.total_votos ? Math.round((a.votos_count/d.total_votos)*100) : 0;
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${this._esc(a.titulo)}</span><span style="color:var(--t3)">${a.votos_count} (${pct}%)</span></div>
+        <div class="prog"><div class="progf" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('') || '<p style="color:var(--t3);font-size:12px">Nenhum voto registrado ainda.</p>';
+
+    s.getElementById('mVotResParticipantes').innerHTML = (d.participantes||[]).length
+      ? `<div style="display:flex;flex-direction:column;gap:4px">${d.participantes.map(p=>`<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span>${this._esc(p.streamer_uid)}</span><span>${this._fdt(p.participou_em)}</span></div>`).join('')}</div>`
+      : '<p style="color:var(--t3);font-size:12px">Ninguém votou ainda.</p>';
+
+    await this._loadChartJS();
+    const canvas=s.getElementById('mVotResChart');
+    if(this._votChart){this._votChart.destroy();this._votChart=null;}
+    if(canvas && typeof Chart!=='undefined' && (d.alternativas||[]).length){
+      this._votChart=new Chart(canvas.getContext('2d'),{
+        type:'bar',
+        data:{labels:d.alternativas.map(a=>a.titulo),datasets:[{label:'Votos',data:d.alternativas.map(a=>a.votos_count),backgroundColor:'rgba(0,212,212,.55)',borderColor:'rgba(0,212,212,1)',borderWidth:1,borderRadius:6}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}},
+      });
+    }
+  }
+
   // ── MONITOR KWAI ────────────────────────────────────────────
   async _carregarMonitor(){
     this._verificarCookieStatus();
@@ -1591,9 +1830,29 @@ class DimaiorAdmin extends HTMLElement {
     const cor=vivo?'var(--verde)':'var(--verm)';
     const ico=vivo?this._ico('check_c',16):this._ico('x_circle',16);
     const txt=vivo?`Cookie ativo — ${d.total_itens??0} live(s) visível(is) no histórico`:'Cookie expirado ou inválido — precisa atualizar';
-    el.style.borderColor=vivo?'rgba(74,222,128,.3)':'rgba(248,113,113,.3)';
-    el.style.background=vivo?'rgba(74,222,128,.07)':'rgba(248,113,113,.07)';
-    el.innerHTML=`<span style="color:${cor};display:flex;align-items:center;gap:6px">${ico} <strong>${this._esc(d.status??'—')}</strong></span><span style="color:var(--t2)">${txt}</span>`;
+    el.style.cssText='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:10px;font-size:13px;background:'+(vivo?'rgba(74,222,128,.07)':'rgba(248,113,113,.07)')+';border:1px solid '+(vivo?'rgba(74,222,128,.3)':'rgba(248,113,113,.3)');
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="color:${cor};display:flex;align-items:center;gap:6px">${ico} <strong>${this._esc(d.status??'—')}</strong></span>
+        <span style="color:var(--t2)">${txt}</span>
+      </div>
+      ${this._renderTempoCookie(d.atualizado_em)}`;
+  }
+
+  // Faixas de saúde do cookie desde a última atualização manual:
+  //   < 18h  → saudável   |  18h–24h → moderado  |  ≥ 24h → risco (atualize)
+  _renderTempoCookie(iso){
+    if(!iso) return `<div style="font-size:11px;color:var(--t3)">Sem registro de quando o cookie foi atualizado pela última vez.</div>`;
+    const horas = (Date.now()-new Date(iso).getTime())/3600000;
+    if(isNaN(horas)) return '';
+    let nivel,cor,bg;
+    if(horas<18){nivel='Saudável';cor='var(--verde)';bg='rgba(74,222,128,.12)';}
+    else if(horas<24){nivel='Moderado';cor='var(--gold)';bg='rgba(240,192,64,.12)';}
+    else{nivel='Risco — atualize o cookie';cor='var(--verm)';bg='rgba(248,113,113,.12)';}
+    const h=Math.floor(Math.max(0,horas));
+    const m=Math.round((horas-h)*60);
+    const tempoTxt=h>0?`${h}h${m>0?` ${m}min`:''}`:`${m}min`;
+    return `<div style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 10px;border-radius:8px;background:${bg};color:${cor};width:fit-content;font-weight:700">${nivel} — atualizado há ${tempoTxt}</div>`;
   }
   async _atualizarCookie(){
     const s=this.shadowRoot;
@@ -1639,6 +1898,27 @@ class DimaiorAdmin extends HTMLElement {
     statusEl.style.display='none';
     resultEl.style.display='block';
     this._exibirResumoCorrecao(d,resultEl);
+  }
+
+  async _baixarDadosMonitor(){
+    const s=this.shadowRoot;
+    const de=s.getElementById('expDataDe').value;
+    const ate=s.getElementById('expDataAte').value||de;
+    const uid=s.getElementById('expUid').value.trim();
+    if(!de){this._toast('Escolha a data inicial','err');return;}
+    const btn=s.getElementById('btnBaixarDados');
+    btn.disabled=true;btn.textContent='Baixando...';
+    const qs=`inicio=${de}&fim=${ate}${uid?`&memberId=${encodeURIComponent(uid)}`:''}`;
+    const d=await this._api('GET',`/admin/monitor/exportar?${qs}`);
+    btn.disabled=false;btn.innerHTML=`${this._ico('download',13)} Baixar Dados`;
+    if(!d?.ok){this._toast(d?.erro||'Erro ao gerar o arquivo','err');return;}
+    const blob=new Blob([d.csv],{type:'text/csv;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=d.filename||'dmaior-dados.csv';
+    this.shadowRoot.appendChild(a);a.click();a.remove();
+    URL.revokeObjectURL(url);
+    this._toast(`Baixado! ${d.total} streamer(s).`);
   }
 
   async _acompanharJobCorrecao(jobId,totalDias,periodo,statusEl,resultEl){
@@ -1864,12 +2144,14 @@ class DimaiorAdmin extends HTMLElement {
     .dc2-blink{animation:bl 1.8s infinite}
     .dc2-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1.5rem,4vw,2.2rem);font-weight:700;line-height:1;margin-top:28px;margin-bottom:4px;color:#fff}
     .dc2-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;opacity:.75;font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
+    .dc2-prev{font-size:10.5px;opacity:.7;margin-top:6px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
     .dc2-indigo{background:linear-gradient(135deg,rgba(79,70,229,.78),rgba(168,85,247,.52));border-color:rgba(167,139,250,.82);}.dc2-indigo .dc2-ico,.dc2-indigo .dc2-val{color:#d8b4fe;text-shadow:0 0 18px rgba(168,85,247,.7)}
     .dc2-verm{background:linear-gradient(135deg,rgba(220,38,38,.78),rgba(249,115,22,.55));border-color:rgba(248,113,113,.82);}.dc2-verm .dc2-ico,.dc2-verm .dc2-val{color:#fecaca;text-shadow:0 0 18px rgba(248,113,113,.7)}
     .dc2-verde{background:linear-gradient(135deg,rgba(22,163,74,.78),rgba(5,150,105,.52));border-color:rgba(74,222,128,.82);}.dc2-verde .dc2-ico,.dc2-verde .dc2-val{color:#bbf7d0;text-shadow:0 0 18px rgba(34,197,94,.68)}
     .dc2-cyan{background:linear-gradient(135deg,rgba(37,99,235,.78),rgba(0,212,212,.55));border-color:rgba(34,211,238,.86);}.dc2-cyan .dc2-ico,.dc2-cyan .dc2-val{color:#a5f3fc;text-shadow:0 0 18px rgba(0,212,212,.72)}
     .dc2-gold{background:linear-gradient(135deg,rgba(217,119,6,.8),rgba(234,179,8,.56));border-color:rgba(251,191,36,.86);}.dc2-gold .dc2-ico,.dc2-gold .dc2-val{color:#fef3c7;text-shadow:0 0 18px rgba(245,158,11,.72)}
     .dc2-slate{background:linear-gradient(135deg,rgba(51,65,85,.82),rgba(14,165,233,.32));border-color:rgba(148,163,184,.72);}.dc2-slate .dc2-ico,.dc2-slate .dc2-val{color:#e2e8f0;text-shadow:0 0 16px rgba(148,163,184,.55)}
+    .dc2-roxo{background:linear-gradient(135deg,rgba(126,34,206,.78),rgba(219,39,119,.42));border-color:rgba(192,132,252,.82);}.dc2-roxo .dc2-ico,.dc2-roxo .dc2-val{color:#e9d5ff;text-shadow:0 0 18px rgba(192,132,252,.7)}
     /* ── Widget Ao Vivo no Dashboard ── */
     .dlw-empty{display:flex;align-items:center;gap:8px;padding:16px;color:var(--t3);font-size:12px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
     .dlw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -2062,6 +2344,12 @@ class DimaiorAdmin extends HTMLElement {
     .rank-mes-row label span{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
     .rank-mes-row input[type="text"],.rank-mes-row input[type="number"],.rank-mes-row input:not([type]){width:100%;min-width:0;padding:8px 10px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none}
     .rank-mes-row input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-d)}
+    .vot-alt-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;padding:10px;border:1px solid var(--brddim);border-radius:var(--rs);background:rgba(0,0,0,.18);margin-bottom:8px}
+    .vot-alt-row label{display:flex;flex-direction:column;gap:4px;min-width:0}
+    .vot-alt-row label span{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
+    .vot-alt-row input{width:100%;min-width:0;padding:8px 10px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none}
+    .vot-alt-row input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-d)}
+    @media(max-width:768px){.vot-alt-row{grid-template-columns:1fr}}
     .rank-mes-check{height:35px;justify-content:center;align-items:center;flex-direction:row!important;border:1px solid var(--brddim);border-radius:var(--rs);background:rgba(255,255,255,.02)}
     .rank-mes-check input{accent-color:var(--cyan)}
     .mproc-sucesso{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3);border-radius:var(--rs);color:var(--verde);font-size:13px;margin-bottom:10px}
@@ -2104,8 +2392,6 @@ class DimaiorAdmin extends HTMLElement {
     .lv-dc2-azul{background:linear-gradient(135deg,rgba(37,99,235,.78),rgba(0,212,212,.52));border-color:rgba(34,211,238,.86)}.lv-dc2-azul .lv-dc2-ico,.lv-dc2-azul .lv-dc2-val,.lv-dc2-azul .lv-dc2-lbl{color:#a5f3fc;text-shadow:0 0 16px rgba(0,212,212,.68)}
     .lv-dc2-verde{background:linear-gradient(135deg,rgba(22,163,74,.78),rgba(5,150,105,.5));border-color:rgba(74,222,128,.82)}.lv-dc2-verde .lv-dc2-ico,.lv-dc2-verde .lv-dc2-val,.lv-dc2-verde .lv-dc2-lbl{color:#bbf7d0;text-shadow:0 0 16px rgba(34,197,94,.65)}
     /* Botão de configurações */
-    .lv-cfg-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rs);border:1px solid var(--brddim);background:rgba(0,0,0,.4);color:var(--t3);font-size:12px;cursor:pointer;transition:all .15s;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;white-space:nowrap;flex-shrink:0}
-    .lv-cfg-btn:hover{border-color:var(--cyan);color:var(--cyan)}
     .lv-cfg-arrow{transition:transform .25s;display:flex;align-items:center}
     /* Painel de configurações */
     .lv-cfg-painel{background:rgba(0,0,0,.4);border:1px solid var(--brd);border-top:none;border-radius:0 0 var(--r) var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px;animation:fadeUp .2s ease}
@@ -2149,6 +2435,8 @@ class DimaiorAdmin extends HTMLElement {
       .top-chip{font-size:8px;padding:2px 7px;letter-spacing:1px;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       .btn-ham{display:flex;flex-shrink:0;}
       .btn-sair{font-size:10px;padding:4px 8px;flex-shrink:0;}
+      #btnVoltarSite{flex-shrink:0;padding:4px 8px;}
+      #btnVoltarSite .btn-voltar-txt{display:none;}
       .content{padding:10px;overflow-x:clip;max-width:100%;}.shell{min-height:auto;}
 
       /* ── Page Header ── */
@@ -2163,6 +2451,7 @@ class DimaiorAdmin extends HTMLElement {
       .dc2{padding:14px 10px 10px !important;}
       .dc2-val{font-size:clamp(1.2rem,5vw,1.8rem) !important;margin-top:22px !important;}
       .dc2-ico svg{width:20px !important;height:20px !important;}
+      .dc2-prev{font-size:9px !important;margin-top:4px !important;}
       .dc2-lbl{font-size:9px !important;}
       .qa-lista{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px;padding:10px;}
       .qa-card{grid-template-columns:minmax(0,1fr) auto;column-gap:7px;min-height:82px;padding:12px 9px 10px !important;border-radius:10px;}
@@ -2320,8 +2609,6 @@ class DimaiorAdmin extends HTMLElement {
       .lv-dc2{padding:10px 12px 8px;min-width:100px;}
       .lv-dc2-val{font-size:1.3rem !important;margin-top:16px !important;}
       .lv-dc2-lbl{font-size:8px !important;letter-spacing:1px !important;}
-      .lv-cfg-btn span:not(.lv-cfg-arrow){display:none;}
-      .lv-cfg-btn{padding:6px 10px;}
       .lv-cfg-painel{padding:10px 12px;gap:8px;}
       .lv-cfg-label{min-width:55px;font-size:9px;}
       .lv-cfg-opt-btn{font-size:10px;padding:4px 8px;}
@@ -2472,6 +2759,7 @@ class DimaiorAdmin extends HTMLElement {
       #gMetricas .dc2{min-height:74px;padding:11px 9px 8px !important;border-radius:9px;}
       #gMetricas .dc2-val{font-size:1.1rem !important;margin-top:18px !important;margin-bottom:3px;}
       #gMetricas .dc2-lbl{font-size:7px !important;letter-spacing:.8px !important;line-height:1.1;}
+      #gMetricas .dc2-prev{font-size:6.5px !important;margin-top:3px !important;line-height:1.2;}
       #gMetricas .dc2-ico{top:8px;right:8px;}
       #gMetricas .dc2-ico svg{width:16px !important;height:16px !important;}
       .cart-saldo-row,.sc-body-grid,.ph-acc-grid{grid-template-columns:1fr !important;}
@@ -2535,7 +2823,7 @@ class DimaiorAdmin extends HTMLElement {
     return`<div id="root">
       <div id="login"><div class="glass lbox"><h2>DMAIOR<br>ADMIN MASTER</h2><div style="text-align:center"><span class="lchip"><span class="ldot"></span>ACESSO RESTRITO</span></div><div class="campo"><label>Usuário</label><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="campo"><label>Senha</label><input id="iP" type="password" placeholder="••••••••" autocomplete="current-password"/></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
       <div id="app">
-        <div class="top"><button class="btn-ham" id="btnHam" aria-label="Abrir menu" aria-expanded="false">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
+        <div class="top"><button class="btn-ham" id="btnHam" aria-label="Abrir menu" aria-expanded="false">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="btn btn-o btn-sm" id="btnVoltarSite">${this._ico('home',13)} <span class="btn-voltar-txt">Voltar ao Site</span></button><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
         <div class="side-backdrop" id="sideBackdrop"></div>
         <div class="shell">
           <div class="side" id="side">
@@ -2562,13 +2850,14 @@ class DimaiorAdmin extends HTMLElement {
             <div class="ns">Sistema</div>
             ${ni('bolt','impulsoCtrl','Ctrl. Impulso')}
             ${ni('bell','comunicados','Comunicados')}
+            ${ni('vote','votacoes','Votações')}
             ${ni('server','monitor','Monitor Kwai')}
             ${ni('search','logs','Auditoria')}
             ${ni('settings','config','Configurações')}
           </div>
           <div class="content">
             <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash')}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
-            <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive')}<div id="gLives">${this._loading()}</div></div>
+            <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive',`<button class="btn btn-o" id="btnLvCfg">${this._ico('settings',13)} Configurações<span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span></button>`)}<div id="gLives">${this._loading()}</div></div>
             <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank')}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
             <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
@@ -2702,6 +2991,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
             <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
             <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-votacoes">${ph('Votações','vote','Enquetes públicas e privadas','btnAtuVot',`<button class="btn btn-g" id="btnNovaVotacao">${this._ico('plus',13)} Nova Votação</button>`)}<div class="box"><div id="tbVot">${this._loading()}</div></div></div>
             <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','Configurações e bloqueios','btnAtuImpulso')}
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Configurações Gerais</div></div>
@@ -2784,6 +3074,15 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                   <div id="monResgateStatus" style="display:none"></div>
                   <div id="monResgateResult" style="display:none;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);padding:12px;max-height:320px;overflow-y:auto;font-size:11px;font-family:monospace;color:var(--t2);word-break:break-word;white-space:pre-wrap;line-height:1.6"></div>
+                </div>
+              </div>
+              <div class="box mon-section">
+                <div class="bhead"><div class="btitulo">${this._ico('download',14)} Baixar Dados (Kwai oficial)</div></div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="font-size:11px;color:var(--t3)">Baixa um CSV com o total do período direto do member/list da Kwai — geral ou de um streamer específico.</div>
+                  <div class="mc"><label>Período</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="expDataDe" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/><span style="color:var(--t3);font-size:12px">até</span><input id="expDataAte" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div></div>
+                  <div class="mc"><label>UID do streamer <span style="color:var(--t3);font-size:11px">(opcional — vazio = todos)</span></label><input id="expUid" type="text" placeholder="Ex: 150001609526898" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div>
+                  <div><button class="btn btn-g" id="btnBaixarDados">${this._ico('download',13)} Baixar Dados</button></div>
                 </div>
               </div>
               <div class="box mon-section">
@@ -2913,6 +3212,40 @@ class DimaiorAdmin extends HTMLElement {
         <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> 🏠 Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
         <div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div>
       </div></div>
+      <div class="ov" id="mVotacao"><div class="modal" style="max-width:560px">
+        <div class="m-titulo" id="mVotTit">Nova Votação</div>
+        <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mVotTitulo" type="text" placeholder="Ex: Melhor streamer do mês" maxlength="120"/></div>
+        <div class="mc"><label>Descrição</label><textarea id="mVotDescricao" rows="2" placeholder="Contexto da votação (opcional)"></textarea></div>
+        <div class="mc"><label>Pergunta <span style="color:var(--t3);font-size:11px">(opcional — se vazio, usa o título)</span></label><input id="mVotPergunta" type="text" placeholder="Ex: Qual streamer você mais gostou?" maxlength="200"/></div>
+        <div class="mc"><label>Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto)</span></label><input id="mVotBanner" type="url" placeholder="https://drive.google.com/file/d/.../view"/><div id="mVotBannerPreview" style="margin-top:8px;display:none"><img id="mVotBannerImg" style="width:100%;max-width:260px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="mc" style="margin:0"><label>Tipo</label><select id="mVotTipo"><option value="foto">Foto</option><option value="texto">Texto</option></select></div>
+          <div class="mc" style="margin:0"><label>Visibilidade</label><select id="mVotPublica"><option value="false">Privada (painel do streamer)</option><option value="true">Pública (link no site)</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="mc" style="margin:0"><label>Início</label><input id="mVotInicio" type="datetime-local"/></div>
+          <div class="mc" style="margin:0"><label>Encerramento <span style="color:var(--verm)">*</span></label><input id="mVotFim" type="datetime-local"/></div>
+        </div>
+        <div class="mc"><label>Máximo de opções por participante</label><input id="mVotMaxSelecoes" type="number" min="1" value="1" style="max-width:100px"/></div>
+        <div class="mc">
+          <label>Alternativas <span style="color:var(--verm)">*</span> <span style="color:var(--t3);font-size:11px">(mínimo 2)</span></label>
+          <div id="mVotAltArea"></div>
+          <button class="btn btn-o btn-sm" type="button" id="mVotAddAlt" style="margin-top:6px">${this._ico('plus',12)} Adicionar Opção</button>
+        </div>
+        <div id="mVotAviso" style="display:none;font-size:12px;color:var(--gold);margin-top:8px;padding:8px;border-radius:8px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.25)"></div>
+        <div class="mf"><button class="btn btn-o" id="mVotCancel">Cancelar</button><button class="btn btn-g" id="mVotSave">${this._ico('check',13)} Salvar</button></div>
+      </div></div>
+
+      <div class="ov" id="mVotResultado"><div class="modal" style="max-width:600px">
+        <div class="m-titulo" id="mVotResTit">Resultado da Votação</div>
+        <div class="dc2-grid" id="mVotResCards" style="grid-template-columns:1fr 1fr;margin-bottom:16px"></div>
+        <div class="chwrap" style="height:220px;margin-bottom:16px"><canvas id="mVotResChart"></canvas></div>
+        <div id="mVotResAlternativas" style="margin-bottom:16px"></div>
+        <div class="m-titulo" style="font-size:14px;margin-top:6px">Participantes</div>
+        <div id="mVotResParticipantes" style="max-height:200px;overflow-y:auto;margin-top:8px"></div>
+        <div class="mf"><button class="btn btn-o" id="mVotResFechar">Fechar</button></div>
+      </div></div>
+
       <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div>
     </div>`;
   }
