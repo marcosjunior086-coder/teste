@@ -1314,10 +1314,13 @@
                 localStorage.setItem('agencia_auth','true');
                 window.dispatchEvent(new CustomEvent('dmaior:auth',{detail:{logado:true,foto:data.foto_url||'',nome:data.nome||'',uid,atalhoAdmin:!!data.atalho_admin,atalhoAgente:!!data.atalho_agente}}));
             } catch(e){}
-            await this.loadDash();
             this.qs('#lPass').value='';
             this.navigate('vD');
             this.navActive('nD');
+            // Não espera o dashboard terminar de carregar pra liberar o botão —
+            // a tela já navega e o conteúdo preenche em segundo plano (o próprio
+            // loadDash tem seu spinner no botão de atualizar).
+            this.loadDash();
             this.fetchComunicados();
         } catch(e){ this.showAlert('#alL',e.message); }
         finally{ btn.textContent='ENTRAR NO PAINEL'; btn.disabled=false; }
