@@ -285,13 +285,16 @@ class MenuMobileDMaior extends HTMLElement {
       .btn-access{ display:flex; align-items:center; justify-content:center; gap:8px; background:var(--dm-grad-effect,var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4))); color:#fff; border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); padding:12px 20px; border-radius:10px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1rem; text-transform:uppercase; cursor:pointer; text-decoration:none; width:100%; letter-spacing:.05em; transition:box-shadow .25s,opacity .2s; box-shadow:0 0 16px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .btn-access:active{ opacity:.85; }
       .btn-access:hover{ box-shadow:0 0 24px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
-      .user-card{ display:flex; align-items:center; gap:12px; }
+      .user-card{ display:flex; align-items:center; gap:12px; cursor:pointer; }
       .avatar-wrap{ width:46px; height:46px; border-radius:50%; border:2px solid var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); overflow:hidden; flex-shrink:0; background:var(--dm-bg-1); display:flex; align-items:center; justify-content:center; box-shadow:0 0 14px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
       .avatar-wrap img{ width:100%; height:100%; object-fit:cover; }
-      .user-info{ display:flex; flex-direction:column; gap:2px; }
+      .user-info{ display:flex; flex-direction:column; gap:2px; min-width:0; }
       .user-name{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1rem; color:var(--dm-text); text-transform:uppercase; letter-spacing:.05em; }
       .user-tag{ font-size:.7rem; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); font-family:var(--dm-font-title,'Rajdhani',sans-serif); }
-      .auth-actions{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+      .user-card-chev{ margin-left:auto; display:flex; flex-shrink:0; transition:transform .3s; color:var(--dm-text-sub); }
+      .user-card.open .user-card-chev{ transform:rotate(180deg); color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
+      .auth-wrap{ max-height:0; overflow:hidden; transition:max-height .3s ease; }
+      .auth-actions{ display:flex; flex-direction:column; gap:6px; margin-top:12px; padding-bottom:2px; }
       .auth-link{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; text-decoration:none; font-size:.9rem; font-weight:600; color:var(--dm-text-sub); transition:background .2s,color .2s; border:none; background:none; cursor:pointer; font-family:var(--dm-font-body,'Exo 2',sans-serif); width:100%; }
       .auth-link:hover{ background:var(--dm-cyan-08); color:var(--dm-text); }
       .auth-link.danger{ color:var(--dm-red, #f87171); }
@@ -414,18 +417,21 @@ class MenuMobileDMaior extends HTMLElement {
           ${SVG_ACCESS} ACESSAR PAINEL
         </a>
         <div class="hidden" id="userCard">
-          <div class="user-card">
+          <div class="user-card" id="userCardToggle">
             <div class="avatar-wrap" id="avatarWrap">${SVG_USER}</div>
             <div class="user-info">
               <span class="user-name" id="userName">Streamer</span>
               <span class="user-tag">DMaior Agency</span>
             </div>
+            <div class="user-card-chev">${SVG_CHEV}</div>
           </div>
-          <div class="auth-actions">
-            <a href="painel/index.html" class="auth-link">${SVG_PAINEL} Painel do Host</a>
-            <a href="admin/index.html" class="auth-link hidden" id="linkAdmin">${SVG_SHIELD} Painel Admin</a>
-            <a href="agente/index.html" class="auth-link hidden" id="linkAgente">${SVG_AGENTE} Painel Agente</a>
-            <button class="auth-link danger" id="btnLogout">${SVG_LOGOUT} Sair</button>
+          <div class="auth-wrap" id="authWrap">
+            <div class="auth-actions">
+              <a href="painel/index.html" class="auth-link">${SVG_PAINEL} Painel do Host</a>
+              <a href="admin/index.html" class="auth-link hidden" id="linkAdmin">${SVG_SHIELD} Painel Admin</a>
+              <a href="agente/index.html" class="auth-link hidden" id="linkAgente">${SVG_AGENTE} Painel Agente</a>
+              <button class="auth-link danger" id="btnLogout">${SVG_LOGOUT} Sair</button>
+            </div>
           </div>
         </div>
       </div>
@@ -449,6 +455,13 @@ class MenuMobileDMaior extends HTMLElement {
       userCard.classList.remove('hidden');
       if (linkAdmin)  linkAdmin.classList.toggle('hidden', !detail.atalhoAdmin);
       if (linkAgente) linkAgente.classList.toggle('hidden', !detail.atalhoAgente);
+      // Se a lista já estiver aberta e os links mudarem (ex: atalho ativado
+      // depois do login), recalcula a altura pra não cortar o conteúdo novo.
+      const userCardToggle = root.getElementById('userCardToggle');
+      const authWrap       = root.getElementById('authWrap');
+      if (userCardToggle?.classList.contains('open') && authWrap) {
+        authWrap.style.maxHeight = authWrap.scrollHeight + 'px';
+      }
       // Exibe o sino e verifica avisos não lidos (com retry até DmaiorAPI estar pronta)
       if (bellBtn) {
         bellBtn.classList.remove('hidden');
@@ -633,6 +646,18 @@ class MenuMobileDMaior extends HTMLElement {
         setTimeout(() => toggle(false), 200);
       });
     });
+
+    // Abre/fecha a lista de atalhos (Painel do Host/Admin/Agente/Sair) — fica
+    // recolhida por padrão pra não ocupar espaço, só expande ao clicar no nome.
+    const userCardToggle = root.getElementById('userCardToggle');
+    const authWrap        = root.getElementById('authWrap');
+    if (userCardToggle && authWrap) {
+      userCardToggle.addEventListener('click', () => {
+        const abrir = !userCardToggle.classList.contains('open');
+        userCardToggle.classList.toggle('open', abrir);
+        authWrap.style.maxHeight = abrir ? authWrap.scrollHeight + 'px' : '0px';
+      });
+    }
 
     // Logout
     const btnLogout = root.getElementById('btnLogout');
