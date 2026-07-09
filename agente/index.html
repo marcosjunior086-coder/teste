@@ -111,8 +111,15 @@
     .sidebar-bottom { padding: 16px 20px; border-top: 1px solid var(--border); }
     .agente-info { font-size: 13px; color: var(--sub); }
     .agente-info strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 2px; }
-    .btn-logout {
+    .btn-voltar-site {
       margin-top: 12px; width: 100%; padding: 9px;
+      background: rgba(0,212,212,.08); border: 1px solid rgba(0,212,212,.3);
+      border-radius: 8px; color: var(--cyan); font-size: 13px; cursor: pointer;
+      transition: all var(--ease);
+    }
+    .btn-voltar-site:hover { background: rgba(0,212,212,.16); }
+    .btn-logout {
+      margin-top: 8px; width: 100%; padding: 9px;
       background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3);
       border-radius: 8px; color: var(--red); font-size: 13px; cursor: pointer;
       transition: all var(--ease);
@@ -639,6 +646,7 @@
           <strong id="sidebar-nome">—</strong>
           <span id="sidebar-login"></span>
         </div>
+        <button class="btn-voltar-site" onclick="voltarAoSite()">Voltar ao Site</button>
         <button class="btn-logout" onclick="logout()">Sair</button>
       </div>
     </aside>
@@ -768,6 +776,15 @@ function logout() {
   document.getElementById('tela-login').style.display = 'flex';
   document.getElementById('inp-senha').value = '';
   document.getElementById('login-erro').textContent = '';
+}
+
+// Mantém a mesma origem/domínio de onde o agente acessou — trocar de
+// origem faria o navegador usar outro "armazenamento" de sessão, e ao
+// voltar pro painel pareceria deslogado sem realmente ter saído.
+function voltarAoSite() {
+  const base = location.pathname.startsWith('/teste/') ? '/teste/' : '/';
+  const url  = location.origin + base;
+  try { window.top.location.href = url; } catch (_) { location.href = url; }
 }
 
 // -- Fetch autenticado --------------------------------------
