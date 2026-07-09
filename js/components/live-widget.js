@@ -26,6 +26,10 @@ class KwaiLiveWidget extends HTMLElement {
     this.CACHE_TTL     = 50000;
     this.BATCH_SIZE    = 5;
     this.ENABLE_MINI_PREVIEW = true;
+    // Quantos mini-players (bolinha com HLS de verdade) tocam ao mesmo tempo —
+    // os demais ficam parados na foto até abrir espaço. Evita travar o
+    // celular quando tem muitos streamers ao vivo simultâneos.
+    this.MAX_MINI_PLAYERS = 3;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
@@ -682,6 +686,11 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   // ── Mini player (círculo de avatar) ─────────────────────────────────────
+  // Limita quantos mini-players decodificam vídeo de verdade ao mesmo tempo —
+  // com muitos streamers ao vivo, deixar todos os círculos visíveis tocarem
+  // HLS sem limite sobrecarrega o celular (cada um é uma decodificação real,
+  // só pra mostrar uma bolinha de ~52px). Os que não estão na vez ficam com
+  // a foto parada (poster) até abrir espaço na fila.
 
   stopMiniPlayer(url) {
     const entry = this.activePlayers.get(url);
@@ -690,6 +699,8 @@ class KwaiLiveWidget extends HTMLElement {
     try { entry.hlsInst?.destroy(); } catch (_) {}
     entry.hlsInst = null;
     entry.playing = false;
+    const idx = this._miniPlayerOrder?.indexOf(url);
+    if (idx > -1) this._miniPlayerOrder.splice(idx, 1);
     const circleEl = this.shadowRoot.getElementById(entry.circleId);
     if (circleEl) {
       const vid = circleEl.querySelector('video');
@@ -712,6 +723,13 @@ class KwaiLiveWidget extends HTMLElement {
     if (!circleEl) return;
     const vid = circleEl.querySelector('video');
     if (!vid)  return;
+
+    if (!this._miniPlayerOrder) this._miniPlayerOrder = [];
+    if (this._miniPlayerOrder.length >= this.MAX_MINI_PLAYERS) {
+      this.stopMiniPlayer(this._miniPlayerOrder[0]);
+    }
+    this._miniPlayerOrder.push(url);
+
     this._startHls(vid, entry.streamer.playUrl, false, entry, url);
   }
 
@@ -853,26 +871,6 @@ class KwaiLiveWidget extends HTMLElement {
     this.setMuteIcon(v.muted);
   }
 
-  waitForBuffer(video, sec, onReady) {
-    this.clearBufferTimer();
-    const bar  = this.shadowRoot.getElementById('bufferBar');
-    const fill = this.shadowRoot.getElementById('bufferFill');
-    bar.style.display = 'block';
-    const fb = setTimeout(() => {
-      this.clearBufferTimer(); bar.style.display = 'none'; onReady();
-    }, 15000);
-    this.bufferTimer = setInterval(() => {
-      if (!video.buffered.length) return;
-      const buffered = video.buffered.end(0) - (video.currentTime || 0);
-      fill.style.width = Math.min(100, (buffered / sec) * 100) + '%';
-      if (buffered >= sec) {
-        clearInterval(this.bufferTimer); clearTimeout(fb);
-        bar.style.display = 'none'; fill.style.width = '0%';
-        onReady();
-      }
-    }, 300);
-  }
-
   startModalWatchdog(video) {
     clearInterval(this.modalWatchdog);
     this.modalLastTime = -1;
@@ -921,9 +919,13 @@ class KwaiLiveWidget extends HTMLElement {
 
     const src = useProxy ? this._proxyBase + encodeURIComponent(url) : url;
 
+    // Toca assim que o manifesto carrega, sem esperar acumular buffer antes
+    // (o admin faz assim e abre liso — a espera de buffer aqui era o que
+    // deixava "carregando" por muito tempo e às vezes travava/ficava preto
+    // num fluxo ao vivo, que não tem buffer acumulado igual um vídeo gravado).
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src;
-      video.addEventListener('canplay', () => this.waitForBuffer(video, 4, onReady), { once: true });
+      video.addEventListener('canplay', () => onReady(), { once: true });
       video.addEventListener('error',   () => onFatal(), { once: true });
       video.load();
     } else if (window.Hls && window.Hls.isSupported()) {
@@ -947,7 +949,7 @@ class KwaiLiveWidget extends HTMLElement {
       this.hlsModal.attachMedia(video);
       this.hlsModal.on(window.Hls.Events.MANIFEST_PARSED, () => {
         video.currentTime = 0;
-        this.waitForBuffer(video, this.BUFFER_TARGET, onReady);
+        onReady();
       });
       this.hlsModal.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
