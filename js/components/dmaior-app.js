@@ -154,6 +154,8 @@
     svgFrame()   { return `<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v2.17A3 3 0 0 0 16.17 5H19zM5 5h2.83A3 3 0 0 0 5 7.83V5zm0 14v-2.83A3 3 0 0 0 7.83 19H5zm14 0h-2.83A3 3 0 0 0 19 16.17V19zM9 19a5 5 0 0 1 10-5V10a5 5 0 0 1-5-5h-4a5 5 0 0 1-5 5v4a5 5 0 0 1 4 5z"/></svg>`; }
     svgKey()     { return `<svg viewBox="0 0 24 24"><path d="M12.65 10A6 6 0 1 0 14 14.65L14 14h2v2h2v2h2v-2.18A6.002 6.002 0 0 0 12.65 10zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>`; }
     svgWallet()  { return `<svg viewBox="0 0 24 24"><path d="M21 7H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H3V9h18v10zm-9-1c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM1 5h20V3H1v2z"/></svg>`; }
+    svgShield()  { return `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.5 14.5L6 11l1.41-1.41L10.5 12.67l6.09-6.09L18 8l-7.5 7.5z"/></svg>`; }
+    svgAgente()  { return `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`; }
     svgSend()    { return `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`; }
 
     // ── Formatação BRL ───────────────────────────────────────────────
@@ -619,6 +621,8 @@
                     <button class="nit" id="nMolduras">${this.svgFrame()} <span data-i18n="frames">MOLDURAS</span></button>
                     <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
+                    <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
+                    <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
                     <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
                 </div>
             </nav>
@@ -1347,7 +1351,15 @@
             try {
                 if(nomeExibir) localStorage.setItem('dm_nome', nomeExibir);
                 if(fotoExibir) localStorage.setItem('dm_foto', fotoExibir);
+                localStorage.setItem('dm_atalho_admin',  p.atalho_admin  ? 'true' : 'false');
+                localStorage.setItem('dm_atalho_agente', p.atalho_agente ? 'true' : 'false');
+                window.dispatchEvent(new CustomEvent('dmaior:auth', { detail: {
+                    logado: true, foto: fotoExibir, nome: nomeExibir, uid: this.sessionUid,
+                    atalhoAdmin: !!p.atalho_admin, atalhoAgente: !!p.atalho_agente,
+                } }));
             } catch(e) {}
+            this.qs('#nAtalhoAdmin')?.classList.toggle('hidden', !p.atalho_admin);
+            this.qs('#nAtalhoAgente')?.classList.toggle('hidden', !p.atalho_agente);
             const usd=Number(t.dolar||0).toFixed(2);
             this.qs('#dUsd').textContent=`$ ${usd}`;
             this.qs('#dDiaLbl').textContent=`${Number(t.diamantes||0).toLocaleString('pt-BR')} diamantes`;
