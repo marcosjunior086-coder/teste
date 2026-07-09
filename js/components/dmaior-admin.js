@@ -1258,7 +1258,14 @@ class DimaiorAdmin extends HTMLElement {
     const _bind=(id,ev,fn)=>{const el=s.getElementById(id);if(el)el.addEventListener(ev,fn);else console.warn('[admin] elemento não encontrado no _bindEvents:',id);};
     s.getElementById('btnL').addEventListener('click',()=>this._doLogin());s.getElementById('iP').addEventListener('keydown',e=>{if(e.key==='Enter')this._doLogin();});s.getElementById('iU').addEventListener('keydown',e=>{if(e.key==='Enter')s.getElementById('iP').focus();});
     s.getElementById('btnSair').addEventListener('click',()=>this._doLogout());
-    s.getElementById('btnVoltarSite').addEventListener('click',()=>{ try{ window.top.location.href='https://www.agencydmaior.com.br'; }catch{ window.location.href='https://www.agencydmaior.com.br'; } });
+    s.getElementById('btnVoltarSite').addEventListener('click',()=>{
+      // Mantém a mesma origem (mesmo domínio/subdominio) de onde o admin foi
+      // acessado — trocar de origem faria o navegador usar outro "armazenamento"
+      // de sessão, e ao voltar pro admin pareceria deslogado sem realmente ter saído.
+      const base = window.location.pathname.startsWith('/teste/') ? '/teste/' : '/';
+      const url  = window.location.origin + base;
+      try{ window.top.location.href=url; }catch{ window.location.href=url; }
+    });
     s.getElementById('btnHam').addEventListener('click',e=>{e.stopPropagation();const side=s.getElementById('side');side?.classList.contains('open')?this._fecharMenuMobile():this._abrirMenuMobile();});
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
