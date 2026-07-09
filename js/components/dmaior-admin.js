@@ -2678,6 +2678,12 @@ class DimaiorAdmin extends HTMLElement {
       .rank-table-wrap{display:none !important}
       .rank-mobile-only{display:block !important}
     }
+    /* Fecha aqui o @media "Base" mais cedo de propósito: os blocos de
+       Agentes (locais e Kwai) abaixo tinham ficado presos dentro dele por
+       engano, o que fazia o "table-wrap"/"mobile-only" nunca alternar
+       certo no desktop (Viram os dois ao mesmo tempo, sem estilo). Cada
+       um já tem seu próprio @media interno pra alternar sozinho. */
+    }
     /* ── Agentes locais: tabela desktop / cards mobile ── */
     .ag-local-table-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
     .ag-local-table-wrap table{min-width:620px;width:100%}
@@ -2725,6 +2731,10 @@ class DimaiorAdmin extends HTMLElement {
     @media(max-width:380px){
       .ag-kwai-grid,.ag-local-grid{grid-template-columns:1fr}
     }
+    /* Reabre aqui o @media "Base" (ver comentário acima, antes de
+       "Agentes locais") — o que vem a seguir ainda faz parte daquela
+       seção original de estilos só-mobile. */
+    @media(max-width:700px){
     /* Cards accordion Ranking/Diário */
     .rk-item{border-bottom:1px solid var(--brddim)}.rk-item:last-child{border-bottom:none}
     .rk-preview{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
