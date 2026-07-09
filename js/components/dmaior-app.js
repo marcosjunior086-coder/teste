@@ -1727,6 +1727,12 @@
             const workerUrl = window.DmaiorConfig?.workers?.dashboard || 'https://dashboard.agencydmaior.com.br';
             el.setAttribute('worker-url', workerUrl);
 
+            // Reconfirma a sessão sempre que abrir essa aba — o componente já
+            // existe no DOM desde antes do login terminar, então pode ter
+            // ficado preso em "Sessão Expirada" da primeira checagem (feita
+            // sem token ainda). Isso corrige sozinho, sem precisar deslogar.
+            el.verificarSessao?.();
+
             // Nav interno do componente removido — painel pai já tem menu
         }
         this.navigate('vImpulso');

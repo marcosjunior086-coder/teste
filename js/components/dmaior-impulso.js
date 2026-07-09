@@ -54,29 +54,38 @@ class DmaiorImpulso extends HTMLElement {
 
   connectedCallback() {
     this._syncThemeHost();
-    this._uid          = localStorage.getItem('dm_uid')      || '';
-    this._token        = localStorage.getItem('dm_token')    || '';
-    this._refreshToken = localStorage.getItem('dm_refresh')  || '';
     // worker-url pode já estar setado ou chegar depois via attributeChangedCallback
     this._workerUrl    = (this.getAttribute('worker-url') || '').replace(/\/+$/, '');
 
     this._renderShell();
     this._shellPronto = true;
 
-    if (!this._uid || !this._token) {
-      this._mostrarSessaoExpirada();
-      return;
-    }
-
-    if (this._workerUrl) {
-      this._iniciarUmaVez();
-    }
-    // Se worker-url ainda não veio, aguarda attributeChangedCallback
+    this.verificarSessao();
 
     this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
     this._themeHandler = () => this._syncThemeHost();
     window.addEventListener('storage', this._storageThemeHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  // Relê o localStorage e tenta iniciar se ainda não tiver iniciado — chamado
+  // no connectedCallback E toda vez que o painel pai abre a aba Impulso.
+  // Necessário porque esse elemento já existe no DOM desde o carregamento da
+  // página (antes do login terminar), então na primeira checagem o token
+  // ainda não existe e ele mostra "Sessão Expirada" — sem isso, ficaria
+  // preso nesse estado pro resto da sessão mesmo após o login completar.
+  verificarSessao() {
+    this._uid          = localStorage.getItem('dm_uid')      || '';
+    this._token        = localStorage.getItem('dm_token')    || '';
+    this._refreshToken = localStorage.getItem('dm_refresh')  || '';
+
+    if (!this._uid || !this._token) {
+      if (!this._iniciado) this._mostrarSessaoExpirada();
+      return;
+    }
+    if (!this._iniciado && this._workerUrl) {
+      this._iniciarUmaVez();
+    }
   }
 
   disconnectedCallback() {
@@ -192,12 +201,8 @@ class DmaiorImpulso extends HTMLElement {
       if (!this._modoTocado) {
         // Usuário ainda não mexeu em nenhuma aba — decide sozinho com base no servidor.
         this._trocarModo(data.ativo ? 'automatico' : 'manual');
-      } else if (!sr.getElementById('btn-modo-automatico').classList.contains('active') && this._agendamentoAtivo) {
-        // Usuário já tinha clicado em "Manual" antes desta resposta chegar, e só agora
-        // descobrimos que o servidor estava com o automático ativo — desativa de verdade
-        // pra UI e servidor não ficarem incoerentes (aba mostrando Manual, mas cron ainda ativo).
-        this._desativarAutomatico();
       }
+      this._atualizarBotaoDesativar();
     } catch (_) {
       if (status) status.textContent = 'Não foi possível carregar o agendamento. Recarregue a página.';
     }
@@ -246,6 +251,7 @@ class DmaiorImpulso extends HTMLElement {
         feedback.textContent = 'Agendamento automático ativado com sucesso!';
         const status = sr.getElementById('agenda-status');
         if (status) status.innerHTML = 'Impulso automático <strong>ativado</strong> para os dias marcados abaixo.';
+        this._atualizarBotaoDesativar();
       } else {
         feedback.className   = 'feedback erro';
         feedback.textContent = data.erro || 'Erro ao salvar o agendamento. Tente novamente.';
@@ -482,6 +488,16 @@ class DmaiorImpulso extends HTMLElement {
         }
         #btn-impulso:hover:not(:disabled), #btn-agendamento:hover:not(:disabled) { box-shadow: 0 0 22px var(--rank-glow); transform: translateY(-2px); }
         #btn-impulso:disabled, #btn-agendamento:disabled { opacity:0.55; background:rgba(59,130,246,.08); border-color:rgba(0,212,212,0.28); color:rgba(0,212,212,0.55); cursor: not-allowed; box-shadow: none; transform: none; }
+
+        #btn-desativar-automatico {
+          width: 100%; margin-top: 10px; padding: 12px;
+          border-radius: 12px; background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.3);
+          color: var(--red); font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 0.88rem; font-weight: 700;
+          letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+          display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
+        }
+        #btn-desativar-automatico:hover:not(:disabled) { background: rgba(248,113,113,.16); box-shadow: 0 0 16px rgba(248,113,113,.2); }
+        #btn-desativar-automatico:disabled { opacity:0.5; cursor: not-allowed; }
 
         .feedback { margin-top:14px; padding:12px 14px; border-radius:9px; font-size:0.82rem; line-height:1.5; display:none; }
         .feedback.ok   { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.3); color:var(--green); display:block; }
@@ -723,6 +739,11 @@ class DmaiorImpulso extends HTMLElement {
                 <span id="btn-agendamento-texto">Carregando...</span>
               </button>
 
+              <button id="btn-desativar-automatico" style="display:none">
+                <div class="spinner" id="spinner-desativar"></div>
+                <span id="btn-desativar-texto">Desativar Automático</span>
+              </button>
+
               <div class="feedback" id="feedback-agendamento"></div>
             </div>
           </div>
@@ -734,8 +755,16 @@ class DmaiorImpulso extends HTMLElement {
 
     this.shadowRoot.getElementById('btn-impulso').addEventListener('click', () => this._enviar());
     this.shadowRoot.getElementById('btn-agendamento').addEventListener('click', () => this._salvarAgendamento());
+    this.shadowRoot.getElementById('btn-desativar-automatico').addEventListener('click', () => this._desativarAutomatico());
     this.shadowRoot.getElementById('btn-modo-manual').addEventListener('click', () => this._onModoClick('manual'));
     this.shadowRoot.getElementById('btn-modo-automatico').addEventListener('click', () => this._onModoClick('automatico'));
+  }
+
+  // Mostra o botão "Desativar Automático" só quando o agendamento está
+  // realmente ativo no servidor — some sozinho depois de desativar.
+  _atualizarBotaoDesativar() {
+    const btn = this.shadowRoot.getElementById('btn-desativar-automatico');
+    if (btn) btn.style.display = this._agendamentoAtivo ? 'flex' : 'none';
   }
 
   // Troca puramente visual — usada tanto no clique do usuário quanto para
@@ -748,19 +777,24 @@ class DmaiorImpulso extends HTMLElement {
     sr.getElementById('painel-automatico').style.display  = modo === 'automatico'  ? 'block' : 'none';
   }
 
-  // Clique do usuário na aba: troca a visual e, se estava com o automático
-  // ativo e o streamer voltou pro Manual, desativa de verdade no servidor
-  // (senão o motor automático continuaria disparando por trás da aba Manual).
+  // Clique do usuário na aba: só troca a visual. Desativar o automático é
+  // uma ação explícita agora (botão "Desativar Automático"), não mais um
+  // efeito colateral de só olhar a aba Manual — clicar pra ver não deveria
+  // desligar nada por trás sem avisar.
   _onModoClick(modo) {
     this._modoTocado = true;
     this._trocarModo(modo);
-    if (modo === 'manual' && this._agendamentoAtivo) {
-      this._desativarAutomatico();
-    }
   }
 
   async _desativarAutomatico(retry = false) {
-    const status = this.shadowRoot.getElementById('agenda-status');
+    const sr      = this.shadowRoot;
+    const status  = sr.getElementById('agenda-status');
+    const btn     = sr.getElementById('btn-desativar-automatico');
+    const spinner = sr.getElementById('spinner-desativar');
+    const btnTexto = sr.getElementById('btn-desativar-texto');
+    if (btn) btn.disabled = true;
+    if (spinner) spinner.style.display = 'block';
+    if (btnTexto) btnTexto.textContent = 'Desativando...';
     try {
       const res = await fetch(`${this._workerUrl}/api/agendamento`, {
         method: 'POST',
@@ -777,8 +811,14 @@ class DmaiorImpulso extends HTMLElement {
       if (res.ok) {
         this._agendamentoAtivo = false;
         if (status) status.innerHTML = 'Impulso automático desativado. Marque os dias e ative novamente quando quiser.';
+        this._atualizarBotaoDesativar();
       }
-    } catch (_) { /* se falhar, a aba Automático ainda mostra o estado real ao reabrir */ }
+    } catch (_) { /* se falhar, a aba Automático ainda mostra o estado real ao reabrir */
+    } finally {
+      if (btn) btn.disabled = false;
+      if (spinner) spinner.style.display = 'none';
+      if (btnTexto) btnTexto.textContent = 'Desativar Automático';
+    }
   }
 
   async _carregarQuota(retry = false) {
