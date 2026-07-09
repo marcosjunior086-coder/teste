@@ -29,7 +29,7 @@ class KwaiLiveWidget extends HTMLElement {
     // Quantos mini-players (bolinha com HLS de verdade) tocam ao mesmo tempo —
     // os demais ficam parados na foto até abrir espaço. Evita travar o
     // celular quando tem muitos streamers ao vivo simultâneos.
-    this.MAX_MINI_PLAYERS = 3;
+    this.MAX_MINI_PLAYERS = 5;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
