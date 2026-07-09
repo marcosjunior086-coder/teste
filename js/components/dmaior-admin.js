@@ -1821,6 +1821,17 @@ class DimaiorAdmin extends HTMLElement {
     this._marcarRevisaoAtiva('revisao_modo',mapa.revisao_modo==='manual'?'manual':'automatico');
     this._marcarRevisaoAtiva('revisao_diamantes',mapa.revisao_diamantes==='false'?'false':'true');
     this._marcarRevisaoAtiva('revisao_horas',mapa.revisao_horas==='false'?'false':'true');
+    this._popularSelectOrgs(mapa.sub_org_ids||'');
+  }
+  _popularSelectOrgs(subOrgIdsStr){
+    const sel=this.shadowRoot.getElementById('expOrg');
+    if(!sel)return;
+    const ids=subOrgIdsStr.split(',').map(v=>v.trim()).filter(Boolean);
+    sel.innerHTML=[
+      '<option value="">Todos</option>',
+      '<option value="principal">Principal</option>',
+      ...ids.map((id,i)=>`<option value="${this._esc(id)}">Sub ${i+1}</option>`),
+    ].join('');
   }
   async _salvarRevisaoConfig(grupo,valor){
     this._marcarRevisaoAtiva(grupo,valor);
@@ -1913,10 +1924,11 @@ class DimaiorAdmin extends HTMLElement {
     const de=s.getElementById('expDataDe').value;
     const ate=s.getElementById('expDataAte').value||de;
     const uid=s.getElementById('expUid').value.trim();
+    const org=s.getElementById('expOrg')?.value||'';
     if(!de){this._toast('Escolha a data inicial','err');return;}
     const btn=s.getElementById('btnBaixarDados');
     btn.disabled=true;btn.textContent='Baixando...';
-    const qs=`inicio=${de}&fim=${ate}${uid?`&memberId=${encodeURIComponent(uid)}`:''}`;
+    const qs=`inicio=${de}&fim=${ate}${uid?`&memberId=${encodeURIComponent(uid)}`:''}${org?`&org=${encodeURIComponent(org)}`:''}`;
     const d=await this._api('GET',`/admin/monitor/exportar?${qs}`);
     btn.disabled=false;btn.innerHTML=`${this._ico('download',13)} Baixar Dados`;
     if(!d?.ok){this._toast(d?.erro||'Erro ao gerar o arquivo','err');return;}
@@ -3092,6 +3104,7 @@ class DimaiorAdmin extends HTMLElement {
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div style="font-size:11px;color:var(--t3)">Baixa um CSV com o total do período direto do member/list da Kwai — geral ou de um streamer específico.</div>
                   <div class="mc"><label>Período</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="expDataDe" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/><span style="color:var(--t3);font-size:12px">até</span><input id="expDataAte" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div></div>
+                  <div class="mc"><label>Agência</label><select id="expOrg" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="">Todos</option></select></div>
                   <div class="mc"><label>UID do streamer <span style="color:var(--t3);font-size:11px">(opcional — vazio = todos)</span></label><input id="expUid" type="text" placeholder="Ex: 150001609526898" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div>
                   <div><button class="btn btn-g" id="btnBaixarDados">${this._ico('download',13)} Baixar Dados</button></div>
                 </div>
