@@ -1912,10 +1912,13 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/monitor/exportar?${qs}`);
     btn.disabled=false;btn.innerHTML=`${this._ico('download',13)} Baixar Dados`;
     if(!d?.ok){this._toast(d?.erro||'Erro ao gerar o arquivo','err');return;}
-    const blob=new Blob([d.csv],{type:'text/csv;charset=utf-8'});
+    const bin=atob(d.xlsxBase64);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
-    a.href=url;a.download=d.filename||'dmaior-dados.csv';
+    a.href=url;a.download=d.filename||'dmaior-dados.xlsx';
     this.shadowRoot.appendChild(a);a.click();a.remove();
     URL.revokeObjectURL(url);
     this._toast(`Baixado! ${d.total} streamer(s).`);
