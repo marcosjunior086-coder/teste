@@ -1327,7 +1327,9 @@ class DimaiorAdmin extends HTMLElement {
     });
     s.getElementById('btnSimularResgate').addEventListener('click',()=>this._executarResgate(true));
     s.getElementById('btnExecutarResgate').addEventListener('click',()=>this._confirmarDel('Executar correção e gravar dados no banco?',()=>this._executarResgate(false)));
-    s.getElementById('btnLimparDatas').addEventListener('click',()=>{s.getElementById('monDataDe').value='';s.getElementById('monDataAte').value='';});
+    s.getElementById('btnLimparDatas').addEventListener('click',()=>{s.getElementById('monDataDe').value='';s.getElementById('monDataAte').value='';s.getElementById('monPeriodoTexto').textContent='Selecionar período';});
+    s.getElementById('monPeriodoBtn').addEventListener('click',()=>this._abrirSeletorPeriodo('monPeriodoBtn','monDataDe','monDataAte','monPeriodoTexto'));
+    s.getElementById('expPeriodoBtn').addEventListener('click',()=>this._abrirSeletorPeriodo('expPeriodoBtn','expDataDe','expDataAte','expPeriodoTexto'));
     s.getElementById('btnBaixarDados').addEventListener('click',()=>this._baixarDadosMonitor());
     s.getElementById('btnVerBuffer').addEventListener('click',()=>this._verBufferMonitor());
     s.getElementById('btnTestarTelegram').addEventListener('click',()=>this._testarTelegram());
@@ -1822,6 +1824,95 @@ class DimaiorAdmin extends HTMLElement {
     this._marcarRevisaoAtiva('revisao_diamantes',mapa.revisao_diamantes==='false'?'false':'true');
     this._marcarRevisaoAtiva('revisao_horas',mapa.revisao_horas==='false'?'false':'true');
     this._popularSelectOrgs(mapa.sub_org_ids||'');
+  }
+  // ── Seletor de período (duplo calendário, estilo Kwai) ────────────────────
+  _gerarGradeMes(ano,mes,inicio,fim){
+    const nomesMes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const ultimoDia=new Date(ano,mes+1,0).getDate();
+    const offsetInicio=new Date(ano,mes,1).getDay();
+    const diasMesAnterior=new Date(ano,mes,0).getDate();
+    const hojeStr=new Date().toDateString();
+    const iso=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    let celulas='';
+    for(let i=offsetInicio-1;i>=0;i--) celulas+=`<button type="button" class="dm-cal-dia outro-mes" disabled>${diasMesAnterior-i}</button>`;
+    for(let dia=1;dia<=ultimoDia;dia++){
+      const d=new Date(ano,mes,dia);
+      let cls='dm-cal-dia';
+      if(d.toDateString()===hojeStr) cls+=' hoje';
+      if(inicio&&fim&&d>inicio&&d<fim) cls+=' no-range';
+      if((inicio&&d.toDateString()===inicio.toDateString())||(fim&&d.toDateString()===fim.toDateString())) cls+=' selecionado';
+      celulas+=`<button type="button" class="${cls}" data-dia="${iso(d)}">${dia}</button>`;
+    }
+    return`<div class="dm-cal-mes"><div class="dm-cal-mes-titulo">${nomesMes[mes]} ${ano}</div><div class="dm-cal-grid"><div class="dm-cal-dow">D</div><div class="dm-cal-dow">S</div><div class="dm-cal-dow">T</div><div class="dm-cal-dow">Q</div><div class="dm-cal-dow">Q</div><div class="dm-cal-dow">S</div><div class="dm-cal-dow">S</div>${celulas}</div></div>`;
+  }
+  _abrirSeletorPeriodo(triggerId,inputDeId,inputAteId,textoId){
+    const s=this.shadowRoot;
+    const trigger=s.getElementById(triggerId);
+    if(!trigger)return;
+    s.getElementById('dm-cal-overlay')?.remove();
+
+    const parseISO=(v)=>v?new Date(v+'T00:00:00'):null;
+    let inicio=parseISO(s.getElementById(inputDeId).value);
+    let fim   =parseISO(s.getElementById(inputAteId).value);
+    const hoje=new Date();
+    let mesBase=inicio?new Date(inicio.getFullYear(),inicio.getMonth(),1):new Date(hoje.getFullYear(),hoje.getMonth(),1);
+
+    const overlay=document.createElement('div');
+    overlay.className='dm-cal-overlay';overlay.id='dm-cal-overlay';
+    const popup=document.createElement('div');
+    popup.className='dm-cal-popup';
+    const fecharPopup=()=>overlay.remove();
+
+    const render=()=>{
+      const mesB=new Date(mesBase.getFullYear(),mesBase.getMonth()+1,1);
+      const fmtBr=(d)=>d?d.toLocaleDateString('pt-BR'):'—';
+      popup.innerHTML=`
+        <div class="dm-cal-header">
+          <button type="button" class="dm-cal-nav" id="dm-cal-prev">‹</button>
+          <div class="dm-cal-meses">${this._gerarGradeMes(mesBase.getFullYear(),mesBase.getMonth(),inicio,fim)}${this._gerarGradeMes(mesB.getFullYear(),mesB.getMonth(),inicio,fim)}</div>
+          <button type="button" class="dm-cal-nav" id="dm-cal-next">›</button>
+        </div>
+        <div class="dm-cal-footer">
+          <span class="dm-cal-resumo">${fmtBr(inicio)} — ${fmtBr(fim)}</span>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-o btn-sm" id="dm-cal-cancelar">Cancelar</button>
+            <button type="button" class="btn btn-sm" id="dm-cal-confirmar" ${inicio&&fim?'':'disabled'}>Confirmar</button>
+          </div>
+        </div>`;
+      popup.querySelector('#dm-cal-prev').addEventListener('click',()=>{mesBase=new Date(mesBase.getFullYear(),mesBase.getMonth()-1,1);render();});
+      popup.querySelector('#dm-cal-next').addEventListener('click',()=>{mesBase=new Date(mesBase.getFullYear(),mesBase.getMonth()+1,1);render();});
+      popup.querySelector('#dm-cal-cancelar').addEventListener('click',fecharPopup);
+      popup.querySelector('#dm-cal-confirmar')?.addEventListener('click',()=>{
+        const iso=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        s.getElementById(inputDeId).value=iso(inicio);
+        s.getElementById(inputAteId).value=iso(fim);
+        const textoEl=s.getElementById(textoId);
+        if(textoEl) textoEl.textContent=`${inicio.toLocaleDateString('pt-BR')} até ${fim.toLocaleDateString('pt-BR')}`;
+        fecharPopup();
+      });
+      popup.querySelectorAll('.dm-cal-dia[data-dia]').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const d=new Date(btn.dataset.dia+'T00:00:00');
+          if(!inicio||(inicio&&fim)){ inicio=d; fim=null; }
+          else if(d<inicio){ fim=inicio; inicio=d; }
+          else { fim=d; }
+          render();
+        });
+      });
+    };
+    render();
+
+    overlay.appendChild(popup);
+    s.getElementById('root').appendChild(overlay);
+
+    const r=trigger.getBoundingClientRect();
+    const largura=560;
+    let left=Math.min(r.left,window.innerWidth-largura-12);
+    left=Math.max(12,left);
+    popup.style.left=left+'px';
+    popup.style.top =(r.bottom+6)+'px';
+
+    overlay.addEventListener('click',(e)=>{ if(e.target===overlay) fecharPopup(); });
   }
   _popularSelectOrgs(subOrgIdsStr){
     const sel=this.shadowRoot.getElementById('expOrg');
@@ -2338,6 +2429,30 @@ class DimaiorAdmin extends HTMLElement {
     .m-titulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;font-weight:700;color:var(--t1);margin-bottom:16px;letter-spacing:1px;text-transform:uppercase}
     .mc{margin-bottom:12px}.mc label{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:4px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)}.mc input,.mc select,.mc textarea{width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:13px;font-family:var(--dm-font-body,'Exo 2',sans-serif);outline:none;transition:border-color .2s;resize:none}.mc input:focus,.mc select:focus,.mc textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-d)}.mc select option{background:#0b0b1a}
     .mf{display:flex;gap:7px;justify-content:flex-end;margin-top:16px}
+    /* ── Seletor de período (duplo calendário, estilo Kwai) ── */
+    .periodo-campo{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;cursor:pointer;transition:border-color .2s}
+    .periodo-campo:hover{border-color:var(--cyan)}
+    .periodo-campo svg{flex-shrink:0;color:var(--t3)}
+    .dm-cal-overlay{position:fixed;inset:0;z-index:2000;background:transparent}
+    .dm-cal-popup{position:fixed;z-index:2001;background:#0b0b1a;border:1px solid var(--brd);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.55);padding:14px;width:min(560px,94vw)}
+    .dm-cal-header{display:flex;align-items:flex-start;gap:6px}
+    .dm-cal-nav{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1px solid var(--brddim);background:rgba(255,255,255,.03);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px;font-size:13px}
+    .dm-cal-nav:hover{border-color:var(--cyan);color:var(--cyan)}
+    .dm-cal-meses{flex:1;display:flex;gap:16px;min-width:0}
+    .dm-cal-mes{flex:1;min-width:0}
+    .dm-cal-mes-titulo{text-align:center;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;color:var(--t1);letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase}
+    .dm-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+    .dm-cal-dow{text-align:center;font-size:10px;color:var(--t3);font-weight:700;padding:2px 0}
+    .dm-cal-dia{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--t2);border:none;background:none;cursor:pointer;border-radius:6px;transition:background .15s}
+    .dm-cal-dia:hover:not(:disabled){background:var(--cyan-d)}
+    .dm-cal-dia:disabled{color:var(--t3);opacity:.35;cursor:default}
+    .dm-cal-dia.outro-mes{opacity:.3}
+    .dm-cal-dia.hoje{box-shadow:inset 0 0 0 1px var(--cyan)}
+    .dm-cal-dia.no-range{background:var(--cyan-d);border-radius:0}
+    .dm-cal-dia.selecionado{background:var(--cyan);color:#04141a;font-weight:700}
+    .dm-cal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--brddim)}
+    .dm-cal-resumo{font-size:11px;color:var(--t3)}
+    @media(max-width:520px){.dm-cal-meses{flex-direction:column;gap:10px}.dm-cal-popup{width:94vw}}
     .toast{position:absolute;bottom:18px;right:18px;background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--t1);box-shadow:0 0 20px var(--cyan-d);display:flex;align-items:center;gap:8px;transform:translateY(70px);opacity:0;transition:all .3s;z-index:999;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.toast.on{transform:translateY(0);opacity:1}.toast.ok{border-color:rgba(74,222,128,.5)}.toast.err{border-color:rgba(248,113,113,.5)}
     .empty{text-align:center;padding:40px;color:var(--t3);display:flex;flex-direction:column;align-items:center;gap:10px}.empty p{font-size:12px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:1px}
     .loading{display:flex;flex-direction:column;align-items:center;gap:9px;padding:36px;color:var(--t3)}.sp{width:40px;height:40px;border-radius:50%;border:3px solid var(--cyan-d);border-top-color:var(--cyan);animation:spin .8s linear infinite;margin:0 auto 5px}
@@ -3099,7 +3214,11 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead"><div class="btitulo">${this._ico('history',14)} Resgate / Correção de Dados</div></div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div style="background:rgba(248,193,0,.06);border:1px solid rgba(248,193,0,.25);border-radius:var(--rs);padding:10px 14px;font-size:11px;color:#fcd34d;display:flex;align-items:flex-start;gap:6px;line-height:1.6">${this._ico('warning',13)}<span><strong>Simular</strong> mostra o que seria alterado sem gravar nada. <strong>Executar</strong> grava os dados corrigidos no banco — confirme antes.</span></div>
-                  <div class="mc"><label>Período específico (opcional)</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="monDataDe" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/><span style="color:var(--t3);font-size:12px">até</span><input id="monDataAte" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/><button class="btn btn-sm" id="btnLimparDatas" type="button">Limpar</button></div></div>
+                  <div class="mc"><label>Período específico (opcional)</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <button type="button" class="periodo-campo" id="monPeriodoBtn">${this._ico('calendar',13)} <span id="monPeriodoTexto">Selecionar período</span></button>
+                    <input id="monDataDe" type="hidden"/><input id="monDataAte" type="hidden"/>
+                    <button class="btn btn-sm" id="btnLimparDatas" type="button">Limpar</button>
+                  </div></div>
                   <div class="mc"><label>Ou janela de dias a reprocessar (usada se nenhum período acima for escolhido)</label><div style="display:flex;gap:8px;align-items:center"><input id="monDias" type="number" min="1" max="90" value="7" style="width:80px;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/><span style="color:var(--t3);font-size:12px">dias atrás</span></div></div>
                   <div style="display:flex;gap:10px;flex-wrap:wrap">
                     <button class="btn btn-o" id="btnSimularResgate">${this._ico('search',13)} Simular (sem gravar)</button>
@@ -3113,7 +3232,10 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead"><div class="btitulo">${this._ico('download',14)} Baixar Dados (Kwai oficial)</div></div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div style="font-size:11px;color:var(--t3)">Baixa um CSV com o total do período direto do member/list da Kwai — geral ou de um streamer específico.</div>
-                  <div class="mc"><label>Período</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="expDataDe" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/><span style="color:var(--t3);font-size:12px">até</span><input id="expDataAte" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div></div>
+                  <div class="mc"><label>Período</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <button type="button" class="periodo-campo" id="expPeriodoBtn">${this._ico('calendar',13)} <span id="expPeriodoTexto">Selecionar período</span></button>
+                    <input id="expDataDe" type="hidden"/><input id="expDataAte" type="hidden"/>
+                  </div></div>
                   <div class="mc"><label>Agência</label><select id="expOrg" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="">Todos</option></select></div>
                   <div class="mc"><label>UID do streamer <span style="color:var(--t3);font-size:11px">(opcional — vazio = todos)</span></label><input id="expUid" type="text" placeholder="Ex: 150001609526898" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div>
                   <div><button class="btn btn-g" id="btnBaixarDados">${this._ico('download',13)} Baixar Dados</button></div>
