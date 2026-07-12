@@ -49,9 +49,9 @@
   <script charset=utf-8 src="js/api.js"></script>
   <script charset=utf-8 src="js/auth.js"></script>
   <script charset=utf-8 src="js/router.js"></script>
-  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260709-toggle-1"></script>
+  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260711-layout-nomes-1"></script>
   <script charset=utf-8 src="js/components/live-widget.js?v=20260709-perf-fix-2"></script>
-  <script charset=utf-8 src="js/components/services-menu.js?v=20260701-ios-1"></script>
+  <script charset=utf-8 src="js/components/services-menu.js?v=20260711-layout-nomes-1"></script>
   <script charset=utf-8 src="js/components/beneficios.js?v=20260624-3"></script>
 
   <script>
@@ -65,12 +65,12 @@
 
     // Aplica o tema salvo imediatamente ao carregar a página
     try {
-      aplicarLayout(localStorage.getItem('dm_layout') || 'original');
+      aplicarLayout(localStorage.getItem('dm_layout') || 'dinamico');
     } catch (e) { /* localStorage bloqueado — mantém padrão */ }
 
     // Reage em tempo real quando o usuário troca o tema via engrenagem
     window.addEventListener('dmaior:layout', function(e) {
-      try { aplicarLayout(e.detail && e.detail.layout ? e.detail.layout : 'original'); }
+      try { aplicarLayout(e.detail && e.detail.layout ? e.detail.layout : 'dinamico'); }
       catch (e) {}
     });
   </script>

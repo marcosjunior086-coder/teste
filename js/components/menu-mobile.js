@@ -335,11 +335,11 @@ class MenuMobileDMaior extends HTMLElement {
           <div class="layout-dropdown" id="layoutDropdown">
             <div class="dd-label">Layout</div>
             <div class="dd-divider"></div>
-            <button class="dd-option" id="ddOriginal" data-layout="original">
-              <span class="dd-dot" style="background:#00d4d4;"></span><span class="dd-copy"><span class="dd-marquee">Padrão</span></span><span class="dd-arrow">&rsaquo;</span>
-            </button>
             <button class="dd-option" id="ddDinamico" data-layout="dinamico">
-              <span class="dd-dot" style="background:#f0c040;"></span><span class="dd-copy"><span class="dd-marquee">Dinâmico Pro</span></span><span class="dd-arrow">&rsaquo;</span>
+              <span class="dd-dot" style="background:#f0c040;"></span><span class="dd-copy"><span class="dd-marquee">Padrão</span></span><span class="dd-arrow">&rsaquo;</span>
+            </button>
+            <button class="dd-option" id="ddOriginal" data-layout="original">
+              <span class="dd-dot" style="background:#00d4d4;"></span><span class="dd-copy"><span class="dd-marquee">Antigo</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
             <div class="dd-divider"></div>
             <div class="dd-label">Cor</div>
@@ -517,8 +517,8 @@ class MenuMobileDMaior extends HTMLElement {
 
     // Lê layout salvo e marca opção ativa
     const updateGearActive = () => {
-      let saved = 'original';
-      try { saved = localStorage.getItem('dm_layout') || 'original'; } catch (_) {}
+      let saved = 'dinamico';
+      try { saved = localStorage.getItem('dm_layout') || 'dinamico'; } catch (_) {}
       ddOriginal.classList.toggle('active', saved === 'original');
       ddDinamico.classList.toggle('active', saved === 'dinamico');
     };

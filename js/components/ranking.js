@@ -1042,7 +1042,7 @@ class RankingDmaior extends HTMLElement {
   }
 
   _isDinamico() {
-    try { return localStorage.getItem('dm_layout') === 'dinamico'; } catch { return false; }
+    try { return (localStorage.getItem('dm_layout') || 'dinamico') === 'dinamico'; } catch { return true; }
   }
 
   _applyLayout() {

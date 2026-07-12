@@ -1864,12 +1864,16 @@ class DimaiorAdmin extends HTMLElement {
     const fecharPopup=()=>overlay.remove();
 
     const render=()=>{
+      const ehMobile=window.matchMedia('(max-width:520px)').matches;
       const mesB=new Date(mesBase.getFullYear(),mesBase.getMonth()+1,1);
       const fmtBr=(d)=>d?d.toLocaleDateString('pt-BR'):'—';
+      const gradeMeses=ehMobile
+        ?this._gerarGradeMes(mesBase.getFullYear(),mesBase.getMonth(),inicio,fim)
+        :`${this._gerarGradeMes(mesBase.getFullYear(),mesBase.getMonth(),inicio,fim)}${this._gerarGradeMes(mesB.getFullYear(),mesB.getMonth(),inicio,fim)}`;
       popup.innerHTML=`
         <div class="dm-cal-header">
           <button type="button" class="dm-cal-nav" id="dm-cal-prev">‹</button>
-          <div class="dm-cal-meses">${this._gerarGradeMes(mesBase.getFullYear(),mesBase.getMonth(),inicio,fim)}${this._gerarGradeMes(mesB.getFullYear(),mesB.getMonth(),inicio,fim)}</div>
+          <div class="dm-cal-meses">${gradeMeses}</div>
           <button type="button" class="dm-cal-nav" id="dm-cal-next">›</button>
         </div>
         <div class="dm-cal-footer">

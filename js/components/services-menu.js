@@ -18,9 +18,9 @@ class DmaiorServicesMenu extends HTMLElement {
     super();
   }
 
-  // Lê layout salvo no localStorage (padrão: 'original')
+  // Lê layout salvo no localStorage (padrão: 'dinamico')
   getLayout() {
-    try { return localStorage.getItem('dm_layout') || 'original'; } catch (_) { return 'original'; }
+    try { return localStorage.getItem('dm_layout') || 'dinamico'; } catch (_) { return 'dinamico'; }
   }
 
   connectedCallback() {
