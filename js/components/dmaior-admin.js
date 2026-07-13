@@ -2803,19 +2803,6 @@ class DimaiorAdmin extends HTMLElement {
       /* Botão único ocupa tudo */
       .saque-acoes .btn:only-child{flex:1 1 100%;max-width:100%;}
 
-      /* ── Migrações de Streamer (Agente) ── */
-      .migra-card{padding:12px 14px;border-bottom:1px solid var(--brd);}
-      .migra-card:last-child{border-bottom:none;}
-      .migra-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:nowrap;}
-      .migra-nome{font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-      .migra-uid{font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px;margin-top:2px;}
-      .btn-copy-uid{background:transparent;border:none;color:var(--cyan);cursor:pointer;padding:2px;display:inline-flex;}
-      .migra-badge-circ{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(0,212,212,.12);color:var(--cyan);white-space:nowrap;}
-      .migra-meta{display:flex;flex-direction:column;gap:4px;margin-top:8px;}
-      .migra-meta span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2);}
-      .migra-obs{margin-top:8px;font-size:11px;color:var(--t2);background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:8px;padding:8px 10px;line-height:1.5;}
-      .migra-evid{margin-top:8px;display:flex;flex-wrap:wrap;}
-
       /* ── Prêmios ── */
       .premio-tipo-tabs{flex-direction:column;gap:5px;}
       .premio-tipo-tab{width:100%;justify-content:center;}
@@ -3048,6 +3035,19 @@ class DimaiorAdmin extends HTMLElement {
     .tog-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .25s}
     .tog-switch input:checked+.tog-slider{background:var(--cyan)}
     .tog-switch input:checked+.tog-slider::before{transform:translateX(18px)}
+    /* ── Migrações de Streamer (Agente) ── */
+    .migra-card{padding:12px 14px;border-bottom:1px solid var(--brd);}
+    .migra-card:last-child{border-bottom:none;}
+    .migra-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:nowrap;}
+    .migra-nome{font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .migra-uid{font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px;margin-top:2px;}
+    .btn-copy-uid{background:transparent;border:none;color:var(--cyan);cursor:pointer;padding:2px;display:inline-flex;}
+    .migra-badge-circ{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(0,212,212,.12);color:var(--cyan);white-space:nowrap;}
+    .migra-meta{display:flex;flex-direction:column;gap:4px;margin-top:8px;}
+    .migra-meta span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2);}
+    .migra-obs{margin-top:8px;font-size:11px;color:var(--t2);background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:8px;padding:8px 10px;line-height:1.5;}
+    .migra-evid{margin-top:8px;display:flex;flex-wrap:wrap;}
+
     .bloq-lista{display:flex;flex-direction:column;gap:0}
     .bloq-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--brddim)}
     .bloq-item:last-child{border-bottom:none}
