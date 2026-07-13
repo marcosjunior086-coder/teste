@@ -14,7 +14,7 @@ class DimaiorAdmin extends HTMLElement {
     this.TK_KEY  = 'dm_admin_token';
     this._token  = '';
     this._edtId  = null;
-    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1 };
+    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1, migracoesAgente:1 };
     this._uidLookup = null;
     this._cartOp   = { uid: null, tipo: null, nome: '' };
     this._saqueId  = null;
@@ -209,12 +209,16 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
   _fdt(v){if(!v)return'—';const d=new Date(v);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
   _fdtCurto(v){if(!v)return'—';const d=new Date(v);return d.toLocaleDateString('pt-BR');}
+  // Datas "YYYY-MM-DD" (coluna `date`, sem hora) não podem passar por
+  // `new Date(v)` + hora local — vira UTC-meia-noite e no fuso BR (UTC-3)
+  // exibe o dia anterior. Faz o parse direto da string.
+  _fdtData(v){if(!v)return'—';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return this._fdtCurto(v);return`${m[3]}/${m[2]}/${m[1]}`;}
   _dataHojeBR(){
     const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
     const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
@@ -1178,6 +1182,77 @@ class DimaiorAdmin extends HTMLElement {
     }catch(e){console.error('[confirmarSaqueAcao] erro:',e);this._toast('Erro interno: '+e.message,'err');}
   }
 
+  // ── Migrações de Streamer solicitadas pelo Agente ────────────────────────
+  _circTextoMigra(n){
+    const t={1:'Falta de suporte/ameaças',2:'Adicionado sem contato prévio',3:'<1 mês e <1h de live',4:'Agência atual concorda',5:'Outra situação (Kwai)',6:'Regra padrão (não se encaixa)'};
+    return t[n]||`Circ. ${n}`;
+  }
+  async _carregarMigracoesAgente(){
+    const s=this.shadowRoot;const container=s.getElementById('listaMigracoesAgente');if(container)container.innerHTML=this._loading();
+    const filtro=s.getElementById('migracaoAgFiltro')?.value||'pendente';
+    const d=await this._api('GET',`/admin/agente-migracoes?status=${filtro}&pagina=${this._pg.migracoesAgente}`);
+    if(!d?.ok){if(container)container.innerHTML=this._empty('warning','Erro');return;}
+    const badge=s.getElementById('nbMigracoesAgente');if(badge){if(d.pendentes_total){badge.textContent=d.pendentes_total;badge.style.display='';}else{badge.style.display='none';}}
+    const lista=d.migracoes||[];if(!lista.length){if(container)container.innerHTML=this._empty('check_c','Nenhuma solicitação');return;}
+    if(container)container.innerHTML=lista.map(m=>{
+      const isPend=m.status==='pendente';
+      const nome=this._esc(m.streamer_nome||m.streamer_uid);
+      const kwai=this._esc(m.streamer_kwai_id||'—');
+      const evid=(m.evidencias||[]).map((e,i)=>`<a href="${this._esc(e)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="margin:2px 4px 2px 0">${this._ico('clipboard',11)} Evidência ${i+1}</a>`).join('');
+      return`<div class="migra-card ${isPend?'migra-pend':''}">
+        <div class="migra-header">
+          <div>
+            <div class="migra-nome">${nome}</div>
+            <div class="migra-uid">Kwai ID: ${kwai} <button class="btn-copy-uid" data-copy="${this._esc(m.streamer_kwai_id||m.streamer_uid||'')}" title="Copiar ID">${this._ico('clipboard',10)}</button></div>
+          </div>
+          <div style="text-align:right">
+            <span class="migra-badge-circ">${this._circTextoMigra(m.circunstancia)}</span><br>
+            <span class="badge ${m.status==='aprovado'?'on':m.status==='rejeitado'?'off':''}" style="margin-top:6px;display:inline-block">${this._esc(m.status)}</span>
+          </div>
+        </div>
+        <div class="migra-meta">
+          <span>${this._ico('users',11)} Solicitado por: <strong>${this._esc(m.agente_nome||'—')}</strong></span>
+          <span>${this._ico('server',11)} Agência atual: ${this._esc(m.agencia_atual||'—')}</span>
+          <span>${this._ico('calendar',11)} Migração prevista: ${this._fdtData(m.mes_migracao)}</span>
+        </div>
+        ${m.observacao_agente?`<div class="migra-obs">${this._ico('clipboard',11)} <strong>Obs. do agente:</strong> ${this._esc(m.observacao_agente)}</div>`:''}
+        ${m.descricao?`<div class="migra-obs">${this._esc(m.descricao)}</div>`:''}
+        ${evid?`<div class="migra-evid">${evid}</div>`:''}
+        ${m.observacao_admin?`<div class="migra-meta"><span>${this._ico('check_c',11)} ${this._fdtCurto(m.processado_em)} por ${this._esc(m.processado_por||'—')}: ${this._esc(m.observacao_admin)}</span></div>`:''}
+        ${isPend?`<div class="saque-acoes"><button class="btn btn-g btn-sm migra-aprovar" data-id="${m.id}" data-nome="${nome}">${this._ico('check_c',12)} Aprovar</button><button class="btn btn-sm migra-rejeitar" style="border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)" data-id="${m.id}" data-nome="${nome}">${this._ico('x_circle',12)} Rejeitar</button></div>`:''}
+      </div>`;
+    }).join('');
+    if(container){
+      container.querySelectorAll('.migra-aprovar').forEach(btn=>{btn.addEventListener('click',()=>this._abrirModalMigracaoAg(btn.dataset.id,btn.dataset.nome,'aprovar'));});
+      container.querySelectorAll('.migra-rejeitar').forEach(btn=>{btn.addEventListener('click',()=>this._abrirModalMigracaoAg(btn.dataset.id,btn.dataset.nome,'rejeitar'));});
+      container.querySelectorAll('.btn-copy-uid').forEach(btn=>{btn.addEventListener('click',()=>navigator.clipboard?.writeText(btn.dataset.copy||'').then(()=>this._toast('ID copiado!')).catch(()=>this._toast('Não foi possível copiar','err')));});
+    }
+    this._renderPg('pgMigracoesAgente',this._pg.migracoesAgente,lista.length,20,n=>{this._pg.migracoesAgente=n;this._carregarMigracoesAgente();});
+  }
+  _abrirModalMigracaoAg(id,nome,acao){
+    const s=this.shadowRoot;this._migracaoAgId=id;this._migracaoAgAcao=acao;
+    const labels={aprovar:{titulo:'Aprovar Migração',btn:'Confirmar Aprovação',cor:'var(--grad)'},rejeitar:{titulo:'Rejeitar Migração',btn:'Confirmar Rejeição',cor:'linear-gradient(135deg,#c00030,#f87171)'}};
+    const l=labels[acao];
+    s.getElementById('mMigracaoAgTitulo').textContent=`${l.titulo} — ${nome}`;
+    s.getElementById('mMigracaoAgObs').value='';
+    s.getElementById('mMigracaoAgConfirmar').textContent=l.btn;
+    s.getElementById('mMigracaoAgConfirmar').style.background=l.cor;
+    this._abrirModal('mMigracaoAg');
+  }
+  async _confirmarMigracaoAgAcao(){
+    try{
+      const s=this.shadowRoot;
+      const observacao=s.getElementById('mMigracaoAgObs')?.value.trim()||'';
+      const btn=s.getElementById('mMigracaoAgConfirmar');
+      if(!this._migracaoAgId){this._toast('ID não definido','err');return;}
+      if(btn){btn.disabled=true;btn.textContent='Processando...';}
+      const d=await this._api('POST',`/admin/agente-migracoes/${this._migracaoAgId}/processar`,{acao:this._migracaoAgAcao,observacao});
+      if(btn){btn.disabled=false;btn.textContent=this._migracaoAgAcao==='aprovar'?'Confirmar Aprovação':'Confirmar Rejeição';}
+      if(d?.ok){this._fechaModal('mMigracaoAg');this._toast(`Migração ${this._migracaoAgAcao==='aprovar'?'aprovada':'rejeitada'}!`);this._carregarMigracoesAgente();}
+      else{this._toast(d?.erro||'Erro ao processar','err');}
+    }catch(e){console.error('[confirmarMigracaoAgAcao] erro:',e);this._toast('Erro interno: '+e.message,'err');}
+  }
+
   async _carregarPremios(){
     const s=this.shadowRoot;this._premioLinhas[this._premioTipo]=[];this._premioRemover[this._premioTipo]=new Set();s.getElementById('historicoPremios').innerHTML=this._loading();
     await Promise.all([this._renderPremiosConfig(),this._carregarHistoricoPremios()]);
@@ -1282,6 +1357,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtuCart').addEventListener('click',()=>this._carregarCarteiraDash());s.getElementById('btnFecharCart').addEventListener('click',()=>this._fechaModal('mCart'));s.getElementById('btnCancelarOp').addEventListener('click',()=>this._fechaModal('mOp'));s.getElementById('mOpConfirmar').addEventListener('click',()=>this._confirmarOperacao());s.getElementById('btnCreditoRapido').addEventListener('click',()=>this._abrirCreditoRapido());s.getElementById('btnCrBuscar').addEventListener('click',()=>this._buscarStreamerParaCredito());s.getElementById('mCrUid').addEventListener('keydown',e=>{if(e.key==='Enter')this._buscarStreamerParaCredito();});s.getElementById('btnCrConfirmar').addEventListener('click',()=>this._confirmarCreditoRapido());s.getElementById('btnCrCancelar').addEventListener('click',()=>this._fechaModal('mCredito'));
     // v2: Saques
     s.getElementById('btnAtuSaques').addEventListener('click',()=>this._carregarSaques());s.getElementById('saqueFiltro').addEventListener('change',()=>{this._pg.saques=1;this._carregarSaques();});s.getElementById('btnCancelarSaque').addEventListener('click',()=>this._fechaModal('mSaque'));s.getElementById('mSaqueConfirmar').addEventListener('click',()=>this._confirmarSaqueAcao());
+    s.getElementById('btnAtuMigracoesAgente')?.addEventListener('click',()=>this._carregarMigracoesAgente());s.getElementById('migracaoAgFiltro')?.addEventListener('change',()=>{this._pg.migracoesAgente=1;this._carregarMigracoesAgente();});s.getElementById('btnCancelarMigracaoAg')?.addEventListener('click',()=>this._fechaModal('mMigracaoAg'));s.getElementById('mMigracaoAgConfirmar')?.addEventListener('click',()=>this._confirmarMigracaoAgAcao());
     // Modal PIX
     _bind('mPixClose','click',()=>this._fechaModal('mPix'));
     _bind('mPixConfirmar','click',async()=>{
@@ -2727,6 +2803,19 @@ class DimaiorAdmin extends HTMLElement {
       /* Botão único ocupa tudo */
       .saque-acoes .btn:only-child{flex:1 1 100%;max-width:100%;}
 
+      /* ── Migrações de Streamer (Agente) ── */
+      .migra-card{padding:12px 14px;border-bottom:1px solid var(--brd);}
+      .migra-card:last-child{border-bottom:none;}
+      .migra-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:nowrap;}
+      .migra-nome{font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .migra-uid{font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px;margin-top:2px;}
+      .btn-copy-uid{background:transparent;border:none;color:var(--cyan);cursor:pointer;padding:2px;display:inline-flex;}
+      .migra-badge-circ{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(0,212,212,.12);color:var(--cyan);white-space:nowrap;}
+      .migra-meta{display:flex;flex-direction:column;gap:4px;margin-top:8px;}
+      .migra-meta span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2);}
+      .migra-obs{margin-top:8px;font-size:11px;color:var(--t2);background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:8px;padding:8px 10px;line-height:1.5;}
+      .migra-evid{margin-top:8px;display:flex;flex-wrap:wrap;}
+
       /* ── Prêmios ── */
       .premio-tipo-tabs{flex-direction:column;gap:5px;}
       .premio-tipo-tab{width:100%;justify-content:center;}
@@ -2995,6 +3084,7 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)}
             ${ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)}
             ${ni('users','agentes','Agentes')}
+            ${ni('refresh','agenteMigracoes','Migrações Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)}
             <div class="ns">Financeiro</div>
             ${ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)}
             ${ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)}
@@ -3140,6 +3230,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
             </div>
             <div class="pag" id="pag-carteira">${ph('Carteira Financeira','wallet','Saldos dos streamers','btnAtuCart',`<button class="btn btn-g" id="btnCreditoRapido">${this._ico('plus',13)} Adicionar Saldo</button>`)}<div class="dc2-grid" id="carteiraResumo">${this._loading('grid-column:1/-1')}</div><div id="carteiraStreamers">${this._loading()}</div></div>
+            <div class="pag" id="pag-agenteMigracoes">${ph('Migrações de Streamer (Agente)','refresh','Solicitações de migração enviadas pelos agentes','btnAtuMigracoesAgente')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('refresh',14)} Migrações</div><select id="migracaoAgFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaMigracoesAgente">${this._loading()}</div><div class="pag-bar" id="pgMigracoesAgente"></div></div></div>
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
             <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
             <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
@@ -3340,6 +3431,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="ov" id="mCredito"><div class="modal"><div class="m-titulo">${this._ico('plus',16)} Adicionar Saldo</div><div id="mCrPasso1"><div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="mCrUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;transition:border-color .2s"/><button class="btn btn-g" id="btnCrBuscar">${this._ico('search',13)} Buscar</button></div></div><div id="mCrInfo" style="display:none;margin-top:12px"></div></div><div id="mCrPasso2" style="display:none"><div id="mCrStreamerCard" style="margin-bottom:14px"></div><div class="mc"><label>Valor (R$) <span style="color:var(--verm)">*</span></label><input id="mCrValor" type="number" min="0.01" step="0.01" placeholder="0.00" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:16px;outline:none;width:100%;transition:border-color .2s"/></div><div class="mc"><label>Motivo <span style="color:var(--verm)">*</span></label><textarea id="mCrDesc" rows="2" placeholder="Ex: Prêmio, fechamento..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;resize:none;transition:border-color .2s"></textarea></div></div><div class="mf" style="margin-top:14px"><button class="btn btn-o" id="btnCrCancelar">Cancelar</button><button class="btn btn-g" id="btnCrConfirmar" style="display:none">${this._ico('check',13)} Confirmar Crédito</button></div></div></div>
       <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose">✕</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)">Valor a pagar</div><div id="mPixValor" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:var(--dm-font-body,'Exo 2',sans-serif)">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
       <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">Observação</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
+      <div class="ov" id="mMigracaoAg"><div class="modal"><div class="m-titulo" id="mMigracaoAgTitulo">${this._ico('refresh',16)} Processar Migração</div><div class="mc"><label>Observação (opcional)</label><textarea id="mMigracaoAgObs" rows="3" placeholder="Visível só pro admin, aparece no card..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarMigracaoAg">Cancelar</button><button class="btn btn-g" id="mMigracaoAgConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="diamantes">💎 Ranking de Diamantes</option><option value="horas">⏱ Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
       <div class="ov" id="mCom"><div class="modal" style="max-width:500px"><div class="m-titulo" id="mComTit">Novo Aviso</div>
         <div id="mComTipoBadge"></div>

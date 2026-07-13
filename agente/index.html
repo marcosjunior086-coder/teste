@@ -428,6 +428,43 @@
     .msg-err { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
     .msg-warn{ background: rgba(240,192,64,.12);  border: 1px solid rgba(240,192,64,.3);  color: var(--gold); }
 
+    /* -- Migração de Agência — acordeão de circunstâncias -------------------- */
+    .mc-field { margin-bottom: 16px; }
+    .mc-field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .mc-field input[type="text"], .mc-field input[type="date"], .mc-field input[type="number"], .mc-field textarea {
+      width: 100%; padding: 11px 14px; background: rgba(255,255,255,.05);
+      border: 1px solid var(--border); border-radius: var(--r);
+      color: var(--text); font-family: var(--font-b); font-size: 14px; outline: none;
+      transition: border-color var(--ease); resize: vertical;
+    }
+    .mc-field input:focus, .mc-field textarea:focus { border-color: var(--cyan); }
+    .circ-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .circ-item {
+      border: 1px solid var(--border); border-radius: var(--r);
+      background: rgba(255,255,255,.03); overflow: hidden;
+    }
+    .circ-item[open] { border-color: rgba(0,212,212,.4); background: rgba(0,212,212,.045); }
+    .circ-item summary {
+      display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px;
+      cursor: pointer; list-style: none; font-size: 14px; color: var(--text); user-select: none;
+    }
+    .circ-item summary::-webkit-details-marker { display: none; }
+    .circ-item summary input[type="radio"] { margin-top: 3px; accent-color: var(--cyan); flex-shrink: 0; cursor: pointer; }
+    .circ-desc { padding: 0 16px 14px 40px; font-size: 13px; color: var(--sub); line-height: 1.6; }
+    .evid-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .evid-row input { flex: 1; }
+    .btn-remover-evid {
+      flex-shrink: 0; width: 38px; background: rgba(248,113,113,.12);
+      border: 1px solid rgba(248,113,113,.3); border-radius: var(--r);
+      color: var(--red); cursor: pointer; font-size: 16px;
+    }
+    .chk-row { display: flex; align-items: center; gap: 10px; margin: 4px 0 18px; font-size: 13px; color: var(--sub); }
+    .chk-row input { width: 17px; height: 17px; accent-color: var(--cyan); cursor: pointer; }
+    .migra-badge-circ {
+      display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px;
+      font-weight: 700; background: rgba(0,212,212,.12); color: var(--cyan);
+    }
+
     /* Empty state */
     .empty { text-align: center; padding: 60px 20px; color: var(--dim); }
     .empty .ico { font-size: 48px; margin-bottom: 12px; }
@@ -640,6 +677,9 @@
         <div class="nav-item" data-section="convites">
           <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span><span>Convites</span>
         </div>
+        <div class="nav-item" data-section="migracao">
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span>Migração</span>
+        </div>
       </nav>
       <div class="sidebar-bottom">
         <div class="agente-info">
@@ -739,6 +779,69 @@
           <span class="conv-history-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
         <div class="table-wrap conv-history-wrap" id="tabela-convites">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- --- MIGRAÇÃO DE AGÊNCIA --- -->
+      <section id="sec-migracao" class="section" style="display:none">
+        <div class="topbar"><h2>Migração de Agência</h2></div>
+
+        <!-- Buscar perfil -->
+        <div class="convite-box">
+          <h3>Buscar Perfil por UID / Kwai ID</h3>
+          <p style="color:var(--sub);font-size:13px;margin-bottom:14px">Use para streamers que hoje estão vinculados a outra agência e você quer trazer para a DMaior.</p>
+          <div class="input-row">
+            <input id="inp-uid-migra" type="text" placeholder="Digite o UID ou @kwaiId do streamer">
+            <button class="btn btn-cyan" id="btn-buscar-perfil-migra">Buscar</button>
+          </div>
+          <div id="perfil-resultado-migra"></div>
+          <div id="msg-busca-migra"></div>
+        </div>
+
+        <!-- Formulário da solicitação (aparece após achar o perfil) -->
+        <div class="convite-box" id="form-migracao-box" style="display:none">
+          <h3>Detalhes da Solicitação</h3>
+
+          <div class="mc-field">
+            <label>Agência atual do streamer</label>
+            <input type="text" id="inp-agencia-atual" placeholder="Nome da agência onde ele está hoje">
+          </div>
+
+          <div class="mc-field">
+            <label>Circunstância (escolha a que se aplica)</label>
+            <div class="circ-list" id="circ-list"></div>
+          </div>
+
+          <div id="campos-condicionais"></div>
+
+          <div class="mc-field">
+            <label>Evidência(s) — link do arquivo individual do Drive</label>
+            <div id="lista-evidencias"></div>
+            <button type="button" class="btn btn-ghost" id="btn-add-evidencia" style="margin-top:4px">+ Adicionar link</button>
+            <a href="#" id="btn-drive-evidencias" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;font-size:12px;color:var(--cyan)">Abrir pasta de evidências no Drive →</a>
+          </div>
+
+          <div class="mc-field">
+            <label>Observação sobre o streamer</label>
+            <textarea id="inp-observacao-agente" rows="3" placeholder="Anotações livres sobre esse caso..."></textarea>
+          </div>
+
+          <label class="chk-row"><input type="checkbox" id="chk-nao-duplicada"> Confirmo que este streamer não possui conta duplicada</label>
+
+          <div id="msg-migracao"></div>
+          <button class="btn btn-green" id="btn-enviar-migracao">Enviar Solicitação</button>
+        </div>
+
+        <!-- Histórico -->
+        <button class="conv-history-head" id="migra-history-toggle" type="button" aria-expanded="true">
+          <span class="conv-history-title">
+            Histórico de Migrações
+            <span class="conv-history-count" id="migra-history-count">0</span>
+          </span>
+          <span class="conv-history-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="table-wrap conv-history-wrap" id="tabela-migracoes">
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </section>
@@ -857,7 +960,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // -- NAVEGAÇÃO ---------------------------------------------
-const SECOES = ['dashboard','streamers','lives','ranking','desempenho','convites'];
+const SECOES = ['dashboard','streamers','lives','ranking','desempenho','convites','migracao'];
 
 function fecharMenuMobile() {
   document.querySelector('.sidebar')?.classList.remove('open');
@@ -888,6 +991,21 @@ convHistoryToggle?.addEventListener('click', () => {
 });
 aplicarEstadoHistoricoConvites();
 
+const migraHistoryToggle = document.getElementById('migra-history-toggle');
+const migraHistoryWrap = document.getElementById('tabela-migracoes');
+function aplicarEstadoHistoricoMigracoes() {
+  const collapsed = localStorage.getItem('dm_agente_migra_hist_collapsed') === '1';
+  migraHistoryToggle?.classList.toggle('is-collapsed', collapsed);
+  migraHistoryWrap?.classList.toggle('is-collapsed', collapsed);
+  migraHistoryToggle?.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+}
+migraHistoryToggle?.addEventListener('click', () => {
+  const collapsed = !migraHistoryWrap?.classList.contains('is-collapsed');
+  localStorage.setItem('dm_agente_migra_hist_collapsed', collapsed ? '1' : '0');
+  aplicarEstadoHistoricoMigracoes();
+});
+aplicarEstadoHistoricoMigracoes();
+
 document.querySelectorAll('.nav-item').forEach(el => {
   el.addEventListener('click', () => {
     navegarPara(el.dataset.section);
@@ -905,6 +1023,7 @@ function navegarPara(sec) {
     ranking:    carregarRanking,
     desempenho: carregarDesempenho,
     convites:   carregarConvites,
+    migracao:   carregarMigracoes,
   };
   loaders[sec]?.();
 }
@@ -1703,6 +1822,237 @@ function mostrarMsg(el, texto, tipo) {
   el.className = `msg-${tipo}`;
   el.textContent = texto;
   el.style.display = 'block';
+}
+
+// -- MIGRAÇÃO DE AGÊNCIA ------------------------------------
+// O link da pasta de evidências não fica fixo aqui no HTML (esta página é
+// estática e sem gate de login — qualquer um veria via "ver código-fonte").
+// É buscado sob demanda, autenticado, na primeira vez que a aba é aberta.
+let _driveEvidenciasUrl = null;
+async function carregarDriveEvidenciasUrl() {
+  if (_driveEvidenciasUrl) return _driveEvidenciasUrl;
+  try {
+    const d = await api('/agente/migracoes/drive-url');
+    _driveEvidenciasUrl = d.url || '';
+  } catch { _driveEvidenciasUrl = ''; }
+  const link = document.getElementById('btn-drive-evidencias');
+  if (link) link.href = _driveEvidenciasUrl || '#';
+  return _driveEvidenciasUrl;
+}
+
+const CIRCUNSTANCIAS = [
+  { id: 1, titulo: 'Falta de suporte, ameaças ou ofensas da agência atual', desc: 'Há provas de falta de suporte, ameaças e ofensas da agência atual.' },
+  { id: 2, titulo: 'Streamer adicionado sem contato prévio', desc: 'O streamer foi adicionado à agência atual sem nenhum contato prévio.' },
+  { id: 3, titulo: 'Contratado há menos de 1 mês, com menos de 1h de live', desc: 'Streamer contratado no primeiro mês pela agência atual, que fez menos de 1h de live.' },
+  { id: 4, titulo: 'A agência atual concorda com a migração', desc: 'A agência atual concorda formalmente com a migração do streamer.' },
+  { id: 5, titulo: 'Outra situação que a equipe da Kwai considera cabível', desc: 'Situação fora das anteriores, a ser avaliada e aceita pela própria equipe da Kwai.' },
+  { id: 6, titulo: 'Não se encaixa em nenhuma das situações acima', desc: 'Segue a regra padrão: o streamer recebe 50% das tarefas por 90 dias, a agência antiga recebe 100% do pagamento por 3 meses, e a nova agência não recebe pelo streamer por 90 dias.' },
+];
+
+let _perfilMigracaoAtual = null;
+
+function renderCircList() {
+  const el = document.getElementById('circ-list');
+  if (!el || el.dataset.montado) return;
+  el.dataset.montado = '1';
+  el.innerHTML = CIRCUNSTANCIAS.map(c => `
+    <details class="circ-item" data-circ="${c.id}">
+      <summary><input type="radio" name="circunstancia" value="${c.id}"><span>${c.id}. ${esc(c.titulo)}</span></summary>
+      <div class="circ-desc">${esc(c.desc)}</div>
+    </details>`).join('');
+  el.querySelectorAll('input[name="circunstancia"]').forEach(r => {
+    r.addEventListener('change', () => {
+      el.querySelectorAll('.circ-item').forEach(d => d.open = d.dataset.circ === r.value);
+      montarCamposCondicionais(Number(r.value));
+    });
+  });
+}
+
+function montarCamposCondicionais(circ) {
+  const el = document.getElementById('campos-condicionais');
+  if (!el) return;
+  if (circ === 1) {
+    el.innerHTML = `<div class="mc-field"><label>Descrição do ocorrido</label><textarea id="cc-descricao" rows="3" placeholder="Descreva a falta de suporte, ameaças ou ofensas..."></textarea></div>`;
+  } else if (circ === 2) {
+    el.innerHTML = `<div class="mc-field"><label>Data em que foi adicionado à agência atual (se souber)</label><input type="date" id="cc-data-vinculo"></div>`;
+  } else if (circ === 3) {
+    el.innerHTML = `
+      <div class="mc-field"><label>Data de vínculo com a agência atual</label><input type="date" id="cc-data-vinculo"></div>
+      <div class="mc-field"><label>Total de horas de live desde a contratação</label><input type="number" id="cc-horas-live" step="0.1" min="0" placeholder="Ex: 0.5"></div>`;
+  } else if (circ === 4) {
+    el.innerHTML = `<div class="mc-field"><label>Nome/contato de quem concordou na agência atual</label><input type="text" id="cc-contato-agencia" placeholder="Nome da pessoa que autorizou"></div>`;
+  } else if (circ === 5) {
+    el.innerHTML = `<div class="mc-field"><label>Descreva a situação para avaliação da Kwai</label><textarea id="cc-descricao" rows="3"></textarea></div>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function addEvidenciaRow(valor = '') {
+  const wrap = document.getElementById('lista-evidencias');
+  const row = document.createElement('div');
+  row.className = 'evid-row';
+  row.innerHTML = `<input type="text" class="evid-input" placeholder="Cole o link do arquivo do Drive" value="${esc(valor)}"><button type="button" class="btn-remover-evid" title="Remover">×</button>`;
+  row.querySelector('.btn-remover-evid').addEventListener('click', () => row.remove());
+  wrap.appendChild(row);
+}
+document.getElementById('btn-add-evidencia')?.addEventListener('click', () => addEvidenciaRow());
+
+function coletarEvidencias() {
+  return [...document.querySelectorAll('#lista-evidencias .evid-input')]
+    .map(i => i.value.trim())
+    .filter(Boolean);
+}
+
+document.getElementById('btn-buscar-perfil-migra')?.addEventListener('click', buscarPerfilMigracao);
+document.getElementById('inp-uid-migra')?.addEventListener('keydown', e => { if (e.key === 'Enter') buscarPerfilMigracao(); });
+
+async function buscarPerfilMigracao() {
+  const btn = document.getElementById('btn-buscar-perfil-migra');
+  const uid = document.getElementById('inp-uid-migra').value.trim();
+  const res_ = document.getElementById('perfil-resultado-migra');
+  const msg  = document.getElementById('msg-busca-migra');
+  const formBox = document.getElementById('form-migracao-box');
+  msg.style.display = 'none'; res_.innerHTML = ''; formBox.style.display = 'none';
+  if (!uid) return;
+  _perfilMigracaoAtual = null;
+  btn.disabled = true; btn.textContent = 'Buscando…';
+  try {
+    const d = await api('/agente/convites/buscar-perfil', { method: 'POST', body: { uid } });
+    if (!d.ok && d.status === 'PERFIL_NAO_ENCONTRADO') {
+      mostrarMsg(msg, 'Perfil não encontrado. Verifique o UID.', 'err'); return;
+    }
+    const p = d.perfil || {};
+    _perfilMigracaoAtual = { ...p };
+    res_.innerHTML = `
+      <div class="perfil-encontrado">
+        ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome||'?')[0])}</div>`}
+        <div class="perfil-info">
+          <h4>${esc(p.nome)||'—'}</h4>
+          <p>@${esc(p.kwaiId||'')} · ID: ${esc(p.memberId||uid)}</p>
+        </div>
+      </div>`;
+    if (d.mensagem) mostrarMsg(msg, d.mensagem, 'warn');
+    renderCircList();
+    formBox.style.display = 'block';
+  } catch (e) {
+    mostrarMsg(msg, `Erro: ${e.message}`, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Buscar';
+  }
+}
+
+document.getElementById('btn-enviar-migracao')?.addEventListener('click', enviarMigracao);
+
+async function enviarMigracao() {
+  if (!_perfilMigracaoAtual) return;
+  const btn = document.getElementById('btn-enviar-migracao');
+  const msg = document.getElementById('msg-migracao');
+  const circEl = document.querySelector('input[name="circunstancia"]:checked');
+  if (!circEl) { mostrarMsg(msg, 'Escolha uma circunstância.', 'err'); return; }
+  const circ = Number(circEl.value);
+
+  const payload = {
+    memberId: _perfilMigracaoAtual.memberId,
+    kwaiId:   _perfilMigracaoAtual.kwaiId,
+    nome:     _perfilMigracaoAtual.nome,
+    foto:     _perfilMigracaoAtual.foto,
+    agenciaAtual: document.getElementById('inp-agencia-atual').value.trim(),
+    circunstancia: circ,
+    descricao: document.getElementById('cc-descricao')?.value.trim() || '',
+    dataVinculoAgenciaAtual: document.getElementById('cc-data-vinculo')?.value || null,
+    horasLiveInformadas: document.getElementById('cc-horas-live')?.value || null,
+    nomeContatoAgencia: document.getElementById('cc-contato-agencia')?.value.trim() || '',
+    evidencias: coletarEvidencias(),
+    observacaoAgente: document.getElementById('inp-observacao-agente').value.trim(),
+    confirmaNaoDuplicada: document.getElementById('chk-nao-duplicada').checked,
+  };
+
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try {
+    const d = await api('/agente/migracoes/solicitar', { method: 'POST', body: payload });
+    if (d.ok) {
+      mostrarMsg(msg, `Solicitação enviada! Migração prevista para a 1ª semana de ${fmtDataSimples(d.mes_migracao)}.`, 'ok');
+      document.getElementById('form-migracao-box').style.display = 'none';
+      document.getElementById('perfil-resultado-migra').innerHTML = '';
+      document.getElementById('inp-uid-migra').value = '';
+      _perfilMigracaoAtual = null;
+      carregarMigracoes();
+    } else {
+      mostrarMsg(msg, d.erro || 'Falha ao enviar solicitação.', 'err');
+    }
+  } catch (e) {
+    mostrarMsg(msg, `Erro: ${e.message}`, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar Solicitação';
+  }
+}
+
+// Datas "YYYY-MM-DD" (colunas `date`, sem hora) não podem passar por
+// `new Date(iso).getDate()` — isso interpreta como UTC-meia-noite e, ao
+// exibir em hora local (UTC-3 no Brasil), volta um dia. Parse direto da string.
+function fmtDataSimples(isoData) {
+  if (!isoData) return '—';
+  const m = String(isoData).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return fmtData(isoData);
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+
+function badgeStatusMigracao(s) {
+  const m = { pendente: 'badge-pend Pendente', aprovado: 'badge-ok Aprovado', rejeitado: 'badge-err Rejeitado' };
+  const [cls, txt] = (m[s] || m.pendente).split(' ');
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+
+async function carregarMigracoes() {
+  carregarDriveEvidenciasUrl();
+  const container = document.getElementById('tabela-migracoes');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const d = await api('/agente/migracoes');
+    const list = d.migracoes || [];
+    const countEl = document.getElementById('migra-history-count');
+    if (countEl) countEl.textContent = fmtNum(list.length);
+    if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><p>Nenhuma solicitação de migração ainda.</p></div>`; aplicarEstadoHistoricoMigracoes(); return; }
+    setAccordion(container, true);
+    const rows = list.map(m => {
+      const nome = esc(m.streamer_nome || m.streamer_uid || '—');
+      const kwai = m.streamer_kwai_id ? '@' + esc(m.streamer_kwai_id) : '—';
+      const circTxt = `<span class="migra-badge-circ">Circ. ${esc(m.circunstancia)}</span>`;
+      const status = badgeStatusMigracao(m.status);
+      const data = fmtData(m.criado_em);
+      const migracaoPrevista = fmtDataSimples(m.mes_migracao);
+      return {
+        table: `
+          <tr>
+            <td>${nome}</td>
+            <td>${kwai}</td>
+            <td>${circTxt}</td>
+            <td>${status}</td>
+            <td>${migracaoPrevista}</td>
+          </tr>`,
+        card: agItem({
+          title: nome,
+          sub: kwai,
+          badge: status,
+          body: [
+            agCell('Kwai ID', kwai),
+            agCell('Circunstância', circTxt),
+            agCell('Status', status),
+            agCell('Solicitado em', data),
+            agCell('Migração prevista', migracaoPrevista),
+          ].join('')
+        })
+      };
+    });
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>Circunstância</th><th>Status</th><th>Migração prevista</th></tr></thead>
+        <tbody>${rows.map(r => r.table).join('')}</tbody>
+      </table>
+      <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
+    aplicarEstadoHistoricoMigracoes();
+  } catch (e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 </script>
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
