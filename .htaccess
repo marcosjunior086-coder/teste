@@ -46,8 +46,10 @@ ErrorDocument 404 /index.html
 ErrorDocument 403 /index.html
 
 # ─── Redirecionar rotas antigas do Wix ────────────
-# (caso alguém acesse URLs antigas com slug /rank-geral)
-RewriteRule ^rank-geral/?$        /ranking.html [R=301,L]
+# (caso alguém acesse URLs antigas com slug /rank-geral — ranking agora é
+#  exclusivo do painel do streamer, não existe mais página pública)
+RewriteRule ^rank-geral/?$        /painel/index.html [R=301,L]
+RewriteRule ^ranking\.html/?$     /painel/index.html [R=301,L]
 RewriteRule ^recarga/?$           /recarga.html [R=301,L]
 RewriteRule ^politicas/?$         /politicas.html [R=301,L]
 RewriteRule ^tutoriais/?$         /tutoriais.html [R=301,L]

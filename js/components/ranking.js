@@ -1,8 +1,10 @@
 /**
- * ranking.js — Ranking público interativo da DMaior Agency
+ * ranking.js — Ranking interativo da DMaior Agency
  *
  * Custom Element: <ranking-dmaior>
  * Pódio top 3, lista paginada, abas Diamantes/Horas, histórico por mês.
+ * Exclusivo do painel do streamer — não existe mais página pública própria;
+ * o acesso é sempre a sessão real do painel (dm_uid/dm_token).
  *
  * ALTERAÇÕES em relação ao original Wix:
  *   - Removida constante CLOUDFLARE_API hardcoded
@@ -40,6 +42,7 @@ class RankingDmaior extends HTMLElement {
     this.liveSet       = new Set();
     this._menuObserver     = null;
     this._menuPollInterval = null;
+    this._dashboardIniciado = false;
 
     this.DSVG           = `<svg viewBox="0 0 24 24" width="16" fill="currentColor"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>`;
     this.HSVG           = `<svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
@@ -49,15 +52,25 @@ class RankingDmaior extends HTMLElement {
     this.VERIFICADO_PREMIUM_SVG = `<span class="verified-badge premium" title="Verificado Premium"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   }
 
-  // Lê token do ranking do localStorage de forma segura
+  // O acesso ao ranking geral agora é o mesmo do painel do streamer — não
+  // existe mais senha própria. dm_uid/dm_token são a sessão real (Supabase
+  // Auth), setados no login do painel e lidos aqui do localStorage.
   _getToken() {
     if (typeof window === 'undefined') return '';
-    try { return localStorage.getItem('dmaior_token') || this._sessionToken || ''; } catch { return ''; }
+    try { return localStorage.getItem('dm_token') || ''; } catch { return ''; }
   }
 
   _isLoggedIn() {
     if (typeof window === 'undefined') return false;
-    try { return !!this._getToken(); } catch { return false; }
+    try { return !!localStorage.getItem('dm_uid') && !!this._getToken(); } catch { return false; }
+  }
+
+  // Reconfirma a sessão — chamado pelo painel (dmaior-app.js) toda vez que a
+  // aba Ranking é aberta, porque este elemento já existe no DOM desde antes
+  // do login do streamer terminar (primeira checagem pode não achar token
+  // ainda). Sem efeito se o dashboard já tiver sido iniciado.
+  verificarSessao() {
+    if (!this._dashboardIniciado && this._isLoggedIn()) this.initDashboard();
   }
 
   connectedCallback() {
@@ -205,15 +218,9 @@ class RankingDmaior extends HTMLElement {
       #login-screen{position:fixed;inset:0;background:rgba(4,4,4,0.98);display:flex;align-items:flex-start;justify-content:center;padding-top:20px;z-index:1000}
       .login-box{padding:40px;width:90%;max-width:400px;text-align:center}
       .login-box h2{font-size:var(--t-title-lg);background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
-      .input-group{position:relative;margin-bottom:20px}
-      .input-group input{width:100%;padding:15px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.6);color:var(--text);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:var(--t-info);outline:none;text-align:center;letter-spacing:2px}
-      .input-group input:focus{border-color:var(--roxo);box-shadow:0 0 10px var(--border)}
-      #toggle-pw{position:absolute;right:15px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted)}
-      #toggle-pw svg{width:22px;height:22px;fill:currentColor}
-      .remember-me{display:flex;align-items:center;justify-content:center;gap:8px;font-size:var(--t-info);color:var(--text-sub);margin-bottom:20px;cursor:pointer}
-      .btn-submit{width:100%;padding:15px;background:var(--bloom-grad);border:none;border-radius:10px;color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:var(--t-title-md);font-weight:700;cursor:pointer}
+      .login-msg{color:var(--text-sub);font-size:var(--t-info);line-height:1.6;margin-bottom:16px}
+      .btn-submit{display:block;width:100%;padding:15px;background:var(--bloom-grad);border:none;border-radius:10px;color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:var(--t-title-md);font-weight:700;cursor:pointer;text-decoration:none;text-align:center;box-sizing:border-box}
       .btn-submit:hover{box-shadow:0 0 20px var(--border);transform:translateY(-1px)}
-      #login-error{color:var(--red);font-size:var(--t-info);margin-top:15px;display:none}
       #dashboard{display:none;width:100%;max-width:600px;margin:0 auto}
       .header{text-align:center;margin-bottom:20px}
       .header h1{font-size:var(--t-title-lg);color:var(--text);margin-bottom:10px;text-shadow:0 0 15px var(--border)}
@@ -302,7 +309,6 @@ class RankingDmaior extends HTMLElement {
       .list-score{font-size:var(--t-val);font-weight:700;font-family:var(--dm-font-title,'Rajdhani',sans-serif);margin-left:auto;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
       .state-msg{text-align:center;padding:40px;color:var(--roxo);font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
       .spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border-dim);border-top-color:var(--roxo);animation:spin 0.8s linear infinite;margin:0 auto 15px}
-      .logout-btn{background:var(--bg-card);border:1px solid var(--border-dim);color:var(--red);cursor:pointer;margin-top:35px;padding:8px 16px;border-radius:8px;transition:0.3s}
       .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700}
       @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
       @keyframes spin{100%{transform:rotate(360deg)}}
@@ -440,15 +446,9 @@ class RankingDmaior extends HTMLElement {
       <div id="login-screen">
         <div class="glass-card login-box">
           <h2>RANK GERAL</h2>
-          <div class="input-group">
-            <input type="password" id="pass" placeholder="Insira a Senha">
-            <button type="button" id="toggle-pw">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            </button>
-          </div>
-          <label class="remember-me"><input type="checkbox" id="remember" checked> Lembrar neste dispositivo</label>
-          <button class="btn-submit" id="btn-login">ACESSAR</button>
-          <p id="login-error">Senha incorreta. Tente novamente.</p>
+          <p class="login-msg">Não encontramos sua sessão do painel.</p>
+          <p class="login-msg">Recarregue a página para fazer login novamente.</p>
+          <button type="button" class="btn-submit" id="btn-recarregar">RECARREGAR</button>
         </div>
       </div>
 
@@ -473,7 +473,6 @@ class RankingDmaior extends HTMLElement {
         </div>
         <div id="anuncios-container"></div>
         <div id="content"></div>
-        <div style="text-align:center"><button class="logout-btn" id="btn-logout">Sair</button></div>
         <div id="panel-overlay" class="panel-overlay"></div>
         <button id="info-tab-btn" class="info-tab-btn" title="Informações e Regras">
           <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
@@ -510,13 +509,10 @@ class RankingDmaior extends HTMLElement {
 
   bindEvents() {
     const r = this.shadowRoot;
-    r.getElementById('pass').addEventListener('keydown', e => { if (e.key === 'Enter') this.doLogin(); });
-    r.getElementById('btn-login').addEventListener('click', () => this.doLogin());
-    r.getElementById('toggle-pw').addEventListener('click', () => this.togglePassword());
+    r.getElementById('btn-recarregar').addEventListener('click', () => location.reload());
     r.getElementById('sheet-selector').addEventListener('change', () => this.loadTabData());
     r.getElementById('btn-diamonds').addEventListener('click', () => this.setTab('diamonds'));
     r.getElementById('btn-hours').addEventListener('click', () => this.setTab('hours'));
-    r.getElementById('btn-logout').addEventListener('click', () => this.logout());
     r.getElementById('btn-refresh').addEventListener('click', () => { this.cache = {}; this.loadTabData(); });
     r.getElementById('info-tab-btn').addEventListener('click', () => this.togglePanel());
     r.getElementById('close-panel').addEventListener('click', () => this.closePanel());
@@ -540,49 +536,8 @@ class RankingDmaior extends HTMLElement {
     this.shadowRoot.getElementById('panel-overlay').classList.remove('show');
   }
 
-  togglePassword() {
-    const p = this.shadowRoot.getElementById('pass');
-    p.type = p.type === 'password' ? 'text' : 'password';
-  }
-
-  // Login via DmaiorAPI centralizado
-  async doLogin() {
-    const val = this.shadowRoot.getElementById('pass').value;
-    const err = this.shadowRoot.getElementById('login-error');
-    err.style.display = 'none';
-    try {
-      const data = await window.DmaiorAPI.rank.login(val);
-      if (data.sucesso && data.token) {
-        if (typeof window !== 'undefined') {
-          if (this.shadowRoot.getElementById('remember').checked) {
-            try { localStorage.setItem('dmaior_token', data.token); } catch {}
-          } else {
-            this._sessionToken = data.token;
-          }
-        }
-        this.initDashboard();
-      } else {
-        err.style.display = 'block';
-        setTimeout(() => err.style.display = 'none', 3000);
-      }
-    } catch {
-      err.textContent   = 'Erro ao conectar no servidor.';
-      err.style.display = 'block';
-    }
-  }
-
-  logout() {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem('dmaior_token');
-        localStorage.removeItem('agencia_auth');
-      } catch {}
-    }
-    this._sessionToken = '';
-    location.reload();
-  }
-
   async initDashboard() {
+    this._dashboardIniciado = true;
     this.shadowRoot.getElementById('login-screen').style.display = 'none';
     this.shadowRoot.getElementById('dashboard').style.display    = 'block';
     await this.loadHistoricalTabs();

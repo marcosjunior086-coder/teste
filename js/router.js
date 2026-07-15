@@ -13,7 +13,7 @@ const Router = {
   // Mapa de rotas: caminho → arquivo HTML correspondente
   routes: {
     '/':                '/index.html',
-    '/rank-geral':      '/ranking.html',
+    '/rank-geral':      '/painel/index.html', // ranking agora é exclusivo do painel do streamer
     '/recarga':         'https://rocketbunny.club/@DMAIOR_AGENCY',
     '/politicas':       '/politicas.html',
     '/tutoriais':       '/tutoriais.html',

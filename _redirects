@@ -1,6 +1,8 @@
 # Old Wix redirects
-/rank-geral     /ranking.html       301
-/rank-geral/    /ranking.html       301
+/rank-geral     /painel/index.html 301
+/rank-geral/    /painel/index.html 301
+/ranking.html   /painel/index.html 301
+/ranking.html/  /painel/index.html 301
 /recarga        /recarga.html       301
 /recarga/       /recarga.html       301
 /politicas      /politicas.html     301

@@ -150,18 +150,6 @@ window.DmaiorAPI = {
     },
 
     /**
-     * Autentica com senha para acessar o ranking.
-     * @param {string} senha - Senha do ranking
-     */
-    async login(senha) {
-      return window.DmaiorAPI._post(
-        window.DmaiorConfig.workers.rank,
-        '/login',
-        { senha },
-      );
-    },
-
-    /**
      * Busca ranking do mês atual via Supabase (endpoint v2).
      * @param {string} token - Bearer token de autenticação
      */
