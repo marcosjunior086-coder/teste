@@ -41,7 +41,7 @@
 
         <section class="stats-grid">
           <div class="stat-card">
-            <h3>2~</h3>
+            <h3>3</h3>
             <p>Anos de experiência</p>
           </div>
           <div class="stat-card">
@@ -49,13 +49,13 @@
             <p>Streamers agenciados</p>
           </div>
           <div class="stat-card">
-            <h3>+50M</h3>
+            <h3>+60M</h3>
             <p>Ganhos em diamantes</p>
           </div>
         </section>
 
         <div class="intro-text">
-          <p>A principal agência de lives e vídeos do <strong>Kwai</strong>, com mais de <strong>2 anos de experiência no mercado de streaming</strong> e um histórico de resultados que fala por si: <strong>mais de 50 milhões de diamantes recebidos</strong> em transmissões e <strong>mais de mil streamers agenciados</strong> em todo o Brasil.</p>
+          <p>A principal agência de lives e vídeos do <strong>Kwai</strong>, com mais de <strong>3 anos de experiência no mercado de streaming</strong> e um histórico de resultados que fala por si: <strong>mais de 60 milhões de diamantes recebidos</strong> em transmissões e <strong>mais de mil streamers agenciados</strong> em todo o Brasil.</p>
           <p>Fundada por <strong>Danilo Duarte</strong>, a DMaior nasceu com a missão de <strong>impulsionar talentos</strong> e <strong>profissionalizar o cenário das lives</strong>, criando oportunidades reais de crescimento para quem deseja viver do entretenimento digital.</p>
           <p>Aqui, acreditamos que o <strong>sucesso é uma construção diária</strong> — e que com orientação, suporte e estratégia, qualquer criador pode alcançar resultados extraordinários.</p>
         </div>
@@ -125,7 +125,7 @@
   <script charset=utf-8 src="js/api.js"></script>
   <script charset=utf-8 src="js/auth.js"></script>
   <script charset=utf-8 src="js/router.js"></script>
-  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260711-layout-nomes-1"></script>
+  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260716-sem-rank-1"></script>
   <script charset=utf-8 src="js/components/footer.js?v=20260624-3"></script>
   <dmaior-cookie-consent></dmaior-cookie-consent>
   <script charset=utf-8 src="js/components/cookie-consent.js?v=20260624-3"></script>
@@ -159,11 +159,11 @@
     .intro-text strong { color: var(--dm-cyan); font-weight: 600; }
 
     /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 20px; margin-bottom: 50px; }
-    .stat-card { background: var(--dm-grad-card); border: 1px solid var(--dm-border); border-radius: 20px; padding: 30px 20px; text-align: center; box-shadow: 0 4px 15px var(--dm-shadow-md); transition: transform .3s; position: relative; overflow: hidden; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: clamp(10px,2.5vw,20px); margin-bottom: 50px; }
+    .stat-card { background: var(--dm-grad-card); border: 1px solid var(--dm-border); border-radius: 16px; padding: clamp(16px,4vw,30px) clamp(8px,2vw,20px); text-align: center; box-shadow: 0 4px 15px var(--dm-shadow-md); transition: transform .3s; position: relative; overflow: hidden; }
     .stat-card:hover { transform: translateY(-5px); }
-    .stat-card h3 { font-size: 2.5rem; color: var(--dm-gold); margin: 0; }
-    .stat-card p { font-size: .75rem; font-family:'Rajdhani',sans-serif; text-transform: uppercase; color: var(--dm-text-muted); letter-spacing: 1px; margin-top: 5px; }
+    .stat-card h3 { font-size: clamp(1.5rem,6.5vw,2.5rem); color: var(--dm-gold); margin: 0; line-height: 1; }
+    .stat-card p { font-size: clamp(.6rem,2.3vw,.75rem); font-family:'Rajdhani',sans-serif; text-transform: uppercase; color: var(--dm-text-muted); letter-spacing: .5px; margin-top: 8px; line-height: 1.3; }
     .stat-card::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:2px; background:linear-gradient(90deg,transparent,var(--dm-cyan),transparent); }
 
     /* MVV */

@@ -2320,7 +2320,7 @@ class DimaiorAdmin extends HTMLElement {
     .btn-sair{padding:5px 10px;border:1px solid var(--brddim);border-radius:var(--rs);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}.btn-sair:hover{border-color:var(--verm);color:var(--verm)}
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .shell{display:flex;flex:1;min-height:548px;}
-    .side{width:220px;flex-shrink:0;background:rgba(8,8,20,.95);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;}
+    .side{width:220px;flex-shrink:0;background:rgba(8,8,20,.95);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;transform:translateZ(0);will-change:transform;}
     .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,212,212,.55);font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
