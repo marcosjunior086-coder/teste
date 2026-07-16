@@ -57,34 +57,22 @@
             const email   = localStorage.getItem('dm_email') || '';
 
             if (uid && token) {
-                if (refresh) {
-                    try {
-                        const controller = new AbortController();
-                        const timer = setTimeout(() => controller.abort(), 5000);
-                        const res = await fetch(`${this.apiUrl}/api/refresh`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ refresh_token: refresh }),
-                            signal: controller.signal,
-                        });
-                        clearTimeout(timer);
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.token) {
-                                localStorage.setItem('dm_token',   data.token);
-                                localStorage.setItem('dm_refresh', data.refresh_token || refresh);
-                            }
-                        } else if (res.status === 401) {
-                            this._clearSession();
-                            if (loading) loading.style.display = 'none';
-                            return;
-                        }
-                    } catch(_) {}
-                }
-
                 this.sessionUid   = uid;
-                this.sessionToken = localStorage.getItem('dm_token') || token;
+                this.sessionToken = token;
                 this.sessionEmail = email;
+
+                // Só renova se o token já expirou ou está perto de vencer (2min) — evita
+                // chamar /api/refresh toda vez que a página abre. Chamar sempre era a
+                // principal causa de duas abas (ou 2 dispositivos) renovarem o mesmo
+                // dm_refresh ao mesmo tempo, e o Supabase derrubar a sessão inteira por
+                // "reuso suspeito" de refresh token. Se a renovação falhar aqui (rede
+                // instável, por exemplo), segue com o token que já tem — o primeiro
+                // fetch autenticado real (_fetchAutenticado) tenta de novo e só força
+                // logout se o refresh_token estiver de fato morto.
+                const exp = this._jwtExp(token);
+                const precisaRenovar = !!refresh && (!exp || exp - Date.now() < 2 * 60 * 1000);
+                if (precisaRenovar) await this._renovarToken();
+                this.sessionToken = localStorage.getItem('dm_token') || this.sessionToken;
 
                 const savedNome = localStorage.getItem('dm_nome') || '';
                 const savedFoto = localStorage.getItem('dm_foto') || '';
@@ -118,6 +106,68 @@
             ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome','dm_atalho_admin','dm_atalho_agente']
                 .forEach(k => localStorage.removeItem(k));
         } catch(e) {}
+    }
+
+    // Lê o "exp" de um JWT sem validar assinatura — só pra saber se está perto
+    // de vencer (a validação de verdade é sempre feita no backend/Supabase).
+    _jwtExp(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+            return payload.exp ? payload.exp * 1000 : null;
+        } catch(_) { return null; }
+    }
+
+    // Renova dm_token via /api/refresh. Compartilha 1 única chamada em
+    // andamento entre quem pedir ao mesmo tempo (ex: várias telas dando 401
+    // juntas) — evita 2 chamadas simultâneas consumirem o mesmo dm_refresh e
+    // o Supabase derrubar a sessão inteira por "reuso suspeito". Retorna
+    // true se conseguiu um token novo, false em qualquer outro caso.
+    async _renovarToken() {
+        if (this._renovacaoPromise) return this._renovacaoPromise;
+        this._renovacaoPromise = (async () => {
+            const refresh = localStorage.getItem('dm_refresh');
+            if (!refresh) return false;
+            try {
+                const res = await fetch(`${this.apiUrl}/api/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: refresh }),
+                    signal: AbortSignal.timeout(8000),
+                });
+                if (!res.ok) return false;
+                const data = await res.json();
+                if (!data.token) return false;
+                this.sessionToken = data.token;
+                localStorage.setItem('dm_token',   data.token);
+                localStorage.setItem('dm_refresh', data.refresh_token || refresh);
+                return true;
+            } catch(_) { return false; }
+        })();
+        try { return await this._renovacaoPromise; }
+        finally { this._renovacaoPromise = null; }
+    }
+
+    // fetch autenticado padrão pro painel: manda o Bearer atual e, se vier
+    // 401 (token expirado), tenta renovar 1x (via _renovarToken, deduplicado)
+    // e repete a chamada original. Só encerra a sessão de verdade se a
+    // renovação também falhar — antes disso, cada tela tratava 401 do seu
+    // jeito (algumas nem tratavam), sem nunca tentar renovar primeiro.
+    async _fetchAutenticado(url, opts = {}) {
+        const comAuth = () => ({
+            ...opts,
+            headers: { ...(opts.headers || {}), 'Authorization': `Bearer ${this.sessionToken}` },
+        });
+        let res = await fetch(url, comAuth());
+        if (res.status === 401) {
+            const renovou = await this._renovarToken();
+            if (renovou) res = await fetch(url, comAuth());
+            if (res.status === 401) {
+                this._clearSession();
+                this.navigate('vL');
+                this.showAlert('#alL','Sua sessão expirou. Faça login novamente.');
+            }
+        }
+        return res;
     }
 
     loadChartJS() {
@@ -1330,17 +1380,12 @@
         if(btn){ btn.disabled=true; btn.innerHTML=`<span style="display:inline-block;animation:spin .8s linear infinite;">${this.svgRefresh()}</span> ...`; }
         if(!document.querySelector('#kfSpin')){ const s=document.createElement('style');s.id='kfSpin';s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(s); }
         try{
-            const res=await fetch(`${this.apiUrl}/api/dashboard`,{
+            const res=await this._fetchAutenticado(`${this.apiUrl}/api/dashboard`,{
                 method:'POST',
-                headers:{'Content-Type':'application/json','Authorization':`Bearer ${this.sessionToken}`},
+                headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({uid:this.sessionUid})
             });
-            if(res.status === 401){
-                this._clearSession();
-                this.navigate('vL');
-                this.showAlert('#alL','Sua sessão expirou. Faça login novamente.');
-                return;
-            }
+            if(res.status === 401) return; // _fetchAutenticado já limpou a sessão e avisou
             if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Falha de integração.'); }
             const data=await res.json();
             const t=data.totais_mes||{}, p=data.perfil||{};
@@ -1448,10 +1493,9 @@
         this.qs('#cHistPanel').classList.remove('on');
 
         try {
-            const resCart = await fetch(`${this.apiUrl}/api/carteira?uid=${this.sessionUid}`, {
-                headers: { 'Authorization': `Bearer ${this.sessionToken}` }
-            });
+            const resCart = await this._fetchAutenticado(`${this.apiUrl}/api/carteira?uid=${this.sessionUid}`, {});
 
+            if (resCart.status === 401) return; // _fetchAutenticado já limpou a sessão e avisou
             if (!resCart.ok) throw new Error('Erro ao carregar carteira');
             const cart   = await resCart.json();
 
@@ -1547,11 +1591,12 @@
         btn.disabled=true; btn.textContent='PROCESSANDO...';
 
         try {
-            const res = await fetch(`${this.apiUrl}/api/carteira/saque`, {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/carteira/saque`, {
                 method: 'POST',
-                headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${this.sessionToken}` },
+                headers: { 'Content-Type':'application/json' },
                 body: JSON.stringify({ uid: this.sessionUid, valor, pix_tipo: pixTipo, pix_chave: pixChave }),
             });
+            if (res.status === 401) return; // _fetchAutenticado já limpou a sessão e avisou
             const data = await res.json();
             if (!res.ok) throw new Error(data.erro || 'Erro ao solicitar saque.');
             this.qs('#cValor').value = '';
@@ -1611,7 +1656,8 @@
         if(nova&&!rx.test(nova)) return this.showAlert('#alS','Senha fraca: 1 maiuscula e 1 numero.');
         const btn=this.qs('#btnSave'); btn.disabled=true; btn.textContent='SALVANDO...';
         try{
-            const res=await fetch(`${this.apiUrl}/api/perfil/atualizar`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${this.sessionToken}`},body:JSON.stringify({uid:this.sessionUid,nome:this.qs('#sName').value,whatsapp:this.qs('#sWpp').value,endereco:this.qs('#sAddr').value,pix_tipo:this.qs('#sPixTipo').value,pix_chave:this.qs('#sPixChave').value,nova_senha:nova})});
+            const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/atualizar`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:this.sessionUid,nome:this.qs('#sName').value,whatsapp:this.qs('#sWpp').value,endereco:this.qs('#sAddr').value,pix_tipo:this.qs('#sPixTipo').value,pix_chave:this.qs('#sPixChave').value,nova_senha:nova})});
+            if(res.status === 401) return; // _fetchAutenticado já limpou a sessão e avisou
             if(!res.ok){ const e=await res.json(); throw new Error(e.erro||'Falha na atualizacao.'); }
             this.showAlert('#alS','Dados atualizados com sucesso.',false);
             const n=this.qs('#sName').value;
