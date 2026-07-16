@@ -14,7 +14,7 @@ class DimaiorAdmin extends HTMLElement {
     this.TK_KEY  = 'dm_admin_token';
     this._token  = '';
     this._edtId  = null;
-    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1, migracoesAgente:1 };
+    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1, migracoesAgente:1, impulso:1 };
     this._uidLookup = null;
     this._cartOp   = { uid: null, tipo: null, nome: '' };
     this._saqueId  = null;
@@ -906,7 +906,9 @@ class DimaiorAdmin extends HTMLElement {
       <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('metrics',26)}</div><div class="dc2-val">${c.sucesso_total}</div><div class="dc2-lbl">Total Sucesso</div></div>
       <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('clock_r',26)}</div><div class="dc2-val">${c.pendente}</div><div class="dc2-lbl">Pendentes</div></div>
       <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${c.com_erro}</div><div class="dc2-lbl">Com Erro</div></div>`;
-    const ultimos=d.ultimos||[];if(ultimos.length)el.insertAdjacentHTML('afterend',`<div class="box" style="margin-top:16px"><div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Últimos Impulsionamentos</div></div><table><thead><tr><th>UID</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}><td style="font-size:11px">${this._esc(u.uid_solicitante||'—')}${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:2px" title="A live desse link pertence a outro UID">⚠ live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
+    const ultimos=d.ultimos||[];
+    s.getElementById('boxUltimosImpulsos')?.remove();
+    if(ultimos.length)el.insertAdjacentHTML('afterend',`<div class="box" id="boxUltimosImpulsos" style="margin-top:16px"><div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Últimos Impulsionamentos</div></div><table><thead><tr><th>UID</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}><td style="font-size:11px">${this._esc(u.uid_solicitante||'—')}${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:2px" title="A live desse link pertence a outro UID">⚠ live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
   }
   async _carregarRecrutamento(){
     const s=this.shadowRoot;s.getElementById('tbRec').innerHTML=this._loading();
@@ -1429,6 +1431,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnBuscarBloqUid').addEventListener('click',()=>this._buscarStreamerBloqueio());
     s.getElementById('btnAplicarBloqueio').addEventListener('click',()=>this._bloquearStreamer());
     s.getElementById('btnAtuBloqueios').addEventListener('click',async()=>{const blq=await this._api('GET','/admin/impulso/bloqueios');this._renderBloqueios(blq?.bloqueios||[]);});
+    s.getElementById('bImpulsoHist')?.addEventListener('input',dbc(()=>this._carregarImpulsoHistorico(1),400));
     // Convites / Candidaturas
     s.getElementById('btnAtuConvites').addEventListener('click',()=>this._carregarConvites());
     s.getElementById('btnConvBuscarPerfil').addEventListener('click',()=>this._abrirModalConvPerfil());
@@ -2225,6 +2228,19 @@ class DimaiorAdmin extends HTMLElement {
       s.getElementById('iOpcao1hora').checked=cfg.opcao_1hora!==false;
     }
     this._renderBloqueios(blq?.bloqueios||[]);
+    this._carregarImpulsoHistorico();
+  }
+  async _carregarImpulsoHistorico(pagina){
+    const s=this.shadowRoot;
+    if(pagina)this._pg.impulso=pagina;
+    const el=s.getElementById('tbImpulsoHist');if(el)el.innerHTML=this._loading();
+    const busca=s.getElementById('bImpulsoHist')?.value.trim()||'';
+    const d=await this._api('GET',`/admin/impulso/historico?pagina=${this._pg.impulso}&busca=${encodeURIComponent(busca)}`);
+    if(!el)return;
+    const lista=d?.historico||[];
+    if(!d?.ok||!lista.length){el.innerHTML=this._empty('search','Nenhum impulsionamento encontrado');this._renderPg('pgImpulsoHist',this._pg.impulso,0,30,n=>this._carregarImpulsoHistorico(n));return;}
+    el.innerHTML=`<table><thead><tr><th>UID</th><th>Link</th><th>Tempo</th><th>Origem</th><th>Status</th><th>Data</th></tr></thead><tbody>${lista.map(u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}><td style="font-size:11px">${this._esc(u.uid_solicitante||'—')}${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:2px" title="A live desse link pertence a outro UID">⚠ live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td style="font-size:11px;color:var(--t3)">${this._esc(u.origem||'manual')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table>`;
+    this._renderPg('pgImpulsoHist',this._pg.impulso,lista.length,30,n=>this._carregarImpulsoHistorico(n));
   }
   async _salvarImpulsoConfig(){
     const s=this.shadowRoot;
@@ -3261,6 +3277,11 @@ class DimaiorAdmin extends HTMLElement {
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('x_circle',14)} Bloqueios Ativos</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuBloqueios">${this._ico('refresh',12)} Atualizar</button></div></div>
                 <div id="tbBloqueios">${this._loading()}</div>
+              </div>
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Impulsionamentos</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bImpulsoHist" type="text" placeholder="Buscar por UID..."/></div></div></div>
+                <div id="tbImpulsoHist">${this._loading()}</div>
+                <div class="pag-bar" id="pgImpulsoHist"></div>
               </div>
             </div>
             <div class="pag" id="pag-monitor">${ph('Monitor Kwai','server','Controle do worker de monitoramento','btnAtuMonitor')}
