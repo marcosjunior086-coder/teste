@@ -2238,8 +2238,8 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/impulso/historico?pagina=${this._pg.impulso}&busca=${encodeURIComponent(busca)}`);
     if(!el)return;
     const lista=d?.historico||[];
-    if(!d?.ok||!lista.length){el.innerHTML=this._empty('search','Nenhum impulsionamento encontrado');this._renderPg('pgImpulsoHist',this._pg.impulso,0,30,n=>this._carregarImpulsoHistorico(n));return;}
-    el.innerHTML=`<table><thead><tr><th>UID</th><th>Link</th><th>Tempo</th><th>Origem</th><th>Status</th><th>Data</th></tr></thead><tbody>${lista.map(u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}><td style="font-size:11px">${this._esc(u.uid_solicitante||'—')}${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:2px" title="A live desse link pertence a outro UID">⚠ live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td style="font-size:11px;color:var(--t3)">${this._esc(u.origem||'manual')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table>`;
+    if(!d?.ok||!lista.length){el.innerHTML=this._empty('check_c','Nenhum UID divergente encontrado');this._renderPg('pgImpulsoHist',this._pg.impulso,0,30,n=>this._carregarImpulsoHistorico(n));return;}
+    el.innerHTML=`<table><thead><tr><th>Solicitante</th><th>UID da Live</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${lista.map(u=>`<tr style="background:rgba(248,113,113,.08)"><td style="font-size:11px">${u.nome_solicitante?`<div style="color:var(--t1);font-weight:600">${this._esc(u.nome_solicitante)}</div>`:''}<div style="color:var(--t3)">${this._esc(u.uid_solicitante||'—')}</div></td><td style="font-size:11px"><div style="color:#f87171;font-weight:700">${this._esc(u.uid_divergente)}</div>${u.nome_divergente?`<div style="color:var(--t3)">${this._esc(u.nome_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table>`;
     this._renderPg('pgImpulsoHist',this._pg.impulso,lista.length,30,n=>this._carregarImpulsoHistorico(n));
   }
   async _salvarImpulsoConfig(){
@@ -3279,7 +3279,8 @@ class DimaiorAdmin extends HTMLElement {
                 <div id="tbBloqueios">${this._loading()}</div>
               </div>
               <div class="box impulso-section">
-                <div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Impulsionamentos</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bImpulsoHist" type="text" placeholder="Buscar por UID..."/></div></div></div>
+                <div class="bhead"><div class="btitulo">${this._ico('warning',14)} UIDs Divergentes</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bImpulsoHist" type="text" placeholder="Buscar por UID..."/></div></div></div>
+                <div style="padding:10px 14px;background:rgba(248,113,113,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Impulsos onde o link pertence à live de um UID diferente de quem pediu — possível uso pra impulsionar outra conta.</div>
                 <div id="tbImpulsoHist">${this._loading()}</div>
                 <div class="pag-bar" id="pgImpulsoHist"></div>
               </div>
