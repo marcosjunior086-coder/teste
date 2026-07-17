@@ -249,6 +249,9 @@ class DmaiorServicesMenu extends HTMLElement {
           /* ── Dinâmico Pro no desktop — 3 colunas + containers largos ── */
           .dinamico-layout { max-width:860px; width:100%; }
           .dp-grid { grid-template-columns:repeat(3,1fr); gap:14px; padding:0 20px 18px; }
+          /* Desktop tem 3 colunas — a sobra de item ímpar não fica isolada
+             sozinha numa linha como no mobile, então reseta a centralização. */
+          .dp-grid .dp-item:last-child:nth-child(odd) { grid-column:auto; max-width:none; margin:0; }
           .dp-item { min-height:96px; padding:16px 14px; border-radius:24px; }
           .dp-item-icon { width:40px; height:40px; border-radius:16px; }
           .dp-item-icon svg { width:22px; height:22px; }
@@ -287,6 +290,10 @@ class DmaiorServicesMenu extends HTMLElement {
 
         /* Grid 2 colunas */
         .dp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px 14px; }
+        /* Quando o total de itens é ímpar, o último fica sozinho na coluna 1
+           com um vão vazio do lado — centraliza ele em vez de deixar preso
+           à esquerda (ex: "Portfólio" sozinho na última linha do Acesso rápido). */
+        .dp-grid .dp-item:last-child:nth-child(odd) { grid-column:1 / -1; max-width:calc(50% - 5px); margin:0 auto; }
         .dp-item { display:flex; flex-direction:row; align-items:center; gap:11px; padding:13px 12px; border-radius:24px; background:var(--dm-grad-card-alt); border:1px solid var(--dm-bw06); text-decoration:none; position:relative; overflow:hidden; transition:transform .18s, border-color .18s, box-shadow .18s; min-height:68px; }
         .dp-item:hover { border-color:var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); box-shadow:0 10px 24px var(--dm-shadow-40),0 0 16px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
         .dp-item:active { transform:scale(.97); }
