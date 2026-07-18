@@ -125,6 +125,7 @@ class DimaiorAdmin extends HTMLElement {
       heart:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
       gift:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M12 2v20"/><path d="M2 7h20"/><path d="M12 7a4 4 0 0 1-4-4 4 4 0 0 1 8 0 4 4 0 0 1-4 4z"/></svg>`,
       wallet:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+      bars_up:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="14"/><line x1="10" y1="20" x2="10" y2="9"/><line x1="16" y1="20" x2="16" y2="4"/><line x1="22" y1="20" x2="2" y2="20"/></svg>`,
       key_uid:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3 3-3-3-3"/></svg>`,
       send:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
       diamond:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5L2 9l10 12L22 9l-3-6zm-7 14.5L4.5 9.5l2-4h11l2 4L12 17.5z"/></svg>`,
@@ -209,7 +210,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
@@ -934,8 +935,9 @@ class DimaiorAdmin extends HTMLElement {
   }
   async _carregarConfig(){
     const s=this.shadowRoot;s.getElementById('tbC').innerHTML=this._loading();const d=await this._api('GET','/admin/config');const el=s.getElementById('tbC');
-    // revisao_* tem tela própria com botões em Monitor Kwai — não repete aqui como texto livre
-    const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas']);
+    // revisao_* tem tela própria com botões em Monitor Kwai, dashboard_limite_* tem
+    // tela própria em Evolução Mensal — não repete aqui como texto livre
+    const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas','dashboard_limite_atencao','dashboard_limite_critico']);
     if(d?.config)d.config=d.config.filter(c=>!NAO_LISTAR.has(c.chave));
     if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configurações');return;}
     const labels={
@@ -992,6 +994,172 @@ class DimaiorAdmin extends HTMLElement {
     if(!confirm(`Apagar a CONTA (login) do UID ${uid}?\n\nIsso remove o acesso ao painel dele definitivamente. Carteira, saldo e histórico de diamantes NÃO são apagados — ficam preservados pra registro contábil e ranking.\n\nEssa ação não tem volta (mas o UID pode ser reautorizado do zero depois, se ele voltar pra agência).`))return;
     const d=await this._api('DELETE',`/admin/uids/${uid}/conta`);
     if(d?.ok){this._toast('Conta apagada. Carteira e histórico preservados.');this._carregarUids();}else this._toast(d?.erro||'Erro','err');
+  }
+
+  // ══════════════════════ DASHBOARD DE DESEMPENHO ═══════════════════════════
+  async _carregarDashboardDesempenho(){
+    const s=this.shadowRoot;
+    s.getElementById('ddHero').innerHTML=this._loading();
+    s.getElementById('ddStats').innerHTML=this._loading('grid-column:1/-1');
+    s.getElementById('ddChartAno').innerHTML=this._loading();
+    s.getElementById('ddChart3m').innerHTML=this._loading();
+    const [comp,anual,cfg]=await Promise.all([
+      this._api('GET','/admin/dashboard-desempenho/comparativo'),
+      this._api('GET','/admin/dashboard-desempenho/anual'),
+      this._api('GET','/admin/config'),
+    ]);
+    if(comp?.ok)this._ddRenderHero(comp);else s.getElementById('ddHero').innerHTML=this._empty('warning','Erro ao carregar comparativo');
+    if(anual?.ok){this._ddRenderStats(anual);this._ddRenderChartAno(anual);this._ddRenderChart3m(anual);}
+    else{s.getElementById('ddStats').innerHTML=this._empty('warning','Erro');s.getElementById('ddChartAno').innerHTML=this._empty('warning','Erro');s.getElementById('ddChart3m').innerHTML=this._empty('warning','Erro');}
+    this._ddRenderImportForm();
+    this._ddRenderLimites(cfg?.config||[]);
+  }
+  _ddRenderHero(d){
+    const s=this.shadowRoot;const el=s.getElementById('ddHero');
+    const cls=d.classificacao,delta=d.delta;
+    const corMap={verde:'var(--verde)',azul:'var(--azul)',gold:'var(--gold)',vermelho:'var(--verm)'};
+    const bgMap={verde:'rgba(74,222,128,.12)',azul:'rgba(59,130,246,.12)',gold:'rgba(240,192,64,.12)',vermelho:'rgba(248,113,113,.12)'};
+    const cor=corMap[cls.cor]||'var(--t3)',bg=bgMap[cls.cor]||'rgba(255,255,255,.05)';
+    const seta=delta>=0?'▲':'▼';
+    const pctTxt=d.percentual!==null&&d.percentual!==undefined?`${d.percentual>=0?'+':''}${d.percentual.toFixed(1)}%`:'—';
+    const fraseDelta=delta>=0?`${this._num(Math.abs(delta))} diamantes acima`:`${this._num(Math.abs(delta))} diamantes abaixo`;
+    const alturaCur=d.mes_anterior.total_ate_mesmo_dia>0?Math.min(100,(d.mes_atual.total_ate_hoje/d.mes_anterior.total_ate_mesmo_dia)*100):0;
+    el.innerHTML=`
+      <div class="dd-hero-top">
+        <div>
+          <span class="dd-status-pill dd-status-${this._esc(cls.nivel)}"><span class="sw"></span> ${this._esc(cls.label)}</span>
+          <p class="dd-headline">${this._esc(d.mes_atual.nome)} está <b style="color:${cor}">${fraseDelta}</b> de ${this._esc(d.mes_anterior.nome)} no mesmo período.</p>
+          <p class="dd-hero-note">Comparando o acumulado até o dia ${d.dia_referencia} de cada mês, pra não pesar um mês fechado contra um mês em andamento.</p>
+        </div>
+        <div class="dd-delta-badge" style="background:${bg};border:1px solid ${cor}55">
+          <span style="color:${cor};font-size:17px;line-height:1">${seta}</span>
+          <span class="num" style="color:${cor}">${delta>=0?'+':''}${this._num(delta)}</span>
+          <span class="pct">${pctTxt} vs. ${this._esc(d.mes_anterior.nome)}</span>
+        </div>
+      </div>
+      <div class="dd-compare-row">
+        <div>
+          <p class="dd-compare-month">${this._esc(d.mes_anterior.nome)} · até dia ${d.dia_referencia}</p>
+          <div class="dd-compare-val" style="color:var(--t3)">${this._num(d.mes_anterior.total_ate_mesmo_dia)} 💎</div>
+          <p class="dd-compare-sub">mês fechou em ${this._num(d.mes_anterior.total_completo)}</p>
+        </div>
+        <div style="text-align:center;color:var(--t3);font-size:20px">→</div>
+        <div style="text-align:right">
+          <p class="dd-compare-month">${this._esc(d.mes_atual.nome)} · até dia ${d.dia_referencia} (agora)</p>
+          <div class="dd-compare-val">${this._num(d.mes_atual.total_ate_hoje)} 💎</div>
+          <p class="dd-compare-sub">${d.mes_atual.streamers_ativos} streamers ativos até aqui</p>
+        </div>
+      </div>
+      <div class="dd-bar-compare">
+        <div class="seg prev" style="height:100%" title="${this._esc(d.mes_anterior.nome)}: ${this._num(d.mes_anterior.total_ate_mesmo_dia)}"></div>
+        <div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div>
+      </div>`;
+  }
+  _ddRenderStats(d){
+    const s=this.shadowRoot;const melhor=d.melhor_mes;const fechados=d.ultimos_3_fechados||[];
+    const ultimo=fechados[fechados.length-1],penultimo=fechados[fechados.length-2];
+    let variacaoTxt='—',variacaoCls='dc2-cyan';
+    if(ultimo&&penultimo&&penultimo.total_diamantes>0){
+      const v=((ultimo.total_diamantes-penultimo.total_diamantes)/penultimo.total_diamantes)*100;
+      variacaoCls=v>=0?'dc2-verde':'dc2-verm';
+      variacaoTxt=`${v>=0?'▲':'▼'} ${Math.abs(v).toFixed(1)}% vs. ${this._esc(penultimo.nome)}`;
+    }
+    s.getElementById('ddStats').innerHTML=`
+      <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('diamond',26)}</div><div class="dc2-val">${this._num(d.total_ano)}</div><div class="dc2-lbl">Acumulado ${d.ano}</div></div>
+      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('award',26)}</div><div class="dc2-val">${melhor?this._esc(melhor.nome):'—'}</div><div class="dc2-lbl">${melhor?this._num(melhor.total_diamantes)+' 💎 · melhor mês':'—'}</div></div>
+      <div class="dc2 ${variacaoCls}"><div class="dc2-ico">${this._ico('bars_up',26)}</div><div class="dc2-val">${ultimo?this._esc(ultimo.nome):'—'}</div><div class="dc2-lbl">${variacaoTxt}</div></div>`;
+  }
+  _ddRenderChartAno(d){
+    const s=this.shadowRoot;const meses=d.meses||[];
+    if(!meses.length){s.getElementById('ddChartAno').innerHTML=this._empty('bars_up','Sem meses registrados ainda');return;}
+    const max=Math.max(...meses.map(m=>m.total_diamantes),1);
+    s.getElementById('ddChartAno').innerHTML=`<div class="dd-bars">${meses.map(m=>`
+      <div class="col">
+        <span class="val">${this._numK(m.total_diamantes)}</span>
+        <div class="stick ${m.fechado?'':'progress'}" style="height:${Math.max(4,(m.total_diamantes/max)*100)}%" title="${this._num(m.total_diamantes)}${m.fechado?'':' — em andamento'}"></div>
+        <span class="lbl ${m.fechado?'':'now'}">${this._esc(m.nome.slice(0,3))}${m.fechado?'':' •'}</span>
+      </div>`).join('')}</div>`;
+  }
+  _ddRenderChart3m(d){
+    const s=this.shadowRoot;const fechados=d.ultimos_3_fechados||[];
+    if(!fechados.length){s.getElementById('ddChart3m').innerHTML=this._empty('history','Nenhum mês fechado ainda');return;}
+    const max=Math.max(...fechados.map(m=>m.total_diamantes),1);
+    s.getElementById('ddChart3m').innerHTML=`<div class="dd-mini-bars">${fechados.map((m,i)=>{
+      const anterior=fechados[i-1];let chg='';
+      if(anterior&&anterior.total_diamantes>0){
+        const v=((m.total_diamantes-anterior.total_diamantes)/anterior.total_diamantes)*100;
+        chg=`<span class="chg ${v>=0?'up':'down'}">${v>=0?'▲':'▼'}${Math.abs(v).toFixed(1)}%</span>`;
+      }
+      return `<div class="col">${chg}<span class="val">${this._numK(m.total_diamantes)}</span><div class="stick" style="height:${Math.max(4,(m.total_diamantes/max)*100)}%"></div><span class="lbl">${this._esc(m.nome.slice(0,3))}</span></div>`;
+    }).join('')}</div>`;
+  }
+  _ddRenderImportForm(){
+    const s=this.shadowRoot;const anoAtual=new Date().getFullYear();
+    const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    s.getElementById('ddImport').innerHTML=`
+      <p class="dd-import-hint">${this._ico('warning',11)} Copie as linhas do arquivo baixado em <strong>Monitor Kwai &gt; Baixar Dados</strong> (com a coluna "diamantes") e cole abaixo. O sistema soma tudo sozinho.</p>
+      <div class="dd-import-form">
+        <div><label>Ano</label><input id="ddImpAno" type="number" value="${anoAtual}"/></div>
+        <div><label>Mês</label><select id="ddImpMes">${meses.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}</select></div>
+        <div><label>&nbsp;</label><button class="btn btn-g" id="ddImpBtn" style="width:100%">${this._ico('plus',13)} Importar</button></div>
+      </div>
+      <textarea class="dd-import-ta" id="ddImpDados" placeholder="Cole aqui as linhas copiadas da planilha (Ctrl+V)..."></textarea>
+      <div class="dd-import-result" id="ddImpResult"></div>
+      <table class="dd-import-table"><thead><tr><th>Mês</th><th>Diamantes</th><th>Origem</th></tr></thead><tbody id="ddImpTabela"><tr><td colspan="3" style="color:var(--t3)">Carregando...</td></tr></tbody></table>`;
+    s.getElementById('ddImpBtn').addEventListener('click',()=>this._ddImportarMes());
+    this._ddCarregarTabelaHistorico();
+  }
+  async _ddCarregarTabelaHistorico(){
+    const s=this.shadowRoot;const d=await this._api('GET','/admin/dashboard-desempenho/anual');
+    const el=s.getElementById('ddImpTabela');if(!el)return;
+    if(!d?.ok||!d.meses?.length){el.innerHTML=`<tr><td colspan="3" style="color:var(--t3)">Nenhum mês ainda.</td></tr>`;return;}
+    el.innerHTML=d.meses.map(m=>`<tr><td style="color:var(--t1);font-weight:600">${this._esc(m.nome)}/${m.ano}</td><td>${this._num(m.total_diamantes)}</td><td>${m.fechado?'Importado':'<span style="color:var(--cyan)">Em andamento</span>'}</td></tr>`).join('');
+  }
+  async _ddImportarMes(){
+    const s=this.shadowRoot;
+    const ano=s.getElementById('ddImpAno').value,mes=s.getElementById('ddImpMes').value,dados=s.getElementById('ddImpDados').value;
+    const resultEl=s.getElementById('ddImpResult'),btn=s.getElementById('ddImpBtn');
+    if(!dados.trim()){resultEl.className='dd-import-result on err';resultEl.textContent='Cole os dados antes de importar.';return;}
+    btn.disabled=true;btn.textContent='Importando...';
+    const d=await this._api('POST','/admin/dashboard-desempenho/importar-mes',{ano,mes,dados_colados:dados});
+    btn.disabled=false;btn.innerHTML=`${this._ico('plus',13)} Importar`;
+    if(d?.ok){
+      resultEl.className='dd-import-result on ok';
+      resultEl.textContent=`Importado! ${this._num(d.total_diamantes)} diamantes somados de ${d.linhas_processadas} streamer(s).`;
+      s.getElementById('ddImpDados').value='';
+      this._ddCarregarTabelaHistorico();
+      this._carregarDashboardDesempenho();
+    }else{
+      resultEl.className='dd-import-result on err';
+      resultEl.textContent=d?.erro||'Erro ao importar.';
+    }
+  }
+  _ddRenderLimites(config){
+    const s=this.shadowRoot;
+    const mapa=Object.fromEntries((config||[]).map(c=>[c.chave,c.valor]));
+    const atencao=parseFloat(mapa.dashboard_limite_atencao)||100000;
+    const critico=parseFloat(mapa.dashboard_limite_critico)||800000;
+    const linhas=[
+      {chave:null,sw:'var(--verde)',lbl:'Excelente',range:`acima de +${this._num(atencao)}`},
+      {chave:null,sw:'var(--azul)',lbl:'Estável',range:`entre −${this._num(atencao)} e +${this._num(atencao)}`},
+      {chave:'dashboard_limite_atencao',sw:'var(--gold)',lbl:'Atenção',range:`de −${this._num(atencao)} até −${this._num(critico)}`,valor:atencao},
+      {chave:'dashboard_limite_critico',sw:'var(--verm)',lbl:'Crítico',range:`a partir de −${this._num(critico)}`,valor:critico},
+    ];
+    s.getElementById('ddLimites').innerHTML=linhas.map(l=>`
+      <div class="dd-th-row">
+        <span class="dd-th-sw" style="background:${l.sw};box-shadow:0 0 8px ${l.sw}"></span>
+        <span class="dd-th-lbl">${l.lbl}</span>
+        <span class="dd-th-range">${l.range}</span>
+        ${l.chave?`<input class="dd-th-edit-inp" id="ddThInp_${l.chave}" type="number" value="${l.valor}"/><button class="btn btn-o btn-sm" id="ddThBtn_${l.chave}">editar</button>`:''}
+      </div>`).join('');
+    linhas.filter(l=>l.chave).forEach(l=>{
+      const btn=s.getElementById(`ddThBtn_${l.chave}`),inp=s.getElementById(`ddThInp_${l.chave}`);
+      btn?.addEventListener('click',async()=>{
+        if(inp.style.display!=='inline-block'){inp.style.display='inline-block';btn.textContent='salvar';return;}
+        const r=await this._api('POST','/admin/config',{chave:l.chave,valor:inp.value});
+        if(r?.ok){this._toast('Limite atualizado!');this._carregarDashboardDesempenho();}else this._toast(r?.erro||'Erro','err');
+      });
+    });
   }
   _abrirModalUID(){
     const s=this.shadowRoot;this._uidLookup=null;s.getElementById('uidInputVal').value='';s.getElementById('uidLookupResult').innerHTML='';s.getElementById('uidLookupResult').style.display='none';s.getElementById('btnConfirmarUID').style.display='none';s.getElementById('btnBuscarUID').textContent='Buscar';s.getElementById('btnBuscarUID').disabled=false;s.getElementById('uidNomeRef').value='';this._abrirModal('mUID');setTimeout(()=>s.getElementById('uidInputVal')?.focus(),200);
@@ -2372,6 +2540,68 @@ class DimaiorAdmin extends HTMLElement {
     .dc2-gold{background:linear-gradient(135deg,rgba(217,119,6,.8),rgba(234,179,8,.56));border-color:rgba(251,191,36,.86);}.dc2-gold .dc2-ico,.dc2-gold .dc2-val{color:#fef3c7;text-shadow:0 0 18px rgba(245,158,11,.72)}
     .dc2-slate{background:linear-gradient(135deg,rgba(51,65,85,.82),rgba(14,165,233,.32));border-color:rgba(148,163,184,.72);}.dc2-slate .dc2-ico,.dc2-slate .dc2-val{color:#e2e8f0;text-shadow:0 0 16px rgba(148,163,184,.55)}
     .dc2-roxo{background:linear-gradient(135deg,rgba(126,34,206,.78),rgba(219,39,119,.42));border-color:rgba(192,132,252,.82);}.dc2-roxo .dc2-ico,.dc2-roxo .dc2-val{color:#e9d5ff;text-shadow:0 0 18px rgba(192,132,252,.7)}
+
+    /* ══ Dashboard de Desempenho ══ */
+    .dd-row2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
+    .dd-chart-wrap{padding:20px 18px;}
+    .dd-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .dd-status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px 6px 10px;border-radius:999px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;}
+    .dd-status-pill .sw{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;}
+    .dd-status-excelente{background:rgba(74,222,128,.12);color:var(--verde);border:1px solid rgba(74,222,128,.35);}
+    .dd-status-estavel{background:rgba(59,130,246,.12);color:var(--azul);border:1px solid rgba(59,130,246,.35);}
+    .dd-status-atencao{background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.35);}
+    .dd-status-critico{background:rgba(248,113,113,.12);color:var(--verm);border:1px solid rgba(248,113,113,.35);}
+    .dd-headline{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:19px;color:#fff;margin:12px 0 2px;}
+    .dd-hero-note{color:var(--t3);font-size:12.5px;margin:0;max-width:60ch;}
+    .dd-delta-badge{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 14px;border-radius:12px;min-width:100px;}
+    .dd-delta-badge .num{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:15px;}
+    .dd-delta-badge .pct{font-size:10px;color:var(--t3);}
+    .dd-compare-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin-top:20px;}
+    .dd-compare-month{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin:0 0 4px;}
+    .dd-compare-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:22px;color:var(--t1);}
+    .dd-compare-sub{font-size:10.5px;color:var(--t3);margin-top:2px;}
+    .dd-bar-compare{display:flex;align-items:flex-end;gap:8px;height:54px;margin-top:16px;}
+    .dd-bar-compare .seg{flex:1;border-radius:6px 6px 0 0;}
+    .dd-bar-compare .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}
+    .dd-bar-compare .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
+    .dd-bars{display:flex;align-items:flex-end;gap:16px;height:150px;padding:4px 4px 0;}
+    .dd-bars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+    .dd-bars .val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;color:var(--t1);white-space:nowrap;}
+    .dd-bars .stick{width:100%;max-width:46px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));box-shadow:0 0 16px rgba(0,212,212,.16);}
+    .dd-bars .stick.progress{background:repeating-linear-gradient(135deg,rgba(0,212,212,.55) 0 6px,rgba(0,212,212,.24) 6px 12px);box-shadow:none;}
+    .dd-bars .lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);}
+    .dd-bars .lbl.now{color:var(--cyan);}
+    .dd-mini-bars{display:flex;align-items:flex-end;gap:14px;height:140px;padding:4px 2px 0;}
+    .dd-mini-bars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;}
+    .dd-mini-bars .stick{width:100%;max-width:42px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--azul),rgba(59,130,246,.2));}
+    .dd-mini-bars .val{font-size:11px;font-weight:700;color:var(--t1);}
+    .dd-mini-bars .chg{font-size:10px;}
+    .dd-mini-bars .chg.up{color:var(--verde);}
+    .dd-mini-bars .chg.down{color:var(--verm);}
+    .dd-mini-bars .lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);}
+    .dd-import-form{display:grid;grid-template-columns:110px 140px 1fr;gap:10px;margin-bottom:10px;align-items:end;}
+    .dd-import-form label{display:block;font-size:9.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+    .dd-import-form select,.dd-import-form input{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--brddim);border-radius:8px;color:var(--t1);padding:8px 9px;font-size:12.5px;font-family:var(--dm-font-body,'Exo 2',sans-serif);}
+    .dd-import-ta{width:100%;min-height:90px;background:rgba(0,0,0,.35);border:1px solid var(--brddim);border-radius:8px;color:var(--t1);padding:9px 10px;font-size:11.5px;font-family:monospace;resize:vertical;margin-bottom:10px;box-sizing:border-box;}
+    .dd-import-hint{font-size:10.5px;color:var(--t3);margin:0 0 12px;line-height:1.5;}
+    .dd-import-result{font-size:11.5px;margin-top:10px;padding:8px 10px;border-radius:8px;display:none;}
+    .dd-import-result.on{display:block;}
+    .dd-import-result.ok{background:rgba(74,222,128,.1);color:var(--verde);}
+    .dd-import-result.err{background:rgba(248,113,113,.1);color:var(--verm);}
+    .dd-import-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:14px;}
+    .dd-import-table th{text-align:left;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);padding:6px 6px;border-bottom:1px solid var(--brddim);}
+    .dd-import-table td{padding:7px 6px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--t2);}
+    .dd-th-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;background:rgba(255,255,255,.02);margin-bottom:8px;flex-wrap:wrap;}
+    .dd-th-sw{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .dd-th-lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;color:var(--t1);min-width:82px;}
+    .dd-th-range{font-size:11.5px;color:var(--t3);flex:1;}
+    .dd-th-edit-inp{width:90px;background:rgba(0,0,0,.35);border:1px solid var(--brddim);border-radius:6px;color:var(--t1);padding:5px 7px;font-size:11.5px;display:none;}
+    @media(max-width:900px){
+      .dd-row2{grid-template-columns:1fr;}
+      .dd-compare-row{grid-template-columns:1fr;text-align:left;}
+      .dd-compare-row div[style*="text-align:right"]{text-align:left !important;}
+      .dd-import-form{grid-template-columns:1fr 1fr;}
+    }
     /* ── Widget Ao Vivo no Dashboard ── */
     .dlw-empty{display:flex;align-items:center;gap:8px;padding:16px;color:var(--t3);font-size:12px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
     .dlw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -3103,6 +3333,7 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('trend','desempenho','Desempenho')}
             ${ni('history','historico','Histórico')}
             ${ni('calendar','mesesRanking','Meses Ranking')}
+            ${ni('bars_up','dashDesemp','Evolução Mensal')}
             <div class="ns">Gestão</div>
             ${ni('users','streamers','Streamers')}
             ${ni('key_uid','uids','Autorização UIDs')}
@@ -3131,6 +3362,18 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
             <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
             <div class="pag" id="pag-mesesRanking">${ph('Meses do Ranking','calendar','Configuração das abas históricas','btnAtuRankMeses',`<button class="btn btn-g" id="btnSalvarRankMeses">${this._ico('check',13)} Salvar Meses</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Meses Históricos via Google Planilhas</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnReordenarRankMeses">${this._ico('refresh',12)} Reordenar</button><button class="btn btn-o btn-sm" id="btnAddRankMes">${this._ico('plus',12)} Adicionar</button></div></div><div style="padding:16px"><div class="premio-info-box">${this._ico('warning',13)} Cadastre aqui o nome do mês e o GID da aba do Google Planilhas. O ranking público passa a montar as abas automaticamente pelo KV do Worker Rank.</div><div id="rankMesesArea">${this._loading()}</div><div id="rankMesesStatus" style="font-size:11px;color:var(--t3);margin-top:10px"></div></div></div></div>
+            <div class="pag" id="pag-dashDesemp">${ph('Evolução Mensal','bars_up','Diamantes por mês e comparativo com o mês anterior','btnAtuDashDesemp')}
+              <div class="box" id="ddHero" style="padding:22px 24px">${this._loading()}</div>
+              <div class="dc2-grid" id="ddStats">${this._loading('grid-column:1/-1')}</div>
+              <div class="dd-row2">
+                <div class="box"><div class="bhead"><div class="btitulo">${this._ico('bars_up',14)} Evolução Mensal · ${new Date().getFullYear()}</div></div><div class="dd-chart-wrap" id="ddChartAno">${this._loading()}</div></div>
+                <div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Últimos 3 Meses Fechados</div></div><div class="dd-chart-wrap" id="ddChart3m">${this._loading()}</div></div>
+              </div>
+              <div class="dd-row2">
+                <div class="box"><div class="bhead"><div class="btitulo">${this._ico('plus',14)} Importar Mês ao Histórico</div></div><div style="padding:16px 18px" id="ddImport"></div></div>
+                <div class="box"><div class="bhead"><div class="btitulo">${this._ico('settings',14)} Limites da Classificação</div></div><div style="padding:12px 18px" id="ddLimites">${this._loading()}</div></div>
+              </div>
+            </div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
