@@ -1023,7 +1023,12 @@ class DimaiorAdmin extends HTMLElement {
     const seta=delta>=0?'▲':'▼';
     const pctTxt=d.percentual!==null&&d.percentual!==undefined?`${d.percentual>=0?'+':''}${d.percentual.toFixed(1)}%`:'—';
     const fraseDelta=delta>=0?`${this._num(Math.abs(delta))} diamantes acima`:`${this._num(Math.abs(delta))} diamantes abaixo`;
-    const alturaCur=d.mes_anterior.total_ate_mesmo_dia>0?Math.min(100,(d.mes_atual.total_ate_hoje/d.mes_anterior.total_ate_mesmo_dia)*100):0;
+    // Escala as duas barras pelo maior dos dois valores (nunca pelo "anterior" fixo em
+    // 100%) — senão, quando o mês atual supera o anterior, a barra dele ficava sempre
+    // travada na mesma altura da anterior, escondendo visualmente o quanto está à frente.
+    const maiorValor=Math.max(d.mes_atual.total_ate_hoje,d.mes_anterior.total_ate_mesmo_dia,1);
+    const alturaPrev=Math.max(4,(d.mes_anterior.total_ate_mesmo_dia/maiorValor)*100);
+    const alturaCur=Math.max(4,(d.mes_atual.total_ate_hoje/maiorValor)*100);
     el.innerHTML=`
       <div class="dd-hero-top">
         <div>
@@ -1051,7 +1056,7 @@ class DimaiorAdmin extends HTMLElement {
         </div>
       </div>
       <div class="dd-bar-compare">
-        <div class="seg prev" style="height:100%" title="${this._esc(d.mes_anterior.nome)}: ${this._num(d.mes_anterior.total_ate_mesmo_dia)}"></div>
+        <div class="seg prev" style="height:${alturaPrev}%" title="${this._esc(d.mes_anterior.nome)}: ${this._num(d.mes_anterior.total_ate_mesmo_dia)}"></div>
         <div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div>
       </div>`;
   }
@@ -1531,6 +1536,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
     s.querySelectorAll('.ov').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)this._fechaModal(ov.id);}));
+    // v2: Dashboard de Desempenho
+    s.getElementById('btnAtuDashDesemp')?.addEventListener('click',()=>this._carregarDashboardDesempenho());
     // v2: UIDs
     s.getElementById('btnAtuUIDs').addEventListener('click',()=>this._carregarUids());s.getElementById('btnNovoUID').addEventListener('click',()=>this._abrirModalUID());s.getElementById('btnBuscarUID').addEventListener('click',()=>this._executarBuscaUID());s.getElementById('uidInputVal').addEventListener('keydown',e=>{if(e.key==='Enter')this._executarBuscaUID();});s.getElementById('btnConfirmarUID').addEventListener('click',()=>this._confirmarAutorizarUID());s.getElementById('btnCancelarUID').addEventListener('click',()=>this._fechaModal('mUID'));s.getElementById('uidFiltro').addEventListener('change',()=>{this._pg.uid=1;this._carregarUids();});
     // v2: Carteira
@@ -2543,7 +2550,7 @@ class DimaiorAdmin extends HTMLElement {
 
     /* ══ Dashboard de Desempenho ══ */
     .dd-row2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
-    .dd-chart-wrap{padding:20px 18px;}
+    .dd-chart-wrap{padding:20px 18px;overflow-x:auto;}
     .dd-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
     .dd-status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px 6px 10px;border-radius:999px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;}
     .dd-status-pill .sw{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;}
@@ -2565,14 +2572,14 @@ class DimaiorAdmin extends HTMLElement {
     .dd-bar-compare .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}
     .dd-bar-compare .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
     .dd-bars{display:flex;align-items:flex-end;gap:16px;height:150px;padding:4px 4px 0;}
-    .dd-bars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+    .dd-bars .col{flex:0 0 64px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
     .dd-bars .val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;color:var(--t1);white-space:nowrap;}
     .dd-bars .stick{width:100%;max-width:46px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));box-shadow:0 0 16px rgba(0,212,212,.16);}
     .dd-bars .stick.progress{background:repeating-linear-gradient(135deg,rgba(0,212,212,.55) 0 6px,rgba(0,212,212,.24) 6px 12px);box-shadow:none;}
     .dd-bars .lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);}
     .dd-bars .lbl.now{color:var(--cyan);}
     .dd-mini-bars{display:flex;align-items:flex-end;gap:14px;height:140px;padding:4px 2px 0;}
-    .dd-mini-bars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;}
+    .dd-mini-bars .col{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;}
     .dd-mini-bars .stick{width:100%;max-width:42px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--azul),rgba(59,130,246,.2));}
     .dd-mini-bars .val{font-size:11px;font-weight:700;color:var(--t1);}
     .dd-mini-bars .chg{font-size:10px;}
