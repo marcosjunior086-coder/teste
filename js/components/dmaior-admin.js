@@ -2608,6 +2608,11 @@ class DimaiorAdmin extends HTMLElement {
       .dd-compare-row{grid-template-columns:1fr;text-align:left;}
       .dd-compare-row div[style*="text-align:right"]{text-align:left !important;}
       .dd-import-form{grid-template-columns:1fr 1fr;}
+      /* Badge de variação (verde/vermelho) some da lateral e vira uma faixa
+         centralizada acima do comparativo Junho/Julho, em vez de ficar
+         colado à esquerda quando quebra linha do texto do cabeçalho. */
+      .dd-hero-top{justify-content:center;}
+      .dd-delta-badge{margin:14px auto 0;}
     }
     /* ── Widget Ao Vivo no Dashboard ── */
     .dlw-empty{display:flex;align-items:center;gap:8px;padding:16px;color:var(--t3);font-size:12px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
