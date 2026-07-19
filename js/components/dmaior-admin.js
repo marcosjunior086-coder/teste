@@ -1043,21 +1043,19 @@ class DimaiorAdmin extends HTMLElement {
         </div>
       </div>
       <div class="dd-compare-row">
-        <div>
+        <div class="dd-compare-col">
           <p class="dd-compare-month">${this._esc(d.mes_anterior.nome)} · até dia ${d.dia_referencia}</p>
           <div class="dd-compare-val" style="color:var(--t3)">${this._num(d.mes_anterior.total_ate_mesmo_dia)} 💎</div>
           <p class="dd-compare-sub">mês fechou em ${this._num(d.mes_anterior.total_completo)}</p>
+          <div class="dd-bar-compare"><div class="seg prev" style="height:${alturaPrev}%" title="${this._esc(d.mes_anterior.nome)}: ${this._num(d.mes_anterior.total_ate_mesmo_dia)}"></div></div>
         </div>
-        <div style="text-align:center;color:var(--t3);font-size:20px">→</div>
-        <div style="text-align:right">
+        <div class="dd-compare-arrow">→</div>
+        <div class="dd-compare-col right">
           <p class="dd-compare-month">${this._esc(d.mes_atual.nome)} · até dia ${d.dia_referencia} (agora)</p>
           <div class="dd-compare-val">${this._num(d.mes_atual.total_ate_hoje)} 💎</div>
           <p class="dd-compare-sub">${d.mes_atual.streamers_ativos} streamers ativos até aqui</p>
+          <div class="dd-bar-compare"><div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div></div>
         </div>
-      </div>
-      <div class="dd-bar-compare">
-        <div class="seg prev" style="height:${alturaPrev}%" title="${this._esc(d.mes_anterior.nome)}: ${this._num(d.mes_anterior.total_ate_mesmo_dia)}"></div>
-        <div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div>
       </div>`;
   }
   _ddRenderStats(d){
@@ -2563,12 +2561,17 @@ class DimaiorAdmin extends HTMLElement {
     .dd-delta-badge{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 14px;border-radius:12px;min-width:100px;}
     .dd-delta-badge .num{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:15px;}
     .dd-delta-badge .pct{font-size:10px;color:var(--t3);}
-    .dd-compare-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin-top:20px;}
+    .dd-compare-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:14px;margin-top:20px;}
+    .dd-compare-col.right{text-align:right;}
+    .dd-compare-arrow{text-align:center;color:var(--t3);font-size:20px;padding-top:28px;}
     .dd-compare-month{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin:0 0 4px;}
     .dd-compare-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:22px;color:var(--t1);}
     .dd-compare-sub{font-size:10.5px;color:var(--t3);margin-top:2px;}
-    .dd-bar-compare{display:flex;align-items:flex-end;gap:8px;height:54px;margin-top:16px;}
-    .dd-bar-compare .seg{flex:1;border-radius:6px 6px 0 0;}
+    /* Barra fica dentro da própria coluna (Junho+barra cinza, Julho+barra
+       azul), logo abaixo do valor — em vez de uma faixa separada embaixo
+       de tudo, desgrudada dos números que ela representa. */
+    .dd-bar-compare{height:54px;margin-top:14px;display:flex;align-items:flex-end;}
+    .dd-bar-compare .seg{width:100%;border-radius:6px 6px 0 0;}
     .dd-bar-compare .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}
     .dd-bar-compare .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
     .dd-bars{display:flex;align-items:flex-end;gap:16px;height:150px;padding:4px 4px 0;}
@@ -2606,7 +2609,8 @@ class DimaiorAdmin extends HTMLElement {
     @media(max-width:900px){
       .dd-row2{grid-template-columns:1fr;}
       .dd-compare-row{grid-template-columns:1fr;text-align:left;}
-      .dd-compare-row div[style*="text-align:right"]{text-align:left !important;}
+      .dd-compare-col.right{text-align:left;}
+      .dd-compare-arrow{padding-top:4px;}
       .dd-import-form{grid-template-columns:1fr 1fr;}
       /* Badge de variação (verde/vermelho) some da lateral e vira uma faixa
          centralizada acima do comparativo Junho/Julho, em vez de ficar
