@@ -32,6 +32,8 @@ class DmaiorImpulso extends HTMLElement {
     this._quotaMax       = QUOTA_MAX_DEFAULT;
     this._quotaCarregada = false;
     this._bloqueado      = false;
+    this._manualBloqueado      = false;
+    this._automaticoBloqueado  = false;
     this._shellPronto    = false;
     this._iniciado       = false;
     this._agendamentoAtivo = false;
@@ -149,9 +151,8 @@ class DmaiorImpulso extends HTMLElement {
     await this._renovarToken();
     await this._carregarConfig();
     if (!this._bloqueado) {
-      this._carregarQuota(false);
-      this._detectarLiveAtual();
-      this._carregarAgendamento();
+      if (!this._manualBloqueado)     { this._carregarQuota(false); this._detectarLiveAtual(); }
+      if (!this._automaticoBloqueado) this._carregarAgendamento();
     }
     this._fetchComunicados();
   }
@@ -209,6 +210,7 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   async _salvarAgendamento(retry = false) {
+    if (this._automaticoBloqueado) return;
     const sr        = this.shadowRoot;
     const btn       = sr.getElementById('btn-agendamento');
     const spinner   = sr.getElementById('spinner-agendamento');
@@ -330,20 +332,42 @@ class DmaiorImpulso extends HTMLElement {
         if (r1h) r1h.checked = true;
       }
 
-      // Verifica se o UID está bloqueado
+      // Verifica se o UID está bloqueado (denylist, trava tudo) ou se falta
+      // liberação por modalidade (allowlist — manual e automático são
+      // independentes: a agência pode liberar só um dos dois, ou os dois).
       if (this._uid) {
         const check = await window.DmaiorAPI.rank.checkImpulsoBlock(this._uid);
         if (check.bloqueado) {
           this._bloqueado = true;
+          const msg = check.motivo
+            ? `Seu acesso ao impulsionamento foi suspenso. Motivo: <strong>${check.motivo}</strong>`
+            : 'Seu acesso ao impulsionamento está suspenso. Entre em contato com a agência.';
           const fb = this.shadowRoot.getElementById('feedback');
-          if (fb) {
-            fb.className = 'feedback erro';
-            fb.innerHTML = check.motivo
-              ? `Seu acesso ao impulsionamento foi suspenso. Motivo: <strong>${check.motivo}</strong>`
-              : 'Seu acesso ao impulsionamento está suspenso. Entre em contato com a agência.';
-          }
+          if (fb) { fb.className = 'feedback erro'; fb.innerHTML = msg; }
+          const fbAuto = this.shadowRoot.getElementById('feedback-agendamento');
+          if (fbAuto) { fbAuto.className = 'feedback erro'; fbAuto.innerHTML = msg; }
           this._travar();
           this._quotaCarregada = true; // evita que _enviar() rode
+        } else {
+          if (check.liberado_manual === false) {
+            this._manualBloqueado = true;
+            const fb = this.shadowRoot.getElementById('feedback');
+            if (fb) {
+              fb.className = 'feedback erro';
+              fb.innerHTML = 'O Impulso manual ainda não foi liberado para a sua conta. Fale com a agência para solicitar acesso.';
+            }
+            this._travarManual();
+            this._quotaCarregada = true; // evita que _enviar() rode
+          }
+          if (check.liberado_automatico === false) {
+            this._automaticoBloqueado = true;
+            const fbAuto = this.shadowRoot.getElementById('feedback-agendamento');
+            if (fbAuto) {
+              fbAuto.className = 'feedback erro';
+              fbAuto.innerHTML = 'O Impulso automático ainda não foi liberado para a sua conta. Fale com a agência para solicitar acesso.';
+            }
+            this._travarAutomatico();
+          }
         }
       }
     } catch { /* usa defaults */ }
@@ -787,6 +811,7 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   async _desativarAutomatico(retry = false) {
+    if (this._automaticoBloqueado) return;
     const sr      = this.shadowRoot;
     const status  = sr.getElementById('agenda-status');
     const btn     = sr.getElementById('btn-desativar-automatico');
@@ -874,16 +899,25 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   _travar() {
+    this._travarManual();
+    this._travarAutomatico();
+  }
+
+  _travarManual() {
     const sr = this.shadowRoot;
     sr.getElementById('btn-impulso').disabled = true;
     sr.getElementById('inp-link').disabled    = true;
     sr.querySelectorAll('input[name="tempo"]').forEach(r => r.disabled = true);
+  }
+
+  _travarAutomatico() {
+    const sr = this.shadowRoot;
     sr.getElementById('btn-agendamento').disabled = true;
     sr.querySelectorAll('.chk-dia, input[name="tempo-auto"]').forEach(r => r.disabled = true);
   }
 
   async _enviar() {
-    if (!this._quotaCarregada) return;
+    if (!this._quotaCarregada || this._manualBloqueado) return;
     const sr       = this.shadowRoot;
     const link     = sr.getElementById('inp-link').value.trim();
     const tempo    = sr.querySelector('input[name="tempo"]:checked')?.value || '30min';

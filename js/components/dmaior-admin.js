@@ -1614,6 +1614,9 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnBuscarBloqUid').addEventListener('click',()=>this._buscarStreamerBloqueio());
     s.getElementById('btnAplicarBloqueio').addEventListener('click',()=>this._bloquearStreamer());
     s.getElementById('btnAtuBloqueios').addEventListener('click',async()=>{const blq=await this._api('GET','/admin/impulso/bloqueios');this._renderBloqueios(blq?.bloqueios||[]);});
+    s.getElementById('btnBuscarLibUid').addEventListener('click',()=>this._buscarStreamerLiberacao());
+    s.getElementById('btnAplicarLiberacao').addEventListener('click',()=>this._liberarImpulso());
+    s.getElementById('btnAtuLiberados').addEventListener('click',async()=>{const lib=await this._api('GET','/admin/impulso/liberados');this._renderLiberados(lib?.liberados||[]);});
     s.getElementById('bImpulsoHist')?.addEventListener('input',dbc(()=>this._carregarImpulsoHistorico(1),400));
     // Convites / Candidaturas
     s.getElementById('btnAtuConvites').addEventListener('click',()=>this._carregarConvites());
@@ -2399,10 +2402,11 @@ class DimaiorAdmin extends HTMLElement {
 
   // ── CONTROLE DE IMPULSIONAMENTO ──────────────────────────────
   async _carregarImpulsoCtrl(){
-    // Carrega config e bloqueios em paralelo
-    const [cfg,blq]=await Promise.all([
+    // Carrega config, bloqueios e liberados em paralelo
+    const [cfg,blq,lib]=await Promise.all([
       this._api('GET','/admin/impulso/config'),
       this._api('GET','/admin/impulso/bloqueios'),
+      this._api('GET','/admin/impulso/liberados'),
     ]);
     const s=this.shadowRoot;
     if(cfg?.ok){
@@ -2411,7 +2415,66 @@ class DimaiorAdmin extends HTMLElement {
       s.getElementById('iOpcao1hora').checked=cfg.opcao_1hora!==false;
     }
     this._renderBloqueios(blq?.bloqueios||[]);
+    this._renderLiberados(lib?.liberados||[]);
     this._carregarImpulsoHistorico();
+  }
+  async _buscarStreamerLiberacao(){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('iLibUid').value.trim();
+    if(!uid)return;
+    const infoEl=s.getElementById('iLibStreamerInfo');
+    infoEl.style.display='block';infoEl.textContent='Buscando...';
+    const d=await this._api('GET',`/admin/streamers?uid=${encodeURIComponent(uid)}`);
+    const match=(d?.perfis||[])[0];
+    if(match){
+      infoEl.innerHTML=`<strong style="color:var(--cyan)">${this._esc(match.nome)}</strong><br><span style="color:var(--t3)">UID: ${this._esc(uid)}</span>`;
+      s.getElementById('iLibManual').checked=!!match.impulso_liberado_manual;
+      s.getElementById('iLibAutomatico').checked=!!match.impulso_liberado_automatico;
+    } else {
+      infoEl.innerHTML=`<span style="color:var(--verm)">UID: ${this._esc(uid)} — sem conta criada ainda (precisa ter cadastro pra liberar).</span>`;
+      s.getElementById('iLibManual').checked=false;
+      s.getElementById('iLibAutomatico').checked=false;
+    }
+  }
+  async _liberarImpulso(){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('iLibUid').value.trim();
+    if(!uid){this._toast('Informe o UID','err');return;}
+    const manual=s.getElementById('iLibManual').checked;
+    const automatico=s.getElementById('iLibAutomatico').checked;
+    const r=await this._api('PATCH',`/admin/impulso/liberar/${encodeURIComponent(uid)}`,{manual,automatico});
+    if(r?.ok){
+      this._toast('Liberação salva!');
+      s.getElementById('iLibUid').value='';
+      s.getElementById('iLibStreamerInfo').style.display='none';
+      s.getElementById('iLibManual').checked=false;
+      s.getElementById('iLibAutomatico').checked=false;
+      const lib=await this._api('GET','/admin/impulso/liberados');
+      this._renderLiberados(lib?.liberados||[]);
+    } else this._toast(r?.erro||'Erro ao salvar','err');
+  }
+  async _revogarLiberacao(uid){
+    const r=await this._api('PATCH',`/admin/impulso/liberar/${encodeURIComponent(uid)}`,{manual:false,automatico:false});
+    if(r?.ok){
+      this._toast('Liberação revogada');
+      const lib=await this._api('GET','/admin/impulso/liberados');
+      this._renderLiberados(lib?.liberados||[]);
+    } else this._toast(r?.erro||'Erro','err');
+  }
+  _renderLiberados(lista){
+    const s=this.shadowRoot;const el=s.getElementById('tbLiberados');if(!el)return;
+    if(!lista.length){el.innerHTML=this._empty('unlock','Nenhum streamer liberado ainda');return;}
+    el.innerHTML=`<div class="bloq-lista">${lista.map(l=>`
+      <div class="bloq-item">
+        <div class="bloq-info">
+          <div class="bloq-uid">${this._ico('unlock',13)} ${this._esc(l.nome)} <span style="color:var(--t3);font-weight:400">— UID: ${this._esc(l.kwai_uid)}</span></div>
+          <div class="bloq-motivo">${l.manual?'<span style="color:var(--verde)">Manual ✓</span>':'<span style="color:var(--t3)">Manual —</span>'} &nbsp;•&nbsp; ${l.automatico?'<span style="color:var(--verde)">Automático ✓</span>':'<span style="color:var(--t3)">Automático —</span>'}</div>
+        </div>
+        <button class="btn btn-o btn-sm lib-rev" data-rev="${this._esc(l.kwai_uid)}" style="border-color:rgba(248,113,113,.4);color:var(--verm)">${this._ico('lock_r',12)} Revogar Tudo</button>
+      </div>`).join('')}</div>`;
+    el.querySelectorAll('.lib-rev').forEach(btn=>{
+      btn.addEventListener('click',()=>this._confirmarDel('Revogar as duas liberações de Impulso (manual e automático) desse streamer?',()=>this._revogarLiberacao(btn.dataset.rev)));
+    });
   }
   async _carregarImpulsoHistorico(pagina){
     const s=this.shadowRoot;
@@ -3532,6 +3595,23 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                   <div><button class="btn btn-g" id="btnSalvarImpulsoConfig">${this._ico('check',13)} Salvar Configurações</button></div>
                 </div>
+              </div>
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('unlock',14)} Liberar Impulso por Streamer</div></div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Ninguém tem Impulso liberado por padrão — libere manual e/ou automático streamer por streamer aqui.</div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="iLibUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/><button class="btn btn-o" id="btnBuscarLibUid">${this._ico('search',13)} Buscar</button></div></div>
+                  <div id="iLibStreamerInfo" style="display:none;background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.15);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--t2)"></div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulso Manual</div><div style="font-size:11px;color:var(--t3)">Streamer pode disparar o impulso na hora, pelo botão</div></div><label class="tog-switch"><input type="checkbox" id="iLibManual"><span class="tog-slider"></span></label></div>
+                    <div class="impulso-toggle-row"><div><div style="font-size:13px;color:var(--t1)">Impulso Automático</div><div style="font-size:11px;color:var(--t3)">Streamer pode agendar por dia da semana</div></div><label class="tog-switch"><input type="checkbox" id="iLibAutomatico"><span class="tog-slider"></span></label></div>
+                  </div>
+                  <div><button class="btn btn-g" id="btnAplicarLiberacao">${this._ico('check',13)} Salvar Liberação</button></div>
+                </div>
+              </div>
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('unlock',14)} Streamers Liberados</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuLiberados">${this._ico('refresh',12)} Atualizar</button></div></div>
+                <div id="tbLiberados">${this._loading()}</div>
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('lock_r',14)} Bloquear Streamer</div></div>
