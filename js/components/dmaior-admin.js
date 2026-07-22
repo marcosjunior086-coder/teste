@@ -1653,6 +1653,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSalvarMeta').addEventListener('click',()=>this._salvarMeta());
     s.getElementById('btnCancelarEdicaoMeta').addEventListener('click',()=>this._cancelarEdicaoMeta());
     s.getElementById('btnAtuMetas').addEventListener('click',()=>this._carregarMetas());
+    s.getElementById('btnAtuMetasAtingidas').addEventListener('click',()=>this._carregarMetasAtingidas());
     s.getElementById('bImpulsoHist')?.addEventListener('input',dbc(()=>this._carregarImpulsoHistorico(1),400));
     // Convites / Candidaturas
     s.getElementById('btnAtuConvites').addEventListener('click',()=>this._carregarConvites());
@@ -2438,12 +2439,13 @@ class DimaiorAdmin extends HTMLElement {
 
   // ── CONTROLE DE IMPULSIONAMENTO ──────────────────────────────
   async _carregarImpulsoCtrl(){
-    // Carrega config, bloqueios, liberados e metas em paralelo
-    const [cfg,blq,lib,metas]=await Promise.all([
+    // Carrega config, bloqueios, liberados, metas e metas atingidas em paralelo
+    const [cfg,blq,lib,metas,metasAt]=await Promise.all([
       this._api('GET','/admin/impulso/config'),
       this._api('GET','/admin/impulso/bloqueios'),
       this._api('GET','/admin/impulso/liberados'),
       this._api('GET','/admin/impulso/metas'),
+      this._api('GET','/admin/impulso/metas-atingidas'),
     ]);
     const s=this.shadowRoot;
     if(cfg?.ok){
@@ -2454,6 +2456,7 @@ class DimaiorAdmin extends HTMLElement {
     this._renderBloqueios(blq?.bloqueios||[]);
     this._renderLiberados(lib?.liberados||[]);
     this._renderMetas(metas?.metas||[]);
+    this._renderMetasAtingidas(metasAt?.streamers||[]);
     this._carregarImpulsoHistorico();
   }
   async _buscarStreamerLiberacao(){
@@ -2572,6 +2575,37 @@ class DimaiorAdmin extends HTMLElement {
     const r=await this._api('DELETE',`/admin/impulso/metas/${encodeURIComponent(id)}`);
     if(r?.ok){this._toast('Meta apagada');this._carregarMetas();}
     else this._toast(r?.erro||'Erro','err');
+  }
+  async _carregarMetasAtingidas(){
+    const s=this.shadowRoot;const el=s.getElementById('tbMetasAtingidas');if(el)el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/impulso/metas-atingidas');
+    this._renderMetasAtingidas(d?.streamers||[]);
+  }
+  _renderMetasAtingidas(lista){
+    const s=this.shadowRoot;const el=s.getElementById('tbMetasAtingidas');if(!el)return;
+    if(!lista.length){el.innerHTML=this._empty('award','Nenhum streamer bateu meta ainda');return;}
+    el.innerHTML=`<div class="bloq-lista">${lista.map(p=>`
+      <div class="bloq-item">
+        <div class="bloq-info">
+          <div class="bloq-uid">${this._ico('award',13)} ${this._esc(p.nome)} <span style="color:var(--t3);font-weight:400">— UID: ${this._esc(p.kwai_uid)} · ${p.quantidade} usos/semana</span></div>
+          <div class="bloq-motivo">
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="ma-manual" data-uid="${this._esc(p.kwai_uid)}" ${p.ativo_manual?'checked':''}/> Manual</label>
+            &nbsp;•&nbsp;
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="ma-auto" data-uid="${this._esc(p.kwai_uid)}" ${p.ativo_automatico?'checked':''}/> Automático</label>
+          </div>
+        </div>
+      </div>`).join('')}</div>`;
+    el.querySelectorAll('.ma-manual').forEach(chk=>{
+      chk.addEventListener('change',()=>this._definirMetaAtiva(chk.dataset.uid,{ativo_manual:chk.checked}));
+    });
+    el.querySelectorAll('.ma-auto').forEach(chk=>{
+      chk.addEventListener('change',()=>this._definirMetaAtiva(chk.dataset.uid,{ativo_automatico:chk.checked}));
+    });
+  }
+  async _definirMetaAtiva(uid,body){
+    const r=await this._api('PATCH',`/admin/impulso/metas-atingidas/${encodeURIComponent(uid)}`,body);
+    if(r?.ok)this._toast('Atualizado!');
+    else{this._toast(r?.erro||'Erro','err');this._carregarMetasAtingidas();}
   }
   async _carregarImpulsoHistorico(pagina){
     const s=this.shadowRoot;
@@ -3729,7 +3763,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('award',14)} Metas Automáticas de Impulso</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuMetas">${this._ico('refresh',12)} Atualizar</button></div></div>
-                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Quem bater uma dessas metas de diamantes no mês libera Impulso (Manual + Automático) sozinho, com a cota de usos do degrau atingido — só vale pra quem ainda NÃO foi liberado manualmente acima. Reinicia sozinho todo mês.</div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Quem bater uma dessas metas de diamantes no mês libera Impulso sozinho, com a cota de usos do degrau atingido — só vale pra quem ainda NÃO foi liberado manualmente acima. Bateu a meta esse mês: libera agora e continua liberado o mês inteiro seguinte, sem precisar bater de novo. Se no mês seguinte não bater pelo menos a mesma meta, no mês depois disso volta a zero.</div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
                     <div class="mc" style="flex:1;min-width:140px"><label>Diamantes no mês</label><input id="iMetaDiamantes" type="number" min="1" placeholder="Ex: 30000" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/></div>
@@ -3740,6 +3774,11 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                   <div id="tbMetas">${this._loading()}</div>
                 </div>
+              </div>
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('award',14)} Streamers com Meta Atingida</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuMetasAtingidas">${this._ico('refresh',12)} Atualizar</button></div></div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Streamers com algum degrau de meta ativo agora (batido este mês ou no mês passado). Aqui dá pra escolher se deixa ativo o Manual, o Automático, ou os dois — desativar aqui não mexe no cálculo da meta, só impede o uso daquele modo enquanto o degrau estiver ativo.</div>
+                <div id="tbMetasAtingidas">${this._loading()}</div>
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('lock_r',14)} Bloquear Streamer</div></div>
