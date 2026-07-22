@@ -19,6 +19,7 @@ const SVG_LINK  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
 const SVG_GRID  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>`;
 const SVG_BOOST = `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`;
 const SVG_LOGOUT= `<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>`;
+const SVG_LOCK  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
 
 class DmaiorImpulso extends HTMLElement {
   constructor() {
@@ -32,8 +33,10 @@ class DmaiorImpulso extends HTMLElement {
     this._quotaMax       = QUOTA_MAX_DEFAULT;
     this._quotaCarregada = false;
     this._bloqueado      = false;
+    this._motivoBloqueio      = null;
     this._manualBloqueado      = false;
     this._automaticoBloqueado  = false;
+    this._meta                 = null;
     this._shellPronto    = false;
     this._iniciado       = false;
     this._agendamentoAtivo = false;
@@ -337,40 +340,123 @@ class DmaiorImpulso extends HTMLElement {
       // independentes: a agência pode liberar só um dos dois, ou os dois).
       if (this._uid) {
         const check = await window.DmaiorAPI.rank.checkImpulsoBlock(this._uid);
+
+        // Meta automática de diamantes do mês (ver _calcularMetaImpulso no
+        // worker) — só vem preenchida quando a agência ainda não liberou
+        // nenhum dos dois modos manualmente. Se já bateu algum degrau, o
+        // worker já devolve liberado_manual/automatico=true e quota_max
+        // personalizada; aqui só precisamos aplicar a cota e guardar os
+        // dados pra mostrar a barra de progresso.
+        this._meta = check.meta || null;
+        if (check.quota_max) {
+          this._quotaMax = check.quota_max;
+          this._renderDots();
+          const alertaEl = this.shadowRoot.getElementById('alerta-limite');
+          if (alertaEl) {
+            alertaEl.innerHTML = `Limite semanal atingido. Você já utilizou os <span class="destaque">${check.quota_max} impulsionamentos</span> desta semana. O contador reinicia toda <span class="destaque">segunda-feira</span>.`;
+          }
+        }
+
         if (check.bloqueado) {
-          this._bloqueado = true;
-          const msg = check.motivo
-            ? `Seu acesso ao impulsionamento foi suspenso. Motivo: <strong>${check.motivo}</strong>`
-            : 'Seu acesso ao impulsionamento está suspenso. Entre em contato com a agência.';
-          const fb = this.shadowRoot.getElementById('feedback');
-          if (fb) { fb.className = 'feedback erro'; fb.innerHTML = msg; }
-          const fbAuto = this.shadowRoot.getElementById('feedback-agendamento');
-          if (fbAuto) { fbAuto.className = 'feedback erro'; fbAuto.innerHTML = msg; }
+          this._bloqueado      = true;
+          this._motivoBloqueio = check.motivo || null;
           this._travar();
           this._quotaCarregada = true; // evita que _enviar() rode
         } else {
           if (check.liberado_manual === false) {
             this._manualBloqueado = true;
-            const fb = this.shadowRoot.getElementById('feedback');
-            if (fb) {
-              fb.className = 'feedback erro';
-              fb.innerHTML = 'O Impulso manual ainda não foi liberado para a sua conta. Fale com a agência para solicitar acesso.';
-            }
             this._travarManual();
             this._quotaCarregada = true; // evita que _enviar() rode
           }
           if (check.liberado_automatico === false) {
             this._automaticoBloqueado = true;
-            const fbAuto = this.shadowRoot.getElementById('feedback-agendamento');
-            if (fbAuto) {
-              fbAuto.className = 'feedback erro';
-              fbAuto.innerHTML = 'O Impulso automático ainda não foi liberado para a sua conta. Fale com a agência para solicitar acesso.';
-            }
             this._travarAutomatico();
           }
         }
+        this._aplicarEstadoAcesso();
       }
     } catch { /* usa defaults */ }
+  }
+
+  // Quando uma modalidade (ou as duas) não está liberada, esconde o
+  // formulário funcional e mostra um cartão simples no lugar — antes disso,
+  // o painel continuava mostrando todos os campos "desabilitados" (parecendo
+  // quebrado) em vez de deixar claro que o acesso ainda não foi concedido.
+  _aplicarEstadoAcesso() {
+    const sr           = this.shadowRoot;
+    const painelManual  = sr.getElementById('painel-manual');
+    const painelAuto    = sr.getElementById('painel-automatico');
+    const quotaBox      = sr.getElementById('quota-box');
+    const modoSwitch    = sr.getElementById('modo-switch');
+    const metaStrip     = sr.getElementById('meta-strip');
+
+    // Cota semanal só diz respeito ao modo manual — não faz sentido mostrá-la
+    // (eternamente carregando) se o manual nem está liberado.
+    if (quotaBox) quotaBox.style.display = this._manualBloqueado ? 'none' : '';
+
+    // Já liberado (manual pela agência ou por meta batida) e ainda tem
+    // degrau acima — mostra o progresso pro próximo, acima da cota semanal.
+    if (metaStrip) {
+      if (!this._bloqueado && this._meta && this._meta.quantidade_atual > 0) {
+        metaStrip.innerHTML = this._metaProgressoHtml(this._meta);
+        metaStrip.style.display = 'block';
+      } else {
+        metaStrip.style.display = 'none';
+      }
+    }
+
+    const nenhumaModalidade = this._manualBloqueado && this._automaticoBloqueado;
+    if (this._bloqueado || nenhumaModalidade) {
+      if (modoSwitch) modoSwitch.style.display = 'none';
+      const titulo = this._bloqueado ? 'Acesso Suspenso' : 'Impulso ainda não liberado';
+      const texto  = this._bloqueado
+        ? (this._motivoBloqueio
+            ? `Seu acesso ao impulsionamento foi suspenso. Motivo: <strong>${this._motivoBloqueio}</strong>`
+            : 'Seu acesso ao impulsionamento está suspenso. Entre em contato com a agência.')
+        : (this._meta
+            ? this._metaProgressoHtml(this._meta)
+            : 'Fale com a agência para solicitar acesso ao impulsionamento de tráfego.');
+      this._setLockedContent(painelManual, titulo, texto);
+      if (painelAuto) painelAuto.style.display = 'none';
+      this._trocarModo('manual');
+      return;
+    }
+
+    if (this._manualBloqueado) {
+      this._setLockedContent(painelManual, 'Impulso Manual não liberado', 'Fale com a agência para solicitar acesso ao impulsionamento manual.');
+    }
+    if (this._automaticoBloqueado) {
+      this._setLockedContent(painelAuto, 'Impulso Automático não liberado', 'Fale com a agência para solicitar acesso ao impulsionamento automático.');
+    }
+  }
+
+  // Barra de progresso da meta automática de diamantes do mês. Usada tanto
+  // no cartão de bloqueio (ainda não bateu nenhum degrau) quanto numa faixa
+  // acima da cota semanal (já liberado, mostrando o próximo degrau).
+  _metaProgressoHtml(meta) {
+    const fmt = n => Number(n || 0).toLocaleString('pt-BR');
+    if (!meta.proxima_meta) {
+      return `<div class="meta-lbl">Meta máxima do mês atingida 🎉 — <b>${meta.quantidade_atual} usos de impulso por semana</b> liberados.</div>`;
+    }
+    const alvo   = meta.proxima_meta.diamantes;
+    const pct    = Math.max(0, Math.min(100, (meta.diamantes_mes / alvo) * 100));
+    const falta  = Math.max(0, alvo - meta.diamantes_mes);
+    const rotulo = meta.quantidade_atual > 0
+      ? `Faltam <b>${fmt(falta)} 💎</b> este mês pra subir de ${meta.quantidade_atual} pra ${meta.proxima_meta.quantidade} usos de impulso por semana`
+      : `Faltam <b>${fmt(falta)} 💎</b> este mês pra liberar o impulso com ${meta.proxima_meta.quantidade} usos por semana`;
+    return `
+      <div class="meta-lbl">${rotulo}</div>
+      <div class="meta-bar"><div class="meta-bar-fill" style="width:${pct}%"></div></div>
+      <div class="meta-vals"><span>${fmt(meta.diamantes_mes)} 💎 este mês</span><b>${fmt(alvo)} 💎</b></div>`;
+  }
+
+  _setLockedContent(painel, titulo, texto) {
+    if (!painel) return;
+    painel.classList.add('locked');
+    const tituloEl = painel.querySelector('.locked-title');
+    const textoEl  = painel.querySelector('.locked-txt');
+    if (tituloEl) tituloEl.innerHTML = titulo;
+    if (textoEl)  textoEl.innerHTML  = texto;
   }
 
   _renderDots() {
@@ -527,6 +613,27 @@ class DmaiorImpulso extends HTMLElement {
         .feedback.ok   { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.3); color:var(--green); display:block; }
         .feedback.erro { background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.2); color:var(--red); display:block; }
 
+        /* ── Estado bloqueado: some com o formulário funcional e mostra um
+           cartão simples no lugar, em vez de campos desabilitados. ── */
+        .locked-placeholder { display:none; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:38px 14px; }
+        .locked-ico { width:38px; height:38px; color:var(--muted); opacity:.75; }
+        .locked-ico svg { width:100%; height:100%; }
+        .locked-title { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1rem; color:var(--text); text-transform:uppercase; letter-spacing:0.04em; }
+        .locked-txt { font-size:0.82rem; color:var(--muted); line-height:1.55; max-width:320px; width:100%; }
+        .locked-txt strong { color:var(--gold); }
+        #painel-manual.locked .form-content, #painel-automatico.locked .form-content { display:none; }
+        #painel-manual.locked .locked-placeholder, #painel-automatico.locked .locked-placeholder { display:flex; }
+
+        /* ── Meta automática de Impulso por diamantes do mês (progresso) ── */
+        .meta-strip { background:rgba(0,0,0,0.3); border:1px solid rgba(0,212,212,0.25); border-radius:12px; padding:12px 14px; margin-bottom:20px; }
+        .meta-lbl { font-size:0.74rem; color:var(--muted); font-family:var(--dm-font-title,'Rajdhani',sans-serif); letter-spacing:0.02em; margin-bottom:8px; line-height:1.5; text-align:left; }
+        .meta-lbl b { color:var(--gold); }
+        .locked-txt .meta-lbl { text-align:center; }
+        .meta-bar { height:8px; border-radius:5px; background:rgba(255,255,255,0.06); overflow:hidden; margin-bottom:6px; }
+        .meta-bar-fill { height:100%; background:linear-gradient(90deg,var(--cyan),#3b82f6); border-radius:5px; transition:width .4s; }
+        .meta-vals { display:flex; justify-content:space-between; font-size:0.72rem; color:var(--muted); }
+        .meta-vals b { color:var(--text); }
+
         /* ── Comunicados ── */
         #imp-comunicados { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
         .imp-comunicado { display:flex; align-items:flex-start; gap:10px; padding:11px 14px; border-radius:10px; background:rgba(240,192,64,0.08); border:1px solid rgba(240,192,64,0.30); animation:pulse .0s; }
@@ -674,12 +781,14 @@ class DmaiorImpulso extends HTMLElement {
 
             <div id="imp-comunicados"></div>
 
-            <div class="modo-switch">
+            <div class="modo-switch" id="modo-switch">
               <button type="button" class="modo-btn active" id="btn-modo-manual" data-modo="manual">Manual</button>
               <button type="button" class="modo-btn" id="btn-modo-automatico" data-modo="automatico">Automático</button>
             </div>
 
-            <div class="quota-box">
+            <div class="meta-strip" id="meta-strip" style="display:none"></div>
+
+            <div class="quota-box" id="quota-box">
               <div class="quota-label">Usos esta semana</div>
               <div class="quota-dots" id="quota-dots">
                 <div class="dot loading" id="d1"></div>
@@ -700,75 +809,89 @@ class DmaiorImpulso extends HTMLElement {
             </div>
 
             <div id="painel-manual">
-              <div class="field-group">
-                <label class="field-label">${SVG_LINK} Link da Live</label>
-                <input type="url" id="inp-link" class="field-input" placeholder="https://www.kwai.com/..." autocomplete="off" spellcheck="false" disabled/>
-                <div class="link-status" id="link-status"></div>
-              </div>
-
-              <div class="field-group">
-                <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
-                <div class="radio-group">
-                  <label class="radio-opt radio-opt-30min">
-                    <input type="radio" name="tempo" value="30min" checked disabled/>
-                    <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
-                  </label>
-                  <label class="radio-opt radio-opt-1hora">
-                    <input type="radio" name="tempo" value="1hora" disabled/>
-                    <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
-                  </label>
+              <div class="form-content">
+                <div class="field-group">
+                  <label class="field-label">${SVG_LINK} Link da Live</label>
+                  <input type="url" id="inp-link" class="field-input" placeholder="https://www.kwai.com/..." autocomplete="off" spellcheck="false" disabled/>
+                  <div class="link-status" id="link-status"></div>
                 </div>
+
+                <div class="field-group">
+                  <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
+                  <div class="radio-group">
+                    <label class="radio-opt radio-opt-30min">
+                      <input type="radio" name="tempo" value="30min" checked disabled/>
+                      <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
+                    </label>
+                    <label class="radio-opt radio-opt-1hora">
+                      <input type="radio" name="tempo" value="1hora" disabled/>
+                      <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
+                    </label>
+                  </div>
+                </div>
+
+                <button id="btn-impulso" disabled>
+                  <div class="spinner" id="spinner"></div>
+                  <span id="btn-texto">Verificando...</span>
+                </button>
+
+                <div class="feedback" id="feedback"></div>
               </div>
-
-              <button id="btn-impulso" disabled>
-                <div class="spinner" id="spinner"></div>
-                <span id="btn-texto">Verificando...</span>
-              </button>
-
-              <div class="feedback" id="feedback"></div>
+              <div class="locked-placeholder">
+                <div class="locked-ico">${SVG_LOCK}</div>
+                <p class="locked-title"></p>
+                <div class="locked-txt"></div>
+              </div>
             </div>
 
             <div id="painel-automatico">
-              <div class="agenda-status" id="agenda-status">Carregando agendamento...</div>
+              <div class="form-content">
+                <div class="agenda-status" id="agenda-status">Carregando agendamento...</div>
 
-              <div class="field-group">
-                <label class="field-label">${SVG_GRID} Dias da Semana</label>
-                <div class="dias-grid">
-                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="0" disabled/><div class="dia-card">Dom</div></label>
-                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="1" disabled/><div class="dia-card">Seg</div></label>
-                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="2" disabled/><div class="dia-card">Ter</div></label>
-                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="3" disabled/><div class="dia-card">Qua</div></label>
-                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="4" disabled/><div class="dia-card">Qui</div></label>
-                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="5" disabled/><div class="dia-card">Sex</div></label>
-                  <label class="dia-opt"><input type="checkbox" class="chk-dia" value="6" disabled/><div class="dia-card">Sáb</div></label>
+                <div class="field-group">
+                  <label class="field-label">${SVG_GRID} Dias da Semana</label>
+                  <div class="dias-grid">
+                    <label class="dia-opt"><input type="checkbox" class="chk-dia" value="0" disabled/><div class="dia-card">Dom</div></label>
+                    <label class="dia-opt"><input type="checkbox" class="chk-dia" value="1" disabled/><div class="dia-card">Seg</div></label>
+                    <label class="dia-opt"><input type="checkbox" class="chk-dia" value="2" disabled/><div class="dia-card">Ter</div></label>
+                    <label class="dia-opt"><input type="checkbox" class="chk-dia" value="3" disabled/><div class="dia-card">Qua</div></label>
+                    <label class="dia-opt"><input type="checkbox" class="chk-dia" value="4" disabled/><div class="dia-card">Qui</div></label>
+                    <label class="dia-opt"><input type="checkbox" class="chk-dia" value="5" disabled/><div class="dia-card">Sex</div></label>
+                    <label class="dia-opt"><input type="checkbox" class="chk-dia" value="6" disabled/><div class="dia-card">Sáb</div></label>
+                  </div>
                 </div>
-              </div>
 
-              <div class="field-group">
-                <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
-                <div class="radio-group">
-                  <label class="radio-opt radio-opt-30min">
-                    <input type="radio" name="tempo-auto" value="30min" checked disabled/>
-                    <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
-                  </label>
-                  <label class="radio-opt radio-opt-1hora">
-                    <input type="radio" name="tempo-auto" value="1hora" disabled/>
-                    <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
-                  </label>
+                <div class="field-group">
+                  <label class="field-label">${SVG_CLOCK} Duração do Impulsionamento</label>
+                  <div class="radio-group">
+                    <label class="radio-opt radio-opt-30min">
+                      <input type="radio" name="tempo-auto" value="30min" checked disabled/>
+                      <div class="radio-card"><span class="rc-tempo">30 Minutos</span></div>
+                    </label>
+                    <label class="radio-opt radio-opt-1hora">
+                      <input type="radio" name="tempo-auto" value="1hora" disabled/>
+                      <div class="radio-card"><span class="rc-tempo">1 Hora</span></div>
+                    </label>
+                  </div>
                 </div>
+
+                <button id="btn-agendamento" disabled>
+                  <div class="spinner" id="spinner-agendamento"></div>
+                  <span id="btn-agendamento-texto">Carregando...</span>
+                </button>
+
+                <button id="btn-desativar-automatico" style="display:none">
+                  <div class="spinner" id="spinner-desativar"></div>
+                  <span id="btn-desativar-texto">Desativar Automático</span>
+                </button>
+
+                <div class="feedback" id="feedback-agendamento"></div>
               </div>
-
-              <button id="btn-agendamento" disabled>
-                <div class="spinner" id="spinner-agendamento"></div>
-                <span id="btn-agendamento-texto">Carregando...</span>
-              </button>
-
-              <button id="btn-desativar-automatico" style="display:none">
-                <div class="spinner" id="spinner-desativar"></div>
-                <span id="btn-desativar-texto">Desativar Automático</span>
-              </button>
-
-              <div class="feedback" id="feedback-agendamento"></div>
+              <div class="locked-placeholder">
+                <div class="locked-ico">${SVG_LOCK}</div>
+                <p class="locked-title"></p>
+                <div class="locked-txt"></div>
+              </div>
             </div>
           </div>
         </div>

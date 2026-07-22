@@ -1650,6 +1650,9 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnBuscarLibUid').addEventListener('click',()=>this._buscarStreamerLiberacao());
     s.getElementById('btnAplicarLiberacao').addEventListener('click',()=>this._liberarImpulso());
     s.getElementById('btnAtuLiberados').addEventListener('click',async()=>{const lib=await this._api('GET','/admin/impulso/liberados');this._renderLiberados(lib?.liberados||[]);});
+    s.getElementById('btnSalvarMeta').addEventListener('click',()=>this._salvarMeta());
+    s.getElementById('btnCancelarEdicaoMeta').addEventListener('click',()=>this._cancelarEdicaoMeta());
+    s.getElementById('btnAtuMetas').addEventListener('click',()=>this._carregarMetas());
     s.getElementById('bImpulsoHist')?.addEventListener('input',dbc(()=>this._carregarImpulsoHistorico(1),400));
     // Convites / Candidaturas
     s.getElementById('btnAtuConvites').addEventListener('click',()=>this._carregarConvites());
@@ -2435,11 +2438,12 @@ class DimaiorAdmin extends HTMLElement {
 
   // ── CONTROLE DE IMPULSIONAMENTO ──────────────────────────────
   async _carregarImpulsoCtrl(){
-    // Carrega config, bloqueios e liberados em paralelo
-    const [cfg,blq,lib]=await Promise.all([
+    // Carrega config, bloqueios, liberados e metas em paralelo
+    const [cfg,blq,lib,metas]=await Promise.all([
       this._api('GET','/admin/impulso/config'),
       this._api('GET','/admin/impulso/bloqueios'),
       this._api('GET','/admin/impulso/liberados'),
+      this._api('GET','/admin/impulso/metas'),
     ]);
     const s=this.shadowRoot;
     if(cfg?.ok){
@@ -2449,6 +2453,7 @@ class DimaiorAdmin extends HTMLElement {
     }
     this._renderBloqueios(blq?.bloqueios||[]);
     this._renderLiberados(lib?.liberados||[]);
+    this._renderMetas(metas?.metas||[]);
     this._carregarImpulsoHistorico();
   }
   async _buscarStreamerLiberacao(){
@@ -2508,6 +2513,65 @@ class DimaiorAdmin extends HTMLElement {
     el.querySelectorAll('.lib-rev').forEach(btn=>{
       btn.addEventListener('click',()=>this._confirmarDel('Revogar as duas liberações de Impulso (manual e automático) desse streamer?',()=>this._revogarLiberacao(btn.dataset.rev)));
     });
+  }
+  async _carregarMetas(){
+    const s=this.shadowRoot;const el=s.getElementById('tbMetas');if(el)el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/impulso/metas');
+    this._renderMetas(d?.metas||[]);
+  }
+  _renderMetas(lista){
+    const s=this.shadowRoot;const el=s.getElementById('tbMetas');if(!el)return;
+    if(!lista.length){el.innerHTML=this._empty('award','Nenhuma meta cadastrada ainda');return;}
+    el.innerHTML=`<div class="bloq-lista">${lista.map(m=>`
+      <div class="bloq-item">
+        <div class="bloq-info">
+          <div class="bloq-uid">${this._ico('award',13)} ${this._num(m.meta_diamantes)} 💎 <span style="color:var(--t3);font-weight:400">→ ${m.quantidade} usos/semana</span></div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-o btn-sm meta-edit" data-id="${m.id}" data-meta="${m.meta_diamantes}" data-qtd="${m.quantidade}">${this._ico('edit',12)} Editar</button>
+          <button class="btn btn-o btn-sm meta-del" data-id="${m.id}" style="border-color:rgba(248,113,113,.4);color:var(--verm)">${this._ico('trash',12)} Apagar</button>
+        </div>
+      </div>`).join('')}</div>`;
+    el.querySelectorAll('.meta-edit').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        s.getElementById('iMetaId').value=btn.dataset.id;
+        s.getElementById('iMetaDiamantes').value=btn.dataset.meta;
+        s.getElementById('iMetaQuantidade').value=btn.dataset.qtd;
+        s.getElementById('btnSalvarMeta').innerHTML=`${this._ico('check',13)} Salvar Edição`;
+        s.getElementById('btnCancelarEdicaoMeta').style.display='';
+      });
+    });
+    el.querySelectorAll('.meta-del').forEach(btn=>{
+      btn.addEventListener('click',()=>this._confirmarDel('Apagar essa meta? Streamers que já dependem dela pra ter Impulso liberado perdem o acesso automático (a não ser que já tenham liberação manual à parte).',()=>this._apagarMeta(btn.dataset.id)));
+    });
+  }
+  async _salvarMeta(){
+    const s=this.shadowRoot;
+    const id=s.getElementById('iMetaId').value;
+    const meta_diamantes=parseInt(s.getElementById('iMetaDiamantes').value);
+    const quantidade=parseInt(s.getElementById('iMetaQuantidade').value);
+    if(!meta_diamantes||meta_diamantes<=0){this._toast('Informe um valor de diamantes válido','err');return;}
+    if(!quantidade||quantidade<=0){this._toast('Informe uma quantidade de usos válida','err');return;}
+    const body=id?{id,meta_diamantes,quantidade}:{meta_diamantes,quantidade};
+    const r=await this._api('POST','/admin/impulso/metas',body);
+    if(r?.ok){
+      this._toast(id?'Meta atualizada!':'Meta adicionada!');
+      this._cancelarEdicaoMeta();
+      this._carregarMetas();
+    } else this._toast(r?.erro||'Erro ao salvar','err');
+  }
+  _cancelarEdicaoMeta(){
+    const s=this.shadowRoot;
+    s.getElementById('iMetaId').value='';
+    s.getElementById('iMetaDiamantes').value='';
+    s.getElementById('iMetaQuantidade').value='';
+    s.getElementById('btnSalvarMeta').innerHTML=`${this._ico('plus',13)} Adicionar Meta`;
+    s.getElementById('btnCancelarEdicaoMeta').style.display='none';
+  }
+  async _apagarMeta(id){
+    const r=await this._api('DELETE',`/admin/impulso/metas/${encodeURIComponent(id)}`);
+    if(r?.ok){this._toast('Meta apagada');this._carregarMetas();}
+    else this._toast(r?.erro||'Erro','err');
   }
   async _carregarImpulsoHistorico(pagina){
     const s=this.shadowRoot;
@@ -3662,6 +3726,20 @@ class DimaiorAdmin extends HTMLElement {
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('unlock',14)} Streamers Liberados</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuLiberados">${this._ico('refresh',12)} Atualizar</button></div></div>
                 <div id="tbLiberados">${this._loading()}</div>
+              </div>
+              <div class="box impulso-section">
+                <div class="bhead"><div class="btitulo">${this._ico('award',14)} Metas Automáticas de Impulso</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuMetas">${this._ico('refresh',12)} Atualizar</button></div></div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Quem bater uma dessas metas de diamantes no mês libera Impulso (Manual + Automático) sozinho, com a cota de usos do degrau atingido — só vale pra quem ainda NÃO foi liberado manualmente acima. Reinicia sozinho todo mês.</div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+                    <div class="mc" style="flex:1;min-width:140px"><label>Diamantes no mês</label><input id="iMetaDiamantes" type="number" min="1" placeholder="Ex: 30000" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/></div>
+                    <div class="mc" style="width:130px"><label>Usos/semana</label><input id="iMetaQuantidade" type="number" min="1" max="99" placeholder="Ex: 2" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/></div>
+                    <input type="hidden" id="iMetaId"/>
+                    <button class="btn btn-g" id="btnSalvarMeta">${this._ico('plus',13)} Adicionar Meta</button>
+                    <button class="btn btn-o" id="btnCancelarEdicaoMeta" style="display:none">${this._ico('x',13)} Cancelar</button>
+                  </div>
+                  <div id="tbMetas">${this._loading()}</div>
+                </div>
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('lock_r',14)} Bloquear Streamer</div></div>
