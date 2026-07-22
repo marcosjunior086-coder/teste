@@ -1051,10 +1051,43 @@ class DimaiorAdmin extends HTMLElement {
         </div>
         <div class="dd-compare-arrow">→</div>
         <div class="dd-compare-col right">
-          <p class="dd-compare-month">${this._esc(d.mes_atual.nome)} · até dia ${d.dia_referencia} (agora)</p>
+          <p class="dd-compare-month">${this._esc(d.mes_atual.nome)} · até dia ${d.dia_referencia} (fechado)</p>
           <div class="dd-compare-val">${this._num(d.mes_atual.total_ate_hoje)} 💎</div>
           <p class="dd-compare-sub">${d.mes_atual.streamers_ativos} streamers ativos até aqui</p>
           <div class="dd-bar-compare"><div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div></div>
+        </div>
+      </div>
+      ${this._ddRenderHoje(d.hoje_em_andamento)}`;
+  }
+  _ddRenderHoje(h){
+    const eq=h.dia_equivalente_mes_anterior;
+    const sobeDesce=h.delta>=0?'▲':'▼';
+    const corDelta=h.delta>=0?'var(--verde)':'var(--verm)';
+    const pctTxt=h.percentual!==null&&h.percentual!==undefined?`${h.percentual>=0?'+':''}${h.percentual.toFixed(1)}%`:'—';
+    const maior=Math.max(h.total_diamantes,eq.total_diamantes,1);
+    const alturaHoje=Math.max(4,(h.total_diamantes/maior)*100);
+    const alturaEq=Math.max(4,(eq.total_diamantes/maior)*100);
+    return `
+      <div class="dd-hoje-row">
+        <div class="dd-hoje-head">
+          <span class="dd-hoje-dot"></span>
+          <span class="dd-hoje-txt">Hoje (dia ${h.dia}, em andamento) vs. dia ${eq.dia} de ${this._esc(eq.nome)} — atualiza a cada carregamento, sobe conforme os diamantes de hoje entram.</span>
+        </div>
+        <div class="dd-hoje-compare">
+          <div class="dd-hoje-col">
+            <p class="dd-hoje-lbl">Dia ${eq.dia} de ${this._esc(eq.nome)}</p>
+            <div class="dd-hoje-val" style="color:var(--t3)">${this._num(eq.total_diamantes)} 💎</div>
+            <div class="dd-hoje-bar"><div class="seg prev" style="height:${alturaEq}%"></div></div>
+          </div>
+          <div class="dd-hoje-col">
+            <p class="dd-hoje-lbl">Hoje até agora</p>
+            <div class="dd-hoje-val">${this._num(h.total_diamantes)} 💎</div>
+            <div class="dd-hoje-bar"><div class="seg cur" style="height:${alturaHoje}%"></div></div>
+          </div>
+          <div class="dd-hoje-delta" style="color:${corDelta}">
+            <span>${sobeDesce} ${this._num(Math.abs(h.delta))}</span>
+            <span class="pct">${pctTxt}</span>
+          </div>
         </div>
       </div>`;
   }
@@ -2637,6 +2670,21 @@ class DimaiorAdmin extends HTMLElement {
     .dd-bar-compare .seg{width:100%;border-radius:6px 6px 0 0;}
     .dd-bar-compare .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}
     .dd-bar-compare .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
+    .dd-hoje-row{margin-top:16px;padding-top:14px;border-top:1px dashed var(--brddim);}
+    .dd-hoje-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;}
+    .dd-hoje-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);margin-top:4px;flex-shrink:0;animation:ddPulse 1.6s ease-in-out infinite;}
+    .dd-hoje-txt{font-size:12px;color:var(--t3);line-height:1.5;}
+    .dd-hoje-compare{display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:14px;}
+    .dd-hoje-col{display:flex;flex-direction:column;}
+    .dd-hoje-lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);margin:0 0 4px;}
+    .dd-hoje-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:17px;color:var(--t1);}
+    .dd-hoje-bar{height:34px;margin-top:8px;display:flex;align-items:flex-end;}
+    .dd-hoje-bar .seg{width:100%;border-radius:5px 5px 0 0;}
+    .dd-hoje-bar .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}
+    .dd-hoje-bar .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
+    .dd-hoje-delta{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;padding-bottom:6px;}
+    .dd-hoje-delta .pct{font-size:10px;font-weight:400;opacity:.85;}
+    @keyframes ddPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
     .dd-bars{display:flex;align-items:flex-end;gap:16px;height:150px;padding:4px 4px 0;}
     .dd-bars .col{flex:0 0 64px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
     .dd-bars .val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;color:var(--t1);white-space:nowrap;}
@@ -2680,6 +2728,8 @@ class DimaiorAdmin extends HTMLElement {
          colado à esquerda quando quebra linha do texto do cabeçalho. */
       .dd-hero-top{justify-content:center;}
       .dd-delta-badge{margin:14px auto 0;}
+      .dd-hoje-compare{grid-template-columns:1fr 1fr;}
+      .dd-hoje-delta{grid-column:1/-1;flex-direction:row;justify-content:center;gap:8px;align-items:baseline;padding-top:10px;}
     }
     /* ── Widget Ao Vivo no Dashboard ── */
     .dlw-empty{display:flex;align-items:center;gap:8px;padding:16px;color:var(--t3);font-size:12px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
