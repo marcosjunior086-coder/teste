@@ -220,7 +220,7 @@ class PoliticasPremium extends HTMLElement {
                     <div class="text-block">
                         <p>Os <span class="highlight">Streamers Premium</span> poderão receber política fixa da plataforma por até 3 meses consecutivos. <strong>O bônus pode ser revogado a qualquer momento sem aviso prévio</strong> caso as metas e a qualidade não sejam cumpridas.</p>
                         <ul>
-                            <li><span class="highlight-cyan">1º mês:</span> Recebe o bônus sem necessidade de meta mínima de diamantes.</li>
+                            <li><span class="highlight-cyan">1º mês:</span> Recebe o bônus ao cumprir 24 dias, 60h ao vivo e 15.000 diamantes no mês.</li>
                             <li><span class="highlight-cyan">2º e 3º meses:</span> Para garantir o bônus, deve atingir pelo menos 30.000 diamantes.</li>
                         </ul>
                     </div>
@@ -232,14 +232,11 @@ class PoliticasPremium extends HTMLElement {
 
                 <div class="content-box">
                     <div class="box-title">${SVG_CHECK} Tabelas de Bonificação</div>
-                    <div class="text-block"><h4>Primeiro Mês (Sem meta de diamantes)</h4></div>
+                    <div class="text-block"><h4>Primeiro Mês</h4></div>
                     <table class="t-mes1">
-                        <thead><tr><th>Dias</th><th>Horas</th><th>Bônus</th></tr></thead>
+                        <thead><tr><th>Dias</th><th>Horas</th><th>Diamantes</th><th>Bônus</th></tr></thead>
                         <tbody>
-                            <tr><td>12</td><td>20 h</td><td>R$ 150</td></tr>
-                            <tr><td>15</td><td>30 h</td><td>R$ 300</td></tr>
-                            <tr><td>24</td><td>50 h</td><td>R$ 600</td></tr>
-                            <tr><td>25</td><td>60 h</td><td>R$ 800</td></tr>
+                            <tr><td>24</td><td>60 h</td><td>15 mil</td><td>$ 120</td></tr>
                         </tbody>
                     </table>
 
@@ -247,9 +244,8 @@ class PoliticasPremium extends HTMLElement {
                     <table class="t-mes2">
                         <thead><tr><th>Dias</th><th>Horas</th><th>Diamantes</th><th>Bônus</th></tr></thead>
                         <tbody>
-                            <tr><td>20</td><td>40 h</td><td>30 mil</td><td>R$ 500</td></tr>
-                            <tr><td>24</td><td>50 h</td><td>30 mil</td><td>R$ 800</td></tr>
-                            <tr><td>24</td><td>60 h</td><td>90 mil</td><td>R$ 1.000</td></tr>
+                            <tr><td>24</td><td>60 h</td><td>30 mil</td><td>$ 120</td></tr>
+                            <tr><td>24</td><td>60 h</td><td>90 mil</td><td>$ 200</td></tr>
                         </tbody>
                     </table>
                 </div>
