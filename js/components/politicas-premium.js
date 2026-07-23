@@ -145,11 +145,13 @@ class PoliticasPremium extends HTMLElement {
             tbody tr:hover { background: rgba(0,220,220,0.05); }
             td { text-align: center; padding: 6px 2px; font-size: clamp(0.65rem, 2.5vw, 0.75rem); color: var(--cyan); vertical-align: middle; word-wrap: break-word; line-height: 1.2; }
             
-            /* Tabela Padrão (3 colunas: Mês 1) */
-            .t-mes1 th:nth-child(1) { width: 30%; }
-            .t-mes1 th:nth-child(2) { width: 30%; }
-            .t-mes1 th:nth-child(3) { width: 40%; }
-            .t-mes1 td:nth-child(3) { color: var(--gold); font-weight: 700; }
+            /* Tabela Padrão (4 colunas: Mês 1 — mesma estrutura do Mês 2/3) */
+            .t-mes1 th:nth-child(1) { width: 20%; }
+            .t-mes1 th:nth-child(2) { width: 25%; }
+            .t-mes1 th:nth-child(3) { width: 25%; }
+            .t-mes1 th:nth-child(4) { width: 30%; }
+            .t-mes1 td:nth-child(3) { color: var(--sub); font-weight: 600; }
+            .t-mes1 td:nth-child(4) { color: var(--gold); font-weight: 700; }
 
             /* Tabela Padrão (4 colunas: Mês 2 e 3) */
             .t-mes2 th:nth-child(1) { width: 20%; }
