@@ -2687,8 +2687,10 @@ class DimaiorAdmin extends HTMLElement {
     };
     const mesAtual=this._statusStreamersInfo?.mes_atual||'Mês atual';
     const mesAnterior=this._statusStreamersInfo?.mes_anterior||'Mês anterior';
+    const varTxt=x=>this._varBadge(x.percentual!==null&&x.percentual!==undefined?Math.round(x.percentual*10)/10:null);
 
-    el.innerHTML=`<table><thead><tr><th>Streamer</th><th>UID</th><th>Status</th><th>${this._esc(mesAtual)}</th><th>${this._esc(mesAnterior)}</th><th>Variação</th><th></th></tr></thead><tbody>
+    // Desktop: tabela — Mobile: accordion (mesmo padrão do Histórico de Meses)
+    const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>Streamer</th><th>UID</th><th>Status</th><th>${this._esc(mesAtual)}</th><th>${this._esc(mesAnterior)}</th><th>Variação</th><th></th></tr></thead><tbody>
       ${lista.map(x=>`
       <tr>
         <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(x.foto,x.nome)}<span>${this._esc(x.nome)}</span></div></td>
@@ -2696,37 +2698,76 @@ class DimaiorAdmin extends HTMLElement {
         <td>${x.ativo?'<span class="badge on">Ativo</span>':'<span class="badge off">Inativo</span>'}${catBadge(x.categoria)}</td>
         <td>${this._num(x.diamantes_atual)} 💎</td>
         <td style="color:var(--t3)">${this._num(x.diamantes_anterior)} 💎</td>
-        <td>${this._varBadge(x.percentual!==null&&x.percentual!==undefined?Math.round(x.percentual*10)/10:null)}</td>
-        <td><button class="btn btn-o btn-sm ss-evol" data-uid="${this._esc(x.kwai_uid)}">${this._ico('chart',12)} Evolução</button></td>
+        <td>${varTxt(x)}</td>
+        <td><button class="btn btn-o btn-sm ss-evol" data-uid="${this._esc(x.kwai_uid)}" data-alvo="ssEvol-${this._esc(x.kwai_uid)}">${this._ico('chart',12)} Evolução</button></td>
       </tr>
       <tr class="ss-evol-row" id="ssEvol-${this._esc(x.kwai_uid)}" style="display:none"><td colspan="7"></td></tr>`).join('')}
-    </tbody></table>`;
+    </tbody></table></div>`;
+
+    const accordionHtml=`<div class="hist-lista hist-mobile-only">${lista.map(x=>`
+      <div class="hist-item">
+        <div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')">
+          <div class="hist-av">${this._avatar(x.foto,x.nome)}</div>
+          <div class="hist-info">
+            <div class="hist-nome">${this._esc(x.nome)}</div>
+            <div class="hist-diam">${this._ico('diamond',10)} ${this._num(x.diamantes_atual)}</div>
+          </div>
+          <div class="hist-right">${x.ativo?'<span class="badge on">Ativo</span>':'<span class="badge off">Inativo</span>'}</div>
+          <span class="hist-chevron">${this._ico('down',11)}</span>
+        </div>
+        <div class="hist-body">
+          <div class="hist-body-grid">
+            <div class="hist-cel"><div class="hist-lbl">UID</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.kwai_uid)}</div></div>
+            <div class="hist-cel"><div class="hist-lbl">Categoria</div><div class="hist-val">${catBadge(x.categoria)||'—'}</div></div>
+            <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAtual)}</div><div class="hist-val" style="color:var(--azul)">${this._num(x.diamantes_atual)}💎</div></div>
+            <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAnterior)}</div><div class="hist-val">${this._num(x.diamantes_anterior)}💎</div></div>
+            <div class="hist-cel" style="grid-column:1/-1"><div class="hist-lbl">Variação</div><div class="hist-val">${varTxt(x)}</div></div>
+          </div>
+          <button class="btn btn-o btn-sm ss-evol" data-uid="${this._esc(x.kwai_uid)}" data-alvo="ssEvolM-${this._esc(x.kwai_uid)}" style="margin-top:10px;width:100%">${this._ico('chart',12)} Ver Evolução</button>
+          <div class="ss-evol-mob" id="ssEvolM-${this._esc(x.kwai_uid)}" style="display:none;margin-top:8px"></div>
+        </div>
+      </div>`).join('')}</div>`;
+
+    el.innerHTML=tabelaHtml+accordionHtml;
 
     el.querySelectorAll('.ss-evol').forEach(btn=>{
-      btn.addEventListener('click',()=>this._toggleEvolucaoStreamer(btn.dataset.uid));
+      btn.addEventListener('click',e=>{e.stopPropagation();this._toggleEvolucaoStreamer(btn.dataset.uid,btn.dataset.alvo);});
     });
   }
-  async _toggleEvolucaoStreamer(uid){
-    const s=this.shadowRoot;const row=s.getElementById(`ssEvol-${uid}`);if(!row)return;
-    const jaAberto=row.style.display!=='none';
+  async _toggleEvolucaoStreamer(uid,alvoId){
+    const s=this.shadowRoot;const alvo=s.getElementById(alvoId);if(!alvo)return;
+    const ehLinhaTabela=alvo.tagName==='TR';
+    const jaAberto=alvo.style.display!=='none';
     s.querySelectorAll('.ss-evol-row').forEach(r=>r.style.display='none');
+    s.querySelectorAll('.ss-evol-mob').forEach(r=>r.style.display='none');
     if(jaAberto)return;
-    row.style.display='';
-    const td=row.querySelector('td');
-    td.innerHTML=this._loading();
+    alvo.style.display='';
+    const destino=ehLinhaTabela?alvo.querySelector('td'):alvo;
+    destino.innerHTML=this._loading();
     const d=await this._api('GET',`/admin/streamers-status/evolucao/${encodeURIComponent(uid)}`);
     const meses=d?.meses||[];
     const nomesMes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    td.innerHTML=meses.length
+    destino.innerHTML=meses.length
       ?`<div style="display:flex;gap:14px;flex-wrap:wrap;padding:12px 6px">${meses.map(m=>`<div style="text-align:center;min-width:44px"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">${nomesMes[m.mes-1]}</div><div style="font-size:12.5px;font-weight:700;color:var(--t1);margin-top:3px">${this._num(m.diamantes)}💎</div></div>`).join('')}</div>`
       :this._empty('chart','Sem dados neste ano');
   }
   _renderRankingAnoStatus(lista){
     const s=this.shadowRoot;const el=s.getElementById('tbRankingAnoStatus');if(!el)return;
     if(!lista.length){el.innerHTML=this._empty('trophy','Sem dados no ano ainda');return;}
-    el.innerHTML=`<table><thead><tr><th>#</th><th>Streamer</th><th>Diamantes no Ano</th></tr></thead><tbody>
-      ${lista.slice(0,50).map(r=>`<tr><td>${r.posicao}</td><td><div style="display:flex;align-items:center;gap:8px">${this._avatar(r.foto,r.nome)}<span>${this._esc(r.nome)}</span></div></td><td>${this._num(r.diamantes_ano)} 💎</td></tr>`).join('')}
-    </tbody></table>`;
+    const top=lista.slice(0,50);
+    const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Streamer</th><th>Diamantes no Ano</th></tr></thead><tbody>
+      ${top.map(r=>`<tr><td>${r.posicao}</td><td><div style="display:flex;align-items:center;gap:8px">${this._avatar(r.foto,r.nome)}<span>${this._esc(r.nome)}</span></div></td><td>${this._num(r.diamantes_ano)} 💎</td></tr>`).join('')}
+    </tbody></table></div>`;
+    const accordionHtml=`<div class="hist-lista hist-mobile-only">${top.map(r=>`
+      <div class="hist-item">
+        <div class="hist-preview" style="cursor:default">
+          <span class="hist-pos">${r.posicao}</span>
+          <div class="hist-av">${this._avatar(r.foto,r.nome)}</div>
+          <div class="hist-info"><div class="hist-nome">${this._esc(r.nome)}</div></div>
+          <div class="hist-right" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--azul)">${this._num(r.diamantes_ano)}💎</div>
+        </div>
+      </div>`).join('')}</div>`;
+    el.innerHTML=tabelaHtml+accordionHtml;
   }
   async _atualizarRosterStatus(){
     const s=this.shadowRoot;const btn=s.getElementById('btnAtualizarRosterStatus');
