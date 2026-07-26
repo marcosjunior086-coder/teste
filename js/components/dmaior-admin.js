@@ -210,7 +210,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
@@ -1641,6 +1641,15 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnBuscarUidAgente')?.addEventListener('click',()=>this._buscarStreamerParaVincular());
     s.getElementById('inpUidVincular')?.addEventListener('keydown',e=>{ if(e.key==='Enter')this._buscarStreamerParaVincular(); });
     s.getElementById('btnConfirmarVincular')?.addEventListener('click',()=>this._confirmarVincularStreamer());
+    // Status de Streamers
+    s.getElementById('btnAtuStatusStreamers')?.addEventListener('click',()=>this._carregarStatusStreamers());
+    s.getElementById('btnAtualizarRosterStatus')?.addEventListener('click',()=>this._atualizarRosterStatus());
+    s.getElementById('statusStreamersFiltro')?.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-filtro]');if(!btn)return;
+      s.querySelectorAll('#statusStreamersFiltro .ss-filtro-tab').forEach(b=>b.classList.toggle('on',b===btn));
+      this._statusStreamersFiltroAtual=btn.dataset.filtro;
+      this._renderStatusStreamersLista();
+    });
     // Controle Impulsionamento
     s.getElementById('btnAtuImpulso').addEventListener('click',()=>this._carregarImpulsoCtrl());
     s.getElementById('btnSalvarImpulsoConfig').addEventListener('click',()=>this._salvarImpulsoConfig());
@@ -2322,10 +2331,11 @@ class DimaiorAdmin extends HTMLElement {
     const ate=s.getElementById('expDataAte').value||de;
     const uid=s.getElementById('expUid').value.trim();
     const org=s.getElementById('expOrg')?.value||'';
+    const porDia=s.getElementById('expPorDia')?.checked;
     if(!de){this._toast('Escolha a data inicial','err');return;}
     const btn=s.getElementById('btnBaixarDados');
     btn.disabled=true;btn.textContent='Baixando...';
-    const qs=`inicio=${de}&fim=${ate}${uid?`&memberId=${encodeURIComponent(uid)}`:''}${org?`&org=${encodeURIComponent(org)}`:''}`;
+    const qs=`inicio=${de}&fim=${ate}${uid?`&memberId=${encodeURIComponent(uid)}`:''}${org?`&org=${encodeURIComponent(org)}`:''}${porDia?'&porDia=1':''}`;
     const d=await this._api('GET',`/admin/monitor/exportar?${qs}`);
     btn.disabled=false;btn.innerHTML=`${this._ico('download',13)} Baixar Dados`;
     if(!d?.ok){this._toast(d?.erro||'Erro ao gerar o arquivo','err');return;}
@@ -2338,7 +2348,7 @@ class DimaiorAdmin extends HTMLElement {
     a.href=url;a.download=d.filename||'dmaior-dados.xlsx';
     this.shadowRoot.appendChild(a);a.click();a.remove();
     URL.revokeObjectURL(url);
-    this._toast(`Baixado! ${d.total} streamer(s).`);
+    this._toast(d.aviso?d.aviso:`Baixado! ${d.total} linha(s)${d.dias?` (${d.dias} dia(s))`:''}.`,d.aviso?'err':'ok');
   }
 
   async _acompanharJobCorrecao(jobId,totalDias,periodo,statusEl,resultEl){
@@ -2606,6 +2616,125 @@ class DimaiorAdmin extends HTMLElement {
     const r=await this._api('PATCH',`/admin/impulso/metas-atingidas/${encodeURIComponent(uid)}`,body);
     if(r?.ok)this._toast('Atualizado!');
     else{this._toast(r?.erro||'Erro','err');this._carregarMetasAtingidas();}
+  }
+  // ══════════════════════ STATUS DE STREAMERS ═══════════════════════════════
+  async _carregarStatusStreamers(){
+    const s=this.shadowRoot;
+    s.getElementById('statusStreamersResumo').innerHTML=this._loading('grid-column:1/-1');
+    s.getElementById('tbStatusStreamers').innerHTML=this._loading();
+    s.getElementById('tbRankingAnoStatus').innerHTML=this._loading();
+    const [status,ranking]=await Promise.all([
+      this._api('GET','/admin/streamers-status'),
+      this._api('GET','/admin/streamers-status/ranking-ano'),
+    ]);
+    if(status?.ok){
+      this._statusStreamersDados=status.streamers||[];
+      this._statusStreamersInfo=status;
+      if(!this._statusStreamersFiltroAtual)this._statusStreamersFiltroAtual='todos';
+      this._renderStatusStreamersAviso(status);
+      this._renderStatusStreamersResumo(status);
+      this._renderStatusStreamersLista();
+    } else {
+      s.getElementById('statusStreamersAvisoRoster').style.display='none';
+      s.getElementById('statusStreamersResumo').innerHTML='';
+      s.getElementById('tbStatusStreamers').innerHTML=this._empty('warning','Erro ao carregar status');
+    }
+    if(ranking?.ok)this._renderRankingAnoStatus(ranking.ranking||[]);
+    else s.getElementById('tbRankingAnoStatus').innerHTML=this._empty('warning','Erro ao carregar ranking anual');
+  }
+  _renderStatusStreamersAviso(d){
+    const s=this.shadowRoot;const el=s.getElementById('statusStreamersAvisoRoster');if(!el)return;
+    if(!d.roster_disponivel){
+      el.style.display='block';
+      el.innerHTML=`<div style="padding:12px 16px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:var(--rs);font-size:12px;color:#fcd34d;display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Ainda não há captura do roster da Kwai este mês. Clique em "Atualizar Roster" pra buscar agora, ou aguarde a captura automática diária.</div>`;
+    } else if(!d.comparacao_disponivel){
+      el.style.display='block';
+      el.innerHTML=`<div style="padding:12px 16px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Roster deste mês já capturado, mas ainda não há mês anterior pra comparar — "Novo"/"Saiu" só ficam disponíveis a partir do próximo mês.</div>`;
+    } else {
+      el.style.display='none';
+    }
+  }
+  _renderStatusStreamersResumo(d){
+    const s=this.shadowRoot;const el=s.getElementById('statusStreamersResumo');if(!el)return;
+    const lista=d.streamers||[];
+    const total=lista.length;
+    const ativos=lista.filter(x=>x.ativo).length;
+    const inativos=total-ativos;
+    const novos=d.comparacao_disponivel?lista.filter(x=>x.categoria==='novo').length:null;
+    const saiu=d.comparacao_disponivel?lista.filter(x=>x.categoria==='saiu').length:null;
+    el.innerHTML=`
+      <div class="dc2 dc2-indigo"><div class="dc2-ico">${this._ico('users',26)}</div><div class="dc2-val">${total}</div><div class="dc2-lbl">Total</div></div>
+      <div class="dc2 dc2-verde"><div class="dc2-ico">${this._ico('check_c',26)}</div><div class="dc2-val">${ativos}</div><div class="dc2-lbl">Ativos (${this._esc(d.mes_atual)})</div></div>
+      <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('clock_r',26)}</div><div class="dc2-val">${inativos}</div><div class="dc2-lbl">Inativos</div></div>
+      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('star',26)}</div><div class="dc2-val">${novos===null?'—':novos}</div><div class="dc2-lbl">Novos</div></div>
+      <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${saiu===null?'—':saiu}</div><div class="dc2-lbl">Saíram</div></div>`;
+  }
+  _renderStatusStreamersLista(){
+    const s=this.shadowRoot;const el=s.getElementById('tbStatusStreamers');if(!el)return;
+    const filtro=this._statusStreamersFiltroAtual||'todos';
+    let lista=this._statusStreamersDados||[];
+    if(filtro==='ativos')lista=lista.filter(x=>x.ativo);
+    else if(filtro==='inativos')lista=lista.filter(x=>!x.ativo);
+    else if(filtro==='novos')lista=lista.filter(x=>x.categoria==='novo');
+    else if(filtro==='saiu')lista=lista.filter(x=>x.categoria==='saiu');
+
+    if(!lista.length){el.innerHTML=this._empty('users','Nenhum streamer nesse filtro');return;}
+
+    const catBadge=c=>{
+      if(c==='novo')return `<span class="badge on" style="background:rgba(0,212,212,.15);color:var(--cyan);margin-left:5px">Novo</span>`;
+      if(c==='saiu')return `<span class="badge off" style="background:rgba(248,113,113,.15);color:var(--verm);margin-left:5px">Saiu</span>`;
+      return '';
+    };
+    const mesAtual=this._statusStreamersInfo?.mes_atual||'Mês atual';
+    const mesAnterior=this._statusStreamersInfo?.mes_anterior||'Mês anterior';
+
+    el.innerHTML=`<table><thead><tr><th>Streamer</th><th>UID</th><th>Status</th><th>${this._esc(mesAtual)}</th><th>${this._esc(mesAnterior)}</th><th>Variação</th><th></th></tr></thead><tbody>
+      ${lista.map(x=>`
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(x.foto,x.nome)}<span>${this._esc(x.nome)}</span></div></td>
+        <td style="font-size:11px;color:var(--t3)">${this._esc(x.kwai_uid)}</td>
+        <td>${x.ativo?'<span class="badge on">Ativo</span>':'<span class="badge off">Inativo</span>'}${catBadge(x.categoria)}</td>
+        <td>${this._num(x.diamantes_atual)} 💎</td>
+        <td style="color:var(--t3)">${this._num(x.diamantes_anterior)} 💎</td>
+        <td>${this._varBadge(x.percentual!==null&&x.percentual!==undefined?Math.round(x.percentual*10)/10:null)}</td>
+        <td><button class="btn btn-o btn-sm ss-evol" data-uid="${this._esc(x.kwai_uid)}">${this._ico('chart',12)} Evolução</button></td>
+      </tr>
+      <tr class="ss-evol-row" id="ssEvol-${this._esc(x.kwai_uid)}" style="display:none"><td colspan="7"></td></tr>`).join('')}
+    </tbody></table>`;
+
+    el.querySelectorAll('.ss-evol').forEach(btn=>{
+      btn.addEventListener('click',()=>this._toggleEvolucaoStreamer(btn.dataset.uid));
+    });
+  }
+  async _toggleEvolucaoStreamer(uid){
+    const s=this.shadowRoot;const row=s.getElementById(`ssEvol-${uid}`);if(!row)return;
+    const jaAberto=row.style.display!=='none';
+    s.querySelectorAll('.ss-evol-row').forEach(r=>r.style.display='none');
+    if(jaAberto)return;
+    row.style.display='';
+    const td=row.querySelector('td');
+    td.innerHTML=this._loading();
+    const d=await this._api('GET',`/admin/streamers-status/evolucao/${encodeURIComponent(uid)}`);
+    const meses=d?.meses||[];
+    const nomesMes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    td.innerHTML=meses.length
+      ?`<div style="display:flex;gap:14px;flex-wrap:wrap;padding:12px 6px">${meses.map(m=>`<div style="text-align:center;min-width:44px"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">${nomesMes[m.mes-1]}</div><div style="font-size:12.5px;font-weight:700;color:var(--t1);margin-top:3px">${this._num(m.diamantes)}💎</div></div>`).join('')}</div>`
+      :this._empty('chart','Sem dados neste ano');
+  }
+  _renderRankingAnoStatus(lista){
+    const s=this.shadowRoot;const el=s.getElementById('tbRankingAnoStatus');if(!el)return;
+    if(!lista.length){el.innerHTML=this._empty('trophy','Sem dados no ano ainda');return;}
+    el.innerHTML=`<table><thead><tr><th>#</th><th>Streamer</th><th>Diamantes no Ano</th></tr></thead><tbody>
+      ${lista.slice(0,50).map(r=>`<tr><td>${r.posicao}</td><td><div style="display:flex;align-items:center;gap:8px">${this._avatar(r.foto,r.nome)}<span>${this._esc(r.nome)}</span></div></td><td>${this._num(r.diamantes_ano)} 💎</td></tr>`).join('')}
+    </tbody></table>`;
+  }
+  async _atualizarRosterStatus(){
+    const s=this.shadowRoot;const btn=s.getElementById('btnAtualizarRosterStatus');
+    if(btn){btn.disabled=true;btn.innerHTML=`${this._ico('refresh',13)} Buscando...`;}
+    const r=await this._api('POST','/admin/monitor/roster');
+    if(r?.ok){this._toast(`Roster atualizado: ${r.total} membro(s) (${r.mes_referencia})`);await this._carregarStatusStreamers();}
+    else this._toast(r?.erro||'Erro ao atualizar roster','err');
+    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('refresh',13)} Atualizar Roster (Kwai)`;}
   }
   async _carregarImpulsoHistorico(pagina){
     const s=this.shadowRoot;
@@ -3037,7 +3166,7 @@ class DimaiorAdmin extends HTMLElement {
     .saque-card{padding:14px 16px;border-bottom:1px solid var(--brddim);transition:background .15s;background:transparent}@media(hover:hover){.saque-card:hover{background:var(--cyan-d)}}.saque-card.saque-pend{border-left:3px solid var(--gold);background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(0,0,0,0))}
     .saque-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}.saque-nome{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1)}.saque-uid{font-size:10px;color:var(--t3)}.saque-valor{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;font-weight:700;color:var(--gold);text-align:right}
     .saque-pix{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);margin-bottom:6px}.saque-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--t3)}.saque-meta span{display:flex;align-items:center;gap:3px}.saque-acoes{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
-    .premio-tipo-tabs{display:flex;gap:8px;margin-bottom:16px}.premio-tipo-tab{padding:8px 20px;border-radius:var(--rs);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--brddim);background:transparent;color:var(--t3);transition:all .2s;display:flex;align-items:center;gap:6px}.premio-tipo-tab:hover{color:var(--t1)}.premio-tipo-tab.on{background:var(--cyan-d);border-color:var(--brd);color:var(--cyan)}
+    .premio-tipo-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}.premio-tipo-tab,.ss-filtro-tab{padding:8px 20px;border-radius:var(--rs);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--brddim);background:transparent;color:var(--t3);transition:all .2s;display:flex;align-items:center;gap:6px}.premio-tipo-tab:hover,.ss-filtro-tab:hover{color:var(--t1)}.premio-tipo-tab.on,.ss-filtro-tab.on{background:var(--cyan-d);border-color:var(--brd);color:var(--cyan)}
     .premio-table{width:100%;border-collapse:collapse;margin-bottom:14px}.premio-pos{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap}
     .premio-info-box{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:11px;color:var(--cyan);margin-bottom:14px;line-height:1.5}
     .rank-mes-row{display:grid;grid-template-columns:minmax(130px,1.2fr) minmax(120px,1fr) minmax(120px,1fr) 82px 82px auto;gap:8px;align-items:end;padding:10px;border:1px solid var(--brddim);border-radius:var(--rs);background:rgba(0,0,0,.18);margin-bottom:10px}
@@ -3563,6 +3692,7 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('bars_up','dashDesemp','Evolução Mensal')}
             <div class="ns">Gestão</div>
             ${ni('users','streamers','Streamers')}
+            ${ni('check_c','statusStreamers','Status de Streamers')}
             ${ni('key_uid','uids','Autorização UIDs')}
             ${ni('metrics','metricas','Métricas')}
             ${ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)}
@@ -3602,6 +3732,29 @@ class DimaiorAdmin extends HTMLElement {
               </div>
             </div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
+            <div class="pag" id="pag-statusStreamers">${ph('Status de Streamers','check_c','Ativo/inativo por mês, novos, saídas e ranking anual','btnAtuStatusStreamers',`<button class="btn btn-o" id="btnAtualizarRosterStatus">${this._ico('refresh',13)} Atualizar Roster (Kwai)</button>`)}
+              <div id="statusStreamersAvisoRoster" style="display:none;margin-bottom:14px"></div>
+              <div class="dc2-grid" id="statusStreamersResumo">${this._loading('grid-column:1/-1')}</div>
+              <div class="box">
+                <div class="bhead">
+                  <div class="btitulo">${this._ico('users',14)} Streamers</div>
+                  <div class="bacoes">
+                    <div class="premio-tipo-tabs" id="statusStreamersFiltro">
+                      <button class="ss-filtro-tab on" data-filtro="todos">Todos</button>
+                      <button class="ss-filtro-tab" data-filtro="ativos">Ativos</button>
+                      <button class="ss-filtro-tab" data-filtro="inativos">Inativos</button>
+                      <button class="ss-filtro-tab" data-filtro="novos">Novos</button>
+                      <button class="ss-filtro-tab" data-filtro="saiu">Saíram</button>
+                    </div>
+                  </div>
+                </div>
+                <div id="tbStatusStreamers">${this._loading()}</div>
+              </div>
+              <div class="box">
+                <div class="bhead"><div class="btitulo">${this._ico('trophy',14)} Ranking Acumulado do Ano</div></div>
+                <div id="tbRankingAnoStatus">${this._loading()}</div>
+              </div>
+            </div>
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
             <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulário','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
@@ -3871,6 +4024,7 @@ class DimaiorAdmin extends HTMLElement {
                   </div></div>
                   <div class="mc"><label>Agência</label><select id="expOrg" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="">Todos</option></select></div>
                   <div class="mc"><label>UID do streamer <span style="color:var(--t3);font-size:11px">(opcional — vazio = todos)</span></label><input id="expUid" type="text" placeholder="Ex: 150001609526898" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none"><input type="checkbox" id="expPorDia" style="width:15px;height:15px;accent-color:var(--cyan)"/> Separar por dia <span style="color:var(--t3);font-size:11px">(1 linha por streamer em cada dia, em vez do total do período)</span></label>
                   <div><button class="btn btn-g" id="btnBaixarDados">${this._ico('download',13)} Baixar Dados</button></div>
                 </div>
               </div>
