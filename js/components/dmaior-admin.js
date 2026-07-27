@@ -14,7 +14,7 @@ class DimaiorAdmin extends HTMLElement {
     this.TK_KEY  = 'dm_admin_token';
     this._token  = '';
     this._edtId  = null;
-    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1, migracoesAgente:1, impulso:1 };
+    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1, migracoesAgente:1, impulso:1, statusStreamers:1, rankingAno:1 };
     this._uidLookup = null;
     this._cartOp   = { uid: null, tipo: null, nome: '' };
     this._saqueId  = null;
@@ -1644,10 +1644,9 @@ class DimaiorAdmin extends HTMLElement {
     // Status de Streamers
     s.getElementById('btnAtuStatusStreamers')?.addEventListener('click',()=>this._carregarStatusStreamers());
     s.getElementById('btnAtualizarRosterStatus')?.addEventListener('click',()=>this._atualizarRosterStatus());
-    s.getElementById('statusStreamersFiltro')?.addEventListener('click',e=>{
-      const btn=e.target.closest('[data-filtro]');if(!btn)return;
-      s.querySelectorAll('#statusStreamersFiltro .ss-filtro-tab').forEach(b=>b.classList.toggle('on',b===btn));
-      this._statusStreamersFiltroAtual=btn.dataset.filtro;
+    s.getElementById('statusStreamersFiltro')?.addEventListener('change',e=>{
+      this._statusStreamersFiltroAtual=e.target.value;
+      this._pg.statusStreamers=1;
       this._renderStatusStreamersLista();
     });
     // Controle Impulsionamento
@@ -2639,7 +2638,7 @@ class DimaiorAdmin extends HTMLElement {
       s.getElementById('statusStreamersResumo').innerHTML='';
       s.getElementById('tbStatusStreamers').innerHTML=this._empty('warning','Erro ao carregar status');
     }
-    if(ranking?.ok)this._renderRankingAnoStatus(ranking.ranking||[]);
+    if(ranking?.ok){this._statusRankingAnoDados=ranking.ranking||[];this._pg.rankingAno=1;this._renderRankingAnoStatus();}
     else s.getElementById('tbRankingAnoStatus').innerHTML=this._empty('warning','Erro ao carregar ranking anual');
   }
   _renderStatusStreamersAviso(d){
@@ -2647,9 +2646,9 @@ class DimaiorAdmin extends HTMLElement {
     if(!d.roster_disponivel){
       el.style.display='block';
       el.innerHTML=`<div style="padding:12px 16px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:var(--rs);font-size:12px;color:#fcd34d;display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Ainda não há captura do roster da Kwai este mês. Clique em "Atualizar Roster" pra buscar agora, ou aguarde a captura automática diária.</div>`;
-    } else if(!d.comparacao_disponivel){
+    } else if(d.comparacao_fonte==='atividade'){
       el.style.display='block';
-      el.innerHTML=`<div style="padding:12px 16px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Roster deste mês já capturado, mas ainda não há mês anterior pra comparar — "Novo"/"Saiu" só ficam disponíveis a partir do próximo mês.</div>`;
+      el.innerHTML=`<div style="padding:12px 16px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Ainda não há snapshot do roster do mês anterior — "Novo"/"Saiu" abaixo estão baseados em atividade (fez diamante ou não), não no registro oficial da Kwai. A partir do próximo mês passa a usar o registro oficial, mais preciso.</div>`;
     } else {
       el.style.display='none';
     }
@@ -2672,13 +2671,19 @@ class DimaiorAdmin extends HTMLElement {
   _renderStatusStreamersLista(){
     const s=this.shadowRoot;const el=s.getElementById('tbStatusStreamers');if(!el)return;
     const filtro=this._statusStreamersFiltroAtual||'todos';
-    let lista=this._statusStreamersDados||[];
-    if(filtro==='ativos')lista=lista.filter(x=>x.ativo);
-    else if(filtro==='inativos')lista=lista.filter(x=>!x.ativo);
-    else if(filtro==='novos')lista=lista.filter(x=>x.categoria==='novo');
-    else if(filtro==='saiu')lista=lista.filter(x=>x.categoria==='saiu');
+    let listaFiltrada=this._statusStreamersDados||[];
+    if(filtro==='ativos')listaFiltrada=listaFiltrada.filter(x=>x.ativo);
+    else if(filtro==='inativos')listaFiltrada=listaFiltrada.filter(x=>!x.ativo);
+    else if(filtro==='novos')listaFiltrada=listaFiltrada.filter(x=>x.categoria==='novo');
+    else if(filtro==='saiu')listaFiltrada=listaFiltrada.filter(x=>x.categoria==='saiu');
 
-    if(!lista.length){el.innerHTML=this._empty('users','Nenhum streamer nesse filtro');return;}
+    if(!listaFiltrada.length){el.innerHTML=this._empty('users','Nenhum streamer nesse filtro');return;}
+
+    const POR_PAG=25;
+    const totalPags=Math.max(1,Math.ceil(listaFiltrada.length/POR_PAG));
+    this._pg.statusStreamers=Math.min(Math.max(this._pg.statusStreamers||1,1),totalPags);
+    const lista=listaFiltrada.slice((this._pg.statusStreamers-1)*POR_PAG,this._pg.statusStreamers*POR_PAG);
+    const pager=totalPags>1?`<div class="pag-bar"><button ${this._pg.statusStreamers<=1?'disabled':''} data-sspg="prev">Anterior</button><span class="pn">Pág ${this._pg.statusStreamers} / ${totalPags}</span><button ${this._pg.statusStreamers>=totalPags?'disabled':''} data-sspg="next">Próxima</button></div>`:'';
 
     const catBadge=c=>{
       if(c==='novo')return `<span class="badge on" style="background:rgba(0,212,212,.15);color:var(--cyan);margin-left:5px">Novo</span>`;
@@ -2690,18 +2695,19 @@ class DimaiorAdmin extends HTMLElement {
     const varTxt=x=>this._varBadge(x.percentual!==null&&x.percentual!==undefined?Math.round(x.percentual*10)/10:null);
 
     // Desktop: tabela — Mobile: accordion (mesmo padrão do Histórico de Meses)
-    const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>Streamer</th><th>UID</th><th>Status</th><th>${this._esc(mesAtual)}</th><th>${this._esc(mesAnterior)}</th><th>Variação</th><th></th></tr></thead><tbody>
+    const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>Streamer</th><th>UID</th><th>Agência</th><th>Status</th><th>${this._esc(mesAtual)}</th><th>${this._esc(mesAnterior)}</th><th>Variação</th><th></th></tr></thead><tbody>
       ${lista.map(x=>`
       <tr>
         <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(x.foto,x.nome)}<span>${this._esc(x.nome)}</span></div></td>
         <td style="font-size:11px;color:var(--t3)">${this._esc(x.kwai_uid)}</td>
+        <td style="font-size:11px;color:var(--t2)">${this._esc(x.org_name||'—')}</td>
         <td>${x.ativo?'<span class="badge on">Ativo</span>':'<span class="badge off">Inativo</span>'}${catBadge(x.categoria)}</td>
         <td>${this._num(x.diamantes_atual)} 💎</td>
         <td style="color:var(--t3)">${this._num(x.diamantes_anterior)} 💎</td>
         <td>${varTxt(x)}</td>
         <td><button class="btn btn-o btn-sm ss-evol" data-uid="${this._esc(x.kwai_uid)}" data-alvo="ssEvol-${this._esc(x.kwai_uid)}">${this._ico('chart',12)} Evolução</button></td>
       </tr>
-      <tr class="ss-evol-row" id="ssEvol-${this._esc(x.kwai_uid)}" style="display:none"><td colspan="7"></td></tr>`).join('')}
+      <tr class="ss-evol-row" id="ssEvol-${this._esc(x.kwai_uid)}" style="display:none"><td colspan="8"></td></tr>`).join('')}
     </tbody></table></div>`;
 
     const accordionHtml=`<div class="hist-lista hist-mobile-only">${lista.map(x=>`
@@ -2718,6 +2724,7 @@ class DimaiorAdmin extends HTMLElement {
         <div class="hist-body">
           <div class="hist-body-grid">
             <div class="hist-cel"><div class="hist-lbl">UID</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.kwai_uid)}</div></div>
+            <div class="hist-cel"><div class="hist-lbl">Agência</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.org_name||'—')}</div></div>
             <div class="hist-cel"><div class="hist-lbl">Categoria</div><div class="hist-val">${catBadge(x.categoria)||'—'}</div></div>
             <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAtual)}</div><div class="hist-val" style="color:var(--azul)">${this._num(x.diamantes_atual)}💎</div></div>
             <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAnterior)}</div><div class="hist-val">${this._num(x.diamantes_anterior)}💎</div></div>
@@ -2728,11 +2735,13 @@ class DimaiorAdmin extends HTMLElement {
         </div>
       </div>`).join('')}</div>`;
 
-    el.innerHTML=tabelaHtml+accordionHtml;
+    el.innerHTML=tabelaHtml+accordionHtml+pager;
 
     el.querySelectorAll('.ss-evol').forEach(btn=>{
       btn.addEventListener('click',e=>{e.stopPropagation();this._toggleEvolucaoStreamer(btn.dataset.uid,btn.dataset.alvo);});
     });
+    el.querySelector('[data-sspg="prev"]')?.addEventListener('click',()=>{this._pg.statusStreamers--;this._renderStatusStreamersLista();});
+    el.querySelector('[data-sspg="next"]')?.addEventListener('click',()=>{this._pg.statusStreamers++;this._renderStatusStreamersLista();});
   }
   async _toggleEvolucaoStreamer(uid,alvoId){
     const s=this.shadowRoot;const alvo=s.getElementById(alvoId);if(!alvo)return;
@@ -2751,10 +2760,17 @@ class DimaiorAdmin extends HTMLElement {
       ?`<div style="display:flex;gap:14px;flex-wrap:wrap;padding:12px 6px">${meses.map(m=>`<div style="text-align:center;min-width:44px"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">${nomesMes[m.mes-1]}</div><div style="font-size:12.5px;font-weight:700;color:var(--t1);margin-top:3px">${this._num(m.diamantes)}💎</div></div>`).join('')}</div>`
       :this._empty('chart','Sem dados neste ano');
   }
-  _renderRankingAnoStatus(lista){
+  _renderRankingAnoStatus(){
     const s=this.shadowRoot;const el=s.getElementById('tbRankingAnoStatus');if(!el)return;
-    if(!lista.length){el.innerHTML=this._empty('trophy','Sem dados no ano ainda');return;}
-    const top=lista.slice(0,50);
+    const listaTotal=this._statusRankingAnoDados||[];
+    if(!listaTotal.length){el.innerHTML=this._empty('trophy','Sem dados no ano ainda');return;}
+
+    const POR_PAG=25;
+    const totalPags=Math.max(1,Math.ceil(listaTotal.length/POR_PAG));
+    this._pg.rankingAno=Math.min(Math.max(this._pg.rankingAno||1,1),totalPags);
+    const top=listaTotal.slice((this._pg.rankingAno-1)*POR_PAG,this._pg.rankingAno*POR_PAG);
+    const pager=totalPags>1?`<div class="pag-bar"><button ${this._pg.rankingAno<=1?'disabled':''} data-rapg="prev">Anterior</button><span class="pn">Pág ${this._pg.rankingAno} / ${totalPags}</span><button ${this._pg.rankingAno>=totalPags?'disabled':''} data-rapg="next">Próxima</button></div>`:'';
+
     const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Streamer</th><th>Diamantes no Ano</th></tr></thead><tbody>
       ${top.map(r=>`<tr><td>${r.posicao}</td><td><div style="display:flex;align-items:center;gap:8px">${this._avatar(r.foto,r.nome)}<span>${this._esc(r.nome)}</span></div></td><td>${this._num(r.diamantes_ano)} 💎</td></tr>`).join('')}
     </tbody></table></div>`;
@@ -2767,7 +2783,10 @@ class DimaiorAdmin extends HTMLElement {
           <div class="hist-right" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--azul)">${this._num(r.diamantes_ano)}💎</div>
         </div>
       </div>`).join('')}</div>`;
-    el.innerHTML=tabelaHtml+accordionHtml;
+    el.innerHTML=tabelaHtml+accordionHtml+pager;
+
+    el.querySelector('[data-rapg="prev"]')?.addEventListener('click',()=>{this._pg.rankingAno--;this._renderRankingAnoStatus();});
+    el.querySelector('[data-rapg="next"]')?.addEventListener('click',()=>{this._pg.rankingAno++;this._renderRankingAnoStatus();});
   }
   async _atualizarRosterStatus(){
     const s=this.shadowRoot;const btn=s.getElementById('btnAtualizarRosterStatus');
@@ -3780,13 +3799,13 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead">
                   <div class="btitulo">${this._ico('users',14)} Streamers</div>
                   <div class="bacoes">
-                    <div class="premio-tipo-tabs" id="statusStreamersFiltro">
-                      <button class="ss-filtro-tab on" data-filtro="todos">Todos</button>
-                      <button class="ss-filtro-tab" data-filtro="ativos">Ativos</button>
-                      <button class="ss-filtro-tab" data-filtro="inativos">Inativos</button>
-                      <button class="ss-filtro-tab" data-filtro="novos">Novos</button>
-                      <button class="ss-filtro-tab" data-filtro="saiu">Saíram</button>
-                    </div>
+                    <select id="statusStreamersFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
+                      <option value="todos">Todos</option>
+                      <option value="ativos">Ativos</option>
+                      <option value="inativos">Inativos</option>
+                      <option value="novos">Novos</option>
+                      <option value="saiu">Saíram</option>
+                    </select>
                   </div>
                 </div>
                 <div id="tbStatusStreamers">${this._loading()}</div>
