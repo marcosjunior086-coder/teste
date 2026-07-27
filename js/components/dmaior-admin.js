@@ -210,7 +210,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
@@ -896,6 +896,39 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mVerifExtPremium').addEventListener('click',async()=>{
       const r=await this._api('POST','/admin/streamers/externos',{kwai_uid:sv.kwai_uid,kwai_id:sv.kwai_id,nome:sv.nome,foto_url:sv.foto,verificado:true,verificado_premium:true});
       if(r?.ok){s.getElementById('mVerifExtOver')?.remove();this._toast('Streamer verificado Premium!');this._carregarStreamers();}else this._toast(r?.erro||'Erro','err');
+    });
+  }
+  _prepararBuscaUid(){
+    this.shadowRoot.getElementById('buscaUidInput')?.focus();
+  }
+  async _executarBuscaUidKwai(){
+    const s=this.shadowRoot;
+    const bruto=(s.getElementById('buscaUidInput')?.value||'').trim();
+    const kwaiId=bruto.replace(/^@/,'');
+    const area=s.getElementById('buscaUidResultado');
+    if(!kwaiId){this._toast('Digite o ID da Kwai','err');return;}
+    const btn=s.getElementById('btnBuscaUidIr');
+    if(btn){btn.disabled=true;btn.innerHTML=`${this._ico('search',13)} Buscando...`;}
+    area.innerHTML=this._loading();
+    const d=await this._api('GET',`/admin/buscauid/resolver?id=${encodeURIComponent(kwaiId)}`);
+    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('search',13)} Buscar`;}
+    if(!d?.ok){area.innerHTML=this._empty('warning',d?.erro||'Não foi possível buscar');return;}
+    const foto=this._proxyFoto(d.foto||'');
+    const selo=d.verificado?`<span style="color:var(--cyan);margin-left:5px" title="${this._esc(d.verificado_desc||'Verificado')}">${this._ico('check_c',13)}</span>`:'';
+    area.innerHTML=`
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        ${this._avatar(foto,d.nome||d.kwai_id,'av')}
+        <div style="flex:1;min-width:160px">
+          <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;color:var(--t1)">${this._esc(d.nome||d.kwai_id)}${selo}</div>
+          <div style="font-size:12px;color:var(--t3)">@${this._esc(d.kwai_id)}${typeof d.seguidores==='number'?` · ${this._num(d.seguidores)} seguidores`:''}</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;background:rgba(0,0,0,.3);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:2px">UID</div><div style="font-size:16px;font-weight:700;font-family:monospace;color:var(--t1);word-break:break-all">${this._esc(d.uid)}</div></div>
+        <button class="btn btn-o" id="btnBuscaUidCopiar" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('clipboard',13)} Copiar UID</button>
+      </div>`;
+    s.getElementById('btnBuscaUidCopiar')?.addEventListener('click',()=>{
+      navigator.clipboard.writeText(d.uid).then(()=>this._toast('UID copiado!')).catch(()=>this._toast('Não foi possível copiar','err'));
     });
   }
   async _carregarMetricas(){
@@ -1649,6 +1682,9 @@ class DimaiorAdmin extends HTMLElement {
       this._pg.statusStreamers=1;
       this._renderStatusStreamersLista();
     });
+    // Buscar UID Kwai
+    s.getElementById('btnBuscaUidIr')?.addEventListener('click',()=>this._executarBuscaUidKwai());
+    s.getElementById('buscaUidInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')this._executarBuscaUidKwai();});
     // Controle Impulsionamento
     s.getElementById('btnAtuImpulso').addEventListener('click',()=>this._carregarImpulsoCtrl());
     s.getElementById('btnSalvarImpulsoConfig').addEventListener('click',()=>this._salvarImpulsoConfig());
@@ -3754,6 +3790,7 @@ class DimaiorAdmin extends HTMLElement {
             ${ni('users','streamers','Streamers')}
             ${ni('check_c','statusStreamers','Status de Streamers')}
             ${ni('key_uid','uids','Autorização UIDs')}
+            ${ni('search','buscaUid','Buscar UID Kwai')}
             ${ni('metrics','metricas','Métricas')}
             ${ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)}
             ${ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)}
@@ -3816,6 +3853,19 @@ class DimaiorAdmin extends HTMLElement {
               </div>
             </div>
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes"><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
+            <div class="pag" id="pag-buscaUid">
+              <div class="ph"><div><div class="titulo">${this._ico('search',18)} Buscar UID Kwai</div><div class="psub">Resolve o ID (usuário) da Kwai para o UID numérico — funciona pra qualquer criador, mesmo sem cadastro na agência</div></div></div>
+              <div class="box">
+                <div class="bhead"><div class="btitulo">${this._ico('search',14)} Buscar por ID da Kwai</div></div>
+                <div style="padding:18px 18px 20px">
+                  <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <div class="busca" style="flex:1;min-width:200px">${this._ico('search',12)}<input id="buscaUidInput" type="text" placeholder="ex: amandinhanery (com ou sem @)" autocapitalize="off" autocorrect="off" spellcheck="false"/></div>
+                    <button class="btn btn-g" id="btnBuscaUidIr">${this._ico('search',13)} Buscar</button>
+                  </div>
+                  <div id="buscaUidResultado" style="margin-top:18px"></div>
+                </div>
+              </div>
+            </div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
             <div class="pag" id="pag-recrutamento">${ph('Recrutamento','clipboard','Candidatos do formulário','btnAtuRec')}<div class="box"><div id="tbRec">${this._loading()}</div></div></div>
             <div class="pag" id="pag-convites">
