@@ -530,22 +530,22 @@ class DmaiorSorteios extends HTMLElement {
       .sort-toast{display:flex;align-items:center;gap:7px;padding:.6rem .85rem;font-size:.8rem;font-weight:500;border-radius:10px;animation:sortIn .25s ease-out;}
       @keyframes sortIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
 
-      .sort-tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,.03);border:1px solid var(--dm-cyan-border,rgba(0,212,212,.15));border-radius:12px;padding:5px;max-width:560px;margin:0 auto 20px;}
+      .sort-tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;background:var(--dm-bg-card,rgba(255,255,255,.06));border:1px solid var(--dm-cyan-border,rgba(0,212,212,.15));border-radius:12px;padding:5px;max-width:560px;margin:0 auto 20px;}
       .sort-tab{flex:1;min-width:110px;padding:.55rem .7rem;border-radius:9px;border:none;cursor:pointer;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-weight:600;font-size:.8rem;background:transparent;color:var(--dm-text-muted,#7a9ab4);transition:background .2s,color .2s;}
-      .sort-tab.ativa{background:var(--dm-cyan-15,rgba(0,212,212,.15));color:var(--dm-cyan,#00d4d4);}
+      .sort-tab.ativa{background:var(--dm-cyan-12,rgba(0,212,212,.12));color:var(--dm-cyan,#00d4d4);}
 
       .sort-painel{display:none;max-width:560px;margin:0 auto;}
       .sort-painel.ativo{display:block;}
 
-      .sort-card{background:rgba(255,255,255,.03);border:1px solid var(--dm-cyan-border,rgba(0,212,212,.15));border-radius:14px;padding:1.1rem 1.15rem;margin-bottom:14px;}
+      .sort-card{background:var(--dm-bg-card,rgba(255,255,255,.06));border:1px solid var(--dm-cyan-border,rgba(0,212,212,.15));border-radius:14px;padding:1.1rem 1.15rem;margin-bottom:14px;}
       .sort-label{font-size:.72rem;color:var(--dm-text-muted,#7a9ab4);display:block;margin-bottom:5px;font-weight:500;}
-      .sort-inp,.sort-textarea,.sort-select{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--dm-cyan-border,rgba(0,212,212,.15));border-radius:9px;padding:.65rem .8rem;color:var(--dm-text,#e2e8f0);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:.85rem;outline:none;transition:border-color .2s;}
+      .sort-inp,.sort-textarea,.sort-select{width:100%;background:var(--dm-bg-tint,rgba(0,0,0,.2));border:1px solid var(--dm-cyan-border,rgba(0,212,212,.15));border-radius:9px;padding:.65rem .8rem;color:var(--dm-text,#e2e8f0);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:.85rem;outline:none;transition:border-color .2s;}
       .sort-inp:focus,.sort-textarea:focus{border-color:var(--dm-cyan,#00d4d4);}
       .sort-textarea{resize:vertical;min-height:90px;font-family:monospace;font-size:.8rem;}
       .sort-row{display:flex;gap:8px;}
       .sort-row .sort-inp{flex:1;}
 
-      .sort-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--dm-cyan,#00d4d4),#00a8a8);color:#04141a;font-weight:700;border:none;border-radius:9px;padding:.62rem 1.1rem;cursor:pointer;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:.82rem;transition:opacity .2s,transform .15s;}
+      .sort-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--dm-grad-cyan,linear-gradient(90deg,#00d4d4,#008c8c));color:#04141a;font-weight:700;border:none;border-radius:9px;padding:.62rem 1.1rem;cursor:pointer;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:.82rem;transition:opacity .2s,transform .15s;}
       .sort-btn:hover{opacity:.9;}
       .sort-btn:active{transform:scale(.97);}
       .sort-btn:disabled{opacity:.35;cursor:not-allowed;}
@@ -565,7 +565,7 @@ class DmaiorSorteios extends HTMLElement {
       .sort-vazio{color:var(--dm-text-muted,#7a9ab4);text-align:center;padding:1.3rem 0;font-size:.8rem;}
 
       .sort-lista{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;margin-bottom:.9rem;}
-      .sort-item{display:flex;align-items:center;gap:8px;background:rgba(0,212,212,.05);border:1px solid var(--dm-cyan-border,rgba(0,212,212,.12));border-radius:9px;padding:.5rem .75rem;}
+      .sort-item{display:flex;align-items:center;gap:8px;background:var(--dm-cyan-05,rgba(0,212,212,.05));border:1px solid var(--dm-cyan-border,rgba(0,212,212,.12));border-radius:9px;padding:.5rem .75rem;}
       .sort-item-idx{font-family:monospace;font-size:.68rem;color:var(--dm-cyan,#00d4d4);min-width:26px;}
       .sort-item-nome{flex:1;font-size:.83rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       .sort-item-rm{background:none;border:none;cursor:pointer;color:rgba(239,68,68,.4);padding:4px;border-radius:6px;line-height:0;flex-shrink:0;}
@@ -573,7 +573,7 @@ class DmaiorSorteios extends HTMLElement {
       .sort-item-rm svg{width:13px;height:13px;}
 
       .sort-tags{display:flex;flex-wrap:wrap;gap:6px;margin:.6rem 0;}
-      .sort-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(0,212,212,.08);border:1px solid var(--dm-cyan-border,rgba(0,212,212,.2));border-radius:20px;padding:.3rem .5rem .3rem .7rem;font-size:.75rem;font-family:monospace;}
+      .sort-tag{display:inline-flex;align-items:center;gap:5px;background:var(--dm-cyan-08,rgba(0,212,212,.08));border:1px solid var(--dm-cyan-border,rgba(0,212,212,.2));border-radius:20px;padding:.3rem .5rem .3rem .7rem;font-size:.75rem;font-family:monospace;}
       .sort-tag button{background:none;border:none;cursor:pointer;color:rgba(239,68,68,.5);padding:2px;line-height:0;}
       .sort-tag button:hover{color:#ef4444;}
       .sort-tag button svg{width:11px;height:11px;}
@@ -581,10 +581,10 @@ class DmaiorSorteios extends HTMLElement {
       #kwai-status{font-size:.76rem;color:var(--dm-text-muted,#7a9ab4);margin-bottom:.7rem;}
 
       .sort-kwai-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:9px;max-height:360px;overflow-y:auto;margin-bottom:.9rem;}
-      .sort-kwai-card{position:relative;background:rgba(0,212,212,.05);border:1px solid var(--dm-cyan-border,rgba(0,212,212,.14));border-radius:11px;padding:.7rem .5rem;text-align:center;}
+      .sort-kwai-card{position:relative;background:var(--dm-cyan-05,rgba(0,212,212,.05));border:1px solid var(--dm-cyan-border,rgba(0,212,212,.14));border-radius:11px;padding:.7rem .5rem;text-align:center;}
       .sort-kwai-rm{position:absolute;top:3px;right:3px;}
       .sort-kwai-foto,.sort-kwai-foto-fb{width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:block;border:2px solid var(--dm-cyan-border,rgba(0,212,212,.3));}
-      .sort-kwai-foto-fb{display:flex;align-items:center;justify-content:center;background:rgba(0,212,212,.08);color:var(--dm-cyan,#00d4d4);}
+      .sort-kwai-foto-fb{display:flex;align-items:center;justify-content:center;background:var(--dm-cyan-08,rgba(0,212,212,.08));color:var(--dm-cyan,#00d4d4);}
       .sort-kwai-foto-fb svg{width:18px;height:18px;}
       .sort-kwai-nome{font-size:.72rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       .sort-kwai-id{font-size:.62rem;color:var(--dm-text-muted,#7a9ab4);font-family:monospace;margin-top:2px;}
@@ -592,14 +592,14 @@ class DmaiorSorteios extends HTMLElement {
       /* ── ROLETA ── */
       #roleta-ol{display:none;position:fixed;inset:0;background:rgba(2,3,6,.94);z-index:300;align-items:center;justify-content:center;flex-direction:column;padding:1rem;overflow-y:auto;}
       #roleta-ol.aberta{display:flex;}
-      .sort-roleta-card{position:relative;width:min(420px,90vw);min-height:280px;background:linear-gradient(150deg,rgba(0,212,212,.16),rgba(0,0,0,.6));border:2px solid var(--dm-cyan-border,rgba(0,212,212,.3));border-radius:24px;display:grid;place-items:center;padding:24px;box-shadow:0 0 70px rgba(0,212,212,.15);}
+      .sort-roleta-card{position:relative;width:min(420px,90vw);min-height:280px;background:linear-gradient(150deg,var(--dm-cyan-20,rgba(0,212,212,.2)),rgba(0,0,0,.6));border:2px solid var(--dm-cyan-border,rgba(0,212,212,.3));border-radius:24px;display:grid;place-items:center;padding:24px;box-shadow:0 0 70px var(--dm-cyan-12,rgba(0,212,212,.12));}
       .sort-shake{animation:sortShake .14s linear infinite;}
       @keyframes sortShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px) rotate(-.4deg)}75%{transform:translateX(3px) rotate(.4deg)}}
-      .sort-cd{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.4);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(70px,16vw,140px);font-weight:700;color:#fff;opacity:0;text-shadow:0 0 40px rgba(0,212,212,.9);pointer-events:none;}
+      .sort-cd{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.4);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(70px,16vw,140px);font-weight:700;color:#fff;opacity:0;text-shadow:0 0 40px var(--dm-cyan,#00d4d4);pointer-events:none;}
       .sort-cd.mostrar{animation:sortCdPop .68s ease forwards;}
       @keyframes sortCdPop{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}35%{transform:translate(-50%,-50%) scale(1.1);opacity:1}100%{transform:translate(-50%,-50%) scale(.95);opacity:.9}}
       .sort-roleta-texto{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(28px,6vw,46px);font-weight:700;text-align:center;color:var(--dm-cyan,#00d4d4);word-break:break-word;max-width:100%;}
-      .sort-roleta-foto-wrap{width:140px;height:140px;border-radius:50%;padding:5px;background:conic-gradient(from 0deg,var(--dm-cyan,#00d4d4),#fff,#00a8a8,var(--dm-cyan,#00d4d4));margin:0 auto 12px;}
+      .sort-roleta-foto-wrap{width:140px;height:140px;border-radius:50%;padding:5px;background:conic-gradient(from 0deg,var(--dm-cyan,#00d4d4),#fff,var(--dm-gold,#f0c040),var(--dm-cyan,#00d4d4));margin:0 auto 12px;}
       .sort-roleta-foto{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid rgba(0,0,0,.7);background:#0a0e1a;}
       .sort-roleta-nome{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(18px,4vw,28px);font-weight:700;text-align:center;color:var(--dm-cyan,#00d4d4);}
       .sort-roleta-sub{font-size:.78rem;color:var(--dm-text-muted,#7a9ab4);text-align:center;margin-top:2px;}
@@ -609,7 +609,7 @@ class DmaiorSorteios extends HTMLElement {
 
       #roleta-resultado{max-width:420px;width:92vw;text-align:center;}
       #roleta-resultado-titulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(22px,4.5vw,32px);font-weight:700;color:var(--dm-cyan,#00d4d4);margin:0 0 14px;}
-      .sort-resultado-foto-wrap{width:110px;height:110px;border-radius:50%;padding:4px;background:conic-gradient(from 0deg,var(--dm-cyan,#00d4d4),#fff,#00a8a8);margin:0 auto 10px;}
+      .sort-resultado-foto-wrap{width:110px;height:110px;border-radius:50%;padding:4px;background:conic-gradient(from 0deg,var(--dm-cyan,#00d4d4),#fff,var(--dm-gold,#f0c040));margin:0 auto 10px;}
       .sort-resultado-foto,.sort-resultado-foto-fb{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid rgba(0,0,0,.7);}
       .sort-resultado-foto-fb{display:flex;align-items:center;justify-content:center;background:#0a0e1a;color:var(--dm-cyan,#00d4d4);}
       .sort-resultado-foto-fb svg{width:38px;height:38px;}
