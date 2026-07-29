@@ -147,16 +147,37 @@ class DmaiorSorteios extends HTMLElement {
       </div>`).join('');
   }
 
+  // Sorteia N itens distintos (sem repetir) de `disponiveis`, recarregando a
+  // lista automaticamente se já tiver acabado, e limitando N ao que houver
+  // disponível. `disponiveis` é mutado diretamente (splice), então precisa
+  // ser o array real do estado (this.xDisponiveis), não uma cópia.
+  _prepararSorteioN(disponiveis, poolCompleto, nSolicitado) {
+    if (!disponiveis.length) {
+      disponiveis.push(...poolCompleto);
+      this.toast('Todos já foram sorteados — lista reiniciada!', 'info');
+    }
+    let n = Math.max(1, parseInt(nSolicitado, 10) || 1);
+    if (n > disponiveis.length) {
+      this.toast(`Só há ${disponiveis.length} disponível${disponiveis.length !== 1 ? 'is' : ''} — sorteando ${disponiveis.length}.`, 'info');
+      n = disponiveis.length;
+    }
+    const vencedores = [];
+    for (let i = 0; i < n; i++) {
+      const idx = Math.floor(Math.random() * disponiveis.length);
+      vencedores.push(disponiveis[idx]);
+      disponiveis.splice(idx, 1);
+    }
+    return vencedores;
+  }
+
   async sortearGeral() {
     if (!this.geralParts.length) { this.toast('Adicione participantes primeiro!', 'erro'); return; }
-    if (!this.geralDisponiveis.length) { this.geralDisponiveis = [...this.geralParts]; this.toast('Todos já foram sorteados — lista reiniciada!', 'info'); }
-    const idx = Math.floor(Math.random() * this.geralDisponiveis.length);
-    const vencedor = this.geralDisponiveis[idx];
-    this.geralDisponiveis.splice(idx, 1);
+    const n = this.$('geral-qtd-ganhadores').value;
+    const vencedores = this._prepararSorteioN(this.geralDisponiveis, this.geralParts, n);
     await this._abrirRoleta({
       tipo: 'geral',
       pool: this.geralParts,
-      vencedor,
+      vencedores,
     });
     this._renderGeralLista();
   }
@@ -178,14 +199,12 @@ class DmaiorSorteios extends HTMLElement {
 
   async sortearRifa() {
     if (!this.rifaPool.length) { this.toast('Gere os números primeiro!', 'erro'); return; }
-    if (!this.rifaDisponiveis.length) { this.rifaDisponiveis = [...this.rifaPool]; this.toast('Todos já foram sorteados — lista reiniciada!', 'info'); }
-    const idx = Math.floor(Math.random() * this.rifaDisponiveis.length);
-    const vencedor = this.rifaDisponiveis[idx];
-    this.rifaDisponiveis.splice(idx, 1);
+    const n = this.$('rifa-qtd-ganhadores').value;
+    const vencedores = this._prepararSorteioN(this.rifaDisponiveis, this.rifaPool, n);
     await this._abrirRoleta({
       tipo: 'rifa',
       pool: this.rifaPool,
-      vencedor,
+      vencedores,
     });
   }
 
@@ -343,14 +362,12 @@ class DmaiorSorteios extends HTMLElement {
   async sortearKwai() {
     if (!this.kwaiParts.length) { this.toast('Processe os participantes primeiro!', 'erro'); return; }
     if (this.kwaiProcessando) { this.toast('Aguarde o processamento terminar.', 'erro'); return; }
-    if (!this.kwaiDisponiveis.length) { this.kwaiDisponiveis = [...this.kwaiParts]; this.toast('Todos já foram sorteados — lista reiniciada!', 'info'); }
-    const idx = Math.floor(Math.random() * this.kwaiDisponiveis.length);
-    const vencedor = this.kwaiDisponiveis[idx];
-    this.kwaiDisponiveis.splice(idx, 1);
+    const n = this.$('kwai-qtd-ganhadores').value;
+    const vencedores = this._prepararSorteioN(this.kwaiDisponiveis, this.kwaiParts, n);
     await this._abrirRoleta({
       tipo: 'kwai',
       pool: this.kwaiParts,
-      vencedor,
+      vencedores,
     });
   }
 
@@ -358,7 +375,8 @@ class DmaiorSorteios extends HTMLElement {
   //  ROLETA — animação compartilhada (efeito adaptado)
   // ════════════════════════════════════════════════════════
 
-  async _abrirRoleta({ tipo, pool, vencedor }) {
+  async _abrirRoleta({ tipo, pool, vencedores }) {
+    const vencedor = vencedores[0];
     this._ultimoSorteio = { tipo };
     const ol      = this.$('roleta-ol');
     const cd      = this.$('roleta-cd');
@@ -429,22 +447,41 @@ class DmaiorSorteios extends HTMLElement {
     spinBox.style.display = 'none';
     resBox.style.display  = '';
 
-    const titulo = { geral: 'Participante Sorteado!', rifa: 'Número Sorteado!', kwai: 'Participante Sorteado!' }[tipo];
-    this.$('roleta-resultado-titulo').textContent = titulo;
+    const rotulo = { geral: 'Participante', rifa: 'Número', kwai: 'Participante' }[tipo];
+    this.$('roleta-resultado-titulo').textContent = vencedores.length > 1
+      ? `${vencedores.length} ${rotulo}s Sorteados!`
+      : `${rotulo} Sorteado!`;
 
     const conteudo = this.$('roleta-resultado-conteudo');
-    if (tipo === 'kwai') {
-      const foto = this._safeUrl(vencedor.foto);
-      conteudo.innerHTML = `
-        <div class="sort-resultado-foto-wrap">
-          ${foto ? `<img class="sort-resultado-foto" src="${this.esc(foto)}" onerror="this.style.display='none'">` : `<div class="sort-resultado-foto-fb">${this._avatarFallbackSvg()}</div>`}
-        </div>
-        <div class="sort-resultado-nome">${this.esc(vencedor.nome)}</div>
-        <div class="sort-resultado-sub">ID: ${this.esc(vencedor.id)}</div>`;
-    } else if (tipo === 'rifa') {
-      conteudo.innerHTML = `<div class="sort-resultado-numero">${this.esc(vencedor)}</div>`;
+    if (vencedores.length === 1) {
+      if (tipo === 'kwai') {
+        const foto = this._safeUrl(vencedor.foto);
+        conteudo.innerHTML = `
+          <div class="sort-resultado-foto-wrap">
+            ${foto ? `<img class="sort-resultado-foto" src="${this.esc(foto)}" onerror="this.style.display='none'">` : `<div class="sort-resultado-foto-fb">${this._avatarFallbackSvg()}</div>`}
+          </div>
+          <div class="sort-resultado-nome">${this.esc(vencedor.nome)}</div>
+          <div class="sort-resultado-sub">ID: ${this.esc(vencedor.id)}</div>`;
+      } else if (tipo === 'rifa') {
+        conteudo.innerHTML = `<div class="sort-resultado-numero">${this.esc(vencedor)}</div>`;
+      } else {
+        conteudo.innerHTML = `<div class="sort-resultado-nome sort-resultado-nome-grande">${this.esc(vencedor.nome)}</div>`;
+      }
     } else {
-      conteudo.innerHTML = `<div class="sort-resultado-nome sort-resultado-nome-grande">${this.esc(vencedor.nome)}</div>`;
+      conteudo.innerHTML = `<div class="sort-resultado-grid">${vencedores.map(v => {
+        if (tipo === 'kwai') {
+          const foto = this._safeUrl(v.foto);
+          return `<div class="sort-resultado-mini">
+            ${foto ? `<img class="sort-resultado-mini-foto" src="${this.esc(foto)}" onerror="this.style.display='none'">` : `<div class="sort-resultado-mini-foto-fb">${this._avatarFallbackSvg()}</div>`}
+            <div class="sort-resultado-mini-nome">${this.esc(v.nome)}</div>
+            <div class="sort-resultado-mini-sub">ID: ${this.esc(v.id)}</div>
+          </div>`;
+        }
+        if (tipo === 'rifa') {
+          return `<div class="sort-resultado-mini"><div class="sort-resultado-mini-numero">${this.esc(v)}</div></div>`;
+        }
+        return `<div class="sort-resultado-mini"><div class="sort-resultado-mini-nome">${this.esc(v.nome)}</div></div>`;
+      }).join('')}</div>`;
     }
 
     this._shootConfetti();
@@ -619,6 +656,15 @@ class DmaiorSorteios extends HTMLElement {
       .sort-resultado-numero{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(48px,12vw,84px);font-weight:800;color:var(--dm-cyan,#00d4d4);}
       .sort-resultado-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
 
+      .sort-resultado-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;max-height:44vh;overflow-y:auto;margin:0 auto;padding:2px;}
+      .sort-resultado-mini{background:rgba(255,255,255,.06);border:1px solid rgba(0,212,212,.25);border-radius:12px;padding:10px 6px;text-align:center;}
+      .sort-resultado-mini-foto,.sort-resultado-mini-foto-fb{width:50px;height:50px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:block;border:2px solid rgba(0,212,212,.4);}
+      .sort-resultado-mini-foto-fb{display:flex;align-items:center;justify-content:center;background:rgba(0,212,212,.12);color:var(--dm-cyan,#00d4d4);}
+      .sort-resultado-mini-foto-fb svg{width:20px;height:20px;}
+      .sort-resultado-mini-nome{font-size:.75rem;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+      .sort-resultado-mini-sub{font-size:.65rem;color:#9db3c4;margin-top:2px;font-family:monospace;}
+      .sort-resultado-mini-numero{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.6rem;font-weight:800;color:var(--dm-cyan,#00d4d4);}
+
       @media(max-width:600px){.sort-roleta-card{min-height:230px;padding:18px;}.sort-roleta-foto-wrap{width:100px;height:100px;}}
     </style>
 
@@ -657,6 +703,10 @@ class DmaiorSorteios extends HTMLElement {
           <span id="geral-cnt">0 participantes</span>
         </div>
         <div id="geral-lista" class="sort-lista"><p class="sort-vazio">Nenhum participante ainda</p></div>
+        <div style="margin-bottom:.7rem;">
+          <label class="sort-label">Quantos ganhadores?</label>
+          <input type="number" id="geral-qtd-ganhadores" class="sort-inp" value="1" min="1">
+        </div>
         <div style="display:flex;gap:8px;">
           <button class="sort-btn sort-btn-full" id="btn-sortear-geral" data-action="sortearGeral" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -677,6 +727,8 @@ class DmaiorSorteios extends HTMLElement {
         <div id="rifa-info" style="font-size:.78rem;color:var(--dm-text-muted,#7a9ab4);"></div>
       </div>
       <div class="sort-card">
+        <label class="sort-label">Quantos números sortear?</label>
+        <input type="number" id="rifa-qtd-ganhadores" class="sort-inp" value="1" min="1" style="margin-bottom:.9rem;">
         <button class="sort-btn sort-btn-full" id="btn-sortear-rifa" data-action="sortearRifa" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Sortear
@@ -712,6 +764,8 @@ class DmaiorSorteios extends HTMLElement {
         </div>
         <div id="kwai-status" style="display:none;"></div>
         <div id="kwai-grid" class="sort-kwai-grid"><p class="sort-vazio">Nenhum participante processado ainda</p></div>
+        <label class="sort-label">Quantos ganhadores?</label>
+        <input type="number" id="kwai-qtd-ganhadores" class="sort-inp" value="1" min="1" style="margin-bottom:.9rem;">
         <button class="sort-btn sort-btn-full" id="btn-sortear-kwai" data-action="sortearKwai" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Sortear
