@@ -103,7 +103,7 @@ class MenuMobileDMaior extends HTMLElement {
       { label: 'Eventos',     icon: SVG_EVENT, subItems: [
           { label: 'PK Interno', link: 'pk-interno.html', comingSoon: true },
       ]},
-      { label: 'Ferramentas', disabled: true,                 icon: SVG_TOOL   },
+      { label: 'Ferramentas', link: 'ferramentas.html',        icon: SVG_TOOL   },
       { label: 'Portfólio',   icon: SVG_INFO, subItems: [
           { label: 'Quem Somos?', link: 'quem-somos.html' },
       ]},
