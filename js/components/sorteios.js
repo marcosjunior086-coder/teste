@@ -34,6 +34,15 @@ class DmaiorSorteios extends HTMLElement {
     this.kwaiDisponiveis  = [];
     this.kwaiErros        = [];
     this.kwaiProcessando  = false;
+
+    this.roletaItens           = [];
+    this.roletaCores            = ['#00d4d4', '#3b82f6', '#f0c040'];
+    this.roletaRemoverGanhador  = false;
+    this.roletaGirando          = false;
+    this.roletaRotacaoAtual     = 0;
+
+    this.moedaGirando  = false;
+    this.moedaHistorico = []; // 'cara' | 'coroa'
   }
 
   connectedCallback() {
@@ -73,6 +82,51 @@ class DmaiorSorteios extends HTMLElement {
     t.innerHTML = (icones[tipo] || icones.info) + `<span>${this.esc(msg)}</span>`;
     this.$('sort-tc').appendChild(t);
     setTimeout(() => t.remove(), 3400);
+  }
+
+  // ════════════════════════════════════════════════════════
+  //  SOM — sintetizado via Web Audio API (sem arquivo de áudio)
+  // ════════════════════════════════════════════════════════
+
+  _audio() {
+    if (!this._audioCtx) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      this._audioCtx = Ctx ? new Ctx() : null;
+    }
+    if (this._audioCtx && this._audioCtx.state === 'suspended') this._audioCtx.resume().catch(() => {});
+    return this._audioCtx;
+  }
+
+  _beep(freq = 440, duracao = 0.08, tipo = 'square', volume = 0.14, atraso = 0) {
+    const ctx = this._audio();
+    if (!ctx) return;
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const inicio = ctx.currentTime + atraso;
+    osc.type = tipo;
+    osc.frequency.setValueAtTime(freq, inicio);
+    gain.gain.setValueAtTime(volume, inicio);
+    gain.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(inicio);
+    osc.stop(inicio + duracao + 0.02);
+  }
+
+  // Beep de contagem: 3, 2, 1 no mesmo tom, GO! um tom mais agudo/longo.
+  _beepContagem(ehGo) {
+    this._beep(ehGo ? 880 : 520, ehGo ? 0.18 : 0.09, 'square', 0.13);
+  }
+
+  // Tick curto — usado no giro da roleta customizável (uma vez por fatia passada).
+  _beepTick() {
+    this._beep(700, 0.035, 'square', 0.1);
+  }
+
+  // Acorde curto de sucesso ao revelar o resultado final.
+  _beepSucesso() {
+    this._beep(523, 0.14, 'triangle', 0.15, 0);
+    this._beep(659, 0.14, 'triangle', 0.15, 0.09);
+    this._beep(784, 0.22, 'triangle', 0.16, 0.18);
   }
 
   // ════════════════════════════════════════════════════════
@@ -372,6 +426,233 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
+  //  MODALIDADE 4 — ROLETA CUSTOMIZÁVEL (roda com fatias e cores)
+  // ════════════════════════════════════════════════════════
+
+  addRoletaIndividual() {
+    const inp = this.$('roleta-item');
+    const item = inp.value.trim();
+    if (!item) { this.toast('Digite um item.', 'erro'); return; }
+    this.roletaItens.push(item);
+    inp.value = '';
+    inp.focus();
+    this._renderRoletaLista();
+    this._renderRoletaWheel();
+  }
+
+  addRoletaLote() {
+    const raw = this.$('roleta-lote').value;
+    if (!raw.trim()) { this.toast('Cole ao menos um item.', 'erro'); return; }
+    let count = 0;
+    raw.split('\n').map(l => l.trim()).filter(Boolean).forEach(item => { this.roletaItens.push(item); count++; });
+    this.$('roleta-lote').value = '';
+    this._renderRoletaLista();
+    this._renderRoletaWheel();
+    this.toast(`${count} item${count !== 1 ? 's' : ''} adicionado${count !== 1 ? 's' : ''}!`, 'sucesso');
+  }
+
+  removeRoletaItem(idx) {
+    this.roletaItens.splice(idx, 1);
+    this._renderRoletaLista();
+    this._renderRoletaWheel();
+  }
+
+  limparRoleta() {
+    if (!this.roletaItens.length) { this.toast('Lista já está vazia.', 'info'); return; }
+    this.roletaItens = [];
+    this._renderRoletaLista();
+    this._renderRoletaWheel();
+    this.toast('Lista limpa!', 'sucesso');
+  }
+
+  atualizarCorRoleta(idx, valor) {
+    this.roletaCores[idx] = valor;
+    this._renderRoletaWheel();
+  }
+
+  toggleRemoverGanhadorRoleta(marcado) {
+    this.roletaRemoverGanhador = marcado;
+  }
+
+  _renderRoletaLista() {
+    const c = this.$('roleta-lista');
+    const cnt = this.$('roleta-cnt');
+    if (cnt) cnt.textContent = this.roletaItens.length === 1 ? '1 item' : `${this.roletaItens.length} itens`;
+    if (!this.roletaItens.length) { c.innerHTML = `<p class="sort-vazio">Nenhum item ainda</p>`; return; }
+    c.innerHTML = this.roletaItens.map((item, i) => `
+      <div class="sort-item">
+        <span class="sort-item-idx" style="background:${this.esc(this.roletaCores[i % this.roletaCores.length])};width:10px;height:10px;padding:0;border-radius:50%;min-width:10px;"></span>
+        <span class="sort-item-nome">${this.esc(item)}</span>
+        <button class="sort-item-rm" data-action="removeRoletaItem" data-idx="${i}" aria-label="Remover">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`).join('');
+  }
+
+  _pontoCirculo(cx, cy, r, anguloGraus) {
+    const rad = (anguloGraus - 90) * Math.PI / 180;
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+  }
+
+  _renderRoletaWheel() {
+    const wrap = this.$('roleta-wheel-wrap');
+    const btn  = this.$('btn-girar-roleta');
+    const itens = this.roletaItens;
+    if (!itens.length) {
+      wrap.innerHTML = `<p class="sort-vazio">Adicione itens pra roda girar</p>`;
+      if (btn) btn.disabled = true;
+      return;
+    }
+    if (btn) btn.disabled = this.roletaGirando;
+    const n = itens.length;
+    const anguloFatia = 360 / n;
+    const cx = 150, cy = 150, raio = 145;
+    let paths = '';
+    itens.forEach((item, i) => {
+      const cor = this.roletaCores[i % this.roletaCores.length] || '#00d4d4';
+      const a0 = i * anguloFatia;
+      const a1 = (i + 1) * anguloFatia;
+      const [x1, y1] = this._pontoCirculo(cx, cy, raio, a0);
+      const [x2, y2] = this._pontoCirculo(cx, cy, raio, a1);
+      const largeArc = anguloFatia > 180 ? 1 : 0;
+      const meio = a0 + anguloFatia / 2;
+      const [tx, ty] = this._pontoCirculo(cx, cy, raio * 0.6, meio);
+      const rotuloBruto = String(item);
+      const rotulo = rotuloBruto.length > 14 ? rotuloBruto.slice(0, 13) + '…' : rotuloBruto;
+      paths += `<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${raio},${raio} 0 ${largeArc} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${this.esc(cor)}" stroke="#04141a" stroke-width="1.5"></path>`;
+      paths += `<text x="${tx.toFixed(2)}" y="${ty.toFixed(2)}" fill="#fff" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" transform="rotate(${(meio + 90).toFixed(2)} ${tx.toFixed(2)} ${ty.toFixed(2)})">${this.esc(rotulo)}</text>`;
+    });
+    wrap.innerHTML = `
+      <div class="sort-roleta-wheel-outer">
+        <svg viewBox="0 0 300 300" class="sort-roleta-wheel-svg"><g id="roleta-svg-grupo" style="transform-box:view-box;transform-origin:150px 150px;transform:rotate(${this.roletaRotacaoAtual}deg)">${paths}</g></svg>
+        <div class="sort-roleta-ponteiro"></div>
+      </div>`;
+  }
+
+  _iniciarTicksRoleta(duracaoMs, n) {
+    const anguloFatia = 360 / n;
+    const grupo = this.shadowRoot.getElementById('roleta-svg-grupo');
+    if (!grupo) return;
+    const inicio = performance.now();
+    let ultimoIndice = null;
+    const passo = () => {
+      if (performance.now() - inicio >= duracaoMs) return;
+      const transform = getComputedStyle(grupo).transform;
+      let angulo = 0;
+      const m = transform && transform.match(/matrix\(([^)]+)\)/);
+      if (m) {
+        const partes = m[1].split(',').map(Number);
+        angulo = Math.atan2(partes[1], partes[0]) * 180 / Math.PI;
+        if (angulo < 0) angulo += 360;
+      }
+      const indice = Math.floor(angulo / anguloFatia);
+      if (indice !== ultimoIndice) {
+        ultimoIndice = indice;
+        this._beepTick();
+      }
+      requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  }
+
+  async girarRoleta() {
+    if (this.roletaGirando) return;
+    if (!this.roletaItens.length) { this.toast('Adicione itens primeiro!', 'erro'); return; }
+    this.roletaGirando = true;
+    this.$('btn-girar-roleta').disabled = true;
+    this.$('roleta-custom-resultado').innerHTML = '';
+
+    const n = this.roletaItens.length;
+    const anguloFatia = 360 / n;
+    const idxVencedor = Math.floor(Math.random() * n);
+    const anguloAlvoNaRoda = idxVencedor * anguloFatia + anguloFatia / 2;
+
+    const rotacaoAtualMod = ((this.roletaRotacaoAtual % 360) + 360) % 360;
+    const posAlvoFinal = (360 - anguloAlvoNaRoda + 360) % 360;
+    let delta = (posAlvoFinal - rotacaoAtualMod + 360) % 360;
+    const voltasExtras = 5 + Math.floor(Math.random() * 2);
+    delta += voltasExtras * 360;
+    this.roletaRotacaoAtual += delta;
+
+    const duracaoMs = 4800;
+    const grupo = this.shadowRoot.getElementById('roleta-svg-grupo');
+    grupo.style.transition = `transform ${duracaoMs}ms cubic-bezier(0.15,0.65,0.1,1)`;
+    grupo.style.transform = `rotate(${this.roletaRotacaoAtual}deg)`;
+    this._iniciarTicksRoleta(duracaoMs, n);
+
+    await this.sleep(duracaoMs);
+
+    this.roletaGirando = false;
+    const vencedor = this.roletaItens[idxVencedor];
+    this._beepSucesso();
+    this._shootConfetti();
+    this.$('roleta-custom-resultado').innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      <span>${this.esc(vencedor)}</span>`;
+
+    if (this.roletaRemoverGanhador) {
+      this.roletaItens.splice(idxVencedor, 1);
+      this._renderRoletaLista();
+      this._renderRoletaWheel();
+    } else {
+      this.$('btn-girar-roleta').disabled = false;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════
+  //  MODALIDADE 5 — CARA OU COROA
+  // ════════════════════════════════════════════════════════
+
+  async jogarMoeda() {
+    if (this.moedaGirando) return;
+    this.moedaGirando = true;
+    const btn = this.$('btn-jogar-moeda');
+    btn.disabled = true;
+    const moeda = this.$('moeda-3d');
+    const resultadoEl = this.$('moeda-resultado');
+    resultadoEl.textContent = '';
+
+    const resultado = Math.random() < 0.5 ? 'cara' : 'coroa';
+    // Sempre dá voltas inteiras (720/1080) + 0 (cara) ou 180 (coroa) graus,
+    // pra sempre terminar mostrando a face certa virada pra frente.
+    const voltas = 4;
+    const anguloFinal = voltas * 360 + (resultado === 'coroa' ? 180 : 0);
+
+    moeda.style.transition = 'none';
+    moeda.style.transform = 'rotateY(0deg)';
+    void moeda.offsetWidth;
+    moeda.style.transition = 'transform 1.8s cubic-bezier(0.2,0.6,0.25,1)';
+    moeda.style.transform = `rotateY(${anguloFinal}deg)`;
+
+    this._tocarSomMoeda();
+
+    await this.sleep(1800);
+
+    this.moedaGirando = false;
+    btn.disabled = false;
+    this.moedaHistorico.unshift(resultado);
+    this.moedaHistorico = this.moedaHistorico.slice(0, 20);
+    resultadoEl.textContent = resultado === 'cara' ? 'Cara!' : 'Coroa!';
+    this._beepSucesso();
+    this._renderMoedaHistorico();
+  }
+
+  _tocarSomMoeda() {
+    // Sequência curta de tiques simulando a moeda girando no ar, mais lenta
+    // no fim — igual ao efeito da roleta, só que num intervalo fixo (a moeda
+    // sempre gira o mesmo tempo, não depende de quantos itens existem).
+    const atrasos = [0, 0.15, 0.32, 0.52, 0.75, 1.0, 1.3, 1.65];
+    atrasos.forEach(s => this._beep(500, 0.05, 'square', 0.09, s));
+  }
+
+  _renderMoedaHistorico() {
+    const c = this.$('moeda-historico');
+    if (!c) return;
+    if (!this.moedaHistorico.length) { c.innerHTML = ''; return; }
+    c.innerHTML = this.moedaHistorico.map(r => `<span class="sort-tag" style="font-family:var(--dm-font-body,'Exo 2',sans-serif)">${r === 'cara' ? 'Cara' : 'Coroa'}</span>`).join('');
+  }
+
+  // ════════════════════════════════════════════════════════
   //  ROLETA — animação compartilhada (efeito adaptado)
   // ════════════════════════════════════════════════════════
 
@@ -395,6 +676,7 @@ class DmaiorSorteios extends HTMLElement {
       cd.classList.remove('mostrar');
       void cd.offsetWidth;
       cd.classList.add('mostrar');
+      this._beepContagem(n === 'GO!');
       await this.sleep(n === 'GO!' ? 550 : 780);
     }
     cd.classList.remove('mostrar');
@@ -484,6 +766,7 @@ class DmaiorSorteios extends HTMLElement {
       }).join('')}</div>`;
     }
 
+    this._beepSucesso();
     this._shootConfetti();
   }
 
@@ -544,13 +827,29 @@ class DmaiorSorteios extends HTMLElement {
       if (a === 'sortearKwai')            this.sortearKwai();
       if (a === 'fecharRoleta')           this.fecharRoleta();
       if (a === 'sortearNovamente')       this.sortearNovamente();
+      if (a === 'addRoletaIndividual')    this.addRoletaIndividual();
+      if (a === 'addRoletaLote')          this.addRoletaLote();
+      if (a === 'removeRoletaItem')       this.removeRoletaItem(parseInt(t.dataset.idx, 10));
+      if (a === 'limparRoleta')           this.limparRoleta();
+      if (a === 'girarRoleta')            this.girarRoleta();
+      if (a === 'jogarMoeda')             this.jogarMoeda();
     });
 
     this.shadowRoot.addEventListener('keydown', e => {
       if (e.key !== 'Enter') return;
-      if (e.target.id === 'geral-nome') this.addGeralIndividual();
+      if (e.target.id === 'geral-nome')  this.addGeralIndividual();
       if (e.target.id === 'kwai-id')     this.addKwaiIndividual();
       if (e.target.id === 'rifa-qtd')    this.gerarRifa();
+      if (e.target.id === 'roleta-item') this.addRoletaIndividual();
+    });
+
+    this.shadowRoot.addEventListener('input', e => {
+      const t = e.target.closest('[data-action="corRoleta"]');
+      if (t) this.atualizarCorRoleta(parseInt(t.dataset.idx, 10), t.value);
+    });
+
+    this.shadowRoot.addEventListener('change', e => {
+      if (e.target.id === 'roleta-remover-ganhador') this.toggleRemoverGanhadorRoleta(e.target.checked);
     });
   }
 
@@ -665,6 +964,27 @@ class DmaiorSorteios extends HTMLElement {
       .sort-resultado-mini-sub{font-size:.65rem;color:#9db3c4;margin-top:2px;font-family:monospace;}
       .sort-resultado-mini-numero{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.6rem;font-weight:800;color:var(--dm-cyan,#00d4d4);}
 
+      /* ── Roleta customizável ── */
+      .sort-roleta-cores-row{display:flex;gap:14px;margin:.5rem 0 1rem;flex-wrap:wrap;}
+      .sort-cor-picker{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--dm-text-muted,#7a9ab4);cursor:pointer;}
+      .sort-cor-picker input[type="color"]{width:30px;height:30px;border:none;border-radius:8px;padding:0;background:none;cursor:pointer;}
+      .sort-toggle-row{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--dm-text-muted,#7a9ab4);cursor:pointer;margin-top:.4rem;}
+      .sort-toggle-row input{width:16px;height:16px;accent-color:var(--dm-cyan,#00d4d4);cursor:pointer;}
+
+      .sort-roleta-wheel-outer{position:relative;width:min(280px,80vw);margin:0 auto;}
+      .sort-roleta-wheel-svg{width:100%;height:auto;display:block;border-radius:50%;box-shadow:0 0 0 4px var(--dm-cyan-border,rgba(0,212,212,.25)),0 10px 30px rgba(0,0,0,.35);}
+      .sort-roleta-ponteiro{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:20px solid var(--dm-cyan,#00d4d4);filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));z-index:5;}
+      .sort-roleta-custom-resultado{display:flex;align-items:center;justify-content:center;gap:8px;min-height:34px;margin-top:12px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.3rem;font-weight:700;color:var(--dm-cyan,#00d4d4);}
+      .sort-roleta-custom-resultado svg{width:22px;height:22px;flex-shrink:0;}
+
+      /* ── Cara ou coroa ── */
+      .sort-moeda-cena{perspective:900px;display:flex;justify-content:center;padding:20px 0;}
+      .sort-moeda-3d{position:relative;width:150px;height:150px;transform-style:preserve-3d;transform:rotateY(0deg);}
+      .sort-moeda-face{position:absolute;inset:0;border-radius:50%;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;background:var(--dm-grad-cyan,linear-gradient(90deg,#00d4d4,#008c8c));border:4px solid rgba(255,255,255,.25);box-shadow:0 8px 26px rgba(0,0,0,.35);color:#04141a;}
+      .sort-moeda-face svg{width:60px;height:60px;}
+      .sort-moeda-coroa{transform:rotateY(180deg);}
+      .sort-moeda-resultado{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.6rem;font-weight:800;color:var(--dm-cyan,#00d4d4);min-height:2.2rem;}
+
       @media(max-width:600px){.sort-roleta-card{min-height:230px;padding:18px;}.sort-roleta-foto-wrap{width:100px;height:100px;}}
     </style>
 
@@ -679,6 +999,12 @@ class DmaiorSorteios extends HTMLElement {
       </button>
       <button class="sort-tab" data-modo="kwai">
         Sorteio por ID Kwai
+      </button>
+      <button class="sort-tab" data-modo="roleta">
+        Roleta Customizável
+      </button>
+      <button class="sort-tab" data-modo="moeda">
+        Cara ou Coroa
       </button>
     </div>
 
@@ -770,6 +1096,80 @@ class DmaiorSorteios extends HTMLElement {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Sortear
         </button>
+      </div>
+    </div>
+
+    <div class="sort-painel" id="painel-roleta">
+      <div class="sort-card">
+        <label class="sort-label">Adicionar item</label>
+        <div class="sort-row" style="margin-bottom:.9rem;">
+          <input type="text" id="roleta-item" class="sort-inp" placeholder="Ex: Prêmio 1, Fulano, Sim...">
+          <button class="sort-btn" data-action="addRoletaIndividual">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Adicionar
+          </button>
+        </div>
+        <div class="sort-divisor">ou cole uma lista (um item por linha)</div>
+        <textarea id="roleta-lote" class="sort-textarea" placeholder="Prêmio 1&#10;Prêmio 2&#10;Prêmio 3"></textarea>
+        <button class="sort-btn sort-btn-g sort-btn-full" style="margin-top:.7rem;" data-action="addRoletaLote">Importar lista</button>
+
+        <div class="sort-divisor">cores da roda</div>
+        <div class="sort-roleta-cores-row">
+          <label class="sort-cor-picker"><input type="color" data-action="corRoleta" data-idx="0" value="#00d4d4"><span>Cor 1</span></label>
+          <label class="sort-cor-picker"><input type="color" data-action="corRoleta" data-idx="1" value="#3b82f6"><span>Cor 2</span></label>
+          <label class="sort-cor-picker"><input type="color" data-action="corRoleta" data-idx="2" value="#f0c040"><span>Cor 3</span></label>
+        </div>
+
+        <label class="sort-toggle-row">
+          <input type="checkbox" id="roleta-remover-ganhador" data-action="toggleRemoverGanhador">
+          <span>Remover ganhador da roda após sortear</span>
+        </label>
+      </div>
+
+      <div class="sort-card">
+        <div class="sort-header-row">
+          <h3>Itens</h3>
+          <span id="roleta-cnt">0 itens</span>
+        </div>
+        <div id="roleta-lista" class="sort-lista"><p class="sort-vazio">Nenhum item ainda</p></div>
+        <div style="display:flex;gap:8px;">
+          <button class="sort-btn sort-btn-d" data-action="limparRoleta">Limpar</button>
+        </div>
+      </div>
+
+      <div class="sort-card" style="text-align:center;">
+        <div id="roleta-wheel-wrap"><p class="sort-vazio">Adicione itens pra roda girar</p></div>
+        <div id="roleta-custom-resultado" class="sort-roleta-custom-resultado"></div>
+        <button class="sort-btn sort-btn-full" id="btn-girar-roleta" data-action="girarRoleta" disabled style="margin-top:14px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+          Girar Roleta
+        </button>
+      </div>
+    </div>
+
+    <div class="sort-painel" id="painel-moeda">
+      <div class="sort-card" style="text-align:center;">
+        <div class="sort-moeda-cena">
+          <div class="sort-moeda-3d" id="moeda-3d">
+            <div class="sort-moeda-face sort-moeda-cara">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.2"/></svg>
+            </div>
+            <div class="sort-moeda-face sort-moeda-coroa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 18h16"/><path d="M4 18l1.5-8 3 4 3.5-6 3.5 6 3-4L20 18"/></svg>
+            </div>
+          </div>
+        </div>
+        <div id="moeda-resultado" class="sort-moeda-resultado"></div>
+        <button class="sort-btn sort-btn-full" id="btn-jogar-moeda" data-action="jogarMoeda" style="margin-top:14px;max-width:280px;margin-left:auto;margin-right:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/></svg>
+          Jogar Moeda
+        </button>
+      </div>
+      <div class="sort-card">
+        <div class="sort-header-row">
+          <h3>Histórico</h3>
+        </div>
+        <div id="moeda-historico" class="sort-tags"></div>
       </div>
     </div>
 
