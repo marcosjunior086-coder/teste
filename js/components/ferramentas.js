@@ -19,15 +19,15 @@ class DmaiorFerramentas extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
     <style>
-      :host{display:block;width:100%;background:transparent}
+      :host{display:block;width:100%;background:transparent;color:var(--dm-text,#e2e8f0)}
       .container{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;max-width:620px;margin:0 auto;padding:10px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
-      .card{position:relative;background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:18px 10px;text-align:center;transition:all 0.25s ease;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center}
-      .card:hover{background:rgba(255,255,255,0.08);transform:translateY(-4px);border-color:#00A8FF;box-shadow:0 6px 18px rgba(0,0,0,0.3)}
-      .icon-wrapper{width:42px;height:42px;background:rgba(0,168,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;transition:0.25s;flex-shrink:0}
-      .card:hover .icon-wrapper{background:#00A8FF}
-      .icon-svg{width:20px;height:20px;fill:#FFFFFF;transition:0.25s}
-      .title{color:#FFFFFF;font-size:11.5px;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:0.8px;line-height:1.3}
-      .subtitle{color:rgba(255,255,255,0.5);font-size:10px;margin-top:4px;font-weight:400;line-height:1.3}
+      .card{position:relative;background:var(--dm-bg-card,rgba(255,255,255,.06));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--dm-cyan-border,rgba(0,168,255,.15));border-radius:12px;padding:18px 10px;text-align:center;transition:all 0.25s ease;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center}
+      .card:hover{background:var(--dm-cyan-08,rgba(0,168,255,.08));transform:translateY(-4px);border-color:var(--dm-cyan,#00A8FF);box-shadow:0 6px 18px rgba(0,0,0,0.15)}
+      .icon-wrapper{width:42px;height:42px;background:var(--dm-cyan-10,rgba(0,168,255,.1));border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;transition:0.25s;flex-shrink:0}
+      .card:hover .icon-wrapper{background:var(--dm-cyan-20,rgba(0,168,255,.2))}
+      .icon-svg{width:20px;height:20px;fill:var(--dm-cyan,#00A8FF);transition:0.25s}
+      .title{color:var(--dm-text,#FFFFFF);font-size:11.5px;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:0.8px;line-height:1.3}
+      .subtitle{color:var(--dm-text-muted,rgba(255,255,255,0.5));font-size:10px;margin-top:4px;font-weight:400;line-height:1.3}
 
       .floating-menu{display:none;flex-direction:column;gap:3px;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);min-width:180px;background:#0d1520;border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,0.45);z-index:20;text-align:left}
       .floating-menu.aberto{display:flex}
