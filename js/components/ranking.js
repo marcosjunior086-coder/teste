@@ -924,6 +924,7 @@ class RankingDmaior extends HTMLElement {
             </div>
             <div class="name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
+            ${this.growthHtml(s)}
             ${prizeHtml}
             <div class="pod-pos-num">${idx + 1}</div>
           </div>`;
