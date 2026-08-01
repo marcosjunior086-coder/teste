@@ -815,7 +815,7 @@ class RankingDmaior extends HTMLElement {
     const pv  = this.prevRows.find(p => p.uid === s.uid);
     const cur = this.currentTab === 'diamonds' ? s.diamonds : s.hoursMin;
     const prv = pv ? (this.currentTab === 'diamonds' ? pv.diamonds : pv.hoursMin) : 0;
-    if (!pv) return `<span class="growth new">${this.STAR_SVG} Novo</span>`;
+    if (!pv) return ''; // "Novo" já é sinalizado pelo positionBadge — evita badge duplicado
     const pct = prv > 0 ? ((cur - prv) / prv) * 100 : 100;
     if (pct > 0)  return `<span class="growth up">▲ ${pct.toFixed(1)}%</span>`;
     if (pct < 0)  return `<span class="growth down">▼ ${Math.abs(pct).toFixed(1)}%</span>`;
@@ -941,6 +941,7 @@ class RankingDmaior extends HTMLElement {
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${prizeHtml}
             ${this.positionBadge(s, idx + 1)}
+            ${this.growthHtml(s)}
           </div>`;
         }
       });
@@ -967,6 +968,7 @@ class RankingDmaior extends HTMLElement {
             <div class="list-id">@${this.esc(s.id)}</div>
             <div class="badges-container">
               ${this.positionBadge(s, globalIndex + 1)}
+              ${this.growthHtml(s)}
               ${prizeValue ? `<span class="list-prize-tag"><span class="currency-symbol">R$</span> ${prizeValue}</span>` : ''}
             </div>
           </div>
