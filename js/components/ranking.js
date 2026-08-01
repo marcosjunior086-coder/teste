@@ -567,6 +567,10 @@ class RankingDmaior extends HTMLElement {
           gid: String(m.gid).trim(),
           compararCom: m.compararCom ?? m.comparar_com ?? null,
         }));
+      // Se o admin cadastrou um mês novo sem preencher "Comparar com", assume
+      // o mês seguinte na ordem (o mais antigo) — evita que a % de variação
+      // suma sozinha até alguém lembrar de preencher esse campo manualmente.
+      historicos.forEach((m, i) => { if (!m.compararCom && historicos[i + 1]) m.compararCom = historicos[i + 1].nome; });
       this.ABAS_CONFIG = historicos.length
         ? [{ nome: 'Mês Atual', tipo: 'supabase_mes', compararCom: null }, ...historicos]
         : [...this.FALLBACK_ABAS_CONFIG];
