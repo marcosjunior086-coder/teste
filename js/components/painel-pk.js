@@ -199,7 +199,7 @@ class PainelPK extends HTMLElement {
         .rank-section-title { font-family: var(--dm-font-body,'Exo 2',sans-serif); font-size: .72rem; font-weight: 800; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .rank-section-title::before, .rank-section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--cyan-d),transparent); }
 
-        .podium { display: flex; justify-content: center; align-items: flex-end; margin-bottom: 28px; margin-top: 44px; gap: 10px; }
+        .podium { display: flex; justify-content: center; align-items: flex-end; margin-bottom: 28px; margin-top: 78px; gap: 10px; }
         .podium-item { display: flex; flex-direction: column; align-items: center; width: 30%; border-radius: 18px; padding: 15px 6px 12px; position: relative; border: 1px solid var(--border); background: var(--card-bg); }
         .podium-item.first { padding-top: 20px; }
         .avatar-wrapper { position: relative; margin-top: -42px; margin-bottom: 8px; }
