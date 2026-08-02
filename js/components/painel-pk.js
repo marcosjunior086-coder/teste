@@ -151,10 +151,18 @@ class PainelPK extends HTMLElement {
         .date-btn:hover { color: var(--text); }
         .date-btn.active { background: var(--cyan-d); border-color: var(--cyan); color: var(--cyan); }
 
-        .tabs { display: flex; justify-content: center; margin: 0 auto 22px; width: fit-content; background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-        .tab-btn { font-family: inherit; background: transparent; border: none; color: var(--muted); padding: 10px 22px; font-weight: 800; font-size: .76rem; cursor: pointer; transition: all .2s; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 6px; }
-        .tab-btn svg { width: 13px; height: 13px; fill: currentColor; }
+        .tabs { display: flex; justify-content: center; margin: 0 auto 22px; width: fit-content; max-width: 100%; background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .tab-btn { font-family: inherit; background: transparent; border: none; color: var(--muted); padding: 10px 22px; font-weight: 800; font-size: .76rem; cursor: pointer; transition: all .2s; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; justify-content: center; gap: 6px; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tab-btn svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
         .tab-btn.active { background: linear-gradient(135deg, var(--pk-pink), var(--pk-blue)); color: #fff; }
+        /* 3 abas (Confrontos/Ranking/Regras) não cabiam num celular estreito
+           com o padding padrão — o container tinha width:fit-content sem
+           limite, então "Regras" ficava cortado fora da tela em vez de
+           encolher junto com as outras. */
+        @media (max-width: 420px) {
+          .tab-btn { padding: 9px 8px; font-size: .64rem; gap: 4px; }
+          .tab-btn svg { width: 11px; height: 11px; }
+        }
 
         .state-msg { text-align: center; padding: 50px 20px; color: var(--muted); font-size: .95rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 12px; }
         .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--cyan-d); border-top-color: var(--cyan); animation: spin .8s linear infinite; }
