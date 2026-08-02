@@ -135,6 +135,12 @@ class PainelPK extends HTMLElement {
 
         .app { width: 100%; color: var(--text); }
         .content { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px 14px 40px; }
+
+        .pk-toolbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .pk-refresh-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color .2s, border-color .2s; padding: 0; }
+        .pk-refresh-btn:hover { color: var(--text); border-color: var(--cyan); }
+        .pk-refresh-btn:disabled { cursor: default; opacity: .7; }
+        .pk-refresh-btn.spinning svg { animation: spin .8s linear infinite; }
         .nav-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 auto 12px; background: var(--card-bg); padding: 5px; border-radius: 14px; border: 1px solid var(--border); width: fit-content; max-width: 100%; }
         .btn-base { font-family: inherit; background: transparent; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 800; font-size: .78rem; cursor: pointer; transition: all .2s; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
         .btn-base:hover { color: var(--text); }
@@ -254,6 +260,9 @@ class PainelPK extends HTMLElement {
       ${estilo}
       <div class="app">
         <div class="content">
+          <div class="pk-toolbar">
+            <button class="pk-refresh-btn" id="btn-pk-refresh" type="button" title="Atualizar">${PainelPK._icons.RefreshSVG}</button>
+          </div>
           <nav class="nav-container" id="nav-container"></nav>
           <div class="date-container" id="date-container"></div>
           <div class="tabs" id="tabs-container"></div>
@@ -262,7 +271,30 @@ class PainelPK extends HTMLElement {
       </div>
     `;
     window.DMaiorPrefs?.bind(this.shadowRoot);
+    this.shadowRoot.getElementById('btn-pk-refresh').addEventListener('click', () => this._atualizar());
     this._renderConteudo();
+  }
+
+  // Botão manual — evita ter que sair da aba ou dar refresh na página
+  // inteira só pra ver diamantes/confrontos atualizados. Não usa o estado
+  // "carregando" de tela cheia (ficaria piscando a cada clique) — só gira o
+  // ícone do próprio botão enquanto busca de novo.
+  async _atualizar() {
+    const btn = this.shadowRoot.getElementById('btn-pk-refresh');
+    if (btn) { btn.disabled = true; btn.classList.add('spinning'); }
+    try {
+      if (!this._programacoes.length) {
+        const data = await window.DmaiorAPI.pk.listarProgramacoes();
+        this._programacoes = data.programacoes || [];
+      }
+      await this._carregarProgramacaoAtiva();
+      this._erro = null;
+    } catch (e) {
+      this._erro = 'Não foi possível atualizar agora. Tente de novo em instantes.';
+    } finally {
+      this._renderConteudo();
+      if (btn) { btn.disabled = false; btn.classList.remove('spinning'); }
+    }
   }
 
   // ── Ícones/escape ──────────────────────────────────────────────────────
@@ -271,6 +303,7 @@ class PainelPK extends HTMLElement {
       UserSVG: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>`,
       CrownSVG: `<svg class="crown-icon" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>`,
       TrophySVG: `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="flex-shrink:0"><path d="M18 2H6v7a6 6 0 0 0 5 5.92V17h-2a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.08A6 6 0 0 0 18 9V2zM4 4v3a4 4 0 0 0 3 3.87V6H5V4H4zm16 0h-1v2h-2v4.87A4 4 0 0 0 20 7V4z"/></svg>`,
+      RefreshSVG: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`,
     };
   }
 
