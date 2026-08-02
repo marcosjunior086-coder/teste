@@ -199,6 +199,7 @@
     svgLogout()  { return `<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>`; }
     svgInfo()    { return `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`; }
     svgRank()    { return `<svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>`; }
+    svgPk()      { return `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
     svgFrame()   { return `<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v2.17A3 3 0 0 0 16.17 5H19zM5 5h2.83A3 3 0 0 0 5 7.83V5zm0 14v-2.83A3 3 0 0 0 7.83 19H5zm14 0h-2.83A3 3 0 0 0 19 16.17V19zM9 19a5 5 0 0 1 10-5V10a5 5 0 0 1-5-5h-4a5 5 0 0 1-5 5v4a5 5 0 0 1 4 5z"/></svg>`; }
     svgKey()     { return `<svg viewBox="0 0 24 24"><path d="M12.65 10A6 6 0 1 0 14 14.65L14 14h2v2h2v2h2v-2.18A6.002 6.002 0 0 0 12.65 10zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>`; }
@@ -670,6 +671,7 @@
                     <button class="nit" id="nMolduras">${this.svgFrame()} <span data-i18n="frames">MOLDURAS</span></button>
                     <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
+                    <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
                     <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
                     <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
                     <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
@@ -1094,6 +1096,13 @@
                     <dmaior-votacao id="votacaoEl"></dmaior-votacao>
                 </div>
 
+                <!-- ══════ PK DIÁRIO (componente nativo) ══════ -->
+                <!-- painel-pk detecta sozinho dm_uid/dm_token, igual dmaior-votacao. -->
+                <div id="vPk" class="view" style="width:100%;">
+                    <button class="iframe-back" id="btnBackPk">${this.svgBack()} VOLTAR AO PAINEL</button>
+                    <painel-pk id="pkEl"></painel-pk>
+                </div>
+
                 <!-- Gerador local de molduras, carregado somente após autenticação -->
                 <div id="vMolduras" class="view" style="width:100%;">
                     <iframe id="moldurasFrame" class="molduras-frame" title="Gerador de molduras da DMaior Agency" allow="clipboard-write"></iframe>
@@ -1259,6 +1268,8 @@
         this.qs('#nImpulso').addEventListener('click',()=>this.goImpulsionamento());
         this.qs('#nMolduras').addEventListener('click',()=>this.goMolduras());
         this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
+        this.qs('#nPk').addEventListener('click',()=>this.goPk());
+        this.qs('#btnBackPk')?.addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#nMore').addEventListener('click',()=>{
             this.qs('#bNav').classList.toggle('expanded');
         });
@@ -1789,6 +1800,13 @@
         // que precisa do worker-url porque fala com um worker diferente).
         this.navigate('vVotacao');
         this.navActive('nVotacao');
+    }
+    goPk(){
+        // painel-pk já lê dm_uid/dm_token do localStorage sozinho — só precisa
+        // navegar e reconfirmar a sessão, igual ranking-dmaior/dmaior-votacao.
+        this.qs('#pkEl')?.verificarSessao?.();
+        this.navigate('vPk');
+        this.navActive('nPk');
     }
     goMolduras(){
         const frame = this.qs('#moldurasFrame');

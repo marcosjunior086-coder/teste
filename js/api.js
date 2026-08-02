@@ -328,6 +328,28 @@ window.DmaiorAPI = {
     },
   },
 
+  // ── Módulo: PK Diário ──────────────────────────────────────────────────────
+  // Leitura pública pro streamer logado — mesmo Worker/nível de confiança do
+  // módulo votacao (não precisa de uid, o ranking/confrontos são iguais pra
+  // qualquer streamer).
+  pk: {
+    /** Programações com status ativa ou encerrada. */
+    async listarProgramacoes() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, '/pk/programacoes');
+    },
+    /** Confrontos de uma programação, com nome/foto/ao_vivo já resolvidos. */
+    async confrontos(programacaoId) {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/pk/confrontos?programacao_id=${encodeURIComponent(programacaoId)}`);
+    },
+    /** Ranking — informe programacao_id OU { data_inicio, data_fim }. */
+    async ranking({ programacao_id, data_inicio, data_fim } = {}) {
+      const qs = programacao_id
+        ? `programacao_id=${encodeURIComponent(programacao_id)}`
+        : `data_inicio=${encodeURIComponent(data_inicio)}&data_fim=${encodeURIComponent(data_fim)}`;
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/pk/ranking?${qs}`);
+    },
+  },
+
   // ── Módulo: Widget de Live ────────────────────────────────────────────────
 
   live: {
