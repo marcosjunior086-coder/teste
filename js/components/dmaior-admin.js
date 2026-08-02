@@ -32,12 +32,11 @@ class DimaiorAdmin extends HTMLElement {
     this._creditoRapidoUid = null;
     this._rankMeses = [];
     // PK Diário
-    this._pkEditId       = null;   // id da programação em edição (null = criando nova)
-    this._pkAbertaId     = null;   // id da programação aberta na tela de detalhe
-    this._pkElegiveis    = [];     // última lista buscada em /admin/pk/elegiveis
-    this._pkSelecionados = new Map(); // kwai_uid -> {kwai_uid,nome,foto,diamantes,novato,origem}
-    this._pkHorarios     = [];     // ["20:00","21:00",...]
-    this._pkPreview      = [];     // prévia do sorteio: [{rodada, confrontos:[...]}]
+    this._pkAbertaId       = null;   // id da liga aberta na tela de gerenciar
+    this._pkElegiveis      = [];     // última lista buscada em /admin/pk/elegiveis (form de criação)
+    this._pkSelecionados   = new Map(); // kwai_uid -> {kwai_uid,nome,foto,diamantes,novato,origem} — roster inicial (form de criação)
+    this._pkDetElegiveis   = [];     // última lista buscada em /admin/pk/elegiveis (tela de gerenciar)
+    this._pkDetalheCache   = null;   // último GET /admin/pk/programacoes/:id (participantes/confrontos)
     // Lives — layout e modo (persistido em localStorage)
     const _lo = (() => { try { return JSON.parse(localStorage.getItem('dm_lives_opts')||'{}'); } catch { return {}; } })();
     this._livesOpts = { cols: _lo.cols||2, modo: _lo.modo||'capa', ordenar: _lo.ordenar||'padrao', estilo: _lo.estilo||1, dashboardAoVivo: _lo.dashboardAoVivo!==false };
@@ -1665,20 +1664,22 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtuPk').addEventListener('click',()=>this._carregarPkDiario());
     s.getElementById('btnNovaPk').addEventListener('click',()=>this._abrirFormPk());
     s.getElementById('btnCancelarFormPk').addEventListener('click',()=>this._fecharFormPk());
-    s.getElementById('pkTipoPeriodo').addEventListener('change',()=>this._pkDiaUnicoToggle());
     s.getElementById('pkCriterioSelect').addEventListener('change',()=>this._pkCriterioToggle());
     s.getElementById('btnBuscarElegiveisPk').addEventListener('click',()=>this._buscarElegiveisPk());
     s.getElementById('btnPkSelecionarTodos').addEventListener('click',()=>this._pkSelecionarTodosElegiveis());
     s.getElementById('btnPkAddManual').addEventListener('click',()=>this._pkAddManual());
-    s.getElementById('btnPkAddHorario').addEventListener('click',()=>this._pkAddHorario());
-    s.getElementById('pkModoSimultaneo').addEventListener('change',()=>this._pkModoHorarioToggle());
-    s.getElementById('pkModoIntervalo').addEventListener('change',()=>this._pkModoHorarioToggle());
-    s.getElementById('btnSortearPk').addEventListener('click',()=>this._sortearPk());
-    s.getElementById('btnMontarManualPk').addEventListener('click',()=>this._pkMontarManualPk());
-    s.getElementById('btnPkAddLinhaPrevia').addEventListener('click',()=>{this._pkPreview=this._pkColetarPreviewConfrontos();this._pkAdicionarLinhaManualPrevia();});
-    s.getElementById('btnRegerarPk').addEventListener('click',()=>this._sortearPk());
     s.getElementById('btnSalvarPk').addEventListener('click',()=>this._salvarProgramacaoPk());
     s.getElementById('btnVoltarListaPk').addEventListener('click',()=>this._carregarPkDiario());
+    s.getElementById('btnPkAtivar').addEventListener('click',()=>this._ativarLigaPk(this._pkAbertaId));
+    s.getElementById('btnPkPausar').addEventListener('click',()=>this._pausarLigaPk(this._pkAbertaId));
+    s.getElementById('btnPkFecharAgora').addEventListener('click',()=>this._fecharAgoraPk(this._pkAbertaId));
+    s.getElementById('btnPkEncerrar').addEventListener('click',()=>{
+      this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId,true));
+    });
+    s.getElementById('btnPkDetToggleAdd').addEventListener('click',()=>this._pkDetToggleAdd());
+    s.getElementById('pkDetCriterioSelect').addEventListener('change',()=>this._pkDetCriterioToggle());
+    s.getElementById('btnPkDetBuscarElegiveis').addEventListener('click',()=>this._buscarElegiveisPkDet());
+    s.getElementById('btnPkDetAddManual').addEventListener('click',()=>this._pkDetAddManual());
     s.getElementById('btnPkCriarConfronto').addEventListener('click',()=>this._pkCriarConfrontoManual());
     s.getElementById('btnVerRankingPk').addEventListener('click',()=>this._abrirRankingPk());
     s.getElementById('btnVoltarRankingPk').addEventListener('click',()=>this._carregarPkDiario());
@@ -2201,67 +2202,55 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot,area=s.getElementById('pkListaArea');
     area.innerHTML=this._loading();
     const d=await this._api('GET','/admin/pk/programacoes');
-    if(!d?.ok){area.innerHTML=this._empty('warning','Erro ao carregar programações');return;}
+    if(!d?.ok){area.innerHTML=this._empty('warning','Erro ao carregar ligas');return;}
     this._renderPkLista(d.programacoes||[]);
   }
 
   _pkStatusBadge(status){
-    const m={rascunho:['Rascunho','var(--t3)'],ativa:['Ativa','var(--verde)'],encerrada:['Encerrada','var(--cyan)'],cancelada:['Cancelada','var(--verm)']};
+    const m={rascunho:['Rascunho','var(--t3)'],ativa:['Ativa','var(--verde)'],pausada:['Pausada','var(--gold)'],encerrada:['Encerrada','var(--cyan)']};
     const [lbl,cor]=m[status]||m.rascunho;
     return `<span style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${cor};border:1px solid ${cor};border-radius:99px;padding:2px 9px">${lbl}</span>`;
   }
 
   _renderPkLista(lista){
     const el=this.shadowRoot.getElementById('pkListaArea');
-    if(!lista.length){el.innerHTML=this._empty('zap','Nenhuma programação cadastrada ainda');return;}
-    const tipoLbl={dia_unico:'Dia único',semanal:'Semanal',mensal:'Mensal',personalizado:'Personalizado'};
+    if(!lista.length){el.innerHTML=this._empty('zap','Nenhuma liga cadastrada ainda');return;}
     el.innerHTML=lista.map(p=>`
       <div class="cfg-row" style="flex-wrap:wrap">
         <div style="flex:1;min-width:180px">
           <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome)}</div>
-          <div style="font-size:11px;color:var(--t3);margin-top:2px">${tipoLbl[p.tipo_periodo]||p.tipo_periodo} · ${this._fdtData(p.data_inicio)} a ${this._fdtData(p.data_fim)}</div>
+          ${p.ultimo_fechamento_em?`<div style="font-size:11px;color:var(--t3);margin-top:2px">Último fechamento: ${this._fdtData(p.ultimo_fechamento_em)}</div>`:''}
         </div>
         ${this._pkStatusBadge(p.status)}
         <button class="btn btn-o btn-sm" data-pk-abrir="${p.id}">${this._ico('eye',12)} Gerenciar</button>
-        <button class="btn btn-o btn-sm btn-d" data-pk-cancelar="${p.id}" ${p.status==='cancelada'?'disabled':''}>${this._ico('x_circle',12)} Cancelar</button>
+        <button class="btn btn-o btn-sm btn-d" data-pk-cancelar="${p.id}">${this._ico('x_circle',12)} ${p.status==='rascunho'?'Excluir':'Encerrar'}</button>
       </div>`).join('');
     el.querySelectorAll('[data-pk-abrir]').forEach(b=>b.addEventListener('click',()=>this._abrirDetalhePk(b.dataset.pkAbrir)));
-    el.querySelectorAll('[data-pk-cancelar]').forEach(b=>b.addEventListener('click',()=>{
-      this._confirmarDel('Cancelar esta programação? Os confrontos e resultados já lançados continuam no histórico.',()=>this._cancelarProgramacaoPk(b.dataset.pkCancelar));
-    }));
+    el.querySelectorAll('[data-pk-cancelar]').forEach(b=>{
+      const rascunho=lista.find(p=>p.id===b.dataset.pkCancelar)?.status==='rascunho';
+      b.addEventListener('click',()=>{
+        this._confirmarDel(
+          rascunho?'Excluir este rascunho de liga?':'Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',
+          ()=>this._cancelarProgramacaoPk(b.dataset.pkCancelar));
+      });
+    });
   }
 
   async _cancelarProgramacaoPk(id){
     const r=await this._api('DELETE',`/admin/pk/programacoes/${id}`);
-    if(r?.ok){this._toast('Programação cancelada');this._carregarPkDiario();}
-    else this._toast(r?.erro||'Erro ao cancelar','err');
+    if(r?.ok){this._toast('Liga atualizada');this._carregarPkDiario();}
+    else this._toast(r?.erro||'Erro ao excluir/encerrar','err');
   }
 
   _abrirFormPk(){
-    this._pkEditId=null;
     this._pkElegiveis=[];
     this._pkSelecionados=new Map();
-    this._pkHorarios=[];
-    this._pkPreview=[];
     const s=this.shadowRoot;
-    s.getElementById('pkPreviaWrap').style.display='none';
-    s.getElementById('pkPreviaAvisos').style.display='none';
-    s.getElementById('pkPreviaArea').innerHTML='';
     s.getElementById('pkNome').value='';
-    s.getElementById('pkTipoPeriodo').value='dia_unico';
-    s.getElementById('pkDataInicio').value='';
-    s.getElementById('pkDataFim').value='';
-    s.getElementById('pkConfrontosPorParticipante').value='1';
     s.getElementById('pkCriterioSelect').value='0';
     s.getElementById('pkCriterioCustom').value='';
     s.getElementById('pkManualUid').value='';
-    s.querySelectorAll('.pk-dia-semana').forEach(c=>c.checked=false);
-    s.getElementById('pkModoSimultaneo').checked=true;
-    s.getElementById('pkIntervaloMinutos').value='15';
-    this._pkDiaUnicoToggle();
     this._pkCriterioToggle();
-    this._pkModoHorarioToggle();
-    this._renderPkHorarios();
     this._renderPkElegiveis();
     s.getElementById('pkListaWrap').style.display='none';
     s.getElementById('pkDetalheWrap').style.display='none';
@@ -2274,11 +2263,6 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('pkListaWrap').style.display='block';
   }
 
-  _pkDiaUnicoToggle(){
-    const s=this.shadowRoot;
-    s.getElementById('pkDiasSemanaWrap').style.display=s.getElementById('pkTipoPeriodo').value==='dia_unico'?'none':'block';
-  }
-
   _pkCriterioToggle(){
     const s=this.shadowRoot;
     s.getElementById('pkCriterioCustomWrap').style.display=s.getElementById('pkCriterioSelect').value==='outro'?'block':'none';
@@ -2289,50 +2273,6 @@ class DimaiorAdmin extends HTMLElement {
     if(sel==='0')return 0;
     if(sel==='outro')return Math.max(0,parseInt(s.getElementById('pkCriterioCustom').value)||0);
     return parseInt(sel);
-  }
-
-  _pkModoHorarioToggle(){
-    const s=this.shadowRoot,simultaneo=s.getElementById('pkModoSimultaneo').checked;
-    s.getElementById('pkIntervaloWrap').style.display=simultaneo?'none':'block';
-    s.getElementById('pkCapacidadeArea').style.display=simultaneo?'flex':'none';
-  }
-
-  _pkAddHorario(){
-    const s=this.shadowRoot,inp=s.getElementById('pkNovoHorario');
-    const v=inp.value;
-    if(!v)return;
-    if(this._pkHorarios.includes(v)){this._toast('Esse horário já foi adicionado','err');return;}
-    this._pkHorarios.push(v);
-    this._pkHorarios.sort();
-    inp.value='';
-    this._renderPkHorarios();
-  }
-
-  _pkRemoverHorario(h){
-    this._pkHorarios=this._pkHorarios.filter(x=>x!==h);
-    this._renderPkHorarios();
-  }
-
-  _renderPkHorarios(){
-    const s=this.shadowRoot,area=s.getElementById('pkHorariosArea'),cap=s.getElementById('pkCapacidadeArea');
-    if(!this._pkHorarios.length){
-      area.innerHTML='<span style="font-size:11px;color:var(--t3)">Nenhum horário cadastrado</span>';
-      cap.innerHTML='';
-      return;
-    }
-    area.innerHTML=this._pkHorarios.map(h=>`
-      <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,212,.1);border:1px solid var(--brddim);border-radius:99px;padding:4px 6px 4px 12px;font-size:12px;color:var(--t1)">
-        ${h}<button type="button" data-pk-rm-horario="${h}" style="background:none;border:none;color:var(--t3);cursor:pointer;display:flex;padding:2px">${this._ico('x_circle',12)}</button>
-      </span>`).join('');
-    area.querySelectorAll('[data-pk-rm-horario]').forEach(b=>b.addEventListener('click',()=>this._pkRemoverHorario(b.dataset.pkRmHorario)));
-
-    // capacidade por horário só faz sentido no modo simultâneo — mantém o
-    // valor já digitado ao adicionar/remover outro horário
-    const atuais={}; cap.querySelectorAll('[data-pk-cap]').forEach(i=>{atuais[i.dataset.pkCap]=i.value;});
-    cap.innerHTML=this._pkHorarios.map(h=>`
-      <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)">${h}
-        <input type="number" min="1" value="${atuais[h]||1}" data-pk-cap="${h}" class="cfg-inp" style="width:55px">
-      </label>`).join('');
   }
 
   async _buscarElegiveisPk(){
@@ -2401,153 +2341,23 @@ class DimaiorAdmin extends HTMLElement {
     this._renderPkElegiveis();
   }
 
-  // Monta a config compartilhada por "Sortear" e "Salvar" — retorna null (com
-  // toast do motivo) se algo obrigatório estiver faltando.
-  _pkColetarConfig(){
+  async _salvarProgramacaoPk(){
     const s=this.shadowRoot;
     const nome=s.getElementById('pkNome').value.trim();
-    if(!nome){this._toast('Informe o nome da programação','err');return null;}
-    const dataInicio=s.getElementById('pkDataInicio').value,dataFim=s.getElementById('pkDataFim').value;
-    if(!dataInicio||!dataFim){this._toast('Informe as datas de início e término','err');return null;}
-    if(!this._pkSelecionados.size){this._toast('Selecione pelo menos 1 participante','err');return null;}
-    if(!this._pkHorarios.length){this._toast('Cadastre pelo menos 1 horário','err');return null;}
-
-    const modoHorario=s.getElementById('pkModoIntervalo').checked?'intervalo':'simultaneo';
-    let capacidade_por_horario=null,intervalo_minutos=null;
-    if(modoHorario==='simultaneo'){
-      capacidade_por_horario={};
-      s.querySelectorAll('[data-pk-cap]').forEach(i=>{capacidade_por_horario[i.dataset.pkCap]=Math.max(1,parseInt(i.value)||1);});
-    } else {
-      intervalo_minutos=Math.max(1,parseInt(s.getElementById('pkIntervaloMinutos').value)||15);
-    }
+    if(!nome){this._toast('Informe o nome da liga','err');return;}
+    if(!this._pkSelecionados.size){this._toast('Selecione pelo menos 1 participante','err');return;}
     const criterio=this._pkCriterioValor();
-
-    return {
+    const payload={
       nome,
-      tipo_periodo: s.getElementById('pkTipoPeriodo').value,
-      data_inicio: dataInicio,
-      data_fim: dataFim,
-      dias_semana: [...s.querySelectorAll('.pk-dia-semana:checked')].map(c=>parseInt(c.value)),
-      confrontos_por_participante: Math.max(1,parseInt(s.getElementById('pkConfrontosPorParticipante').value)||1),
       criterio_diamantes_min: criterio>0?criterio:null,
-      horarios: this._pkHorarios,
-      modo_horario: modoHorario,
-      capacidade_por_horario, intervalo_minutos,
       participantes: [...this._pkSelecionados.values()].map(st=>({kwai_uid:st.kwai_uid,diamantes:st.diamantes||0,novato:!!st.novato,origem:st.origem||'elegivel'})),
     };
-  }
-
-  async _sortearPk(){
-    const config=this._pkColetarConfig();
-    if(!config)return;
-    if(config.participantes.length<2){this._toast('Precisa de pelo menos 2 participantes pra sortear','err');return;}
-    const s=this.shadowRoot,btn=s.getElementById('btnSortearPk');
-    if(btn){btn.disabled=true;btn.innerHTML=`${this._ico('refresh',13)} Sorteando...`;}
-    const d=await this._api('POST','/admin/pk/sorteio/preview',config);
-    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('refresh',13)} Sortear Automaticamente`;}
-    if(!d?.ok){this._toast(d?.erro||'Erro ao sortear','err');return;}
-    // "achata" as rodadas vindas do sorteio num array só — a rodada vira só
-    // mais um campo editável de cada confronto, não uma estrutura fixa.
-    this._pkPreview=(d.rodadas||[]).flatMap(rd=>rd.confrontos.map(c=>({...c,rodada:rd.rodada,gerado_automaticamente:true})));
-    this._renderPkPrevia(d.avisos||[]);
-  }
-
-  // Abre a prévia vazia (ou mantém a atual) pra montagem 100% manual — sem
-  // rodar o algoritmo de equilíbrio, "por fora" da lógica de desempenho.
-  _pkMontarManualPk(){
-    if(!this._pkSelecionados.size){this._toast('Selecione pelo menos 1 participante primeiro','err');return;}
-    this._pkAdicionarLinhaManualPrevia();
-  }
-
-  _pkAdicionarLinhaManualPrevia(){
-    const parts=[...this._pkSelecionados.values()];
-    const proxRodada=this._pkPreview.length?Math.max(...this._pkPreview.map(c=>c.rodada||1)):1;
-    this._pkPreview.push({
-      kwai_uid_a: parts[0]?.kwai_uid||'', kwai_uid_b: parts[1]?.kwai_uid||'',
-      rodada: proxRodada,
-      data_confronto: this.shadowRoot.getElementById('pkDataInicio').value||'',
-      horario: this._pkHorarios[0]||'',
-      observacao: null, gerado_automaticamente: false,
-    });
-    this._renderPkPrevia([]);
-  }
-
-  _renderPkPrevia(avisos){
-    const s=this.shadowRoot;
-    s.getElementById('pkPreviaWrap').style.display='flex';
-    const av=s.getElementById('pkPreviaAvisos');
-    if(avisos&&avisos.length){
-      av.style.display='block';
-      av.innerHTML=`<div class="premio-info-box">${this._ico('warning',13)} ${avisos.map(a=>this._esc(a)).join('<br>')}</div>`;
-    } else { av.style.display='none'; av.innerHTML=''; }
-
-    const opcoesParticipantes=[...this._pkSelecionados.values()].map(p=>`<option value="${this._esc(p.kwai_uid)}">${this._esc(p.nome)}</option>`).join('');
-    if(!this._pkPreview.length){
-      s.getElementById('pkPreviaArea').innerHTML=this._empty('bolt','Nenhum confronto na prévia ainda — sorteie automaticamente ou adicione manualmente.');
-      return;
-    }
-    // agrupa só pra exibição — a fonte da verdade é o array plano this._pkPreview
-    const porRodada=new Map();
-    this._pkPreview.forEach((c,idx)=>{const r=c.rodada||1;if(!porRodada.has(r))porRodada.set(r,[]);porRodada.get(r).push(idx);});
-    const rodadasOrdenadas=[...porRodada.keys()].sort((a,b)=>a-b);
-
-    s.getElementById('pkPreviaArea').innerHTML=rodadasOrdenadas.map(r=>`
-      <div style="margin-top:8px">
-        <div style="font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Rodada ${r}</div>
-        ${porRodada.get(r).map(idx=>{const c=this._pkPreview[idx];return`
-          <div class="cfg-row" style="flex-wrap:wrap" data-pk-prev-idx="${idx}">
-            <input class="cfg-inp pk-prev-rodada" type="number" min="1" value="${c.rodada||1}" title="Rodada" style="width:55px">
-            <select class="cfg-inp pk-prev-a" style="width:160px">${opcoesParticipantes.replace(`value="${this._esc(c.kwai_uid_a)}"`,`value="${this._esc(c.kwai_uid_a)}" selected`)}</select>
-            <span style="color:var(--t3);font-size:11px">vs</span>
-            <select class="cfg-inp pk-prev-b" style="width:160px">${opcoesParticipantes.replace(`value="${this._esc(c.kwai_uid_b)}"`,`value="${this._esc(c.kwai_uid_b)}" selected`)}</select>
-            <input class="cfg-inp pk-prev-data" type="date" value="${c.data_confronto||''}" style="width:140px">
-            <input class="cfg-inp pk-prev-horario" type="time" value="${String(c.horario||'').slice(0,5)}" style="width:100px">
-            <button class="btn btn-o btn-sm btn-d" data-pk-prev-del="${idx}">${this._ico('trash',12)}</button>
-            ${c.gerado_automaticamente===false?`<span style="font-size:9px;color:var(--t3);letter-spacing:.5px">MANUAL</span>`:''}
-            ${c.observacao?`<div style="width:100%;font-size:10px;color:var(--cyan)">${this._ico('warning',10)} ${this._esc(c.observacao)}</div>`:''}
-          </div>`;}).join('')}
-      </div>`).join('');
-
-    s.querySelectorAll('[data-pk-prev-del]').forEach(btn=>btn.addEventListener('click',()=>{
-      // recolhe o estado atual da tela antes de remover, senão edições feitas
-      // em outras linhas antes do clique seriam perdidas no re-render
-      this._pkPreview=this._pkColetarPreviewConfrontos();
-      this._pkPreview.splice(Number(btn.dataset.pkPrevDel),1);
-      this._renderPkPrevia(avisos);
-    }));
-  }
-
-  // Lê os selects/inputs da prévia de volta pra um array de confrontos —
-  // mesma lógica de "coletar do DOM" usada em Meses do Ranking.
-  _pkColetarPreviewConfrontos(){
-    const s=this.shadowRoot;
-    return [...s.querySelectorAll('[data-pk-prev-idx]')].map(row=>{
-      const uidA=row.querySelector('.pk-prev-a').value,uidB=row.querySelector('.pk-prev-b').value;
-      const original=this._pkPreview[Number(row.dataset.pkPrevIdx)];
-      return {
-        rodada: Math.max(1,parseInt(row.querySelector('.pk-prev-rodada').value)||1),
-        kwai_uid_a: uidA, kwai_uid_b: uidB,
-        data_confronto: row.querySelector('.pk-prev-data').value,
-        horario: row.querySelector('.pk-prev-horario').value,
-        diamantes_referencia_a: this._pkSelecionados.get(uidA)?.diamantes ?? null,
-        diamantes_referencia_b: this._pkSelecionados.get(uidB)?.diamantes ?? null,
-        observacao: original?.observacao ?? null,
-        gerado_automaticamente: original?.gerado_automaticamente !== false,
-      };
-    }).filter(c=>c.kwai_uid_a&&c.kwai_uid_b&&c.kwai_uid_a!==c.kwai_uid_b&&c.data_confronto&&c.horario);
-  }
-
-  async _salvarProgramacaoPk(){
-    const config=this._pkColetarConfig();
-    if(!config)return;
-    const s=this.shadowRoot,btn=s.getElementById('btnSalvarPk');
-    const payload={...config, confrontos: (this._pkPreview&&this._pkPreview.length)?this._pkColetarPreviewConfrontos():[]};
-
+    const btn=s.getElementById('btnSalvarPk');
     if(btn){btn.disabled=true;btn.innerHTML=`${this._ico('refresh',13)} Salvando...`;}
     const r=await this._api('POST','/admin/pk/programacoes',payload);
-    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('check',13)} Salvar Programação`;}
-    if(r?.ok){this._toast(r.aviso||'Programação criada!',r.aviso?'err':'ok');this._fecharFormPk();this._carregarPkDiario();}
-    else this._toast(r?.erro||'Erro ao salvar programação','err');
+    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('check',13)} Criar Liga (rascunho)`;}
+    if(r?.ok){this._toast('Liga criada! Abra "Gerenciar" e clique em Ativar quando quiser começar.');this._fecharFormPk();this._carregarPkDiario();}
+    else this._toast(r?.erro||'Erro ao criar liga','err');
   }
 
   async _abrirDetalhePk(id){
@@ -2557,20 +2367,150 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('pkFormWrap').style.display='none';
     s.getElementById('pkDetalheWrap').style.display='block';
     s.getElementById('pkDetalheConfrontos').innerHTML=this._loading();
+    s.getElementById('pkDetAddWrap').style.display='none';
+    s.getElementById('pkFecharAgoraStatus').textContent='';
     const d=await this._api('GET',`/admin/pk/programacoes/${id}`);
-    if(!d?.ok){this._toast(d?.erro||'Erro ao carregar programação','err');this._carregarPkDiario();return;}
+    if(!d?.ok){this._toast(d?.erro||'Erro ao carregar liga','err');this._carregarPkDiario();return;}
     this._pkDetalheCache=d;
+    const st=d.programacao.status;
     s.getElementById('pkDetalheTitulo').textContent=d.programacao.nome;
-    s.getElementById('pkDetalheParticipantes').innerHTML=`
-      <div class="bhead"><div class="btitulo">${this._ico('users',14)} Participantes (${d.participantes.length})</div></div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 0">
-        ${d.participantes.map(p=>`<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--brddim);border-radius:99px;padding:4px 10px 4px 4px;font-size:11px;color:var(--t1)">${this._avatar(p.foto,p.nome)}${this._esc(p.nome)}</span>`).join('') || '<span style="font-size:11px;color:var(--t3)">Nenhum participante</span>'}
-      </div>`;
+    s.getElementById('pkDetalheStatusBadge').innerHTML=this._pkStatusBadge(st);
+    s.getElementById('btnPkAtivar').style.display=(st==='rascunho'||st==='pausada')?'inline-flex':'none';
+    s.getElementById('btnPkPausar').style.display=st==='ativa'?'inline-flex':'none';
+    s.getElementById('btnPkFecharAgora').style.display=(st==='ativa'||st==='pausada')?'inline-flex':'none';
+    s.getElementById('btnPkEncerrar').style.display=st!=='encerrada'?'inline-flex':'none';
+
+    s.getElementById('pkDetParticipantesCount').textContent=d.participantes.length;
+    s.getElementById('pkDetalheParticipantes').innerHTML=d.participantes.length
+      ? d.participantes.map(p=>`
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--brddim);border-radius:99px;padding:4px 6px 4px 4px;font-size:11px;color:var(--t1)">
+            ${this._avatar(p.foto,p.nome)}${this._esc(p.nome)}
+            <button type="button" data-pk-rm-part="${this._esc(p.kwai_uid)}" title="Remover" style="background:none;border:none;color:var(--t3);cursor:pointer;display:flex;padding:2px">${this._ico('x_circle',12)}</button>
+          </span>`).join('')
+      : '<span style="font-size:11px;color:var(--t3)">Nenhum participante ativo</span>';
+    s.getElementById('pkDetalheParticipantes').querySelectorAll('[data-pk-rm-part]').forEach(b=>b.addEventListener('click',()=>{
+      this._confirmarDel(`Remover ${b.dataset.pkRmPart} da liga?`,()=>this._removerParticipantePk(b.dataset.pkRmPart));
+    }));
+
     this._renderPkConfrontos(d.confrontos||[]);
     const opts=d.participantes.map(p=>`<option value="${this._esc(p.kwai_uid)}">${this._esc(p.nome)}</option>`).join('');
     s.getElementById('pkNovoConfrontoA').innerHTML=opts;
     s.getElementById('pkNovoConfrontoB').innerHTML=opts;
-    s.getElementById('pkNovoConfrontoData').value=d.programacao.data_inicio;
+    const hoje=new Date(),pad=n=>String(n).padStart(2,'0');
+    s.getElementById('pkNovoConfrontoData').value=`${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}-${pad(hoje.getDate())}`;
+  }
+
+  async _ativarLigaPk(id){
+    const r=await this._api('PUT',`/admin/pk/programacoes/${id}`,{status:'ativa'});
+    if(!r?.ok){this._toast(r?.erro||'Erro ao ativar liga','err');return;}
+    this._toast('Liga ativada! Gerando os pares de hoje...');
+    await this._fecharAgoraPk(id,true);
+  }
+
+  async _pausarLigaPk(id){
+    const r=await this._api('PUT',`/admin/pk/programacoes/${id}`,{status:'pausada'});
+    if(r?.ok){this._toast('Liga pausada — fecha o dia em andamento, mas não gera pares novos.');this._abrirDetalhePk(id);}
+    else this._toast(r?.erro||'Erro ao pausar liga','err');
+  }
+
+  // silencioso=true quando chamado logo após ativar (evita toast duplicado)
+  async _fecharAgoraPk(id,silencioso){
+    const el=this.shadowRoot.getElementById('pkFecharAgoraStatus');
+    if(el)el.textContent='Processando...';
+    const r=await this._api('POST',`/admin/pk/programacoes/${id}/fechar`);
+    if(!r?.ok){
+      if(el)el.textContent='';
+      this._toast(r?.erro||'Erro ao processar liga','err');
+      return;
+    }
+    const partes=[];
+    if(r.fechados)partes.push(`${r.fechados} confronto(s) fechado(s)`);
+    if(r.gerados)partes.push(`${r.gerados} par(es) gerado(s) hoje`);
+    if(!partes.length)partes.push('nada pra fazer agora (pares de hoje já existem)');
+    const msg=[...partes,...(r.avisos||[])].join(' · ');
+    if(!silencioso)this._toast(partes.join(', '));
+    // _abrirDetalhePk limpa pkFecharAgoraStatus ao recarregar — escreve a
+    // mensagem só DEPOIS do reload, senão o "Processando..." vira "" e a
+    // mensagem some antes do usuário conseguir ler.
+    await this._abrirDetalhePk(id);
+    if(el)el.textContent=msg;
+  }
+
+  async _removerParticipantePk(uid){
+    const r=await this._api('DELETE',`/admin/pk/programacoes/${this._pkAbertaId}/participantes/${encodeURIComponent(uid)}`);
+    if(r?.ok){this._toast('Participante removido');this._abrirDetalhePk(this._pkAbertaId);}
+    else this._toast(r?.erro||'Erro ao remover','err');
+  }
+
+  _pkDetToggleAdd(){
+    const wrap=this.shadowRoot.getElementById('pkDetAddWrap');
+    const abrir=wrap.style.display==='none';
+    wrap.style.display=abrir?'block':'none';
+    if(abrir && !this._pkDetElegiveis.length)this._buscarElegiveisPkDet();
+  }
+
+  _pkDetCriterioToggle(){
+    const s=this.shadowRoot;
+    s.getElementById('pkDetCriterioCustomWrap').style.display=s.getElementById('pkDetCriterioSelect').value==='outro'?'block':'none';
+  }
+
+  _pkDetCriterioValor(){
+    const s=this.shadowRoot,sel=s.getElementById('pkDetCriterioSelect').value;
+    if(sel==='0')return 0;
+    if(sel==='outro')return Math.max(0,parseInt(s.getElementById('pkDetCriterioCustom').value)||0);
+    return parseInt(sel);
+  }
+
+  // Roster da liga já em andamento — cada checkbox chama a API na hora (o
+  // roster é dinâmico: não existe "confirmar" em lote, diferente do form de
+  // criação, que ainda não gravou nada no banco.
+  async _buscarElegiveisPkDet(){
+    const minimo=this._pkDetCriterioValor();
+    const area=this.shadowRoot.getElementById('pkDetElegiveisArea');
+    area.innerHTML=this._loading();
+    const d=await this._api('GET',`/admin/pk/elegiveis?minimo=${minimo}`);
+    if(!d?.ok){area.innerHTML=this._empty('warning','Erro ao buscar elegíveis');return;}
+    this._pkDetElegiveis=d.streamers||[];
+    this._renderPkElegiveisDet();
+  }
+
+  _renderPkElegiveisDet(){
+    const s=this.shadowRoot,area=s.getElementById('pkDetElegiveisArea');
+    const ativos=new Set((this._pkDetalheCache?.participantes||[]).map(p=>p.kwai_uid));
+    if(!this._pkDetElegiveis.length){
+      area.innerHTML=this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do mês anterior');
+      return;
+    }
+    const linhas=[...this._pkDetElegiveis].sort((a,b)=>(b.diamantes||0)-(a.diamantes||0));
+    area.innerHTML=linhas.map(st=>`
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--brddim);cursor:pointer">
+        <input type="checkbox" class="pk-det-elig-chk" data-pk-uid="${this._esc(st.kwai_uid)}" ${ativos.has(st.kwai_uid)?'checked':''} style="accent-color:var(--cyan)">
+        ${this._avatar(st.foto,st.nome,'av')}
+        <span style="flex:1;font-size:12px;color:var(--t1)">${this._esc(st.nome)}${st.novato?' <span style="color:var(--cyan);font-size:10px">· NOVATO</span>':''}</span>
+        <span style="font-size:11px;color:var(--t3)">${this._num(st.diamantes||0)} 💎</span>
+      </label>`).join('');
+    area.querySelectorAll('.pk-det-elig-chk').forEach(chk=>chk.addEventListener('change',async()=>{
+      const uid=chk.dataset.pkUid,st=this._pkDetElegiveis.find(x=>x.kwai_uid===uid);
+      chk.disabled=true;
+      if(chk.checked){
+        await this._api('POST',`/admin/pk/programacoes/${this._pkAbertaId}/participantes`,{kwai_uid:uid,diamantes:st?.diamantes||0,novato:!!st?.novato});
+      } else {
+        await this._api('DELETE',`/admin/pk/programacoes/${this._pkAbertaId}/participantes/${encodeURIComponent(uid)}`);
+      }
+      await this._abrirDetalhePk(this._pkAbertaId);
+      this.shadowRoot.getElementById('pkDetAddWrap').style.display='block';
+      this._renderPkElegiveisDet();
+    }));
+  }
+
+  async _pkDetAddManual(){
+    const s=this.shadowRoot,inp=s.getElementById('pkDetManualUid'),uid=inp.value.trim();
+    if(!uid)return;
+    const d=await this._api('GET',`/admin/streamers?uid=${encodeURIComponent(uid)}`);
+    const perfil=(d?.perfis||[])[0];
+    const r=await this._api('POST',`/admin/pk/programacoes/${this._pkAbertaId}/participantes`,{kwai_uid:uid,diamantes:0,novato:true,origem:'manual'});
+    if(r?.ok){inp.value='';this._toast(perfil?.nome?`${perfil.nome} adicionado!`:'Participante adicionado!');await this._abrirDetalhePk(this._pkAbertaId);s.getElementById('pkDetAddWrap').style.display='block';}
+    else this._toast(r?.erro||'Erro ao adicionar','err');
   }
 
   _pkResultadoLabel(r){
@@ -2581,16 +2521,27 @@ class DimaiorAdmin extends HTMLElement {
     const el=this.shadowRoot.getElementById('pkDetalheConfrontos');
     if(!lista.length){el.innerHTML=this._empty('bolt','Nenhum confronto cadastrado ainda');return;}
     const opcoes=['pendente','vitoria_a','vitoria_b','empate','cancelado'];
-    el.innerHTML=lista.map(c=>`
-      <div class="cfg-row" style="flex-wrap:wrap">
-        <div style="flex:1;min-width:220px;font-size:12px;color:var(--t1)">
-          <strong>${c.ao_vivo_a?'🔴 ':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong> vs <strong>${c.ao_vivo_b?'🔴 ':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px">Rodada ${c.rodada} · ${this._fdtData(c.data_confronto)} ${String(c.horario).slice(0,5)}${c.observacao?` · ${this._esc(c.observacao)}`:''}</div>
-        </div>
-        <select class="cfg-inp" data-pk-conf-resultado="${c.id}" style="width:130px">
-          ${opcoes.map(o=>`<option value="${o}" ${c.resultado===o?'selected':''}>${this._pkResultadoLabel(o)}</option>`).join('')}
-        </select>
-        <button class="btn btn-o btn-sm btn-d" data-pk-conf-del="${c.id}">${this._ico('trash',12)}</button>
+    const hoje=new Date(),pad=n=>String(n).padStart(2,'0');
+    const isoHoje=`${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}-${pad(hoje.getDate())}`;
+    // agrupa por data — mais recente primeiro (a lista já vem ordenada assim do Worker)
+    const porData=new Map();
+    lista.forEach(c=>{if(!porData.has(c.data_confronto))porData.set(c.data_confronto,[]);porData.get(c.data_confronto).push(c);});
+    el.innerHTML=[...porData.entries()].map(([data,confs])=>`
+      <div style="margin-top:8px">
+        <div style="font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${data===isoHoje?'Hoje':this._fdtData(data)}</div>
+        ${confs.map(c=>`
+          <div class="cfg-row" style="flex-wrap:wrap">
+            <div style="flex:1;min-width:220px;font-size:12px;color:var(--t1)">
+              <strong>${c.ao_vivo_a?'🔴 ':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong>
+              ${c.score_a!=null?` (${this._num(c.score_a)} 💎)`:''} vs
+              <strong>${c.ao_vivo_b?'🔴 ':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>${c.score_b!=null?` (${this._num(c.score_b)} 💎)`:''}
+              <div style="font-size:10px;color:var(--t3);margin-top:2px">${c.fechado_automaticamente?'Fechado automaticamente':(c.gerado_automaticamente?'Gerado automaticamente':'Manual')}${c.observacao?` · ${this._esc(c.observacao)}`:''}</div>
+            </div>
+            <select class="cfg-inp" data-pk-conf-resultado="${c.id}" style="width:130px">
+              ${opcoes.map(o=>`<option value="${o}" ${c.resultado===o?'selected':''}>${this._pkResultadoLabel(o)}</option>`).join('')}
+            </select>
+            <button class="btn btn-o btn-sm btn-d" data-pk-conf-del="${c.id}">${this._ico('trash',12)}</button>
+          </div>`).join('')}
       </div>`).join('');
     el.querySelectorAll('[data-pk-conf-resultado]').forEach(sel=>sel.addEventListener('change',()=>this._lancarResultadoPk(sel.dataset.pkConfResultado,sel.value)));
     el.querySelectorAll('[data-pk-conf-del]').forEach(b=>b.addEventListener('click',()=>{
@@ -2615,12 +2566,10 @@ class DimaiorAdmin extends HTMLElement {
     const kwai_uid_a=s.getElementById('pkNovoConfrontoA').value,kwai_uid_b=s.getElementById('pkNovoConfrontoB').value;
     if(!kwai_uid_a||!kwai_uid_b){this._toast('Selecione os 2 participantes','err');return;}
     if(kwai_uid_a===kwai_uid_b){this._toast('Os dois lados não podem ser o mesmo streamer','err');return;}
-    const data_confronto=s.getElementById('pkNovoConfrontoData').value,horario=s.getElementById('pkNovoConfrontoHorario').value;
-    if(!data_confronto||!horario){this._toast('Informe data e horário','err');return;}
+    const data_confronto=s.getElementById('pkNovoConfrontoData').value;
+    if(!data_confronto){this._toast('Informe a data','err');return;}
     const r=await this._api('POST','/admin/pk/confrontos',{
-      programacao_id:this._pkAbertaId, kwai_uid_a, kwai_uid_b,
-      rodada:Math.max(1,parseInt(s.getElementById('pkNovoConfrontoRodada').value)||1),
-      data_confronto, horario,
+      programacao_id:this._pkAbertaId, kwai_uid_a, kwai_uid_b, data_confronto,
     });
     if(r?.ok){this._toast('Confronto criado!');this._abrirDetalhePk(this._pkAbertaId);}
     else this._toast(r?.erro||'Erro ao criar confronto','err');
@@ -4366,38 +4315,19 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
             <div class="pag" id="pag-mesesRanking">${ph('Meses do Ranking','calendar','Configuração das abas históricas','btnAtuRankMeses',`<button class="btn btn-g" id="btnSalvarRankMeses">${this._ico('check',13)} Salvar Meses</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Meses Históricos via Google Planilhas</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnReordenarRankMeses">${this._ico('refresh',12)} Reordenar</button><button class="btn btn-o btn-sm" id="btnAddRankMes">${this._ico('plus',12)} Adicionar</button></div></div><div style="padding:16px"><div class="premio-info-box">${this._ico('warning',13)} Cadastre aqui o nome do mês e o GID da aba do Google Planilhas. O ranking público passa a montar as abas automaticamente pelo KV do Worker Rank.</div><div id="rankMesesArea">${this._loading()}</div><div id="rankMesesStatus" style="font-size:11px;color:var(--t3);margin-top:10px"></div></div></div></div>
 
-            <div class="pag" id="pag-pkDiario">${ph('PK Diário','zap','Confrontos entre streamers, sorteio por desempenho e ranking de vitórias','btnAtuPk',`<button class="btn btn-o" id="btnVerRankingPk">${this._ico('trophy',13)} Ranking</button><button class="btn btn-g" id="btnNovaPk">${this._ico('plus',13)} Nova Programação</button>`)}
+            <div class="pag" id="pag-pkDiario">${ph('PK Diário','zap','Liga contínua entre streamers — fecha o dia e já monta os pares seguintes sozinha','btnAtuPk',`<button class="btn btn-o" id="btnVerRankingPk">${this._ico('trophy',13)} Ranking</button><button class="btn btn-g" id="btnNovaPk">${this._ico('plus',13)} Nova Liga</button>`)}
 
               <div class="box" id="pkListaWrap">
-                <div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Programações</div></div>
+                <div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Ligas</div></div>
                 <div id="pkListaArea">${this._loading()}</div>
               </div>
 
               <div class="box" id="pkFormWrap" style="display:none">
-                <div class="bhead"><div class="btitulo">${this._ico('plus',14)} <span id="pkFormTitulo">Nova Programação</span></div>
+                <div class="bhead"><div class="btitulo">${this._ico('plus',14)} Nova Liga</div>
                   <div class="bacoes"><button class="btn btn-o btn-sm" id="btnCancelarFormPk">Cancelar</button></div>
                 </div>
                 <div style="padding:16px">
-                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Nome da programação</div><input class="cfg-inp" style="width:100%" id="pkNome" placeholder="Ex: PK Diário — Semana 1"></label></div>
-                  <div class="cfg-row" style="flex-wrap:wrap">
-                    <label><div class="cfg-chave">Tipo de período</div>
-                      <select class="cfg-inp" id="pkTipoPeriodo">
-                        <option value="dia_unico">Dia único</option>
-                        <option value="semanal">Semanal</option>
-                        <option value="mensal">Mensal</option>
-                        <option value="personalizado">Personalizado</option>
-                      </select>
-                    </label>
-                    <label><div class="cfg-chave">Data início</div><input class="cfg-inp" type="date" id="pkDataInicio"></label>
-                    <label><div class="cfg-chave">Data fim</div><input class="cfg-inp" type="date" id="pkDataFim"></label>
-                    <label><div class="cfg-chave">Confrontos/participante</div><input class="cfg-inp" type="number" min="1" value="1" id="pkConfrontosPorParticipante" style="width:70px"></label>
-                  </div>
-                  <div id="pkDiasSemanaWrap" style="display:none;padding:0 14px 11px">
-                    <div class="cfg-chave" style="width:auto;margin-bottom:6px">Dias da semana</div>
-                    <div style="display:flex;gap:12px;flex-wrap:wrap">
-                      ${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((d,i)=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" class="pk-dia-semana" value="${i}" style="accent-color:var(--cyan)"> ${d}</label>`).join('')}
-                    </div>
-                  </div>
+                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Nome da liga</div><input class="cfg-inp" style="width:100%" id="pkNome" placeholder="Ex: PK Diário — Squad Principal"></label></div>
 
                   <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Critério (diamantes mês anterior)</div>
@@ -4413,7 +4343,7 @@ class DimaiorAdmin extends HTMLElement {
                     <button class="btn btn-o btn-sm" id="btnBuscarElegiveisPk" style="margin-top:16px">${this._ico('search',12)} Buscar Elegíveis</button>
                   </div>
 
-                  <div class="bhead" style="margin-top:6px"><div class="btitulo">${this._ico('users',14)} Participantes</div>
+                  <div class="bhead" style="margin-top:6px"><div class="btitulo">${this._ico('users',14)} Roster inicial</div>
                     <div class="bacoes"><span id="pkParticipantesCount" style="font-size:11px;color:var(--t3)">0 selecionados</span><button class="btn btn-o btn-sm" id="btnPkSelecionarTodos">Selecionar elegíveis</button></div>
                   </div>
                   <div id="pkElegiveisArea" style="max-height:320px;overflow-y:auto;border:1px solid var(--brddim);border-radius:var(--rs);margin-top:8px">${this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do mês anterior')}</div>
@@ -4422,51 +4352,57 @@ class DimaiorAdmin extends HTMLElement {
                     <button class="btn btn-o btn-sm" id="btnPkAddManual" style="margin-top:16px">${this._ico('plus',12)} Adicionar</button>
                   </div>
 
-                  <div class="bhead" style="margin-top:6px"><div class="btitulo">${this._ico('clock_r',14)} Horários</div>
-                    <div class="bacoes"><input class="cfg-inp" type="time" id="pkNovoHorario" style="width:100px"><button class="btn btn-o btn-sm" id="btnPkAddHorario">${this._ico('plus',12)} Adicionar</button></div>
-                  </div>
-                  <div id="pkHorariosArea" style="padding:11px 14px;display:flex;gap:8px;flex-wrap:wrap"></div>
-                  <div class="cfg-row" style="flex-wrap:wrap;gap:14px">
-                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer"><input type="radio" name="pkModoHorario" value="simultaneo" id="pkModoSimultaneo" checked style="accent-color:var(--cyan)"> Vários PKs no mesmo horário</label>
-                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer"><input type="radio" name="pkModoHorario" value="intervalo" id="pkModoIntervalo" style="accent-color:var(--cyan)"> Intervalo fixo entre confrontos</label>
-                  </div>
-                  <div id="pkCapacidadeArea" style="padding:0 14px 11px;display:flex;gap:8px;flex-wrap:wrap"></div>
-                  <div id="pkIntervaloWrap" style="display:none;padding:0 14px 11px"><label><div class="cfg-chave" style="width:auto">Intervalo (minutos)</div><input class="cfg-inp" type="number" id="pkIntervaloMinutos" value="15" style="width:90px"></label></div>
-
-                  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-                    <button class="btn btn-o" id="btnSortearPk">${this._ico('refresh',13)} Sortear Automaticamente</button>
-                    <button class="btn btn-o" id="btnMontarManualPk">${this._ico('plus',13)} Montar Manualmente</button>
-                  </div>
-                  <div style="font-size:10px;color:var(--t3);margin-top:4px">Automático: gera os confrontos por desempenho do mês anterior. Manual: você escolhe cada dupla e horário, sem passar pelo sorteio.</div>
-
-                  <div class="bhead" id="pkPreviaWrap" style="display:none;margin-top:14px"><div class="btitulo">${this._ico('bolt',14)} Prévia dos Confrontos</div>
-                    <div class="bacoes">
-                      <button class="btn btn-o btn-sm" id="btnPkAddLinhaPrevia">${this._ico('plus',12)} Adicionar confronto</button>
-                      <button class="btn btn-o btn-sm" id="btnRegerarPk">${this._ico('refresh',12)} Sortear de novo</button>
-                    </div>
-                  </div>
-                  <div id="pkPreviaAvisos" style="display:none"></div>
-                  <div id="pkPreviaArea"></div>
-
-                  <div style="margin-top:12px"><button class="btn btn-g" id="btnSalvarPk">${this._ico('check',13)} Salvar Programação</button></div>
+                  <div style="margin-top:12px"><button class="btn btn-g" id="btnSalvarPk">${this._ico('check',13)} Criar Liga (rascunho)</button></div>
+                  <div style="font-size:10px;color:var(--t3);margin-top:4px">A liga começa como rascunho. Depois de criada, abra "Gerenciar" e clique em "Ativar" pra ligar o motor automático — ele fecha o dia anterior comparando diamantes reais e já gera os pares seguintes sozinho, todo dia, sem precisar sortear de novo.</div>
                 </div>
               </div>
 
               <div class="box" id="pkDetalheWrap" style="display:none">
-                <div class="bhead"><div class="btitulo">${this._ico('zap',14)} <span id="pkDetalheTitulo">Programação</span></div>
-                  <div class="bacoes"><button class="btn btn-o btn-sm" id="btnVoltarListaPk">${this._ico('arrow_right',12)} Voltar</button></div>
+                <div class="bhead"><div class="btitulo">${this._ico('zap',14)} <span id="pkDetalheTitulo">Liga</span> <span id="pkDetalheStatusBadge"></span></div>
+                  <div class="bacoes">
+                    <button class="btn btn-o btn-sm" id="btnPkAtivar">${this._ico('check',12)} Ativar</button>
+                    <button class="btn btn-o btn-sm" id="btnPkPausar">${this._ico('x_circle',12)} Pausar</button>
+                    <button class="btn btn-o btn-sm" id="btnPkFecharAgora">${this._ico('refresh',12)} Fechar agora</button>
+                    <button class="btn btn-o btn-sm btn-d" id="btnPkEncerrar">${this._ico('trash',12)} Encerrar</button>
+                    <button class="btn btn-o btn-sm" id="btnVoltarListaPk">${this._ico('arrow_right',12)} Voltar</button>
+                  </div>
                 </div>
                 <div style="padding:16px">
-                  <div id="pkDetalheParticipantes" style="margin-bottom:14px"></div>
-                  <div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Confrontos</div></div>
+                  <div id="pkFecharAgoraStatus" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div>
+
+                  <div class="bhead"><div class="btitulo">${this._ico('users',14)} Participantes ativos (<span id="pkDetParticipantesCount">0</span>)</div>
+                    <div class="bacoes"><button class="btn btn-o btn-sm" id="btnPkDetToggleAdd">${this._ico('plus',12)} Gerenciar roster</button></div>
+                  </div>
+                  <div id="pkDetalheParticipantes" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 0"></div>
+
+                  <div id="pkDetAddWrap" style="display:none;margin-top:4px">
+                    <div class="cfg-row" style="flex-wrap:wrap">
+                      <label><div class="cfg-chave">Critério (diamantes mês anterior)</div>
+                        <select class="cfg-inp" id="pkDetCriterioSelect" style="width:210px">
+                          <option value="0">Sem critério</option>
+                          <option value="1000">Acima de 1.000</option>
+                          <option value="2000">Acima de 2.000</option>
+                          <option value="5000">Acima de 5.000</option>
+                          <option value="outro">Outro valor...</option>
+                        </select>
+                      </label>
+                      <label id="pkDetCriterioCustomWrap" style="display:none"><div class="cfg-chave">Valor</div><input class="cfg-inp" type="number" id="pkDetCriterioCustom" style="width:100px"></label>
+                      <button class="btn btn-o btn-sm" id="btnPkDetBuscarElegiveis" style="margin-top:16px">${this._ico('search',12)} Buscar Elegíveis</button>
+                    </div>
+                    <div id="pkDetElegiveisArea" style="max-height:280px;overflow-y:auto;border:1px solid var(--brddim);border-radius:var(--rs);margin-top:8px"></div>
+                    <div class="cfg-row">
+                      <label style="flex:1"><div class="cfg-chave">Adicionar manual (UID)</div><input class="cfg-inp" style="width:100%" id="pkDetManualUid" placeholder="kwai_uid"></label>
+                      <button class="btn btn-o btn-sm" id="btnPkDetAddManual" style="margin-top:16px">${this._ico('plus',12)} Adicionar</button>
+                    </div>
+                  </div>
+
+                  <div class="bhead" style="margin-top:14px"><div class="btitulo">${this._ico('bolt',14)} Confrontos</div></div>
                   <div id="pkDetalheConfrontos">${this._loading()}</div>
                   <div class="bhead" style="margin-top:14px"><div class="btitulo">${this._ico('plus',14)} Criar confronto manual</div></div>
                   <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Streamer A</div><select class="cfg-inp" id="pkNovoConfrontoA" style="width:170px"></select></label>
                     <label><div class="cfg-chave">Streamer B</div><select class="cfg-inp" id="pkNovoConfrontoB" style="width:170px"></select></label>
-                    <label><div class="cfg-chave">Rodada</div><input class="cfg-inp" type="number" min="1" value="1" id="pkNovoConfrontoRodada" style="width:60px"></label>
                     <label><div class="cfg-chave">Data</div><input class="cfg-inp" type="date" id="pkNovoConfrontoData"></label>
-                    <label><div class="cfg-chave">Horário</div><input class="cfg-inp" type="time" id="pkNovoConfrontoHorario"></label>
                     <button class="btn btn-o btn-sm" id="btnPkCriarConfronto" style="margin-top:16px">${this._ico('plus',12)} Criar</button>
                   </div>
                 </div>

@@ -340,9 +340,9 @@ class PainelPK extends HTMLElement {
       const classeResultado = cancelado ? 'cancelado' : (pendente ? 'pendente' : '');
 
       const [dia, mes] = [String(c.data_confronto).slice(8,10), String(c.data_confronto).slice(5,7)];
-      const dataLabel = pendente
-        ? `${dia}/${mes} às ${String(c.horario).slice(0,5)}`
-        : `${dia}/${mes}/${String(c.data_confronto).slice(0,4)}`;
+      // Confronto pendente é sempre o de hoje (a liga fecha à meia-noite) —
+      // não existe mais horário fixo por confronto.
+      const dataLabel = pendente ? 'Hoje' : `${dia}/${mes}/${String(c.data_confronto).slice(0,4)}`;
 
       const imgA = c.foto_a ? `<img class="pk-avatar" src="${this._esc(c.foto_a)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
       const imgB = c.foto_b ? `<img class="pk-avatar" src="${this._esc(c.foto_b)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
