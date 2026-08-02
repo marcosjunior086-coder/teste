@@ -2593,9 +2593,9 @@ class DimaiorAdmin extends HTMLElement {
           <div class="cfg-row" style="flex-wrap:wrap">
             <div style="flex:1;min-width:220px;font-size:12px;color:var(--t1)">
               <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_a,c.nome_a)}<strong>${c.ao_vivo_a?'🔴 ':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong>${c.score_a!=null?` <span style="color:var(--t3)">(${this._num(c.score_a)} 💎)</span>`:''}</span>
+                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_a,c.nome_a)}<strong>${c.ao_vivo_a?'🔴 ':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong>${c.score_a!=null?` <span style="color:var(--t3)">(${this._num(c.score_a)} 💎)</span>`:(c.diamantes_hoje_a!=null?` <span style="color:var(--cyan)">(${this._num(c.diamantes_hoje_a)} 💎 até agora)</span>`:'')}</span>
                 <span style="color:var(--t3);font-size:11px">vs</span>
-                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_b,c.nome_b)}<strong>${c.ao_vivo_b?'🔴 ':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>${c.score_b!=null?` <span style="color:var(--t3)">(${this._num(c.score_b)} 💎)</span>`:''}</span>
+                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_b,c.nome_b)}<strong>${c.ao_vivo_b?'🔴 ':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>${c.score_b!=null?` <span style="color:var(--t3)">(${this._num(c.score_b)} 💎)</span>`:(c.diamantes_hoje_b!=null?` <span style="color:var(--cyan)">(${this._num(c.diamantes_hoje_b)} 💎 até agora)</span>`:'')}</span>
               </div>
               <div style="font-size:10px;color:var(--t3);margin-top:4px">${c.fechado_automaticamente?'Fechado automaticamente':(c.gerado_automaticamente?'Gerado automaticamente':'Manual')}${c.observacao?` · ${this._esc(c.observacao)}`:''}</div>
             </div>

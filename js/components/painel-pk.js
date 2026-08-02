@@ -135,10 +135,6 @@ class PainelPK extends HTMLElement {
 
         .app { width: 100%; color: var(--text); }
         .content { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px 14px 40px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-family: var(--dm-font-body,'Exo 2',sans-serif); font-size: clamp(1.3rem,5vw,1.8rem); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
-        .header h1 .pk-a { color: var(--pk-pink); } .header h1 .pk-b { color: var(--pk-blue); }
-
         .nav-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 auto 12px; background: var(--card-bg); padding: 5px; border-radius: 14px; border: 1px solid var(--border); width: fit-content; max-width: 100%; }
         .btn-base { font-family: inherit; background: transparent; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 800; font-size: .78rem; cursor: pointer; transition: all .2s; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
         .btn-base:hover { color: var(--text); }
@@ -176,8 +172,9 @@ class PainelPK extends HTMLElement {
         .pk-result.pendente { color: var(--muted); font-size: 1rem; }
         .pk-date { text-align: center; font-size: .78rem; color: var(--muted); font-weight: 700; margin-top: 3px; margin-bottom: 16px; }
 
-        .pk-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 0 2px; margin-bottom: 16px; gap: 8px; }
+        .pk-row { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; margin-bottom: 16px; gap: 8px; }
         .pk-side { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 96px; }
+        .pk-vs { font-family: var(--dm-font-body,'Exo 2',sans-serif); font-weight: 900; font-size: .8rem; color: var(--muted); flex-shrink: 0; letter-spacing: 1px; }
         .pk-avatar-ring { width: 58px; height: 58px; border-radius: 50%; padding: 3px; display: flex; flex-shrink: 0; }
         .pk-avatar-ring.a { background: linear-gradient(135deg, var(--pk-pink), var(--pk-pink-l)); }
         .pk-avatar-ring.b { background: linear-gradient(135deg, var(--pk-blue-l), var(--pk-blue)); }
@@ -257,9 +254,6 @@ class PainelPK extends HTMLElement {
       ${estilo}
       <div class="app">
         <div class="content">
-          <header class="header">
-            <h1><span class="pk-a">PK</span> <span class="pk-b">Diário</span></h1>
-          </header>
           <nav class="nav-container" id="nav-container"></nav>
           <div class="date-container" id="date-container"></div>
           <div class="tabs" id="tabs-container"></div>
@@ -282,6 +276,9 @@ class PainelPK extends HTMLElement {
 
   _esc(str) {
     return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+  }
+  _num(n) {
+    return Number(n || 0).toLocaleString('pt-BR');
   }
 
   // Data local (fuso do navegador do streamer) em ISO — usada só pra
@@ -393,7 +390,9 @@ class PainelPK extends HTMLElement {
       const winA = resultado === 'vitoria_a';
       const winB = resultado === 'vitoria_b';
 
-      const rotuloResultado = { vitoria_a: 'Vitória', vitoria_b: 'Derrota', empate: 'Empate', cancelado: 'Cancelado' }[resultado] || 'Programado';
+      const isHoje = c.data_confronto === this._hojeISO();
+      const rotuloResultado = { vitoria_a: 'Vitória', vitoria_b: 'Derrota', empate: 'Empate', cancelado: 'Cancelado' }[resultado]
+        || (pendente && isHoje ? 'Em Andamento' : 'Programado');
       const classeResultado = cancelado ? 'cancelado' : (pendente ? 'pendente' : '');
 
       const [dia, mes] = [String(c.data_confronto).slice(8,10), String(c.data_confronto).slice(5,7)];
@@ -402,7 +401,7 @@ class PainelPK extends HTMLElement {
       // agendado no futuro a rodada 1 já fica visível com antecedência,
       // datada num dia que ainda vai chegar.
       const dataLabel = pendente
-        ? (c.data_confronto === this._hojeISO() ? 'Hoje' : `Agendado — ${dia}/${mes}`)
+        ? (isHoje ? 'Hoje' : `Agendado — ${dia}/${mes}`)
         : `${dia}/${mes}/${String(c.data_confronto).slice(0,4)}`;
 
       const imgA = c.foto_a ? `<img class="pk-avatar" src="${this._esc(c.foto_a)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
@@ -416,8 +415,20 @@ class PainelPK extends HTMLElement {
       let barraHtml;
       if (cancelado) {
         barraHtml = `<div class="pk-scorebar neutro"><div class="side">Confronto cancelado</div></div>`;
+      } else if (pendente && isHoje) {
+        // Placar parcial de hoje — só pra acompanhar, quem tiver mais
+        // diamantes ATÉ AGORA fica com a barra maior. O resultado oficial
+        // só é decidido à meia-noite (isso aqui nunca decide ponto).
+        const diamA = Number(c.diamantes_hoje_a || 0), diamB = Number(c.diamantes_hoje_b || 0);
+        const total = diamA + diamB;
+        const pctA = total > 0 ? (diamA / total) * 100 : 50;
+        const pctB = 100 - pctA;
+        barraHtml = `<div class="pk-scorebar">
+          <div class="side pink" style="flex:${pctA} 1 0%">${this._num(diamA)} 💎</div>
+          <div class="side blue" style="flex:${pctB} 1 0%">${this._num(diamB)} 💎</div>
+        </div>`;
       } else if (pendente) {
-        barraHtml = `<div class="pk-scorebar neutro"><div class="side">Aguardando resultado</div></div>`;
+        barraHtml = `<div class="pk-scorebar neutro"><div class="side">Ainda não começou</div></div>`;
       } else {
         const [placarA, placarB] = this._placarConfronto(c, resultado);
         barraHtml = `<div class="pk-scorebar">
@@ -436,6 +447,7 @@ class PainelPK extends HTMLElement {
               <span class="pk-name">${this._esc(c.nome_a || c.kwai_uid_a)}</span>
               ${liveA}
             </div>
+            <div class="pk-vs">VS</div>
             <div class="pk-side">
               <div class="pk-avatar-ring ${anelB}">${imgB}</div>
               <span class="pk-name">${this._esc(c.nome_b || c.kwai_uid_b)}</span>
