@@ -2414,11 +2414,11 @@ class DimaiorAdmin extends HTMLElement {
     let dica;
     if(st==='rascunho'){
       dica=d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO
-        ? `Clique em "Ativar" — a liga fica pronta, mas só começa a gerar pares em ${fmtBr(d.programacao.data_inicio)}.`
+        ? `Clique em "Ativar" — a rodada 1 já é criada na hora, datada pra ${fmtBr(d.programacao.data_inicio)} (fica visível com antecedência), mas só fecha e gera as próximas de verdade a partir dessa data.`
         :'Clique em "Ativar" pra começar a liga hoje — os confrontos do dia 1 são gerados automaticamente na hora, por desempenho do mês anterior.';
     } else if(st==='ativa'){
       dica='Liga rodando sozinha: todo dia à meia-noite ela fecha o dia anterior (comparando diamantes reais) e já gera os pares seguintes. Use "Fechar agora" só se quiser forçar/reprocessar na hora.';
-      if(d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO) dica=`Liga ativa, mas ainda não começou — início agendado pra ${fmtBr(d.programacao.data_inicio)}.`;
+      if(d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO) dica=`Liga ativa, início agendado pra ${fmtBr(d.programacao.data_inicio)} — a rodada 1 já foi gerada e fica visível com antecedência, mas só fecha de verdade a partir dessa data.`;
       else if(d.programacao.data_fim) dica+=` Encerra automaticamente depois de ${fmtBr(d.programacao.data_fim)}.`;
     } else if(st==='pausada'){
       dica='Liga pausada — fecha o dia em andamento, mas não gera pares novos até você clicar em "Ativar" de novo.';
@@ -2482,8 +2482,11 @@ class DimaiorAdmin extends HTMLElement {
     }
     const partes=[];
     if(r.fechados)partes.push(`${r.fechados} confronto(s) fechado(s)`);
-    if(r.gerados)partes.push(`${r.gerados} par(es) gerado(s) hoje`);
-    if(!partes.length)partes.push('nada pra fazer agora (pares de hoje já existem)');
+    if(r.gerados)partes.push(`${r.gerados} par(es) gerado(s)`);
+    // Só usa o fallback genérico quando não há aviso nenhum explicando o
+    // motivo real (ex.: "liga ainda não começou") — senão a mensagem batia
+    // de frente com o aviso, tipo "pares já existem" + "ainda não começou".
+    if(!partes.length && !(r.avisos&&r.avisos.length))partes.push('nada pra fazer agora (pares já existem pra essa data)');
     const msg=[...partes,...(r.avisos||[])].join(' · ');
     if(!silencioso)this._toast(partes.join(', '));
     // _abrirDetalhePk limpa pkFecharAgoraStatus ao recarregar — escreve a

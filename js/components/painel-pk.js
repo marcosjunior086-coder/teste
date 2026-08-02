@@ -144,6 +144,8 @@ class PainelPK extends HTMLElement {
         .btn-base:hover { color: var(--text); }
         .btn-base.active { background: linear-gradient(135deg, var(--pk-pink), var(--pk-blue)); color: #fff; box-shadow: 0 4px 16px rgba(0,85,255,.25); }
 
+        .pk-agenda-banner { text-align: center; font-size: .74rem; font-weight: 800; color: var(--cyan); background: var(--cyan-d); border: 1px solid var(--cyan); border-radius: 12px; padding: 8px 14px; margin: 0 auto 14px; width: fit-content; max-width: 100%; }
+
         .date-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 auto 16px; min-height: 34px; }
         .date-btn { font-family: inherit; background: var(--card-bg); border: 1px solid var(--border); color: var(--muted); padding: 6px 16px; border-radius: 10px; font-weight: 800; font-size: .72rem; cursor: pointer; transition: all .2s; }
         .date-btn:hover { color: var(--text); }
@@ -219,6 +221,13 @@ class PainelPK extends HTMLElement {
         .list-sub { font-size: .66rem; color: var(--muted); font-weight: 700; margin-top: 2px; }
         .list-score { font-size: .85rem; font-weight: 900; color: var(--cyan); display: flex; align-items: center; gap: 4px; margin-left: auto; white-space: nowrap; }
 
+        /* ── Regras ── */
+        .rules-wrap { animation: fadeUp .4s ease both; display: flex; flex-direction: column; gap: 12px; }
+        .rule-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+        .rule-num { font-family: var(--dm-font-body,'Exo 2',sans-serif); font-weight: 900; font-size: 1rem; color: #fff; background: linear-gradient(135deg, var(--pk-pink), var(--pk-blue)); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .rule-text { font-size: .82rem; line-height: 1.5; color: var(--text); }
+        .rule-text strong { color: var(--cyan); }
+
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 
         /* ══ Temas claros — mesmo padrão de dmaior-votacao.js/ranking.js ══ */
@@ -267,6 +276,39 @@ class PainelPK extends HTMLElement {
     return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
   }
 
+  // Data local (fuso do navegador do streamer) em ISO — usada só pra
+  // decidir rótulos de exibição (não precisa ser BRT exato como no Worker).
+  _hojeISO() {
+    const h = new Date();
+    return `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`;
+  }
+  _diasAte(dataISO) {
+    const alvo = new Date(dataISO + 'T00:00:00');
+    const hoje = new Date(this._hojeISO() + 'T00:00:00');
+    return Math.round((alvo - hoje) / 86400000);
+  }
+  _fmtBr(dataISO) {
+    const [ano, mes, dia] = dataISO.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  // Banner de agendamento — só aparece quando a liga tem início futuro
+  // e/ou data de encerramento definida (liga contínua sem essas datas não
+  // mostra nada aqui).
+  _renderAvisoAgendamento() {
+    const prog = this._programacoes[this._progIdx];
+    if (!prog || (!prog.data_inicio && !prog.data_fim)) return '';
+    const partes = [];
+    if (prog.data_inicio) {
+      const dias = this._diasAte(prog.data_inicio);
+      partes.push(dias > 0
+        ? `Começa em ${dias} dia${dias === 1 ? '' : 's'} — ${this._fmtBr(prog.data_inicio)}`
+        : `Em andamento desde ${this._fmtBr(prog.data_inicio)}`);
+    }
+    if (prog.data_fim) partes.push(`Até ${this._fmtBr(prog.data_fim)}`);
+    return `<div class="pk-agenda-banner">${this._esc(partes.join(' · '))}</div>`;
+  }
+
   // ── Barras de navegação (programações / datas / abas) ─────────────────
   _renderNav() {
     const nav = this.shadowRoot.getElementById('nav-container');
@@ -277,7 +319,7 @@ class PainelPK extends HTMLElement {
     nav.querySelectorAll('[data-prog-idx]').forEach(b => b.addEventListener('click', () => this._mudarProgramacao(Number(b.dataset.progIdx))));
 
     const dateWrap = this.shadowRoot.getElementById('date-container');
-    if (this._abaAtiva === 'ranking' || this._datas.length <= 1) {
+    if (this._abaAtiva !== 'confrontos' || this._datas.length <= 1) {
       dateWrap.innerHTML = '';
     } else {
       dateWrap.innerHTML = this._datas.map((d, i) => {
@@ -296,6 +338,10 @@ class PainelPK extends HTMLElement {
       <button class="tab-btn${this._abaAtiva === 'ranking' ? ' active' : ''}" data-aba="ranking">
         <svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>
         Ranking
+      </button>
+      <button class="tab-btn${this._abaAtiva === 'regras' ? ' active' : ''}" data-aba="regras">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        Regras
       </button>`;
     tabs.querySelectorAll('[data-aba]').forEach(b => b.addEventListener('click', () => this._mudarAba(b.dataset.aba)));
   }
@@ -308,9 +354,12 @@ class PainelPK extends HTMLElement {
 
     if (this._carregando) { el.innerHTML = `<div class="state-msg"><div class="spinner"></div>Carregando...</div>`; return; }
     if (this._erro) { el.innerHTML = `<div class="state-msg">${this._esc(this._erro)}</div>`; return; }
+    // Regras é conteúdo estático — funciona mesmo sem nenhuma liga ativa.
+    if (this._abaAtiva === 'regras') { el.innerHTML = this._renderRegras(); return; }
     if (!this._programacoes.length) { el.innerHTML = `<div class="state-msg">Nenhuma programação de PK disponível no momento.</div>`; return; }
 
-    el.innerHTML = this._abaAtiva === 'ranking' ? this._renderRanking() : this._renderConfrontos();
+    const banner = this._renderAvisoAgendamento();
+    el.innerHTML = banner + (this._abaAtiva === 'ranking' ? this._renderRanking() : this._renderConfrontos());
   }
 
   // Placar mostrado na pílula — usa score_a/score_b reais quando o admin
@@ -340,9 +389,13 @@ class PainelPK extends HTMLElement {
       const classeResultado = cancelado ? 'cancelado' : (pendente ? 'pendente' : '');
 
       const [dia, mes] = [String(c.data_confronto).slice(8,10), String(c.data_confronto).slice(5,7)];
-      // Confronto pendente é sempre o de hoje (a liga fecha à meia-noite) —
-      // não existe mais horário fixo por confronto.
-      const dataLabel = pendente ? 'Hoje' : `${dia}/${mes}/${String(c.data_confronto).slice(0,4)}`;
+      // Confronto pendente normalmente é o de hoje (a liga fecha à meia-noite
+      // e não existe mais horário fixo por confronto) — mas com início
+      // agendado no futuro a rodada 1 já fica visível com antecedência,
+      // datada num dia que ainda vai chegar.
+      const dataLabel = pendente
+        ? (c.data_confronto === this._hojeISO() ? 'Hoje' : `Agendado — ${dia}/${mes}`)
+        : `${dia}/${mes}/${String(c.data_confronto).slice(0,4)}`;
 
       const imgA = c.foto_a ? `<img class="pk-avatar" src="${this._esc(c.foto_a)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
       const imgB = c.foto_b ? `<img class="pk-avatar" src="${this._esc(c.foto_b)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
@@ -428,6 +481,22 @@ class PainelPK extends HTMLElement {
       html += `</div>`;
     }
     return html + `</div>`;
+  }
+
+  _renderRegras() {
+    const regras = [
+      'Todo dia você é pareado com <strong>1 streamer</strong> — não é uma live conjunta, cada um transmite normal, separado.',
+      'À meia-noite, o sistema compara quantos <strong>diamantes cada um dos dois recebeu naquele dia</strong>. Quem fez mais vence e ganha <strong>1 ponto</strong> no ranking.',
+      'Empate (inclusive 0 a 0) não rende ponto pra nenhum lado.',
+      'O ranking é por <strong>vitórias</strong>, não por diamantes — quem vence mais confrontos sobe na tabela.',
+      'Ninguém é eliminado: mesmo perdendo, você recebe um <strong>novo adversário no dia seguinte</strong>, automaticamente.',
+      'O primeiro confronto de cada streamer usa o desempenho do <strong>mês anterior</strong> só pra equilibrar o início — depois disso, os pares seguem o desempenho dentro da própria liga.',
+    ];
+    return `<div class="rules-wrap">` + regras.map((texto, i) => `
+      <div class="rule-card">
+        <div class="rule-num">${i + 1}</div>
+        <div class="rule-text">${texto}</div>
+      </div>`).join('') + `</div>`;
   }
 }
 
