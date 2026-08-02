@@ -1677,6 +1677,11 @@ class DimaiorAdmin extends HTMLElement {
       this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId,true));
     });
     s.getElementById('btnPkDetToggleAdd').addEventListener('click',()=>this._pkDetToggleAdd());
+    s.getElementById('accPkPart').addEventListener('click',e=>{
+      if(e.target.closest('.btn'))return;
+      s.getElementById('accPkPartBody').classList.toggle('fechado');
+      s.getElementById('accPkPartIco').classList.toggle('open');
+    });
     s.getElementById('pkDetCriterioSelect').addEventListener('change',()=>this._pkDetCriterioToggle());
     s.getElementById('btnPkDetBuscarElegiveis').addEventListener('click',()=>this._buscarElegiveisPkDet());
     s.getElementById('btnPkDetAddManual').addEventListener('click',()=>this._pkDetAddManual());
@@ -2379,6 +2384,16 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkPausar').style.display=st==='ativa'?'inline-flex':'none';
     s.getElementById('btnPkFecharAgora').style.display=(st==='ativa'||st==='pausada')?'inline-flex':'none';
     s.getElementById('btnPkEncerrar').style.display=st!=='encerrada'?'inline-flex':'none';
+
+    // Não existe mais "gerar sorteio"/"definir início" separado — Ativar já
+    // dispara a geração do dia 1 na hora (a liga sempre começa hoje).
+    const dicaStatus={
+      rascunho:'Clique em "Ativar" pra começar a liga hoje — os confrontos do dia 1 são gerados automaticamente na hora, por desempenho do mês anterior.',
+      ativa:'Liga rodando sozinha: todo dia à meia-noite ela fecha o dia anterior (comparando diamantes reais) e já gera os pares seguintes. Use "Fechar agora" só se quiser forçar/reprocessar na hora.',
+      pausada:'Liga pausada — fecha o dia em andamento, mas não gera pares novos até você clicar em "Ativar" de novo.',
+      encerrada:'Liga encerrada — histórico de confrontos e ranking continua disponível.',
+    };
+    s.getElementById('pkFecharAgoraStatus').textContent=dicaStatus[st]||'';
 
     s.getElementById('pkDetParticipantesCount').textContent=d.participantes.length;
     s.getElementById('pkDetalheParticipantes').innerHTML=d.participantes.length
@@ -4370,10 +4385,12 @@ class DimaiorAdmin extends HTMLElement {
                 <div style="padding:16px">
                   <div id="pkFecharAgoraStatus" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div>
 
-                  <div class="bhead"><div class="btitulo">${this._ico('users',14)} Participantes ativos (<span id="pkDetParticipantesCount">0</span>)</div>
-                    <div class="bacoes"><button class="btn btn-o btn-sm" id="btnPkDetToggleAdd">${this._ico('plus',12)} Gerenciar roster</button></div>
+                  <div class="bhead acc-toggle" id="accPkPart"><div class="btitulo">${this._ico('users',14)} Participantes ativos (<span id="pkDetParticipantesCount">0</span>)</div>
+                    <div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnPkDetToggleAdd">${this._ico('plus',12)} Gerenciar roster</button><span class="acc-chevron" id="accPkPartIco">▼</span></div>
                   </div>
-                  <div id="pkDetalheParticipantes" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 0"></div>
+                  <div class="acc-body fechado" id="accPkPartBody">
+                    <div id="pkDetalheParticipantes" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;max-height:220px;overflow-y:auto;border:1px solid var(--brddim);border-radius:var(--rs);margin:8px 0"></div>
+                  </div>
 
                   <div id="pkDetAddWrap" style="display:none;margin-top:4px">
                     <div class="cfg-row" style="flex-wrap:wrap">
