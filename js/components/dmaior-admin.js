@@ -1675,7 +1675,10 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkFecharAgora').addEventListener('click',()=>this._fecharAgoraPk(this._pkAbertaId));
     s.getElementById('btnPkSalvarAgendamento').addEventListener('click',()=>this._pkSalvarAgendamento());
     s.getElementById('btnPkEncerrar').addEventListener('click',()=>{
-      this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId,true));
+      this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId));
+    });
+    s.getElementById('btnPkExcluirDef').addEventListener('click',()=>{
+      this._confirmarDel('Excluir esta liga DEFINITIVAMENTE? Isso apaga pra sempre todo o histórico de confrontos e ranking dela — não dá pra desfazer.',()=>this._cancelarProgramacaoPk(this._pkAbertaId,true));
     });
     s.getElementById('btnPkDetToggleAdd').addEventListener('click',()=>this._pkDetToggleAdd());
     s.getElementById('accPkPart').addEventListener('click',e=>{
@@ -2230,7 +2233,9 @@ class DimaiorAdmin extends HTMLElement {
         </div>
         ${this._pkStatusBadge(p.status)}
         <button class="btn btn-o btn-sm" data-pk-abrir="${p.id}">${this._ico('eye',12)} Gerenciar</button>
-        <button class="btn btn-o btn-sm btn-d" data-pk-cancelar="${p.id}">${this._ico('x_circle',12)} ${p.status==='rascunho'?'Excluir':'Encerrar'}</button>
+        ${p.status==='encerrada'
+          ?`<button class="btn btn-o btn-sm btn-d" data-pk-excluir-def="${p.id}">${this._ico('trash',12)} Excluir</button>`
+          :`<button class="btn btn-o btn-sm btn-d" data-pk-cancelar="${p.id}">${this._ico('x_circle',12)} ${p.status==='rascunho'?'Excluir':'Encerrar'}</button>`}
       </div>`).join('');
     el.querySelectorAll('[data-pk-abrir]').forEach(b=>b.addEventListener('click',()=>this._abrirDetalhePk(b.dataset.pkAbrir)));
     el.querySelectorAll('[data-pk-cancelar]').forEach(b=>{
@@ -2241,11 +2246,16 @@ class DimaiorAdmin extends HTMLElement {
           ()=>this._cancelarProgramacaoPk(b.dataset.pkCancelar));
       });
     });
+    el.querySelectorAll('[data-pk-excluir-def]').forEach(b=>b.addEventListener('click',()=>{
+      this._confirmarDel(
+        'Excluir esta liga DEFINITIVAMENTE? Isso apaga pra sempre todo o histórico de confrontos e ranking dela — não dá pra desfazer.',
+        ()=>this._cancelarProgramacaoPk(b.dataset.pkExcluirDef,true));
+    }));
   }
 
-  async _cancelarProgramacaoPk(id){
-    const r=await this._api('DELETE',`/admin/pk/programacoes/${id}`);
-    if(r?.ok){this._toast('Liga atualizada');this._carregarPkDiario();}
+  async _cancelarProgramacaoPk(id,definitivo){
+    const r=await this._api('DELETE',`/admin/pk/programacoes/${id}${definitivo?'?definitivo=1':''}`);
+    if(r?.ok){this._toast(definitivo?'Liga excluída definitivamente':'Liga atualizada');this._carregarPkDiario();}
     else this._toast(r?.erro||'Erro ao excluir/encerrar','err');
   }
 
@@ -2392,6 +2402,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkPausar').style.display=st==='ativa'?'inline-flex':'none';
     s.getElementById('btnPkFecharAgora').style.display=(st==='ativa'||st==='pausada')?'inline-flex':'none';
     s.getElementById('btnPkEncerrar').style.display=st!=='encerrada'?'inline-flex':'none';
+    s.getElementById('btnPkExcluirDef').style.display=st==='encerrada'?'inline-flex':'none';
     s.getElementById('pkDetDataInicio').value=d.programacao.data_inicio||'';
     s.getElementById('pkDetDataFim').value=d.programacao.data_fim||'';
 
@@ -2578,10 +2589,12 @@ class DimaiorAdmin extends HTMLElement {
         ${confs.map(c=>`
           <div class="cfg-row" style="flex-wrap:wrap">
             <div style="flex:1;min-width:220px;font-size:12px;color:var(--t1)">
-              <strong>${c.ao_vivo_a?'🔴 ':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong>
-              ${c.score_a!=null?` (${this._num(c.score_a)} 💎)`:''} vs
-              <strong>${c.ao_vivo_b?'🔴 ':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>${c.score_b!=null?` (${this._num(c.score_b)} 💎)`:''}
-              <div style="font-size:10px;color:var(--t3);margin-top:2px">${c.fechado_automaticamente?'Fechado automaticamente':(c.gerado_automaticamente?'Gerado automaticamente':'Manual')}${c.observacao?` · ${this._esc(c.observacao)}`:''}</div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_a,c.nome_a)}<strong>${c.ao_vivo_a?'🔴 ':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong>${c.score_a!=null?` <span style="color:var(--t3)">(${this._num(c.score_a)} 💎)</span>`:''}</span>
+                <span style="color:var(--t3);font-size:11px">vs</span>
+                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_b,c.nome_b)}<strong>${c.ao_vivo_b?'🔴 ':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>${c.score_b!=null?` <span style="color:var(--t3)">(${this._num(c.score_b)} 💎)</span>`:''}</span>
+              </div>
+              <div style="font-size:10px;color:var(--t3);margin-top:4px">${c.fechado_automaticamente?'Fechado automaticamente':(c.gerado_automaticamente?'Gerado automaticamente':'Manual')}${c.observacao?` · ${this._esc(c.observacao)}`:''}</div>
             </div>
             <select class="cfg-inp" data-pk-conf-resultado="${c.id}" style="width:130px">
               ${opcoes.map(o=>`<option value="${o}" ${c.resultado===o?'selected':''}>${this._pkResultadoLabel(o)}</option>`).join('')}
@@ -4447,6 +4460,7 @@ class DimaiorAdmin extends HTMLElement {
                     <button class="btn btn-o btn-sm" id="btnPkPausar">${this._ico('x_circle',12)} Pausar</button>
                     <button class="btn btn-o btn-sm" id="btnPkFecharAgora">${this._ico('refresh',12)} Fechar agora</button>
                     <button class="btn btn-o btn-sm btn-d" id="btnPkEncerrar">${this._ico('trash',12)} Encerrar</button>
+                    <button class="btn btn-o btn-sm btn-d" id="btnPkExcluirDef">${this._ico('trash',12)} Excluir</button>
                     <button class="btn btn-o btn-sm" id="btnVoltarListaPk">${this._ico('arrow_right',12)} Voltar</button>
                   </div>
                 </div>
