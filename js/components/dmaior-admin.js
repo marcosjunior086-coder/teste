@@ -14,7 +14,7 @@ class DimaiorAdmin extends HTMLElement {
     this.TK_KEY  = 'dm_admin_token';
     this._token  = '';
     this._edtId  = null;
-    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1, migracoesAgente:1, impulso:1, statusStreamers:1, rankingAno:1 };
+    this._pg     = { s:1, u:1, l:1, uid:1, cart:1, saques:1, desemp:1, rank:1, diario:1, migracoesAgente:1, impulso:1, statusStreamers:1, rankingAno:1, pkRanking:1 };
     this._uidLookup = null;
     this._cartOp   = { uid: null, tipo: null, nome: '' };
     this._saqueId  = null;
@@ -1673,6 +1673,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkAtivar').addEventListener('click',()=>this._ativarLigaPk(this._pkAbertaId));
     s.getElementById('btnPkPausar').addEventListener('click',()=>this._pausarLigaPk(this._pkAbertaId));
     s.getElementById('btnPkFecharAgora').addEventListener('click',()=>this._fecharAgoraPk(this._pkAbertaId));
+    s.getElementById('btnPkSalvarAgendamento').addEventListener('click',()=>this._pkSalvarAgendamento());
     s.getElementById('btnPkEncerrar').addEventListener('click',()=>{
       this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId,true));
     });
@@ -2224,6 +2225,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="cfg-row" style="flex-wrap:wrap">
         <div style="flex:1;min-width:180px">
           <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome)}</div>
+          ${(p.data_inicio||p.data_fim)?`<div style="font-size:11px;color:var(--cyan);margin-top:2px">${this._ico('calendar',10)} ${p.data_inicio?this._fdtData(p.data_inicio):'sem início'} → ${p.data_fim?this._fdtData(p.data_fim):'sem fim'}</div>`:''}
           ${p.ultimo_fechamento_em?`<div style="font-size:11px;color:var(--t3);margin-top:2px">Último fechamento: ${this._fdtData(p.ultimo_fechamento_em)}</div>`:''}
         </div>
         ${this._pkStatusBadge(p.status)}
@@ -2252,6 +2254,8 @@ class DimaiorAdmin extends HTMLElement {
     this._pkSelecionados=new Map();
     const s=this.shadowRoot;
     s.getElementById('pkNome').value='';
+    s.getElementById('pkDataInicioAgendada').value='';
+    s.getElementById('pkDataFimAgendada').value='';
     s.getElementById('pkCriterioSelect').value='0';
     s.getElementById('pkCriterioCustom').value='';
     s.getElementById('pkManualUid').value='';
@@ -2352,8 +2356,12 @@ class DimaiorAdmin extends HTMLElement {
     if(!nome){this._toast('Informe o nome da liga','err');return;}
     if(!this._pkSelecionados.size){this._toast('Selecione pelo menos 1 participante','err');return;}
     const criterio=this._pkCriterioValor();
+    const dataInicio=s.getElementById('pkDataInicioAgendada').value||null;
+    const dataFim=s.getElementById('pkDataFimAgendada').value||null;
+    if(dataInicio&&dataFim&&dataFim<dataInicio){this._toast('Data de encerramento não pode ser antes do início','err');return;}
     const payload={
       nome,
+      data_inicio: dataInicio, data_fim: dataFim,
       criterio_diamantes_min: criterio>0?criterio:null,
       participantes: [...this._pkSelecionados.values()].map(st=>({kwai_uid:st.kwai_uid,diamantes:st.diamantes||0,novato:!!st.novato,origem:st.origem||'elegivel'})),
     };
@@ -2384,16 +2392,29 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkPausar').style.display=st==='ativa'?'inline-flex':'none';
     s.getElementById('btnPkFecharAgora').style.display=(st==='ativa'||st==='pausada')?'inline-flex':'none';
     s.getElementById('btnPkEncerrar').style.display=st!=='encerrada'?'inline-flex':'none';
+    s.getElementById('pkDetDataInicio').value=d.programacao.data_inicio||'';
+    s.getElementById('pkDetDataFim').value=d.programacao.data_fim||'';
 
-    // Não existe mais "gerar sorteio"/"definir início" separado — Ativar já
-    // dispara a geração do dia 1 na hora (a liga sempre começa hoje).
-    const dicaStatus={
-      rascunho:'Clique em "Ativar" pra começar a liga hoje — os confrontos do dia 1 são gerados automaticamente na hora, por desempenho do mês anterior.',
-      ativa:'Liga rodando sozinha: todo dia à meia-noite ela fecha o dia anterior (comparando diamantes reais) e já gera os pares seguintes. Use "Fechar agora" só se quiser forçar/reprocessar na hora.',
-      pausada:'Liga pausada — fecha o dia em andamento, mas não gera pares novos até você clicar em "Ativar" de novo.',
-      encerrada:'Liga encerrada — histórico de confrontos e ranking continua disponível.',
-    };
-    s.getElementById('pkFecharAgoraStatus').textContent=dicaStatus[st]||'';
+    // Sem agendamento, "Ativar" já dispara a geração do dia 1 na hora (a
+    // liga começa hoje). Com início/fim agendados, o motor só gera pares
+    // dentro dessa janela — a mensagem avisa isso pra não parecer travado.
+    const hojeISO=(()=>{const h=new Date();return `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`;})();
+    const fmtBr=iso=>iso?new Date(iso+'T00:00:00').toLocaleDateString('pt-BR'):null;
+    let dica;
+    if(st==='rascunho'){
+      dica=d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO
+        ? `Clique em "Ativar" — a liga fica pronta, mas só começa a gerar pares em ${fmtBr(d.programacao.data_inicio)}.`
+        :'Clique em "Ativar" pra começar a liga hoje — os confrontos do dia 1 são gerados automaticamente na hora, por desempenho do mês anterior.';
+    } else if(st==='ativa'){
+      dica='Liga rodando sozinha: todo dia à meia-noite ela fecha o dia anterior (comparando diamantes reais) e já gera os pares seguintes. Use "Fechar agora" só se quiser forçar/reprocessar na hora.';
+      if(d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO) dica=`Liga ativa, mas ainda não começou — início agendado pra ${fmtBr(d.programacao.data_inicio)}.`;
+      else if(d.programacao.data_fim) dica+=` Encerra automaticamente depois de ${fmtBr(d.programacao.data_fim)}.`;
+    } else if(st==='pausada'){
+      dica='Liga pausada — fecha o dia em andamento, mas não gera pares novos até você clicar em "Ativar" de novo.';
+    } else {
+      dica='Liga encerrada — histórico de confrontos e ranking continua disponível.';
+    }
+    s.getElementById('pkFecharAgoraStatus').textContent=dica;
 
     s.getElementById('pkDetParticipantesCount').textContent=d.participantes.length;
     s.getElementById('pkDetalheParticipantes').innerHTML=d.participantes.length
@@ -2426,6 +2447,16 @@ class DimaiorAdmin extends HTMLElement {
     const r=await this._api('PUT',`/admin/pk/programacoes/${id}`,{status:'pausada'});
     if(r?.ok){this._toast('Liga pausada — fecha o dia em andamento, mas não gera pares novos.');this._abrirDetalhePk(id);}
     else this._toast(r?.erro||'Erro ao pausar liga','err');
+  }
+
+  async _pkSalvarAgendamento(){
+    const s=this.shadowRoot;
+    const data_inicio=s.getElementById('pkDetDataInicio').value||null;
+    const data_fim=s.getElementById('pkDetDataFim').value||null;
+    if(data_inicio&&data_fim&&data_fim<data_inicio){this._toast('Data de encerramento não pode ser antes do início','err');return;}
+    const r=await this._api('PUT',`/admin/pk/programacoes/${this._pkAbertaId}`,{data_inicio,data_fim});
+    if(r?.ok){this._toast('Agendamento salvo!');this._abrirDetalhePk(this._pkAbertaId);}
+    else this._toast(r?.erro||'Erro ao salvar agendamento','err');
   }
 
   // silencioso=true quando chamado logo após ativar (evita toast duplicado)
@@ -2637,19 +2668,33 @@ class DimaiorAdmin extends HTMLElement {
     area.innerHTML=this._loading();
     const d=await this._api('GET',`/admin/pk/ranking?${query}`);
     if(!d?.ok){area.innerHTML=this._empty('warning',d?.erro||'Erro ao calcular ranking');return;}
-    this._renderRankingPk(d.ranking||[]);
+    this._pkRankingLista=d.ranking||[];
+    this._pg.pkRanking=1;
+    this._renderRankingPk();
   }
 
-  _renderRankingPk(lista){
+  // Paginado (25/página, igual ao Rank do Mês) + tabela no desktop / cards
+  // no mobile (a tabela de 10 colunas não cabia na tela e não tinha limite
+  // de altura — igual ao padrão de _carregarRankingAnoStatus/_carregarRanking).
+  _renderRankingPk(){
     const el=this.shadowRoot.getElementById('pkRankingArea');
+    const lista=this._pkRankingLista||[];
     if(!lista.length){el.innerHTML=this._empty('trophy','Nenhum confronto finalizado nesse período ainda');return;}
-    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+
+    const POR_PAG=25;
+    const totalPags=Math.max(1,Math.ceil(lista.length/POR_PAG));
+    this._pg.pkRanking=Math.min(Math.max(this._pg.pkRanking||1,1),totalPags);
+    const pagina=lista.slice((this._pg.pkRanking-1)*POR_PAG,this._pg.pkRanking*POR_PAG);
+    const pager=totalPags>1?`<div class="pag-bar"><button ${this._pg.pkRanking<=1?'disabled':''} data-pkrank-pg="prev">Anterior</button><span class="pn">Pág ${this._pg.pkRanking} / ${totalPags}</span><button ${this._pg.pkRanking>=totalPags?'disabled':''} data-pkrank-pg="next">Próxima</button></div>`:'';
+    const medalCor=pos=>pos===1?'var(--gold)':pos===2?'#94a3b8':pos===3?'#a86c31':'var(--t3)';
+
+    const tabelaHtml=`<div class="rank-table-wrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="text-align:left;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:1px">
         <th style="padding:8px">#</th><th></th><th>Streamer</th><th style="text-align:center">PKs</th><th style="text-align:center">V</th><th style="text-align:center">D</th><th style="text-align:center">E</th><th style="text-align:center">Pend.</th><th style="text-align:center">Aprov.</th><th style="text-align:center">Pontos</th>
       </tr></thead>
       <tbody>
-        ${lista.map(r=>`<tr style="border-top:1px solid var(--brddim)">
-          <td style="padding:8px;color:var(--t3)">${r.posicao}</td>
+        ${pagina.map(r=>`<tr style="border-top:1px solid var(--brddim)">
+          <td style="padding:8px;color:${medalCor(r.posicao)};font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${r.posicao}</td>
           <td style="padding:4px">${this._avatar(r.foto,r.nome)}</td>
           <td style="color:var(--t1)">${this._esc(r.nome||r.kwai_uid)}</td>
           <td style="text-align:center">${r.pks_realizados}</td>
@@ -2661,7 +2706,24 @@ class DimaiorAdmin extends HTMLElement {
           <td style="text-align:center;font-weight:700;color:var(--cyan)">${r.pontos}</td>
         </tr>`).join('')}
       </tbody>
-    </table>`;
+    </table></div>`;
+
+    const mobileHtml=`<div class="rank-mobile-only">${pagina.map(r=>`
+      <div class="rk-item">
+        <div class="rk-preview" style="cursor:default">
+          <span class="rk-pos" style="color:${medalCor(r.posicao)}">${r.posicao}</span>
+          <div class="rk-av">${this._avatar(r.foto,r.nome)}</div>
+          <div class="rk-info">
+            <div class="rk-nome">${this._esc(r.nome||r.kwai_uid)}</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:2px">${r.vitorias}V ${r.derrotas}D ${r.empates}E${r.pendentes?` · ${r.pendentes} pend.`:''}${r.aproveitamento!=null?` · ${r.aproveitamento}%`:''}</div>
+          </div>
+          <div class="rk-right"><div class="rk-diam" style="color:var(--cyan)">${r.pontos} pts</div></div>
+        </div>
+      </div>`).join('')}</div>`;
+
+    el.innerHTML=tabelaHtml+mobileHtml+pager;
+    el.querySelector('[data-pkrank-pg="prev"]')?.addEventListener('click',()=>{this._pg.pkRanking--;this._renderRankingPk();});
+    el.querySelector('[data-pkrank-pg="next"]')?.addEventListener('click',()=>{this._pg.pkRanking++;this._renderRankingPk();});
   }
 
   // ── MONITOR KWAI ────────────────────────────────────────────
@@ -4345,6 +4407,12 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Nome da liga</div><input class="cfg-inp" style="width:100%" id="pkNome" placeholder="Ex: PK Diário — Squad Principal"></label></div>
 
                   <div class="cfg-row" style="flex-wrap:wrap">
+                    <label><div class="cfg-chave">Início agendado <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDataInicioAgendada"></label>
+                    <label><div class="cfg-chave">Encerra automaticamente em <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDataFimAgendada"></label>
+                  </div>
+                  <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Deixe em branco pra rodar indefinidamente. Com início agendado, a liga fica "ativa" mas só começa a gerar pares nessa data; com encerramento, ela para sozinha depois do dia escolhido.</div>
+
+                  <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Critério (diamantes mês anterior)</div>
                       <select class="cfg-inp" id="pkCriterioSelect" style="width:210px">
                         <option value="0">Sem critério — seleção manual</option>
@@ -4384,6 +4452,12 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
                 <div style="padding:16px">
                   <div id="pkFecharAgoraStatus" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div>
+
+                  <div class="cfg-row" style="flex-wrap:wrap">
+                    <label><div class="cfg-chave">Início agendado <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDetDataInicio"></label>
+                    <label><div class="cfg-chave">Encerra automaticamente em <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDetDataFim"></label>
+                    <button class="btn btn-o btn-sm" id="btnPkSalvarAgendamento" style="margin-top:16px">${this._ico('check',12)} Salvar agendamento</button>
+                  </div>
 
                   <div class="bhead acc-toggle" id="accPkPart"><div class="btitulo">${this._ico('users',14)} Participantes ativos (<span id="pkDetParticipantesCount">0</span>)</div>
                     <div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnPkDetToggleAdd">${this._ico('plus',12)} Gerenciar roster</button><span class="acc-chevron" id="accPkPartIco">▼</span></div>
