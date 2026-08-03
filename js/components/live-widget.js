@@ -385,24 +385,10 @@ class KwaiLiveWidget extends HTMLElement {
 
   initObserver() {
     if (!this.ENABLE_MINI_PREVIEW) {
-      this.cardObserver    = { observe() {}, unobserve() {} };
-      this._visibleObserver = { observe() {}, unobserve() {} };
+      this.cardObserver = { observe() {}, unobserve() {} };
       return;
     }
     const row = this.shadowRoot.getElementById('liveRow');
-    // Quais cards estão de fato na tela agora (sem margem de antecipação).
-    // Usado só para decidir prioridade na fila do MAX_MINI_PLAYERS — um card
-    // realmente visível nunca deve ser expulso por outro que só está
-    // "chegando" pela margem de pré-carregamento (ver startMiniPlayer).
-    this._reallyVisible = new Set();
-    this._visibleObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        const url = entry.target.dataset.url;
-        if (entry.isIntersecting) this._reallyVisible.add(url);
-        else                      this._reallyVisible.delete(url);
-      });
-    }, { root: row, threshold: 0.1 });
-
     // IntersectionObserver: inicia mini player quando o card entra na tela
     // (ou perto dela, pela margem de antecipação abaixo)
     this.cardObserver = new IntersectionObserver((entries) => {
@@ -419,6 +405,24 @@ class KwaiLiveWidget extends HTMLElement {
       rootMargin: '0px 200px 0px 200px',
       threshold: 0.1,
     });
+  }
+
+  // Calcula, de forma síncrona, se o card está de fato dentro da área visível
+  // do liveRow AGORA (sem a margem de antecipação). Usado só para decidir
+  // prioridade na fila do MAX_MINI_PLAYERS. Feito com getBoundingClientRect
+  // em vez de um segundo IntersectionObserver: dois observers rodam em
+  // callbacks assíncronos independentes, sem ordem garantida entre si — isso
+  // causava uma corrida onde a fila decidia com informação desatualizada,
+  // deixava o card errado tocando por um instante e logo o expulsava assim
+  // que o outro observer "corrigia" o estado (o vídeo que aparecia e sumia
+  // de novo, voltando pra foto).
+  _isReallyVisible(url) {
+    const entry = this.activePlayers.get(url);
+    if (!entry?.card) return false;
+    const row = this.shadowRoot.getElementById('liveRow');
+    const rowRect  = row.getBoundingClientRect();
+    const cardRect = entry.card.getBoundingClientRect();
+    return cardRect.right > rowRect.left && cardRect.left < rowRect.right;
   }
 
   // ── Cache localStorage (já protegido com try/catch) ─────────────────────
@@ -693,18 +697,13 @@ class KwaiLiveWidget extends HTMLElement {
     card.addEventListener('click', () => this.openModal(streamer.url));
     row.appendChild(card);
     this.cardObserver.observe(card);
-    this._visibleObserver.observe(card);
     return { card, circleId: safeId };
   }
 
   removeCard(url) {
     const entry = this.activePlayers.get(url);
     if (!entry) return;
-    if (entry.card) {
-      this.cardObserver.unobserve(entry.card);
-      this._visibleObserver.unobserve(entry.card);
-    }
-    this._reallyVisible?.delete(url);
+    if (entry.card) this.cardObserver.unobserve(entry.card);
     this.stopMiniPlayer(url);
     entry.card?.remove();
     this.activePlayers.delete(url);
@@ -756,10 +755,10 @@ class KwaiLiveWidget extends HTMLElement {
       // visíveis à esquerda sejam expulsos por cards que ainda nem
       // chegaram na tela, o que fazia só os últimos (direita) sobreviverem
       // quando muitos cards entravam em cena de uma vez no carregamento.
-      const victim = this._miniPlayerOrder.find((u) => !this._reallyVisible?.has(u));
+      const victim = this._miniPlayerOrder.find((u) => !this._isReallyVisible(u));
       if (victim) {
         this.stopMiniPlayer(victim);
-      } else if (!this._reallyVisible?.has(url)) {
+      } else if (!this._isReallyVisible(url)) {
         // Fila cheia de cards já visíveis, e este candidato ainda não está
         // na tela de verdade — espera abrir espaço em vez de furar a fila.
         return;
