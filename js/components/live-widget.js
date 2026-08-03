@@ -396,7 +396,10 @@ class KwaiLiveWidget extends HTMLElement {
       });
     }, {
       root: this.shadowRoot.getElementById('liveRow'),
-      rootMargin: '0px 60px 0px 60px',
+      // Margem maior que a largura de um card (52-60px) — assim o próximo
+      // card já começa a preparar o HLS antes do usuário chegar nele ao
+      // deslizar, em vez de só reagir quando ele já está na tela.
+      rootMargin: '0px 200px 0px 200px',
       threshold: 0.1,
     });
   }
@@ -773,6 +776,13 @@ class KwaiLiveWidget extends HTMLElement {
       vid.play().catch(() => {});
 
     } else if (window.Hls && window.Hls.isSupported()) {
+      // Nota: quando useProxy=true, "src" já é a URL do proxy — o próprio
+      // Worker devolve o m3u8 com todas as URIs internas (segmentos e
+      // sub-playlists) já reescritas para passar por ele. NÃO reescrever
+      // de novo aqui via xhrSetup: fazer isso envolveria a URL do proxy
+      // dentro de outra camada de proxy ("proxy do proxy"), e o Worker
+      // rejeitaria com 403 por o host decodificado ser o próprio domínio
+      // do proxy em vez de um CDN da Kwai.
       const hlsCfg = {
         enableWorker:              true,
         lowLatencyMode:            false,
@@ -781,25 +791,27 @@ class KwaiLiveWidget extends HTMLElement {
         maxMaxBufferLength:        60,
         liveSyncDurationCount:     6,
         startFragPrefetch:         true,
-        maxLoadingRetry:           8,
+        manifestLoadingMaxRetry:   4,
+        fragLoadingMaxRetry:       6,
         fragLoadingRetryDelay:     1000,
         manifestLoadingRetryDelay: 1000,
       };
-      if (useProxy) {
-        hlsCfg.xhrSetup = (xhr, reqUrl) => {
-          xhr.open('GET', this._proxyBase + encodeURIComponent(reqUrl), true);
-        };
-      }
       const hls = new window.Hls(hlsCfg);
       hls.loadSource(src);
       hls.attachMedia(vid);
       hls.on(window.Hls.Events.MANIFEST_PARSED, () => vid.play().catch(() => {}));
       vid.addEventListener('playing', onPlaying, { once: true });
+      let networkRetries = 0;
       hls.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
-        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-        else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-        else onFatal();
+        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && networkRetries < 3) {
+          networkRetries++;
+          hls.startLoad();
+        } else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
+          hls.recoverMediaError();
+        } else {
+          onFatal();
+        }
       });
       entry.hlsInst = hls;
     }
@@ -929,21 +941,22 @@ class KwaiLiveWidget extends HTMLElement {
       video.addEventListener('error',   () => onFatal(), { once: true });
       video.load();
     } else if (window.Hls && window.Hls.isSupported()) {
+      // Mesma observação do mini player: quando useProxy=true, "src" já é a
+      // URL do proxy e o Worker já devolve o m3u8 com as URIs internas
+      // reescritas para passar por ele. Nada de xhrSetup aqui — reaplicar
+      // o proxy sobre uma URL que já é do proxy vira "proxy do proxy" e o
+      // Worker rejeita com 403 (host decodificado = o próprio domínio).
       const hlsCfg = {
-        enableWorker:          false,
-        lowLatencyMode:        false,
-        maxBufferLength:       30,
-        maxMaxBufferLength:    60,
-        backBufferLength:      10,
-        startFragPrefetch:     true,
-        maxLoadingRetry:       6,
-        fragLoadingRetryDelay: 1000,
+        enableWorker:            false,
+        lowLatencyMode:          false,
+        maxBufferLength:         30,
+        maxMaxBufferLength:      60,
+        backBufferLength:        10,
+        startFragPrefetch:       true,
+        manifestLoadingMaxRetry: 4,
+        fragLoadingMaxRetry:     6,
+        fragLoadingRetryDelay:   1000,
       };
-      if (useProxy) {
-        hlsCfg.xhrSetup = (xhr, reqUrl) => {
-          xhr.open('GET', this._proxyBase + encodeURIComponent(reqUrl), true);
-        };
-      }
       this.hlsModal = new window.Hls(hlsCfg);
       this.hlsModal.loadSource(src);
       this.hlsModal.attachMedia(video);
@@ -951,10 +964,15 @@ class KwaiLiveWidget extends HTMLElement {
         video.currentTime = 0;
         onReady();
       });
+      let networkRetries = 0;
       this.hlsModal.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
-        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR) this.hlsModal.startLoad();
-        else onFatal();
+        if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && networkRetries < 3) {
+          networkRetries++;
+          this.hlsModal.startLoad();
+        } else {
+          onFatal();
+        }
       });
     } else {
       this.shadowRoot.getElementById('spinnerText').textContent = 'Navegador sem suporte a HLS.';
