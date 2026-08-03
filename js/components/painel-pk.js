@@ -186,9 +186,13 @@ class PainelPK extends HTMLElement {
         .pk-avatar-ring.b { background: linear-gradient(135deg, var(--pk-blue-l), var(--pk-blue)); }
         .pk-avatar-ring.gray { background: var(--border); }
         .pk-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; background: var(--card-bg); border: 2px solid var(--card-bg); }
+        .pk-avatar.lose { filter: grayscale(100%); opacity: .75; }
         .pk-avatar-placeholder { width: 100%; height: 100%; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; border: 2px solid var(--card-bg); }
         .pk-avatar-placeholder svg { width: 24px; height: 24px; fill: var(--muted); }
         .pk-name { font-size: .74rem; font-weight: 800; text-align: center; color: var(--text); max-width: 96px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pk-badge-result { font-size: .6rem; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; }
+        .pk-badge-result.win  { background: rgba(240,192,64,.1); border: 1px solid rgba(240,192,64,.35); color: var(--dm-gold, #f0c040); }
+        .pk-badge-result.lose { background: rgba(148,163,184,.1); border: 1px solid rgba(148,163,184,.35); color: var(--muted); }
         .pk-live-tag { font-size: .56rem; font-weight: 900; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: .5px; display: inline-flex; align-items: center; gap: 3px; }
         .pk-live-tag.on { background: rgba(74,222,128,.15); color: var(--green); }
         .pk-live-tag.off { background: var(--border); color: var(--muted); }
@@ -437,10 +441,16 @@ class PainelPK extends HTMLElement {
         ? (isHoje ? 'Hoje' : `Agendado — ${dia}/${mes}`)
         : `${dia}/${mes}/${String(c.data_confronto).slice(0,4)}`;
 
-      const imgA = c.foto_a ? `<img class="pk-avatar" src="${this._esc(c.foto_a)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
-      const imgB = c.foto_b ? `<img class="pk-avatar" src="${this._esc(c.foto_b)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
-      const anelA = cancelado ? 'gray' : 'a';
-      const anelB = cancelado ? 'gray' : 'b';
+      // Confronto com vencedor definido — cada lado ganha um badge próprio
+      // (Vitória dourado / Derrota cinza) em vez do rótulo genérico no topo,
+      // e o lado perdedor fica com foto e anel em cinza.
+      const finalizado = winA || winB;
+      const imgA = c.foto_a ? `<img class="pk-avatar${finalizado && !winA ? ' lose' : ''}" src="${this._esc(c.foto_a)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
+      const imgB = c.foto_b ? `<img class="pk-avatar${finalizado && !winB ? ' lose' : ''}" src="${this._esc(c.foto_b)}">` : `<div class="pk-avatar-placeholder">${UserSVG}</div>`;
+      const anelA = cancelado || (finalizado && !winA) ? 'gray' : 'a';
+      const anelB = cancelado || (finalizado && !winB) ? 'gray' : 'b';
+      const badgeA = finalizado ? `<span class="pk-badge-result ${winA ? 'win' : 'lose'}">${winA ? 'Vitória' : 'Derrota'}</span>` : '';
+      const badgeB = finalizado ? `<span class="pk-badge-result ${winB ? 'win' : 'lose'}">${winB ? 'Vitória' : 'Derrota'}</span>` : '';
 
       const liveA = pendente && c.ao_vivo_a != null ? `<span class="pk-live-tag ${c.ao_vivo_a ? 'on' : 'off'}">${c.ao_vivo_a ? '<span class="pk-live-dot"></span>AO VIVO' : 'OFFLINE'}</span>` : '';
       const liveB = pendente && c.ao_vivo_b != null ? `<span class="pk-live-tag ${c.ao_vivo_b ? 'on' : 'off'}">${c.ao_vivo_b ? '<span class="pk-live-dot"></span>AO VIVO' : 'OFFLINE'}</span>` : '';
@@ -472,18 +482,20 @@ class PainelPK extends HTMLElement {
 
       return `
         <div class="pk-card">
-          <div class="pk-result ${classeResultado}">${rotuloResultado}</div>
+          ${finalizado ? '' : `<div class="pk-result ${classeResultado}">${rotuloResultado}</div>`}
           <div class="pk-date">${dataLabel}</div>
           <div class="pk-row">
             <div class="pk-side">
               <div class="pk-avatar-ring ${anelA}">${imgA}</div>
               <span class="pk-name">${this._esc(c.nome_a || c.kwai_uid_a)}</span>
+              ${badgeA}
               ${liveA}
             </div>
             <div class="pk-vs">VS</div>
             <div class="pk-side">
               <div class="pk-avatar-ring ${anelB}">${imgB}</div>
               <span class="pk-name">${this._esc(c.nome_b || c.kwai_uid_b)}</span>
+              ${badgeB}
               ${liveB}
             </div>
           </div>
