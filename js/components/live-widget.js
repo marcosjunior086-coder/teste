@@ -80,6 +80,13 @@ class KwaiLiveWidget extends HTMLElement {
   async connectedCallback() {
     this._syncThemeHost();
     this.render();
+    // Nasce fechado (só a barra "N AO VIVO" aparece) em vez de já mostrar a
+    // fileira vazia com "A procurar transmissões...". updateTop() já reabre
+    // sozinho assim que os primeiros streamers chegam (mesma lógica que já
+    // fecha o widget quando não há ninguém ao vivo) — aqui só adiantamos
+    // esse estado pro momento inicial, sem marcar como ação do usuário
+    // (userMinimized continua false, então o auto-abrir não fica bloqueado).
+    this.setMinimized(true);
     this.setupListeners();
     this.hlsReadyPromise = this.loadHlsLib();
     this.initObserver();

@@ -151,7 +151,12 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   async _iniciar() {
-    await this._renovarToken();
+    // Não renova o token aqui incondicionalmente — cada chamada abaixo que
+    // realmente precisa dele (_carregarQuota, _detectarLiveAtual,
+    // _carregarAgendamento) já renova sozinha se receber 401. Renovar de
+    // antemão em toda carga de página gastava uma troca de refresh_token à
+    // toa quando o token atual ainda era válido, e arriscava invalidar uma
+    // sessão em uso simultâneo em outra aba (reuso de refresh_token).
     await this._carregarConfig();
     if (!this._bloqueado) {
       if (!this._manualBloqueado)     { this._carregarQuota(false); this._detectarLiveAtual(); }
