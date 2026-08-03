@@ -28,8 +28,9 @@ class KwaiLiveWidget extends HTMLElement {
     this.ENABLE_MINI_PREVIEW = true;
     // Quantos mini-players (bolinha com HLS de verdade) tocam ao mesmo tempo —
     // os demais ficam parados na foto até abrir espaço. Evita travar o
-    // celular quando tem muitos streamers ao vivo simultâneos.
-    this.MAX_MINI_PLAYERS = 5;
+    // celular quando tem muitos streamers ao vivo simultâneos. Cobre os
+    // ~6 cards visíveis por vez no mobile + 1-2 sendo preparados à frente.
+    this.MAX_MINI_PLAYERS = 8;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
@@ -384,10 +385,26 @@ class KwaiLiveWidget extends HTMLElement {
 
   initObserver() {
     if (!this.ENABLE_MINI_PREVIEW) {
-      this.cardObserver = { observe() {}, unobserve() {} };
+      this.cardObserver    = { observe() {}, unobserve() {} };
+      this._visibleObserver = { observe() {}, unobserve() {} };
       return;
     }
+    const row = this.shadowRoot.getElementById('liveRow');
+    // Quais cards estão de fato na tela agora (sem margem de antecipação).
+    // Usado só para decidir prioridade na fila do MAX_MINI_PLAYERS — um card
+    // realmente visível nunca deve ser expulso por outro que só está
+    // "chegando" pela margem de pré-carregamento (ver startMiniPlayer).
+    this._reallyVisible = new Set();
+    this._visibleObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const url = entry.target.dataset.url;
+        if (entry.isIntersecting) this._reallyVisible.add(url);
+        else                      this._reallyVisible.delete(url);
+      });
+    }, { root: row, threshold: 0.1 });
+
     // IntersectionObserver: inicia mini player quando o card entra na tela
+    // (ou perto dela, pela margem de antecipação abaixo)
     this.cardObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         const url = entry.target.dataset.url;
@@ -395,7 +412,7 @@ class KwaiLiveWidget extends HTMLElement {
         else                      this.stopMiniPlayer(url);
       });
     }, {
-      root: this.shadowRoot.getElementById('liveRow'),
+      root: row,
       // Margem maior que a largura de um card (52-60px) — assim o próximo
       // card já começa a preparar o HLS antes do usuário chegar nele ao
       // deslizar, em vez de só reagir quando ele já está na tela.
@@ -676,13 +693,18 @@ class KwaiLiveWidget extends HTMLElement {
     card.addEventListener('click', () => this.openModal(streamer.url));
     row.appendChild(card);
     this.cardObserver.observe(card);
+    this._visibleObserver.observe(card);
     return { card, circleId: safeId };
   }
 
   removeCard(url) {
     const entry = this.activePlayers.get(url);
     if (!entry) return;
-    if (entry.card) this.cardObserver.unobserve(entry.card);
+    if (entry.card) {
+      this.cardObserver.unobserve(entry.card);
+      this._visibleObserver.unobserve(entry.card);
+    }
+    this._reallyVisible?.delete(url);
     this.stopMiniPlayer(url);
     entry.card?.remove();
     this.activePlayers.delete(url);
@@ -729,7 +751,24 @@ class KwaiLiveWidget extends HTMLElement {
 
     if (!this._miniPlayerOrder) this._miniPlayerOrder = [];
     if (this._miniPlayerOrder.length >= this.MAX_MINI_PLAYERS) {
-      this.stopMiniPlayer(this._miniPlayerOrder[0]);
+      // Prefere expulsar alguém que NÃO está realmente visível agora (só
+      // "de passagem" pela margem de antecipação) — evita que cards
+      // visíveis à esquerda sejam expulsos por cards que ainda nem
+      // chegaram na tela, o que fazia só os últimos (direita) sobreviverem
+      // quando muitos cards entravam em cena de uma vez no carregamento.
+      const victim = this._miniPlayerOrder.find((u) => !this._reallyVisible?.has(u));
+      if (victim) {
+        this.stopMiniPlayer(victim);
+      } else if (!this._reallyVisible?.has(url)) {
+        // Fila cheia de cards já visíveis, e este candidato ainda não está
+        // na tela de verdade — espera abrir espaço em vez de furar a fila.
+        return;
+      } else {
+        // Candidato também visível e fila cheia de visíveis: não há quem
+        // sacrificar sem tirar prioridade de alguém igualmente visível —
+        // cede o mais antigo.
+        this.stopMiniPlayer(this._miniPlayerOrder[0]);
+      }
     }
     this._miniPlayerOrder.push(url);
 
