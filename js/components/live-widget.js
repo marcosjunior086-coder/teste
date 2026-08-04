@@ -776,7 +776,11 @@ class KwaiLiveWidget extends HTMLElement {
         this.stopMiniPlayer(this._miniPlayerOrder[0]);
       }
     }
-    this._miniPlayerOrder.push(url);
+    // Nunca duplica: se a URL já está na fila (ex.: uma tentativa anterior
+    // ainda não foi limpa por qualquer caminho), não empurra de novo — isso
+    // inflava a contagem de vagas ocupadas e fazia o sistema achar que
+    // estava cheio (8/8) quando só metade eram streamers de fato tocando.
+    if (!this._miniPlayerOrder.includes(url)) this._miniPlayerOrder.push(url);
 
     this._startHls(vid, entry.streamer.playUrl, false, entry, url);
   }
@@ -806,6 +810,12 @@ class KwaiLiveWidget extends HTMLElement {
         this._startHls(vid, playUrl, true, entry, url);
       } else {
         entry.playing = false;
+        // Libera a vaga de verdade agora — sem isso, essa URL ficava
+        // "fantasma" ocupando um lugar em _miniPlayerOrder até a próxima
+        // tentativa (até 50s depois), fazendo a fila parecer cheia e
+        // expulsar outros cards que estavam tocando bem sem necessidade.
+        const idx = this._miniPlayerOrder?.indexOf(url);
+        if (idx > -1) this._miniPlayerOrder.splice(idx, 1);
         entry.retries = (entry.retries || 0) + 1;
         if (entry.retries < 6)
           setTimeout(() => this.startMiniPlayer(url), Math.min(5000 * entry.retries, 50000));
