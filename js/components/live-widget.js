@@ -26,11 +26,6 @@ class KwaiLiveWidget extends HTMLElement {
     this.CACHE_TTL     = 50000;
     this.BATCH_SIZE    = 5;
     this.ENABLE_MINI_PREVIEW = true;
-    // Quantos mini-players (bolinha com HLS de verdade) tocam ao mesmo tempo —
-    // os demais ficam parados na foto até abrir espaço. Evita travar o
-    // celular quando tem muitos streamers ao vivo simultâneos. Cobre os
-    // ~6 cards visíveis por vez no mobile + 1-2 sendo preparados à frente.
-    this.MAX_MINI_PLAYERS = 8;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
@@ -432,6 +427,18 @@ class KwaiLiveWidget extends HTMLElement {
     return cardRect.right > rowRect.left && cardRect.left < rowRect.right;
   }
 
+  // Quantos mini-players (bolinha com HLS de verdade) podem tocar ao mesmo
+  // tempo. Não é mais um número fixo: acompanha quantos cards cabem de fato
+  // na tela agora (mobile ~6, desktop largo pode caber 15+), com uma margem
+  // pra já preparar os próximos. Um número fixo baixo (era 8) travava telas
+  // largas — onde cabem mais cards visíveis do que o limite — num cabo de
+  // guerra permanente entre cards igualmente visíveis disputando as mesmas
+  // vagas, expulsando uns aos outros sem nenhum realmente ficar estável.
+  get MAX_MINI_PLAYERS() {
+    const visible = [...this.activePlayers.keys()].filter((u) => this._isReallyVisible(u)).length;
+    return Math.max(6, visible + 2);
+  }
+
   // ── Cache localStorage (já protegido com try/catch) ─────────────────────
 
   saveCache() {
@@ -728,10 +735,14 @@ class KwaiLiveWidget extends HTMLElement {
     if (!entry) return;
     clearInterval(entry.watchdog);
     try { entry.hlsInst?.destroy(); } catch (_) {}
-    entry.hlsInst = null;
-    entry.playing = false;
-    const idx = this._miniPlayerOrder?.indexOf(url);
-    if (idx > -1) this._miniPlayerOrder.splice(idx, 1);
+    entry.hlsInst  = null;
+    entry.playing  = false;
+    entry.starting = false;
+    // Remove TODAS as ocorrências (não só a primeira) — defesa extra caso
+    // alguma duplicata residual ainda exista na fila por qualquer motivo.
+    if (this._miniPlayerOrder) {
+      this._miniPlayerOrder = this._miniPlayerOrder.filter((u) => u !== url);
+    }
     const circleEl = this.shadowRoot.getElementById(entry.circleId);
     if (circleEl) {
       const vid = circleEl.querySelector('video');
@@ -749,7 +760,13 @@ class KwaiLiveWidget extends HTMLElement {
   startMiniPlayer(url) {
     const entry = this.activePlayers.get(url);
     if (!entry || !entry.streamer.playUrl) return;
-    if (entry.playing || entry.hlsInst)   return;
+    // "starting" cobre a janela entre chamar _startHls e o vídeo de fato
+    // tocar — necessário porque no HLS nativo (Safari/iOS) "entry.hlsInst"
+    // nunca é preenchido (só a branch HLS.js usa essa variável), então sem
+    // esse terceiro flag a guarda não bloqueava uma segunda chamada pra
+    // mesma URL enquanto ela ainda carregava, deixando a mesma URL entrar
+    // duplicada em _miniPlayerOrder.
+    if (entry.playing || entry.hlsInst || entry.starting) return;
     const circleEl = this.shadowRoot.getElementById(entry.circleId);
     if (!circleEl) return;
     const vid = circleEl.querySelector('video');
@@ -787,6 +804,7 @@ class KwaiLiveWidget extends HTMLElement {
 
   _startHls(vid, playUrl, useProxy, entry, url) {
     let lastT = -1;
+    entry.starting = true;
 
     const startWatchdog = () => {
       clearInterval(entry.watchdog);
@@ -799,6 +817,7 @@ class KwaiLiveWidget extends HTMLElement {
     const onPlaying = () => {
       if (entry.playing) return;
       entry.playing = true;
+      entry.starting = false;
       startWatchdog();
     };
 
@@ -806,16 +825,19 @@ class KwaiLiveWidget extends HTMLElement {
       try { entry.hlsInst?.destroy(); } catch (_) {}
       entry.hlsInst = null;
       if (!useProxy) {
-        // Tenta via proxy como fallback antes de desistir
+        // Tenta via proxy como fallback antes de desistir (continua "starting")
         this._startHls(vid, playUrl, true, entry, url);
       } else {
-        entry.playing = false;
+        entry.playing  = false;
+        entry.starting = false;
         // Libera a vaga de verdade agora — sem isso, essa URL ficava
         // "fantasma" ocupando um lugar em _miniPlayerOrder até a próxima
         // tentativa (até 50s depois), fazendo a fila parecer cheia e
         // expulsar outros cards que estavam tocando bem sem necessidade.
-        const idx = this._miniPlayerOrder?.indexOf(url);
-        if (idx > -1) this._miniPlayerOrder.splice(idx, 1);
+        // filter (não indexOf/splice) remove qualquer ocorrência duplicada.
+        if (this._miniPlayerOrder) {
+          this._miniPlayerOrder = this._miniPlayerOrder.filter((u) => u !== url);
+        }
         entry.retries = (entry.retries || 0) + 1;
         if (entry.retries < 6)
           setTimeout(() => this.startMiniPlayer(url), Math.min(5000 * entry.retries, 50000));
