@@ -913,7 +913,7 @@ class DimaiorAdmin extends HTMLElement {
     let over=s.getElementById('mOcultRankOver');
     if(!over){
       over=document.createElement('div');over.id='mOcultRankOver';
-      over.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+      over.style.cssText='position:fixed;inset:0;background:rgba(4,4,14,.9);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
       over.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:24px;position:relative">
         <button id="mOcultRankFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px">✕</button>
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:17px;font-weight:700;color:var(--t1);margin-bottom:16px">${this._ico('settings',16)} Ocultar do Ranking Geral</div>
