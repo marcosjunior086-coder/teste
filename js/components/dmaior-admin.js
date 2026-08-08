@@ -579,8 +579,8 @@ class DimaiorAdmin extends HTMLElement {
     const premios=prem?.premios||[];
     const medalCor=pos=>pos===1?'var(--gold)':pos===2?'#94a3b8':pos===3?'#a86c31':'var(--t3)';
     const pager=`<div class="pag-bar rank-local-pg"><button ${this._pg.rank<=1?'disabled':''} data-pg="prev">Anterior</button><span class="pn">Pag ${this._pg.rank} / ${totalPags}</span><button ${this._pg.rank>=totalPags?'disabled':''} data-pg="next">Proxima</button></div>`;
-    const tabelaHtml=`<div class="rank-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>${this._ico('diamond',12)} Diamantes</th><th>Dolar</th><th>Horas</th><th>Dias</th><th>Premio</th></tr></thead><tbody>${pagina.map(sv=>{const pos=sv.posicao,cor=medalCor(pos),pv=premios[pos-1];return`<tr><td style="color:${cor};font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:16px">${pos}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;color:var(--t1)">${this._esc(sv.nome||'-')}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(sv.kwai_uid||sv.kwai_id||'-')}</div></td><td style="color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._num(this._diam(sv))}</td><td style="color:var(--verde);font-size:11px">${sv.dolar?'$'+Number(sv.dolar).toFixed(2):'-'}</td><td style="color:var(--t2)">${sv.horas||'-'}</td><td style="color:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'};font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px">${sv.dias_validos||'-'}</td><td>${pv?.valor_premio?`<span class="prize-tag">${this._brl(pv.valor_premio)}</span>`:''}</td></tr>`;}).join('')}</tbody></table></div>`;
-    const mobileHtml=`<div class="rank-mobile-only">${pagina.map(sv=>{const pos=sv.posicao,cor=medalCor(pos),pv=premios[pos-1];const uidNum=sv.kwai_uid||sv.uid||sv.member_id||sv.memberId||'';const kwaiId=sv.kwai_id||sv.kwaiId||'';const nome=sv.nome||kwaiId||uidNum||'-';return`<div class="rk-item"><div class="rk-preview"><span class="rk-pos" style="color:${cor}">${pos}</span><div class="rk-av">${this._avatar(this._proxyFoto(sv.foto||''),nome)}</div><div class="rk-info"><div class="rk-nome">${this._esc(nome)}</div><div class="rk-diam">${this._ico('diamond',11)} ${this._num(this._diam(sv))}</div></div><div class="rk-right"><div class="rk-val" style="color:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}">${sv.dias_validos||'-'}/20 dias</div><div class="rk-val">${sv.horas||'-'}</div>${pv?.valor_premio?`<span class="prize-tag" style="font-size:9px">${this._brl(pv.valor_premio)}</span>`:''}</div></div></div>`;}).join('')}</div>`;
+    const tabelaHtml=`<div class="rank-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>${this._ico('diamond',12)} Diamantes</th><th>Dolar</th><th>Horas</th><th>Dias</th><th>Premio</th></tr></thead><tbody>${pagina.map(sv=>{const pos=sv.posicao,cor=medalCor(pos),pv=premios[pos-1];return`<tr><td style="color:${cor};font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:16px">${pos}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;color:var(--t1)">${this._esc(sv.nome||'-')}${sv.oculto_ranking?` <span style="font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.4);color:#f87171;vertical-align:middle">Oculto</span>`:''}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(sv.kwai_uid||sv.kwai_id||'-')}</div></td><td style="color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._num(this._diam(sv))}</td><td style="color:var(--verde);font-size:11px">${sv.dolar?'$'+Number(sv.dolar).toFixed(2):'-'}</td><td style="color:var(--t2)">${sv.horas||'-'}</td><td style="color:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'};font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px">${sv.dias_validos||'-'}</td><td>${pv?.valor_premio?`<span class="prize-tag">${this._brl(pv.valor_premio)}</span>`:''}</td></tr>`;}).join('')}</tbody></table></div>`;
+    const mobileHtml=`<div class="rank-mobile-only">${pagina.map(sv=>{const pos=sv.posicao,cor=medalCor(pos),pv=premios[pos-1];const uidNum=sv.kwai_uid||sv.uid||sv.member_id||sv.memberId||'';const kwaiId=sv.kwai_id||sv.kwaiId||'';const nome=sv.nome||kwaiId||uidNum||'-';return`<div class="rk-item"><div class="rk-preview"><span class="rk-pos" style="color:${cor}">${pos}</span><div class="rk-av">${this._avatar(this._proxyFoto(sv.foto||''),nome)}</div><div class="rk-info"><div class="rk-nome">${this._esc(nome)}${sv.oculto_ranking?` <span style="font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.4);color:#f87171;vertical-align:middle">Oculto</span>`:''}</div><div class="rk-diam">${this._ico('diamond',11)} ${this._num(this._diam(sv))}</div></div><div class="rk-right"><div class="rk-val" style="color:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}">${sv.dias_validos||'-'}/20 dias</div><div class="rk-val">${sv.horas||'-'}</div>${pv?.valor_premio?`<span class="prize-tag" style="font-size:9px">${this._brl(pv.valor_premio)}</span>`:''}</div></div></div>`;}).join('')}</div>`;
     const root=s.getElementById('root');
     const isMobile=root?.classList.contains('narrow')||window.matchMedia('(max-width:700px)').matches;
     el.innerHTML=(isMobile?mobileHtml:tabelaHtml)+pager;
@@ -904,6 +904,94 @@ class DimaiorAdmin extends HTMLElement {
       if(r?.ok){s.getElementById('mVerifExtOver')?.remove();this._toast('Streamer verificado Premium!');this._carregarStreamers();}else this._toast(r?.erro||'Erro','err');
     });
   }
+
+  // ── Ocultar streamer do Ranking Geral público ──────────────────────────
+  // Não mexe em diamantes/premiação/histórico — só esconde da tela pública.
+  // O streamer continua aparecendo no Rank do Mês do admin, com uma tag "Oculto".
+  async _abrirModalOcultarRanking(){
+    const s=this.shadowRoot;
+    let over=s.getElementById('mOcultRankOver');
+    if(!over){
+      over=document.createElement('div');over.id='mOcultRankOver';
+      over.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+      over.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:24px;position:relative">
+        <button id="mOcultRankFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px">✕</button>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:17px;font-weight:700;color:var(--t1);margin-bottom:16px">${this._ico('settings',16)} Ocultar do Ranking Geral</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">O streamer some só da tela pública de ranking — diamantes, dólar e premiação continuam contabilizados normalmente.</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input id="mOcultRankInput" type="text" placeholder="UID ou Kwai ID..." style="flex:1;background:rgba(0,0,0,.4);border:1px solid var(--brd);border-radius:8px;color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/>
+          <button id="mOcultRankBuscar" class="btn btn-o" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('search',13)} Buscar</button>
+        </div>
+        <div id="mOcultRankPreview" style="display:none;border:1px solid var(--brd);border-radius:8px;padding:14px;margin-bottom:12px;background:rgba(0,0,0,.25)"></div>
+        <input id="mOcultRankMotivo" type="text" placeholder="Motivo (opcional)..." style="display:none;width:100%;background:rgba(0,0,0,.4);border:1px solid var(--brd);border-radius:8px;color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;margin-bottom:12px"/>
+        <div id="mOcultRankAcoes" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:20px"></div>
+        <div style="border-top:1px solid var(--brddim);padding-top:16px">
+          <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;color:var(--t2);margin-bottom:10px">Atualmente ocultos</div>
+          <div id="mOcultRankLista">${this._loading()}</div>
+        </div>
+      </div>`;
+      s.appendChild(over);
+      s.getElementById('mOcultRankFechar').addEventListener('click',()=>over.remove());
+      over.addEventListener('click',e=>{if(e.target===over)over.remove();});
+      s.getElementById('mOcultRankBuscar').addEventListener('click',()=>this._buscarStreamerRanking());
+      s.getElementById('mOcultRankInput').addEventListener('keydown',e=>{if(e.key==='Enter')this._buscarStreamerRanking();});
+    } else {
+      over.style.display='flex';
+      s.getElementById('mOcultRankPreview').style.display='none';
+      s.getElementById('mOcultRankMotivo').style.display='none';
+      s.getElementById('mOcultRankAcoes').style.display='none';
+      s.getElementById('mOcultRankInput').value='';
+    }
+    s.getElementById('mOcultRankInput')?.focus();
+    this._carregarListaOcultosRanking();
+  }
+  async _buscarStreamerRanking(){
+    const s=this.shadowRoot;
+    const q=(s.getElementById('mOcultRankInput')?.value||'').trim();
+    if(!q){this._toast('Digite um UID ou Kwai ID','err');return;}
+    const btn=s.getElementById('mOcultRankBuscar');
+    if(btn){btn.disabled=true;btn.textContent='Buscando...';}
+    const prev=s.getElementById('mOcultRankPreview'),motivo=s.getElementById('mOcultRankMotivo'),acoes=s.getElementById('mOcultRankAcoes');
+    prev.style.display='none';motivo.style.display='none';acoes.style.display='none';
+    const d=await this._api('GET',`/admin/ranking/ocultos/buscar?q=${encodeURIComponent(q)}`);
+    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('search',13)} Buscar`;}
+    if(!d?.ok){this._toast(d?.erro||'Erro ao buscar','err');return;}
+    if(!d.encontrado){prev.style.display='block';prev.innerHTML=`<div style="color:var(--t3);font-size:13px;text-align:center">Nenhum streamer encontrado com esse UID / Kwai ID.<br><span style="font-size:11px">Verifique se o streamer já apareceu na planilha de resultados.</span></div>`;return;}
+    const sv=d.streamer;const foto=this._proxyFoto(sv.foto||'');
+    prev.style.display='block';
+    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'—')}</div>${d.ja_oculto?`<div style="font-size:10px;color:#ff9800;margin-top:4px">Já está oculto do ranking${d.motivo?' — '+this._esc(d.motivo):''}</div>`:''}</div></div>`;
+    if(d.ja_oculto){
+      acoes.style.display='flex';
+      acoes.innerHTML=`<button id="mOcultRankReexibir" class="btn btn-o" style="border-color:rgba(74,222,128,.4);color:#4ade80">${this._ico('check',13)} Reexibir no Ranking</button>`;
+      s.getElementById('mOcultRankReexibir').addEventListener('click',async()=>{
+        const r=await this._api('DELETE',`/admin/ranking/ocultos/${encodeURIComponent(sv.kwai_uid)}`);
+        if(r?.ok){this._toast('Streamer reexibido no ranking!');this._buscarStreamerRanking();this._carregarListaOcultosRanking();this._carregarRanking();}else this._toast(r?.erro||'Erro','err');
+      });
+      return;
+    }
+    motivo.style.display='block';
+    acoes.style.display='flex';
+    acoes.innerHTML=`<button id="mOcultRankSalvar" class="btn btn-o" style="border-color:rgba(248,113,113,.4);color:#f87171">${this._ico('warning',13)} Ocultar do Ranking</button>`;
+    s.getElementById('mOcultRankSalvar').addEventListener('click',async()=>{
+      const mot=(s.getElementById('mOcultRankMotivo')?.value||'').trim();
+      const r=await this._api('POST','/admin/ranking/ocultos',{kwai_uid:sv.kwai_uid,kwai_id:sv.kwai_id,nome:sv.nome,foto_url:sv.foto,motivo:mot||null});
+      if(r?.ok){this._toast('Streamer ocultado do ranking!');this._buscarStreamerRanking();this._carregarListaOcultosRanking();this._carregarRanking();}else this._toast(r?.erro||'Erro','err');
+    });
+  }
+  async _carregarListaOcultosRanking(){
+    const s=this.shadowRoot;const el=s.getElementById('mOcultRankLista');if(!el)return;
+    const d=await this._api('GET','/admin/ranking/ocultos');
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar');return;}
+    const lista=d.ocultos||[];
+    if(!lista.length){el.innerHTML=`<div style="color:var(--t3);font-size:12px;text-align:center;padding:10px 0">Nenhum streamer oculto no momento.</div>`;return;}
+    el.innerHTML=lista.map(o=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brddim)"><div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(o.nome||o.kwai_id||o.kwai_uid)}</div><div style="font-size:10px;color:var(--cyan)">UID: ${this._esc(o.kwai_uid)}</div>${o.motivo?`<div style="font-size:10px;color:var(--t3)">${this._esc(o.motivo)}</div>`:''}</div><button class="btn btn-o btn-sm" data-uid="${this._esc(o.kwai_uid)}" style="border-color:rgba(74,222,128,.4);color:#4ade80;flex-shrink:0">${this._ico('check',12)} Reexibir</button></div>`).join('');
+    el.querySelectorAll('button[data-uid]').forEach(btn=>btn.addEventListener('click',async()=>{
+      const uid=btn.dataset.uid;
+      const r=await this._api('DELETE',`/admin/ranking/ocultos/${encodeURIComponent(uid)}`);
+      if(r?.ok){this._toast('Streamer reexibido no ranking!');this._carregarListaOcultosRanking();this._carregarRanking();}else this._toast(r?.erro||'Erro','err');
+    }));
+  }
+
   _prepararBuscaUid(){
     this.shadowRoot.getElementById('buscaUidInput')?.focus();
   }
@@ -1610,7 +1698,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
-    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
+    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
@@ -4402,7 +4490,7 @@ class DimaiorAdmin extends HTMLElement {
           <div class="content">
             <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash')}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
             <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive',`<button class="btn btn-o" id="btnLvCfg">${this._ico('settings',13)} Configurações<span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span></button>`)}<div id="gLives">${this._loading()}</div></div>
-            <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank')}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank',`<button class="btn btn-o" id="btnOcultarRanking">${this._ico('settings',13)} Opções</button>`)}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
             <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
             <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
