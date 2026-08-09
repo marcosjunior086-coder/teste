@@ -91,7 +91,12 @@ class PainelPK extends HTMLElement {
     this._confrontos = confData.confrontos || [];
     this._ranking = rankData.ranking || [];
     this._datas = [...new Set(this._confrontos.map(c => c.data_confronto))].sort();
-    this._dataIdx = 0;
+    // Abre direto no dia de hoje, não no mais antigo da lista (índice 0 era
+    // sempre o primeiro dia da liga inteira, ex: "ontem" logo que um novo dia
+    // é gerado). Sem confronto de hoje na lista (liga ainda não começou ou já
+    // encerrou), cai pro último dia disponível — mais últil que o mais antigo.
+    const idxHoje = this._datas.indexOf(this._hojeISO());
+    this._dataIdx = idxHoje !== -1 ? idxHoje : Math.max(0, this._datas.length - 1);
   }
 
   async _mudarProgramacao(idx) {
