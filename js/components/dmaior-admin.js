@@ -1763,6 +1763,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkPausar').addEventListener('click',()=>this._pausarLigaPk(this._pkAbertaId));
     s.getElementById('btnPkFecharAgora').addEventListener('click',()=>this._fecharAgoraPk(this._pkAbertaId));
     s.getElementById('btnPkSalvarAgendamento').addEventListener('click',()=>this._pkSalvarAgendamento());
+    s.getElementById('pkDetBanner').addEventListener('input',e=>this._atualizarPreviewBannerPkDet(e.target.value));
+    s.getElementById('btnPkSalvarBanner').addEventListener('click',()=>this._pkSalvarBanner());
     s.getElementById('btnPkEncerrar').addEventListener('click',()=>{
       this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId));
     });
@@ -2175,6 +2177,22 @@ class DimaiorAdmin extends HTMLElement {
     this._renderAltVotacao();
   }
 
+  _atualizarPreviewBannerPkDet(url){
+    const s=this.shadowRoot;
+    const wrap=s.getElementById('pkDetBannerPreview');const img=s.getElementById('pkDetBannerImg');
+    if(!wrap||!img)return;
+    const safe=this._normalizarImagemUrl(url);
+    if(safe){img.src=safe;img.onerror=()=>{wrap.style.display='none';};img.onload=()=>{wrap.style.display='block';};wrap.style.display='block';}
+    else{wrap.style.display='none';img.src='';}
+  }
+  async _pkSalvarBanner(){
+    const s=this.shadowRoot;
+    const raw=s.getElementById('pkDetBanner').value.trim();
+    const banner_url=raw?(this._normalizarImagemUrl(raw)||raw):null;
+    const r=await this._api('PUT',`/admin/pk/programacoes/${this._pkAbertaId}`,{banner_url});
+    if(r?.ok){this._toast('Banner salvo!');this._abrirDetalhePk(this._pkAbertaId);}
+    else this._toast(r?.erro||'Erro ao salvar banner','err');
+  }
   _atualizarPreviewBannerPk(url){
     const s=this.shadowRoot;
     const wrap=s.getElementById('pkBannerPreview');const img=s.getElementById('pkBannerImg');
@@ -2508,6 +2526,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkExcluirDef').style.display=st==='encerrada'?'inline-flex':'none';
     s.getElementById('pkDetDataInicio').value=d.programacao.data_inicio||'';
     s.getElementById('pkDetDataFim').value=d.programacao.data_fim||'';
+    s.getElementById('pkDetBanner').value=d.programacao.banner_url||'';
+    this._atualizarPreviewBannerPkDet(d.programacao.banner_url||'');
 
     // Sem agendamento, "Ativar" já dispara a geração do dia 1 na hora (a
     // liga começa hoje). Com início/fim agendados, o motor só gera pares
@@ -4590,6 +4610,9 @@ class DimaiorAdmin extends HTMLElement {
                     <label><div class="cfg-chave">Encerra automaticamente em <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDetDataFim"></label>
                     <button class="btn btn-o btn-sm" id="btnPkSalvarAgendamento" style="margin-top:16px">${this._ico('check',12)} Salvar agendamento</button>
                   </div>
+
+                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto — opcional)</span></div><input class="cfg-inp" type="url" style="width:100%" id="pkDetBanner" placeholder="https://drive.google.com/file/d/.../view"><div id="pkDetBannerPreview" style="margin-top:8px;display:none"><img id="pkDetBannerImg" style="width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"></div></label></div>
+                  <div><button class="btn btn-o btn-sm" id="btnPkSalvarBanner">${this._ico('check',12)} Salvar banner</button></div>
 
                   <div class="bhead acc-toggle" id="accPkPart"><div class="btitulo">${this._ico('users',14)} Participantes ativos (<span id="pkDetParticipantesCount">0</span>)</div>
                     <div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnPkDetToggleAdd">${this._ico('plus',12)} Gerenciar roster</button><span class="acc-chevron" id="accPkPartIco">▼</span></div>
