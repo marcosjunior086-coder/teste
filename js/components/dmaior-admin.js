@@ -2357,6 +2357,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('pkCriterioSelect').value='0';
     s.getElementById('pkCriterioCustom').value='';
     s.getElementById('pkManualUid').value='';
+    s.getElementById('pkModoPontuacao').value='padrao';
     this._pkCriterioToggle();
     this._renderPkElegiveis();
     s.getElementById('pkListaWrap').style.display='none';
@@ -2461,6 +2462,7 @@ class DimaiorAdmin extends HTMLElement {
       nome,
       data_inicio: dataInicio, data_fim: dataFim,
       criterio_diamantes_min: criterio>0?criterio:null,
+      modo_pontuacao: s.getElementById('pkModoPontuacao')?.value==='diamantes_vitoria'?'diamantes_vitoria':'padrao',
       participantes: [...this._pkSelecionados.values()].map(st=>({kwai_uid:st.kwai_uid,diamantes:st.diamantes||0,novato:!!st.novato,origem:st.origem||'elegivel'})),
     };
     const btn=s.getElementById('btnSalvarPk');
@@ -4515,6 +4517,16 @@ class DimaiorAdmin extends HTMLElement {
                     <label><div class="cfg-chave">Encerra automaticamente em <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDataFimAgendada"></label>
                   </div>
                   <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Deixe em branco pra rodar indefinidamente. Com início agendado, a liga fica "ativa" mas só começa a gerar pares nessa data; com encerramento, ela para sozinha depois do dia escolhido.</div>
+
+                  <div class="cfg-row" style="flex-wrap:wrap">
+                    <label><div class="cfg-chave">Modo de pontuação</div>
+                      <select class="cfg-inp" id="pkModoPontuacao" style="width:260px">
+                        <option value="padrao">Padrão — só vitória vale ponto</option>
+                        <option value="diamantes_vitoria">Diamantes + Vitória (nova) — 1 pt a cada 1.000 diamantes + 2 pts por vitória</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Só vale pra essa liga — não muda a pontuação de nenhuma liga já criada.</div>
 
                   <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Critério (diamantes mês anterior)</div>
