@@ -1752,6 +1752,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtuPk').addEventListener('click',()=>this._carregarPkDiario());
     s.getElementById('btnNovaPk').addEventListener('click',()=>this._abrirFormPk());
     s.getElementById('btnCancelarFormPk').addEventListener('click',()=>this._fecharFormPk());
+    s.getElementById('pkBanner').addEventListener('input',e=>this._atualizarPreviewBannerPk(e.target.value));
     s.getElementById('pkCriterioSelect').addEventListener('change',()=>this._pkCriterioToggle());
     s.getElementById('btnBuscarElegiveisPk').addEventListener('click',()=>this._buscarElegiveisPk());
     s.getElementById('btnPkSelecionarTodos').addEventListener('click',()=>this._pkSelecionarTodosElegiveis());
@@ -2174,6 +2175,14 @@ class DimaiorAdmin extends HTMLElement {
     this._renderAltVotacao();
   }
 
+  _atualizarPreviewBannerPk(url){
+    const s=this.shadowRoot;
+    const wrap=s.getElementById('pkBannerPreview');const img=s.getElementById('pkBannerImg');
+    if(!wrap||!img)return;
+    const safe=this._normalizarImagemUrl(url);
+    if(safe){img.src=safe;img.onerror=()=>{wrap.style.display='none';};img.onload=()=>{wrap.style.display='block';};wrap.style.display='block';}
+    else{wrap.style.display='none';img.src='';}
+  }
   _atualizarPreviewBannerVotacao(url){
     const s=this.shadowRoot;
     const wrap=s.getElementById('mVotBannerPreview');const img=s.getElementById('mVotBannerImg');
@@ -2352,6 +2361,8 @@ class DimaiorAdmin extends HTMLElement {
     this._pkSelecionados=new Map();
     const s=this.shadowRoot;
     s.getElementById('pkNome').value='';
+    s.getElementById('pkBanner').value='';
+    this._atualizarPreviewBannerPk('');
     s.getElementById('pkDataInicioAgendada').value='';
     s.getElementById('pkDataFimAgendada').value='';
     s.getElementById('pkCriterioSelect').value='0';
@@ -2458,8 +2469,10 @@ class DimaiorAdmin extends HTMLElement {
     const dataInicio=s.getElementById('pkDataInicioAgendada').value||null;
     const dataFim=s.getElementById('pkDataFimAgendada').value||null;
     if(dataInicio&&dataFim&&dataFim<dataInicio){this._toast('Data de encerramento não pode ser antes do início','err');return;}
+    const bannerRaw=s.getElementById('pkBanner').value.trim();
     const payload={
       nome,
+      banner_url: bannerRaw?(this._normalizarImagemUrl(bannerRaw)||bannerRaw):null,
       data_inicio: dataInicio, data_fim: dataFim,
       criterio_diamantes_min: criterio>0?criterio:null,
       modo_pontuacao: s.getElementById('pkModoPontuacao')?.value==='diamantes_vitoria'?'diamantes_vitoria':'padrao',
@@ -4511,6 +4524,8 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
                 <div style="padding:16px">
                   <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Nome da liga</div><input class="cfg-inp" style="width:100%" id="pkNome" placeholder="Ex: PK Diário — Squad Principal"></label></div>
+
+                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto — opcional)</span></div><input class="cfg-inp" type="url" style="width:100%" id="pkBanner" placeholder="https://drive.google.com/file/d/.../view"><div id="pkBannerPreview" style="margin-top:8px;display:none"><img id="pkBannerImg" style="width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"></div></label></div>
 
                   <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Início agendado <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDataInicioAgendada"></label>

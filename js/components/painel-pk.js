@@ -153,6 +153,8 @@ class PainelPK extends HTMLElement {
 
         .pk-agenda-banner { text-align: center; font-size: .74rem; font-weight: 800; color: var(--cyan); background: var(--cyan-d); border: 1px solid var(--cyan); border-radius: 12px; padding: 8px 14px; margin: 0 auto 14px; width: fit-content; max-width: 100%; }
 
+        .pk-banner-liga { display: block; width: 100%; max-height: 220px; object-fit: cover; border-radius: 14px; margin-bottom: 14px; border: 1px solid var(--border); background: var(--card-bg); }
+
         .date-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 auto 16px; min-height: 34px; }
         .date-btn { font-family: inherit; background: var(--card-bg); border: 1px solid var(--border); color: var(--muted); padding: 6px 16px; border-radius: 10px; font-weight: 800; font-size: .72rem; cursor: pointer; transition: all .2s; }
         .date-btn:hover { color: var(--text); }
@@ -339,6 +341,34 @@ class PainelPK extends HTMLElement {
     return `${dia}/${mes}/${ano}`;
   }
 
+  // Mesma conversão de link do Drive usada no admin (_normalizarImagemUrl) e
+  // na votação (_imgUrl), duplicada aqui de propósito — cada custom element
+  // deste projeto é autocontido, sem import entre componentes.
+  _imgUrl(url, w = 800, h = 280) {
+    if (!url || typeof url !== 'string') return '';
+    let raw = url.trim();
+    if (!raw) return '';
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+      const host = u.hostname.toLowerCase();
+      if (host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')) {
+        const m  = u.pathname.match(/\/file\/d\/([^/]+)/);
+        const id = m?.[1] || u.searchParams.get('id');
+        if (id && /^[\w-]{10,}$/.test(id)) raw = `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`;
+      } else {
+        raw = u.href;
+      }
+    } catch { return ''; }
+    return `https://images.weserv.nl/?url=${encodeURIComponent(raw)}&w=${w}&h=${h}&fit=cover&output=webp`;
+  }
+
+  _renderBannerLiga() {
+    const url = this._imgUrl(this._programacoes[this._progIdx]?.banner_url || '');
+    if (!url) return '';
+    return `<img class="pk-banner-liga" src="${this._esc(url)}" alt="" loading="eager" onerror="this.remove()">`;
+  }
+
   // Banner de agendamento — só aparece quando a liga tem início futuro
   // e/ou data de encerramento definida (liga contínua sem essas datas não
   // mostra nada aqui).
@@ -405,8 +435,8 @@ class PainelPK extends HTMLElement {
     if (this._abaAtiva === 'regras') { el.innerHTML = this._renderRegras(); return; }
     if (!this._programacoes.length) { el.innerHTML = `<div class="state-msg">Nenhuma programação de PK disponível no momento.</div>`; return; }
 
-    const banner = this._renderAvisoAgendamento();
-    el.innerHTML = banner + (this._abaAtiva === 'ranking' ? this._renderRanking() : this._renderConfrontos());
+    const avisoAgendamento = this._renderAvisoAgendamento();
+    el.innerHTML = this._renderBannerLiga() + avisoAgendamento + (this._abaAtiva === 'ranking' ? this._renderRanking() : this._renderConfrontos());
   }
 
   // Placar mostrado na pílula — usa score_a/score_b reais quando o admin
