@@ -554,6 +554,7 @@ class PainelPK extends HTMLElement {
       'À meia-noite, o sistema compara quantos <strong>diamantes cada um dos dois recebeu naquele dia</strong>. Quem fez mais vence e ganha <strong>1 ponto</strong> no ranking.',
       'Empate (inclusive 0 a 0) não rende ponto pra nenhum lado.',
       'O ranking é por <strong>vitórias</strong>, não por diamantes — quem vence mais confrontos sobe na tabela.',
+      'Em caso de <strong>empate no total de pontos</strong> entre dois ou mais streamers, o desempate é feito por quem recebeu mais diamantes ao longo do período.',
       'Ninguém é eliminado: mesmo perdendo, você recebe um <strong>novo adversário no dia seguinte</strong>, automaticamente.',
       'O primeiro confronto de cada streamer usa o desempenho do <strong>mês anterior</strong> só pra equilibrar o início — depois disso, os pares seguem o desempenho dentro da própria liga.',
     ];
