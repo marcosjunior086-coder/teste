@@ -274,6 +274,7 @@ class PainelPK extends HTMLElement {
           <div class="pk-toolbar">
             <button class="pk-refresh-btn" id="btn-pk-refresh" type="button" title="Atualizar">${PainelPK._icons.RefreshSVG}</button>
           </div>
+          <div id="banner-container"></div>
           <nav class="nav-container" id="nav-container"></nav>
           <div class="date-container" id="date-container"></div>
           <div class="tabs" id="tabs-container"></div>
@@ -363,8 +364,7 @@ class PainelPK extends HTMLElement {
     return `https://images.weserv.nl/?url=${encodeURIComponent(raw)}&w=${w}&h=${h}&fit=cover&output=webp`;
   }
 
-  _renderBannerLiga() {
-    const url = this._imgUrl(this._programacoes[this._progIdx]?.banner_url || '');
+  _renderBannerLiga(url) {
     if (!url) return '';
     return `<img class="pk-banner-liga" src="${this._esc(url)}" alt="" loading="eager" onerror="this.remove()">`;
   }
@@ -386,11 +386,20 @@ class PainelPK extends HTMLElement {
     return `<div class="pk-agenda-banner">${this._esc(partes.join(' · '))}</div>`;
   }
 
-  // ── Barras de navegação (programações / datas / abas) ─────────────────
+  // ── Barras de navegação (banner / programações / datas / abas) ────────
   _renderNav() {
     const nav = this.shadowRoot.getElementById('nav-container');
+    const bannerWrap = this.shadowRoot.getElementById('banner-container');
     if (!nav) return;
-    nav.innerHTML = this._programacoes.map((p, i) =>
+
+    const bannerUrl = this._imgUrl(this._programacoes[this._progIdx]?.banner_url || '');
+    if (bannerWrap) bannerWrap.innerHTML = this._renderBannerLiga(bannerUrl);
+    // Com banner e só 1 liga, o pill de nome fica redundante (o banner já
+    // ocupa o lugar dele) — mas com mais de 1 liga o pill continua sendo o
+    // único jeito de trocar entre elas, então some só o texto, nunca a troca.
+    const esconderPills = !!bannerUrl && this._programacoes.length <= 1;
+    nav.style.display = esconderPills ? 'none' : '';
+    nav.innerHTML = esconderPills ? '' : this._programacoes.map((p, i) =>
       `<button class="btn-base${this._progIdx === i ? ' active' : ''}" data-prog-idx="${i}">${this._esc(p.nome)}</button>`
     ).join('');
     nav.querySelectorAll('[data-prog-idx]').forEach(b => b.addEventListener('click', () => this._mudarProgramacao(Number(b.dataset.progIdx))));
@@ -436,7 +445,7 @@ class PainelPK extends HTMLElement {
     if (!this._programacoes.length) { el.innerHTML = `<div class="state-msg">Nenhuma programação de PK disponível no momento.</div>`; return; }
 
     const avisoAgendamento = this._renderAvisoAgendamento();
-    el.innerHTML = this._renderBannerLiga() + avisoAgendamento + (this._abaAtiva === 'ranking' ? this._renderRanking() : this._renderConfrontos());
+    el.innerHTML = avisoAgendamento + (this._abaAtiva === 'ranking' ? this._renderRanking() : this._renderConfrontos());
   }
 
   // Placar mostrado na pílula — usa score_a/score_b reais quando o admin
