@@ -1792,6 +1792,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtuHistoricoLive').addEventListener('click',()=>this._carregarHistoricoLive());
     s.getElementById('btnBuscarHistoricoLive').addEventListener('click',()=>this._buscarHistoricoLive());
     s.getElementById('btnCapturarAgoraHistoricoLive').addEventListener('click',()=>this._capturarAgoraHistoricoLive());
+    s.getElementById('btnCapturarDiaHistoricoLive').addEventListener('click',()=>this._capturarDiaHistoricoLive());
     s.getElementById('hlPeriodoBtn').addEventListener('click',()=>this._abrirSeletorPeriodo('hlPeriodoBtn','hlDataDe','hlDataAte','hlPeriodoTexto'));
     s.getElementById('btnVoltarListaPk').addEventListener('click',()=>this._carregarPkDiario());
     s.getElementById('btnPkAtivar').addEventListener('click',()=>this._ativarLigaPk(this._pkAbertaId));
@@ -2401,6 +2402,23 @@ class DimaiorAdmin extends HTMLElement {
       return;
     }
     this._toast('Capturado! Atualizando busca...');
+    this._buscarHistoricoLive();
+  }
+
+  async _capturarDiaHistoricoLive(){
+    const s=this.shadowRoot;
+    const dia=s.getElementById('hlDiaCompleto').value;
+    if(!dia){this._toast('Escolha uma data','err');return;}
+    const btn=s.getElementById('btnCapturarDiaHistoricoLive');
+    btn.disabled=true;btn.innerHTML=`${this._ico('refresh',13)} Capturando o dia...`;
+    const d=await this._api('GET',`/admin/monitor/debug-historico-lives-dia?dia=${encodeURIComponent(dia)}`);
+    btn.disabled=false;btn.innerHTML=`${this._ico('refresh',13)} Capturar dia inteiro`;
+    if(!d?.ok){
+      const motivo={sem_cookie:'cookie da Kwai não encontrado',cookie_morto:'cookie da Kwai expirado',erro_fetch:'falha ao falar com a Kwai'}[d?.motivo]||d?.erro||d?.motivo||'erro desconhecido';
+      this._toast(`Não capturou: ${motivo}`,'err');
+      return;
+    }
+    this._toast(`Capturado! ${d.total_lives_kwai} live(s) encontrada(s) na Kwai pra ${dia}. Atualizando busca...`);
     this._buscarHistoricoLive();
   }
 
@@ -5059,6 +5077,11 @@ class DimaiorAdmin extends HTMLElement {
                     <button class="btn btn-o" id="btnCapturarAgoraHistoricoLive" style="margin-top:16px">${this._ico('refresh',13)} Capturar agora</button>
                   </div>
                   <div style="font-size:10px;color:var(--t3)">"Capturar agora" busca a live mais recente desse streamer direto na Kwai e grava na hora — precisa do UID numérico (não funciona por nome). Use se a busca não achar nada e você quiser forçar sem esperar o próximo horário automático.</div>
+                  <div class="cfg-row" style="flex-wrap:wrap;align-items:flex-end">
+                    <label><div class="cfg-chave">Capturar o dia inteiro (todos os streamers)</div><input class="cfg-inp" type="date" id="hlDiaCompleto" style="width:180px"></label>
+                    <button class="btn btn-o" id="btnCapturarDiaHistoricoLive">${this._ico('refresh',13)} Capturar dia inteiro</button>
+                  </div>
+                  <div style="font-size:10px;color:var(--t3)">Roda o reforço diário na hora, pra 1 dia específico — o mesmo que roda sozinho às 03h/06h/09h. Use se um dia inteiro estiver sem nenhum registro (não depende de UID).</div>
                 </div>
               </div>
               <div id="hlResultadoArea"></div>
