@@ -2372,22 +2372,22 @@ class DimaiorAdmin extends HTMLElement {
 
   async _buscarHistoricoLive(){
     const s=this.shadowRoot;
-    const uid=s.getElementById('hlKwaiUid').value.trim();
-    if(!uid){this._toast('Informe o UID da Kwai','err');return;}
+    const busca=s.getElementById('hlKwaiUid').value.trim();
     const de=s.getElementById('hlDataDe').value;
     const ate=s.getElementById('hlDataAte').value;
     const area=s.getElementById('hlResultadoArea');
     area.innerHTML=this._loading();
-    let qs=`kwai_uid=${encodeURIComponent(uid)}`;
-    if(de)qs+=`&inicio=${encodeURIComponent(de)}`;
-    if(ate)qs+=`&fim=${encodeURIComponent(ate)}`;
-    const d=await this._api('GET',`/admin/historico-lives?${qs}`);
+    let qs='';
+    if(busca)qs+=`busca=${encodeURIComponent(busca)}`;
+    if(de)qs+=`${qs?'&':''}inicio=${encodeURIComponent(de)}`;
+    if(ate)qs+=`${qs?'&':''}fim=${encodeURIComponent(ate)}`;
+    const d=await this._api('GET',`/admin/historico-lives${qs?`?${qs}`:''}`);
     if(!d?.ok){area.innerHTML=this._empty('warning',d?.erro||'Erro ao buscar histórico');return;}
-    area.innerHTML=this._renderHistoricoLiveCards(d.streamer||{},d.lives||[]);
+    area.innerHTML=this._renderHistoricoLiveCards(d.lives||[]);
   }
 
-  _renderHistoricoLiveCards(streamer,lives){
-    if(!lives.length)return this._empty('play_circle','Nenhuma live encontrada pra esse streamer/período — pode ainda não ter sido capturada (a captura roda quando a live encerra + de madrugada como reforço).');
+  _renderHistoricoLiveCards(lives){
+    if(!lives.length)return this._empty('play_circle','Nenhuma live encontrada — pode ainda não ter sido capturada (a captura roda quando a live encerra + de madrugada como reforço).');
     const fmtDur=seg=>{
       if(seg==null)return'—';
       const h=Math.floor(seg/3600),m=Math.floor((seg%3600)/60),sg=seg%60;
@@ -2395,10 +2395,7 @@ class DimaiorAdmin extends HTMLElement {
     };
     const fmtDataHora=iso=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
     return`
-      <div style="display:flex;align-items:center;gap:10px;margin:16px 2px 12px">
-        ${this._avatar(streamer.foto,streamer.nome)}
-        <div><div style="font-weight:700;color:var(--t1)">${this._esc(streamer.nome||streamer.kwai_uid||'')}</div><div style="font-size:11px;color:var(--t3)">${lives.length} live(s) encontrada(s)</div></div>
-      </div>
+      <div style="font-size:11px;color:var(--t3);margin:16px 2px 12px">${lives.length} live(s) encontrada(s)</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
         ${lives.map(l=>`
           <div class="box" style="overflow:hidden">
@@ -2409,7 +2406,11 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <span style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:2px 6px;border-radius:4px">${fmtDur(l.duracao_segundos)}</span>
             </a>
-            <div style="padding:12px;display:flex;flex-direction:column;gap:6px">
+            <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                ${this._avatar(l.foto,l.nome)}
+                <div style="font-size:12px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(l.nome||l.kwai_uid||'')}</div>
+              </div>
               <div style="font-size:11px;color:var(--t3)">${fmtDataHora(l.inicio_em)} — ${fmtDataHora(l.fim_em)}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--t2)">
                 <div>💎 ${this._num(l.diamantes)}</div>
@@ -5031,7 +5032,7 @@ class DimaiorAdmin extends HTMLElement {
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div style="font-size:11px;color:var(--t3)">Busca o que já está gravado no banco (capturado automaticamente pelo Worker do monitor) — não consulta a Kwai na hora.</div>
                   <div class="cfg-row" style="flex-wrap:wrap">
-                    <label><div class="cfg-chave">UID da Kwai</div><input class="cfg-inp" id="hlKwaiUid" placeholder="Ex: 150001756165363" style="width:220px"></label>
+                    <label><div class="cfg-chave">UID ou nome do streamer <span style="color:var(--t3);font-size:10px">(opcional — vazio = todos)</span></div><input class="cfg-inp" id="hlKwaiUid" placeholder="Ex: 150001756165363 ou Haridade7" style="width:260px"></label>
                     <label><div class="cfg-chave">Período <span style="color:var(--t3);font-size:10px">(opcional)</span></div>
                       <button type="button" class="periodo-campo" id="hlPeriodoBtn">${this._ico('calendar',13)} <span id="hlPeriodoTexto">Selecionar período</span></button>
                       <input id="hlDataDe" type="hidden"/><input id="hlDataAte" type="hidden"/>
