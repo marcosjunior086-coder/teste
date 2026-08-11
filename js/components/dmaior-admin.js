@@ -1791,6 +1791,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSalvarPk').addEventListener('click',()=>this._salvarProgramacaoPk());
     s.getElementById('btnAtuHistoricoLive').addEventListener('click',()=>this._carregarHistoricoLive());
     s.getElementById('btnBuscarHistoricoLive').addEventListener('click',()=>this._buscarHistoricoLive());
+    s.getElementById('btnCapturarAgoraHistoricoLive').addEventListener('click',()=>this._capturarAgoraHistoricoLive());
     s.getElementById('hlPeriodoBtn').addEventListener('click',()=>this._abrirSeletorPeriodo('hlPeriodoBtn','hlDataDe','hlDataAte','hlPeriodoTexto'));
     s.getElementById('btnVoltarListaPk').addEventListener('click',()=>this._carregarPkDiario());
     s.getElementById('btnPkAtivar').addEventListener('click',()=>this._ativarLigaPk(this._pkAbertaId));
@@ -2384,6 +2385,23 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/historico-lives${qs?`?${qs}`:''}`);
     if(!d?.ok){area.innerHTML=this._empty('warning',d?.erro||'Erro ao buscar histórico');return;}
     area.innerHTML=this._renderHistoricoLiveCards(d.lives||[]);
+  }
+
+  async _capturarAgoraHistoricoLive(){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('hlKwaiUid').value.trim();
+    if(!/^\d+$/.test(uid)){this._toast('Digite o UID numérico do streamer (não funciona por nome)','err');return;}
+    const btn=s.getElementById('btnCapturarAgoraHistoricoLive');
+    btn.disabled=true;btn.innerHTML=`${this._ico('refresh',13)} Capturando...`;
+    const d=await this._api('GET',`/admin/monitor/debug-historico-lives?kwai_uid=${encodeURIComponent(uid)}`);
+    btn.disabled=false;btn.innerHTML=`${this._ico('refresh',13)} Capturar agora`;
+    if(!d?.captura?.ok){
+      const motivo={sem_kwai_id:'streamer sem nome da Kwai salvo ainda',cookie_morto:'cookie da Kwai expirado',nao_encontrada_ainda:'a Kwai ainda não mostra live nenhuma pra esse streamer'}[d?.captura?.motivo]||d?.erro||d?.captura?.motivo||'erro desconhecido';
+      this._toast(`Não capturou: ${motivo}`,'err');
+      return;
+    }
+    this._toast('Capturado! Atualizando busca...');
+    this._buscarHistoricoLive();
   }
 
   _renderHistoricoLiveCards(lives){
@@ -5038,7 +5056,9 @@ class DimaiorAdmin extends HTMLElement {
                       <input id="hlDataDe" type="hidden"/><input id="hlDataAte" type="hidden"/>
                     </label>
                     <button class="btn btn-g" id="btnBuscarHistoricoLive" style="margin-top:16px">${this._ico('search',13)} Buscar</button>
+                    <button class="btn btn-o" id="btnCapturarAgoraHistoricoLive" style="margin-top:16px">${this._ico('refresh',13)} Capturar agora</button>
                   </div>
+                  <div style="font-size:10px;color:var(--t3)">"Capturar agora" busca a live mais recente desse streamer direto na Kwai e grava na hora — precisa do UID numérico (não funciona por nome). Use se a busca não achar nada e você quiser forçar sem esperar o próximo horário automático.</div>
                 </div>
               </div>
               <div id="hlResultadoArea"></div>
