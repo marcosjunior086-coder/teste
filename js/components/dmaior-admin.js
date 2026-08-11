@@ -212,9 +212,25 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('sideBackdrop')?.classList.add('on');
     s.getElementById('btnHam')?.setAttribute('aria-expanded','true');
   }
+  _toggleNavSec(chave){
+    const s=this.shadowRoot;
+    s.getElementById(`navSec-${chave}`)?.classList.toggle('fechado');
+    s.querySelector(`[data-nav-sec="${chave}"] .acc-chevron`)?.classList.toggle('open');
+  }
+  _abrirNavSec(chave){
+    const s=this.shadowRoot;
+    s.getElementById(`navSec-${chave}`)?.classList.remove('fechado');
+    s.querySelector(`[data-nav-sec="${chave}"] .acc-chevron`)?.classList.add('open');
+  }
+  // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
+  // navegação não veio de clicar num item já visível (ex: link direto).
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
-    s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));this._fecharMenuMobile();
+    s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
+    const secao=DimaiorAdmin._NAV_SECAO_POR_PAGINA[pag];
+    if(secao)this._abrirNavSec(secao);
+    this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
     const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
@@ -1706,6 +1722,10 @@ class DimaiorAdmin extends HTMLElement {
     });
     s.getElementById('btnHam').addEventListener('click',e=>{e.stopPropagation();const side=s.getElementById('side');side?.classList.contains('open')?this._fecharMenuMobile():this._abrirMenuMobile();});
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
+    s.getElementById('side')?.addEventListener('click',e=>{
+      const sec=e.target.closest('[data-nav-sec]');
+      if(sec)this._toggleNavSec(sec.dataset.navSec);
+    });
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
     s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
@@ -3662,7 +3682,8 @@ class DimaiorAdmin extends HTMLElement {
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .shell{display:flex;flex:1;min-height:548px;}
     .side{width:220px;flex-shrink:0;background:rgba(8,8,20,.95);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;transform:translateZ(0);will-change:transform;}
-    .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,212,212,.55);font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
+    .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,212,212,.55);font-family:var(--dm-font-title,'Rajdhani',sans-serif);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+    .ns .acc-chevron{margin-left:8px;font-size:9px}
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
     .nb{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,212,.3);border-radius:99px;padding:1px 6px}.nb.live{background:rgba(248,113,113,.2);color:var(--verm);border-color:rgba(248,113,113,.4);animation:bl 1.8s infinite}.nb.gold{background:rgba(240,192,64,.2);color:var(--gold);border-color:rgba(240,192,64,.4)}
@@ -4491,6 +4512,10 @@ class DimaiorAdmin extends HTMLElement {
 
   _html(){
     const ni=(ico,pag,lbl,extra='')=>`<div class="ni" data-p="${pag}"><span class="ico">${this._ico(ico,14)}</span><span class="nlb">${lbl}</span>${extra}</div>`;
+    // Seções da sidebar viram acordeão — só "Principal" começa aberta (é onde
+    // cai o Dashboard, a página inicial). _ir() reabre a seção certa sozinha
+    // se o usuário for parar numa página de seção fechada por outro caminho.
+    const navSec=(chave,titulo,itensHtml,abertaPorPadrao=false)=>`<div class="ns" data-nav-sec="${chave}"><span>${titulo}</span><span class="acc-chevron${abertaPorPadrao?' open':''}">▾</span></div><div class="acc-body${abertaPorPadrao?'':' fechado'}" id="navSec-${chave}">${itensHtml}</div>`;
     const ph=(titulo,icoN,sub,btnId,extra='')=>`<div class="ph"><div><div class="titulo">${this._ico(icoN,18)} ${titulo}</div><div class="psub">${sub}</div></div><div class="ph-r"><button class="btn btn-o" id="${btnId}">${this._ico('refresh',13)} Atualizar</button>${extra}</div></div>`;
     return`<div id="root">
       <div id="login"><div class="glass lbox"><h2>DMAIOR<br>ADMIN MASTER</h2><div style="text-align:center"><span class="lchip"><span class="ldot"></span>ACESSO RESTRITO</span></div><div class="campo"><label>Usuário</label><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="campo"><label>Senha</label><input id="iP" type="password" placeholder="••••••••" autocomplete="current-password"/></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
@@ -4499,38 +4524,43 @@ class DimaiorAdmin extends HTMLElement {
         <div class="side-backdrop" id="sideBackdrop"></div>
         <div class="shell">
           <div class="side" id="side">
-            <div class="ns">Principal</div>
-            ${ni('dashboard','dashboard','Dashboard')}
-            ${ni('live','aoVivo','Ao Vivo',`<span class="nb live" id="nbLive">0</span>`)}
-            <div class="ns">Ranking</div>
-            ${ni('trophy','ranking','Ranking Mês')}
-            ${ni('chart','diario','Resultado Diário')}
-            ${ni('trend','desempenho','Desempenho')}
-            ${ni('history','historico','Histórico')}
-            ${ni('calendar','mesesRanking','Meses Ranking')}
-            ${ni('bars_up','dashDesemp','Evolução Mensal')}
-            <div class="ns">Gestão</div>
-            ${ni('users','streamers','Streamers')}
-            ${ni('check_c','statusStreamers','Status de Streamers')}
-            ${ni('key_uid','uids','Autorização UIDs')}
-            ${ni('search','buscaUid','Buscar UID Kwai')}
-            ${ni('metrics','metricas','Métricas')}
-            ${ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)}
-            ${ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)}
-            ${ni('users','agentes','Agentes')}
-            ${ni('refresh','agenteMigracoes','Migrações Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)}
-            <div class="ns">Financeiro</div>
-            ${ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)}
-            ${ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)}
-            ${ni('award','premios','Prêmios')}
-            <div class="ns">Sistema</div>
-            ${ni('bolt','impulsoCtrl','Ctrl. Impulso')}
-            ${ni('bell','comunicados','Comunicados')}
-            ${ni('vote','votacoes','Votações')}
-            ${ni('zap','pkDiario','PK Diário')}
-            ${ni('server','monitor','Monitor Kwai')}
-            ${ni('search','logs','Auditoria')}
-            ${ni('settings','config','Configurações')}
+            ${navSec('principal','Principal',
+              ni('dashboard','dashboard','Dashboard')+
+              ni('live','aoVivo','Ao Vivo',`<span class="nb live" id="nbLive">0</span>`)
+            ,true)}
+            ${navSec('ranking','Ranking',
+              ni('trophy','ranking','Ranking Mês')+
+              ni('chart','diario','Resultado Diário')+
+              ni('trend','desempenho','Desempenho')+
+              ni('history','historico','Histórico')+
+              ni('calendar','mesesRanking','Meses Ranking')+
+              ni('bars_up','dashDesemp','Evolução Mensal')
+            )}
+            ${navSec('gestao','Gestão',
+              ni('users','streamers','Streamers')+
+              ni('check_c','statusStreamers','Status de Streamers')+
+              ni('key_uid','uids','Autorização UIDs')+
+              ni('search','buscaUid','Buscar UID Kwai')+
+              ni('metrics','metricas','Métricas')+
+              ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)+
+              ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)+
+              ni('users','agentes','Agentes')+
+              ni('refresh','agenteMigracoes','Migrações Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)
+            )}
+            ${navSec('financeiro','Financeiro',
+              ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)+
+              ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)+
+              ni('award','premios','Prêmios')
+            )}
+            ${navSec('sistema','Sistema',
+              ni('bolt','impulsoCtrl','Ctrl. Impulso')+
+              ni('bell','comunicados','Comunicados')+
+              ni('vote','votacoes','Votações')+
+              ni('zap','pkDiario','PK Diário')+
+              ni('server','monitor','Monitor Kwai')+
+              ni('search','logs','Auditoria')+
+              ni('settings','config','Configurações')
+            )}
           </div>
           <div class="content">
             <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash')}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
