@@ -113,6 +113,7 @@ class DimaiorAdmin extends HTMLElement {
       search:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
       settings:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
       history:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>`,
+      play_circle:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>`,
       logout:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
       vote:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`,
       home:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
@@ -224,7 +225,7 @@ class DimaiorAdmin extends HTMLElement {
   }
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
@@ -232,7 +233,7 @@ class DimaiorAdmin extends HTMLElement {
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
     mapa[pag]?.();
   }
 
@@ -1788,6 +1789,9 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkSelecionarTodos').addEventListener('click',()=>this._pkSelecionarTodosElegiveis());
     s.getElementById('btnPkAddManual').addEventListener('click',()=>this._pkAddManual());
     s.getElementById('btnSalvarPk').addEventListener('click',()=>this._salvarProgramacaoPk());
+    s.getElementById('btnAtuHistoricoLive').addEventListener('click',()=>this._carregarHistoricoLive());
+    s.getElementById('btnBuscarHistoricoLive').addEventListener('click',()=>this._buscarHistoricoLive());
+    s.getElementById('hlPeriodoBtn').addEventListener('click',()=>this._abrirSeletorPeriodo('hlPeriodoBtn','hlDataDe','hlDataAte','hlPeriodoTexto'));
     s.getElementById('btnVoltarListaPk').addEventListener('click',()=>this._carregarPkDiario());
     s.getElementById('btnPkAtivar').addEventListener('click',()=>this._ativarLigaPk(this._pkAbertaId));
     s.getElementById('btnPkPausar').addEventListener('click',()=>this._pausarLigaPk(this._pkAbertaId));
@@ -2358,6 +2362,64 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET','/admin/pk/programacoes');
     if(!d?.ok){area.innerHTML=this._empty('warning','Erro ao carregar ligas');return;}
     this._renderPkLista(d.programacoes||[]);
+  }
+
+  // ── Histórico de Live (tela de teste) ─────────────────────────────────
+  _carregarHistoricoLive(){
+    this.shadowRoot.getElementById('hlResultadoArea').innerHTML=
+      this._empty('play_circle','Digite o UID de um streamer e clique em Buscar.');
+  }
+
+  async _buscarHistoricoLive(){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('hlKwaiUid').value.trim();
+    if(!uid){this._toast('Informe o UID da Kwai','err');return;}
+    const de=s.getElementById('hlDataDe').value;
+    const ate=s.getElementById('hlDataAte').value;
+    const area=s.getElementById('hlResultadoArea');
+    area.innerHTML=this._loading();
+    let qs=`kwai_uid=${encodeURIComponent(uid)}`;
+    if(de)qs+=`&inicio=${encodeURIComponent(de)}`;
+    if(ate)qs+=`&fim=${encodeURIComponent(ate)}`;
+    const d=await this._api('GET',`/admin/historico-lives?${qs}`);
+    if(!d?.ok){area.innerHTML=this._empty('warning',d?.erro||'Erro ao buscar histórico');return;}
+    area.innerHTML=this._renderHistoricoLiveCards(d.streamer||{},d.lives||[]);
+  }
+
+  _renderHistoricoLiveCards(streamer,lives){
+    if(!lives.length)return this._empty('play_circle','Nenhuma live encontrada pra esse streamer/período — pode ainda não ter sido capturada (a captura roda quando a live encerra + de madrugada como reforço).');
+    const fmtDur=seg=>{
+      if(seg==null)return'—';
+      const h=Math.floor(seg/3600),m=Math.floor((seg%3600)/60),sg=seg%60;
+      return h>0?`${h}:${String(m).padStart(2,'0')}:${String(sg).padStart(2,'0')}`:`${m}:${String(sg).padStart(2,'0')}`;
+    };
+    const fmtDataHora=iso=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+    return`
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 2px 12px">
+        ${this._avatar(streamer.foto,streamer.nome)}
+        <div><div style="font-weight:700;color:var(--t1)">${this._esc(streamer.nome||streamer.kwai_uid||'')}</div><div style="font-size:11px;color:var(--t3)">${lives.length} live(s) encontrada(s)</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        ${lives.map(l=>`
+          <div class="box" style="overflow:hidden">
+            <a href="${l.hls_url?this._esc(l.hls_url):'#'}" target="_blank" rel="noopener" style="position:relative;display:block;aspect-ratio:16/10;background:#000;${l.hls_url?'':'pointer-events:none;opacity:.5'}">
+              ${l.cover_url?`<img src="${this._esc(this._proxyFoto(l.cover_url)||l.cover_url)}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">`:''}
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)">
+                <div style="width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;color:#fff">${this._ico('play_circle',26)}</div>
+              </div>
+              <span style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:2px 6px;border-radius:4px">${fmtDur(l.duracao_segundos)}</span>
+            </a>
+            <div style="padding:12px;display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:11px;color:var(--t3)">${fmtDataHora(l.inicio_em)} — ${fmtDataHora(l.fim_em)}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--t2)">
+                <div>💎 ${this._num(l.diamantes)}</div>
+                <div>👁 ${this._num(l.espectadores)}</div>
+                <div>❤️ ${this._num(l.curtidas)}</div>
+                <div>💬 ${this._num(l.comentarios)}</div>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`;
   }
 
   _pkStatusBadge(status){
@@ -4557,6 +4619,7 @@ class DimaiorAdmin extends HTMLElement {
               ni('bell','comunicados','Comunicados')+
               ni('vote','votacoes','Votações')+
               ni('zap','pkDiario','PK Diário')+
+              ni('play_circle','historicoLive','Histórico de Live')+
               ni('server','monitor','Monitor Kwai')+
               ni('search','logs','Auditoria')+
               ni('settings','config','Configurações')
@@ -4962,6 +5025,22 @@ class DimaiorAdmin extends HTMLElement {
                 <div id="tbImpulsoHist">${this._loading()}</div>
                 <div class="pag-bar" id="pgImpulsoHist"></div>
               </div>
+            </div>
+            <div class="pag" id="pag-historicoLive">${ph('Histórico de Live','play_circle','Tela de teste — mostra o que já foi capturado do review/list da Kwai pra 1 streamer','btnAtuHistoricoLive')}
+              <div class="box mon-section">
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="font-size:11px;color:var(--t3)">Busca o que já está gravado no banco (capturado automaticamente pelo Worker do monitor) — não consulta a Kwai na hora.</div>
+                  <div class="cfg-row" style="flex-wrap:wrap">
+                    <label><div class="cfg-chave">UID da Kwai</div><input class="cfg-inp" id="hlKwaiUid" placeholder="Ex: 150001756165363" style="width:220px"></label>
+                    <label><div class="cfg-chave">Período <span style="color:var(--t3);font-size:10px">(opcional)</span></div>
+                      <button type="button" class="periodo-campo" id="hlPeriodoBtn">${this._ico('calendar',13)} <span id="hlPeriodoTexto">Selecionar período</span></button>
+                      <input id="hlDataDe" type="hidden"/><input id="hlDataAte" type="hidden"/>
+                    </label>
+                    <button class="btn btn-g" id="btnBuscarHistoricoLive" style="margin-top:16px">${this._ico('search',13)} Buscar</button>
+                  </div>
+                </div>
+              </div>
+              <div id="hlResultadoArea"></div>
             </div>
             <div class="pag" id="pag-monitor">${ph('Monitor Kwai','server','Controle do worker de monitoramento','btnAtuMonitor')}
               <div class="box mon-section">
