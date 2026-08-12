@@ -1801,6 +1801,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnPkSalvarAgendamento').addEventListener('click',()=>this._pkSalvarAgendamento());
     s.getElementById('pkDetBanner').addEventListener('input',e=>this._atualizarPreviewBannerPkDet(e.target.value));
     s.getElementById('btnPkSalvarBanner').addEventListener('click',()=>this._pkSalvarBanner());
+    s.getElementById('btnPkSalvarModoPontuacao').addEventListener('click',()=>this._pkSalvarModoPontuacao());
     s.getElementById('btnPkEncerrar').addEventListener('click',()=>{
       this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId));
     });
@@ -2228,6 +2229,15 @@ class DimaiorAdmin extends HTMLElement {
     const r=await this._api('PUT',`/admin/pk/programacoes/${this._pkAbertaId}`,{banner_url});
     if(r?.ok){this._toast('Banner salvo!');this._abrirDetalhePk(this._pkAbertaId);}
     else this._toast(r?.erro||'Erro ao salvar banner','err');
+  }
+  async _pkSalvarModoPontuacao(){
+    const s=this.shadowRoot;
+    const modo_pontuacao=s.getElementById('pkDetModoPontuacao').value;
+    this._confirmarDel('Trocar o modo de pontuação recalcula o ranking dessa liga inteira (inclusive dias já fechados) com a nova regra. Confirma?',async()=>{
+      const r=await this._api('PUT',`/admin/pk/programacoes/${this._pkAbertaId}`,{modo_pontuacao});
+      if(r?.ok){this._toast('Modo de pontuação atualizado!');this._abrirDetalhePk(this._pkAbertaId);}
+      else this._toast(r?.erro||'Erro ao salvar modo de pontuação','err');
+    });
   }
   _atualizarPreviewBannerPk(url){
     const s=this.shadowRoot;
@@ -2657,6 +2667,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('pkDetDataFim').value=d.programacao.data_fim||'';
     s.getElementById('pkDetBanner').value=d.programacao.banner_url||'';
     this._atualizarPreviewBannerPkDet(d.programacao.banner_url||'');
+    s.getElementById('pkDetModoPontuacao').value=d.programacao.modo_pontuacao==='diamantes_vitoria'?'diamantes_vitoria':'padrao';
 
     // Sem agendamento, "Ativar" já dispara a geração do dia 1 na hora (a
     // liga começa hoje). Com início/fim agendados, o motor só gera pares
@@ -4753,6 +4764,17 @@ class DimaiorAdmin extends HTMLElement {
 
                   <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto — opcional)</span></div><input class="cfg-inp" type="url" style="width:100%" id="pkDetBanner" placeholder="https://drive.google.com/file/d/.../view"><div id="pkDetBannerPreview" style="margin-top:8px;display:none"><img id="pkDetBannerImg" style="width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"></div></label></div>
                   <div><button class="btn btn-o btn-sm" id="btnPkSalvarBanner">${this._ico('check',12)} Salvar banner</button></div>
+
+                  <div class="cfg-row" style="flex-wrap:wrap;margin-top:12px">
+                    <label><div class="cfg-chave">Modo de pontuação</div>
+                      <select class="cfg-inp" id="pkDetModoPontuacao" style="width:260px">
+                        <option value="padrao">Padrão — só vitória vale ponto</option>
+                        <option value="diamantes_vitoria">Diamantes + Vitória (nova) — 1 pt a cada 1.000 diamantes + 2 pts por vitória</option>
+                      </select>
+                    </label>
+                    <button class="btn btn-o btn-sm" id="btnPkSalvarModoPontuacao" style="margin-top:16px">${this._ico('check',12)} Salvar modo de pontuação</button>
+                  </div>
+                  <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Recalcula o ranking dessa liga inteira (inclusive dias já fechados) com o novo modo — corrige na hora se a liga foi criada com o modo errado.</div>
 
                   <div class="bhead acc-toggle" id="accPkPart"><div class="btitulo">${this._ico('users',14)} Participantes ativos (<span id="pkDetParticipantesCount">0</span>)</div>
                     <div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnPkDetToggleAdd">${this._ico('plus',12)} Gerenciar roster</button><span class="acc-chevron" id="accPkPartIco">▼</span></div>
