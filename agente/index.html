@@ -973,7 +973,7 @@ function iniciarPainel() {
     document.getElementById('sidebar-login').textContent      = ag.login || '';
     document.getElementById('mobile-header-nome').textContent = ag.nome  || '—';
     const linkInput = document.getElementById('meu-link-input');
-    if (linkInput && ag.id) linkInput.value = `https://agencydmaior.com.br/recrutamento.html?agente=${ag.id}`;
+    if (linkInput && ag.id) linkInput.value = `https://agencydmaior.com.br/recrutamento?agente=${ag.id}`;
   }
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('painel').style.display     = 'block';
