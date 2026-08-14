@@ -5424,6 +5424,7 @@ class DimaiorAdmin extends HTMLElement {
           ${wppNum}</a>`:'';
         const cat=c.categoria==='games'?'🎮 Games':'🎭 Entretenimento';
         const recrutador=this._esc(c.recrutador_nome||'Padrão da agência');
+        const viaAgente=c.agente_nome?`<br><span style="font-size:10px;color:var(--cyan)">via agente: ${this._esc(c.agente_nome)}</span>`:'';
         const stBadge=`<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:${COR[c.status]||'var(--t2)'}">${BADGE[c.status]||c.status}</span>`;
         let motivoErro=String(c.motivo_bloqueio||'').trim();
         if(!motivoErro&&c.status==='erro'&&c.resposta_voyager){
@@ -5434,7 +5435,7 @@ class DimaiorAdmin extends HTMLElement {
         return`<tr style="border-bottom:1px solid var(--brddim)">
           <td style="padding:8px 12px">${foto}<strong style="color:var(--t1)">${nome}</strong>${wpp}</td>
           <td style="padding:8px">${cat}</td>
-          <td style="padding:8px;color:var(--t2)">${recrutador}</td>
+          <td style="padding:8px;color:var(--t2)">${recrutador}${viaAgente}</td>
           <td style="padding:8px">${stBadge}${erroDetalhe}</td>
           <td style="padding:8px;color:var(--t3)">${this._fdtCurto(c.criado_em)}</td>
           <td style="padding:8px;display:flex;gap:4px;flex-wrap:wrap">

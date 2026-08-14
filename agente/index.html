@@ -136,6 +136,28 @@
     .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse-dot 1.5s infinite; }
     @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:.3; } }
 
+    .meu-link-box {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 16px 20px; margin-bottom: 24px;
+    }
+    .meu-link-info { display: flex; flex-direction: column; gap: 4px; min-width: 220px; }
+    .meu-link-titulo { font-family: var(--font-t); font-size: 15px; font-weight: 700; color: var(--text); }
+    .meu-link-desc { font-size: 12px; color: var(--muted); }
+    .meu-link-copia { display: flex; gap: 8px; flex: 1; min-width: 260px; max-width: 460px; }
+    #meu-link-input {
+      flex: 1; min-width: 0; padding: 10px 12px; background: rgba(255,255,255,.05);
+      border: 1px solid var(--border); border-radius: var(--r);
+      color: var(--sub); font-family: var(--font-b); font-size: 13px; outline: none;
+    }
+    #btn-copiar-meu-link {
+      flex-shrink: 0; padding: 10px 16px; background: linear-gradient(135deg, #00b4b4, var(--cyan));
+      border: none; border-radius: var(--r); color: #060B16;
+      font-family: var(--font-t); font-size: 13px; font-weight: 700; letter-spacing: .5px;
+      cursor: pointer; transition: opacity var(--ease);
+    }
+    #btn-copiar-meu-link:hover { opacity: .88; }
+
     /* Cards de métricas */
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .card {
@@ -700,6 +722,16 @@
           <h2>Dashboard</h2>
           <div class="badge-ao-vivo"><div class="dot-live"></div><span id="dash-ao-vivo-badge">— ao vivo</span></div>
         </div>
+        <div class="meu-link-box">
+          <div class="meu-link-info">
+            <span class="meu-link-titulo">Meu link de recrutamento</span>
+            <span class="meu-link-desc">Compartilhe com streamers — quem se candidatar por ele já fica vinculado a você.</span>
+          </div>
+          <div class="meu-link-copia">
+            <input type="text" id="meu-link-input" readonly>
+            <button type="button" id="btn-copiar-meu-link">Copiar</button>
+          </div>
+        </div>
         <div class="cards-grid" id="cards-dashboard">
           <div class="loading"><div class="spinner"></div></div>
         </div>
@@ -940,11 +972,27 @@ function iniciarPainel() {
     document.getElementById('sidebar-nome').textContent       = ag.nome  || '—';
     document.getElementById('sidebar-login').textContent      = ag.login || '';
     document.getElementById('mobile-header-nome').textContent = ag.nome  || '—';
+    const linkInput = document.getElementById('meu-link-input');
+    if (linkInput && ag.id) linkInput.value = `https://agencydmaior.com.br/recrutamento.html?agente=${ag.id}`;
   }
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('painel').style.display     = 'block';
   navegarPara('dashboard');
 }
+
+document.getElementById('btn-copiar-meu-link')?.addEventListener('click', async function () {
+  const input = document.getElementById('meu-link-input');
+  if (!input?.value) return;
+  try {
+    await navigator.clipboard.writeText(input.value);
+  } catch (_) {
+    input.select();
+    document.execCommand('copy');
+  }
+  const original = this.textContent;
+  this.textContent = 'Copiado!';
+  setTimeout(() => { this.textContent = original; }, 1600);
+});
 
 // Tenta restaurar sessão ao carregar
 window.addEventListener('DOMContentLoaded', () => {

@@ -289,13 +289,17 @@ window.DmaiorAPI = {
     async listarRecrutadores() {
       return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, '/candidatura/recrutadores');
     },
+    /** Resolve o agente por trás de um link exclusivo (?agente=<id>). */
+    async buscarAgente(id) {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/candidatura/agente/${encodeURIComponent(id)}`);
+    },
     /** Busca perfil Kwai/Voyager pelo UID antes do cadastro. */
     async buscarPerfil(uid) {
       return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/buscar-perfil', { uid });
     },
     /** Envia candidatura completa com perfil confirmado. */
-    async enviar({ uid, nome, whatsapp, categoria, recrutador_id, aceite }) {
-      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, recrutador_id, aceite });
+    async enviar({ uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite }) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite });
     },
     /** Consulta status pelo protocolo gerado no envio. */
     async status(protocolo) {

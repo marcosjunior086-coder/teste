@@ -330,7 +330,7 @@
 
   <script charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
   <script charset=utf-8 src="js/utils/helpers.js"></script>
-  <script charset=utf-8 src="js/api.js?v=20260801-pk-diario"></script>
+  <script charset=utf-8 src="js/api.js?v=20260814-agente-link-recrutamento"></script>
   <script charset=utf-8 src="js/auth.js"></script>
   <script charset=utf-8 src="js/router.js"></script>
   <script charset=utf-8 src="js/components/menu-mobile.js?v=20260801-sino-rapido-fix"></script>
@@ -342,6 +342,7 @@
     let _verificacao = null;
     let _candidaturaId = null;
     let _recrutadoresCarregados = false;
+    let _agenteVinculo = null;
 
     const $ = id => document.getElementById(id);
     const tt = (key, params) => window.DMaiorPrefs?.t ? window.DMaiorPrefs.t(key, params) : key;
@@ -609,6 +610,7 @@
           whatsapp,
           categoria,
           recrutador_id: $('f-recrutador').value || null,
+          agente_id: _agenteVinculo?.id || null,
           aceite: true,
         });
 
@@ -692,6 +694,19 @@
       $('f-aceite').checked = false;
       irParaEtapa(1);
     });
+
+    /* -- Agente do link exclusivo (recrutamento.html?agente=<id>) --
+       Resolvido uma vez no carregamento da página, sem bloquear nada:
+       se o agente não existir/estiver inativo, a candidatura segue normal,
+       sem atribuição de agente (mesmo comportamento de sempre). */
+    (async function resolverAgenteDaUrl() {
+      const agenteId = new URLSearchParams(location.search).get('agente');
+      if (!agenteId) return;
+      try {
+        const r = await window.DmaiorAPI.candidatura.buscarAgente(agenteId);
+        if (r?.ok && r.agente?.id) _agenteVinculo = r.agente;
+      } catch (e) { console.warn('[agente]', e); }
+    })();
   })();
   </script>
 
