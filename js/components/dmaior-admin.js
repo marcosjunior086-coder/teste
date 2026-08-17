@@ -2553,9 +2553,10 @@ class DimaiorAdmin extends HTMLElement {
 
   async _buscarElegiveisPk(){
     const minimo=this._pkCriterioValor();
+    const periodo=this.shadowRoot.getElementById('pkPeriodoSelect')?.value==='atual'?'atual':'anterior';
     const area=this.shadowRoot.getElementById('pkElegiveisArea');
     area.innerHTML=this._loading();
-    const d=await this._api('GET',`/admin/pk/elegiveis?minimo=${minimo}`);
+    const d=await this._api('GET',`/admin/pk/elegiveis?minimo=${minimo}&periodo=${periodo}`);
     if(!d?.ok){area.innerHTML=this._empty('warning','Erro ao buscar elegíveis');return;}
     this._pkElegiveis=d.streamers||[];
     // pré-marca quem já bate o critério — admin pode desmarcar/marcar livremente
@@ -2570,7 +2571,7 @@ class DimaiorAdmin extends HTMLElement {
   _renderPkElegiveis(){
     const s=this.shadowRoot,area=s.getElementById('pkElegiveisArea');
     if(!this._pkElegiveis.length && !this._pkSelecionados.size){
-      area.innerHTML=this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do mês anterior');
+      area.innerHTML=this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do período escolhido');
     } else {
       // une elegíveis buscados + quem já foi adicionado manualmente (pode não estar na lista de elegíveis)
       const porUid=new Map(this._pkElegiveis.map(st=>[st.kwai_uid,st]));
@@ -2789,9 +2790,10 @@ class DimaiorAdmin extends HTMLElement {
   // criação, que ainda não gravou nada no banco.
   async _buscarElegiveisPkDet(){
     const minimo=this._pkDetCriterioValor();
+    const periodo=this.shadowRoot.getElementById('pkDetPeriodoSelect')?.value==='atual'?'atual':'anterior';
     const area=this.shadowRoot.getElementById('pkDetElegiveisArea');
     area.innerHTML=this._loading();
-    const d=await this._api('GET',`/admin/pk/elegiveis?minimo=${minimo}`);
+    const d=await this._api('GET',`/admin/pk/elegiveis?minimo=${minimo}&periodo=${periodo}`);
     if(!d?.ok){area.innerHTML=this._empty('warning','Erro ao buscar elegíveis');return;}
     this._pkDetElegiveis=d.streamers||[];
     this._renderPkElegiveisDet();
@@ -2801,7 +2803,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot,area=s.getElementById('pkDetElegiveisArea');
     const ativos=new Set((this._pkDetalheCache?.participantes||[]).map(p=>p.kwai_uid));
     if(!this._pkDetElegiveis.length){
-      area.innerHTML=this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do mês anterior');
+      area.innerHTML=this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do período escolhido');
       return;
     }
     const linhas=[...this._pkDetElegiveis].sort((a,b)=>(b.diamantes||0)-(a.diamantes||0));
@@ -4715,7 +4717,13 @@ class DimaiorAdmin extends HTMLElement {
                   <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Só vale pra essa liga — não muda a pontuação de nenhuma liga já criada.</div>
 
                   <div class="cfg-row" style="flex-wrap:wrap">
-                    <label><div class="cfg-chave">Critério (diamantes mês anterior)</div>
+                    <label><div class="cfg-chave">Período de referência</div>
+                      <select class="cfg-inp" id="pkPeriodoSelect" style="width:150px">
+                        <option value="anterior">Mês anterior</option>
+                        <option value="atual">Mês atual</option>
+                      </select>
+                    </label>
+                    <label><div class="cfg-chave">Critério (diamantes)</div>
                       <select class="cfg-inp" id="pkCriterioSelect" style="width:210px">
                         <option value="0">Sem critério — seleção manual</option>
                         <option value="1000">Acima de 1.000</option>
@@ -4731,7 +4739,7 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="bhead" style="margin-top:6px"><div class="btitulo">${this._ico('users',14)} Roster inicial</div>
                     <div class="bacoes"><span id="pkParticipantesCount" style="font-size:11px;color:var(--t3)">0 selecionados</span><button class="btn btn-o btn-sm" id="btnPkSelecionarTodos">Selecionar elegíveis</button></div>
                   </div>
-                  <div id="pkElegiveisArea" style="max-height:320px;overflow-y:auto;border:1px solid var(--brddim);border-radius:var(--rs);margin-top:8px">${this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do mês anterior')}</div>
+                  <div id="pkElegiveisArea" style="max-height:320px;overflow-y:auto;border:1px solid var(--brddim);border-radius:var(--rs);margin-top:8px">${this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do período escolhido')}</div>
                   <div class="cfg-row">
                     <label style="flex:1"><div class="cfg-chave">Adicionar manual (UID)</div><input class="cfg-inp" style="width:100%" id="pkManualUid" placeholder="kwai_uid"></label>
                     <button class="btn btn-o btn-sm" id="btnPkAddManual" style="margin-top:16px">${this._ico('plus',12)} Adicionar</button>
@@ -4785,7 +4793,13 @@ class DimaiorAdmin extends HTMLElement {
 
                   <div id="pkDetAddWrap" style="display:none;margin-top:4px">
                     <div class="cfg-row" style="flex-wrap:wrap">
-                      <label><div class="cfg-chave">Critério (diamantes mês anterior)</div>
+                      <label><div class="cfg-chave">Período de referência</div>
+                        <select class="cfg-inp" id="pkDetPeriodoSelect" style="width:150px">
+                          <option value="anterior">Mês anterior</option>
+                          <option value="atual">Mês atual</option>
+                        </select>
+                      </label>
+                      <label><div class="cfg-chave">Critério (diamantes)</div>
                         <select class="cfg-inp" id="pkDetCriterioSelect" style="width:210px">
                           <option value="0">Sem critério</option>
                           <option value="1000">Acima de 1.000</option>
