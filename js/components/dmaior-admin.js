@@ -1847,6 +1847,10 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAgenteVoltarLista')?.addEventListener('click',()=>this._mostrarListaAgentes());
     s.getElementById('btnAgenteEditar')?.addEventListener('click',()=>this._editarAgenteAtual());
     s.getElementById('btnAgenteSenha')?.addEventListener('click',()=>this._alterarSenhaAgenteAtual());
+    s.getElementById('btnAgenteExcluir')?.addEventListener('click',()=>{
+      const nome=s.getElementById('agenteDetalheTitulo')?.textContent||'este agente';
+      this._confirmarDel(`Excluir "${nome}" definitivamente? Só funciona se ele nunca teve streamer vinculado — caso já tenha histórico, use Editar e mude o status pra Inativo em vez de excluir.`,()=>this._excluirAgenteAtual());
+    });
     s.getElementById('btnVincularStreamer')?.addEventListener('click',()=>{ const fb=s.getElementById('formVincularBox'); if(fb)fb.style.display=fb.style.display==='none'?'':'none'; });
     s.getElementById('btnCancelarVincular')?.addEventListener('click',()=>{ s.getElementById('formVincularBox').style.display='none'; s.getElementById('resultadoUidAgente').style.display='none'; s.getElementById('inpUidVincular').value=''; s.getElementById('btnConfirmarVincular').style.display='none'; this._buscaVincularStreamer=null; });
     s.getElementById('btnBuscarUidAgente')?.addEventListener('click',()=>this._buscarStreamerParaVincular());
@@ -5240,6 +5244,7 @@ class DimaiorAdmin extends HTMLElement {
                       <button class="btn btn-sm" id="btnAgenteVoltarLista">${this._ico('history',13)} Voltar</button>
                       <button class="btn btn-sm btn-o" id="btnAgenteEditar">${this._ico('edit',13)} Editar</button>
                       <button class="btn btn-sm" id="btnAgenteSenha" style="background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.3);color:var(--gold)">${this._ico('settings',13)} Senha</button>
+                      <button class="btn btn-sm" id="btnAgenteExcluir" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',13)} Excluir</button>
                     </div>
                   </div>
                   <div id="agenteDetalheInfo" style="padding:16px;display:flex;gap:24px;flex-wrap:wrap">
@@ -6313,6 +6318,15 @@ class DimaiorAdmin extends HTMLElement {
     try {
       const d = await this._get(`/admin/agentes/${this._agenteAtualId}`);
       this._abrirModalAgente(d.agente);
+    } catch(e) { this._toast(e.message,'err'); }
+  }
+
+  async _excluirAgenteAtual() {
+    if (!this._agenteAtualId) return;
+    try {
+      await this._delete(`/admin/agentes/${this._agenteAtualId}`);
+      this._toast('Agente excluído!','ok');
+      this._mostrarListaAgentes();
     } catch(e) { this._toast(e.message,'err'); }
   }
 

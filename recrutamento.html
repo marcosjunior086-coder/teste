@@ -106,7 +106,7 @@
     .rc-agencia-id strong { display: block; margin-top: 2px; color: var(--dm-cyan); font-family: monospace; font-size: 1.05rem; letter-spacing: .08em; }
     .rc-copy-btn { flex-shrink: 0; padding: 8px 11px; border: 1px solid var(--dm-border); border-radius: 7px; background: transparent; color: var(--dm-cyan); font-family: var(--dm-font-title); font-weight: 700; cursor: pointer; }
     .rc-result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .rc-result-link { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 12px; border: 1px solid var(--dm-border); border-radius: 8px; color: var(--dm-text); font-family: var(--dm-font-title); font-weight: 700; text-align: center; text-decoration: none; }
+    .rc-result-link { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 12px; border: 1px solid var(--dm-border); border-radius: 8px; background: transparent; color: var(--dm-text); font-family: var(--dm-font-title); font-size: inherit; font-weight: 700; text-align: center; text-decoration: none; cursor: pointer; }
     .rc-result-link:hover { border-color: var(--dm-cyan); color: var(--dm-cyan); }
     .rc-result-link.whatsapp { border-color: rgba(37,211,102,.4); color: #25d366; }
     @media(max-width:480px){ .rc-result-actions { grid-template-columns: 1fr; } }
@@ -132,6 +132,56 @@
     [data-font-size="extra"] .rc-perfil-nome { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.15; }
     [data-font-size="extra"] .rc-btn-row { flex-direction: column; }
     [data-font-size="extra"] .rc-card { padding: 24px 18px; }
+
+    /* -- Tutorial "Como aceitar o convite" (carrossel peek + lightbox) -- */
+    .rc-tut-overlay { position: fixed; inset: 0; background: rgba(4,5,8,.88); backdrop-filter: blur(6px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s; padding: 20px 0; }
+    .rc-tut-overlay.on { opacity: 1; pointer-events: auto; }
+    .rc-tut-dialog { width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; background: var(--dm-grad-card,#0e1525); border: 1px solid var(--dm-border); border-radius: 16px; padding: 20px 18px 24px; }
+    .rc-tut-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .rc-tut-title { font-family: var(--dm-font-title); font-size: 1rem; color: var(--dm-cyan); text-transform: uppercase; letter-spacing: .06em; }
+    .rc-tut-close { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--dm-border); background: transparent; color: var(--dm-text); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .rc-tut-caption { text-align: center; margin: 14px 0 18px; min-height: 46px; }
+    .rc-tut-badge { display: inline-block; background: linear-gradient(135deg,#fff3d6,var(--dm-gold)); color: #1a1500; font-weight: 800; font-size: .68rem; letter-spacing: .05em; padding: 4px 14px; border-radius: 999px; margin-bottom: 8px; }
+    .rc-tut-caption-txt { font-size: .85rem; line-height: 1.5; color: var(--dm-text); }
+    .rc-tut-caption-txt b { color: var(--dm-gold); font-weight: 700; }
+
+    .rc-tut-stage-outer { overflow: hidden; position: relative; padding: 6px 0 30px; }
+    .rc-tut-stage { position: relative; height: 340px; display: flex; align-items: center; justify-content: center; touch-action: pan-y; }
+    .rc-tut-card { position: absolute; width: 200px; border-radius: 18px; overflow: hidden; cursor: pointer; transition: transform .45s cubic-bezier(.22,.85,.25,1), filter .45s, opacity .45s, box-shadow .45s; }
+    .rc-tut-card img { display: block; width: 100%; height: auto; border-radius: 18px; pointer-events: none; -webkit-user-drag: none; }
+    .rc-tut-card.active { z-index: 10; transform: translateX(0) scale(1); filter: brightness(1) saturate(1); opacity: 1; box-shadow: 0 10px 26px -6px rgba(240,192,64,.28), 0 12px 28px -12px rgba(0,0,0,.6); }
+    .rc-tut-card.side { z-index: 5; filter: brightness(.42) saturate(.55); opacity: .85; box-shadow: 0 10px 22px -10px rgba(0,0,0,.5); }
+    .rc-tut-card.prev { transform: translateX(-150px) scale(.86); }
+    .rc-tut-card.next { transform: translateX(150px) scale(.86); }
+    .rc-tut-card.far { z-index: 1; opacity: 0; pointer-events: none; }
+    .rc-tut-card.far.prev { transform: translateX(-150px) scale(.8); }
+    .rc-tut-card.far.next { transform: translateX(150px) scale(.8); }
+
+    .rc-tut-nav { display: flex; justify-content: center; gap: 12px; margin-top: 0; }
+    .rc-tut-nav-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--dm-border); background: transparent; color: var(--dm-cyan); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .95rem; }
+    .rc-tut-nav-btn.disabled { opacity: .3; pointer-events: none; }
+    .rc-tut-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+    .rc-tut-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dm-border); transition: .25s; cursor: pointer; }
+    .rc-tut-dot.on { background: var(--dm-gold); width: 18px; border-radius: 4px; }
+
+    .rc-tut-lb { position: fixed; inset: 0; background: rgba(4,5,8,.94); backdrop-filter: blur(6px); z-index: 220; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .rc-tut-lb.on { opacity: 1; pointer-events: auto; }
+    .rc-tut-lb img { width: 340px; max-width: 84vw; max-height: 78vh; object-fit: contain; border-radius: 18px; box-shadow: 0 30px 70px -10px rgba(0,0,0,.8); transform: scale(.92); transition: transform .3s; }
+    .rc-tut-lb.on img { transform: scale(1); }
+    .rc-tut-lb-close { position: absolute; top: 18px; right: 18px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.06); border: 1px solid var(--dm-border); color: var(--dm-text); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .rc-tut-lb-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.06); border: 1px solid var(--dm-border); color: var(--dm-cyan); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .rc-tut-lb-prev { left: 14px; } .rc-tut-lb-next { right: 14px; }
+    .rc-tut-lb-counter { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); font-size: .74rem; color: var(--dm-text-muted); }
+
+    @media(max-width:420px){
+      .rc-tut-card { width: 62vw; }
+      .rc-tut-card.prev { transform: translateX(-48vw) scale(.86); }
+      .rc-tut-card.next { transform: translateX(48vw) scale(.86); }
+      .rc-tut-card.far.prev { transform: translateX(-48vw) scale(.8); }
+      .rc-tut-card.far.next { transform: translateX(48vw) scale(.8); }
+      .rc-tut-lb-prev { left: 4px; } .rc-tut-lb-next { right: 4px; }
+    }
   </style>
 </head>
 <body>
@@ -309,7 +359,7 @@
                 <span style="display:block;margin-top:4px;font-size:.75rem;font-style:italic;color:var(--dm-text-muted)" data-i18n="recruiterSoon">Informações de recrutador em breve.</span>
               </div>
               <div class="rc-result-actions">
-                <a class="rc-result-link" href="https://drive.google.com/file/d/1ywFAzGnmj4xyhs_p8sPWWZUWSx3FzCVj/view?usp=drive_link" target="_blank" rel="noopener noreferrer" data-i18n="howAcceptInvite">Como aceitar o convite</a>
+                <button type="button" class="rc-result-link" id="btn-como-aceitar" data-i18n="howAcceptInvite">Como aceitar o convite</button>
                 <a class="rc-result-link whatsapp" id="btn-wpp-resultado" href="https://wa.me/5517997176407" target="_blank" rel="noopener noreferrer" data-i18n="talkAgency">Falar com a agência</a>
               </div>
             </div>
@@ -327,6 +377,33 @@
       </div><!-- /rc-card -->
     </div><!-- /rc-page -->
   </main>
+
+  <!-- -- Tutorial "Como aceitar o convite" -- -->
+  <div class="rc-tut-overlay" id="rc-tut-overlay">
+    <div class="rc-tut-dialog">
+      <div class="rc-tut-head">
+        <span class="rc-tut-title" data-i18n="howAcceptInvite">Como aceitar o convite</span>
+        <button type="button" class="rc-tut-close" id="rc-tut-close" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="rc-tut-caption">
+        <span class="rc-tut-badge" id="rc-tut-badge"></span>
+        <div class="rc-tut-caption-txt" id="rc-tut-caption-txt"></div>
+      </div>
+      <div class="rc-tut-stage-outer"><div class="rc-tut-stage" id="rc-tut-stage"></div></div>
+      <div class="rc-tut-nav">
+        <button type="button" class="rc-tut-nav-btn" id="rc-tut-prev">&lsaquo;</button>
+        <button type="button" class="rc-tut-nav-btn" id="rc-tut-next">&rsaquo;</button>
+      </div>
+      <div class="rc-tut-dots" id="rc-tut-dots"></div>
+    </div>
+  </div>
+  <div class="rc-tut-lb" id="rc-tut-lb">
+    <button type="button" class="rc-tut-lb-close" id="rc-tut-lb-close" aria-label="Fechar">&times;</button>
+    <button type="button" class="rc-tut-lb-nav rc-tut-lb-prev" id="rc-tut-lb-prev">&lsaquo;</button>
+    <img id="rc-tut-lb-img" src="" alt="">
+    <button type="button" class="rc-tut-lb-nav rc-tut-lb-next" id="rc-tut-lb-next">&rsaquo;</button>
+    <div class="rc-tut-lb-counter" id="rc-tut-lb-counter"></div>
+  </div>
 
   <script charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
   <script charset=utf-8 src="js/utils/helpers.js"></script>
@@ -685,6 +762,97 @@
       $('f-uid').value = '';
       irParaEtapa(1);
     });
+
+    /* -- Tutorial "Como aceitar o convite" (carrossel peek + lightbox) -- */
+    (function tutorialConvite() {
+      const btnAbrir = $('btn-como-aceitar');
+      if (!btnAbrir) return;
+      const overlay = $('rc-tut-overlay');
+      const stage   = $('rc-tut-stage');
+      const dotsWrap = $('rc-tut-dots');
+      const capBadge = $('rc-tut-badge');
+      const capTxt   = $('rc-tut-caption-txt');
+      const lb        = $('rc-tut-lb');
+      const lbImg      = $('rc-tut-lb-img');
+      const lbCounter  = $('rc-tut-lb-counter');
+
+      const total = 5;
+      const imgs = Array.from({ length: total }, (_, i) => `assets/tutorial-convite/passo${i + 1}.png`);
+      const legendas = [
+        { badge: '1º PASSO', txt: 'Abra <b>"Kwai mensagens"</b> e toque na conversa <b>"Live Kwai BR"</b>.' },
+        { badge: '2º PASSO', txt: 'Na mensagem do convite, toque em <b>"para autorizar"</b>.' },
+        { badge: '3º PASSO', txt: 'Leia as informações, marque a confirmação do acordo e toque em <b>"Aceitar convite"</b>.' },
+        { badge: '4º PASSO', txt: 'Escolha <b>"WhatsApp"</b> como contato e informe seu número.' },
+        { badge: '5º PASSO', txt: `Digite o ID da agência <b>"${AGENCIA_KWAI_ID}"</b> e toque em <b>"Confirmar entrada"</b>.` },
+      ];
+      let active = 0;
+      let montado = false;
+      let lbIndex = 0;
+
+      function montarCards() {
+        if (montado) return;
+        montado = true;
+        stage.innerHTML = imgs.map((src, i) => `<div class="rc-tut-card" data-i="${i}"><img src="${src}" alt="Passo ${i + 1}" loading="lazy"></div>`).join('');
+        dotsWrap.innerHTML = imgs.map((_, i) => `<div class="rc-tut-dot" data-i="${i}"></div>`).join('');
+        const cardEls = [...stage.querySelectorAll('.rc-tut-card')];
+        const dotEls  = [...dotsWrap.querySelectorAll('.rc-tut-dot')];
+
+        function render() {
+          cardEls.forEach((el, i) => {
+            const offset = i - active;
+            el.classList.remove('active', 'side', 'prev', 'next', 'far');
+            if (offset === 0) el.classList.add('active');
+            else if (offset === -1) el.classList.add('side', 'prev');
+            else if (offset === 1) el.classList.add('side', 'next');
+            else if (offset < -1) el.classList.add('side', 'prev', 'far');
+            else el.classList.add('side', 'next', 'far');
+          });
+          dotEls.forEach((d, i) => d.classList.toggle('on', i === active));
+          $('rc-tut-prev').classList.toggle('disabled', active === 0);
+          $('rc-tut-next').classList.toggle('disabled', active === total - 1);
+          capBadge.textContent = legendas[active].badge;
+          capTxt.innerHTML = legendas[active].txt;
+        }
+        render();
+
+        function irPara(i) { active = Math.max(0, Math.min(total - 1, i)); render(); }
+        $('rc-tut-prev').addEventListener('click', () => irPara(active - 1));
+        $('rc-tut-next').addEventListener('click', () => irPara(active + 1));
+        dotEls.forEach(d => d.addEventListener('click', () => irPara(+d.dataset.i)));
+        cardEls.forEach((el, i) => el.addEventListener('click', () => { if (i === active) abrirLightbox(i); else irPara(i); }));
+
+        let dragging = false, startX = 0, moved = 0;
+        stage.addEventListener('pointerdown', e => { dragging = true; startX = e.clientX; moved = 0; stage.setPointerCapture(e.pointerId); });
+        stage.addEventListener('pointermove', e => { if (dragging) moved = e.clientX - startX; });
+        stage.addEventListener('pointerup', () => {
+          if (!dragging) return; dragging = false;
+          if (moved < -40) irPara(active + 1);
+          else if (moved > 40) irPara(active - 1);
+          moved = 0;
+        });
+      }
+
+      function abrirLightbox(i) { lbIndex = i; renderLb(); lb.classList.add('on'); }
+      function renderLb() { lbImg.src = imgs[lbIndex]; lbCounter.textContent = `${lbIndex + 1} / ${total}`; }
+      function fecharLightbox() { lb.classList.remove('on'); }
+
+      $('rc-tut-lb-close').addEventListener('click', fecharLightbox);
+      $('rc-tut-lb-prev').addEventListener('click', () => { lbIndex = Math.max(0, lbIndex - 1); renderLb(); });
+      $('rc-tut-lb-next').addEventListener('click', () => { lbIndex = Math.min(total - 1, lbIndex + 1); renderLb(); });
+      lb.addEventListener('click', e => { if (e.target === lb) fecharLightbox(); });
+
+      function abrirModal() { montarCards(); overlay.classList.add('on'); document.body.style.overflow = 'hidden'; }
+      function fecharModal() { overlay.classList.remove('on'); document.body.style.overflow = ''; fecharLightbox(); }
+
+      btnAbrir.addEventListener('click', abrirModal);
+      $('rc-tut-close').addEventListener('click', fecharModal);
+      overlay.addEventListener('click', e => { if (e.target === overlay) fecharModal(); });
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        if (lb.classList.contains('on')) fecharLightbox();
+        else if (overlay.classList.contains('on')) fecharModal();
+      });
+    })();
 
     /* -- Resultado ? nova consulta -- */
     $('btn-nova').addEventListener('click', () => {
