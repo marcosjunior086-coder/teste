@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script>
+    document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#060B16">
+  <link rel="manifest" href="manifest.webmanifest?v=20260703-favicon-1">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=20260703-favicon-1">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=20260703-favicon-1">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon.png?v=20260703-favicon-1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DMaior">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="color-scheme" content="dark light">
+  <title>Buscar UID Kwai — DMaior Agency</title>
+  <meta name="description" content="Resolve o Kwai ID (usuário) para o UID numérico. Ferramenta exclusiva pra streamers logados da DMaior Agency.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css?v=20260701-ios-1">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .bu-page { max-width: 480px; margin: 32px auto 60px; padding: 0 16px; }
+    .bu-hero { text-align: center; margin-bottom: 24px; }
+    .bu-hero h1 { font-family: var(--dm-font-title); font-size: clamp(1.5rem,5vw,2rem); color: var(--dm-cyan); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .bu-hero p  { color: var(--dm-text-muted); font-size: .9rem; line-height: 1.6; }
+
+    .bu-card { padding: 26px 22px; }
+    @media(max-width:480px){ .bu-card { padding: 20px 16px; } }
+
+    .bu-form-row { display: flex; gap: 10px; }
+    .bu-form-row .dm-input-field { flex: 1; }
+    .bu-form-row .dm-btn-primary { flex-shrink: 0; padding: 12px 18px; }
+    .bu-hint { font-size: .78rem; color: var(--dm-text-muted); margin-top: 8px; }
+
+    .bu-loading { display: none; align-items: center; justify-content: center; gap: 10px; padding: 26px 0; color: var(--dm-text-muted); font-size: .9rem; }
+    .bu-loading.on { display: flex; }
+    .bu-spinner { width: 22px; height: 22px; border: 2px solid rgba(0,212,212,.2); border-top-color: var(--dm-cyan); border-radius: 50%; animation: bu-spin .7s linear infinite; }
+    @keyframes bu-spin { to { transform: rotate(360deg); } }
+
+    .bu-alert { display: none; border-radius: 10px; padding: 14px 16px; margin-top: 18px; font-size: .88rem; line-height: 1.5; background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.3); color: #f87171; }
+    .bu-alert.on { display: block; }
+
+    .bu-resultado { display: none; margin-top: 22px; }
+    .bu-resultado.on { display: block; }
+    .bu-perfil { display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(0,212,212,.04); border: 1px solid rgba(0,212,212,.2); border-radius: 12px; }
+    .bu-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(0,212,212,.3); flex-shrink: 0; background: var(--dm-card); }
+    .bu-avatar-ph { width: 56px; height: 56px; border-radius: 50%; background: var(--dm-card); border: 2px solid var(--dm-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--dm-font-title); font-size: 1.3rem; color: var(--dm-cyan); }
+    .bu-info { min-width: 0; flex: 1; }
+    .bu-nome { font-family: var(--dm-font-title); font-size: 1.05rem; font-weight: 700; color: var(--dm-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+    .bu-kwai-id { font-size: .8rem; color: var(--dm-text-muted); margin-top: 2px; }
+    .bu-extra { font-size: .78rem; color: var(--dm-text-muted); margin-top: 4px; }
+    .bu-selo { color: #4ade80; }
+
+    .bu-uid-box { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin-top: 14px; border: 1px solid var(--dm-border); border-radius: 8px; background: var(--dm-cyan-08); }
+    .bu-uid-box span { color: var(--dm-text-muted); font-size: .78rem; display: block; }
+    .bu-uid-box strong { display: block; margin-top: 2px; color: var(--dm-cyan); font-family: monospace; font-size: 1.1rem; letter-spacing: .05em; word-break: break-all; }
+    .bu-copy-btn { flex-shrink: 0; padding: 8px 12px; border: 1px solid var(--dm-border); border-radius: 7px; background: transparent; color: var(--dm-cyan); font-family: var(--dm-font-title); font-weight: 700; cursor: pointer; font-size: .82rem; }
+    .bu-copy-btn:hover { border-color: var(--dm-cyan); }
+
+    .bu-hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <menu-mobile-dmaior></menu-mobile-dmaior>
+
+  <main class="dm-main">
+    <div class="bu-page">
+      <div class="bu-hero">
+        <h1>Buscar UID Kwai</h1>
+        <p>Digite o Kwai ID (nome de usuário) pra descobrir o UID numérico.</p>
+      </div>
+
+      <div class="dm-glass-card bu-card">
+        <form id="bu-form">
+          <div class="bu-form-row">
+            <input id="bu-input" class="dm-input-field" type="text" placeholder="ex: amandinhanery" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+            <button type="submit" class="dm-btn-primary" id="bu-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Buscar
+            </button>
+          </div>
+          <div class="bu-hint">Aceita o @usuário do perfil ou o link do perfil na Kwai.</div>
+        </form>
+
+        <div class="bu-loading" id="bu-loading">
+          <div class="bu-spinner"></div>
+          <span>Buscando…</span>
+        </div>
+
+        <div class="bu-alert" id="bu-alert"></div>
+
+        <div class="bu-resultado" id="bu-resultado">
+          <div class="bu-perfil">
+            <img class="bu-avatar bu-hidden" id="bu-avatar" alt="" onerror="this.classList.add('bu-hidden');document.getElementById('bu-avatar-ph').classList.remove('bu-hidden')">
+            <div class="bu-avatar-ph bu-hidden" id="bu-avatar-ph"></div>
+            <div class="bu-info">
+              <div class="bu-nome"><span id="bu-nome"></span><span class="bu-selo bu-hidden" id="bu-selo" title="Verificado">✓</span></div>
+              <div class="bu-kwai-id" id="bu-kwai-id"></div>
+              <div class="bu-extra" id="bu-extra"></div>
+            </div>
+          </div>
+          <div class="bu-uid-box">
+            <div><span>UID numérico</span><strong id="bu-uid"></strong></div>
+            <button type="button" class="bu-copy-btn" id="bu-copy">Copiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
+  <script charset=utf-8 src="js/utils/helpers.js"></script>
+  <script charset=utf-8 src="js/api.js"></script>
+  <script charset=utf-8 src="js/auth.js"></script>
+  <script charset=utf-8 src="js/router.js"></script>
+  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260801-sino-rapido-fix"></script>
+  <script>
+  (function () {
+    // Só pra quem tem acesso ao painel do streamer — sem sessão, manda pro login do painel.
+    if (!window.Auth || !Auth.isLoggedIn()) {
+      window.location.href = document.baseURI + 'painel/index.html?redirect=' + encodeURIComponent('/buscar-uid.html');
+      return;
+    }
+
+    const WORKER_URL = 'https://busca-uid.agencydmaior.com.br';
+    const $ = id => document.getElementById(id);
+    const form = $('bu-form');
+    const input = $('bu-input');
+    const btn = $('bu-btn');
+    const loading = $('bu-loading');
+    const alertEl = $('bu-alert');
+    const resultado = $('bu-resultado');
+
+    function esconderTudo() {
+      loading.classList.remove('on');
+      alertEl.classList.remove('on');
+      resultado.classList.remove('on');
+    }
+
+    function mostrarErro(msg) {
+      esconderTudo();
+      alertEl.textContent = msg || 'Não foi possível concluir a busca.';
+      alertEl.classList.add('on');
+    }
+
+    function mostrarResultado(d) {
+      esconderTudo();
+      $('bu-nome').textContent = d.nome || d.kwai_id || '(sem nome)';
+      $('bu-kwai-id').textContent = '@' + (d.kwai_id || '');
+      $('bu-uid').textContent = d.uid;
+      $('bu-selo').classList.toggle('bu-hidden', !d.verificado);
+
+      const avatar = $('bu-avatar'), avatarPh = $('bu-avatar-ph');
+      if (d.foto) {
+        avatar.src = d.foto;
+        avatar.classList.remove('bu-hidden');
+        avatarPh.classList.add('bu-hidden');
+      } else {
+        avatar.classList.add('bu-hidden');
+        avatarPh.classList.remove('bu-hidden');
+        avatarPh.textContent = (d.nome || d.kwai_id || '?').trim().charAt(0).toUpperCase();
+      }
+
+      const partes = [];
+      if (typeof d.seguidores === 'number') partes.push(d.seguidores.toLocaleString('pt-BR') + ' seguidores');
+      if (d.verificado && d.verificado_desc) partes.push(d.verificado_desc);
+      $('bu-extra').textContent = partes.join(' · ');
+
+      $('bu-copy').textContent = 'Copiar';
+      resultado.classList.add('on');
+    }
+
+    async function buscar(id) {
+      esconderTudo();
+      loading.classList.add('on');
+      btn.disabled = true;
+      try {
+        const resp = await fetch(WORKER_URL + '/resolver?id=' + encodeURIComponent(id));
+        const dados = await resp.json();
+        if (dados.ok) mostrarResultado(dados);
+        else mostrarErro(dados.erro);
+      } catch (e) {
+        mostrarErro('Falha ao conectar com o serviço de busca.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      const id = input.value.trim();
+      if (!id) return;
+      buscar(id);
+    });
+
+    $('bu-copy').addEventListener('click', async function () {
+      const uid = $('bu-uid').textContent.trim();
+      if (!uid) return;
+      try {
+        await navigator.clipboard.writeText(uid);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = uid;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      this.textContent = 'Copiado!';
+      setTimeout(() => { this.textContent = 'Copiar'; }, 1600);
+    });
+  })();
+  </script>
+
+  <dmaior-footer></dmaior-footer>
+  <script charset=utf-8 src="js/components/footer.js?v=20260624-3"></script>
+  <dmaior-cookie-consent></dmaior-cookie-consent>
+  <script charset=utf-8 src="js/components/cookie-consent.js?v=20260624-3"></script>
+  <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
+</body>
+</html>

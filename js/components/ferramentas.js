@@ -36,6 +36,14 @@ class DmaiorFerramentas extends HTMLElement {
       .floating-link svg{width:14px;height:14px;fill:#00A8FF;flex-shrink:0}
     </style>
     <div class="container">
+      <a href="buscar-uid.html" class="card">
+        <div class="icon-wrapper">
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.49L20.49,19L15.5,14M9.5,14C7.01,14 5,11.99 5,9.5C5,7.01 7.01,5 9.5,5C11.99,5 14,7.01 14,9.5C14,11.99 11.99,14 9.5,14Z"/></svg>
+        </div>
+        <h3 class="title">Buscar UID</h3>
+        <span class="subtitle">ID Kwai → UID</span>
+      </a>
+
       <div class="card" id="cardLivePC">
         <div class="icon-wrapper">
           <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21,16H3V4H21M21,2H3C1.89,2 1,2.89 1,4V16A2,2 0 0,0 3,18H10V20H8V22H16V20H14V18H21A2,2 0 0,0 23,16V4C23,2.89 22.1,2 21,2Z"/></svg>
