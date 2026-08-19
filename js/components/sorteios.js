@@ -1066,7 +1066,7 @@ class DmaiorSorteios extends HTMLElement {
       <div class="sort-card">
         <label class="sort-label">Adicionar ID da Kwai</label>
         <div class="sort-row" style="margin-bottom:.7rem;">
-          <input type="text" id="kwai-id" class="sort-inp" placeholder="ex: amandinhanery">
+          <input type="text" id="kwai-id" class="sort-inp" placeholder="Insira o ID Kwai">
           <button class="sort-btn" data-action="addKwaiIndividual">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Adicionar

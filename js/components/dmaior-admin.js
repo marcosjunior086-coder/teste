@@ -4898,7 +4898,7 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead"><div class="btitulo">${this._ico('search',14)} Buscar por ID da Kwai</div></div>
                 <div style="padding:18px 18px 20px">
                   <div style="display:flex;gap:10px;flex-wrap:wrap">
-                    <div class="busca" style="flex:1;min-width:200px">${this._ico('search',12)}<input id="buscaUidInput" type="text" placeholder="ex: amandinhanery (com ou sem @)" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%"/></div>
+                    <div class="busca" style="flex:1;min-width:200px">${this._ico('search',12)}<input id="buscaUidInput" type="text" placeholder="Insira o ID Kwai (com ou sem @)" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%"/></div>
                     <button class="btn btn-g" id="btnBuscaUidIr">${this._ico('search',13)} Buscar</button>
                   </div>
                   <div id="buscaUidResultado" style="margin-top:18px"></div>
