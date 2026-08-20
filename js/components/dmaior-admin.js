@@ -6869,10 +6869,9 @@ class DimaiorAdmin extends HTMLElement {
       const d=await this._get('/admin/tickets/liberados');
       const lista=d.liberados||[];
       if(!lista.length){el.innerHTML=this._empty('unlock','Nenhum streamer liberado ainda.');return;}
-      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>UID</th><th>Liberado em</th><th>Por</th><th>Ações</th></tr></thead><tbody>
+      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>Liberado em</th><th>Por</th><th>Ações</th></tr></thead><tbody>
         ${lista.map(l=>`<tr>
-          <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(l.foto,l.nome,'av')}<span>${this._esc(l.nome)}</span></div></td>
-          <td style="color:var(--t3)">${this._esc(l.kwai_uid)}</td>
+          <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(l.foto,l.nome,'av')}<div><div>${this._esc(l.nome)}</div>${l.nome!==l.kwai_uid?`<div style="font-size:10px;color:var(--t3)">UID: ${this._esc(l.kwai_uid)}</div>`:''}</div></div></td>
           <td>${this._fdt(l.liberado_em)}</td>
           <td style="color:var(--t3)">${this._esc(l.liberado_por||'—')}</td>
           <td><button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-remover-liberado="${this._esc(l.kwai_uid)}">${this._ico('trash',12)} Remover</button></td>
