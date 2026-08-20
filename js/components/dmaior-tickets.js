@@ -45,8 +45,28 @@ class DmaiorTickets extends HTMLElement {
     this._uid = localStorage.getItem('dm_uid') || '';
     this._token = localStorage.getItem('dm_token') || '';
     this._refreshToken = localStorage.getItem('dm_refresh') || '';
+    this._syncThemeHost();
     this._render();
     if (this._isLoggedIn()) this._iniciar();
+    this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
+    this._themeHandler = () => this._syncThemeHost();
+    window.addEventListener('storage', this._storageThemeHandler);
+    window.addEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('storage', this._storageThemeHandler);
+    window.removeEventListener('dmaior:tema', this._themeHandler);
+  }
+
+  // Mesmo mecanismo de tema de painel-pk.js/dmaior-votacao.js — lê dm_tema
+  // do localStorage e espelha no atributo data-theme do próprio host, pra
+  // CSS :host([data-theme]) reagir.
+  _syncThemeHost() {
+    let tema = 'original';
+    try { tema = localStorage.getItem('dm_tema') || 'original'; } catch (_) {}
+    if (tema === 'original') this.removeAttribute('data-theme');
+    else this.setAttribute('data-theme', tema);
   }
 
   // Chamado por dmaior-app.js ao abrir a aba — cobre o caso do elemento já
@@ -154,10 +174,18 @@ class DmaiorTickets extends HTMLElement {
   _render() {
     this.shadowRoot.innerHTML = `
     <style>
-      :host{ display:block; --dm-bg:#060B16; --dm-card:#0e1525; --dm-border:rgba(0,212,212,.15);
-        --dm-text:#e2e8f0; --dm-text-muted:#8aa3ba; --dm-cyan:#00d4d4; --dm-gold:#f0c040;
+      :host{ display:block; --dm-bg:#060B16; --dm-card:#0e1525; --dm-border:rgba(var(--dm-cyan-rgb),.15);
+        --dm-text:#e2e8f0; --dm-text-muted:#8aa3ba; --dm-cyan:#00d4d4; --dm-cyan-rgb:0,212,212; --dm-gold:#f0c040;
         --verde:#4ade80; --verm:#f87171; font-family:'Exo 2',sans-serif; color:var(--dm-text); }
       *{box-sizing:border-box}
+
+      /* Temas claros — mesmo padrão de painel-pk.js/dmaior-votacao.js/ranking.js:
+         data-theme espelhado no host via _syncThemeHost(), lê dm_tema do
+         localStorage. Só troca as variáveis — todo o resto do CSS já usa
+         var(--dm-*), então reage sozinho. */
+      :host([data-theme="branco"]){ --dm-card:#eaeff6; --dm-border:rgba(0,0,0,.08); --dm-text:#0d1117; --dm-text-muted:#5b6472; --dm-cyan:#0095a8; --dm-cyan-rgb:0,149,168; }
+      :host([data-theme="rosa"]){ --dm-card:#fce4ec; --dm-border:rgba(0,0,0,.06); --dm-text:#1a0010; --dm-text-muted:#7a4060; --dm-cyan:#e91e8c; --dm-cyan-rgb:233,30,140; }
+      :host([data-theme="laranja"]){ --dm-card:#fff3e0; --dm-border:rgba(0,0,0,.06); --dm-text:#1a0a00; --dm-text-muted:#7c5b3a; --dm-cyan:#f97316; --dm-cyan-rgb:249,115,22; }
       .wrap{max-width:720px;margin:0 auto;padding:6px 4px 40px}
       .ico{width:1em;height:1em;display:inline-block;vertical-align:-.15em;flex-shrink:0;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
@@ -166,16 +194,16 @@ class DmaiorTickets extends HTMLElement {
 
       .loading,.erro-box{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px 0;color:var(--dm-text-muted);font-size:.9rem}
       .erro-box{color:var(--verm)}
-      .spin{width:22px;height:22px;border:2px solid rgba(0,212,212,.2);border-top-color:var(--dm-cyan);border-radius:50%;animation:sp .7s linear infinite}
+      .spin{width:22px;height:22px;border:2px solid rgba(var(--dm-cyan-rgb),.2);border-top-color:var(--dm-cyan);border-radius:50%;animation:sp .7s linear infinite}
       @keyframes sp{to{transform:rotate(360deg)}}
 
-      .saldo-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;background:linear-gradient(135deg,rgba(240,192,64,.1),rgba(0,212,212,.05));border:1px solid rgba(240,192,64,.25);border-radius:16px;margin-bottom:20px;flex-wrap:wrap}
+      .saldo-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;background:linear-gradient(135deg,rgba(240,192,64,.1),rgba(var(--dm-cyan-rgb),.05));border:1px solid rgba(240,192,64,.25);border-radius:16px;margin-bottom:20px;flex-wrap:wrap}
       .saldo-left{display:flex;align-items:center;gap:14px}
       .saldo-icon{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#f0c040,#f0a020);display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(240,192,64,.35)}
       .saldo-icon .ico{width:26px;height:26px;color:#1a1200}
       .saldo-num{font-family:'Rajdhani',sans-serif;font-size:2.1rem;font-weight:700;color:var(--dm-gold);line-height:1}
       .saldo-lbl{font-size:.72rem;color:var(--dm-text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
-      .btn-como{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:1px solid rgba(0,212,212,.3);border-radius:8px;background:rgba(0,212,212,.06);color:var(--dm-cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+      .btn-como{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:1px solid rgba(var(--dm-cyan-rgb),.3);border-radius:8px;background:rgba(var(--dm-cyan-rgb),.06);color:var(--dm-cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
       .btn-como .ico{width:16px;height:16px}
 
       .jornada-card{padding:18px 20px;background:var(--dm-card);border:1px solid var(--dm-border);border-radius:14px;margin-bottom:24px}
@@ -191,10 +219,10 @@ class DmaiorTickets extends HTMLElement {
       .nivel-card.completo{border-color:rgba(34,197,94,.55)}
       .nivel-card.completo .nivel-selo{background:linear-gradient(135deg,#22c55e,#16a34a);border-color:#22c55e;color:#04150a}
       .nivel-card.completo .nivel-rodape{background:rgba(34,197,94,.14);border-top-color:rgba(34,197,94,.35);color:#4ade80}
-      .nivel-card.atual{border-color:var(--dm-cyan);box-shadow:0 0 0 3px rgba(0,212,212,.12)}
+      .nivel-card.atual{border-color:var(--dm-cyan);box-shadow:0 0 0 3px rgba(var(--dm-cyan-rgb),.12)}
       .nivel-card.atual .nivel-nome{color:var(--dm-cyan)}
-      .nivel-card.atual .nivel-selo{background:rgba(0,212,212,.18);border-color:var(--dm-cyan);color:var(--dm-cyan)}
-      .nivel-card.atual .nivel-rodape{background:rgba(0,212,212,.14);border-top-color:rgba(0,212,212,.35);color:var(--dm-cyan)}
+      .nivel-card.atual .nivel-selo{background:rgba(var(--dm-cyan-rgb),.18);border-color:var(--dm-cyan);color:var(--dm-cyan)}
+      .nivel-card.atual .nivel-rodape{background:rgba(var(--dm-cyan-rgb),.14);border-top-color:rgba(var(--dm-cyan-rgb),.35);color:var(--dm-cyan)}
       .nivel-card.futuro .nivel-selo{background:rgba(255,255,255,.03);color:var(--dm-text-muted)}
       .nivel-card.futuro .nivel-rodape{background:rgba(255,255,255,.02);color:var(--dm-text-muted)}
 
@@ -220,8 +248,8 @@ class DmaiorTickets extends HTMLElement {
       .ordenar select{background:rgba(0,0,0,.5);border:1px solid var(--dm-border);border-radius:7px;color:var(--dm-text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:.78rem;outline:none}
       .galeria-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:30px}
       .presente-card{background:var(--dm-card);border:1px solid var(--dm-border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
-      .presente-card:hover{border-color:rgba(0,212,212,.4)}
-      .presente-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(0,212,212,.07),transparent 70%);padding:12px}
+      .presente-card:hover{border-color:rgba(var(--dm-cyan-rgb),.4)}
+      .presente-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(var(--dm-cyan-rgb),.07),transparent 70%);padding:12px}
       .presente-img img{max-width:100%;max-height:100%;object-fit:contain}
       .presente-info{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px}
       .presente-nome{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.88rem;color:var(--dm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -229,14 +257,14 @@ class DmaiorTickets extends HTMLElement {
       .presente-custo{font-size:.86rem;color:var(--dm-gold);font-weight:700;display:flex;align-items:center;gap:5px}
       .presente-custo .ico{width:14px;height:14px}
       .btn-resgatar{margin-top:6px;padding:8px;border-radius:8px;border:none;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.76rem;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;text-align:center}
-      .btn-resgatar.ok{background:linear-gradient(135deg,#00b4b4,#00d4d4);color:#04101c}
+      .btn-resgatar.ok{background:var(--dm-cyan);color:#04101c}
       .btn-resgatar.ok:hover{opacity:.9}
       .btn-resgatar.bloq{background:rgba(255,255,255,.04);border:1px solid var(--dm-border);color:var(--dm-text-muted);cursor:not-allowed}
       .btn-resgatar[disabled]{opacity:.6;pointer-events:none}
 
       .hist-tabs{display:flex;gap:6px;margin-bottom:12px}
       .hist-tab{padding:7px 14px;border-radius:8px;border:1px solid var(--dm-border);background:transparent;color:var(--dm-text-muted);font-family:'Rajdhani',sans-serif;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;cursor:pointer}
-      .hist-tab.on{background:rgba(0,212,212,.1);border-color:rgba(0,212,212,.35);color:var(--dm-cyan)}
+      .hist-tab.on{background:rgba(var(--dm-cyan-rgb),.1);border-color:rgba(var(--dm-cyan-rgb),.35);color:var(--dm-cyan)}
       .hist-list{background:var(--dm-card);border:1px solid var(--dm-border);border-radius:14px;overflow:hidden}
       .hist-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--dm-border);font-size:.82rem}
       .hist-row:last-child{border-bottom:none}
@@ -246,7 +274,7 @@ class DmaiorTickets extends HTMLElement {
       .hist-val.neg{color:var(--verm);font-weight:700;flex-shrink:0}
       .hist-vertudo{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;color:var(--dm-cyan);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;border-top:1px solid var(--dm-border)}
       .hist-vertudo .ico{width:14px;height:14px}
-      .hist-vertudo:hover{background:rgba(0,212,212,.05)}
+      .hist-vertudo:hover{background:rgba(var(--dm-cyan-rgb),.05)}
       .empty-box{padding:22px;text-align:center;color:var(--dm-text-muted);font-size:.85rem}
 
       .hist-overlay{position:fixed;inset:0;background:rgba(4,5,8,.86);backdrop-filter:blur(5px);display:flex;align-items:flex-end;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .22s}
@@ -266,7 +294,7 @@ class DmaiorTickets extends HTMLElement {
       .modal-resg-btns{display:flex;gap:8px;margin-top:16px}
       .modal-resg-btns button{flex:1;padding:10px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-weight:700;text-transform:uppercase;font-size:.78rem;cursor:pointer;border:none}
       .btn-cancelar{background:rgba(255,255,255,.05);border:1px solid var(--dm-border) !important;color:var(--dm-text-muted)}
-      .btn-confirmar{background:linear-gradient(135deg,#00b4b4,#00d4d4);color:#04101c}
+      .btn-confirmar{background:var(--dm-cyan);color:#04101c}
     </style>
     <div class="wrap" id="root"></div>
     `;

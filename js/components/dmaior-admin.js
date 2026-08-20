@@ -1873,6 +1873,11 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnNovaRegraTicket')?.addEventListener('click',()=>this._abrirModalRegraTicket());
     s.getElementById('btnSalvarTicketsPeriodo')?.addEventListener('click',()=>this._salvarTicketsConfig());
     s.getElementById('btnNovoPresenteTicket')?.addEventListener('click',()=>this._abrirModalPresenteTicket());
+    s.getElementById('mMtCancel')?.addEventListener('click',()=>this._fechaModal('mMetaTicket'));
+    s.getElementById('mMtSave')?.addEventListener('click',()=>this._salvarMetaTicket());
+    s.getElementById('mPtCancel')?.addEventListener('click',()=>this._fechaModal('mPresenteTicket'));
+    s.getElementById('mPtSave')?.addEventListener('click',()=>this._salvarPresenteTicket());
+    s.getElementById('mPtImagem')?.addEventListener('input',()=>this._atualizarPreviewPresente());
     s.getElementById('ticketsResgateFiltro')?.addEventListener('change',()=>this._carregarTicketsResgates());
     s.getElementById('btnAplicarAjusteTicket')?.addEventListener('click',()=>this._aplicarAjusteTicket());
     // Status de Streamers
@@ -5053,7 +5058,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Todo dia 1º, ~10h, o sistema processa sozinho o ranking do mês que acabou de fechar (diamantes e horas). O botão "Processar" continua disponível pra rodar na hora, corrigir ou repetir um mês — rodar os dois pro mesmo mês nunca credita em dobro.</div><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
             <div class="pag" id="pag-tickets">${ph('Tickets & Presentes','star','Regras de pontuação e resgate de presentes','btnAtuTickets')}
               <div class="month-tabs" id="ticketsSubTabs" style="display:flex;gap:6px;padding:0 0 12px">
-                <button class="month-tab on" data-sub="regras">Regras</button>
+                <button class="month-tab on" data-sub="regras">Metas</button>
                 <button class="month-tab" data-sub="presentes">Presentes</button>
                 <button class="month-tab" data-sub="resgates">Resgates</button>
                 <button class="month-tab" data-sub="ajustes">Ajustes</button>
@@ -5078,10 +5083,10 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                 </div>
                 <div class="box" style="margin-top:14px">
-                  <div class="bhead"><div class="btitulo">${this._ico('star',14)} Regras de Pontuação</div>
-                    <button class="btn btn-sm btn-g" id="btnNovaRegraTicket">${this._ico('plus',12)} Nova Regra</button>
+                  <div class="bhead"><div class="btitulo">${this._ico('star',14)} Metas de Pontuação</div>
+                    <button class="btn btn-sm btn-g" id="btnNovaRegraTicket">${this._ico('plus',12)} Nova Meta</button>
                   </div>
-                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} As regras funcionam como níveis (mesmo modelo das Metas de Impulso) — só a de maior "Tickets fixos" que o streamer atingir vale no período, nunca soma todas as batidas. Ex: nível de 50 tickets + nível de 150 tickets → quem bate o segundo recebe 150 no total, não 200. A ordem dos níveis é decidida sozinha pelo valor em "Tickets fixos" (maior valor = nível mais alto), sem precisar configurar nada à parte. Nada aqui fica fixo no código — tudo editável.</div>
+                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} As metas funcionam como níveis (mesmo modelo das Metas de Impulso) — só a de maior "Tickets fixos" que o streamer atingir vale no período, nunca soma todas as batidas. Ex: nível de 50 tickets + nível de 150 tickets → quem bate o segundo recebe 150 no total, não 200. A ordem dos níveis é decidida sozinha pelo valor em "Tickets fixos" (maior valor = nível mais alto), sem precisar configurar nada à parte. Nada aqui fica fixo no código — tudo editável.</div>
                   <div id="tbTicketsRegras">${this._loading()}</div>
                 </div>
               </div>
@@ -5451,6 +5456,37 @@ class DimaiorAdmin extends HTMLElement {
         <div class="m-titulo" style="font-size:14px;margin-top:6px">Participantes</div>
         <div id="mVotResParticipantes" style="max-height:200px;overflow-y:auto;margin-top:8px"></div>
         <div class="mf"><button class="btn btn-o" id="mVotResFechar">Fechar</button></div>
+      </div></div>
+
+      <div class="ov" id="mMetaTicket"><div class="modal">
+        <div class="m-titulo" id="mMtTit">Nova Meta</div>
+        <div class="mc"><label>Nome</label><input id="mRtNome" type="text" placeholder="Ex: Meta Base do Mês"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div class="mc" style="margin:0"><label>Dias mín.</label><input id="mRtDias" type="number" min="0" value="0"/></div>
+          <div class="mc" style="margin:0"><label>Horas mín.</label><input id="mRtHoras" type="number" min="0" step="0.01" value="0"/></div>
+          <div class="mc" style="margin:0"><label>Diamantes mín.</label><input id="mRtDiam" type="number" min="0" value="0"/></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="mc" style="margin:0"><label>Tickets fixos ao bater a meta</label><input id="mRtFixos" type="number" min="0" value="0"/></div>
+          <div class="mc" style="margin:0"><label id="mRtPorMilLbl">Tickets a cada 1.000</label><input id="mRtPorMil" type="number" min="0" value="0"/></div>
+        </div>
+        <div class="mc"><label>Critério</label><select id="mRtCriterio"><option value="combinado">Combinado (todos os mínimos juntos)</option><option value="independente">Independente (cada mínimo à parte)</option></select></div>
+        <div class="mc"><label class="com-check-label"><input type="checkbox" id="mRtAtivo"> Meta ativa</label></div>
+        <div id="mMtErro" style="color:var(--verm);font-size:13px;margin-top:6px;min-height:18px"></div>
+        <div class="mf"><button class="btn btn-o" id="mMtCancel">Cancelar</button><button class="btn btn-g" id="mMtSave">${this._ico('check',13)} Salvar</button></div>
+      </div></div>
+
+      <div class="ov" id="mPresenteTicket"><div class="modal">
+        <div class="m-titulo" id="mPtTicketTit">Novo Presente</div>
+        <div class="mc"><label>Nome</label><input id="mPtNome" type="text" placeholder="Ex: Unicórnio"/></div>
+        <div class="mc"><label>Link da imagem (Google Drive)</label><input id="mPtImagem" type="text" placeholder="Cole o link de compartilhamento do Drive"/><div id="mPtPreview" style="margin-top:8px;display:none"><img id="mPtPreviewImg" style="max-width:100%;max-height:120px;border-radius:10px;border:1px solid var(--brd)" alt="preview"/></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="mc" style="margin:0"><label>Valor em diamantes</label><input id="mPtDiam" type="number" min="0" value="0"/></div>
+          <div class="mc" style="margin:0"><label>Custo em tickets</label><input id="mPtTickets" type="number" min="0" value="0"/></div>
+        </div>
+        <div class="mc"><label class="com-check-label"><input type="checkbox" id="mPtAtivo"> Ativo na galeria</label></div>
+        <div id="mPtErro" style="color:var(--verm);font-size:13px;margin-top:6px;min-height:18px"></div>
+        <div class="mf"><button class="btn btn-o" id="mPtCancel">Cancelar</button><button class="btn btn-g" id="mPtSave">${this._ico('check',13)} Salvar</button></div>
       </div></div>
 
       <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div>
@@ -6610,73 +6646,52 @@ class DimaiorAdmin extends HTMLElement {
       </tbody></table>`;
       el.querySelectorAll('[data-edit-regra]').forEach(b=>b.addEventListener('click',()=>this._abrirModalRegraTicket(lista.find(r=>String(r.id)===b.dataset.editRegra))));
       el.querySelectorAll('[data-del-regra]').forEach(b=>b.addEventListener('click',()=>{
-        this._confirmarDel('Excluir esta regra de pontuação?',()=>this._excluirRegraTicket(b.dataset.delRegra));
+        this._confirmarDel('Excluir esta meta de pontuação?',()=>this._excluirRegraTicket(b.dataset.delRegra));
       }));
     }catch(e){el.innerHTML=`<div style="padding:20px;color:var(--verm)">${this._esc(e.message)}</div>`;}
   }
 
   _abrirModalRegraTicket(regra=null){
-    const html=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px" id="modalRegraTicket">
-      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:340px;max-width:520px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:#e2e8f0">${regra?'Editar Regra':'Nova Regra de Pontuação'}</div>
-        <div style="display:grid;gap:14px">
-          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nome</label>
-            <input id="mRtNome" type="text" value="${this._esc(regra?.nome||'')}" placeholder="Ex: Meta Base do Mês" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Dias mín.</label>
-              <input id="mRtDias" type="number" min="0" value="${Number(regra?.dias_minimos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Horas mín.</label>
-              <input id="mRtHoras" type="number" min="0" step="0.01" value="${Number(regra?.horas_minimas||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Diamantes mín.</label>
-              <input id="mRtDiam" type="number" min="0" value="${Number(regra?.diamantes_minimos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets fixos ao bater a meta</label>
-              <input id="mRtFixos" type="number" min="0" value="${Number(regra?.tickets_fixos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets a cada 1.000 ${this._iconeDiamanteTickets(11)}</label>
-              <input id="mRtPorMil" type="number" min="0" value="${Number(regra?.tickets_por_1000_diamantes||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-          </div>
-          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Critério</label>
-            <select id="mRtCriterio" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none">
-              <option value="combinado" ${regra?.criterio_modo!=='independente'?'selected':''}>Combinado (todos os mínimos juntos)</option>
-              <option value="independente" ${regra?.criterio_modo==='independente'?'selected':''}>Independente (cada mínimo à parte)</option>
-            </select></div>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8"><input type="checkbox" id="mRtAtivo" ${regra?.ativo!==false?'checked':''}> Regra ativa</label>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
-          <button id="mRtCancelar" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
-          <button id="mRtSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
-        </div>
-        <div id="mRtErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:18px"></div>
-      </div>
-    </div>`;
-    const el=document.createElement('div');el.innerHTML=html;document.body.appendChild(el.firstChild);
-    const modal=document.getElementById('modalRegraTicket');
-    modal.querySelector('#mRtCancelar').addEventListener('click',()=>modal.remove());
-    modal.querySelector('#mRtSalvar').addEventListener('click',async()=>{
-      const payload={
-        nome:modal.querySelector('#mRtNome').value.trim(),
-        dias_minimos:Number(modal.querySelector('#mRtDias').value)||0,
-        horas_minimas:Number(modal.querySelector('#mRtHoras').value)||0,
-        diamantes_minimos:Number(modal.querySelector('#mRtDiam').value)||0,
-        tickets_fixos:Number(modal.querySelector('#mRtFixos').value)||0,
-        tickets_por_1000_diamantes:Number(modal.querySelector('#mRtPorMil').value)||0,
-        criterio_modo:modal.querySelector('#mRtCriterio').value,
-        ativo:modal.querySelector('#mRtAtivo').checked,
-      };
-      const erroEl=modal.querySelector('#mRtErro');erroEl.textContent='';
-      if(!payload.nome){erroEl.textContent='Nome obrigatório';return;}
-      try{
-        if(regra)await this._patch(`/admin/tickets/regras/${regra.id}`,payload);
-        else await this._post('/admin/tickets/regras',payload);
-        modal.remove();this._toast(regra?'Regra atualizada!':'Regra criada!','ok');
-        this._carregarTicketsRegras();
-      }catch(e){erroEl.textContent=e.message||'Erro ao salvar';}
-    });
+    const s=this.shadowRoot;
+    this._edtMetaId=regra?.id||null;
+    s.getElementById('mMtTit').textContent=regra?'Editar Meta':'Nova Meta';
+    s.getElementById('mRtPorMilLbl').innerHTML=`Tickets a cada 1.000 ${this._iconeDiamanteTickets(11)}`;
+    s.getElementById('mRtNome').value=regra?.nome||'';
+    s.getElementById('mRtDias').value=Number(regra?.dias_minimos||0);
+    s.getElementById('mRtHoras').value=Number(regra?.horas_minimas||0);
+    s.getElementById('mRtDiam').value=Number(regra?.diamantes_minimos||0);
+    s.getElementById('mRtFixos').value=Number(regra?.tickets_fixos||0);
+    s.getElementById('mRtPorMil').value=Number(regra?.tickets_por_1000_diamantes||0);
+    s.getElementById('mRtCriterio').value=regra?.criterio_modo==='independente'?'independente':'combinado';
+    s.getElementById('mRtAtivo').checked=regra?.ativo!==false;
+    s.getElementById('mMtErro').textContent='';
+    this._abrirModal('mMetaTicket');
+  }
+
+  async _salvarMetaTicket(){
+    const s=this.shadowRoot;
+    const payload={
+      nome:s.getElementById('mRtNome').value.trim(),
+      dias_minimos:Number(s.getElementById('mRtDias').value)||0,
+      horas_minimas:Number(s.getElementById('mRtHoras').value)||0,
+      diamantes_minimos:Number(s.getElementById('mRtDiam').value)||0,
+      tickets_fixos:Number(s.getElementById('mRtFixos').value)||0,
+      tickets_por_1000_diamantes:Number(s.getElementById('mRtPorMil').value)||0,
+      criterio_modo:s.getElementById('mRtCriterio').value,
+      ativo:s.getElementById('mRtAtivo').checked,
+    };
+    const erroEl=s.getElementById('mMtErro');erroEl.textContent='';
+    if(!payload.nome){erroEl.textContent='Nome obrigatório';return;}
+    try{
+      if(this._edtMetaId)await this._patch(`/admin/tickets/regras/${this._edtMetaId}`,payload);
+      else await this._post('/admin/tickets/regras',payload);
+      this._fechaModal('mMetaTicket');this._toast(this._edtMetaId?'Meta atualizada!':'Meta criada!','ok');
+      this._carregarTicketsRegras();
+    }catch(e){erroEl.textContent=e.message||'Erro ao salvar';}
   }
 
   async _excluirRegraTicket(id){
-    try{await this._delete(`/admin/tickets/regras/${id}`);this._toast('Regra excluída','ok');this._carregarTicketsRegras();}
+    try{await this._delete(`/admin/tickets/regras/${id}`);this._toast('Meta excluída','ok');this._carregarTicketsRegras();}
     catch(e){this._toast(e.message,'err');}
   }
 
@@ -6713,60 +6728,45 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   _abrirModalPresenteTicket(presente=null){
-    const html=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px" id="modalPresenteTicket">
-      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:340px;max-width:440px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:#e2e8f0">${presente?'Editar Presente':'Novo Presente'}</div>
-        <div style="display:grid;gap:14px">
-          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nome</label>
-            <input id="mPtNome" type="text" value="${this._esc(presente?.nome||'')}" placeholder="Ex: Unicórnio" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Link da imagem (Google Drive)</label>
-            <input id="mPtImagem" type="text" value="${this._esc(presente?.imagem_url||'')}" placeholder="Cole o link de compartilhamento do Drive" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;box-sizing:border-box">
-            <div id="mPtPreview" style="margin-top:8px;display:none"><img id="mPtPreviewImg" style="max-width:100%;max-height:120px;border-radius:8px;display:block" onerror="this.parentElement.style.display='none'"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Valor em diamantes</label>
-              <input id="mPtDiam" type="number" min="0" value="${Number(presente?.valor_diamantes||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Custo em tickets</label>
-              <input id="mPtTickets" type="number" min="0" value="${Number(presente?.custo_tickets||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-          </div>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8"><input type="checkbox" id="mPtAtivo" ${presente?.ativo!==false?'checked':''}> Ativo na galeria</label>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
-          <button id="mPtCancelar" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
-          <button id="mPtSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
-        </div>
-        <div id="mPtErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:18px"></div>
-      </div>
-    </div>`;
-    const el=document.createElement('div');el.innerHTML=html;document.body.appendChild(el.firstChild);
-    const modal=document.getElementById('modalPresenteTicket');
-    const atualizarPreview=()=>{
-      const raw=modal.querySelector('#mPtImagem').value.trim();
-      const safe=this._normalizarImagemUrl(raw);
-      const wrap=modal.querySelector('#mPtPreview'),img=modal.querySelector('#mPtPreviewImg');
-      if(safe){img.src=safe;wrap.style.display='block';}else{wrap.style.display='none';img.src='';}
+    const s=this.shadowRoot;
+    this._edtPresenteId=presente?.id||null;
+    s.getElementById('mPtTicketTit').textContent=presente?'Editar Presente':'Novo Presente';
+    s.getElementById('mPtNome').value=presente?.nome||'';
+    s.getElementById('mPtImagem').value=presente?.imagem_url||'';
+    s.getElementById('mPtDiam').value=Number(presente?.valor_diamantes||0);
+    s.getElementById('mPtTickets').value=Number(presente?.custo_tickets||0);
+    s.getElementById('mPtAtivo').checked=presente?.ativo!==false;
+    s.getElementById('mPtErro').textContent='';
+    this._atualizarPreviewPresente();
+    this._abrirModal('mPresenteTicket');
+  }
+
+  _atualizarPreviewPresente(){
+    const s=this.shadowRoot;
+    const raw=s.getElementById('mPtImagem').value.trim();
+    const safe=raw?this._normalizarImagemUrl(raw):null;
+    const wrap=s.getElementById('mPtPreview'),img=s.getElementById('mPtPreviewImg');
+    if(safe){img.src=safe;wrap.style.display='block';}else{wrap.style.display='none';img.src='';}
+  }
+
+  async _salvarPresenteTicket(){
+    const s=this.shadowRoot;
+    const nome=s.getElementById('mPtNome').value.trim();
+    const imagem_url=this._normalizarImagemUrl(s.getElementById('mPtImagem').value.trim());
+    const erroEl=s.getElementById('mPtErro');erroEl.textContent='';
+    if(!nome){erroEl.textContent='Nome obrigatório';return;}
+    const payload={
+      nome, imagem_url,
+      valor_diamantes:Number(s.getElementById('mPtDiam').value)||0,
+      custo_tickets:Number(s.getElementById('mPtTickets').value)||0,
+      ativo:s.getElementById('mPtAtivo').checked,
     };
-    modal.querySelector('#mPtImagem').addEventListener('input',atualizarPreview);
-    if(presente?.imagem_url)atualizarPreview();
-    modal.querySelector('#mPtCancelar').addEventListener('click',()=>modal.remove());
-    modal.querySelector('#mPtSalvar').addEventListener('click',async()=>{
-      const nome=modal.querySelector('#mPtNome').value.trim();
-      const imagem_url=this._normalizarImagemUrl(modal.querySelector('#mPtImagem').value.trim());
-      const erroEl=modal.querySelector('#mPtErro');erroEl.textContent='';
-      if(!nome){erroEl.textContent='Nome obrigatório';return;}
-      const payload={
-        nome, imagem_url,
-        valor_diamantes:Number(modal.querySelector('#mPtDiam').value)||0,
-        custo_tickets:Number(modal.querySelector('#mPtTickets').value)||0,
-        ativo:modal.querySelector('#mPtAtivo').checked,
-      };
-      try{
-        if(presente)await this._patch(`/admin/tickets/presentes/${presente.id}`,payload);
-        else await this._post('/admin/tickets/presentes',payload);
-        modal.remove();this._toast(presente?'Presente atualizado!':'Presente criado!','ok');
-        this._carregarTicketsPresentes();
-      }catch(e){erroEl.textContent=e.message||'Erro ao salvar';}
-    });
+    try{
+      if(this._edtPresenteId)await this._patch(`/admin/tickets/presentes/${this._edtPresenteId}`,payload);
+      else await this._post('/admin/tickets/presentes',payload);
+      this._fechaModal('mPresenteTicket');this._toast(this._edtPresenteId?'Presente atualizado!':'Presente criado!','ok');
+      this._carregarTicketsPresentes();
+    }catch(e){erroEl.textContent=e.message||'Erro ao salvar';}
   }
 
   async _excluirPresenteTicket(id){
