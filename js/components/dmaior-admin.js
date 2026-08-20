@@ -6514,8 +6514,10 @@ class DimaiorAdmin extends HTMLElement {
   // /admin/tickets/* existirem no dashboard.agencydmaior.com.br.
 
   _ticketsSubAtual='regras';
+  _ticketsIconeDiamanteUrl=undefined;
 
-  _carregarTickets(){
+  async _carregarTickets(){
+    await this._garantirIconeDiamanteTickets();
     const s=this.shadowRoot;
     const sub=this._ticketsSubAtual||'regras';
     s.querySelectorAll('#ticketsSubTabs .month-tab').forEach(t=>t.classList.toggle('on',t.dataset.sub===sub));
@@ -6526,6 +6528,26 @@ class DimaiorAdmin extends HTMLElement {
     if(sub==='presentes')this._carregarTicketsPresentes();
     if(sub==='resgates')this._carregarTicketsResgates();
     if(sub==='ajustes')this._carregarTicketsAjustes();
+  }
+
+  // Ícone de diamante usado em toda a feature Tickets — busca uma vez e
+  // reaproveita a mesma imagem cadastrada em Regras → link do Google Drive.
+  // Sem link cadastrado, cai no SVG padrão (_ico('diamond', …)).
+  async _garantirIconeDiamanteTickets(){
+    if(this._ticketsIconeDiamanteUrl!==undefined) return this._ticketsIconeDiamanteUrl;
+    try{
+      const d=await this._get('/admin/tickets/config');
+      this._ticketsIconeDiamanteUrl=d.icone_diamante_url||'';
+    }catch(e){
+      this._ticketsIconeDiamanteUrl='';
+    }
+    return this._ticketsIconeDiamanteUrl;
+  }
+
+  _iconeDiamanteTickets(size=12){
+    const url=this._ticketsIconeDiamanteUrl?this._proxyPresenteImg(this._ticketsIconeDiamanteUrl):null;
+    if(url) return `<img src="${this._esc(url)}" alt="" style="width:${size}px;height:${size}px;object-fit:contain;vertical-align:-2px;display:inline-block">`;
+    return this._ico('diamond',size);
   }
 
   async _carregarTicketsConfig(){
@@ -6558,7 +6580,9 @@ class DimaiorAdmin extends HTMLElement {
     const icone_diamante_url=iconeRaw?this._normalizarImagemUrl(iconeRaw):'';
     try{
       await this._post('/admin/tickets/config',{periodo_modo,icone_diamante_url});
+      this._ticketsIconeDiamanteUrl=icone_diamante_url;
       this._toast('Configuração salva!','ok');
+      if(this._ticketsSubAtual==='regras')this._carregarTicketsRegras();
     }catch(e){this._toast(e.message,'err');}
   }
 
@@ -6571,7 +6595,7 @@ class DimaiorAdmin extends HTMLElement {
       const lista=d.regras||[];
       if(!lista.length){el.innerHTML=this._empty('star','Nenhuma regra cadastrada ainda.');return;}
       const listaOrdenada=lista.slice().sort((a,b)=>Number(a.tickets_fixos||0)-Number(b.tickets_fixos||0));
-      el.innerHTML=`<table class="tb"><thead><tr><th>Nome</th><th>Dias</th><th>Horas</th><th>Diamantes</th><th>Tickets fixos</th><th>Tickets/1000 ${this._ico('diamond',11)}</th><th>Critério</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+      el.innerHTML=`<table class="tb"><thead><tr><th>Nome</th><th>Dias</th><th>Horas</th><th>Diamantes</th><th>Tickets fixos</th><th>Tickets/1000 ${this._iconeDiamanteTickets(11)}</th><th>Critério</th><th>Status</th><th>Ações</th></tr></thead><tbody>
         ${listaOrdenada.map(r=>`<tr>
           <td style="font-weight:600">${this._esc(r.nome)}</td>
           <td>${Number(r.dias_minimos||0)}</td>
@@ -6609,7 +6633,7 @@ class DimaiorAdmin extends HTMLElement {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets fixos ao bater a meta</label>
               <input id="mRtFixos" type="number" min="0" value="${Number(regra?.tickets_fixos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets a cada 1.000 ${this._ico('diamond',11)}</label>
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets a cada 1.000 ${this._iconeDiamanteTickets(11)}</label>
               <input id="mRtPorMil" type="number" min="0" value="${Number(regra?.tickets_por_1000_diamantes||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
           </div>
           <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Critério</label>
@@ -6671,7 +6695,7 @@ class DimaiorAdmin extends HTMLElement {
           </div>
           <div style="padding:10px">
             <div style="font-weight:600;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${this._esc(p.nome)}</div>
-            <div style="font-size:11px;color:var(--t3);margin-top:3px;display:flex;align-items:center;gap:4px">${this._ico('diamond',11)} ${this._num(p.valor_diamantes||0)}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:3px;display:flex;align-items:center;gap:4px">${this._iconeDiamanteTickets(11)} ${this._num(p.valor_diamantes||0)}</div>
             <div style="font-size:12px;color:var(--cyan);font-weight:700;margin-top:2px">${this._num(p.custo_tickets||0)} tickets</div>
             <div style="margin-top:6px">${p.ativo?`<span style="color:var(--verde);font-size:11px">● Ativo</span>`:`<span style="color:var(--verm);font-size:11px">● Inativo</span>`}</div>
             <div style="display:flex;gap:6px;margin-top:8px">
@@ -6762,7 +6786,7 @@ class DimaiorAdmin extends HTMLElement {
       const d=await this._get(`/admin/tickets/resgates${q}`);
       const lista=d.resgates||[];
       if(!lista.length){el.innerHTML=this._empty('send','Nenhuma solicitação de resgate encontrada.');return;}
-      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>Presente</th><th>${this._ico('diamond',11)}</th><th>Tickets</th><th>Status</th><th>Solicitado em</th><th>Ações</th></tr></thead><tbody>
+      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>Presente</th><th>${this._iconeDiamanteTickets(11)}</th><th>Tickets</th><th>Status</th><th>Solicitado em</th><th>Ações</th></tr></thead><tbody>
         ${lista.map(r=>{
           const acoes=r.status==='pendente'
             ?`<button class="btn btn-sm btn-g" data-resg-aprovar="${r.id}">${this._ico('check',12)} Aprovar</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-resg-cancelar="${r.id}">${this._ico('x_circle',12)} Cancelar</button>`
