@@ -201,6 +201,7 @@
     svgRank()    { return `<svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>`; }
     svgPk()      { return `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
+    svgTicket()  { return `<svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/></svg>`; }
     svgFrame()   { return `<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v2.17A3 3 0 0 0 16.17 5H19zM5 5h2.83A3 3 0 0 0 5 7.83V5zm0 14v-2.83A3 3 0 0 0 7.83 19H5zm14 0h-2.83A3 3 0 0 0 19 16.17V19zM9 19a5 5 0 0 1 10-5V10a5 5 0 0 1-5-5h-4a5 5 0 0 1-5 5v4a5 5 0 0 1 4 5z"/></svg>`; }
     svgKey()     { return `<svg viewBox="0 0 24 24"><path d="M12.65 10A6 6 0 1 0 14 14.65L14 14h2v2h2v2h2v-2.18A6.002 6.002 0 0 0 12.65 10zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>`; }
     svgWallet()  { return `<svg viewBox="0 0 24 24"><path d="M21 7H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H3V9h18v10zm-9-1c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM1 5h20V3H1v2z"/></svg>`; }
@@ -672,6 +673,7 @@
                     <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
                     <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
+                    <button class="nit" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
                     <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
                     <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
                     <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
@@ -1103,6 +1105,15 @@
                     <painel-pk id="pkEl"></painel-pk>
                 </div>
 
+                <!-- ══════ TICKETS (componente nativo) ══════ -->
+                <!-- dmaior-tickets lê dm_uid/dm_token do localStorage sozinho, igual
+                     dmaior-impulso — mas precisa do worker-url pra falar com o
+                     mesmo worker do painel (dashboard). -->
+                <div id="vTickets" class="view" style="width:100%;">
+                    <button class="iframe-back" id="btnBackTickets">${this.svgBack()} VOLTAR AO PAINEL</button>
+                    <dmaior-tickets id="ticketsEl" worker-url="https://dashboard.agencydmaior.com.br"></dmaior-tickets>
+                </div>
+
                 <!-- Gerador local de molduras, carregado somente após autenticação -->
                 <div id="vMolduras" class="view" style="width:100%;">
                     <iframe id="moldurasFrame" class="molduras-frame" title="Gerador de molduras da DMaior Agency" allow="clipboard-write"></iframe>
@@ -1270,6 +1281,8 @@
         this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
         this.qs('#nPk').addEventListener('click',()=>this.goPk());
         this.qs('#btnBackPk')?.addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
+        this.qs('#nTickets').addEventListener('click',()=>this.goTickets());
+        this.qs('#btnBackTickets')?.addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#nMore').addEventListener('click',()=>{
             this.qs('#bNav').classList.toggle('expanded');
         });
@@ -1807,6 +1820,13 @@
         this.qs('#pkEl')?.verificarSessao?.();
         this.navigate('vPk');
         this.navActive('nPk');
+    }
+    goTickets(){
+        // dmaior-tickets já existe no DOM desde antes do login terminar — reconfirma
+        // a sessão toda vez que a aba abre, igual dmaior-impulso.
+        this.qs('#ticketsEl')?.verificarSessao?.();
+        this.navigate('vTickets');
+        this.navActive('nTickets');
     }
     goMolduras(){
         const frame = this.qs('#moldurasFrame');

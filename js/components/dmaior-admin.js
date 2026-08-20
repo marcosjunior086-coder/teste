@@ -225,7 +225,7 @@ class DimaiorAdmin extends HTMLElement {
   }
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
@@ -233,7 +233,7 @@ class DimaiorAdmin extends HTMLElement {
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa[pag]?.();
   }
 
@@ -249,6 +249,13 @@ class DimaiorAdmin extends HTMLElement {
     return `${p.year}-${p.month}-${p.day}`;
   }
   _proxyFoto(url){url=this._normalizarImagemUrl(url);if(!url||url==='null'||url==='undefined')return null;if(url.includes('flaticon')||url.includes('149071'))return null;if(url.includes('weserv.nl'))return url;return`https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=100&h=100&fit=cover&output=webp`;}
+  // Mesmo proxy/cache do weserv.nl, mas sem recortar em círculo (fit=contain)
+  // e num tamanho maior — pra presente de galeria mostrar a arte inteira.
+  // Usado tanto no admin (preview) quanto pelo painel do streamer, pra imagens
+  // do Drive não serem buscadas direto a cada vez que alguém abre a tela —
+  // o weserv.nl já entrega com cache/CDN próprio, então carrega mais rápido
+  // nas próximas visitas sem depender do Drive de novo.
+  _proxyPresenteImg(url){url=this._normalizarImagemUrl(url);if(!url||url==='null'||url==='undefined')return null;if(url.includes('weserv.nl'))return url;return`https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&fit=contain&output=webp`;}
   _diam(sv){return Number(sv?.diamantes_acumulados||sv?.diamantes||sv?.diamantes_hoje||sv?.total_diamantes||sv?.diamonds||0);}
   _listaDiario(d){
     const lista=d?.streamers||d?.resultados||d?.ranking||d?.diario||d?.dados||d?.items||d?.lista||[];
@@ -1856,6 +1863,18 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnBuscarUidAgente')?.addEventListener('click',()=>this._buscarStreamerParaVincular());
     s.getElementById('inpUidVincular')?.addEventListener('keydown',e=>{ if(e.key==='Enter')this._buscarStreamerParaVincular(); });
     s.getElementById('btnConfirmarVincular')?.addEventListener('click',()=>this._confirmarVincularStreamer());
+    // Tickets & Presentes
+    s.getElementById('btnAtuTickets')?.addEventListener('click',()=>this._carregarTickets());
+    s.getElementById('ticketsSubTabs')?.addEventListener('click',e=>{
+      const b=e.target.closest('[data-sub]');if(!b)return;
+      this._ticketsSubAtual=b.dataset.sub;
+      this._carregarTickets();
+    });
+    s.getElementById('btnNovaRegraTicket')?.addEventListener('click',()=>this._abrirModalRegraTicket());
+    s.getElementById('btnSalvarTicketsPeriodo')?.addEventListener('click',()=>this._salvarTicketsConfig());
+    s.getElementById('btnNovoPresenteTicket')?.addEventListener('click',()=>this._abrirModalPresenteTicket());
+    s.getElementById('ticketsResgateFiltro')?.addEventListener('change',()=>this._carregarTicketsResgates());
+    s.getElementById('btnAplicarAjusteTicket')?.addEventListener('click',()=>this._aplicarAjusteTicket());
     // Status de Streamers
     s.getElementById('btnAtuStatusStreamers')?.addEventListener('click',()=>this._carregarStatusStreamers());
     s.getElementById('btnAtualizarRosterStatus')?.addEventListener('click',()=>this._atualizarRosterStatus());
@@ -4666,7 +4685,8 @@ class DimaiorAdmin extends HTMLElement {
             ${navSec('financeiro','Financeiro',
               ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)+
               ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)+
-              ni('award','premios','Prêmios')
+              ni('award','premios','Prêmios')+
+              ni('star','tickets','Tickets',`<span class="nb gold" id="nbTicketsResgates" style="display:none">0</span>`)
             )}
             ${navSec('sistema','Sistema',
               ni('bolt','impulsoCtrl','Ctrl. Impulso')+
@@ -5031,6 +5051,76 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-agenteMigracoes">${ph('Migrações de Streamer (Agente)','refresh','Solicitações de migração enviadas pelos agentes','btnAtuMigracoesAgente')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('refresh',14)} Migrações</div><select id="migracaoAgFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaMigracoesAgente">${this._loading()}</div><div class="pag-bar" id="pgMigracoesAgente"></div></div></div>
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
             <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Todo dia 1º, ~10h, o sistema processa sozinho o ranking do mês que acabou de fechar (diamantes e horas). O botão "Processar" continua disponível pra rodar na hora, corrigir ou repetir um mês — rodar os dois pro mesmo mês nunca credita em dobro.</div><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-tickets">${ph('Tickets & Presentes','star','Regras de pontuação e resgate de presentes','btnAtuTickets')}
+              <div class="month-tabs" id="ticketsSubTabs" style="display:flex;gap:6px;padding:0 0 12px">
+                <button class="month-tab on" data-sub="regras">Regras</button>
+                <button class="month-tab" data-sub="presentes">Presentes</button>
+                <button class="month-tab" data-sub="resgates">Resgates</button>
+                <button class="month-tab" data-sub="ajustes">Ajustes</button>
+              </div>
+              <div id="tickets-sub-regras">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('settings',14)} Período do Crédito Automático</div></div>
+                  <div style="padding:14px 16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+                    <label style="flex:1;min-width:220px"><div class="cfg-chave">Modo</div>
+                      <select id="ticketsPeriodoModo" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
+                        <option value="mes_atual">Mês corrente — recalcula todo dia, streamer vê o nível subindo ao vivo</option>
+                        <option value="mes_fechado">Mês fechado — só credita quando o mês anterior já fechou por inteiro</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div style="padding:0 16px 14px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+                    <label style="flex:1;min-width:260px"><div class="cfg-chave">Ícone de diamante (link do Google Drive)</div>
+                      <input id="ticketsIconeDiamante" type="text" placeholder="Cole o link de compartilhamento do Drive — vazio usa o ícone padrão" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none;box-sizing:border-box">
+                    </label>
+                    <div id="ticketsIconeDiamantePreview" style="display:none;width:36px;height:36px;flex-shrink:0"><img id="ticketsIconeDiamantePreviewImg" style="width:100%;height:100%;object-fit:contain;border-radius:6px" onerror="this.parentElement.style.display='none'"></div>
+                    <button class="btn btn-o btn-sm" id="btnSalvarTicketsPeriodo">${this._ico('check',12)} Salvar</button>
+                  </div>
+                </div>
+                <div class="box" style="margin-top:14px">
+                  <div class="bhead"><div class="btitulo">${this._ico('star',14)} Regras de Pontuação</div>
+                    <button class="btn btn-sm btn-g" id="btnNovaRegraTicket">${this._ico('plus',12)} Nova Regra</button>
+                  </div>
+                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} As regras funcionam como níveis (mesmo modelo das Metas de Impulso) — só a de maior "Ordem" que o streamer atingir vale no período, nunca soma todas as batidas. Ex: nível de 50 tickets + nível de 150 tickets → quem bate o segundo recebe 150 no total, não 200. Use "Ordem" crescente do nível mais baixo pro mais alto. Nada aqui fica fixo no código — tudo editável.</div>
+                  <div id="tbTicketsRegras">${this._loading()}</div>
+                </div>
+              </div>
+              <div id="tickets-sub-presentes" class="rc-hidden-sub" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('gift',14)} Galeria de Presentes</div>
+                    <button class="btn btn-sm btn-g" id="btnNovoPresenteTicket">${this._ico('plus',12)} Novo Presente</button>
+                  </div>
+                  <div id="tbTicketsPresentes" style="padding:14px">${this._loading()}</div>
+                </div>
+              </div>
+              <div id="tickets-sub-resgates" class="rc-hidden-sub" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('send',14)} Solicitações de Resgate</div>
+                    <select id="ticketsResgateFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
+                      <option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="enviado">Enviados</option><option value="cancelado">Cancelados</option><option value="todos">Todos</option>
+                    </select>
+                  </div>
+                  <div id="tbTicketsResgates">${this._loading()}</div>
+                </div>
+              </div>
+              <div id="tickets-sub-ajustes" class="rc-hidden-sub" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('edit',14)} Ajuste Manual</div></div>
+                  <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                      <input id="ajusteTicketUid" type="text" placeholder="UID do streamer" style="flex:1;min-width:160px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none">
+                      <input id="ajusteTicketQtd" type="number" placeholder="Quantidade (use negativo pra descontar)" style="flex:1;min-width:200px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none">
+                    </div>
+                    <textarea id="ajusteTicketMotivo" rows="2" placeholder="Motivo do ajuste (obrigatório)" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;resize:vertical;box-sizing:border-box"></textarea>
+                    <div><button class="btn btn-g" id="btnAplicarAjusteTicket">${this._ico('check',13)} Aplicar Ajuste</button></div>
+                  </div>
+                </div>
+                <div class="box" style="margin-top:14px">
+                  <div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Ajustes</div></div>
+                  <div id="tbTicketsAjustes">${this._loading()}</div>
+                </div>
+              </div>
+            </div>
             <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
             <div class="pag" id="pag-votacoes">${ph('Votações','vote','Enquetes públicas e privadas','btnAtuVot',`<button class="btn btn-g" id="btnNovaVotacao">${this._ico('plus',13)} Nova Votação</button>`)}<div class="box"><div id="tbVot">${this._loading()}</div></div></div>
             <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','Configurações e bloqueios','btnAtuImpulso')}
@@ -6415,6 +6505,341 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnConfirmarVincular').style.display = 'none';
     this._buscaVincularStreamer = null;
     this._abrirDetalheAgente(this._agenteAtualId);
+  }
+
+  // ══════════════════════════ TICKETS & PRESENTES ═════════════════════════════
+  // Estrutura de tela construída antes do backend (rotas ainda não existem no
+  // Worker) — pedido explícito do usuário: revisar a tela primeiro, aplicar o
+  // banco por último. Os erros de rede aqui são esperados até as rotas
+  // /admin/tickets/* existirem no dashboard.agencydmaior.com.br.
+
+  _ticketsSubAtual='regras';
+
+  _carregarTickets(){
+    const s=this.shadowRoot;
+    const sub=this._ticketsSubAtual||'regras';
+    s.querySelectorAll('#ticketsSubTabs .month-tab').forEach(t=>t.classList.toggle('on',t.dataset.sub===sub));
+    ['regras','presentes','resgates','ajustes'].forEach(k=>{
+      const el=s.getElementById(`tickets-sub-${k}`);if(el)el.style.display=k===sub?'':'none';
+    });
+    if(sub==='regras'){this._carregarTicketsRegras();this._carregarTicketsConfig();}
+    if(sub==='presentes')this._carregarTicketsPresentes();
+    if(sub==='resgates')this._carregarTicketsResgates();
+    if(sub==='ajustes')this._carregarTicketsAjustes();
+  }
+
+  async _carregarTicketsConfig(){
+    const s=this.shadowRoot;const sel=s.getElementById('ticketsPeriodoModo');if(!sel)return;
+    const inputIcone=s.getElementById('ticketsIconeDiamante');
+    if(inputIcone && !inputIcone.dataset.bound){
+      inputIcone.dataset.bound='1';
+      inputIcone.addEventListener('input',()=>this._atualizarPreviewIconeDiamante());
+    }
+    try{
+      const d=await this._get('/admin/tickets/config');
+      sel.value=d.periodo_modo==='mes_fechado'?'mes_fechado':'mes_atual';
+      if(inputIcone){inputIcone.value=d.icone_diamante_url||'';this._atualizarPreviewIconeDiamante();}
+    }catch(e){/* mantém o padrão selecionado se a rota ainda não existir */}
+  }
+
+  _atualizarPreviewIconeDiamante(){
+    const s=this.shadowRoot;
+    const raw=s.getElementById('ticketsIconeDiamante')?.value.trim();
+    const safe=raw?this._normalizarImagemUrl(raw):null;
+    const wrap=s.getElementById('ticketsIconeDiamantePreview'),img=s.getElementById('ticketsIconeDiamantePreviewImg');
+    if(!wrap||!img)return;
+    if(safe){img.src=safe;wrap.style.display='block';}else{wrap.style.display='none';img.src='';}
+  }
+
+  async _salvarTicketsConfig(){
+    const s=this.shadowRoot;
+    const periodo_modo=s.getElementById('ticketsPeriodoModo')?.value||'mes_atual';
+    const iconeRaw=s.getElementById('ticketsIconeDiamante')?.value.trim()||'';
+    const icone_diamante_url=iconeRaw?this._normalizarImagemUrl(iconeRaw):'';
+    try{
+      await this._post('/admin/tickets/config',{periodo_modo,icone_diamante_url});
+      this._toast('Configuração salva!','ok');
+    }catch(e){this._toast(e.message,'err');}
+  }
+
+  // ── Regras ─────────────────────────────────────────────────────────────────
+  async _carregarTicketsRegras(){
+    const s=this.shadowRoot;const el=s.getElementById('tbTicketsRegras');if(!el)return;
+    el.innerHTML=this._loading();
+    try{
+      const d=await this._get('/admin/tickets/regras');
+      const lista=d.regras||[];
+      if(!lista.length){el.innerHTML=this._empty('star','Nenhuma regra cadastrada ainda.');return;}
+      el.innerHTML=`<table class="tb"><thead><tr><th>Nome</th><th>Dias</th><th>Horas</th><th>Diamantes</th><th>Tickets fixos</th><th>Tickets/1000💎</th><th>Critério</th><th>Ordem</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+        ${lista.map(r=>`<tr>
+          <td style="font-weight:600">${this._esc(r.nome)}</td>
+          <td>${Number(r.dias_minimos||0)}</td>
+          <td>${Number(r.horas_minimas||0)}</td>
+          <td>${this._num(r.diamantes_minimos||0)}</td>
+          <td style="color:var(--cyan);font-weight:700">${Number(r.tickets_fixos||0)}</td>
+          <td>${Number(r.tickets_por_1000_diamantes||0)}</td>
+          <td style="font-size:11px;color:var(--t3)">${r.criterio_modo==='independente'?'Independente':'Combinado'}</td>
+          <td>${Number(r.ordem||0)}</td>
+          <td>${r.ativo?`<span style="color:var(--verde);font-size:12px">● Ativa</span>`:`<span style="color:var(--verm);font-size:12px">● Inativa</span>`}</td>
+          <td style="white-space:nowrap"><button class="btn btn-sm btn-o" data-edit-regra="${r.id}">${this._ico('edit',12)}</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-del-regra="${r.id}">${this._ico('trash',12)}</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+      el.querySelectorAll('[data-edit-regra]').forEach(b=>b.addEventListener('click',()=>this._abrirModalRegraTicket(lista.find(r=>String(r.id)===b.dataset.editRegra))));
+      el.querySelectorAll('[data-del-regra]').forEach(b=>b.addEventListener('click',()=>{
+        this._confirmarDel('Excluir esta regra de pontuação?',()=>this._excluirRegraTicket(b.dataset.delRegra));
+      }));
+    }catch(e){el.innerHTML=`<div style="padding:20px;color:var(--verm)">${this._esc(e.message)}</div>`;}
+  }
+
+  _abrirModalRegraTicket(regra=null){
+    const html=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px" id="modalRegraTicket">
+      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:340px;max-width:520px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:#e2e8f0">${regra?'Editar Regra':'Nova Regra de Pontuação'}</div>
+        <div style="display:grid;gap:14px">
+          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nome</label>
+            <input id="mRtNome" type="text" value="${this._esc(regra?.nome||'')}" placeholder="Ex: Meta Base do Mês" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Dias mín.</label>
+              <input id="mRtDias" type="number" min="0" value="${Number(regra?.dias_minimos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Horas mín.</label>
+              <input id="mRtHoras" type="number" min="0" step="0.01" value="${Number(regra?.horas_minimas||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Diamantes mín.</label>
+              <input id="mRtDiam" type="number" min="0" value="${Number(regra?.diamantes_minimos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets fixos ao bater a meta</label>
+              <input id="mRtFixos" type="number" min="0" value="${Number(regra?.tickets_fixos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets a cada 1.000💎</label>
+              <input id="mRtPorMil" type="number" min="0" value="${Number(regra?.tickets_por_1000_diamantes||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Critério</label>
+              <select id="mRtCriterio" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none">
+                <option value="combinado" ${regra?.criterio_modo!=='independente'?'selected':''}>Combinado (todos os mínimos juntos)</option>
+                <option value="independente" ${regra?.criterio_modo==='independente'?'selected':''}>Independente (cada mínimo à parte)</option>
+              </select></div>
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Ordem</label>
+              <input id="mRtOrdem" type="number" value="${Number(regra?.ordem||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8"><input type="checkbox" id="mRtAtivo" ${regra?.ativo!==false?'checked':''}> Regra ativa</label>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+          <button id="mRtCancelar" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
+          <button id="mRtSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+        </div>
+        <div id="mRtErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:18px"></div>
+      </div>
+    </div>`;
+    const el=document.createElement('div');el.innerHTML=html;document.body.appendChild(el.firstChild);
+    const modal=document.getElementById('modalRegraTicket');
+    modal.querySelector('#mRtCancelar').addEventListener('click',()=>modal.remove());
+    modal.querySelector('#mRtSalvar').addEventListener('click',async()=>{
+      const payload={
+        nome:modal.querySelector('#mRtNome').value.trim(),
+        dias_minimos:Number(modal.querySelector('#mRtDias').value)||0,
+        horas_minimas:Number(modal.querySelector('#mRtHoras').value)||0,
+        diamantes_minimos:Number(modal.querySelector('#mRtDiam').value)||0,
+        tickets_fixos:Number(modal.querySelector('#mRtFixos').value)||0,
+        tickets_por_1000_diamantes:Number(modal.querySelector('#mRtPorMil').value)||0,
+        criterio_modo:modal.querySelector('#mRtCriterio').value,
+        ordem:Number(modal.querySelector('#mRtOrdem').value)||0,
+        ativo:modal.querySelector('#mRtAtivo').checked,
+      };
+      const erroEl=modal.querySelector('#mRtErro');erroEl.textContent='';
+      if(!payload.nome){erroEl.textContent='Nome obrigatório';return;}
+      try{
+        if(regra)await this._patch(`/admin/tickets/regras/${regra.id}`,payload);
+        else await this._post('/admin/tickets/regras',payload);
+        modal.remove();this._toast(regra?'Regra atualizada!':'Regra criada!','ok');
+        this._carregarTicketsRegras();
+      }catch(e){erroEl.textContent=e.message||'Erro ao salvar';}
+    });
+  }
+
+  async _excluirRegraTicket(id){
+    try{await this._delete(`/admin/tickets/regras/${id}`);this._toast('Regra excluída','ok');this._carregarTicketsRegras();}
+    catch(e){this._toast(e.message,'err');}
+  }
+
+  // ── Presentes ──────────────────────────────────────────────────────────────
+  async _carregarTicketsPresentes(){
+    const s=this.shadowRoot;const el=s.getElementById('tbTicketsPresentes');if(!el)return;
+    el.innerHTML=this._loading();
+    try{
+      const d=await this._get('/admin/tickets/presentes');
+      const lista=d.presentes||[];
+      if(!lista.length){el.innerHTML=this._empty('gift','Nenhum presente cadastrado ainda.');return;}
+      el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+        ${lista.map(p=>`<div style="border:1px solid var(--brddim);border-radius:var(--rs);overflow:hidden;background:rgba(255,255,255,.02)">
+          <div style="aspect-ratio:1;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;overflow:hidden">
+            ${p.imagem_url?`<img src="${this._esc(this._proxyPresenteImg(p.imagem_url)||'')}" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display='none'">`:this._ico('gift',28)}
+          </div>
+          <div style="padding:10px">
+            <div style="font-weight:600;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${this._esc(p.nome)}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:3px">${this._num(p.valor_diamantes||0)} 💎</div>
+            <div style="font-size:12px;color:var(--cyan);font-weight:700;margin-top:2px">${this._num(p.custo_tickets||0)} tickets</div>
+            <div style="margin-top:6px">${p.ativo?`<span style="color:var(--verde);font-size:11px">● Ativo</span>`:`<span style="color:var(--verm);font-size:11px">● Inativo</span>`}</div>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button class="btn btn-sm btn-o" style="flex:1;justify-content:center" data-edit-presente="${p.id}">${this._ico('edit',12)}</button>
+              <button class="btn btn-sm" style="flex:1;justify-content:center;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-del-presente="${p.id}">${this._ico('trash',12)}</button>
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>`;
+      el.querySelectorAll('[data-edit-presente]').forEach(b=>b.addEventListener('click',()=>this._abrirModalPresenteTicket(lista.find(p=>String(p.id)===b.dataset.editPresente))));
+      el.querySelectorAll('[data-del-presente]').forEach(b=>b.addEventListener('click',()=>{
+        this._confirmarDel('Remover este presente da galeria? O histórico de resgates antigos não é afetado.',()=>this._excluirPresenteTicket(b.dataset.delPresente));
+      }));
+    }catch(e){el.innerHTML=`<div style="padding:20px;color:var(--verm)">${this._esc(e.message)}</div>`;}
+  }
+
+  _abrirModalPresenteTicket(presente=null){
+    const html=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px" id="modalPresenteTicket">
+      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:340px;max-width:440px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:#e2e8f0">${presente?'Editar Presente':'Novo Presente'}</div>
+        <div style="display:grid;gap:14px">
+          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nome</label>
+            <input id="mPtNome" type="text" value="${this._esc(presente?.nome||'')}" placeholder="Ex: Unicórnio" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Link da imagem (Google Drive)</label>
+            <input id="mPtImagem" type="text" value="${this._esc(presente?.imagem_url||'')}" placeholder="Cole o link de compartilhamento do Drive" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;box-sizing:border-box">
+            <div id="mPtPreview" style="margin-top:8px;display:none"><img id="mPtPreviewImg" style="max-width:100%;max-height:120px;border-radius:8px;display:block" onerror="this.parentElement.style.display='none'"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Valor em diamantes</label>
+              <input id="mPtDiam" type="number" min="0" value="${Number(presente?.valor_diamantes||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Custo em tickets</label>
+              <input id="mPtTickets" type="number" min="0" value="${Number(presente?.custo_tickets||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Ordem</label>
+              <input id="mPtOrdem" type="number" value="${Number(presente?.ordem||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8;padding-bottom:10px"><input type="checkbox" id="mPtAtivo" ${presente?.ativo!==false?'checked':''}> Ativo na galeria</label>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+          <button id="mPtCancelar" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
+          <button id="mPtSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+        </div>
+        <div id="mPtErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:18px"></div>
+      </div>
+    </div>`;
+    const el=document.createElement('div');el.innerHTML=html;document.body.appendChild(el.firstChild);
+    const modal=document.getElementById('modalPresenteTicket');
+    const atualizarPreview=()=>{
+      const raw=modal.querySelector('#mPtImagem').value.trim();
+      const safe=this._normalizarImagemUrl(raw);
+      const wrap=modal.querySelector('#mPtPreview'),img=modal.querySelector('#mPtPreviewImg');
+      if(safe){img.src=safe;wrap.style.display='block';}else{wrap.style.display='none';img.src='';}
+    };
+    modal.querySelector('#mPtImagem').addEventListener('input',atualizarPreview);
+    if(presente?.imagem_url)atualizarPreview();
+    modal.querySelector('#mPtCancelar').addEventListener('click',()=>modal.remove());
+    modal.querySelector('#mPtSalvar').addEventListener('click',async()=>{
+      const nome=modal.querySelector('#mPtNome').value.trim();
+      const imagem_url=this._normalizarImagemUrl(modal.querySelector('#mPtImagem').value.trim());
+      const erroEl=modal.querySelector('#mPtErro');erroEl.textContent='';
+      if(!nome){erroEl.textContent='Nome obrigatório';return;}
+      const payload={
+        nome, imagem_url,
+        valor_diamantes:Number(modal.querySelector('#mPtDiam').value)||0,
+        custo_tickets:Number(modal.querySelector('#mPtTickets').value)||0,
+        ordem:Number(modal.querySelector('#mPtOrdem').value)||0,
+        ativo:modal.querySelector('#mPtAtivo').checked,
+      };
+      try{
+        if(presente)await this._patch(`/admin/tickets/presentes/${presente.id}`,payload);
+        else await this._post('/admin/tickets/presentes',payload);
+        modal.remove();this._toast(presente?'Presente atualizado!':'Presente criado!','ok');
+        this._carregarTicketsPresentes();
+      }catch(e){erroEl.textContent=e.message||'Erro ao salvar';}
+    });
+  }
+
+  async _excluirPresenteTicket(id){
+    try{await this._delete(`/admin/tickets/presentes/${id}`);this._toast('Presente removido','ok');this._carregarTicketsPresentes();}
+    catch(e){this._toast(e.message,'err');}
+  }
+
+  // ── Resgates ───────────────────────────────────────────────────────────────
+  async _carregarTicketsResgates(){
+    const s=this.shadowRoot;const el=s.getElementById('tbTicketsResgates');if(!el)return;
+    const filtro=s.getElementById('ticketsResgateFiltro')?.value||'pendente';
+    el.innerHTML=this._loading();
+    const BADGE={pendente:'Pendente',aprovado:'Aprovado',enviado:'Enviado',cancelado:'Cancelado'};
+    const COR={pendente:'var(--gold)',aprovado:'var(--cyan)',enviado:'var(--verde)',cancelado:'var(--verm)'};
+    try{
+      const q=filtro&&filtro!=='todos'?`?status=${encodeURIComponent(filtro)}`:'';
+      const d=await this._get(`/admin/tickets/resgates${q}`);
+      const lista=d.resgates||[];
+      if(!lista.length){el.innerHTML=this._empty('send','Nenhuma solicitação de resgate encontrada.');return;}
+      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>Presente</th><th>💎</th><th>Tickets</th><th>Status</th><th>Solicitado em</th><th>Ações</th></tr></thead><tbody>
+        ${lista.map(r=>{
+          const acoes=r.status==='pendente'
+            ?`<button class="btn btn-sm btn-g" data-resg-aprovar="${r.id}">${this._ico('check',12)} Aprovar</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-resg-cancelar="${r.id}">${this._ico('x_circle',12)} Cancelar</button>`
+            :r.status==='aprovado'
+            ?`<button class="btn btn-sm btn-g" data-resg-enviar="${r.id}">${this._ico('send',12)} Marcar Enviado</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-resg-cancelar="${r.id}">${this._ico('x_circle',12)} Cancelar</button>`
+            :'—';
+          return`<tr>
+            <td>${this._esc(r.streamer_nome||r.kwai_uid)}</td>
+            <td>${this._esc(r.presente_nome||'—')}</td>
+            <td>${this._num(r.valor_diamantes_no_momento||0)}</td>
+            <td style="color:var(--cyan);font-weight:700">${this._num(r.custo_tickets_no_momento||0)}</td>
+            <td><span style="font-size:11px;color:${COR[r.status]||'var(--t2)'}">● ${BADGE[r.status]||r.status}</span></td>
+            <td style="color:var(--t3);font-size:11px">${this._fdt(r.solicitado_em)}</td>
+            <td style="white-space:nowrap">${acoes}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table>`;
+      el.querySelectorAll('[data-resg-aprovar]').forEach(b=>b.addEventListener('click',()=>this._processarResgateTicket(b.dataset.resgAprovar,'aprovar')));
+      el.querySelectorAll('[data-resg-enviar]').forEach(b=>b.addEventListener('click',()=>this._processarResgateTicket(b.dataset.resgEnviar,'enviar')));
+      el.querySelectorAll('[data-resg-cancelar]').forEach(b=>b.addEventListener('click',()=>{
+        this._confirmarDel('Cancelar este resgate? Os tickets voltam pro saldo do streamer.',()=>this._processarResgateTicket(b.dataset.resgCancelar,'cancelar'));
+      }));
+    }catch(e){el.innerHTML=`<div style="padding:20px;color:var(--verm)">${this._esc(e.message)}</div>`;}
+  }
+
+  async _processarResgateTicket(id,acao){
+    try{
+      await this._post(`/admin/tickets/resgates/${id}/${acao}`,{});
+      this._toast(acao==='aprovar'?'Resgate aprovado!':acao==='enviar'?'Resgate marcado como enviado!':'Resgate cancelado — tickets estornados','ok');
+      this._carregarTicketsResgates();
+    }catch(e){this._toast(e.message,'err');}
+  }
+
+  // ── Ajustes manuais ───────────────────────────────────────────────────────
+  async _carregarTicketsAjustes(){
+    const s=this.shadowRoot;const el=s.getElementById('tbTicketsAjustes');if(!el)return;
+    el.innerHTML=this._loading();
+    try{
+      const d=await this._get('/admin/tickets/ajustes');
+      const lista=d.ajustes||[];
+      if(!lista.length){el.innerHTML=this._empty('history','Nenhum ajuste manual registrado ainda.');return;}
+      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>Quantidade</th><th>Motivo</th><th>Por</th><th>Data</th></tr></thead><tbody>
+        ${lista.map(a=>`<tr>
+          <td>${this._esc(a.streamer_nome||a.kwai_uid)}</td>
+          <td style="color:${Number(a.quantidade)>=0?'var(--verde)':'var(--verm)'};font-weight:700">${Number(a.quantidade)>=0?'+':''}${this._num(a.quantidade||0)}</td>
+          <td style="font-size:12px;color:var(--t2)">${this._esc(a.motivo||'—')}</td>
+          <td style="font-size:11px;color:var(--t3)">${this._esc(a.operador||'—')}</td>
+          <td style="color:var(--t3);font-size:11px">${this._fdt(a.criado_em)}</td>
+        </tr>`).join('')}
+      </tbody></table>`;
+    }catch(e){el.innerHTML=`<div style="padding:20px;color:var(--verm)">${this._esc(e.message)}</div>`;}
+  }
+
+  async _aplicarAjusteTicket(){
+    const s=this.shadowRoot;
+    const uid=s.getElementById('ajusteTicketUid')?.value.trim();
+    const qtd=Number(s.getElementById('ajusteTicketQtd')?.value);
+    const motivo=s.getElementById('ajusteTicketMotivo')?.value.trim();
+    if(!uid){this._toast('Informe o UID do streamer','err');return;}
+    if(!qtd){this._toast('Informe a quantidade (positiva ou negativa)','err');return;}
+    if(!motivo){this._toast('Motivo é obrigatório','err');return;}
+    try{
+      await this._post('/admin/tickets/ajuste',{kwai_uid:uid,quantidade:qtd,motivo});
+      this._toast('Ajuste aplicado!','ok');
+      s.getElementById('ajusteTicketUid').value='';s.getElementById('ajusteTicketQtd').value='';s.getElementById('ajusteTicketMotivo').value='';
+      this._carregarTicketsAjustes();
+    }catch(e){this._toast(e.message,'err');}
   }
 
   // ── Helpers HTTP usados pelos métodos de Agentes ──────────────────────────
