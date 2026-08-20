@@ -6710,11 +6710,7 @@ class DimaiorAdmin extends HTMLElement {
             <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Custo em tickets</label>
               <input id="mPtTickets" type="number" min="0" value="${Number(presente?.custo_tickets||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Ordem</label>
-              <input id="mPtOrdem" type="number" value="${Number(presente?.ordem||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8;padding-bottom:10px"><input type="checkbox" id="mPtAtivo" ${presente?.ativo!==false?'checked':''}> Ativo na galeria</label>
-          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8"><input type="checkbox" id="mPtAtivo" ${presente?.ativo!==false?'checked':''}> Ativo na galeria</label>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
           <button id="mPtCancelar" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
@@ -6743,7 +6739,6 @@ class DimaiorAdmin extends HTMLElement {
         nome, imagem_url,
         valor_diamantes:Number(modal.querySelector('#mPtDiam').value)||0,
         custo_tickets:Number(modal.querySelector('#mPtTickets').value)||0,
-        ordem:Number(modal.querySelector('#mPtOrdem').value)||0,
         ativo:modal.querySelector('#mPtAtivo').checked,
       };
       try{
