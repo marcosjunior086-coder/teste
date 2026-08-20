@@ -1878,6 +1878,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mPtCancel')?.addEventListener('click',()=>this._fechaModal('mPresenteTicket'));
     s.getElementById('mPtSave')?.addEventListener('click',()=>this._salvarPresenteTicket());
     s.getElementById('mPtImagem')?.addEventListener('input',()=>this._atualizarPreviewPresente());
+    s.getElementById('btnBuscarAcessoTickets')?.addEventListener('click',()=>this._buscarTicketsElegiveis());
     s.getElementById('ticketsResgateFiltro')?.addEventListener('change',()=>this._carregarTicketsResgates());
     s.getElementById('btnAplicarAjusteTicket')?.addEventListener('click',()=>this._aplicarAjusteTicket());
     // Status de Streamers
@@ -5062,6 +5063,7 @@ class DimaiorAdmin extends HTMLElement {
                 <button class="month-tab" data-sub="presentes">Presentes</button>
                 <button class="month-tab" data-sub="resgates">Resgates</button>
                 <button class="month-tab" data-sub="ajustes">Ajustes</button>
+                <button class="month-tab" data-sub="acesso">Acesso</button>
               </div>
               <div id="tickets-sub-regras">
                 <div class="box">
@@ -5123,6 +5125,25 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="box" style="margin-top:14px">
                   <div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Ajustes</div></div>
                   <div id="tbTicketsAjustes">${this._loading()}</div>
+                </div>
+              </div>
+              <div id="tickets-sub-acesso" class="rc-hidden-sub" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('users',14)} Buscar Elegíveis</div></div>
+                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Só quem for marcado aqui vê a aba Tickets no painel do streamer — quem não for liberado nem sabe que a função existe. Busque pelo rendimento do período escolhido e marque quem deve ter acesso; desmarcar remove o acesso na hora. Sem expiração automática — fica liberado até você desmarcar.</div>
+                  <div style="padding:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+                    <label style="flex:1;min-width:180px"><div class="cfg-chave">Período</div>
+                      <select id="ticketsAcessoPeriodo" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
+                        <option value="anterior">Mês anterior (fechado)</option>
+                        <option value="atual">Mês atual (parcial, em andamento)</option>
+                      </select>
+                    </label>
+                    <label style="flex:1;min-width:160px"><div class="cfg-chave">Mínimo de diamantes</div>
+                      <input id="ticketsAcessoMinimo" type="number" min="0" value="0" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none;box-sizing:border-box">
+                    </label>
+                    <button class="btn btn-g" id="btnBuscarAcessoTickets">${this._ico('search',13)} Buscar Elegíveis</button>
+                  </div>
+                  <div id="ticketsAcessoArea">${this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do período escolhido')}</div>
                 </div>
               </div>
             </div>
@@ -6557,7 +6578,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;
     const sub=this._ticketsSubAtual||'regras';
     s.querySelectorAll('#ticketsSubTabs .month-tab').forEach(t=>t.classList.toggle('on',t.dataset.sub===sub));
-    ['regras','presentes','resgates','ajustes'].forEach(k=>{
+    ['regras','presentes','resgates','ajustes','acesso'].forEach(k=>{
       const el=s.getElementById(`tickets-sub-${k}`);if(el)el.style.display=k===sub?'':'none';
     });
     if(sub==='regras'){this._carregarTicketsRegras();this._carregarTicketsConfig();}
@@ -6772,6 +6793,47 @@ class DimaiorAdmin extends HTMLElement {
   async _excluirPresenteTicket(id){
     try{await this._delete(`/admin/tickets/presentes/${id}`);this._toast('Presente removido','ok');this._carregarTicketsPresentes();}
     catch(e){this._toast(e.message,'err');}
+  }
+
+  // ── Acesso (elegibilidade) ────────────────────────────────────────────────
+  // Cada checkbox chama a API na hora — sem "confirmar" em lote, mesmo
+  // padrão do gerenciamento de participantes do PK Diário já em andamento.
+  async _buscarTicketsElegiveis(){
+    const s=this.shadowRoot;
+    const periodo=s.getElementById('ticketsAcessoPeriodo')?.value==='atual'?'atual':'anterior';
+    const minimo=Math.max(0,parseInt(s.getElementById('ticketsAcessoMinimo')?.value)||0);
+    const area=s.getElementById('ticketsAcessoArea');
+    area.innerHTML=this._loading();
+    try{
+      const d=await this._get(`/admin/tickets/elegiveis?minimo=${minimo}&periodo=${periodo}`);
+      this._ticketsElegiveis=d.streamers||[];
+      this._renderTicketsElegiveis();
+    }catch(e){area.innerHTML=this._empty('warning','Erro ao buscar elegíveis');}
+  }
+
+  _renderTicketsElegiveis(){
+    const s=this.shadowRoot,area=s.getElementById('ticketsAcessoArea');
+    const lista=this._ticketsElegiveis||[];
+    if(!lista.length){area.innerHTML=this._empty('users','Nenhum streamer encontrado nesse período.');return;}
+    const linhas=[...lista].sort((a,b)=>(b.diamantes||0)-(a.diamantes||0));
+    area.innerHTML=linhas.map(st=>`
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--brddim);cursor:pointer">
+        <input type="checkbox" class="ticket-acesso-chk" data-uid="${this._esc(st.kwai_uid)}" ${st.ja_liberado?'checked':''} style="accent-color:var(--cyan)">
+        ${this._avatar(st.foto,st.nome,'av')}
+        <span style="flex:1;font-size:12px;color:var(--t1)">${this._esc(st.nome)}${st.novato?' <span style="color:var(--cyan);font-size:10px">· NOVATO</span>':''}${st.elegivel?' <span style="color:var(--verde);font-size:10px">· elegível</span>':''}</span>
+        <span style="font-size:11px;color:var(--t3);display:flex;align-items:center;gap:4px">${this._iconeDiamanteTickets(11)} ${this._num(st.diamantes||0)}</span>
+      </label>`).join('');
+    area.querySelectorAll('.ticket-acesso-chk').forEach(chk=>chk.addEventListener('change',async()=>{
+      const uid=chk.dataset.uid;
+      chk.disabled=true;
+      try{
+        if(chk.checked)await this._post('/admin/tickets/liberados',{kwai_uid:uid});
+        else await this._delete(`/admin/tickets/liberados/${encodeURIComponent(uid)}`);
+        const st=this._ticketsElegiveis.find(x=>x.kwai_uid===uid);
+        if(st)st.ja_liberado=chk.checked;
+      }catch(e){this._toast(e.message,'err');chk.checked=!chk.checked;}
+      chk.disabled=false;
+    }));
   }
 
   // ── Resgates ───────────────────────────────────────────────────────────────

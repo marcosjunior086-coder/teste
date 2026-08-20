@@ -673,7 +673,7 @@
                     <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
                     <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
-                    <button class="nit" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
+                    <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
                     <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
                     <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
                     <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
@@ -1430,6 +1430,10 @@
             } catch(e) {}
             this.qs('#nAtalhoAdmin')?.classList.toggle('hidden', !p.atalho_admin);
             this.qs('#nAtalhoAgente')?.classList.toggle('hidden', !p.atalho_agente);
+            // Aba Tickets só aparece pra quem o admin liberou (ver
+            // tickets_streamers_liberados) — quem não foi selecionado nem
+            // sabe que a função existe.
+            this.qs('#nTickets')?.classList.toggle('hidden', !p.tickets_liberado);
             const usd=Number(t.dolar||0).toFixed(2);
             this.qs('#dUsd').textContent=`$ ${usd}`;
             this.qs('#dDiaLbl').textContent=`${Number(t.diamantes||0).toLocaleString('pt-BR')} diamantes`;
