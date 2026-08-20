@@ -102,7 +102,7 @@ class DmaiorTickets extends HTMLElement {
       this._movimentacoes  = Array.isArray(dados.movimentacoes) ? dados.movimentacoes : [];
       this._metricasMes    = dados.metricas_mes || { dias: 0, horas: 0, diamantes: 0 };
       this._regrasAtivas   = (Array.isArray(dados.regras_ativas) ? dados.regras_ativas : [])
-        .slice().sort((a, b) => Number(a.ordem || 0) - Number(b.ordem || 0));
+        .slice().sort((a, b) => Number(a.tickets_fixos || 0) - Number(b.tickets_fixos || 0));
       this._iconeDiamanteUrl = dados.icone_diamante_url || '';
 
       const dp = await resPresentes.json().catch(() => ({ presentes: [] }));

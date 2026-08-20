@@ -5081,7 +5081,7 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="bhead"><div class="btitulo">${this._ico('star',14)} Regras de Pontuação</div>
                     <button class="btn btn-sm btn-g" id="btnNovaRegraTicket">${this._ico('plus',12)} Nova Regra</button>
                   </div>
-                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} As regras funcionam como níveis (mesmo modelo das Metas de Impulso) — só a de maior "Ordem" que o streamer atingir vale no período, nunca soma todas as batidas. Ex: nível de 50 tickets + nível de 150 tickets → quem bate o segundo recebe 150 no total, não 200. Use "Ordem" crescente do nível mais baixo pro mais alto. Nada aqui fica fixo no código — tudo editável.</div>
+                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} As regras funcionam como níveis (mesmo modelo das Metas de Impulso) — só a de maior "Tickets fixos" que o streamer atingir vale no período, nunca soma todas as batidas. Ex: nível de 50 tickets + nível de 150 tickets → quem bate o segundo recebe 150 no total, não 200. A ordem dos níveis é decidida sozinha pelo valor em "Tickets fixos" (maior valor = nível mais alto), sem precisar configurar nada à parte. Nada aqui fica fixo no código — tudo editável.</div>
                   <div id="tbTicketsRegras">${this._loading()}</div>
                 </div>
               </div>
@@ -6570,8 +6570,9 @@ class DimaiorAdmin extends HTMLElement {
       const d=await this._get('/admin/tickets/regras');
       const lista=d.regras||[];
       if(!lista.length){el.innerHTML=this._empty('star','Nenhuma regra cadastrada ainda.');return;}
-      el.innerHTML=`<table class="tb"><thead><tr><th>Nome</th><th>Dias</th><th>Horas</th><th>Diamantes</th><th>Tickets fixos</th><th>Tickets/1000💎</th><th>Critério</th><th>Ordem</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-        ${lista.map(r=>`<tr>
+      const listaOrdenada=lista.slice().sort((a,b)=>Number(a.tickets_fixos||0)-Number(b.tickets_fixos||0));
+      el.innerHTML=`<table class="tb"><thead><tr><th>Nome</th><th>Dias</th><th>Horas</th><th>Diamantes</th><th>Tickets fixos</th><th>Tickets/1000 ${this._ico('diamond',11)}</th><th>Critério</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+        ${listaOrdenada.map(r=>`<tr>
           <td style="font-weight:600">${this._esc(r.nome)}</td>
           <td>${Number(r.dias_minimos||0)}</td>
           <td>${Number(r.horas_minimas||0)}</td>
@@ -6579,7 +6580,6 @@ class DimaiorAdmin extends HTMLElement {
           <td style="color:var(--cyan);font-weight:700">${Number(r.tickets_fixos||0)}</td>
           <td>${Number(r.tickets_por_1000_diamantes||0)}</td>
           <td style="font-size:11px;color:var(--t3)">${r.criterio_modo==='independente'?'Independente':'Combinado'}</td>
-          <td>${Number(r.ordem||0)}</td>
           <td>${r.ativo?`<span style="color:var(--verde);font-size:12px">● Ativa</span>`:`<span style="color:var(--verm);font-size:12px">● Inativa</span>`}</td>
           <td style="white-space:nowrap"><button class="btn btn-sm btn-o" data-edit-regra="${r.id}">${this._ico('edit',12)}</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-del-regra="${r.id}">${this._ico('trash',12)}</button></td>
         </tr>`).join('')}
@@ -6609,18 +6609,14 @@ class DimaiorAdmin extends HTMLElement {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets fixos ao bater a meta</label>
               <input id="mRtFixos" type="number" min="0" value="${Number(regra?.tickets_fixos||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets a cada 1.000💎</label>
+            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tickets a cada 1.000 ${this._ico('diamond',11)}</label>
               <input id="mRtPorMil" type="number" min="0" value="${Number(regra?.tickets_por_1000_diamantes||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Critério</label>
-              <select id="mRtCriterio" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none">
-                <option value="combinado" ${regra?.criterio_modo!=='independente'?'selected':''}>Combinado (todos os mínimos juntos)</option>
-                <option value="independente" ${regra?.criterio_modo==='independente'?'selected':''}>Independente (cada mínimo à parte)</option>
-              </select></div>
-            <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Ordem</label>
-              <input id="mRtOrdem" type="number" value="${Number(regra?.ordem||0)}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
-          </div>
+          <div><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Critério</label>
+            <select id="mRtCriterio" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none">
+              <option value="combinado" ${regra?.criterio_modo!=='independente'?'selected':''}>Combinado (todos os mínimos juntos)</option>
+              <option value="independente" ${regra?.criterio_modo==='independente'?'selected':''}>Independente (cada mínimo à parte)</option>
+            </select></div>
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8"><input type="checkbox" id="mRtAtivo" ${regra?.ativo!==false?'checked':''}> Regra ativa</label>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
@@ -6642,7 +6638,6 @@ class DimaiorAdmin extends HTMLElement {
         tickets_fixos:Number(modal.querySelector('#mRtFixos').value)||0,
         tickets_por_1000_diamantes:Number(modal.querySelector('#mRtPorMil').value)||0,
         criterio_modo:modal.querySelector('#mRtCriterio').value,
-        ordem:Number(modal.querySelector('#mRtOrdem').value)||0,
         ativo:modal.querySelector('#mRtAtivo').checked,
       };
       const erroEl=modal.querySelector('#mRtErro');erroEl.textContent='';
@@ -6676,7 +6671,7 @@ class DimaiorAdmin extends HTMLElement {
           </div>
           <div style="padding:10px">
             <div style="font-weight:600;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${this._esc(p.nome)}</div>
-            <div style="font-size:11px;color:var(--t3);margin-top:3px">${this._num(p.valor_diamantes||0)} 💎</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:3px;display:flex;align-items:center;gap:4px">${this._ico('diamond',11)} ${this._num(p.valor_diamantes||0)}</div>
             <div style="font-size:12px;color:var(--cyan);font-weight:700;margin-top:2px">${this._num(p.custo_tickets||0)} tickets</div>
             <div style="margin-top:6px">${p.ativo?`<span style="color:var(--verde);font-size:11px">● Ativo</span>`:`<span style="color:var(--verm);font-size:11px">● Inativo</span>`}</div>
             <div style="display:flex;gap:6px;margin-top:8px">
@@ -6767,7 +6762,7 @@ class DimaiorAdmin extends HTMLElement {
       const d=await this._get(`/admin/tickets/resgates${q}`);
       const lista=d.resgates||[];
       if(!lista.length){el.innerHTML=this._empty('send','Nenhuma solicitação de resgate encontrada.');return;}
-      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>Presente</th><th>💎</th><th>Tickets</th><th>Status</th><th>Solicitado em</th><th>Ações</th></tr></thead><tbody>
+      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>Presente</th><th>${this._ico('diamond',11)}</th><th>Tickets</th><th>Status</th><th>Solicitado em</th><th>Ações</th></tr></thead><tbody>
         ${lista.map(r=>{
           const acoes=r.status==='pendente'
             ?`<button class="btn btn-sm btn-g" data-resg-aprovar="${r.id}">${this._ico('check',12)} Aprovar</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-resg-cancelar="${r.id}">${this._ico('x_circle',12)} Cancelar</button>`
