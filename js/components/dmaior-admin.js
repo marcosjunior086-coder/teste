@@ -1879,6 +1879,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mPtSave')?.addEventListener('click',()=>this._salvarPresenteTicket());
     s.getElementById('mPtImagem')?.addEventListener('input',()=>this._atualizarPreviewPresente());
     s.getElementById('btnBuscarAcessoTickets')?.addEventListener('click',()=>this._buscarTicketsElegiveis());
+    s.getElementById('btnAcessoAddManual')?.addEventListener('click',()=>this._adicionarAcessoManual());
+    s.getElementById('btnAtuTicketsLiberados')?.addEventListener('click',()=>this._carregarTicketsLiberados());
     s.getElementById('ticketsResgateFiltro')?.addEventListener('change',()=>this._carregarTicketsResgates());
     s.getElementById('btnAplicarAjusteTicket')?.addEventListener('click',()=>this._aplicarAjusteTicket());
     // Status de Streamers
@@ -5144,6 +5146,14 @@ class DimaiorAdmin extends HTMLElement {
                     <button class="btn btn-g" id="btnBuscarAcessoTickets">${this._ico('search',13)} Buscar Elegíveis</button>
                   </div>
                   <div id="ticketsAcessoArea">${this._empty('users','Clique em "Buscar Elegíveis" pra listar os streamers do período escolhido')}</div>
+                  <div style="padding:14px 16px;border-top:1px solid var(--brddim);display:flex;gap:8px;flex-wrap:wrap">
+                    <input id="ticketsAcessoManualUid" type="text" placeholder="Ou libere direto pelo UID..." style="flex:1;min-width:200px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none">
+                    <button class="btn btn-o" id="btnAcessoAddManual">${this._ico('plus',13)} Liberar por UID</button>
+                  </div>
+                </div>
+                <div class="box" style="margin-top:14px">
+                  <div class="bhead"><div class="btitulo">${this._ico('unlock',14)} Streamers Liberados</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuTicketsLiberados">${this._ico('refresh',12)} Atualizar</button></div></div>
+                  <div id="tbTicketsLiberados">${this._loading()}</div>
                 </div>
               </div>
             </div>
@@ -6585,6 +6595,7 @@ class DimaiorAdmin extends HTMLElement {
     if(sub==='presentes')this._carregarTicketsPresentes();
     if(sub==='resgates')this._carregarTicketsResgates();
     if(sub==='ajustes')this._carregarTicketsAjustes();
+    if(sub==='acesso')this._carregarTicketsLiberados();
   }
 
   // Ícone de diamante usado em toda a feature Tickets — busca uma vez e
@@ -6834,6 +6845,53 @@ class DimaiorAdmin extends HTMLElement {
       }catch(e){this._toast(e.message,'err');chk.checked=!chk.checked;}
       chk.disabled=false;
     }));
+  }
+
+  async _adicionarAcessoManual(){
+    const s=this.shadowRoot,inp=s.getElementById('ticketsAcessoManualUid'),uid=inp.value.trim();
+    if(!uid)return;
+    try{
+      await this._post('/admin/tickets/liberados',{kwai_uid:uid});
+      inp.value='';
+      this._toast('Streamer liberado!','ok');
+      // Se ele já estiver na lista de elegíveis buscada, marca o checkbox
+      // sem precisar buscar de novo.
+      const st=(this._ticketsElegiveis||[]).find(x=>x.kwai_uid===uid);
+      if(st){st.ja_liberado=true;this._renderTicketsElegiveis();}
+      this._carregarTicketsLiberados();
+    }catch(e){this._toast(e.message,'err');}
+  }
+
+  async _carregarTicketsLiberados(){
+    const s=this.shadowRoot,el=s.getElementById('tbTicketsLiberados');if(!el)return;
+    el.innerHTML=this._loading();
+    try{
+      const d=await this._get('/admin/tickets/liberados');
+      const lista=d.liberados||[];
+      if(!lista.length){el.innerHTML=this._empty('unlock','Nenhum streamer liberado ainda.');return;}
+      el.innerHTML=`<table class="tb"><thead><tr><th>Streamer</th><th>UID</th><th>Liberado em</th><th>Por</th><th>Ações</th></tr></thead><tbody>
+        ${lista.map(l=>`<tr>
+          <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(l.foto,l.nome,'av')}<span>${this._esc(l.nome)}</span></div></td>
+          <td style="color:var(--t3)">${this._esc(l.kwai_uid)}</td>
+          <td>${this._fdt(l.liberado_em)}</td>
+          <td style="color:var(--t3)">${this._esc(l.liberado_por||'—')}</td>
+          <td><button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-remover-liberado="${this._esc(l.kwai_uid)}">${this._ico('trash',12)} Remover</button></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+      el.querySelectorAll('[data-remover-liberado]').forEach(b=>b.addEventListener('click',()=>{
+        this._confirmarDel('Remover o acesso à aba Tickets desse streamer? Os tickets já acumulados não são afetados.',()=>this._removerAcessoTicket(b.dataset.removerLiberado));
+      }));
+    }catch(e){el.innerHTML=`<div style="padding:20px;color:var(--verm)">${this._esc(e.message)}</div>`;}
+  }
+
+  async _removerAcessoTicket(uid){
+    try{
+      await this._delete(`/admin/tickets/liberados/${encodeURIComponent(uid)}`);
+      this._toast('Acesso removido','ok');
+      const st=(this._ticketsElegiveis||[]).find(x=>x.kwai_uid===uid);
+      if(st){st.ja_liberado=false;this._renderTicketsElegiveis();}
+      this._carregarTicketsLiberados();
+    }catch(e){this._toast(e.message,'err');}
   }
 
   // ── Resgates ───────────────────────────────────────────────────────────────
