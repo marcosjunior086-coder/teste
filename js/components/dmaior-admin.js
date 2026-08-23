@@ -281,33 +281,90 @@ class DimaiorAdmin extends HTMLElement {
     try{this.scrollIntoView({behavior:'instant',block:'start'});}catch{}
   }
 
+  // Cards coloridos 2x2 do Dashboard (estilo referência) — chamado sozinho
+  // (skeleton, com "—"/spinner) e de novo cada vez que uma das duas fontes
+  // de dado (métricas gerais / diamantes do dia) resolve. Nunca espera as
+  // duas juntas: o que já chegou aparece, o resto continua girando.
+  _dashValOuSpinner(disponivel,valFmt){
+    return disponivel?valFmt:`<span class="dc2-spin"></span>`;
+  }
+  _renderDashMetricasGrid(){
+    const s=this.shadowRoot;
+    const m=this._dashMetricas;
+    const diaDisponivel=this._dashDiamantesDia!==null;
+    const mostrarHoras=!m||m.horas_mes!==null&&m.horas_mes!==undefined;
+    const dcards=[
+      {ico:'trophy',  val:m?.streamers_mes,    lbl:'No Ranking',    cor:'indigo', fmt:'num'},
+      ...(this._livesOpts.dashboardAoVivo!==false?[{ico:'live',val:m?.ao_vivo,lbl:'Ao Vivo Agora',cor:'verm',fmt:'num',blink:true}]:[]),
+      {ico:'bolt',    val:m?.impulsionamentos, lbl:'Boosts',        cor:'verde',  fmt:'num'},
+      {ico:'diamond', val:m?.total_diamantes,  lbl:'Diamantes Mês', cor:'cyan',   fmt:'num', prev:m?.total_diamantes_mes_anterior},
+      {ico:'diamond', val:diaDisponivel?this._dashDiamantesDia:undefined, lbl:'Diamantes do Dia', cor:'cyan', fmt:'num'},
+      {ico:'users',   val:m?.streamers_ao_vivo_mes, lbl:'Streamer(s) ao Vivo', cor:'roxo', fmt:'num', prev:m?.streamers_ao_vivo_mes_anterior},
+      {ico:'metrics', val:m?.registros_hoje,   lbl:'Registros Hoje',cor:'gold',   fmt:'num'},
+      ...(mostrarHoras?[{ico:'clock_r', val:m?.horas_mes, lbl:'Carga Horária Geral', cor:'azul', fmt:'horas', prev:m?.horas_mes_anterior}]:[]),
+      {ico:'server',  val:m?m.horario:undefined, lbl:'Horário Servidor', cor:'slate', fmt:'str'},
+    ];
+    s.getElementById('gMetricas').innerHTML=dcards.map(c=>{
+      const disponivel=c.val!==undefined&&c.val!==null;
+      let valFmt='';
+      if(disponivel){
+        if(c.fmt==='num')valFmt=this._numK(Number(c.val||0));
+        else if(c.fmt==='horas')valFmt=`${this._num(Math.round(Number(c.val||0)))}h`;
+        else if(c.fmt==='str')valFmt=new Date(c.val).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        else valFmt=c.val;
+      }
+      return `<div class="dc2 dc2-${c.cor}">
+        <div class="dc2-ico ${c.blink?'dc2-blink':''}">${this._ico(c.ico,26)}</div>
+        <div class="dc2-val">${this._dashValOuSpinner(disponivel,valFmt)}</div>
+        <div class="dc2-lbl">${c.lbl}</div>
+        ${c.prev!==undefined?`<div class="dc2-prev">Mês anterior: ${c.fmt==='horas'?this._num(Math.round(Number(c.prev||0)))+'h':this._numK(Number(c.prev||0))}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  // Toggle "fonte dos dados do Dashboard" — kwai (oficial, direto da Kwai,
+  // já soma sub-agências) ou banco (calculado do nosso Supabase, como
+  // sempre foi). Falha ao consultar a Kwai cai sozinho pro banco (ver
+  // rotaDashboard no worker) — o toggle só reflete a preferência, não
+  // garante que está de fato usando a Kwai nesse carregamento.
+  async _carregarDashFonteToggle(){
+    const s=this.shadowRoot,chk=s.getElementById('dashFonteToggle');
+    if(!chk)return;
+    try{
+      const d=await this._api('GET','/admin/dashboard/config');
+      chk.checked=d?.fonte==='kwai';
+    }catch(e){/* mantém desmarcado (banco) se a rota ainda não existir */}
+  }
+  async _salvarDashFonteToggle(ativo){
+    try{
+      await this._api('POST','/admin/dashboard/config',{fonte:ativo?'kwai':'banco'});
+      this._toast(ativo?'Dashboard usando dados oficiais da Kwai':'Dashboard usando dados do banco','ok');
+      this._carregarDash();
+    }catch(e){this._toast(e.message,'err');}
+  }
+
   async _carregarDash(){
     const s=this.shadowRoot;
-    s.getElementById('gMetricas').innerHTML=this._loading('grid-column:1/-1');
-    const dataHoje=this._dataHojeBR();
-    const [d,diarioDash]=await Promise.all([this._api('GET','/admin/dashboard'),this._api('GET',`/admin/ranking/diario?data=${dataHoje}`)]);
-    if(!d?.ok){s.getElementById('gMetricas').innerHTML=this._empty('warning','Erro ao carregar');return;}
-    const m=d.metricas;
-    const diamantesDia=this._listaDiario(diarioDash).reduce((acc,sv)=>acc+this._diam(sv),0);
+    // Skeleton na hora: a grade de métricas já aparece com "—"/spinner em
+    // vez de travar a tela toda esperando a rede — e o Acesso Rápido (que
+    // não depende de nenhum dado do banco) nem precisa esperar nada.
+    this._dashMetricas=null;
+    this._dashDiamantesDia=null;
+    this._renderDashMetricasGrid();
+    this._carregarDashFonteToggle();
 
-    // Cards coloridos 2x2 (estilo referência)
-    const dcards=[
-      {ico:'trophy',  val:m.streamers_mes||0,    lbl:'No Ranking',    cor:'indigo', fmt:'num'},
-      ...(this._livesOpts.dashboardAoVivo!==false?[{ico:'live',val:m.ao_vivo,lbl:'Ao Vivo Agora',cor:'verm',fmt:'num',blink:true}]:[]),
-      {ico:'bolt',    val:m.impulsionamentos,    lbl:'Boosts',        cor:'verde',  fmt:'num'},
-      {ico:'diamond', val:m.total_diamantes||0,  lbl:'Diamantes Mês', cor:'cyan',   fmt:'num', prev:m.total_diamantes_mes_anterior},
-      {ico:'diamond', val:diamantesDia,          lbl:'Diamantes do Dia', cor:'cyan', fmt:'num'},
-      {ico:'users',   val:m.streamers_ao_vivo_mes||0, lbl:'Streamer(s) ao Vivo', cor:'roxo', fmt:'num', prev:m.streamers_ao_vivo_mes_anterior},
-      {ico:'metrics', val:m.registros_hoje||0,   lbl:'Registros Hoje',cor:'gold',   fmt:'num'},
-      {ico:'server',  val:new Date(m.horario).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), lbl:'Horário Servidor', cor:'slate', fmt:'str'},
-    ];
-    s.getElementById('gMetricas').innerHTML=dcards.map(c=>`
-      <div class="dc2 dc2-${c.cor}">
-        <div class="dc2-ico ${c.blink?'dc2-blink':''}">${this._ico(c.ico,26)}</div>
-        <div class="dc2-val">${c.fmt==='num'?this._numK(Number(c.val||0)):c.val}</div>
-        <div class="dc2-lbl">${c.lbl}</div>
-        ${c.prev!==undefined?`<div class="dc2-prev">Mês anterior: ${this._numK(Number(c.prev||0))}</div>`:''}
-      </div>`).join('');
+    // As duas chamadas rodam independentes — cada uma preenche só a parte
+    // dela assim que responder, sem uma travar a outra (Diamantes do Dia
+    // costuma voltar bem mais rápido que o resumo geral).
+    this._api('GET','/admin/dashboard').then(d=>{
+      if(d?.ok){this._dashMetricas=d.metricas;this._renderDashMetricasGrid();}
+      else if(!this._dashMetricas)s.getElementById('gMetricas').innerHTML=this._empty('warning','Erro ao carregar');
+    });
+    const dataHoje=this._dataHojeBR();
+    this._api('GET',`/admin/ranking/diario?data=${dataHoje}`).then(diarioDash=>{
+      this._dashDiamantesDia=this._listaDiario(diarioDash).reduce((acc,sv)=>acc+this._diam(sv),0);
+      this._renderDashMetricasGrid();
+    });
 
     // Ações Rápidas — estilo lista colorida (referência imagem 1)
     const qas=[
@@ -1736,7 +1793,7 @@ class DimaiorAdmin extends HTMLElement {
     });
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
-    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
+    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('dashFonteToggle')?.addEventListener('change',e=>this._salvarDashFonteToggle(e.target.checked));s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
@@ -3851,6 +3908,8 @@ class DimaiorAdmin extends HTMLElement {
     .dc2-gold{background:linear-gradient(135deg,rgba(217,119,6,.8),rgba(234,179,8,.56));border-color:rgba(251,191,36,.86);}.dc2-gold .dc2-ico,.dc2-gold .dc2-val{color:#fef3c7;text-shadow:0 0 18px rgba(245,158,11,.72)}
     .dc2-slate{background:linear-gradient(135deg,rgba(51,65,85,.82),rgba(14,165,233,.32));border-color:rgba(148,163,184,.72);}.dc2-slate .dc2-ico,.dc2-slate .dc2-val{color:#e2e8f0;text-shadow:0 0 16px rgba(148,163,184,.55)}
     .dc2-roxo{background:linear-gradient(135deg,rgba(126,34,206,.78),rgba(219,39,119,.42));border-color:rgba(192,132,252,.82);}.dc2-roxo .dc2-ico,.dc2-roxo .dc2-val{color:#e9d5ff;text-shadow:0 0 18px rgba(192,132,252,.7)}
+    .dc2-azul{background:linear-gradient(135deg,rgba(29,78,216,.78),rgba(56,189,248,.45));border-color:rgba(96,165,250,.82);}.dc2-azul .dc2-ico,.dc2-azul .dc2-val{color:#bfdbfe;text-shadow:0 0 18px rgba(96,165,250,.7)}
+    .dc2-spin{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
 
     /* ══ Dashboard de Desempenho ══ */
     .dd-row2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
@@ -4708,7 +4767,7 @@ class DimaiorAdmin extends HTMLElement {
             )}
           </div>
           <div class="content">
-            <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash')}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
+            <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash',`<div style="display:flex;align-items:center;gap:8px;margin-left:6px" title="Quando ativo, os números de diamantes/streamers ao vivo/horas vêm direto da Kwai (mais preciso, já soma sub-agências) em vez do nosso banco"><span style="font-size:11px;color:var(--t3);white-space:nowrap">Dados oficiais Kwai</span><label class="tog-switch"><input type="checkbox" id="dashFonteToggle"><span class="tog-slider"></span></label></div>`)}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
             <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive',`<button class="btn btn-o" id="btnLvCfg">${this._ico('settings',13)} Configurações<span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span></button>`)}<div id="gLives">${this._loading()}</div></div>
             <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank',`<button class="btn btn-o" id="btnOcultarRanking">${this._ico('settings',13)} Opções</button>`)}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
