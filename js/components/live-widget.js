@@ -860,13 +860,21 @@ class KwaiLiveWidget extends HTMLElement {
       // dentro de outra camada de proxy ("proxy do proxy"), e o Worker
       // rejeitaria com 403 por o host decodificado ser o próprio domínio
       // do proxy em vez de um CDN da Kwai.
+      // Buffer bem mais enxuto que o player do modal: isso aqui é uma
+      // prévia em miniatura, não a visualização principal. Os valores
+      // antigos (30-60s de buffer, 6 segmentos = ~24s atrás do ao vivo)
+      // foram copiados do player grande e faziam cada mini-player brigar
+      // por banda/CPU/memória tentando acumular um buffer gigante — com
+      // vários rodando ao mesmo tempo isso é o que dava a sensação de
+      // "baixando o vídeo antes de tocar" e travava mais fácil no mobile.
+      // Poucos segundos bastam pra uma bolinha pequena continuar rolando.
       const hlsCfg = {
         enableWorker:              true,
         lowLatencyMode:            false,
         autoLevelCapping:          0,
-        maxBufferLength:           30,
-        maxMaxBufferLength:        60,
-        liveSyncDurationCount:     6,
+        maxBufferLength:           4,
+        maxMaxBufferLength:        8,
+        liveSyncDurationCount:     2,
         startFragPrefetch:         true,
         manifestLoadingMaxRetry:   4,
         fragLoadingMaxRetry:       6,
