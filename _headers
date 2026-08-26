@@ -39,6 +39,11 @@
   Content-Type: text/html; charset=utf-8
   Cache-Control: public, max-age=0, must-revalidate
 
+# robots.txt real (evita fallback pro index.html)
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=14400, must-revalidate
+
 # Static text assets
 /js/*
   Content-Type: application/javascript; charset=utf-8
