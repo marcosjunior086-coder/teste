@@ -50,7 +50,7 @@ ErrorDocument 403 /index.html
 #  exclusivo do painel do streamer, não existe mais página pública)
 RewriteRule ^rank-geral/?$        /painel/index.html [R=301,L]
 RewriteRule ^ranking\.html/?$     /painel/index.html [R=301,L]
-RewriteRule ^recarga/?$           /recarga.html [R=301,L]
+RewriteRule ^recarga(\.html)?/?$  https://rocketbunny.club/@DMAIOR_AGENCY [R=301,L]
 RewriteRule ^politicas/?$         /politicas.html [R=301,L]
 RewriteRule ^tutoriais/?$         /tutoriais.html [R=301,L]
 RewriteRule ^formulario/?$        /recrutamento.html [R=301,L]

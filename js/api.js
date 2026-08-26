@@ -15,7 +15,6 @@ window.DmaiorConfig = {
   // document.baseURI resolve o <base href> automaticamente
   get baseUrl() { return typeof document !== 'undefined' ? document.baseURI : '/'; },
   workers: {
-    recarga:     'https://recarga-dmaior.agencydmaior.com.br',
     rank:        'https://rank.agencydmaior.com.br',
     admin:       'https://admin.agencydmaior.com.br',
     dashboard:   'https://dashboard.agencydmaior.com.br',
@@ -78,67 +77,6 @@ window.DmaiorAPI = {
     const res = await fetch(url, { headers });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.text();
-  },
-
-  // ── Módulo: Recarga de Diamantes ──────────────────────────────────────────
-
-  recarga: {
-    /**
-     * Valida o ID de um perfil do Kwai.
-     * @param {string} kwaiId - ID do Kwai informado pelo usuário
-     * @param {string} sessionId - ID único da sessão de recarga
-     */
-    async validateId(kwaiId, sessionId) {
-      return window.DmaiorAPI._post(
-        window.DmaiorConfig.workers.recarga,
-        '/validate-id',
-        { kwai_id: kwaiId },
-        { 'X-DM-Origin': 'hostinger-v1', 'X-Session-ID': sessionId },
-      );
-    },
-
-    /**
-     * Consulta o preço de uma quantidade de diamantes.
-     * @param {number} diamantes - Quantidade de diamantes
-     * @param {string} sessionId - ID da sessão
-     */
-    async getPrice(diamantes, sessionId) {
-      return window.DmaiorAPI._post(
-        window.DmaiorConfig.workers.recarga,
-        '/get-price',
-        { diamantes },
-        { 'X-DM-Origin': 'hostinger-v1', 'X-Session-ID': sessionId },
-      );
-    },
-
-    /**
-     * Cria uma ordem de pagamento PIX.
-     * @param {object} dados - { kwai_id, diamantes, whatsapp }
-     * @param {string} sessionId - ID da sessão
-     */
-    async createOrder({ kwai_id, diamantes, whatsapp }, sessionId) {
-      return window.DmaiorAPI._post(
-        window.DmaiorConfig.workers.recarga,
-        '/create-order',
-        { kwai_id, diamantes, whatsapp },
-        { 'X-DM-Origin': 'hostinger-v1', 'X-Session-ID': sessionId },
-      );
-    },
-
-    /**
-     * Verifica o status de um pagamento EnjoyPayment.
-     * @param {string} epRef - Referência EnjoyPayment
-     * @param {string} epHash - Hash EnjoyPayment
-     * @param {string} sessionId - ID da sessão
-     */
-    async checkStatus(epRef, epHash, sessionId) {
-      return window.DmaiorAPI._post(
-        window.DmaiorConfig.workers.recarga,
-        '/check-status',
-        { ep_ref: epRef, ep_hash: epHash },
-        { 'X-DM-Origin': 'hostinger-v1', 'X-Session-ID': sessionId },
-      );
-    },
   },
 
   // ── Módulo: Ranking ───────────────────────────────────────────────────────
