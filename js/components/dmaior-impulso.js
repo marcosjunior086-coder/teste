@@ -45,6 +45,11 @@ class DmaiorImpulso extends HTMLElement {
     this._modoTocado       = false; // usuário já clicou numa aba manualmente?
   }
 
+  // Escapa texto vindo da API antes de interpolar em innerHTML (evita XSS).
+  _esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
   static get observedAttributes() { return ['worker-url']; }
 
   attributeChangedCallback(name, oldVal, newVal) {
@@ -1102,8 +1107,8 @@ class DmaiorImpulso extends HTMLElement {
       if (!lista.length) { el.innerHTML = ''; return; }
       el.innerHTML = lista.map(c => `
         <div class="imp-comunicado">
-          ${c.emoji ? `<span class="imp-comunicado-ico">${c.emoji}</span>` : ''}
-          <span class="imp-comunicado-txt">${c.texto || ''}</span>
+          ${c.emoji ? `<span class="imp-comunicado-ico">${this._esc(c.emoji)}</span>` : ''}
+          <span class="imp-comunicado-txt">${this._esc(c.texto)}</span>
         </div>`).join('');
     } catch { /* comunicados são opcionais */ }
   }

@@ -88,6 +88,11 @@ class DmaiorVotacao extends HTMLElement {
     catch { return ''; }
   }
 
+  // Escapa texto vindo da API antes de interpolar em innerHTML (evita XSS).
+  _esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
   _renderShell() {
     this.shadowRoot.innerHTML = `
       <style>
@@ -305,7 +310,7 @@ class DmaiorVotacao extends HTMLElement {
       <div class="votacao-card ${v.ja_votou ? 'votada' : ''}" data-id="${v.id}">
         ${v.banner_url ? `<img class="votacao-banner" src="${this._imgUrl(v.banner_url, 144, 104)}" alt="">` : ''}
         <div class="votacao-info">
-          <div class="votacao-titulo">${v.titulo}</div>
+          <div class="votacao-titulo">${this._esc(v.titulo)}</div>
           <div class="votacao-meta">
             <span>Encerra em ${this._fmtData(v.data_fim)}</span>
             ${v.ja_votou ? '<span class="badge-votada">✓ Você já votou</span>' : ''}
@@ -348,16 +353,16 @@ class DmaiorVotacao extends HTMLElement {
     el.innerHTML = `
       ${voltar}
       ${votacao.banner_url ? `<img class="banner-img" src="${this._imgUrl(votacao.banner_url, 640, 220)}" alt="">` : ''}
-      <div class="pergunta-texto">${pergunta.texto}</div>
-      ${votacao.descricao ? `<div class="pergunta-desc">${votacao.descricao}</div>` : ''}
+      <div class="pergunta-texto">${this._esc(pergunta.texto)}</div>
+      ${votacao.descricao ? `<div class="pergunta-desc">${this._esc(votacao.descricao)}</div>` : ''}
       ${pergunta.max_selecoes > 1 ? `<div class="pergunta-limite">Escolha até ${pergunta.max_selecoes} opções</div>` : ''}
       <div class="alt-grid ${isFoto ? '' : 'tipo-texto'}" id="alt-grid">
         ${alternativas.map(a => `
           <div class="alt-card" data-id="${a.id}">
             <div class="alt-check">${SVG_CHECK}</div>
             ${isFoto && a.imagem_url ? `<img class="alt-foto" src="${this._imgUrl(a.imagem_url, 300, 220)}" alt="">` : ''}
-            <div class="alt-titulo">${a.titulo}</div>
-            ${a.descricao ? `<div class="alt-desc">${a.descricao}</div>` : ''}
+            <div class="alt-titulo">${this._esc(a.titulo)}</div>
+            ${a.descricao ? `<div class="alt-desc">${this._esc(a.descricao)}</div>` : ''}
           </div>`).join('')}
       </div>
       <button class="btn-main" id="btn-confirmar-voto" disabled><span id="btn-confirmar-texto">Confirmar Voto</span></button>
