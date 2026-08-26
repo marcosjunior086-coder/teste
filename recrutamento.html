@@ -786,7 +786,7 @@
         { badge: '2º PASSO', txt: 'Na mensagem do convite, toque em <b>"para autorizar"</b>.' },
         { badge: '3º PASSO', txt: 'Leia as informações, marque a confirmação do acordo e toque em <b>"Aceitar convite"</b>.' },
         { badge: '4º PASSO', txt: 'Escolha <b>"WhatsApp"</b> como contato e informe seu número.' },
-        { badge: '5º PASSO', txt: `Digite o ID da agência <b>"${AGENCIA_KWAI_ID}"</b> e toque em <b>"Confirmar entrada"</b>.` },
+        { badge: '5º PASSO', txt: `Digite o ID da agência <b>"${AGENCIA_KWAI_ID}"</b> <button type="button" class="rc-copy-btn" id="rc-tut-copy-id" style="margin-left:4px;vertical-align:middle;">${tt('copy')}</button> e toque em <b>"Confirmar entrada"</b>.` },
       ];
       let active = 0;
       let montado = false;
@@ -834,6 +834,26 @@
           moved = 0;
         });
       }
+
+      // Delegado no container (o botão é recriado a cada render do carrossel)
+      capTxt.addEventListener('click', async (e) => {
+        const btn = e.target.closest('#rc-tut-copy-id');
+        if (!btn) return;
+        try {
+          await navigator.clipboard.writeText(AGENCIA_KWAI_ID);
+        } catch (_) {
+          const campo = document.createElement('textarea');
+          campo.value = AGENCIA_KWAI_ID;
+          campo.style.position = 'fixed';
+          campo.style.opacity = '0';
+          document.body.appendChild(campo);
+          campo.select();
+          document.execCommand('copy');
+          campo.remove();
+        }
+        btn.textContent = tt('copied');
+        setTimeout(() => { btn.textContent = tt('copy'); }, 1600);
+      });
 
       function abrirLightbox(i) { lbIndex = i; renderLb(); lb.classList.add('on'); }
       function renderLb() { lbImg.src = imgs[lbIndex]; lbCounter.textContent = `${lbIndex + 1} / ${total}`; }
