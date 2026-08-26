@@ -234,6 +234,8 @@
             </div>
           </div>
 
+          <button type="button" class="dm-btn-secondary" id="btn-como-aceitar-topo" data-i18n="howAcceptInvite" style="width:100%;padding:12px;margin-bottom:18px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;">Como aceitar o convite</button>
+
           <div class="rc-group">
             <label for="f-uid" data-i18n="kwaiIdLabel">Kwai ID ou número de membro</label>
             <input id="f-uid" class="dm-input-field" type="text" placeholder="Ex: seu_usuario ou 123456789" data-i18n-placeholder="kwaiIdPlaceholder" maxlength="80" autocomplete="off" autocorrect="off" spellcheck="false">
@@ -766,7 +768,8 @@
     /* -- Tutorial "Como aceitar o convite" (carrossel peek + lightbox) -- */
     (function tutorialConvite() {
       const btnAbrir = $('btn-como-aceitar');
-      if (!btnAbrir) return;
+      const btnAbrirTopo = $('btn-como-aceitar-topo');
+      if (!btnAbrir && !btnAbrirTopo) return;
       const overlay = $('rc-tut-overlay');
       const stage   = $('rc-tut-stage');
       const dotsWrap = $('rc-tut-dots');
@@ -844,7 +847,8 @@
       function abrirModal() { montarCards(); overlay.classList.add('on'); document.body.style.overflow = 'hidden'; }
       function fecharModal() { overlay.classList.remove('on'); document.body.style.overflow = ''; fecharLightbox(); }
 
-      btnAbrir.addEventListener('click', abrirModal);
+      if (btnAbrir) btnAbrir.addEventListener('click', abrirModal);
+      if (btnAbrirTopo) btnAbrirTopo.addEventListener('click', abrirModal);
       $('rc-tut-close').addEventListener('click', fecharModal);
       overlay.addEventListener('click', e => { if (e.target === overlay) fecharModal(); });
       document.addEventListener('keydown', e => {
