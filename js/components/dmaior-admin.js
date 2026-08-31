@@ -225,7 +225,7 @@ class DimaiorAdmin extends HTMLElement {
   }
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',streamersPremium:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
@@ -233,7 +233,7 @@ class DimaiorAdmin extends HTMLElement {
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa[pag]?.();
   }
 
@@ -1990,8 +1990,16 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mConvPerfil').addEventListener('click',e=>{if(e.target===s.getElementById('mConvPerfil'))this._fechaModalConvPerfil();});
     // Recrutadores
     _bind('btnNovoRecrutador','click',()=>this._abrirFormRecrutador(null));
+    _bind('btnLimparRecrutadoresInativos','click',()=>this._limparRecrutadoresInativos());
     _bind('btnSalvarRecrutador','click',()=>this._salvarRecrutador());
     _bind('btnCancelarRecrutador','click',()=>{const fb=s.getElementById('formRecrutadorBox');if(fb)fb.style.display='none';});
+    // Streamers Premium
+    _bind('btnNovoStreamerPremium','click',()=>this._abrirFormStreamerPremium(null));
+    _bind('btnAtuStreamersPremium','click',()=>this._carregarStreamersPremium());
+    _bind('btnSalvarStreamerPremium','click',()=>this._salvarStreamerPremium());
+    _bind('btnCancelarStreamerPremium','click',()=>{const fb=s.getElementById('formStreamerPremiumBox');if(fb)fb.style.display='none';});
+    _bind('btnBuscarPrefillStreamerPremium','click',()=>this._buscarPrefillStreamerPremium());
+    _bind('fSpSelo','input',()=>this._renderSeloPrev());
   }
 
   // ── COMUNICADOS ─────────────────────────────────────────────────────────────
@@ -4740,6 +4748,7 @@ class DimaiorAdmin extends HTMLElement {
             )}
             ${navSec('gestao','Gestão',
               ni('users','streamers','Streamers')+
+              ni('star','streamersPremium','Streamers Premium')+
               ni('check_c','statusStreamers','Status de Streamers')+
               ni('key_uid','uids','Autorização UIDs')+
               ni('search','buscaUid','Buscar UID Kwai')+
@@ -4955,6 +4964,43 @@ class DimaiorAdmin extends HTMLElement {
               </div>
             </div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
+            <div class="pag" id="pag-streamersPremium">
+              <div class="ph"><div><div class="titulo">${this._ico('star',18)} Streamers Premium</div><div class="psub">Onboarding premium — lives-teste, início de contrato e selo Premium (Drive)</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnAtuStreamersPremium">${this._ico('refresh',13)} Atualizar</button><button class="btn btn-g" id="btnNovoStreamerPremium">${this._ico('plus',13)} Novo</button></div></div>
+              <div class="box"><div id="tbStreamersPremium">${this._loading()}</div></div>
+              <div class="box" id="formStreamerPremiumBox" style="display:none;margin-top:10px">
+                <div class="bhead"><div class="btitulo" id="formStreamerPremiumTit">Novo Streamer Premium</div></div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <input type="hidden" id="fSpId">
+                  <div class="mc"><label>Kwai UID *</label>
+                    <div style="display:flex;gap:8px">
+                      <input id="fSpUid" type="text" placeholder="UID numérico do streamer" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;box-sizing:border-box">
+                      <button class="btn btn-o" id="btnBuscarPrefillStreamerPremium" style="flex:0 0 auto;border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('search',13)} Buscar</button>
+                    </div>
+                    <div id="fSpPrefill" style="font-size:11px;color:var(--t3);margin-top:4px"></div>
+                  </div>
+                  <div class="mc"><label>Nome</label><input id="fSpNome" type="text" placeholder="Nome do streamer" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                  <div class="mc"><label>Foto (URL)</label><input id="fSpFoto" type="text" placeholder="https://..." style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                  <div style="display:flex;gap:12px;flex-wrap:wrap">
+                    <div class="mc" style="flex:1;min-width:200px"><label>1ª Live Teste — data e horário *</label><input id="fSpLive1" type="datetime-local" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <div class="mc" style="flex:1;min-width:200px"><label>2ª Live Teste — data e horário *</label><input id="fSpLive2" type="datetime-local" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                  </div>
+                  <div class="mc"><label>Início do contrato (data e mês) *</label><input id="fSpContrato" type="date" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                  <div class="mc"><label>Link do símbolo Premium (Drive)</label>
+                    <input id="fSpSelo" type="text" placeholder="Cole o link do Drive da imagem do selo" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box">
+                    <div id="fSpSeloPrev" style="display:flex;align-items:center;gap:8px;margin-top:6px"></div>
+                  </div>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--t2)">
+                    <input type="checkbox" id="fSpVisivel" checked style="width:15px;height:15px;accent-color:var(--cyan)">
+                    Exibir esse selo no ranking (sobrepõe o selo Premium global)
+                  </label>
+                  <div class="mc"><label>Observação</label><textarea id="fSpObs" rows="2" placeholder="Anotações livres" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box;resize:vertical"></textarea></div>
+                  <div style="display:flex;gap:8px">
+                    <button class="btn btn-g" id="btnSalvarStreamerPremium" style="flex:1">${this._ico('check',13)} Salvar</button>
+                    <button class="btn" id="btnCancelarStreamerPremium" style="flex:0 0 auto;background:rgba(255,255,255,.05);border:1px solid var(--brddim)">${this._ico('x',12)} Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="pag" id="pag-statusStreamers">${ph('Status de Streamers','check_c','Ativo/inativo por mês, novos, saídas e ranking anual','btnAtuStatusStreamers',`<button class="btn btn-o" id="btnAtualizarRosterStatus">${this._ico('refresh',13)} Atualizar Roster (Kwai)</button>`)}
               <div id="statusStreamersAvisoRoster" style="display:none;margin-bottom:14px"></div>
               <div class="dc2-grid" id="statusStreamersResumo">${this._loading('grid-column:1/-1')}</div>
@@ -5061,7 +5107,10 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="box">
                   <div class="bhead">
                     <div class="btitulo">${this._ico('user_plus',14)} Recrutadores</div>
-                    <button class="btn btn-g btn-sm" id="btnNovoRecrutador">${this._ico('plus',12)} Novo</button>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-sm" id="btnLimparRecrutadoresInativos" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)">${this._ico('trash',12)} Limpar inativos</button>
+                      <button class="btn btn-g btn-sm" id="btnNovoRecrutador">${this._ico('plus',12)} Novo</button>
+                    </div>
                   </div>
                   <div id="tbRecrutadores">${this._loading()}</div>
                 </div>
@@ -5072,6 +5121,7 @@ class DimaiorAdmin extends HTMLElement {
                     <input type="hidden" id="fRecId">
                     <div class="mc"><label>Nome</label><input id="fRecNome" type="text" placeholder="Ex: Dan" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
                     <div class="mc"><label>Telefone (WhatsApp)</label><input id="fRecTel" type="text" placeholder="Ex: 17997176407" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <div class="mc"><label>Comissão (%)</label><input id="fRecComissao" type="number" min="0" max="100" step="0.01" placeholder="Ex: 5" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"><div style="font-size:10px;color:var(--t3);margin-top:3px">Percentual individual deste recrutador. Vazio = 0%.</div></div>
                     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--t2)">
                       <input type="checkbox" id="fRecPadrao" style="width:15px;height:15px;accent-color:var(--cyan)">
                       Usar como recrutador padrão (envios automáticos)
@@ -5885,10 +5935,12 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar recrutadores');return;}
     const lista=d.recrutadores||[];
     if(!lista.length){el.innerHTML=this._empty('user_plus','Nenhum recrutador cadastrado. Clique em "+ Novo" para adicionar.');return;}
+    const inativos=lista.filter(r=>!r.ativo&&!r.padrao).length;
     el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:1px solid var(--brddim)">
         <th style="padding:10px 16px;text-align:left;color:var(--t3);font-weight:600">Nome</th>
         <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Telefone</th>
+        <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Comissão</th>
         <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Status</th>
         <th style="padding:10px 8px;text-align:right;color:var(--t3);font-weight:600">Ações</th>
       </tr></thead>
@@ -5898,20 +5950,34 @@ class DimaiorAdmin extends HTMLElement {
           ${r.padrao?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:10px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);color:var(--cyan)">★ Padrão</span>`:''}
         </td>
         <td style="padding:10px 8px;color:var(--t2)">${this._esc(r.telefone)}</td>
+        <td style="padding:10px 8px;color:var(--t2)"><strong style="color:var(--t1)">${Number(r.comissao_percentual||0).toLocaleString('pt-BR')}%</strong></td>
         <td style="padding:10px 8px">
           <span style="font-size:11px;padding:2px 8px;border-radius:10px;${r.ativo?'background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80':'background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)'}">${r.ativo?'Ativo':'Inativo'}</span>
         </td>
         <td style="padding:10px 8px;text-align:right;display:flex;gap:6px;justify-content:flex-end">
-          <button class="btn btn-sm btn-o" data-rec-edit='${JSON.stringify({id:r.id,nome:r.nome,telefone:r.telefone,padrao:r.padrao,ativo:r.ativo})}'>${this._ico('edit',11)} Editar</button>
-          <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-rec-del="${r.id}">${this._ico('x_circle',11)} Excluir</button>
+          <button class="btn btn-sm btn-o" data-rec-edit="${this._esc(JSON.stringify({id:r.id,nome:r.nome,telefone:r.telefone,padrao:r.padrao,ativo:r.ativo,comissao_percentual:r.comissao_percentual}))}">${this._ico('edit',11)} Editar</button>
+          ${r.padrao?'':`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-rec-del="${r.id}" data-rec-nome="${this._esc(r.nome)}" data-rec-ativo="${r.ativo?1:0}">${this._ico('x_circle',11)} ${r.ativo?'Excluir':'Excluir definitivamente'}</button>`}
         </td>
-      </tr>`).join('')}</tbody></table>`;
+      </tr>`).join('')}</tbody></table>
+      <div style="padding:8px 16px;font-size:11px;color:var(--t3)">${inativos} recrutador(es) inativo(s). Use "Limpar inativos" para apagar todos de uma vez.</div>`;
     el.querySelectorAll('[data-rec-edit]').forEach(b=>b.addEventListener('click',()=>{
       try{this._abrirFormRecrutador(JSON.parse(b.dataset.recEdit));}catch{}
     }));
-    el.querySelectorAll('[data-rec-del]').forEach(b=>b.addEventListener('click',()=>
-      this._confirmarDel(`Excluir recrutador?`,()=>this._excluirRecrutador(b.dataset.recDel))
-    ));
+    el.querySelectorAll('[data-rec-del]').forEach(b=>b.addEventListener('click',()=>{
+      const dura=b.dataset.recAtivo==='1';
+      this._confirmarDel(dura?`Excluir o recrutador "${b.dataset.recNome}"?`:`Excluir DEFINITIVAMENTE "${b.dataset.recNome}"? Esta ação não pode ser desfeita.`,()=>this._excluirRecrutador(b.dataset.recDel));
+    }));
+  }
+
+  async _limparRecrutadoresInativos(){
+    const d=await this._api('GET','/admin/recrutadores');
+    const inativos=(d?.recrutadores||[]).filter(r=>!r.ativo&&!r.padrao);
+    if(!inativos.length){this._toast('Nenhum recrutador inativo para limpar','ok');return;}
+    this._confirmarDel(`Excluir DEFINITIVAMENTE ${inativos.length} recrutador(es) inativo(s)? Esta ação não pode ser desfeita.`,async()=>{
+      const r=await this._api('POST','/admin/recrutadores/limpar-inativos');
+      if(r?.ok){this._toast(`${r.removidos||0} recrutador(es) removido(s)`,'ok');this._carregarRecrutadores();}
+      else this._toast(r?.erro||'Erro ao limpar inativos','err');
+    });
   }
 
   _abrirFormRecrutador(rec){
@@ -5920,6 +5986,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('fRecId').value=rec?.id||'';
     s.getElementById('fRecNome').value=rec?.nome||'';
     s.getElementById('fRecTel').value=rec?.telefone||'';
+    s.getElementById('fRecComissao').value=(rec?.comissao_percentual!==undefined&&rec?.comissao_percentual!==null)?rec.comissao_percentual:'';
     s.getElementById('fRecPadrao').checked=!!rec?.padrao;
     s.getElementById('formRecrutadorTit').textContent=rec?'Editar Recrutador':'Novo Recrutador';
     box.style.display='';
@@ -5931,12 +5998,14 @@ class DimaiorAdmin extends HTMLElement {
     const id=s.getElementById('fRecId')?.value?.trim();
     const nome=s.getElementById('fRecNome')?.value?.trim();
     const telefone=s.getElementById('fRecTel')?.value?.trim();
+    const comissaoRaw=s.getElementById('fRecComissao')?.value?.trim()||'';
+    const comissao_percentual=comissaoRaw===''?0:Math.min(100,Math.max(0,parseFloat(comissaoRaw.replace(',','.'))||0));
     const padrao=s.getElementById('fRecPadrao')?.checked||false;
     if(!nome||!telefone){this._toast('Nome e telefone são obrigatórios','err');return;}
     const btn=s.getElementById('btnSalvarRecrutador');btn.disabled=true;
     const r=id
-      ?await this._api('PUT',`/admin/recrutadores/${id}`,{nome,telefone,padrao,ativo:true})
-      :await this._api('POST','/admin/recrutadores',{nome,telefone,padrao});
+      ?await this._api('PUT',`/admin/recrutadores/${id}`,{nome,telefone,padrao,ativo:true,comissao_percentual})
+      :await this._api('POST','/admin/recrutadores',{nome,telefone,padrao,comissao_percentual});
     btn.disabled=false;
     if(r?.ok){
       this._toast(id?'Recrutador atualizado':'Recrutador criado','ok');
@@ -5950,6 +6019,135 @@ class DimaiorAdmin extends HTMLElement {
   async _excluirRecrutador(id){
     const r=await this._api('DELETE',`/admin/recrutadores/${id}`);
     if(r?.ok){this._toast('Recrutador excluído','ok');this._carregarRecrutadores();}
+    else this._toast(r?.erro||'Erro ao excluir','err');
+  }
+
+  // ── STREAMERS PREMIUM ────────────────────────────────────────────────────────
+  // Datas de live-teste são timestamptz gravados "como digitado" (sem fuso):
+  // exibição e round-trip usam sempre as partes UTC pra bater com o input.
+  _spDataHora(v){
+    if(!v)return'—';const d=new Date(v);if(isNaN(d))return'—';
+    const p=n=>String(n).padStart(2,'0');
+    return `${p(d.getUTCDate())}/${p(d.getUTCMonth()+1)}/${d.getUTCFullYear()} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+  }
+  _spParaInput(v){
+    if(!v)return'';const d=new Date(v);if(isNaN(d))return'';
+    const p=n=>String(n).padStart(2,'0');
+    return `${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+  }
+
+  async _carregarStreamersPremium(){
+    const s=this.shadowRoot;const el=s.getElementById('tbStreamersPremium');if(!el)return;
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/streamers-premium');
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar streamers premium');return;}
+    const lista=d.streamers||[];
+    if(!lista.length){el.innerHTML=this._empty('star','Nenhum streamer premium cadastrado. Clique em "Novo" para adicionar.');return;}
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:1px solid var(--brddim)">
+        <th style="padding:10px 16px;text-align:left;color:var(--t3);font-weight:600">Streamer</th>
+        <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Início contrato</th>
+        <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">1ª / 2ª live teste</th>
+        <th style="padding:10px 8px;text-align:left;color:var(--t3);font-weight:600">Selo</th>
+        <th style="padding:10px 8px;text-align:right;color:var(--t3);font-weight:600">Ações</th>
+      </tr></thead>
+      <tbody>${lista.map(r=>{
+        const seloSafe=this._normalizarImagemUrl(r.selo_url||'');
+        const seloCell=seloSafe
+          ?`<img src="${this._esc(seloSafe)}" width="22" height="22" style="border-radius:4px;object-fit:cover;vertical-align:middle" onerror="this.style.display='none'"> ${r.selo_visivel?'<span style="font-size:10px;color:#4ade80">visível</span>':'<span style="font-size:10px;color:var(--t3)">oculto</span>'}`
+          :'<span style="font-size:11px;color:var(--t3)">—</span>';
+        return`<tr style="border-bottom:1px solid var(--brddim)">
+        <td style="padding:10px 16px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(r.foto_url||''),r.nome||r.kwai_uid,'av')}<div><strong style="color:var(--t1)">${this._esc(r.nome||'—')}</strong><div style="font-size:10px;color:var(--cyan)">${this._esc(r.kwai_uid)}</div></div></div></td>
+        <td style="padding:10px 8px;color:var(--t2)">${this._fdtData(r.contrato_inicio)}</td>
+        <td style="padding:10px 8px;color:var(--t2);font-size:11px">${this._spDataHora(r.live_teste_1)}<br>${this._spDataHora(r.live_teste_2)}</td>
+        <td style="padding:10px 8px">${seloCell}</td>
+        <td style="padding:10px 8px;text-align:right;display:flex;gap:6px;justify-content:flex-end">
+          <button class="btn btn-sm btn-o" data-sp-edit="${this._esc(JSON.stringify(r))}">${this._ico('edit',11)} Editar</button>
+          <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-sp-del="${r.id}" data-sp-nome="${this._esc(r.nome||r.kwai_uid)}">${this._ico('x_circle',11)} Excluir</button>
+        </td>
+      </tr>`;}).join('')}</tbody></table>`;
+    el.querySelectorAll('[data-sp-edit]').forEach(b=>b.addEventListener('click',()=>{try{this._abrirFormStreamerPremium(JSON.parse(b.dataset.spEdit));}catch{}}));
+    el.querySelectorAll('[data-sp-del]').forEach(b=>b.addEventListener('click',()=>
+      this._confirmarDel(`Excluir o cadastro premium de "${b.dataset.spNome}"?`,()=>this._excluirStreamerPremium(b.dataset.spDel))
+    ));
+  }
+
+  _abrirFormStreamerPremium(rec){
+    const s=this.shadowRoot;
+    const box=s.getElementById('formStreamerPremiumBox');if(!box)return;
+    s.getElementById('fSpId').value=rec?.id||'';
+    s.getElementById('fSpUid').value=rec?.kwai_uid||'';
+    s.getElementById('fSpNome').value=rec?.nome||'';
+    s.getElementById('fSpFoto').value=rec?.foto_url||'';
+    s.getElementById('fSpLive1').value=this._spParaInput(rec?.live_teste_1);
+    s.getElementById('fSpLive2').value=this._spParaInput(rec?.live_teste_2);
+    s.getElementById('fSpContrato').value=rec?.contrato_inicio?String(rec.contrato_inicio).slice(0,10):'';
+    s.getElementById('fSpSelo').value=rec?.selo_url||'';
+    s.getElementById('fSpVisivel').checked=rec?rec.selo_visivel!==false:true;
+    s.getElementById('fSpObs').value=rec?.observacao||'';
+    s.getElementById('fSpPrefill').textContent='';
+    this._renderSeloPrev();
+    s.getElementById('formStreamerPremiumTit').textContent=rec?'Editar Streamer Premium':'Novo Streamer Premium';
+    box.style.display='';
+    s.getElementById('fSpUid').focus();
+  }
+
+  _renderSeloPrev(){
+    const s=this.shadowRoot;const prev=s.getElementById('fSpSeloPrev');if(!prev)return;
+    const safe=this._normalizarImagemUrl(s.getElementById('fSpSelo')?.value.trim()||'');
+    prev.innerHTML=safe
+      ?`<img src="${this._esc(safe)}" width="26" height="26" style="border-radius:5px;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview do selo</span>`
+      :`<span style="font-size:10px;color:var(--t3)">Sem selo individual — usa o selo Premium global</span>`;
+  }
+
+  async _buscarPrefillStreamerPremium(){
+    const s=this.shadowRoot;
+    const q=s.getElementById('fSpUid')?.value.trim();
+    const info=s.getElementById('fSpPrefill');
+    if(!q){this._toast('Informe o UID (ou Kwai ID)','err');return;}
+    if(info)info.textContent='Buscando…';
+    const d=await this._api('GET',`/admin/streamers-premium/buscar?q=${encodeURIComponent(q)}`);
+    if(!d?.ok){if(info)info.textContent='';this._toast(d?.erro||'Erro na busca','err');return;}
+    if(!d.encontrado){if(info)info.textContent='Nada encontrado no histórico — preencha os dados manualmente.';return;}
+    const st=d.streamer||{};
+    s.getElementById('fSpUid').value=st.kwai_uid||q;
+    if(st.nome&&st.nome!=='—')s.getElementById('fSpNome').value=st.nome;
+    if(st.foto)s.getElementById('fSpFoto').value=st.foto;
+    if(info)info.textContent=d.ja_cadastrado?'⚠️ Este UID já tem cadastro premium.':`Encontrado: ${st.nome||st.kwai_uid}`;
+  }
+
+  async _salvarStreamerPremium(){
+    const s=this.shadowRoot;
+    const id=s.getElementById('fSpId')?.value?.trim();
+    const payload={
+      kwai_uid:s.getElementById('fSpUid')?.value?.trim(),
+      nome:s.getElementById('fSpNome')?.value?.trim()||null,
+      foto_url:this._normalizarImagemUrl(s.getElementById('fSpFoto')?.value?.trim()||'')||null,
+      live_teste_1:s.getElementById('fSpLive1')?.value||'',
+      live_teste_2:s.getElementById('fSpLive2')?.value||'',
+      contrato_inicio:s.getElementById('fSpContrato')?.value||'',
+      selo_url:this._normalizarImagemUrl(s.getElementById('fSpSelo')?.value?.trim()||'')||(s.getElementById('fSpSelo')?.value?.trim()||null),
+      selo_visivel:s.getElementById('fSpVisivel')?.checked!==false,
+      observacao:s.getElementById('fSpObs')?.value?.trim()||null,
+    };
+    if(!payload.kwai_uid){this._toast('Kwai UID é obrigatório','err');return;}
+    if(!payload.live_teste_1||!payload.live_teste_2){this._toast('Informe as duas datas de live teste','err');return;}
+    if(!payload.contrato_inicio){this._toast('Informe o início do contrato','err');return;}
+    const btn=s.getElementById('btnSalvarStreamerPremium');btn.disabled=true;
+    const r=id
+      ?await this._api('PUT',`/admin/streamers-premium/${id}`,payload)
+      :await this._api('POST','/admin/streamers-premium',payload);
+    btn.disabled=false;
+    if(r?.ok){
+      this._toast(id?'Streamer premium atualizado':'Streamer premium cadastrado','ok');
+      s.getElementById('formStreamerPremiumBox').style.display='none';
+      this._carregarStreamersPremium();
+    }else this._toast(r?.erro||r?.mensagem||'Erro ao salvar','err');
+  }
+
+  async _excluirStreamerPremium(id){
+    const r=await this._api('DELETE',`/admin/streamers-premium/${id}`);
+    if(r?.ok){this._toast('Cadastro premium excluído','ok');this._carregarStreamersPremium();}
     else this._toast(r?.erro||'Erro ao excluir','err');
   }
 

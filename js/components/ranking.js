@@ -655,6 +655,7 @@ class RankingDmaior extends HTMLElement {
           hoursMin:   this.h2m(s.horas_video),
           verificado:         s.verificado         || false,
           verificado_premium: s.verificado_premium || false,
+          selo_premium_url:   this.normalizeImageUrl(s.selo_premium_url || ''),
         }));
         const _safeBadge = u => this.normalizeImageUrl(u);
         const _safeV = _safeBadge(data.badge_verificado_url || '');
@@ -799,6 +800,19 @@ class RankingDmaior extends HTMLElement {
     return `https://images.weserv.nl/?url=${encodeURIComponent(safe)}&w=80&h=80&fit=cover&output=webp`;
   }
 
+  // Selo do streamer, em ordem de prioridade:
+  //   1) selo Premium individual (cadastro Streamer Premium, selo_visivel=true)
+  //   2) selo Premium global (verificado_premium + badge_premium_url)
+  //   3) selo Verificado
+  badgeFor(s) {
+    if (s.selo_premium_url) {
+      return `<img class="verified-badge premium" src="${this.esc(s.selo_premium_url)}" width="15" height="15" title="Premium" onerror="this.remove()">`;
+    }
+    if (s.verificado_premium) return this.VERIFICADO_PREMIUM_SVG;
+    if (s.verificado)         return this.VERIFICADO_SVG;
+    return '';
+  }
+
   // Escapa caracteres HTML perigosos de dados externos (Supabase/Sheets) antes de injetar via innerHTML
   esc(str) {
     if (str == null) return '';
@@ -922,7 +936,7 @@ class RankingDmaior extends HTMLElement {
                 ${liveDot}
               </div>
             </div>
-            <div class="name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
+            <div class="name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${this.badgeFor(s)}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${this.growthHtml(s)}
             ${prizeHtml}
@@ -937,7 +951,7 @@ class RankingDmaior extends HTMLElement {
               <div class="badge">${idx + 1}</div>
               ${liveDot}
             </div>
-            <div class="name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
+            <div class="name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${this.badgeFor(s)}</div>
             <div class="podium-id">@${this.esc(s.id)}</div>
             <div class="podium-val">${icon} ${getVal(s)}</div>
             ${prizeHtml}
@@ -965,7 +979,7 @@ class RankingDmaior extends HTMLElement {
             ${liveDotItem}
           </div>
           <div class="list-name-col">
-            <div class="list-name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${s.verificado_premium ? this.VERIFICADO_PREMIUM_SVG : (s.verificado ? this.VERIFICADO_SVG : '')}</div>
+            <div class="list-name" title="${this.esc(s.nome)}"><span class="rank-name-text">${this.esc(s.nome) || 'Sem Nome'}</span>${this.badgeFor(s)}</div>
             <div class="list-id">@${this.esc(s.id)}</div>
             <div class="badges-container">
               ${this.positionBadge(s, globalIndex + 1)}

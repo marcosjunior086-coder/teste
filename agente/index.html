@@ -445,7 +445,9 @@
     .perfil-info p  { font-size: 13px; color: var(--sub); margin-top: 2px; }
     .perfil-acoes   { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .sel-categoria  { padding: 10px 12px; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font-b); font-size: 14px; outline: none; }
-    #msg-convite { margin-top: 14px; font-size: 13px; padding: 12px 16px; border-radius: 8px; display: none; }
+    #msg-convite, #msg-uid { margin-top: 14px; font-size: 13px; padding: 12px 16px; border-radius: 8px; display: none; }
+    #buscauid-resultado { margin-top: 14px; }
+    #buscauid-resultado .msg-err { display: block; padding: 12px 16px; border-radius: 8px; font-size: 13px; }
     .msg-ok  { background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.3); color: var(--green); }
     .msg-err { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
     .msg-warn{ background: rgba(240,192,64,.12);  border: 1px solid rgba(240,192,64,.3);  color: var(--gold); }
@@ -687,6 +689,9 @@
         <div class="nav-item" data-section="streamers">
           <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span><span>Streamers</span>
         </div>
+        <div class="nav-item" data-section="buscauid">
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span><span>Buscar UID</span>
+        </div>
         <div class="nav-item" data-section="lives">
           <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/><path d="M8.56 8.56a5 5 0 0 0 0 6.88M15.44 8.56a5 5 0 0 1 0 6.88M5.14 5.14a9 9 0 0 0 0 13.72M18.86 5.14a9 9 0 0 1 0 13.72"/></svg></span><span>Ao Vivo</span>
         </div>
@@ -750,8 +755,27 @@
       <!-- --- STREAMERS --- -->
       <section id="sec-streamers" class="section" style="display:none">
         <div class="topbar"><h2>Meus Streamers</h2></div>
+        <div id="msg-uid"></div>
         <div class="table-wrap" id="tabela-streamers">
           <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- --- BUSCAR UID --- -->
+      <section id="sec-buscauid" class="section" style="display:none">
+        <div class="topbar">
+          <div>
+            <h2>Buscar UID Kwai</h2>
+            <p style="color:var(--sub);font-size:13px;margin-top:4px">Resolve o ID (@usuário) de qualquer conta da Kwai para o UID numérico — funciona para qualquer criador, de qualquer agência, vinculado ou não.</p>
+          </div>
+        </div>
+        <div class="convite-box">
+          <h3>Buscar por ID da Kwai</h3>
+          <div class="input-row">
+            <input id="inp-buscauid" type="text" placeholder="Digite o ID da Kwai (com ou sem @)" autocapitalize="off" autocorrect="off" spellcheck="false">
+            <button class="btn btn-cyan" id="btn-buscauid">Buscar</button>
+          </div>
+          <div id="buscauid-resultado"></div>
         </div>
       </section>
 
@@ -1008,7 +1032,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // -- NAVEGAÇÃO ---------------------------------------------
-const SECOES = ['dashboard','streamers','lives','ranking','desempenho','convites','migracao'];
+const SECOES = ['dashboard','streamers','buscauid','lives','ranking','desempenho','convites','migracao'];
 
 function fecharMenuMobile() {
   document.querySelector('.sidebar')?.classList.remove('open');
@@ -1067,6 +1091,7 @@ function navegarPara(sec) {
   const loaders = {
     dashboard:  carregarDashboard,
     streamers:  carregarStreamers,
+    buscauid:   () => document.getElementById('inp-buscauid')?.focus(),
     lives:      carregarLives,
     ranking:    carregarRanking,
     desempenho: carregarDesempenho,
@@ -1553,6 +1578,8 @@ async function carregarStreamers() {
       const badge = s.verificado_premium ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="*">' : s.verificado ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="ok">' : '';
       const title = `${esc(s.nome)}${badge}`;
       const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : '—';
+      const uidAttr = esc(String(s.uid || ''));
+      const btnDesvincular = `<button class="btn btn-ghost btn-desvincular" data-uid="${uidAttr}">Desvincular</button>`;
       return {
         table: `
           <tr>
@@ -1564,6 +1591,7 @@ async function carregarStreamers() {
             <td>${fmtNum(s.diamantes_mes)}</td>
             <td>${esc(s.horas_mes || '0:00')}</td>
             <td>${fmtData(s.vinculado_em)}</td>
+            <td style="text-align:right">${btnDesvincular}</td>
           </tr>`,
         card: agItem({
           avatar: foto(s.foto, s.nome),
@@ -1572,20 +1600,78 @@ async function carregarStreamers() {
           value: fmtNum(s.diamantes_mes || 0),
           body: [
             agCell('Kwai ID', kwai),
+            agCell('UID', uidAttr || '—'),
             agCell('Diamantes mês', fmtNum(s.diamantes_mes || 0)),
             agCell('Horas mês', esc(s.horas_mes || '0:00')),
             agCell('Vinculado em', fmtData(s.vinculado_em)),
+            `<div style="grid-column:1/-1;margin-top:6px">${btnDesvincular}</div>`,
           ].join('')
         })
       };
     });
     container.innerHTML = `
       <table>
-        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} Mês</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th></tr></thead>
+        <thead><tr><th>Streamer</th><th>Kwai ID</th><th>${ico('diamond',13)} Mês</th><th>${ico('clock',13)} Horas</th><th>Vinculado em</th><th></th></tr></thead>
         <tbody>${rows.map(r => r.table).join('')}</tbody>
       </table>
       <div class="ag-acc-list">${rows.map(r => r.card).join('')}</div>`;
+    container.querySelectorAll('.btn-desvincular').forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation();
+      desvincularStreamerAgente(b.dataset.uid);
+    }));
   } catch(e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
+}
+
+// -- SISTEMA DE UID (buscar / copiar / desvincular da própria lista) ------
+document.getElementById('btn-buscauid')?.addEventListener('click', buscarUidAgente);
+document.getElementById('inp-buscauid')?.addEventListener('keydown', e => { if (e.key === 'Enter') buscarUidAgente(); });
+
+async function buscarUidAgente() {
+  const btn = document.getElementById('btn-buscauid');
+  const area = document.getElementById('buscauid-resultado');
+  const bruto = (document.getElementById('inp-buscauid').value || '').trim().replace(/^@/, '');
+  if (!bruto) { area.innerHTML = ''; return; }
+  btn.disabled = true; btn.textContent = 'Buscando…';
+  area.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const d = await api(`/agente/buscauid/resolver?id=${encodeURIComponent(bruto)}`);
+    if (!d || d.ok === false || !d.uid) {
+      area.innerHTML = `<p class="msg-err" style="display:block">${esc(d?.erro || 'Não foi possível resolver esse ID.')}</p>`;
+      return;
+    }
+    area.innerHTML = `
+      <div class="perfil-encontrado">
+        ${d.foto ? `<img src="${esc(d.foto)}" alt="${esc(d.nome || d.kwai_id)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((d.nome || d.kwai_id || '?')[0])}</div>`}
+        <div class="perfil-info">
+          <h4>${esc(d.nome || d.kwai_id || '—')}</h4>
+          <p>@${esc(d.kwai_id || bruto)}${typeof d.seguidores === 'number' ? ` · ${fmtNum(d.seguidores)} seguidores` : ''}</p>
+          <p style="font-family:monospace;color:var(--text);margin-top:4px">UID: <strong>${esc(d.uid)}</strong></p>
+        </div>
+        <div class="perfil-acoes">
+          <button class="btn btn-cyan" id="btn-copiar-uid">Copiar UID</button>
+        </div>
+      </div>`;
+    document.getElementById('btn-copiar-uid').addEventListener('click', () => {
+      navigator.clipboard.writeText(String(d.uid)).then(() => { const b = document.getElementById('btn-copiar-uid'); b.textContent = 'Copiado!'; setTimeout(() => b.textContent = 'Copiar UID', 1500); }).catch(() => {});
+    });
+  } catch (e) {
+    area.innerHTML = `<p class="msg-err" style="display:block">Erro: ${esc(e.message)}</p>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Buscar';
+  }
+}
+
+async function desvincularStreamerAgente(uid) {
+  if (!uid) return;
+  if (!confirm('Desvincular esse streamer de você? Ele deixa de aparecer no seu painel.')) return;
+  try {
+    await api(`/agente/streamers/${encodeURIComponent(uid)}`, { method: 'DELETE' });
+    _streamersCarregado = false;
+    carregarStreamers();
+  } catch (e) {
+    const msg = document.getElementById('msg-uid');
+    if (msg) mostrarMsg(msg, e.message || 'Erro ao desvincular.', 'err');
+  }
 }
 
 // -- AO VIVO -----------------------------------------------
