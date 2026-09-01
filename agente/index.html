@@ -707,6 +707,9 @@
         <div class="nav-item" data-section="migracao">
           <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span>Migração</span>
         </div>
+        <div class="nav-item" data-section="solicitacoes">
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6a2 2 0 0 1 2 2v0H7v0a2 2 0 0 1 2-2z"/><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 12h6M9 16h6"/></svg></span><span>Solicitações</span>
+        </div>
       </nav>
       <div class="sidebar-bottom">
         <div class="agente-info">
@@ -902,6 +905,20 @@
         </div>
       </section>
 
+      <!-- --- SOLICITAÇÕES DE FORMULÁRIOS --- -->
+      <section id="sec-solicitacoes" class="section" style="display:none">
+        <div class="topbar">
+          <h2 id="solic-titulo">Solicitações</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost" id="btn-solic-forms" type="button">Formulários</button>
+            <button class="btn btn-ghost" id="btn-solic-minhas" type="button">Minhas solicitações</button>
+          </div>
+        </div>
+        <div id="solic-lista"><div class="loading"><div class="spinner"></div></div></div>
+        <div id="solic-preencher" style="display:none"></div>
+        <div id="solic-minhas" style="display:none"><div class="loading"><div class="spinner"></div></div></div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -1032,7 +1049,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // -- NAVEGAÇÃO ---------------------------------------------
-const SECOES = ['dashboard','streamers','buscauid','lives','ranking','desempenho','convites','migracao'];
+const SECOES = ['dashboard','streamers','buscauid','lives','ranking','desempenho','convites','migracao','solicitacoes'];
 
 function fecharMenuMobile() {
   document.querySelector('.sidebar')?.classList.remove('open');
@@ -1097,6 +1114,7 @@ function navegarPara(sec) {
     desempenho: carregarDesempenho,
     convites:   carregarConvites,
     migracao:   carregarMigracoes,
+    solicitacoes: carregarSolicitacoes,
   };
   loaders[sec]?.();
 }
@@ -1672,6 +1690,403 @@ async function desvincularStreamerAgente(uid) {
     const msg = document.getElementById('msg-uid');
     if (msg) mostrarMsg(msg, e.message || 'Erro ao desvincular.', 'err');
   }
+}
+
+// ==========================================================
+// SOLICITAÇÕES DE FORMULÁRIOS
+// ==========================================================
+const FORM_STATUS_LABEL = {
+  pendente_analise:   ['badge-pend', 'Pendente de análise'],
+  aprovada:           ['badge-ok',   'Aprovada'],
+  aguardando_envio:   ['badge-bom',  'Aguardando envio ao Google Forms'],
+  enviada:            ['badge-env',  'Enviada'],
+  recusada:           ['badge-err',  'Recusada'],
+  necessita_correcao: ['badge-at',   'Necessita correção'],
+};
+function badgeSolic(status) {
+  const [cls, txt] = FORM_STATUS_LABEL[status] || ['badge-pend', status || '—'];
+  return `<span class="badge ${cls}">${esc(txt)}</span>`;
+}
+function fmtDataBRag(iso) {
+  const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : (iso ? esc(iso) : '—');
+}
+function fmtHoraBRag(hhmm) {
+  const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return hhmm ? esc(hhmm) : '';
+  return Number(m[2]) === 0 ? `${Number(m[1])}h` : `${Number(m[1])}h${m[2]}`;
+}
+function fmtValorSolic(entrada) {
+  if (!entrada) return '—';
+  const { tipo, valor } = entrada;
+  if (valor == null || valor === '') return '—';
+  if (tipo === 'data') return fmtDataBRag(valor);
+  if (tipo === 'hora') return fmtHoraBRag(valor);
+  if (tipo === 'datahora') {
+    const h = fmtHoraBRag(valor.hora);
+    return h ? `${fmtDataBRag(valor.data)} às ${h}` : fmtDataBRag(valor.data);
+  }
+  if (Array.isArray(valor)) return valor.map(esc).join(', ');
+  return esc(String(valor));
+}
+
+let _solicView = 'lista';
+let _solicFormAtual = null;   // { slug, nome, descricao, instrucoes, versao, campos: [] }
+let _solicVerif = null;       // resultado da verificação do streamer
+let _solicEditId = null;      // id da solicitação sendo corrigida
+let _solicDirty = false;
+
+document.getElementById('btn-solic-forms')?.addEventListener('click', () => { _solicView = 'lista'; carregarSolicitacoes(); });
+document.getElementById('btn-solic-minhas')?.addEventListener('click', () => { _solicView = 'minhas'; carregarSolicitacoes(); });
+
+window.addEventListener('beforeunload', (e) => {
+  if (_solicView === 'preencher' && _solicDirty) { e.preventDefault(); e.returnValue = ''; }
+});
+
+function mostrarSolicView(v) {
+  _solicView = v;
+  document.getElementById('solic-lista').style.display     = v === 'lista' ? '' : 'none';
+  document.getElementById('solic-preencher').style.display = v === 'preencher' ? '' : 'none';
+  document.getElementById('solic-minhas').style.display    = v === 'minhas' ? '' : 'none';
+  const tit = document.getElementById('solic-titulo');
+  if (tit) tit.textContent = v === 'preencher' ? 'Preencher formulário' : v === 'minhas' ? 'Minhas solicitações' : 'Solicitações';
+  document.getElementById('btn-solic-forms')?.classList.toggle('btn-cyan', v === 'lista');
+  document.getElementById('btn-solic-minhas')?.classList.toggle('btn-cyan', v === 'minhas');
+}
+
+async function carregarSolicitacoes() {
+  if (_solicView === 'preencher') return; // não recarrega no meio do preenchimento
+  mostrarSolicView(_solicView === 'minhas' ? 'minhas' : 'lista');
+  if (_solicView === 'minhas') return carregarMinhasSolicitacoes();
+  return carregarFormsAtivos();
+}
+
+async function carregarFormsAtivos() {
+  const c = document.getElementById('solic-lista');
+  c.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const d = await api('/agente/formularios');
+    const list = d.formularios || [];
+    if (!list.length) { c.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum formulário disponível no momento.</p></div>`; return; }
+    c.innerHTML = list.map(f => `
+      <div class="convite-box">
+        <h3>${esc(f.nome)}</h3>
+        ${f.descricao ? `<p style="color:var(--sub);font-size:13px;margin-bottom:10px">${esc(f.descricao)}</p>` : ''}
+        ${f.instrucoes ? `<p style="color:var(--dim);font-size:12px;white-space:pre-wrap;margin-bottom:14px">${esc(f.instrucoes)}</p>` : ''}
+        <button class="btn btn-cyan" data-form-slug="${esc(f.slug)}" type="button">Preencher formulário</button>
+      </div>`).join('');
+    c.querySelectorAll('[data-form-slug]').forEach(b => b.addEventListener('click', () => abrirPreencherForm(b.dataset.formSlug)));
+  } catch (e) { c.innerHTML = `<div class="empty"><p>Erro: ${esc(e.message)}</p></div>`; }
+}
+
+async function abrirPreencherForm(slug, solicExistente) {
+  const c = document.getElementById('solic-preencher');
+  mostrarSolicView('preencher');
+  c.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  _solicVerif = null; _solicDirty = false; _solicEditId = solicExistente?.id || null;
+  try {
+    const d = await api(`/agente/formularios/${encodeURIComponent(slug)}`);
+    _solicFormAtual = d.formulario;
+    const valoresIniciais = solicExistente?.valores || {};
+    if (solicExistente?.verificacao) _solicVerif = solicExistente.verificacao;
+
+    const camposHtml = _solicFormAtual.campos.map(campo => renderCampoForm(campo, valoresIniciais[campo.chave])).join('');
+    c.innerHTML = `
+      <div class="convite-box">
+        <h3>${esc(_solicFormAtual.nome)}</h3>
+        ${_solicFormAtual.instrucoes ? `<p style="color:var(--dim);font-size:12px;white-space:pre-wrap;margin-bottom:14px">${esc(_solicFormAtual.instrucoes)}</p>` : ''}
+        ${_solicEditId ? `<p class="msg-warn" style="display:block">Corrigindo uma solicitação. Ajuste os campos e reenvie.</p>` : ''}
+        <div id="form-campos">${camposHtml}</div>
+        <div id="msg-solic"></div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn btn-ghost" id="btn-solic-cancelar" type="button">Cancelar</button>
+          <button class="btn btn-green" id="btn-solic-revisar" type="button">Revisar e enviar</button>
+        </div>
+      </div>
+      <div id="solic-resumo" style="display:none"></div>`;
+
+    wireVerificarStreamer();
+    c.querySelectorAll('#form-campos input, #form-campos select, #form-campos textarea').forEach(el => {
+      el.addEventListener('input', () => { _solicDirty = true; });
+    });
+    document.getElementById('btn-solic-cancelar').addEventListener('click', () => {
+      if (_solicDirty && !confirm('Descartar o preenchimento?')) return;
+      _solicDirty = false; _solicView = 'lista'; carregarSolicitacoes();
+    });
+    document.getElementById('btn-solic-revisar').addEventListener('click', mostrarResumoForm);
+  } catch (e) { c.innerHTML = `<div class="empty"><p>Erro: ${esc(e.message)}</p></div>`; }
+}
+
+function renderCampoForm(campo, valorAtual) {
+  const req = campo.obrigatorio ? ' <span style="color:var(--red)">*</span>' : '';
+  const ajuda = campo.ajuda ? `<div style="font-size:11px;color:var(--dim);margin-top:3px">${esc(campo.ajuda)}</div>` : '';
+  const v = valorAtual && typeof valorAtual === 'object' && 'valor' in valorAtual ? valorAtual.valor : valorAtual;
+  const key = esc(campo.chave);
+  const base = `data-chave="${key}" data-tipo="${esc(campo.tipo)}"`;
+  if (campo.tipo === 'id') {
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+      <div class="input-row">
+        <input type="text" id="fc-${key}" ${base} value="${esc(v || '')}" placeholder="@ ou ID do streamer na Kwai">
+        <button class="btn btn-cyan" id="btn-verificar-streamer" type="button">Verificar streamer</button>
+      </div>
+      <div id="verif-resultado"></div>${ajuda}</div>`;
+  }
+  if (campo.tipo === 'uid') {
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+      <input type="text" id="fc-${key}" ${base} value="${esc(v || '')}" placeholder="UID numérico do streamer">${ajuda}</div>`;
+  }
+  if (campo.tipo === 'textarea') {
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+      <textarea id="fc-${key}" ${base} rows="3">${esc(v || '')}</textarea>${ajuda}</div>`;
+  }
+  if (campo.tipo === 'data') {
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+      <input type="date" id="fc-${key}" ${base} value="${esc(v || '')}">${ajuda}</div>`;
+  }
+  if (campo.tipo === 'hora') {
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+      <input type="time" id="fc-${key}" ${base} value="${esc(v || '')}">${ajuda}</div>`;
+  }
+  if (campo.tipo === 'datahora') {
+    const dd = v && typeof v === 'object' ? v.data : '';
+    const hh = v && typeof v === 'object' ? v.hora : '';
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+      <div class="input-row">
+        <input type="date" id="fc-${key}-data" data-chave="${key}" data-tipo="datahora" data-part="data" value="${esc(dd || '')}">
+        <input type="time" id="fc-${key}-hora" data-chave="${key}" data-tipo="datahora" data-part="hora" value="${esc(hh || '')}">
+      </div>${ajuda}</div>`;
+  }
+  if (campo.tipo === 'selecao') {
+    const opts = (campo.opcoes || []).map(o => {
+      const val = o.gforms_valor || o.rotulo;
+      return `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(o.rotulo || val)}</option>`;
+    }).join('');
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+      <select id="fc-${key}" ${base}><option value="">— selecione —</option>${opts}</select>${ajuda}</div>`;
+  }
+  if (campo.tipo === 'multi') {
+    const arr = Array.isArray(v) ? v : [];
+    const boxes = (campo.opcoes || []).map((o, i) => {
+      const val = o.gforms_valor || o.rotulo;
+      return `<label class="chk-row"><input type="checkbox" data-chave="${key}" data-tipo="multi" value="${esc(val)}" ${arr.includes(val) ? 'checked' : ''}> ${esc(o.rotulo || val)}</label>`;
+    }).join('');
+    return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>${boxes}${ajuda}</div>`;
+  }
+  return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
+    <input type="text" id="fc-${key}" ${base} value="${esc(v || '')}">${ajuda}</div>`;
+}
+
+function wireVerificarStreamer() {
+  const btn = document.getElementById('btn-verificar-streamer');
+  if (!btn) return;
+  btn.addEventListener('click', verificarStreamerForm);
+  if (_solicVerif) renderVerifResultado(_solicVerif);
+}
+
+function renderVerifResultado(p) {
+  const area = document.getElementById('verif-resultado');
+  if (!area) return;
+  area.innerHTML = `
+    <div class="perfil-encontrado" style="margin-top:12px">
+      ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome || '')}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome || p.kwaiId || '?')[0])}</div>`}
+      <div class="perfil-info">
+        <h4>${esc(p.nome || p.kwaiId || '—')} <span style="color:var(--green)">&#10003;</span></h4>
+        <p>@${esc(p.kwaiId || '')}</p>
+        <p style="font-family:monospace;color:var(--text);margin-top:2px">UID: <strong>${esc(p.memberId || '')}</strong></p>
+      </div>
+    </div>`;
+}
+
+async function verificarStreamerForm() {
+  const btn = document.getElementById('btn-verificar-streamer');
+  const area = document.getElementById('verif-resultado');
+  const campoId = _solicFormAtual.campos.find(c => c.tipo === 'id');
+  const campoUid = _solicFormAtual.campos.find(c => c.tipo === 'uid');
+  const idVal = campoId ? (document.getElementById('fc-' + campoId.chave)?.value || '').trim().replace(/^@/, '') : '';
+  if (!idVal) { area.innerHTML = `<p class="msg-err" style="display:block">Informe o ID do streamer.</p>`; return; }
+  btn.disabled = true; btn.textContent = 'Verificando…';
+  area.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const d = await api('/agente/convites/buscar-perfil', { method: 'POST', body: { uid: idVal } });
+    if (!d.perfil || !d.perfil.memberId) {
+      _solicVerif = null;
+      area.innerHTML = `<p class="msg-err" style="display:block">${esc(d.mensagem || 'Perfil não encontrado. Verifique o ID.')}</p>`;
+      return;
+    }
+    _solicVerif = {
+      memberId: d.perfil.memberId, kwaiId: d.perfil.kwaiId, nome: d.perfil.nome, foto: d.perfil.foto,
+      status: d.status, check_message: d.checkMessage || d.mensagem || null,
+    };
+    renderVerifResultado(_solicVerif);
+    // sugere o UID no campo, se vazio
+    if (campoUid) {
+      const el = document.getElementById('fc-' + campoUid.chave);
+      if (el && !el.value.trim()) { el.value = d.perfil.memberId; _solicDirty = true; }
+    }
+  } catch (e) {
+    _solicVerif = null;
+    const msg = /indispon/i.test(e.message) ? 'Verificação indisponível no momento. Tente novamente em alguns minutos.' : e.message;
+    area.innerHTML = `<p class="msg-err" style="display:block">${esc(msg)}</p>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Verificar streamer';
+  }
+}
+
+function coletarValoresForm() {
+  const valores = {};
+  for (const campo of _solicFormAtual.campos) {
+    if (campo.tipo === 'datahora') {
+      const dd = (document.getElementById(`fc-${campo.chave}-data`)?.value || '').trim();
+      const hh = (document.getElementById(`fc-${campo.chave}-hora`)?.value || '').trim();
+      if (dd || hh) valores[campo.chave] = { tipo: 'datahora', valor: { data: dd, hora: hh } };
+      continue;
+    }
+    if (campo.tipo === 'multi') {
+      const marcados = Array.from(document.querySelectorAll(`#form-campos input[type="checkbox"][data-chave="${campo.chave}"]:checked`)).map(x => x.value);
+      if (marcados.length) valores[campo.chave] = { tipo: 'multi', valor: marcados };
+      continue;
+    }
+    const el = document.getElementById('fc-' + campo.chave);
+    const val = (el?.value || '').trim();
+    if (val) valores[campo.chave] = { tipo: campo.tipo, valor: campo.tipo === 'id' ? val.replace(/^@/, '') : val };
+  }
+  return valores;
+}
+
+function validarFormParaResumo(valores) {
+  for (const campo of _solicFormAtual.campos) {
+    if (!campo.obrigatorio) continue;
+    const v = valores[campo.chave];
+    const vazio = !v || v.valor == null || v.valor === '' ||
+      (Array.isArray(v.valor) && !v.valor.length) ||
+      (v.valor && typeof v.valor === 'object' && (!v.valor.data || !v.valor.hora));
+    if (vazio) return `Preencha o campo "${campo.rotulo}".`;
+  }
+  const campoId = _solicFormAtual.campos.find(c => c.tipo === 'id');
+  const campoUid = _solicFormAtual.campos.find(c => c.tipo === 'uid');
+  if (campoId || campoUid) {
+    if (!_solicVerif || !_solicVerif.memberId) return 'Verifique o streamer antes de enviar.';
+    if (campoId) {
+      const idV = String(valores[campoId.chave]?.valor || '').trim().toLowerCase();
+      if (idV !== String(_solicVerif.kwaiId || '').trim().toLowerCase()) return 'O ID informado não corresponde ao streamer verificado. Corrija ou verifique novamente.';
+    }
+    if (campoUid) {
+      const uidV = String(valores[campoUid.chave]?.valor || '').trim();
+      if (uidV !== String(_solicVerif.memberId || '').trim()) return 'O UID informado não corresponde ao streamer verificado. Corrija ou verifique novamente.';
+    }
+  }
+  return null;
+}
+
+function mostrarResumoForm() {
+  const msg = document.getElementById('msg-solic');
+  const valores = coletarValoresForm();
+  const erro = validarFormParaResumo(valores);
+  if (erro) { mostrarMsg(msg, erro, 'err'); return; }
+
+  const linhas = _solicFormAtual.campos.map(campo =>
+    agCell(campo.rotulo, fmtValorSolic(valores[campo.chave]))).join('');
+  const resumo = document.getElementById('solic-resumo');
+  const v = _solicVerif || {};
+  resumo.style.display = '';
+  resumo.innerHTML = `
+    <div class="convite-box">
+      <h3>Confira antes de enviar</h3>
+      ${v.memberId ? `<div class="perfil-encontrado" style="margin-bottom:14px">
+        ${v.foto ? `<img src="${esc(v.foto)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px">${esc((v.nome || '?')[0])}</div>`}
+        <div class="perfil-info"><h4>${esc(v.nome || v.kwaiId || '—')}</h4><p>@${esc(v.kwaiId || '')} · UID ${esc(v.memberId)}</p></div>
+      </div>` : ''}
+      <div class="ag-grid" style="margin-top:0">${linhas}</div>
+      <div id="msg-resumo"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="btn-resumo-voltar" type="button">Voltar e editar</button>
+        <button class="btn btn-green" id="btn-resumo-confirmar" type="button">${_solicEditId ? 'Reenviar solicitação' : 'Confirmar e enviar'}</button>
+      </div>
+    </div>`;
+  resumo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('btn-resumo-voltar').addEventListener('click', () => { resumo.style.display = 'none'; });
+  document.getElementById('btn-resumo-confirmar').addEventListener('click', () => confirmarEnvioSolic(valores));
+}
+
+async function confirmarEnvioSolic(valores) {
+  const btn = document.getElementById('btn-resumo-confirmar');
+  const msg = document.getElementById('msg-resumo');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  const body = { slug: _solicFormAtual.slug, valores, verificacao: _solicVerif || null };
+  try {
+    if (_solicEditId) await api(`/agente/solicitacoes/${encodeURIComponent(_solicEditId)}`, { method: 'PUT', body });
+    else await api('/agente/solicitacoes', { method: 'POST', body });
+    _solicDirty = false; _solicEditId = null; _solicView = 'minhas';
+    carregarSolicitacoes();
+  } catch (e) {
+    mostrarMsg(msg, e.message || 'Não foi possível enviar.', 'err');
+    btn.disabled = false; btn.textContent = _solicEditId ? 'Reenviar solicitação' : 'Confirmar e enviar';
+  }
+}
+
+async function carregarMinhasSolicitacoes() {
+  const c = document.getElementById('solic-minhas');
+  c.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const d = await api('/agente/solicitacoes');
+    const list = d.solicitacoes || [];
+    if (!list.length) { c.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Você ainda não enviou nenhuma solicitação.</p></div>`; return; }
+    const rows = list.map(s => {
+      const title = `${esc(s.streamer_nome || s.streamer_id || s.streamer_uid || '—')}`;
+      const sub = `${esc(s.tipo_form)} · ${fmtData(s.criado_em)}`;
+      return agItem({
+        avatar: foto(s.streamer_foto, s.streamer_nome || s.streamer_id),
+        title, sub, badge: badgeSolic(s.status),
+        body: [
+          agCell('ID', s.streamer_id ? '@' + esc(s.streamer_id) : '—'),
+          agCell('UID', esc(s.streamer_uid || '—')),
+          agCell('Formulário', esc(s.tipo_form)),
+          agCell('Atualizada', fmtData(s.atualizado_em)),
+          s.motivo_correcao ? `<div class="ag-cell" style="grid-column:1/-1"><div class="ag-cell-label">Correção pedida</div><div class="ag-cell-value" style="color:var(--gold)">${esc(s.motivo_correcao)}</div></div>` : '',
+          s.motivo_recusa ? `<div class="ag-cell" style="grid-column:1/-1"><div class="ag-cell-label">Motivo da recusa</div><div class="ag-cell-value" style="color:var(--red)">${esc(s.motivo_recusa)}</div></div>` : '',
+          `<div style="grid-column:1/-1;margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost" data-solic-detalhe="${esc(s.id)}" type="button">Ver detalhes</button>
+            ${s.status === 'necessita_correcao' ? `<button class="btn btn-green" data-solic-corrigir="${esc(s.id)}" data-solic-slug="${esc(s.tipo_form)}" type="button">Corrigir e reenviar</button>` : ''}
+          </div>`,
+        ].join(''),
+      });
+    });
+    setAccordion(c, false);
+    c.innerHTML = `<div class="ag-acc-list" style="display:block">${rows.join('')}</div>`;
+    c.querySelectorAll('[data-solic-detalhe]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); abrirDetalheSolic(b.dataset.solicDetalhe); }));
+    c.querySelectorAll('[data-solic-corrigir]').forEach(b => b.addEventListener('click', async e => {
+      e.stopPropagation();
+      const d2 = await api(`/agente/solicitacoes/${encodeURIComponent(b.dataset.solicCorrigir)}`);
+      abrirPreencherForm(b.dataset.solicSlug, d2.solicitacao);
+    }));
+  } catch (e) { c.innerHTML = `<div class="empty"><p>Erro: ${esc(e.message)}</p></div>`; }
+}
+
+async function abrirDetalheSolic(id) {
+  try {
+    const d = await api(`/agente/solicitacoes/${encodeURIComponent(id)}`);
+    const s = d.solicitacao;
+    const snap = d.versao?.snapshot || { campos: [] };
+    const campos = (snap.campos || []).filter(c => c.origem === 'agente');
+    const linhas = campos.map(c => `<div class="ag-cell"><div class="ag-cell-label">${esc(c.rotulo)}</div><div class="ag-cell-value">${fmtValorSolic(s.valores?.[c.chave])}</div></div>`).join('');
+    const hist = (d.historico || []).map(h =>
+      `<li>${fmtData(h.criado_em)} — <strong>${esc(h.acao)}</strong> por ${esc(h.ator_nome || h.ator_id)}${h.detalhe?.motivo ? ` · ${esc(h.detalhe.motivo)}` : ''}</li>`).join('');
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto';
+    wrap.innerHTML = `<div class="convite-box" style="max-width:560px;width:100%;position:relative">
+      <button type="button" id="det-solic-fechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer">&times;</button>
+      <h3>${esc(s.streamer_nome || s.streamer_id || '—')} — ${badgeSolic(s.status)}</h3>
+      <p style="color:var(--sub);font-size:12px;margin-bottom:12px">${esc(s.tipo_form)} · enviada ${fmtData(s.criado_em)}</p>
+      ${s.motivo_correcao ? `<p class="msg-warn" style="display:block">Correção pedida: ${esc(s.motivo_correcao)}</p>` : ''}
+      ${s.motivo_recusa ? `<p class="msg-err" style="display:block">Recusada: ${esc(s.motivo_recusa)}</p>` : ''}
+      <div class="ag-grid" style="margin-top:4px">${linhas}</div>
+      ${hist ? `<div style="margin-top:14px"><div class="ag-cell-label">Histórico</div><ul style="font-size:12px;color:var(--sub);margin:6px 0 0 16px;line-height:1.7">${hist}</ul></div>` : ''}
+    </div>`;
+    document.body.appendChild(wrap);
+    const close = () => wrap.remove();
+    wrap.querySelector('#det-solic-fechar').addEventListener('click', close);
+    wrap.addEventListener('click', e => { if (e.target === wrap) close(); });
+  } catch (e) { alert('Erro: ' + e.message); }
 }
 
 // -- AO VIVO -----------------------------------------------

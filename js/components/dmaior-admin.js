@@ -225,7 +225,7 @@ class DimaiorAdmin extends HTMLElement {
   }
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',streamersPremium:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',streamersPremium:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',solicitacoesFormularios:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
@@ -233,7 +233,7 @@ class DimaiorAdmin extends HTMLElement {
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa[pag]?.();
   }
 
@@ -4756,7 +4756,8 @@ class DimaiorAdmin extends HTMLElement {
               ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)+
               ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)+
               ni('users','agentes','Agentes')+
-              ni('refresh','agenteMigracoes','Migrações Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)
+              ni('refresh','agenteMigracoes','Migrações Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)+
+              ni('clipboard','solicitacoesFormularios','Solicitações de Formulários',`<span class="nb gold" id="nbSolicForm" style="display:none">0</span>`)
             )}
             ${navSec('financeiro','Financeiro',
               ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)+
@@ -4772,7 +4773,8 @@ class DimaiorAdmin extends HTMLElement {
               ni('play_circle','historicoLive','Histórico de Live')+
               ni('server','monitor','Monitor Kwai')+
               ni('search','logs','Auditoria')+
-              ni('settings','config','Configurações')
+              ni('settings','config','Configurações')+
+              ni('clipboard','configFormularios','Configurar Formulários')
             )}
           </div>
           <div class="content">
@@ -5449,6 +5451,36 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <div class="pag" id="pag-logs">${ph('Auditoria','search','Registro de ações','btnAtuLog')}<div class="box"><div class="bhead"><div class="btitulo">Logs</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bL" type="text" placeholder="Filtrar..."/></div></div></div><div id="tbL">${this._loading()}</div><div class="pag-bar" id="pgL"></div></div></div>
             <div class="pag" id="pag-config">${ph('Configurações','settings','Variáveis operacionais','btnAtuCfg')}<div class="box"><div id="tbC">${this._loading()}</div></div></div>
+
+            <!-- ── CENTRAL DE FORMULÁRIOS ── -->
+            <div class="pag" id="pag-solicitacoesFormularios">
+              ${ph('Solicitações de Formulários','clipboard','Solicitações dos agentes para preencher os Google Forms da agência','btnAtuSolicForm')}
+              <div class="box"><div class="bhead"><div class="btitulo">${this._ico('search',14)} Filtros</div></div>
+                <div style="padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                  <select id="sfStatus" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 10px;font-size:12px;outline:none">
+                    <option value="">Todos os status</option>
+                    <option value="pendente_analise">Pendente de análise</option>
+                    <option value="aprovada">Aprovada</option>
+                    <option value="aguardando_envio">Aguardando envio</option>
+                    <option value="enviada">Enviada</option>
+                    <option value="recusada">Recusada</option>
+                    <option value="necessita_correcao">Necessita correção</option>
+                  </select>
+                  <select id="sfAgente" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 10px;font-size:12px;outline:none"><option value="">Todos os agentes</option></select>
+                  <select id="sfTipo" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 10px;font-size:12px;outline:none"><option value="">Todos os formulários</option></select>
+                  <input type="date" id="sfDe" title="De" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 8px;font-size:12px;outline:none">
+                  <input type="date" id="sfAte" title="Até" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 8px;font-size:12px;outline:none">
+                  <div class="busca">${this._ico('search',12)}<input id="sfBusca" type="text" placeholder="ID ou UID do streamer" style="width:180px"/></div>
+                </div>
+              </div>
+              <div class="box"><div id="tbSolicForm">${this._loading()}</div><div class="pag-bar" id="pgSolicForm"></div></div>
+            </div>
+
+            <div class="pag" id="pag-configFormularios">
+              ${ph('Configurar Formulários','settings','Cadastro, campos e mapeamento dos Google Forms da agência','btnAtuConfigForm',`<button class="btn btn-g" id="btnNovoFormulario">${this._ico('plus',13)} Novo formulário</button>`)}
+              <div class="box" id="listaFormulariosBox"><div id="tbConfigForm">${this._loading()}</div></div>
+              <div id="editorFormularioBox" style="display:none"></div>
+            </div>
             <!-- ── AGENTES DE TALENTOS ── -->
             <div class="pag" id="pag-agentes">
               ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-o" id="btnAgentesKwai">${this._ico('refresh',13)} Visão Kwai</button><button class="btn btn-o" id="btnConfigComissaoAgentes">${this._ico('settings',13)} Comissões</button><button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
@@ -5491,6 +5523,14 @@ class DimaiorAdmin extends HTMLElement {
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">💎 Mês</span><div id="aDDiamMes" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Comissão</span><div id="aDComissao" style="font-size:15px;margin-top:4px;color:var(--verde)"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Meta</span><div id="aDComissaoMeta" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">% Manual</span>
+                      <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                        <input id="aDComissaoOverride" type="number" min="0" max="100" step="0.01" placeholder="auto" style="width:64px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 7px;font-size:13px;outline:none">
+                        <button class="btn btn-sm btn-o" id="btnSalvarComissaoOverride" style="padding:4px 8px">Salvar</button>
+                        <button class="btn btn-sm" id="btnLimparComissaoOverride" title="Voltar às regras automáticas" style="padding:4px 8px;border:1px solid var(--brddim);color:var(--t3)">✕</button>
+                      </div>
+                      <div style="font-size:9px;color:var(--t3);margin-top:2px">Vazio = usa as regras automáticas</div>
+                    </div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Observação</span><div id="aDObs" style="font-size:15px;margin-top:4px"></div></div>
                   </div>
                 </div>
@@ -6498,6 +6538,23 @@ class DimaiorAdmin extends HTMLElement {
       s.getElementById('aDComissaoMeta').textContent = calc.regra_aplicada
         ? `${calc.regra_aplicada.nome} · ${Number(calc.comissao?.percentual||0)}%`
         : 'Sem meta atingida';
+      const ovInp = s.getElementById('aDComissaoOverride');
+      ovInp.value = (ag.comissao_percentual_override !== null && ag.comissao_percentual_override !== undefined) ? ag.comissao_percentual_override : '';
+      s.getElementById('btnSalvarComissaoOverride').onclick = async () => {
+        const v = ovInp.value.trim();
+        try {
+          await this._patch(`/admin/agentes/${id}/comissao-override`, { percentual: v === '' ? null : v });
+          this._toast(v === '' ? 'Override removido — voltou às regras' : `Comissão fixada em ${v}%`, 'ok');
+          this._abrirDetalheAgente(id);
+        } catch (e) { this._toast(e.message, 'err'); }
+      };
+      s.getElementById('btnLimparComissaoOverride').onclick = async () => {
+        try {
+          await this._patch(`/admin/agentes/${id}/comissao-override`, { percentual: null });
+          this._toast('Override removido — voltou às regras', 'ok');
+          this._abrirDetalheAgente(id);
+        } catch (e) { this._toast(e.message, 'err'); }
+      };
       s.getElementById('aDObs').textContent       = ag.observacao || '—';
       // Streamers
       const streamers = detalhe.streamers || [];
@@ -7230,6 +7287,422 @@ class DimaiorAdmin extends HTMLElement {
       s.getElementById('ajusteTicketUid').value='';s.getElementById('ajusteTicketQtd').value='';s.getElementById('ajusteTicketMotivo').value='';
       this._carregarTicketsAjustes();
     }catch(e){this._toast(e.message,'err');}
+  }
+
+  // ══════════════════════════ CENTRAL DE FORMULÁRIOS ═════════════════════════
+
+  _solicStatusInfo(st){
+    const m={
+      pendente_analise:['#fbbf24','Pendente de análise'],
+      aprovada:['#4ade80','Aprovada'],
+      aguardando_envio:['#00d4d4','Aguardando envio ao Google Forms'],
+      enviada:['#818cf8','Enviada'],
+      recusada:['#f87171','Recusada'],
+      necessita_correcao:['#fb923c','Necessita correção'],
+    };
+    return m[st]||['var(--t3)',st||'—'];
+  }
+  _solicBadge(st){
+    const [cor,txt]=this._solicStatusInfo(st);
+    return `<span style="font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid ${cor}55;color:${cor};background:${cor}14">${this._esc(txt)}</span>`;
+  }
+  _fmtValorForm(entrada){
+    if(!entrada)return'—';
+    const {tipo,valor}=entrada;
+    if(valor==null||valor==='')return'—';
+    if(tipo==='data')return this._fdtData(valor);
+    if(tipo==='hora'){const m=String(valor).match(/^(\d{1,2}):(\d{2})/);return m?(Number(m[2])===0?`${Number(m[1])}h`:`${Number(m[1])}h${m[2]}`):this._esc(valor);}
+    if(tipo==='datahora'){const h=this._fmtValorForm({tipo:'hora',valor:valor.hora});return h!=='—'?`${this._fdtData(valor.data)} às ${h}`:this._fdtData(valor.data);}
+    if(Array.isArray(valor))return valor.map(v=>this._esc(v)).join(', ');
+    return this._esc(String(valor));
+  }
+
+  async _carregarSolicForm(){
+    const s=this.shadowRoot;
+    if(!this._solicFormWired){
+      this._solicFormWired=true;
+      ['sfStatus','sfAgente','sfTipo','sfDe','sfAte'].forEach(id=>s.getElementById(id)?.addEventListener('change',()=>{this._pg.solicForm=1;this._renderSolicForm();}));
+      s.getElementById('sfBusca')?.addEventListener('input',this._dbc(()=>{this._pg.solicForm=1;this._renderSolicForm();},400));
+      s.getElementById('btnAtuSolicForm')?.addEventListener('click',()=>this._renderSolicForm());
+      // popula selects de agente e tipo
+      try{
+        const [ag,fo]=await Promise.all([this._get('/admin/agentes'),this._get('/admin/formularios')]);
+        const selAg=s.getElementById('sfAgente');
+        (ag.agentes||ag||[]).forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.nome;selAg.appendChild(o);});
+        const selTp=s.getElementById('sfTipo');
+        (fo.formularios||[]).forEach(f=>{const o=document.createElement('option');o.value=f.slug;o.textContent=f.nome;selTp.appendChild(o);});
+      }catch{}
+    }
+    this._pg.solicForm=this._pg.solicForm||1;
+    this._renderSolicForm();
+  }
+
+  async _renderSolicForm(){
+    const s=this.shadowRoot;const el=s.getElementById('tbSolicForm');if(!el)return;
+    el.innerHTML=this._loading();
+    const p=new URLSearchParams();
+    p.set('pagina',this._pg.solicForm);
+    const st=s.getElementById('sfStatus')?.value;if(st)p.set('status',st);
+    const ag=s.getElementById('sfAgente')?.value;if(ag)p.set('agente',ag);
+    const tp=s.getElementById('sfTipo')?.value;if(tp)p.set('tipo',tp);
+    const de=s.getElementById('sfDe')?.value;if(de)p.set('de',de);
+    const at=s.getElementById('sfAte')?.value;if(at)p.set('ate',at);
+    const q=s.getElementById('sfBusca')?.value.trim();if(q)p.set('q',q);
+    let d;
+    try{d=await this._get('/admin/solicitacoes-formularios?'+p.toString());}
+    catch(e){el.innerHTML=this._empty('warning',e.message);return;}
+    const badge=s.getElementById('nbSolicForm');
+    if(badge){if(d.pendentes_total){badge.textContent=d.pendentes_total;badge.style.display='';}else badge.style.display='none';}
+    const lista=d.solicitacoes||[];
+    if(!lista.length){el.innerHTML=this._empty('clipboard','Nenhuma solicitação');this._renderPg('pgSolicForm',this._pg.solicForm,0,20,n=>{this._pg.solicForm=n;this._renderSolicForm();});return;}
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="border-bottom:1px solid var(--brddim)">
+        <th style="padding:9px 12px;text-align:left;color:var(--t3)">Streamer</th>
+        <th style="padding:9px 8px;text-align:left;color:var(--t3)">ID / UID</th>
+        <th style="padding:9px 8px;text-align:left;color:var(--t3)">Formulário</th>
+        <th style="padding:9px 8px;text-align:left;color:var(--t3)">Agente</th>
+        <th style="padding:9px 8px;text-align:left;color:var(--t3)">Solicitada</th>
+        <th style="padding:9px 8px;text-align:left;color:var(--t3)">Status</th>
+        <th style="padding:9px 8px;text-align:left;color:var(--t3)">Atualizada</th>
+        <th style="padding:9px 8px;text-align:right;color:var(--t3)">Ações</th>
+      </tr></thead><tbody>${lista.map(r=>`<tr style="border-bottom:1px solid var(--brddim)">
+        <td style="padding:9px 12px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(r.streamer_foto||''),r.streamer_nome||r.streamer_id,'av')}<span style="color:var(--t1)">${this._esc(r.streamer_nome||'—')}</span></div></td>
+        <td style="padding:9px 8px;color:var(--t2)">${r.streamer_id?'@'+this._esc(r.streamer_id):'—'}<br><span style="font-size:10px;color:var(--t3)">${this._esc(r.streamer_uid||'')}</span></td>
+        <td style="padding:9px 8px;color:var(--t2)">${this._esc(r.tipo_form)}</td>
+        <td style="padding:9px 8px;color:var(--t2)">${this._esc(r.agente_nome||'—')}</td>
+        <td style="padding:9px 8px;color:var(--t3)">${this._fdt(r.criado_em)}</td>
+        <td style="padding:9px 8px">${this._solicBadge(r.status)}</td>
+        <td style="padding:9px 8px;color:var(--t3)">${this._fdt(r.atualizado_em)}</td>
+        <td style="padding:9px 8px;text-align:right"><button class="btn btn-sm btn-o" data-solicf-abrir="${r.id}">${this._ico('eye',11)} Abrir</button></td>
+      </tr>`).join('')}</tbody></table>`;
+    el.querySelectorAll('[data-solicf-abrir]').forEach(b=>b.addEventListener('click',()=>this._abrirDetalheSolicForm(b.dataset.solicfAbrir)));
+    this._renderPg('pgSolicForm',this._pg.solicForm,lista.length,20,n=>{this._pg.solicForm=n;this._renderSolicForm();});
+  }
+
+  async _abrirDetalheSolicForm(id){
+    let d;
+    try{d=await this._get('/admin/solicitacoes-formularios/'+encodeURIComponent(id));}
+    catch(e){this._toast(e.message,'err');return;}
+    const s=d.solicitacao;const snap=d.versao?.snapshot||{campos:[]};
+    const v=s.verificacao||{};
+    const camposAg=(snap.campos||[]).filter(c=>c.origem==='agente'||c.origem==='admin');
+    const linhas=camposAg.map(c=>`<div style="padding:6px 0;border-bottom:1px solid var(--brddim)"><span style="font-size:10px;color:var(--t3);text-transform:uppercase">${this._esc(c.rotulo)}</span><br><span style="color:var(--t1)">${this._fmtValorForm(s.valores?.[c.chave])}</span></div>`).join('');
+    const admOpcoes=(snap.adm_opcoes||[]).map(o=>o.nome);
+    const hist=(d.historico||[]).map(h=>`<li>${this._fdt(h.criado_em)} — <strong>${this._esc(h.acao)}</strong> · ${this._esc(h.ator_nome||h.ator_id)}${h.detalhe?.motivo?` · "${this._esc(h.detalhe.motivo)}"`:''}${h.detalhe?.adm?` · ADM: ${this._esc(h.detalhe.adm)}`:''}</li>`).join('');
+    const podeAprovar=s.status==='pendente_analise';
+    const podeCorrigir=['pendente_analise','aprovada','aguardando_envio'].includes(s.status);
+    const podeRecusar=['pendente_analise','aprovada','aguardando_envio','necessita_correcao'].includes(s.status);
+    const podeAbrirForm=['aprovada','aguardando_envio'].includes(s.status);
+    const podeEnviar=['aprovada','aguardando_envio'].includes(s.status);
+
+    const over=document.createElement('div');
+    over.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9500;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto';
+    over.innerHTML=`<div style="background:var(--card,#0d1424);border:1px solid var(--brd);border-radius:14px;max-width:640px;width:100%;position:relative;font-family:var(--dm-font-body,'Exo 2',sans-serif)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--brddim)">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;color:var(--t1)">${this._esc(s.streamer_nome||s.streamer_id||'Solicitação')} — ${this._solicBadge(s.status)}</div>
+        <button id="dsfX" style="background:none;border:none;color:var(--t3);font-size:20px;cursor:pointer">&times;</button>
+      </div>
+      <div style="padding:18px 20px">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">${this._esc(s.tipo_form)} (versão ${d.versao?.versao||'?'}) · agente ${this._esc(s.agente_nome||'—')} · ${this._fdt(s.criado_em)}</div>
+        ${v.memberId?`<div style="display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--brddim);border-radius:10px;margin-bottom:12px">
+          ${this._avatar(this._proxyFoto(v.foto||''),v.nome,'av')}
+          <div><div style="color:var(--t1)">${this._esc(v.nome||v.kwaiId||'—')}</div>
+          <div style="font-size:11px;color:var(--t3)">@${this._esc(v.kwaiId||'')} · UID ${this._esc(v.memberId||'')}</div>
+          <div style="font-size:10px;color:${v.id_confere&&v.uid_confere?'#4ade80':'#f87171'}">${v.id_confere&&v.uid_confere?'ID e UID conferem com a verificação':'ATENÇÃO: divergência entre digitado e verificado'}</div></div>
+        </div>`:'<div style="font-size:11px;color:var(--gold);margin-bottom:12px">Sem verificação de streamer registrada.</div>'}
+        <div style="margin-bottom:14px">${linhas}</div>
+        ${s.motivo_correcao?`<div style="font-size:12px;color:#fb923c;margin-bottom:8px">Correção pedida: ${this._esc(s.motivo_correcao)}</div>`:''}
+        ${s.motivo_recusa?`<div style="font-size:12px;color:#f87171;margin-bottom:8px">Recusada: ${this._esc(s.motivo_recusa)}</div>`:''}
+        ${s.adm_plataforma?`<div style="font-size:12px;color:var(--t2);margin-bottom:8px">ADM responsável: <strong>${this._esc(s.adm_plataforma)}</strong></div>`:''}
+        ${s.enviado_em?`<div style="font-size:12px;color:#818cf8;margin-bottom:8px">Enviada em ${this._fdt(s.enviado_em)} por ${this._esc(s.enviado_por||'—')}${s.envio_obs?` · ${this._esc(s.envio_obs)}`:''}${s.envio_comprovante_url?` · <a href="${this._esc(s.envio_comprovante_url)}" target="_blank" rel="noopener" style="color:var(--cyan)">comprovante</a>`:''}</div>`:''}
+        ${hist?`<details style="margin-bottom:14px"><summary style="cursor:pointer;font-size:12px;color:var(--t3)">Histórico (${(d.historico||[]).length})</summary><ul style="font-size:11px;color:var(--t2);margin:8px 0 0 16px;line-height:1.8">${hist}</ul></details>`:''}
+        <div id="dsfAcoes" style="display:flex;gap:8px;flex-wrap:wrap">
+          ${podeAprovar?`<button class="btn btn-sm btn-g" id="dsfAprovar">${this._ico('check_c',12)} Aprovar</button>`:''}
+          ${podeAbrirForm?`<button class="btn btn-sm btn-o" id="dsfAbrirForm" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('send',12)} Abrir formulário preenchido</button>`:''}
+          ${podeEnviar?`<button class="btn btn-sm btn-o" id="dsfEnviar" style="border-color:rgba(129,140,248,.5);color:#818cf8">${this._ico('check',12)} Marcar como enviado</button>`:''}
+          ${podeCorrigir?`<button class="btn btn-sm" id="dsfCorrecao" style="border:1px solid rgba(251,146,60,.4);color:#fb923c;background:rgba(251,146,60,.08)">${this._ico('edit',12)} Solicitar correção</button>`:''}
+          ${podeRecusar?`<button class="btn btn-sm" id="dsfRecusar" style="border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)">${this._ico('x_circle',12)} Recusar</button>`:''}
+        </div>
+        <div id="dsfPainel" style="margin-top:12px"></div>
+      </div>
+    </div>`;
+    this.shadowRoot.appendChild(over);
+    const fechar=()=>over.remove();
+    over.querySelector('#dsfX').addEventListener('click',fechar);
+    over.addEventListener('click',e=>{if(e.target===over)fechar();});
+    const painel=over.querySelector('#dsfPainel');
+    const recarrega=()=>{fechar();this._renderSolicForm();};
+
+    over.querySelector('#dsfAprovar')?.addEventListener('click',()=>{
+      painel.innerHTML=`<div style="padding:12px;border:1px solid var(--brddim);border-radius:8px">
+        <div style="font-size:12px;color:var(--t2);margin-bottom:6px">Selecione o ADM da plataforma responsável *</div>
+        <select id="dsfAdm" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px;font-size:13px"><option value="">— selecione —</option>${admOpcoes.map(a=>`<option value="${this._esc(a)}">${this._esc(a)}</option>`).join('')}</select>
+        <button class="btn btn-sm btn-g" id="dsfAprovarOk" style="margin-top:10px">${this._ico('check_c',12)} Confirmar aprovação</button>
+      </div>`;
+      painel.querySelector('#dsfAprovarOk').addEventListener('click',async()=>{
+        const adm=painel.querySelector('#dsfAdm').value;
+        if(!adm){this._toast('Escolha o ADM','err');return;}
+        try{await this._post(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/aprovar`,{adm});this._toast('Solicitação aprovada','ok');recarrega();}
+        catch(e){this._toast(e.message,'err');}
+      });
+    });
+    over.querySelector('#dsfCorrecao')?.addEventListener('click',()=>{
+      painel.innerHTML=`<div style="padding:12px;border:1px solid var(--brddim);border-radius:8px">
+        <textarea id="dsfMotivo" rows="2" placeholder="O que o agente precisa corrigir?" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px;font-size:13px;resize:vertical"></textarea>
+        <button class="btn btn-sm" id="dsfCorrecaoOk" style="margin-top:8px;border:1px solid rgba(251,146,60,.4);color:#fb923c;background:rgba(251,146,60,.08)">Enviar pedido de correção</button>
+      </div>`;
+      painel.querySelector('#dsfCorrecaoOk').addEventListener('click',async()=>{
+        const motivo=painel.querySelector('#dsfMotivo').value.trim();
+        if(!motivo){this._toast('Descreva a correção','err');return;}
+        try{await this._post(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/correcao`,{motivo});this._toast('Correção solicitada','ok');recarrega();}
+        catch(e){this._toast(e.message,'err');}
+      });
+    });
+    over.querySelector('#dsfRecusar')?.addEventListener('click',()=>{
+      painel.innerHTML=`<div style="padding:12px;border:1px solid var(--brddim);border-radius:8px">
+        <textarea id="dsfMotivoR" rows="2" placeholder="Motivo da recusa" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px;font-size:13px;resize:vertical"></textarea>
+        <button class="btn btn-sm" id="dsfRecusarOk" style="margin-top:8px;border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)">Confirmar recusa</button>
+      </div>`;
+      painel.querySelector('#dsfRecusarOk').addEventListener('click',async()=>{
+        const motivo=painel.querySelector('#dsfMotivoR').value.trim();
+        if(!motivo){this._toast('Descreva o motivo','err');return;}
+        if(!confirm('Recusar esta solicitação?'))return;
+        try{await this._post(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/recusar`,{motivo});this._toast('Solicitação recusada','ok');recarrega();}
+        catch(e){this._toast(e.message,'err');}
+      });
+    });
+    over.querySelector('#dsfAbrirForm')?.addEventListener('click',async()=>{
+      try{
+        const r=await this._get(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/prefill-url`);
+        if(r.avisos?.length)painel.innerHTML=`<div style="font-size:11px;color:var(--gold);padding:8px;border:1px solid rgba(251,191,36,.3);border-radius:8px">${r.avisos.map(a=>'• '+this._esc(a)).join('<br>')}</div>`;
+        if(!r.url){this._toast('Não foi possível gerar a URL — confira o mapeamento','err');return;}
+        window.open(r.url,'_blank','noopener');
+        await this._post(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/form-aberto`,{});
+        this._toast('Formulário aberto em nova aba','ok');
+        this._renderSolicForm();
+      }catch(e){this._toast(e.message,'err');}
+    });
+    over.querySelector('#dsfEnviar')?.addEventListener('click',()=>{
+      const agora=new Date();const local=new Date(agora.getTime()-agora.getTimezoneOffset()*60000).toISOString().slice(0,16);
+      painel.innerHTML=`<div style="padding:12px;border:1px solid var(--brddim);border-radius:8px;display:flex;flex-direction:column;gap:8px">
+        <label style="font-size:11px;color:var(--t3)">Data/hora do envio<input type="datetime-local" id="dsfEnvDt" value="${local}" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:7px;font-size:13px"></label>
+        <input type="text" id="dsfEnvObs" placeholder="Observação (opcional)" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:7px;font-size:13px">
+        <input type="text" id="dsfEnvComp" placeholder="Link do comprovante (opcional)" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:7px;font-size:13px">
+        <button class="btn btn-sm btn-o" id="dsfEnviarOk" style="border-color:rgba(129,140,248,.5);color:#818cf8">Confirmar envio</button>
+      </div>`;
+      painel.querySelector('#dsfEnviarOk').addEventListener('click',async()=>{
+        if(!confirm('Confirmar que o formulário foi enviado no Google Forms?'))return;
+        try{
+          await this._post(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/marcar-enviada`,{
+            enviado_em:painel.querySelector('#dsfEnvDt').value,
+            obs:painel.querySelector('#dsfEnvObs').value.trim()||null,
+            comprovante_url:painel.querySelector('#dsfEnvComp').value.trim()||null,
+          });
+          this._toast('Marcada como enviada','ok');recarrega();
+        }catch(e){this._toast(e.message,'err');}
+      });
+    });
+  }
+
+  // ── Configurar Formulários ──────────────────────────────────────────────────
+  async _carregarConfigForm(){
+    const s=this.shadowRoot;
+    s.getElementById('listaFormulariosBox').style.display='';
+    s.getElementById('editorFormularioBox').style.display='none';
+    if(!this._configFormWired){
+      this._configFormWired=true;
+      s.getElementById('btnNovoFormulario')?.addEventListener('click',()=>this._abrirEditorFormulario(null));
+      s.getElementById('btnAtuConfigForm')?.addEventListener('click',()=>this._carregarConfigForm());
+    }
+    const el=s.getElementById('tbConfigForm');el.innerHTML=this._loading();
+    let d;
+    try{d=await this._get('/admin/formularios');}catch(e){el.innerHTML=this._empty('warning',e.message);return;}
+    const lista=d.formularios||[];
+    if(!lista.length){el.innerHTML=this._empty('clipboard','Nenhum formulário cadastrado. Clique em "Novo formulário".');return;}
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:1px solid var(--brddim)">
+      <th style="padding:10px 16px;text-align:left;color:var(--t3)">Nome</th>
+      <th style="padding:10px 8px;text-align:left;color:var(--t3)">Estado</th>
+      <th style="padding:10px 8px;text-align:left;color:var(--t3)">Versão</th>
+      <th style="padding:10px 8px;text-align:left;color:var(--t3)">Solicitações</th>
+      <th style="padding:10px 8px;text-align:right;color:var(--t3)">Ações</th>
+    </tr></thead><tbody>${lista.map(f=>{
+      const estado=f.arquivado?'<span style="color:var(--t3)">Arquivado</span>':f.ativo?'<span style="color:#4ade80">Ativo</span>':'<span style="color:var(--gold)">Inativo</span>';
+      const rasc=f.tem_rascunho?' <span style="font-size:10px;color:#fb923c">• rascunho</span>':'';
+      return `<tr style="border-bottom:1px solid var(--brddim)">
+        <td style="padding:10px 16px"><strong style="color:var(--t1)">${this._esc(f.nome)}</strong><div style="font-size:10px;color:var(--t3)">${this._esc(f.slug)}</div></td>
+        <td style="padding:10px 8px">${estado}${rasc}</td>
+        <td style="padding:10px 8px;color:var(--t2)">${f.versao_atual?'v'+f.versao_atual:'—'}</td>
+        <td style="padding:10px 8px;color:var(--t2)">${f.total_solicitacoes||0}</td>
+        <td style="padding:10px 8px;text-align:right;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="btn btn-sm btn-o" data-cf-edit="${f.id}">${this._ico('edit',11)} Editar</button>
+          ${f.arquivado?'':`<button class="btn btn-sm btn-o" data-cf-toggle="${f.id}" data-cf-ativo="${f.ativo?1:0}">${f.ativo?'Desativar':'Ativar'}</button>`}
+          <button class="btn btn-sm" data-cf-arq="${f.id}" data-cf-nome="${this._esc(f.nome)}" style="border:1px solid rgba(248,113,113,.3);color:var(--verm);background:rgba(248,113,113,.06)">${this._ico('trash',11)} Arquivar</button>
+        </td>
+      </tr>`;}).join('')}</tbody></table>`;
+    el.querySelectorAll('[data-cf-edit]').forEach(b=>b.addEventListener('click',()=>this._abrirEditorFormulario(b.dataset.cfEdit)));
+    el.querySelectorAll('[data-cf-toggle]').forEach(b=>b.addEventListener('click',async()=>{
+      try{const fm=await this._get('/admin/formularios/'+b.dataset.cfToggle);
+        await this._put('/admin/formularios/'+b.dataset.cfToggle,{...fm.formulario,campos:fm.campos,ativo:b.dataset.cfAtivo!=='1'});
+        this._toast(b.dataset.cfAtivo==='1'?'Desativado':'Ativado','ok');this._carregarConfigForm();
+      }catch(e){this._toast(e.message,'err');}
+    }));
+    el.querySelectorAll('[data-cf-arq]').forEach(b=>b.addEventListener('click',()=>
+      this._confirmarDel(`Arquivar o formulário "${b.dataset.cfNome}"? O histórico é preservado.`,async()=>{
+        try{await this._delete('/admin/formularios/'+b.dataset.cfArq);this._toast('Arquivado','ok');this._carregarConfigForm();}
+        catch(e){this._toast(e.message,'err');}
+      })));
+  }
+
+  async _abrirEditorFormulario(id){
+    const s=this.shadowRoot;
+    s.getElementById('listaFormulariosBox').style.display='none';
+    const box=s.getElementById('editorFormularioBox');
+    box.style.display='';box.innerHTML=this._loading();
+    let f={nome:'',slug:'',descricao:'',instrucoes:'',google_forms_url:'',agencia_nome:'',adm_opcoes:[],ativo:false,versao_atual:null};
+    let campos=[];
+    if(id){
+      try{const d=await this._get('/admin/formularios/'+id);f=d.formulario;campos=d.campos||[];}
+      catch(e){box.innerHTML=this._empty('warning',e.message);return;}
+    }
+    this._formEditorId=id||null;
+    this._formEditorCampos=campos.map(c=>({...c,opcoes:c.opcoes||[]}));
+    this._formEditorAdm=(f.adm_opcoes||[]).map(o=>({...o}));
+    const inp=(id2,lbl,val,ph2='')=>`<div class="mc" style="margin-bottom:10px"><label>${lbl}</label><input id="${id2}" type="text" value="${this._esc(val||'')}" placeholder="${ph2}" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-size:13px;outline:none;box-sizing:border-box"></div>`;
+    box.innerHTML=`<div class="box"><div class="bhead"><div class="btitulo">${id?'Editar formulário':'Novo formulário'}</div><button class="btn btn-sm btn-o" id="feVoltar">&lsaquo; Voltar</button></div>
+      <div style="padding:16px">
+        ${inp('feNome','Nome *',f.nome,'Ex: Streamer Premium')}
+        <div class="mc" style="margin-bottom:10px"><label>Descrição</label><textarea id="feDesc" rows="2" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-size:13px;outline:none;box-sizing:border-box;resize:vertical">${this._esc(f.descricao||'')}</textarea></div>
+        <div class="mc" style="margin-bottom:10px"><label>Instruções (aparecem pro agente)</label><textarea id="feInstr" rows="3" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-size:13px;outline:none;box-sizing:border-box;resize:vertical">${this._esc(f.instrucoes||'')}</textarea></div>
+        ${inp('feUrl','Link do Google Forms (…/viewform) *',f.google_forms_url,'https://docs.google.com/forms/d/e/…/viewform')}
+        ${inp('feAgencia','Nome padronizado da agência',f.agencia_nome,'Ex: DMaior Agency')}
+        <div class="mc" style="margin:14px 0 6px"><label>Opções de ADM (nome + valor exato no Google Forms)</label></div>
+        <div id="feAdmLista"></div>
+        <button class="btn btn-sm btn-o" id="feAddAdm">${this._ico('plus',11)} Adicionar ADM</button>
+        <div class="mc" style="margin:18px 0 6px"><label>Campos do formulário</label><div style="font-size:10px;color:var(--t3)">origem "fixo" usa o nome da agência · "adm" recebe a escolha do admin · "verificação" puxa da consulta do streamer · "partes" no formato = pergunta de Data/Hora do Google</div></div>
+        <div id="feCampos"></div>
+        <button class="btn btn-sm btn-o" id="feAddCampo">${this._ico('plus',11)} Adicionar campo</button>
+        <div id="fePreview" style="margin-top:14px"></div>
+        <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn btn-g" id="feSalvar">${this._ico('check',13)} Salvar rascunho</button>
+          <button class="btn btn-o" id="feTestar" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('eye',13)} Testar mapeamento</button>
+          ${id?`<button class="btn btn-o" id="fePublicar" style="border-color:rgba(74,222,128,.4);color:#4ade80">${this._ico('send',13)} Publicar${f.versao_atual?' nova versão':''}</button>`:''}
+        </div>
+      </div></div>`;
+    box.querySelector('#feVoltar').addEventListener('click',()=>this._carregarConfigForm());
+    box.querySelector('#feAddAdm').addEventListener('click',()=>{this._formEditorAdm.push({nome:'',gforms_valor:''});this._renderAdmEditor();});
+    box.querySelector('#feAddCampo').addEventListener('click',()=>{this._formEditorCampos.push({chave:'',rotulo:'',tipo:'texto',origem:'agente',obrigatorio:true,ordem:this._formEditorCampos.length,opcoes:[],gforms_entry_id:'',gforms_formato:'texto'});this._renderCamposEditor();});
+    box.querySelector('#feSalvar').addEventListener('click',()=>this._salvarFormulario(false));
+    box.querySelector('#feTestar').addEventListener('click',()=>this._testarMapeamentoFormulario());
+    box.querySelector('#fePublicar')?.addEventListener('click',()=>this._salvarFormulario(true));
+    this._renderAdmEditor();this._renderCamposEditor();
+  }
+
+  _renderAdmEditor(){
+    const c=this.shadowRoot.getElementById('feAdmLista');if(!c)return;
+    c.innerHTML=this._formEditorAdm.map((a,i)=>`<div style="display:flex;gap:6px;margin-bottom:6px">
+      <input type="text" data-adm-nome="${i}" value="${this._esc(a.nome)}" placeholder="Nome (ex: Ren)" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 10px;font-size:12px">
+      <input type="text" data-adm-val="${i}" value="${this._esc(a.gforms_valor)}" placeholder="Valor exato no Google Forms" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 10px;font-size:12px">
+      <button class="btn btn-sm" data-adm-del="${i}" style="border:1px solid rgba(248,113,113,.3);color:var(--verm)">${this._ico('x',11)}</button>
+    </div>`).join('');
+    c.querySelectorAll('[data-adm-nome]').forEach(el=>el.addEventListener('input',()=>{this._formEditorAdm[el.dataset.admNome].nome=el.value;}));
+    c.querySelectorAll('[data-adm-val]').forEach(el=>el.addEventListener('input',()=>{this._formEditorAdm[el.dataset.admVal].gforms_valor=el.value;}));
+    c.querySelectorAll('[data-adm-del]').forEach(el=>el.addEventListener('click',()=>{this._formEditorAdm.splice(+el.dataset.admDel,1);this._renderAdmEditor();}));
+  }
+
+  _renderCamposEditor(){
+    const c=this.shadowRoot.getElementById('feCampos');if(!c)return;
+    const TIPOS=['id','uid','texto','textarea','data','hora','datahora','selecao','multi'];
+    const ORIGENS=['agente','admin','fixo','adm','verificacao'];
+    const FORMATOS=['texto','data_br','datahora_br','data_partes','hora_partes'];
+    const VERIF=['','kwaiId','memberId','nome','foto'];
+    c.innerHTML=this._formEditorCampos.map((f,i)=>`<div style="border:1px solid var(--brddim);border-radius:8px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <input type="text" data-fc-rotulo="${i}" value="${this._esc(f.rotulo)}" placeholder="Rótulo" style="flex:2;min-width:120px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px">
+        <select data-fc-tipo="${i}" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px;font-size:12px">${TIPOS.map(t=>`<option value="${t}" ${f.tipo===t?'selected':''}>${t}</option>`).join('')}</select>
+        <select data-fc-origem="${i}" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px;font-size:12px">${ORIGENS.map(o=>`<option value="${o}" ${f.origem===o?'selected':''}>${o}</option>`).join('')}</select>
+        <label style="font-size:11px;color:var(--t3);display:flex;align-items:center;gap:4px"><input type="checkbox" data-fc-obr="${i}" ${f.obrigatorio!==false?'checked':''}>obrig.</label>
+        <button class="btn btn-sm" data-fc-up="${i}" style="border:1px solid var(--brddim);color:var(--t3);padding:3px 7px">↑</button>
+        <button class="btn btn-sm" data-fc-down="${i}" style="border:1px solid var(--brddim);color:var(--t3);padding:3px 7px">↓</button>
+        <button class="btn btn-sm" data-fc-del="${i}" style="border:1px solid rgba(248,113,113,.3);color:var(--verm);padding:3px 7px">${this._ico('x',10)}</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+        <input type="text" data-fc-entry="${i}" value="${this._esc(f.gforms_entry_id||'')}" placeholder="entry.123456789" style="flex:1;min-width:120px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:monospace">
+        <select data-fc-fmt="${i}" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px;font-size:12px">${FORMATOS.map(o=>`<option value="${o}" ${f.gforms_formato===o?'selected':''}>${o}</option>`).join('')}</select>
+        ${f.origem==='fixo'?`<input type="text" data-fc-fixo="${i}" value="${this._esc(f.valor_fixo||'')}" placeholder="valor fixo (vazio = nome da agência)" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px">`:''}
+        ${f.origem==='verificacao'?`<select data-fc-verif="${i}" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px;font-size:12px">${VERIF.map(o=>`<option value="${o}" ${f.chave_verificacao===o?'selected':''}>${o||'— campo —'}</option>`).join('')}</select>`:''}
+      </div>
+      ${['selecao','multi'].includes(f.tipo)?`<div style="margin-top:6px"><div style="font-size:10px;color:var(--t3)">Opções (rótulo | valor no Google Forms)</div>
+        ${(f.opcoes||[]).map((o,j)=>`<div style="display:flex;gap:6px;margin-top:4px"><input type="text" data-fo-rot="${i}_${j}" value="${this._esc(o.rotulo||'')}" placeholder="rótulo" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 8px;font-size:12px"><input type="text" data-fo-val="${i}_${j}" value="${this._esc(o.gforms_valor||'')}" placeholder="valor" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 8px;font-size:12px"><button class="btn btn-sm" data-fo-del="${i}_${j}" style="border:1px solid rgba(248,113,113,.3);color:var(--verm);padding:2px 6px">${this._ico('x',10)}</button></div>`).join('')}
+        <button class="btn btn-sm btn-o" data-fo-add="${i}" style="margin-top:4px">${this._ico('plus',10)} opção</button></div>`:''}
+    </div>`).join('');
+    const g=(sel,fn)=>c.querySelectorAll(sel).forEach(fn);
+    g('[data-fc-rotulo]',el=>el.addEventListener('input',()=>{this._formEditorCampos[+el.dataset.fcRotulo].rotulo=el.value;}));
+    g('[data-fc-tipo]',el=>el.addEventListener('change',()=>{this._formEditorCampos[+el.dataset.fcTipo].tipo=el.value;this._renderCamposEditor();}));
+    g('[data-fc-origem]',el=>el.addEventListener('change',()=>{this._formEditorCampos[+el.dataset.fcOrigem].origem=el.value;this._renderCamposEditor();}));
+    g('[data-fc-obr]',el=>el.addEventListener('change',()=>{this._formEditorCampos[+el.dataset.fcObr].obrigatorio=el.checked;}));
+    g('[data-fc-entry]',el=>el.addEventListener('input',()=>{this._formEditorCampos[+el.dataset.fcEntry].gforms_entry_id=el.value.trim();}));
+    g('[data-fc-fmt]',el=>el.addEventListener('change',()=>{this._formEditorCampos[+el.dataset.fcFmt].gforms_formato=el.value;}));
+    g('[data-fc-fixo]',el=>el.addEventListener('input',()=>{this._formEditorCampos[+el.dataset.fcFixo].valor_fixo=el.value;}));
+    g('[data-fc-verif]',el=>el.addEventListener('change',()=>{this._formEditorCampos[+el.dataset.fcVerif].chave_verificacao=el.value;}));
+    g('[data-fc-del]',el=>el.addEventListener('click',()=>{this._formEditorCampos.splice(+el.dataset.fcDel,1);this._renderCamposEditor();}));
+    g('[data-fc-up]',el=>el.addEventListener('click',()=>{const i=+el.dataset.fcUp;if(i>0){[this._formEditorCampos[i-1],this._formEditorCampos[i]]=[this._formEditorCampos[i],this._formEditorCampos[i-1]];this._renderCamposEditor();}}));
+    g('[data-fc-down]',el=>el.addEventListener('click',()=>{const i=+el.dataset.fcDown;if(i<this._formEditorCampos.length-1){[this._formEditorCampos[i+1],this._formEditorCampos[i]]=[this._formEditorCampos[i],this._formEditorCampos[i+1]];this._renderCamposEditor();}}));
+    g('[data-fo-add]',el=>el.addEventListener('click',()=>{const i=+el.dataset.foAdd;this._formEditorCampos[i].opcoes=this._formEditorCampos[i].opcoes||[];this._formEditorCampos[i].opcoes.push({rotulo:'',gforms_valor:''});this._renderCamposEditor();}));
+    g('[data-fo-rot]',el=>el.addEventListener('input',()=>{const[i,j]=el.dataset.foRot.split('_').map(Number);this._formEditorCampos[i].opcoes[j].rotulo=el.value;}));
+    g('[data-fo-val]',el=>el.addEventListener('input',()=>{const[i,j]=el.dataset.foVal.split('_').map(Number);this._formEditorCampos[i].opcoes[j].gforms_valor=el.value;}));
+    g('[data-fo-del]',el=>el.addEventListener('click',()=>{const[i,j]=el.dataset.foDel.split('_').map(Number);this._formEditorCampos[i].opcoes.splice(j,1);this._renderCamposEditor();}));
+  }
+
+  _coletarFormularioEditor(){
+    const s=this.shadowRoot;
+    return {
+      nome:s.getElementById('feNome').value.trim(),
+      descricao:s.getElementById('feDesc').value.trim()||null,
+      instrucoes:s.getElementById('feInstr').value.trim()||null,
+      google_forms_url:s.getElementById('feUrl').value.trim()||null,
+      agencia_nome:s.getElementById('feAgencia').value.trim()||null,
+      adm_opcoes:this._formEditorAdm.filter(a=>a.nome.trim()),
+      campos:this._formEditorCampos.map((c,i)=>({...c,ordem:i})),
+    };
+  }
+
+  async _salvarFormulario(publicar){
+    const payload=this._coletarFormularioEditor();
+    if(!payload.nome){this._toast('Informe o nome','err');return;}
+    try{
+      let id=this._formEditorId;
+      if(id){await this._put('/admin/formularios/'+id,payload);}
+      else{const r=await this._post('/admin/formularios',payload);id=r.formulario.id;this._formEditorId=id;
+        await this._put('/admin/formularios/'+id,payload);}
+      if(publicar){
+        await this._post('/admin/formularios/'+id+'/publicar',{});
+        this._toast('Formulário publicado!','ok');
+      }else{
+        this._toast('Rascunho salvo','ok');
+      }
+      this._carregarConfigForm();
+    }catch(e){this._toast(e.message,'err');}
+  }
+
+  async _testarMapeamentoFormulario(){
+    const payload=this._coletarFormularioEditor();
+    const prev=this.shadowRoot.getElementById('fePreview');
+    if(!this._formEditorId){this._toast('Salve o rascunho antes de testar','err');return;}
+    try{
+      await this._put('/admin/formularios/'+this._formEditorId,payload);
+      const r=await this._post('/admin/formularios/'+this._formEditorId+'/testar',{});
+      prev.innerHTML=`<div style="border:1px solid var(--brddim);border-radius:8px;padding:12px">
+        ${r.avisos?.length?`<div style="font-size:11px;color:var(--gold);margin-bottom:8px">${r.avisos.map(a=>'• '+this._esc(a)).join('<br>')}</div>`:'<div style="font-size:11px;color:#4ade80;margin-bottom:8px">Sem avisos de mapeamento.</div>'}
+        ${r.url?`<a href="${this._esc(r.url)}" target="_blank" rel="noopener" class="btn btn-sm btn-o" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('send',11)} Abrir prévia no Google Forms</a><div style="font-size:10px;color:var(--t3);word-break:break-all;margin-top:6px">${this._esc(r.url)}</div>`:'<div style="font-size:12px;color:var(--verm)">Não foi possível gerar a URL.</div>'}
+      </div>`;
+    }catch(e){this._toast(e.message,'err');}
+  }
+
+  async _put(path,body){
+    const r=await fetch(this.WORKER+path,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${this._token}`},body:JSON.stringify(body)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.erro||`HTTP ${r.status}`);
+    return d;
   }
 
   // ── Helpers HTTP usados pelos métodos de Agentes ──────────────────────────
