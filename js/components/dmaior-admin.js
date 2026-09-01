@@ -213,16 +213,10 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('sideBackdrop')?.classList.add('on');
     s.getElementById('btnHam')?.setAttribute('aria-expanded','true');
   }
-  _toggleNavSec(chave){
-    const s=this.shadowRoot;
-    s.getElementById(`navSec-${chave}`)?.classList.toggle('fechado');
-    s.querySelector(`[data-nav-sec="${chave}"] .acc-chevron`)?.classList.toggle('open');
-  }
-  _abrirNavSec(chave){
-    const s=this.shadowRoot;
-    s.getElementById(`navSec-${chave}`)?.classList.remove('fechado');
-    s.querySelector(`[data-nav-sec="${chave}"] .acc-chevron`)?.classList.add('open');
-  }
+  // Seções da sidebar não colapsam mais — ficam sempre abertas. Métodos mantidos
+  // como no-op pra não quebrar quem ainda os chama.
+  _toggleNavSec(){}
+  _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
   static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',streamersPremium:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',solicitacoesFormularios:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
@@ -1787,10 +1781,6 @@ class DimaiorAdmin extends HTMLElement {
     });
     s.getElementById('btnHam').addEventListener('click',e=>{e.stopPropagation();const side=s.getElementById('side');side?.classList.contains('open')?this._fecharMenuMobile():this._abrirMenuMobile();});
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
-    s.getElementById('side')?.addEventListener('click',e=>{
-      const sec=e.target.closest('[data-nav-sec]');
-      if(sec)this._toggleNavSec(sec.dataset.navSec);
-    });
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
     s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('dashFonteToggle')?.addEventListener('change',e=>this._salvarDashFonteToggle(e.target.checked));s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
@@ -3890,8 +3880,8 @@ class DimaiorAdmin extends HTMLElement {
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .shell{display:flex;flex:1;min-height:548px;}
     .side{width:220px;flex-shrink:0;background:rgba(8,8,20,.95);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;transform:translateZ(0);will-change:transform;}
-    .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,212,212,.55);font-family:var(--dm-font-title,'Rajdhani',sans-serif);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
-    .ns .acc-chevron{margin-left:8px;font-size:9px}
+    .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,212,212,.55);font-family:var(--dm-font-title,'Rajdhani',sans-serif);display:flex;align-items:center;user-select:none}
+    .side .acc-body{overflow:visible;max-height:none;transition:none}
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
     .nb{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,212,.3);border-radius:99px;padding:1px 6px}.nb.live{background:rgba(248,113,113,.2);color:var(--verm);border-color:rgba(248,113,113,.4);animation:bl 1.8s infinite}.nb.gold{background:rgba(240,192,64,.2);color:var(--gold);border-color:rgba(240,192,64,.4)}
@@ -4725,7 +4715,7 @@ class DimaiorAdmin extends HTMLElement {
     // Seções da sidebar viram acordeão — só "Principal" começa aberta (é onde
     // cai o Dashboard, a página inicial). _ir() reabre a seção certa sozinha
     // se o usuário for parar numa página de seção fechada por outro caminho.
-    const navSec=(chave,titulo,itensHtml,abertaPorPadrao=false)=>`<div class="ns" data-nav-sec="${chave}"><span>${titulo}</span><span class="acc-chevron${abertaPorPadrao?' open':''}">▾</span></div><div class="acc-body${abertaPorPadrao?'':' fechado'}" id="navSec-${chave}">${itensHtml}</div>`;
+    const navSec=(chave,titulo,itensHtml)=>`<div class="ns" data-nav-sec="${chave}"><span>${titulo}</span></div><div class="acc-body" id="navSec-${chave}">${itensHtml}</div>`;
     const ph=(titulo,icoN,sub,btnId,extra='')=>`<div class="ph"><div><div class="titulo">${this._ico(icoN,18)} ${titulo}</div><div class="psub">${sub}</div></div><div class="ph-r"><button class="btn btn-o" id="${btnId}">${this._ico('refresh',13)} Atualizar</button>${extra}</div></div>`;
     return`<div id="root">
       <div id="login"><div class="glass lbox"><h2>DMAIOR<br>ADMIN MASTER</h2><div style="text-align:center"><span class="lchip"><span class="ldot"></span>ACESSO RESTRITO</span></div><div class="campo"><label>Usuário</label><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="campo"><label>Senha</label><input id="iP" type="password" placeholder="••••••••" autocomplete="current-password"/></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
