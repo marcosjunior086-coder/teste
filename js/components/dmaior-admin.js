@@ -219,7 +219,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',streamersPremium:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',solicitacoesFormularios:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',streamersPremium:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',solicitacoesFormularios:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',notificacoes:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
@@ -227,7 +227,7 @@ class DimaiorAdmin extends HTMLElement {
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa[pag]?.();
   }
 
@@ -1825,6 +1825,11 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mComCancel').addEventListener('click',()=>this._fechaModal('mCom'));
     // Preview ao colar/digitar URL de imagem
     s.getElementById('mComImagem').addEventListener('input',e=>this._atualizarPreviewImagem(e.target.value));
+    // Notificações push
+    s.getElementById('btnAtuNotif')?.addEventListener('click',()=>this._carregarNotificacoes());
+    s.getElementById('btnEnviarNotif')?.addEventListener('click',()=>this._enviarNotificacao());
+    s.getElementById('btnTesteNotif')?.addEventListener('click',()=>this._enviarTesteNotif());
+    s.querySelectorAll('.notif-dest').forEach(b=>b.addEventListener('click',()=>{s.querySelectorAll('.notif-dest').forEach(x=>{x.classList.remove('btn-g');x.classList.add('btn-o');});b.classList.remove('btn-o');b.classList.add('btn-g');const w=s.getElementById('notifUidWrap');if(w)w.style.display=b.dataset.dest==='streamer'?'':'none';}));
     // Votações
     s.getElementById('btnAtuVot').addEventListener('click',()=>this._carregarVotacoes());
     s.getElementById('btnNovaVotacao').addEventListener('click',()=>this._abrirModalVotacao(null));
@@ -1990,6 +1995,114 @@ class DimaiorAdmin extends HTMLElement {
     _bind('btnCancelarStreamerPremium','click',()=>{const fb=s.getElementById('formStreamerPremiumBox');if(fb)fb.style.display='none';});
     _bind('btnBuscarPrefillStreamerPremium','click',()=>this._buscarPrefillStreamerPremium());
     _bind('fSpSelo','input',()=>this._renderSeloPrev());
+  }
+
+  // ── NOTIFICAÇÕES PUSH ───────────────────────────────────────────────────────
+  // Envia via worker admin → /admin/notificacoes/* → worker push (/internal/*).
+  _pagNotificacoesHTML(ph){
+    const inp="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;width:100%";
+    return ph('Notificações Push','megaphone','Avisos push nos aparelhos das streamers (Web Push)','btnAtuNotif')+`
+      <div class="box">
+        <div class="bhead"><div class="btitulo">${this._ico('send',14)} Enviar notificação</div></div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+          <div class="mc"><label>Para quem</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" class="btn btn-g notif-dest" data-dest="agency">Toda a agência</button>
+              <button type="button" class="btn btn-o notif-dest" data-dest="streamer">Uma streamer</button>
+            </div>
+          </div>
+          <div class="mc" id="notifUidWrap" style="display:none"><label>UID da streamer</label>
+            <input id="notifUid" type="number" placeholder="Ex: 11614413" style="${inp}"/>
+          </div>
+          <div class="mc"><label>Título</label>
+            <input id="notifTitulo" type="text" maxlength="80" placeholder="Ex: Nova votação no ar" style="${inp}"/>
+          </div>
+          <div class="mc"><label>Mensagem</label>
+            <textarea id="notifMsg" rows="3" maxlength="300" placeholder="Texto que aparece na notificação" style="${inp};resize:vertical"></textarea>
+          </div>
+          <div class="mc"><label>Link ao tocar (opcional)</label>
+            <input id="notifUrl" type="text" placeholder="/painel/   ·   /painel/#carteira" style="${inp}"/>
+          </div>
+          <div style="padding:10px 14px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:var(--rs);font-size:11px;color:var(--gold)">
+            ${this._ico('warning',12)} Não escreva valor, saldo ou chave PIX — a notificação aparece na tela bloqueada. O detalhe fica no painel.
+          </div>
+          <div><button class="btn btn-g" id="btnEnviarNotif">${this._ico('send',13)} Enviar</button></div>
+          <div id="notifResultado" style="font-size:12px;color:var(--t3)"></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="bhead"><div class="btitulo">${this._ico('bell',14)} Teste rápido</div></div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;color:var(--t3)">Manda uma notificação de teste só pros aparelhos de uma streamer.</div>
+          <div class="mc"><label>UID da streamer</label>
+            <div style="display:flex;gap:8px">
+              <input id="notifTesteUid" type="number" placeholder="Ex: 11614413" style="${inp};flex:1"/>
+              <button class="btn btn-o" id="btnTesteNotif">${this._ico('send',13)} Enviar teste</button>
+            </div>
+          </div>
+          <div id="notifTesteResultado" style="font-size:12px;color:var(--t3)"></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="bhead"><div class="btitulo">${this._ico('server',14)} Status do serviço</div></div>
+        <div style="padding:16px;font-size:12px" id="notifStatus">${this._loading()}</div>
+      </div>`;
+  }
+
+  async _carregarNotificacoes(){
+    const s=this.shadowRoot;const st=s.getElementById('notifStatus');
+    if(!st)return;
+    const d=await this._api('GET','/admin/notificacoes/status');
+    if(d&&d.ok){
+      st.innerHTML=`<span style="color:#4ade80">${this._ico('check_c',13)} Online</span> · ambiente: <strong>${this._esc(d.push?.environment||'?')}</strong>`;
+    }else{
+      st.innerHTML=`<span style="color:var(--gold)">${this._ico('warning',13)} Sem contato com o worker de push.</span> Confira PUSH_URL e PUSH_INTERNAL_SECRET nas variáveis do worker admin.`;
+    }
+  }
+
+  async _enviarNotificacao(){
+    const s=this.shadowRoot;
+    const dest=s.querySelector('.notif-dest.btn-g')?.dataset.dest||'agency';
+    const titulo=(s.getElementById('notifTitulo').value||'').trim();
+    const msg=(s.getElementById('notifMsg').value||'').trim();
+    const url=(s.getElementById('notifUrl').value||'').trim();
+    const uid=(s.getElementById('notifUid').value||'').trim();
+    const out=s.getElementById('notifResultado');
+    if(!titulo||!msg){this._toast('Preencha título e mensagem','err');return;}
+    if(dest==='streamer'&&!uid){this._toast('Informe o UID da streamer','err');return;}
+    const btn=s.getElementById('btnEnviarNotif');btn.disabled=true;out.textContent='Enviando…';
+    const body={scope:dest,title:titulo,body:msg};
+    if(dest==='streamer')body.kwai_uid=uid;
+    if(url)body.url=url;
+    const r=await this._api('POST','/admin/notificacoes/enviar',body);
+    btn.disabled=false;
+    if(r&&(r.ok||r.event_id)){
+      const n=(r.enqueued!=null)?r.enqueued:'—';
+      out.textContent=`Enviado. ${n} aparelho(s) na fila — as notificações saem em até 2 minutos.`;
+      this._toast('Notificação enviada');
+      s.getElementById('notifTitulo').value='';s.getElementById('notifMsg').value='';s.getElementById('notifUrl').value='';
+    }else{
+      out.textContent=r?.erro||'Falha ao enviar.';
+      this._toast(r?.erro||'Falha ao enviar','err');
+    }
+  }
+
+  async _enviarTesteNotif(){
+    const s=this.shadowRoot;
+    const uid=(s.getElementById('notifTesteUid').value||'').trim();
+    const out=s.getElementById('notifTesteResultado');
+    if(!uid){this._toast('Informe o UID','err');return;}
+    const btn=s.getElementById('btnTesteNotif');btn.disabled=true;out.textContent='Enviando…';
+    const r=await this._api('POST','/admin/notificacoes/teste',{kwai_uid:uid});
+    btn.disabled=false;
+    if(r&&(r.ok||r.event_id)){
+      const e=r.entrega||{};
+      out.textContent=`Teste enviado (${r.enqueued||0} aparelho(s)). Entregues: ${e.enviadas||0} · falhas: ${e.falhas||0} · expiradas: ${e.expiradas||0}.`;
+      this._toast('Teste enviado');
+    }else{
+      out.textContent=r?.erro||'Falha no teste.';
+      this._toast(r?.erro||'Falha no teste','err');
+    }
   }
 
   // ── COMUNICADOS ─────────────────────────────────────────────────────────────
@@ -4758,6 +4871,7 @@ class DimaiorAdmin extends HTMLElement {
             ${navSec('sistema','Sistema',
               ni('bolt','impulsoCtrl','Ctrl. Impulso')+
               ni('bell','comunicados','Comunicados')+
+              ni('megaphone','notificacoes','Notificações')+
               ni('vote','votacoes','Votações')+
               ni('zap','pkDiario','PK Diário')+
               ni('play_circle','historicoLive','Histórico de Live')+
@@ -5259,6 +5373,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
             </div>
             <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-notificacoes">${this._pagNotificacoesHTML(ph)}</div>
             <div class="pag" id="pag-votacoes">${ph('Votações','vote','Enquetes públicas e privadas','btnAtuVot',`<button class="btn btn-g" id="btnNovaVotacao">${this._ico('plus',13)} Nova Votação</button>`)}<div class="box"><div id="tbVot">${this._loading()}</div></div></div>
             <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','Configurações e bloqueios','btnAtuImpulso')}
               <div class="box impulso-section">

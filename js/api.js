@@ -22,6 +22,16 @@ window.DmaiorConfig = {
     pk:          'https://pk.agencydmaior.com.br',
     recrutamento:'https://recrutamento.agencydmaior.com.br',
     impulso:     'https://impulsionamento.agencydmaior.com.br',
+    // Notificações push (Fase 1). O worker é UM só. No domínio real usa
+    // push.agencydmaior.com.br (anexar o domínio ao worker); em qualquer outro
+    // host (dmaior-site.pages.dev de teste, github.io, localhost) usa a URL
+    // .workers.dev do MESMO worker.
+    push: (function () {
+      var h = (typeof location !== 'undefined' && location.hostname) || '';
+      return /(^|\.)agencydmaior\.com\.br$/.test(h)
+        ? 'https://push.agencydmaior.com.br'
+        : 'https://push.contato-marcosbento.workers.dev';
+    })(),
   },
 };
 
@@ -322,6 +332,82 @@ window.DmaiorAPI = {
         const text = await res.text();
         return text.length > 200 ? text : null;
       } catch (_) { return null; }
+    },
+  },
+
+  // ── Módulo: Notificações Push ────────────────────────────────────────────
+  // Auth = mesmo access_token do Supabase Auth (dm_token) já usado no painel.
+  // O worker deriva a identidade sozinho — nunca mandamos uid/kwai_uid daqui.
+  push: {
+    _auth(token) { return token ? { Authorization: `Bearer ${token}` } : {}; },
+
+    /** Chave pública VAPID (para PushManager.subscribe). Público, sem auth. */
+    async vapidPublicKey() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.push, '/vapid-public-key');
+    },
+
+    /** Registra/atualiza este aparelho. sub = PushSubscription.toJSON(). */
+    async subscribe(token, sub) {
+      return window.DmaiorAPI._post(
+        window.DmaiorConfig.workers.push, '/subscribe',
+        { subscription: sub }, window.DmaiorAPI.push._auth(token),
+      );
+    },
+
+    /** Revoga um aparelho. ref = { endpoint } ou { endpoint_hash }. */
+    async unsubscribe(token, ref) {
+      return window.DmaiorAPI._post(
+        window.DmaiorConfig.workers.push, '/unsubscribe',
+        ref || {}, window.DmaiorAPI.push._auth(token),
+      );
+    },
+
+    /** Lista os aparelhos registrados do streamer (sanitizado). */
+    async devices(token) {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.push, '/devices',
+        window.DmaiorAPI.push._auth(token),
+      );
+    },
+
+    /** Dispara um push de teste para o próprio streamer. */
+    async test(token) {
+      return window.DmaiorAPI._post(
+        window.DmaiorConfig.workers.push, '/test',
+        {}, window.DmaiorAPI.push._auth(token),
+      );
+    },
+
+    /** Histórico de notificações. params ex: '?limit=20&before=<ISO>'. */
+    async notifications(token, params = '') {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.push, `/notifications${params}`,
+        window.DmaiorAPI.push._auth(token),
+      );
+    },
+
+    /** Contador de não lidas (sino). */
+    async unreadCount(token) {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.push, '/unread-count',
+        window.DmaiorAPI.push._auth(token),
+      );
+    },
+
+    /** Marca uma notificação como lida. */
+    async markRead(token, id) {
+      return window.DmaiorAPI._post(
+        window.DmaiorConfig.workers.push, `/notifications/${encodeURIComponent(id)}/read`,
+        {}, window.DmaiorAPI.push._auth(token),
+      );
+    },
+
+    /** Marca todas as visíveis como lidas. */
+    async markAllRead(token) {
+      return window.DmaiorAPI._post(
+        window.DmaiorConfig.workers.push, '/notifications/read-all',
+        {}, window.DmaiorAPI.push._auth(token),
+      );
     },
   },
 };

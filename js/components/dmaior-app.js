@@ -974,6 +974,8 @@
                             </div>
                         </div>
                         <p class="pref-note" data-i18n="appearanceHelp">Essas opções ficam salvas neste aparelho e ajudam na leitura sem alterar seus dados.</p>
+                        <!-- Notificações push (Fase 1) — preenchido por js/push.js; fica vazio se o navegador não suportar -->
+                        <div id="dmPushMount"></div>
                         <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;">DADOS DE RECEBIMENTO</h2>
                         <div class="ig"><label>TIPO DE CHAVE PIX</label>
                             <div class="iw"><span class="ico">${this.svgPix()}</span>
