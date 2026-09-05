@@ -709,6 +709,34 @@
     .live-actions a.primary,
     .live-actions button { background: var(--grad); color: var(--on-accent); }
 
+    /* ── Ao Vivo: cards de resumo/cards de live seguindo os tokens do tema
+       (antes: gradiente azul fixo + texto branco = "cor morta" no claro) ── */
+    .live-stat {
+      border: 1px solid var(--dm-cyan-30);
+      background: var(--dm-cyan-12);
+    }
+    .live-stat strong { color: var(--azul); }
+    .live-stat span   { color: var(--sub); }
+    .live-stat.live-on {
+      border-color: rgba(248,113,113,.45);
+      background: rgba(248,113,113,.13);
+    }
+    .live-stat.live-on strong { color: var(--red); }
+    .live-stat.live-on span   { color: var(--red); opacity: .8; }
+    .live-settings {
+      border: 1px solid var(--brd);
+      background: var(--dm-bw05); color: var(--sub);
+    }
+    .live-settings:hover { border-color: var(--dm-cyan-30); background: var(--dm-cyan-08); }
+    .live-config-panel { background: var(--glass); }
+    .live-cfg-btn { border-color: var(--dm-cyan-25); background: var(--dm-bw05); color: var(--sub); }
+    .live-card {
+      background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--brd);
+    }
+    .live-actions a { border-color: var(--dm-cyan-30); background: var(--dm-bw05); color: var(--text); }
+    .live-tag { background: var(--dm-overlay); }
+
     /* ── Sidebar: vidro + logo (sem texto) + ativo no acento do tema ── */
     .sidebar         { background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-right: 1px solid var(--brd); }
     .sidebar-logo    { display: flex; align-items: center; }
