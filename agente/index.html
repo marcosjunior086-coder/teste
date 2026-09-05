@@ -776,14 +776,14 @@
     .card.gold  .card-value { color: var(--gold); }
     .card.green .card-value { color: var(--green); }
 
-    /* ── Barra de chrome do painel (desktop/tablet): recolher menu + Aparência ── */
+    /* ── Barra de chrome do painel (desktop/tablet): recolher menu + Aparência.
+       Barra FIXA de ponta a ponta (não corta no max-width do conteúdo). ── */
     .ag-chrome {
       display: none; align-items: center; gap: 10px;
-      height: 54px; padding: 0 18px;
-      position: sticky; top: 0; z-index: 90;
+      height: 54px; padding: 0 22px;
+      position: fixed; top: 0; left: 220px; right: 0; z-index: 95;
       background: var(--dm-bg-panel); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--brd);
-      margin: -28px -28px 24px;
     }
     .ag-chrome .sp { flex: 1; }
     .ag-chrome .ag-crumb { font-family: var(--font-t); font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
@@ -798,14 +798,27 @@
 
     @media (min-width: 601px) {
       .ag-chrome { display: flex; }
+      .main { padding-top: 82px; }
+      .sidebar, .ag-chrome { transition: transform var(--ease), left var(--ease); }
+      .main { transition: margin-left var(--ease); }
       /* menu recolhido */
-      body.nav-collapsed .sidebar { transform: translateX(-100%); }
-      body.nav-collapsed .main    { margin-left: 0; }
-      .sidebar { transition: transform var(--ease); }
-      .main    { transition: margin-left var(--ease); }
+      body.nav-collapsed .sidebar   { transform: translateX(-100%); }
+      body.nav-collapsed .main      { margin-left: 0; }
+      body.nav-collapsed .ag-chrome { left: 0; }
     }
     @media (max-width: 900px) and (min-width: 601px) {
-      .ag-chrome { margin: -20px -20px 20px; }
+      /* Desativa o trilho de 64px do CSS antigo — sidebar cheia + toggle de recolher */
+      .sidebar { width: 220px; }
+      .main { margin-left: 220px; }
+      .sidebar-logo { padding: 24px 20px 20px; justify-content: flex-start; text-align: left; }
+      .sidebar-logo::after { content: none; }
+      .sidebar-logo img { height: 30px; }
+      .nav-item { padding: 12px 20px; justify-content: flex-start; gap: 12px; }
+      .nav-item span:not(.ico) { display: inline; }
+      .nav-item .ico { width: 18px; }
+      .agente-info { display: block; }
+      .ag-chrome { left: 220px; }
+      body.nav-collapsed .ag-chrome { left: 0; }
     }
 
     /* ── Painel de Aparência (slide-over) ── */
