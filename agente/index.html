@@ -860,9 +860,10 @@
         bottom: calc(14px + env(safe-area-inset-bottom));
         z-index: 160; height: 62px; padding: 0 26px;
         color: var(--dm-bg-2);
-        filter: drop-shadow(0 14px 30px rgba(8,12,30,.34));
+        filter: drop-shadow(0 12px 28px rgba(6,10,26,.5));
       }
       .mnav-bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .mnav-bg path { stroke: var(--brd); stroke-width: 1; }
       .mnav .grp { display: flex; gap: 34px; position: relative; z-index: 1; }
       .mnav button {
         display: grid; place-items: center; background: none; border: none;
@@ -926,8 +927,10 @@
     .greet .av {
       width: 46px; height: 46px; border-radius: 50%; flex: none;
       background: var(--grad); color: #fff; display: grid; place-items: center;
-      font-family: var(--font-t); font-weight: 700; font-size: 17px;
+      font-family: var(--font-t); font-weight: 700; font-size: 17px; overflow: hidden;
     }
+    .greet .av.has-foto { background: none; }
+    .greet .av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .greet h1 { font-family: var(--font-t); font-size: 22px; color: var(--text); }
     .greet p { color: var(--muted); font-size: 13px; margin-top: 1px; }
     .greet .greet-act { margin-left: auto; }
@@ -1045,7 +1048,6 @@
     </button>
     <span class="mobile-header-logo"><img src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency"></span>
     <span class="mh-sp"></span>
-    <span class="mobile-header-nome" id="mobile-header-nome">—</span>
     <button class="mobile-header-gear" id="mobile-header-gear" type="button" aria-label="Aparência">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -1494,9 +1496,8 @@ async function fazerLogin() {
 function iniciarPainel() {
   const ag = getAgente();
   if (ag) {
-    document.getElementById('sidebar-nome').textContent       = ag.nome  || '—';
-    document.getElementById('sidebar-login').textContent      = ag.login || '';
-    document.getElementById('mobile-header-nome').textContent = ag.nome  || '—';
+    document.getElementById('sidebar-nome').textContent  = ag.nome  || '—';
+    document.getElementById('sidebar-login').textContent = ag.login || '';
     const linkInput = document.getElementById('meu-link-input');
     if (linkInput && ag.login) linkInput.value = `https://agencydmaior.com.br/recrutamento?agente=${encodeURIComponent(ag.login)}`;
   }
@@ -1963,7 +1964,20 @@ async function carregarDashboard() {
     const ag = getAgente() || {};
     const primeiro = (ag.nome || '').trim().split(/\s+/)[0] || 'Agente';
     const iniciais = (ag.nome || 'A').trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
-    document.getElementById('dash-av').textContent = iniciais;
+    const avEl = document.getElementById('dash-av');
+    const fotoS = fotoStreamerVinculada();
+    if (fotoS) {
+      const img = new Image();
+      img.alt = '';
+      img.onerror = () => { avEl.classList.remove('has-foto'); avEl.textContent = iniciais; };
+      img.src = fotoS;
+      avEl.textContent = '';
+      avEl.classList.add('has-foto');
+      avEl.appendChild(img);
+    } else {
+      avEl.classList.remove('has-foto');
+      avEl.textContent = iniciais;
+    }
     document.getElementById('dash-greet-nome').textContent = `${saudacaoHora()}, ${primeiro}`;
     document.getElementById('dash-greet-sub').textContent =
       `${r.streamers || 0} streamers · ${r.ao_vivo || 0} ao vivo · ${mesAtualLabel()}`;
@@ -2009,6 +2023,17 @@ async function carregarDashboard() {
 function saudacaoHora() {
   const h = new Date().getHours();
   return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+}
+// Foto do painel do streamer (mesmo aparelho/origem) — usada no avatar se o
+// agente também estiver logado como streamer. Chaves do js/auth.js do site.
+function fotoStreamerVinculada() {
+  try {
+    if (!localStorage.getItem('dm_token')) return '';
+    const f = localStorage.getItem('dm_foto');
+    if (!f) return '';
+    const u = new URL(f);
+    return (u.protocol === 'http:' || u.protocol === 'https:') ? f : '';
+  } catch (e) { return ''; }
 }
 function mesAtualLabel() {
   return new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -3320,12 +3345,19 @@ async function carregarMigracoes() {
     window.addEventListener('resize', updateNotchBar);
     window.addEventListener('orientationchange', function () { setTimeout(updateNotchBar, 120); });
 
+    // A barra fica dentro de #painel (display:none até o login) — quando ela
+    // ganha largura pela 1ª vez o path do entalhe precisa ser (re)desenhado.
+    if (window.ResizeObserver && mnav) {
+      new ResizeObserver(function () { updateNotchBar(); }).observe(mnav);
+    }
+
     // Toda navegação passa por navegarPara() — embrulha pra manter a barra em sincronia.
     if (typeof window.navegarPara === 'function') {
       var _navP = window.navegarPara;
       window.navegarPara = function (sec) {
         var r = _navP.apply(this, arguments);
         syncMnav(sec);
+        updateNotchBar();
         return r;
       };
     }
@@ -3335,6 +3367,11 @@ async function carregarMigracoes() {
       navObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
     });
 
+    // Redesenha após o login (painel deixa de ser display:none)
+    ['btn-entrar'].forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b) b.addEventListener('click', function () { setTimeout(updateNotchBar, 400); setTimeout(updateNotchBar, 1200); });
+    });
     setTimeout(function () { updateNotchBar(); syncMnav(); }, 60);
     window.addEventListener('DOMContentLoaded', function () { setTimeout(function () { updateNotchBar(); syncMnav(); }, 120); });
   })();
