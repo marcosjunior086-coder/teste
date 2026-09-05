@@ -19,67 +19,120 @@
   <title>Painel do Agente — DMaior Agency</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Boot de tema: aplica data-theme/data-font-size antes do 1º paint (evita flash).
+       O preferences.js (carregado no fim) cuida do resto: fonte, idioma, meta theme-color. -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('dm_tema');
+        if (t && t !== 'original') document.documentElement.setAttribute('data-theme', t);
+        var fs = localStorage.getItem('dm_tamanho_texto');
+        if (fs && fs !== 'normal') document.documentElement.setAttribute('data-font-size', fs);
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Design system oficial do site: tokens --dm-*, os 5 temas, tipografia, reset base.
+       O painel do agente agora consome os MESMOS tokens do site/admin. -->
+  <link rel="stylesheet" href="css/global.css?v=20260905-agente-redesign-1">
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ─────────────────────────────────────────────────────────────────────────
+       Ponte de tokens — os nomes locais do painel do agente (--cyan, --card…)
+       passam a apontar para o design system --dm-*. Assim os 5 temas + tamanho
+       de texto + fonte + idioma valem automaticamente, sem tocar em cada tela.
+       ───────────────────────────────────────────────────────────────────────── */
     :root {
-      --bg:       #060B16;
-      --bg2:      #0e1525;
-      --bg3:      #131d2e;
-      --card:     rgba(255,255,255,.055);
-      --border:   rgba(0,212,212,.15);
-      --cyan:     #00d4d4;
-      --cyan2:    rgba(0,212,212,.65);
-      --cyan-glow:rgba(0,212,212,.18);
-      --gold:     #f0c040;
-      --red:      #f87171;
-      --green:    #4ade80;
-      --text:     #e2e8f0;
-      --sub:      #a0b8c8;
-      --muted:    #7a9ab4;
-      --dim:      #4a6070;
-      --font-t:   'Rajdhani', sans-serif;
-      --font-b:   'Exo 2', sans-serif;
-      --r:        12px;
-      --ease:     .25s ease;
+      --bg:        var(--dm-bg);
+      --bg2:       var(--dm-bg-2);
+      --bg3:       var(--dm-bg-4);
+      --card:      var(--dm-bg-card);
+      --border:    var(--dm-border);
+      --cyan:      var(--dm-effect-accent);
+      --cyan2:     var(--dm-cyan-dim);
+      --cyan-glow: var(--dm-cyan-glow);
+      --gold:      var(--dm-gold);
+      --red:       var(--dm-red);
+      --green:     var(--dm-green);
+      --text:      var(--dm-text);
+      --sub:       var(--dm-text-sub);
+      --muted:     var(--dm-text-muted);
+      --dim:       var(--dm-text-dim);
+      --font-t:    var(--dm-font-title);
+      --font-b:    var(--dm-font-body);
+      --r:         14px;
+      --r-lg:      20px;
+      --ease:      .25s ease;
+
+      /* Identidade herdada do painel admin — SEGUEM o tema:
+         azul→ciano nos temas escuros/branco, rosa no Rosa, laranja no Laranja. */
+      --azul:      var(--dm-effect-blue);
+      --grad:      var(--dm-grad-effect);
+      --grad-x:    var(--dm-grad-effect-x);
+      --glass:     var(--dm-bg-panel);                    /* painel translúcido */
+      --brd:       var(--dm-border);
+      --brd-azul:  var(--dm-border-dim);
+      --on-accent: #fff;
     }
 
     html, body { background: var(--bg); min-height: 100%; font-family: var(--font-b); color: var(--text); }
 
-    /* -- TELA DE LOGIN ------------------------------------------------------- */
+    /* -- TELA DE LOGIN — estilo "app moderno": campos em pílula + selo de ícone -- */
     #tela-login {
       display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 24px;
-      background: radial-gradient(ellipse at 50% 0%, rgba(0,212,212,.08) 0%, transparent 65%);
+      min-height: 100vh; min-height: 100dvh; padding: 28px 22px;
     }
-    .login-box {
-      width: 100%; max-width: 400px;
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 20px; padding: 40px 36px;
-      box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 0 40px rgba(0,212,212,.06);
+    .login-wrap { width: 100%; max-width: 400px; }
+
+    .login-logo { text-align: center; margin-bottom: 34px; }
+    .login-logo img { height: 46px; width: auto; margin: 0 auto 16px; }
+    .login-logo h1 {
+      font-family: var(--font-t); font-size: 24px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--text);
     }
-    .login-logo { text-align: center; margin-bottom: 32px; }
-    .login-logo h1 { font-family: var(--font-t); font-size: 28px; color: var(--cyan); letter-spacing: 2px; }
-    .login-logo p  { color: var(--sub); font-size: 13px; margin-top: 6px; }
-    .login-field { margin-bottom: 18px; }
-    .login-field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    .login-field input {
-      width: 100%; padding: 13px 16px; background: rgba(255,255,255,.05);
-      border: 1px solid var(--border); border-radius: var(--r);
-      color: var(--text); font-family: var(--font-b); font-size: 15px; outline: none;
-      transition: border-color var(--ease);
+    .login-logo p { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+    .lf {
+      position: relative; display: flex; align-items: center;
+      background: var(--dm-bg-card); border: 1px solid var(--brd);
+      border-radius: 999px; padding: 6px; margin-bottom: 14px;
+      transition: border-color var(--ease), box-shadow var(--ease);
     }
-    .login-field input:focus { border-color: var(--cyan); }
+    .lf:focus-within { border-color: var(--azul); box-shadow: 0 0 0 4px var(--dm-cyan-20); }
+    .lf-ic {
+      width: 44px; height: 44px; flex: none; border-radius: 999px;
+      display: grid; place-items: center; color: var(--on-accent);
+      background: var(--grad);
+    }
+    .lf-ic svg { width: 20px; height: 20px; }
+    .lf input {
+      flex: 1; min-width: 0; border: none; background: transparent; outline: none;
+      padding: 0 14px; height: 44px;
+      color: var(--text); font-family: var(--font-b); font-size: 15px; font-weight: 500;
+    }
+    .lf input::placeholder { color: var(--muted); }
+    .lf-eye {
+      width: 40px; height: 44px; flex: none; display: grid; place-items: center;
+      background: transparent; border: none; color: var(--muted); cursor: pointer;
+    }
+    .lf-eye svg { width: 19px; height: 19px; }
+    .lf-eye:hover { color: var(--sub); }
+
     .btn-login {
-      width: 100%; padding: 14px; margin-top: 8px;
-      background: linear-gradient(135deg, #00b4b4, var(--cyan));
-      border: none; border-radius: var(--r); color: #060B16;
-      font-family: var(--font-t); font-size: 17px; font-weight: 700; letter-spacing: 1px;
-      cursor: pointer; transition: opacity var(--ease);
+      width: 100%; height: 56px; margin-top: 10px;
+      background: var(--grad); border: none; border-radius: 999px;
+      color: var(--on-accent); font-family: var(--font-t);
+      font-size: 17px; font-weight: 700; letter-spacing: .04em;
+      cursor: pointer; transition: transform .2s ease, opacity var(--ease), box-shadow .2s ease;
+      box-shadow: 0 14px 30px -6px var(--dm-cyan-40);
     }
-    .btn-login:hover { opacity: .88; }
-    .btn-login:disabled { opacity: .5; cursor: not-allowed; }
-    #login-erro { color: var(--red); font-size: 13px; text-align: center; margin-top: 12px; min-height: 20px; }
+    .btn-login:hover  { opacity: .95; }
+    .btn-login:active { transform: scale(.98); }
+    .btn-login:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+    #login-erro { color: var(--red); font-size: 13px; text-align: center; margin-top: 14px; min-height: 20px; }
 
     /* -- PAINEL PRINCIPAL --------------------------------------------------- */
     #painel { display: none; min-height: 100vh; }
@@ -638,25 +691,346 @@
       .chart-tab { width: 100%; min-height: 36px; }
       #canvas-chart { height: 120px; }
     }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       REDESIGN v1 — identidade alinhada ao painel admin (azul→ciano + vidro),
+       menu recolhível e painel de Aparência. Regras abaixo vencem por ordem.
+       ═══════════════════════════════════════════════════════════════════════════ */
+
+    /* ── Marca: gradiente azul→ciano nos CTAs (era ciano→teal) ── */
+    .btn-login,
+    #btn-copiar-meu-link,
+    .btn-cyan            { background: var(--grad); color: var(--on-accent); }
+    .btn-login:hover,
+    #btn-copiar-meu-link:hover,
+    .btn-cyan:hover      { opacity: .9; }
+    .chart-tab.active    { background: var(--grad); color: var(--on-accent); }
+    .live-cfg-btn.on,
+    .live-actions a.primary,
+    .live-actions button { background: var(--grad); color: var(--on-accent); }
+
+    /* ── Sidebar: vidro + logo (sem texto) + ativo no acento do tema ── */
+    .sidebar         { background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-right: 1px solid var(--brd); }
+    .sidebar-logo    { display: flex; align-items: center; }
+    .sidebar-logo img{ height: 30px; width: auto; flex: none; transition: filter .25s ease; }
+    .nav-item.active { color: var(--azul); border-left-color: var(--azul); background: var(--dm-cyan-10); }
+    .nav-item:hover  { background: var(--dm-bw03); color: var(--text); }
+    .nav-item.active .ico { color: var(--azul); }
+    .btn-voltar-site { background: var(--dm-cyan-08); border-color: var(--dm-cyan-30); color: var(--azul); }
+    .btn-voltar-site:hover { background: var(--dm-cyan-12); }
+
+    /* Logo escurece nos temas claros pra ficar visível (mesmo padrão do site) */
+    :root[data-theme="branco"]  .sidebar-logo img,
+    :root[data-theme="rosa"]    .sidebar-logo img,
+    :root[data-theme="laranja"] .sidebar-logo img,
+    :root[data-theme="branco"]  .login-logo img,
+    :root[data-theme="rosa"]    .login-logo img,
+    :root[data-theme="laranja"] .login-logo img,
+    :root[data-theme="branco"]  .mobile-header-logo img,
+    :root[data-theme="rosa"]    .mobile-header-logo img,
+    :root[data-theme="laranja"] .mobile-header-logo img { filter: brightness(0); }
+
+    /* ── Superfícies em vidro (padrão admin .glass) ── */
+    .card,
+    .chart-wrap,
+    .convite-box,
+    .meu-link-box,
+    .live-summary,
+    .live-config-panel,
+    .perfil-encontrado,
+    .ag-acc-list      { background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--brd); border-radius: var(--r-lg); }
+    .chart-wrap,
+    .convite-box     { position: relative; overflow: hidden; }
+    .chart-wrap::after,
+    .convite-box::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--grad); opacity: .55; }
+    .card-value      { color: var(--text); }
+    .card.cyan  .card-value { color: var(--azul); }
+    .card.gold  .card-value { color: var(--gold); }
+    .card.green .card-value { color: var(--green); }
+
+    /* ── Barra de chrome do painel (desktop/tablet): recolher menu + Aparência ── */
+    .ag-chrome {
+      display: none; align-items: center; gap: 10px;
+      height: 54px; padding: 0 18px;
+      position: sticky; top: 0; z-index: 90;
+      background: var(--dm-bg-panel); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--brd);
+      margin: -28px -28px 24px;
+    }
+    .ag-chrome .sp { flex: 1; }
+    .ag-chrome .ag-crumb { font-family: var(--font-t); font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .ag-icon-btn {
+      width: 38px; height: 38px; border-radius: 11px; flex: none;
+      display: grid; place-items: center;
+      border: 1px solid var(--brd); background: var(--card); color: var(--sub);
+      cursor: pointer; transition: all var(--ease);
+    }
+    .ag-icon-btn:hover { color: var(--azul); border-color: var(--dm-cyan-30); background: var(--dm-cyan-08); }
+    .ag-icon-btn svg { width: 19px; height: 19px; }
+
+    @media (min-width: 601px) {
+      .ag-chrome { display: flex; }
+      /* menu recolhido */
+      body.nav-collapsed .sidebar { transform: translateX(-100%); }
+      body.nav-collapsed .main    { margin-left: 0; }
+      .sidebar { transition: transform var(--ease); }
+      .main    { transition: margin-left var(--ease); }
+    }
+    @media (max-width: 900px) and (min-width: 601px) {
+      .ag-chrome { margin: -20px -20px 20px; }
+    }
+
+    /* ── Painel de Aparência (slide-over) ── */
+    .ap-backdrop {
+      position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.5);
+      -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none; transition: opacity .25s ease;
+    }
+    .ap-backdrop.open { opacity: 1; pointer-events: auto; }
+    .ap-panel {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 301;
+      width: min(370px, 92vw); transform: translateX(102%);
+      background: var(--dm-bg-2); border-left: 1px solid var(--brd);
+      box-shadow: -22px 0 55px rgba(0,0,0,.45);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .ap-panel.open { transform: translateX(0); }
+    .ap-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; border-bottom: 1px solid var(--brd);
+      position: sticky; top: 0; background: var(--dm-bg-2); z-index: 1;
+    }
+    .ap-head h3 { font-family: var(--font-t); font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text); }
+    .ap-close {
+      width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+      border: 1px solid rgba(248,113,113,.3); background: rgba(248,113,113,.12); color: var(--red); cursor: pointer;
+    }
+    .ap-body { padding: 20px; display: flex; flex-direction: column; gap: 24px; }
+    .ap-group .ap-label {
+      display: block; font-family: var(--font-t); font-size: 11px; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 11px;
+    }
+    .ap-themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+    .ap-theme {
+      display: flex; align-items: center; gap: 8px; padding: 10px 11px;
+      border-radius: 12px; border: 1px solid var(--brd); background: var(--card);
+      color: var(--sub); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all var(--ease);
+    }
+    .ap-theme:hover  { border-color: var(--dm-cyan-30); }
+    .ap-theme.active { border-color: var(--azul); color: var(--text); background: var(--dm-cyan-10); }
+    .ap-theme .sw { width: 16px; height: 16px; border-radius: 5px; flex: none; }
+    .ap-select {
+      width: 100%; padding: 11px 38px 11px 13px; border-radius: 11px;
+      border: 1px solid var(--brd); background: var(--card); color: var(--text);
+      font-family: var(--font-b); font-size: 13px; cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a9ab4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    .ap-field + .ap-field { margin-top: 12px; }
+    .ap-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .ap-note { font-size: 11.5px; color: var(--dim); line-height: 1.55; }
+
+    /* ── Mobile: gear no header + logo real ── */
+    @media (max-width: 600px) {
+      .mobile-header { gap: 8px; }
+      .mobile-header-gear {
+        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: var(--dm-cyan-10); border: 1px solid var(--dm-cyan-30); color: var(--azul); cursor: pointer;
+      }
+      .mobile-header-gear svg { width: 18px; height: 18px; }
+      .mobile-header-logo { flex: 0 0 auto; display: flex; align-items: center; }
+      .mobile-header-logo img { height: 20px; width: auto; }
+      .mh-sp { flex: 1; }
+      .mobile-header-nome { max-width: 26vw; }
+    }
+
+    /* ═══ Navegação inferior flutuante (mobile) — padrão do demo ═══ */
+    .mnav { display: none; }
+    .msheet { display: none; }
+    @media (max-width: 600px) {
+      /* esconde o hambúrguer: a barra inferior + FAB substituem a gaveta */
+      .mobile-menu-btn { display: none !important; }
+      .main { padding-bottom: 122px; }
+
+      .mnav {
+        display: flex; align-items: center; justify-content: space-between;
+        position: fixed; left: 16px; right: 16px;
+        bottom: calc(14px + env(safe-area-inset-bottom));
+        z-index: 160; height: 62px; padding: 0 26px;
+        color: var(--dm-bg-2);
+        filter: drop-shadow(0 14px 30px rgba(8,12,30,.34));
+      }
+      .mnav-bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .mnav .grp { display: flex; gap: 34px; position: relative; z-index: 1; }
+      .mnav button {
+        display: grid; place-items: center; background: none; border: none;
+        color: var(--muted); padding: 8px; cursor: pointer;
+      }
+      .mnav button svg { width: 23px; height: 23px; opacity: .62; }
+      .mnav button[aria-current="page"] { color: var(--azul); }
+      .mnav button[aria-current="page"] svg { opacity: 1; }
+
+      .fab {
+        display: flex; align-items: center; justify-content: center; z-index: 162;
+        position: fixed; left: 50%;
+        bottom: calc(14px + env(safe-area-inset-bottom) + 24px);
+        transform: translateX(-50%);
+        width: 56px; height: 56px; padding: 0; border: none; border-radius: 50%;
+        background: var(--grad); color: #fff; cursor: pointer;
+        box-shadow: 0 13px 30px -6px var(--dm-cyan-40);
+      }
+      .fab svg { width: 24px; height: 24px; }
+      .fab.open { transform: translateX(-50%) rotate(45deg); }
+
+      .msheet {
+        position: fixed; inset: 0; z-index: 175; background: var(--dm-overlay);
+        opacity: 0; pointer-events: none; transition: opacity .22s ease;
+      }
+      .msheet.open { display: block; opacity: 1; pointer-events: auto; }
+      .msheet .inner {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        background: var(--dm-bg-2); border-top: 1px solid var(--brd);
+        border-radius: 22px 22px 0 0;
+        padding: 10px 14px calc(20px + env(safe-area-inset-bottom));
+        max-height: 82vh; overflow-y: auto;
+        transform: translateY(100%); transition: transform .28s cubic-bezier(.4,0,.2,1);
+      }
+      .msheet.open .inner { transform: translateY(0); }
+      .msheet .grab { width: 38px; height: 4px; border-radius: 4px; background: var(--brd); margin: 4px auto 14px; }
+      .msheet h4 {
+        font-family: var(--font-t); font-size: 11px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .12em; color: var(--muted);
+        margin: 8px 4px 8px;
+      }
+      .msheet .mrows { display: grid; gap: 2px; }
+      .msheet .mrow {
+        display: flex; align-items: center; gap: 13px; width: 100%;
+        padding: 12px 8px; border: none; border-radius: 12px; background: none;
+        font: inherit; font-size: 14.5px; color: var(--text); text-align: left; cursor: pointer;
+      }
+      .msheet .mrow[aria-current="page"] { background: var(--dm-cyan-10); color: var(--azul); }
+      .msheet .mrow.danger { color: var(--red); }
+      .msheet .mrow .qi {
+        width: 36px; height: 36px; border-radius: 11px; flex: none;
+        background: var(--card); border: 1px solid var(--brd);
+        display: grid; place-items: center; color: var(--azul);
+      }
+      .msheet .mrow.danger .qi { color: var(--red); border-color: rgba(248,113,113,.3); }
+      .msheet .mrow .qi svg { width: 17px; height: 17px; }
+    }
+
+    /* ═══ Dashboard estilo Finnova (cards com selo de ícone + gráfico de linha) ═══ */
+    .greet { display: flex; align-items: center; gap: 13px; margin-bottom: 20px; flex-wrap: wrap; }
+    .greet .av {
+      width: 46px; height: 46px; border-radius: 50%; flex: none;
+      background: var(--grad); color: #fff; display: grid; place-items: center;
+      font-family: var(--font-t); font-weight: 700; font-size: 17px;
+    }
+    .greet h1 { font-family: var(--font-t); font-size: 22px; color: var(--text); }
+    .greet p { color: var(--muted); font-size: 13px; margin-top: 1px; }
+    .greet .greet-act { margin-left: auto; }
+
+    .scards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 1100px) { .scards { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px)  { .scards { grid-template-columns: 1fr; } }
+    .scard {
+      background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--brd); border-radius: var(--r-lg); padding: 17px;
+      display: flex; flex-direction: column;
+    }
+    .scard .sc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .scard .sc-k { font-size: 12.5px; color: var(--sub); font-weight: 600; line-height: 1.3; }
+    .scard .sc-ic { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+    .scard .sc-ic svg { width: 15px; height: 15px; }
+    .scard .sc-ic.blue  { background: var(--dm-cyan-10);        color: var(--azul); }
+    .scard .sc-ic.green { background: rgba(74,222,128,.14);     color: var(--green); }
+    .scard .sc-ic.gold  { background: rgba(240,192,64,.15);     color: var(--gold); }
+    .scard .sc-ic.red   { background: rgba(248,113,113,.14);    color: var(--red); }
+    .scard .sc-v {
+      font-family: var(--font-t); font-weight: 700; font-size: 26px; line-height: 1.12;
+      margin-top: 12px; color: var(--text); font-variant-numeric: tabular-nums;
+    }
+    .scard .sc-v small { font-size: 14px; color: var(--muted); font-weight: 600; }
+    .scard .sc-d { font-size: 11.5px; font-weight: 600; margin-top: 6px; color: var(--muted); }
+    .scard .sc-d.up { color: var(--green); }
+    .scard .sc-d.dn { color: var(--red); }
+
+    .filterbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 18px; }
+    .filterbar .fb-lbl { font-size: 12.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 7px; }
+    .filterbar .fb-lbl .n {
+      width: 18px; height: 18px; border-radius: 50%; background: var(--azul); color: #fff;
+      font-size: 10px; display: grid; place-items: center;
+    }
+    .filterbar .fb {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 22px;
+      border: 1px solid var(--brd); background: var(--glass); font-size: 12.5px; font-weight: 500;
+      color: var(--sub); cursor: default;
+    }
+    .filterbar .fb svg { width: 13px; height: 13px; color: var(--muted); }
+
+    .dash-split { display: grid; grid-template-columns: 1.55fr 1fr; gap: 16px; align-items: start; margin-bottom: 20px; }
+    @media (max-width: 1000px) { .dash-split { grid-template-columns: 1fr; } }
+    .chart-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+    .chart-hd h3 { font-family: var(--font-t); font-size: 15px; color: var(--text); }
+    #canvas-chart { width: 100%; height: auto; margin-top: 4px; }
+    .svg-line { width: 100%; height: auto; display: block; overflow: visible; }
+    .chart-leg { display: flex; gap: 16px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+    .chart-leg i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+
+    /* painel-resumo em gradiente do tema (estilo board-detail do demo) */
+    .dash-resumo { background: var(--grad); border-radius: var(--r-lg); padding: 18px; color: #fff; }
+    .dash-resumo h4 { font-size: 13px; letter-spacing: .02em; margin-bottom: 13px; display: flex; align-items: center; gap: 8px; opacity: .95; }
+    .dash-resumo h4 svg { width: 15px; height: 15px; }
+    .dash-resumo .rz-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .dash-resumo .rz-box { background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 12px 13px; }
+    .dash-resumo .rz-box b { font-family: var(--font-t); font-weight: 700; font-size: 17px; display: block; }
+    .dash-resumo .rz-box span { font-size: 11px; color: rgba(255,255,255,.8); }
+    .dash-resumo .rz-prog { height: 6px; border-radius: 6px; background: rgba(255,255,255,.22); overflow: hidden; margin: 14px 0 5px; }
+    .dash-resumo .rz-prog i { display: block; height: 100%; background: #fff; border-radius: 6px; }
+    .dash-resumo .rz-note { font-size: 11.5px; color: rgba(255,255,255,.85); }
+
+    @media (max-width: 600px) {
+      .greet { gap: 10px 12px; }
+      .greet h1 { font-size: 19px; }
+      .greet .greet-act { margin-left: 58px; }
+      .scards { gap: 10px; margin-bottom: 16px; }
+      .scard { padding: 14px; }
+      .scard .sc-v { font-size: 22px; }
+      .dash-split { gap: 12px; }
+      .dash-resumo { padding: 16px; }
+    }
   </style>
 </head>
 <body>
 
 <!-- ---------------- LOGIN ---------------- -->
 <div id="tela-login">
-  <div class="login-box">
+  <div class="login-wrap">
     <div class="login-logo">
-      <h1>DMAIOR</h1>
-      <p>Painel do Agente de Talentos</p>
+      <img src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency">
+      <h1>Painel do Agente</h1>
+      <p>Acesse com suas credenciais</p>
     </div>
-    <div class="login-field">
-      <label>Login</label>
-      <input id="inp-login" type="text" placeholder="seu.login" autocomplete="username">
+
+    <div class="lf">
+      <span class="lf-ic" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </span>
+      <input id="inp-login" type="text" placeholder="Login" autocomplete="username" aria-label="Login">
     </div>
-    <div class="login-field">
-      <label>Senha</label>
-      <input id="inp-senha" type="password" placeholder="••••••" autocomplete="current-password">
+
+    <div class="lf">
+      <span class="lf-ic" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </span>
+      <input id="inp-senha" type="password" placeholder="Senha" autocomplete="current-password" aria-label="Senha">
+      <button type="button" class="lf-eye" id="toggle-senha" aria-label="Mostrar senha">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
     </div>
+
     <button class="btn-login" id="btn-entrar">Entrar</button>
     <p id="login-erro"></p>
   </div>
@@ -669,8 +1043,12 @@
     <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Abrir menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
-    <span class="mobile-header-logo">DMAIOR</span>
+    <span class="mobile-header-logo"><img src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency"></span>
+    <span class="mh-sp"></span>
     <span class="mobile-header-nome" id="mobile-header-nome">—</span>
+    <button class="mobile-header-gear" id="mobile-header-gear" type="button" aria-label="Aparência">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     <button class="mobile-header-logout" onclick="logout()">Sair</button>
   </div>
   <div class="mobile-menu-backdrop" id="mobile-menu-backdrop"></div>
@@ -679,8 +1057,7 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <span>DMAIOR</span>
-        <small>Agente</small>
+        <img src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-item active" data-section="dashboard">
@@ -724,12 +1101,31 @@
     <!-- CONTEÚDO -->
     <main class="main">
 
+      <!-- Barra do painel: recolher menu + Aparência (desktop/tablet) -->
+      <div class="ag-chrome">
+        <button class="ag-icon-btn" id="ag-nav-toggle" type="button" aria-label="Recolher menu" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+        <span class="sp"></span>
+        <button class="ag-icon-btn" id="ag-voltar-site" type="button" aria-label="Voltar ao site" title="Voltar ao site" onclick="voltarAoSite()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+        </button>
+        <button class="ag-icon-btn" id="ag-aparencia-btn" type="button" aria-label="Aparência" title="Aparência">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+
       <!-- --- DASHBOARD --- -->
       <section id="sec-dashboard" class="section">
-        <div class="topbar">
-          <h2>Dashboard</h2>
-          <div class="badge-ao-vivo"><div class="dot-live"></div><span id="dash-ao-vivo-badge">— ao vivo</span></div>
+        <div class="greet">
+          <span class="av" id="dash-av">—</span>
+          <div style="flex:1;min-width:0">
+            <h1 id="dash-greet-nome">Painel do Agente</h1>
+            <p id="dash-greet-sub">Carregando…</p>
+          </div>
+          <span class="badge-ao-vivo greet-act"><span class="dot-live"></span><span id="dash-ao-vivo-badge">— ao vivo</span></span>
         </div>
+
         <div class="meu-link-box">
           <div class="meu-link-info">
             <span class="meu-link-titulo">Meu link de recrutamento</span>
@@ -740,18 +1136,24 @@
             <button type="button" id="btn-copiar-meu-link">Copiar</button>
           </div>
         </div>
-        <div class="cards-grid" id="cards-dashboard">
+
+        <div class="scards" id="cards-dashboard">
           <div class="loading"><div class="spinner"></div></div>
         </div>
-        <div class="chart-wrap" id="chart-wrap" style="display:none">
-          <div class="chart-title">
-            <span id="chart-title-text">Diamantes - mês atual</span>
-            <div class="chart-tabs" role="group" aria-label="Métrica do gráfico">
-              <button type="button" class="chart-tab active" data-chart-metric="diamantes"><span class="dot" style="background:#00d4d4"></span>Diamantes</button>
-              <button type="button" class="chart-tab" data-chart-metric="horas"><span class="dot" style="background:#f0c040"></span>Horas</button>
+
+        <div class="dash-split" id="dash-split" style="display:none">
+          <div class="card">
+            <div class="chart-hd">
+              <h3 id="chart-title-text">Diamantes · mês atual</h3>
+              <div class="chart-tabs" role="group" aria-label="Métrica do gráfico">
+                <button type="button" class="chart-tab active" data-chart-metric="diamantes">Diamantes</button>
+                <button type="button" class="chart-tab" data-chart-metric="horas">Horas</button>
+              </div>
             </div>
+            <div id="canvas-chart"></div>
+            <div class="chart-leg"><span><i id="chart-leg-swatch"></i><span id="chart-leg-label">Diamantes por dia</span></span></div>
           </div>
-          <canvas id="canvas-chart"></canvas>
+          <aside class="dash-resumo" id="dash-resumo"></aside>
         </div>
       </section>
 
@@ -921,7 +1323,89 @@
 
     </main>
   </div>
+
+  <!-- Navegação inferior flutuante (mobile) — preenchida por JS -->
+  <nav class="mnav" id="ag-mnav" aria-label="Navegação rápida">
+    <svg class="mnav-bg" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor"></path></svg>
+    <div class="grp" data-grp="a"></div>
+    <div class="grp" data-grp="b"></div>
+  </nav>
+  <button class="fab" id="ag-fab" type="button" aria-label="Abrir menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <div class="msheet" id="ag-msheet">
+    <div class="inner">
+      <div class="grab"></div>
+      <h4>Navegar</h4>
+      <div class="mrows" id="ag-msheet-nav"></div>
+      <h4>Preferências</h4>
+      <div class="mrows">
+        <button class="mrow" id="ag-msheet-aparencia" type="button" data-ico="settings"><span class="qi"></span>Aparência</button>
+        <button class="mrow" type="button" data-ico="home" onclick="voltarAoSite()"><span class="qi"></span>Voltar ao site</button>
+        <button class="mrow danger" type="button" data-ico="logout" onclick="logout()"><span class="qi"></span>Sair</button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- ---------------- PAINEL DE APARÊNCIA (slide-over) ---------------- -->
+<div class="ap-backdrop" id="ap-backdrop"></div>
+<aside class="ap-panel" id="ap-panel" aria-hidden="true" aria-label="Aparência e acessibilidade">
+  <div class="ap-head">
+    <h3>Aparência</h3>
+    <button class="ap-close" id="ap-close" type="button" aria-label="Fechar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="ap-body">
+    <div class="ap-group">
+      <span class="ap-label">Tema</span>
+      <div class="ap-themes" id="ap-themes">
+        <button class="ap-theme" type="button" data-theme-id="original"><span class="sw" style="background:#0a0e27;border:1.5px solid rgba(0,212,212,.5)"></span>Padrão</button>
+        <button class="ap-theme" type="button" data-theme-id="dark"><span class="sw" style="background:#0d0f14;border:1.5px solid rgba(180,180,200,.3)"></span>Escuro</button>
+        <button class="ap-theme" type="button" data-theme-id="branco"><span class="sw" style="background:#f0f4f8;border:1.5px solid rgba(0,0,0,.25)"></span>Branco</button>
+        <button class="ap-theme" type="button" data-theme-id="rosa"><span class="sw" style="background:#fce4ec;border:1.5px solid #e91e8c"></span>Rosa</button>
+        <button class="ap-theme" type="button" data-theme-id="laranja"><span class="sw" style="background:#fff3e0;border:1.5px solid #f97316"></span>Laranja</button>
+      </div>
+    </div>
+
+    <div class="ap-group">
+      <span class="ap-label">Acessibilidade</span>
+      <div class="ap-field">
+        <label for="ap-fontsize" data-i18n="textSize">Tamanho do texto</label>
+        <select class="ap-select" id="ap-fontsize" data-pref-font-select>
+          <option value="normal" data-i18n="fontNormal">Normal</option>
+          <option value="grande" data-i18n="fontLarge">Grande</option>
+          <option value="extra" data-i18n="fontExtra">Muito grande</option>
+        </select>
+      </div>
+      <div class="ap-field">
+        <label for="ap-lang" data-i18n="language">Idioma</label>
+        <select class="ap-select" id="ap-lang" data-pref-lang-select>
+          <option value="pt-BR">Português BR</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="zh">中文</option>
+        </select>
+      </div>
+      <div class="ap-field">
+        <label for="ap-fontfamily">Fonte</label>
+        <select class="ap-select" id="ap-fontfamily">
+          <option value="dmaior">DMaior (Padrão)</option>
+          <option value="inter">Inter</option>
+          <option value="manrope">Manrope</option>
+          <option value="montserrat">Montserrat</option>
+          <option value="opensans">Open Sans</option>
+          <option value="plusjakarta">Plus Jakarta Sans</option>
+          <option value="poppins">Poppins</option>
+          <option value="sistema">Sistema</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="ap-note" data-i18n="appearanceHelp">Essas opções ficam salvas neste aparelho e ajudam na leitura sem alterar seus dados.</p>
+  </div>
+</aside>
 
 <script>
 // ------------------------------------------------------------
@@ -1196,6 +1680,11 @@ function ico(name, size = 16) {
     heart:     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`,
     gift:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg>`,
     down:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`,
+    search:    `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+    refresh:   `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+    clipboard: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6a2 2 0 0 1 2 2v0H7v0a2 2 0 0 1 2-2z"/><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 12h6M9 16h6"/></svg>`,
+    home:      `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>`,
+    logout:    `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
   };
   return icons[name] || '';
 }
@@ -1470,26 +1959,65 @@ async function carregarDashboard() {
 
     document.getElementById('dash-ao-vivo-badge').textContent = `${r.ao_vivo||0} ao vivo`;
 
-    container.innerHTML = `
-      <div class="card"><div class="card-label">Streamers</div><div class="card-value">${r.streamers||0}</div><div class="card-sub">Vinculados a você</div></div>
-      <div class="card"><div class="card-label">Ao Vivo Agora</div><div class="card-value green" style="color:var(--green)">${r.ao_vivo||0}</div><div class="card-sub">Lives ativas</div></div>
-      <div class="card"><div class="card-label">${ico('diamond',13)} Hoje</div><div class="card-value">${fmtNum(r.diamantes_hoje||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_hoje||'0:00'} h hoje</div></div>
-      <div class="card gold"><div class="card-label">${ico('diamond',13)} Este Mês</div><div class="card-value">${fmtNum(r.diamantes_mes||0)}</div><div class="card-sub">${ico('clock',11)} ${r.horas_mes||'0:00'} h no mês</div></div>
-      <div class="card"><div class="card-label">Convites Enviados</div><div class="card-value">${r.convites_enviados||0}</div><div class="card-sub">${r.convites_pendentes||0} pendentes</div></div>
-      <div class="card green"><div class="card-label">Comissão Estimada</div><div class="card-value">${fmtBRL(com.brl||0)}</div><div class="card-sub">${Number(com.percentual||0)}% aplicado · ${fmtNum(com.koin||0)} Koin</div></div>
-      <div class="card"><div class="card-label">Meta de Comissão</div><div class="card-value" style="font-size:22px">${regra ? esc(regra.nome) : 'Sem meta'}</div><div class="card-sub">${totaisCom.dias_ativos||0} dias · ${Number(totaisCom.horas||0).toFixed(1)}h${prox&&!regra?` · próx.: ${esc(prox.nome)}`:''}</div></div>
+    // Saudação
+    const ag = getAgente() || {};
+    const primeiro = (ag.nome || '').trim().split(/\s+/)[0] || 'Agente';
+    const iniciais = (ag.nome || 'A').trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
+    document.getElementById('dash-av').textContent = iniciais;
+    document.getElementById('dash-greet-nome').textContent = `${saudacaoHora()}, ${primeiro}`;
+    document.getElementById('dash-greet-sub').textContent =
+      `${r.streamers || 0} streamers · ${r.ao_vivo || 0} ao vivo · ${mesAtualLabel()}`;
+
+    // Cards com selo de ícone (estilo Finnova / painel admin)
+    container.innerHTML = [
+      scard({ k: 'Diamantes no mês', v: fmtNum(r.diamantes_mes || 0),
+        d: `${ico('clock', 11)} ${r.horas_mes || '0:00'} h transmitidas`, ico: 'diamond', icc: 'blue' }),
+      scard({ k: 'Ao vivo agora', v: r.ao_vivo || 0,
+        d: `${r.streamers || 0} streamers na equipe`, ico: 'live', icc: 'green' }),
+      scard({ k: 'Diamantes hoje', v: fmtNum(r.diamantes_hoje || 0),
+        d: `${ico('clock', 11)} ${r.horas_hoje || '0:00'} h hoje`, ico: 'clock', icc: 'gold' }),
+      scard({ k: 'Comissão estimada', v: fmtBRL(com.brl || 0),
+        d: `${Number(com.percentual || 0)}% aplicado · ${fmtNum(com.koin || 0)} Koin`, ico: 'chart', icc: 'blue' }),
+    ].join('');
+
+    // Painel-resumo (gradiente do tema)
+    const metaCom = regra ? esc(regra.nome) : (prox ? `próx.: ${esc(prox.nome)}` : 'Sem meta');
+    document.getElementById('dash-resumo').innerHTML = `
+      <h4>${ico('users', 15)} Resumo · ${mesAtualLabel()}</h4>
+      <div class="rz-boxes">
+        <div class="rz-box"><b>${fmtNum(r.diamantes_mes || 0)}</b><span>diamantes no mês</span></div>
+        <div class="rz-box"><b>${r.horas_mes || '0:00'}</b><span>horas transmitidas</span></div>
+        <div class="rz-box"><b>${r.convites_enviados || 0}</b><span>convites enviados</span></div>
+        <div class="rz-box"><b>${r.convites_pendentes || 0}</b><span>convites pendentes</span></div>
+      </div>
+      <div class="rz-note" style="margin-top:12px">Meta de comissão: <b>${metaCom}</b> · ${totaisCom.dias_ativos || 0} dias ativos · ${Number(totaisCom.horas || 0).toFixed(1)}h</div>
     `;
 
     // Gráfico
     if ((d.grafico||[]).length > 1) {
       _graficoDados = d.grafico || [];
-      document.getElementById('chart-wrap').style.display = 'block';
+      document.getElementById('dash-split').style.display = 'grid';
       bindGraficoTabs();
       renderizarGrafico(_graficoDados);
     }
   } catch (e) {
     container.innerHTML = `<div class="empty"><p>Erro ao carregar dashboard: ${e.message}</p></div>`;
   }
+}
+
+// Helpers do dashboard novo
+function saudacaoHora() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+}
+function mesAtualLabel() {
+  return new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
+function scard(o) {
+  const d = o.d ? `<div class="sc-d ${o.dir || ''}">${o.d}</div>` : '';
+  const ic = o.ico ? `<span class="sc-ic ${o.icc || 'blue'}">${ico(o.ico, 15)}</span>` : '';
+  return `<div class="scard"><div class="sc-top"><div class="sc-k">${o.k}</div>${ic}</div>` +
+    `<div class="sc-v">${o.v}${o.unit ? ` <small>${o.unit}</small>` : ''}</div>${d}</div>`;
 }
 
 // -- GRÁFICO SIMPLES (Canvas 2D) ---------------------------
@@ -1505,7 +2033,11 @@ function bindGraficoTabs() {
     };
   });
   const titulo = document.getElementById('chart-title-text');
-  if (titulo) titulo.textContent = `${_graficoMetrica === 'horas' ? 'Horas' : 'Diamantes'} - mês atual`;
+  if (titulo) titulo.textContent = `${_graficoMetrica === 'horas' ? 'Horas' : 'Diamantes'} · mês atual`;
+  const leg = document.getElementById('chart-leg-label');
+  if (leg) leg.textContent = `${_graficoMetrica === 'horas' ? 'Horas' : 'Diamantes'} por dia`;
+  const sw = document.getElementById('chart-leg-swatch');
+  if (sw) sw.style.background = _graficoMetrica === 'horas' ? 'var(--gold)' : 'var(--azul)';
 }
 
 function corAlpha(hex, alpha) {
@@ -1516,69 +2048,61 @@ function corAlpha(hex, alpha) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
+// Gráfico de linha suave em SVG (área + pontos) — padrão do redesign/demo
 function renderizarGrafico(dados) {
   if (!dados || dados.length < 2) return;
-  const canvas = document.getElementById('canvas-chart');
-  const ctx    = canvas.getContext('2d');
-  const dpr    = window.devicePixelRatio || 1;
+  const host = document.getElementById('canvas-chart');
+  if (!host) return;
   const metrica = _graficoMetrica === 'horas' ? 'horas' : 'diamantes';
   const campo = metrica === 'horas' ? 'minutos' : 'diamantes';
-  const cor = metrica === 'horas' ? '#f0c040' : '#00d4d4';
-  const W = canvas.offsetWidth || 600, H = 160;
-  canvas.width  = W * dpr; canvas.height = H * dpr;
-  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-  ctx.scale(dpr, dpr);
+  const rootCS = getComputedStyle(document.documentElement);
+  const cor = (metrica === 'horas'
+    ? rootCS.getPropertyValue('--dm-gold')
+    : rootCS.getPropertyValue('--dm-effect-blue')).trim() || '#3b82f6';
 
-  const PAD = { t:10, r:16, b:30, l:10 };
-  const cw = W - PAD.l - PAD.r, ch = H - PAD.t - PAD.b;
+  const w = 680, h = 210, pl = 40, pr = 14, pt = 16, pb = 26;
+  const iw = w - pl - pr, ih = h - pt - pb;
+  const vals = dados.map(d => Number(d[campo] || 0));
+  let max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+  const mrg = (max - min) * 0.18 || 1;
+  max += mrg; min = Math.max(0, min - mrg);
+  const rng = max - min || 1;
+  const n = dados.length;
 
-  const maxVal = Math.max(...dados.map(d=>Number(d[campo] || 0)), 1);
-  const n    = dados.length;
-  const step = cw / (n - 1);
-
-  function pontos(campo, maxVal) {
-    return dados.map((d,i) => ({
-      x: PAD.l + i * step,
-      y: PAD.t + ch - (Number(d[campo] || 0) / maxVal) * ch,
-    }));
+  const P = vals.map((v, i) => [pl + i * iw / (n - 1), pt + ih - ((v - min) / rng) * ih]);
+  let d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
+  for (let i = 0; i < P.length - 1; i++) {
+    const a = P[i], b = P[i + 1], cx = (a[0] + b[0]) / 2;
+    d += ' C' + cx.toFixed(1) + ' ' + a[1].toFixed(1) + ' ' + cx.toFixed(1) + ' ' + b[1].toFixed(1) + ' ' + b[0].toFixed(1) + ' ' + b[1].toFixed(1);
   }
+  const area = d + ' L' + P[n - 1][0].toFixed(1) + ' ' + (pt + ih) + ' L' + P[0][0].toFixed(1) + ' ' + (pt + ih) + ' Z';
 
-  function desenharLinha(pts, cor) {
-    ctx.beginPath();
-    pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-    // Área sob a linha
-    ctx.beginPath();
-    pts.forEach((p,i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.lineTo(pts[pts.length-1].x, PAD.t + ch);
-    ctx.lineTo(PAD.l, PAD.t + ch);
-    ctx.closePath();
-    ctx.fillStyle = corAlpha(cor, .16);
-    ctx.fill();
-  }
+  const grid = [0, .5, 1].map(t => {
+    const y = pt + t * ih;
+    const label = Math.round((max - t * rng) / (metrica === 'horas' ? 60 : 1000));
+    return `<line x1="${pl}" y1="${y.toFixed(1)}" x2="${w - pr}" y2="${y.toFixed(1)}" stroke="var(--brd)" stroke-width="1"/>` +
+      `<text x="${pl - 7}" y="${(y + 3).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--dim)">${label}${metrica === 'horas' ? 'h' : 'k'}</text>`;
+  }).join('');
 
-  ctx.clearRect(0, 0, W, H);
-  // Grid lines
-  ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 1;
-  for (let i = 0; i <= 3; i++) {
-    const y = PAD.t + (ch / 3) * i;
-    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(PAD.l + cw, y); ctx.stroke();
-  }
-
-  desenharLinha(pontos(campo, maxVal), cor);
-
-  // Labels do eixo X (datas) — máx. 7 labels, sem sobreposição
-  ctx.fillStyle = '#4a6070'; ctx.font = '10px Exo 2, sans-serif'; ctx.textAlign = 'center';
   const tick = Math.ceil(n / 7);
-  dados.forEach((d,i) => {
-    const isRegular = i % tick === 0;
-    const isLast    = i === n - 1;
-    const prevTick  = Math.floor((n - 1) / tick) * tick;
-    if (isRegular || (isLast && i - prevTick >= 2)) {
-      const partes = d.data.split('-');
-      ctx.fillText(`${partes[2]}/${partes[1]}`, PAD.l + i*step, H - 6);
-    }
-  });
+  const xlabels = dados.map((row, i) => {
+    if (i % tick !== 0 && i !== n - 1) return '';
+    const pt2 = String(row.data).split('-');
+    return `<text x="${P[i][0].toFixed(1)}" y="${h - 6}" text-anchor="middle" font-size="9" fill="var(--dim)">${pt2[2]}/${pt2[1]}</text>`;
+  }).join('');
+
+  const gid = 'agchart-' + metrica;
+  const L = P[n - 1];
+  host.innerHTML =
+    `<svg class="svg-line" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Evolução diária de ${metrica}">` +
+      `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">` +
+        `<stop offset="0" stop-color="${cor}" stop-opacity="0.22"/><stop offset="1" stop-color="${cor}" stop-opacity="0"/></linearGradient></defs>` +
+      grid + xlabels +
+      `<path d="${area}" fill="url(#${gid})"/>` +
+      `<path d="${d}" fill="none" stroke="${cor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+      P.map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.4" fill="var(--dm-bg-2)" stroke="${cor}" stroke-width="2"/>`).join('') +
+      `<circle cx="${L[0].toFixed(1)}" cy="${L[1].toFixed(1)}" r="4" fill="${cor}"/>` +
+    `</svg>`;
 }
 
 // -- STREAMERS ---------------------------------------------
@@ -2604,6 +3128,218 @@ async function carregarMigracoes() {
   } catch (e) { container.innerHTML = `<div class="empty"><p>Erro: ${e.message}</p></div>`; }
 }
 </script>
+
+  <!-- Motor de preferências oficial do site: tema (meta), tamanho de texto,
+       família de fonte, idioma (com tradução automática). Expõe window.DMaiorPrefs. -->
+  <script src="js/preferences.js?v=20260905-agente-redesign-1"></script>
+
+  <script>
+  /* ═══════ REDESIGN v1 — shell: olho da senha, menu recolhível, Aparência ═══════ */
+  (function () {
+    'use strict';
+    var $  = function (s, r) { return (r || document).querySelector(s); };
+    var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+    /* ── Mostrar/ocultar senha ── */
+    var eye = $('#toggle-senha'), senha = $('#inp-senha');
+    if (eye && senha) eye.addEventListener('click', function () {
+      var reveal = senha.type === 'password';
+      senha.type = reveal ? 'text' : 'password';
+      eye.setAttribute('aria-label', reveal ? 'Ocultar senha' : 'Mostrar senha');
+      eye.style.color = reveal ? 'var(--azul)' : '';
+    });
+
+    /* ── Recolher o menu lateral (desktop/tablet) ── */
+    var NAV_KEY = 'dm_agente_nav_collapsed';
+    try { if (localStorage.getItem(NAV_KEY) === '1') document.body.classList.add('nav-collapsed'); } catch (e) {}
+    var navToggle = $('#ag-nav-toggle');
+    if (navToggle) navToggle.addEventListener('click', function () {
+      var collapsed = document.body.classList.toggle('nav-collapsed');
+      try { localStorage.setItem(NAV_KEY, collapsed ? '1' : '0'); } catch (e) {}
+    });
+
+    /* ── Painel de Aparência (slide-over) ── */
+    var apPanel = $('#ap-panel'), apBd = $('#ap-backdrop');
+    function apOpen () {
+      if (!apPanel) return;
+      apPanel.classList.add('open'); apBd.classList.add('open');
+      apPanel.setAttribute('aria-hidden', 'false');
+      syncAparencia();
+    }
+    function apClose () {
+      if (!apPanel) return;
+      apPanel.classList.remove('open'); apBd.classList.remove('open');
+      apPanel.setAttribute('aria-hidden', 'true');
+    }
+    [$('#ag-aparencia-btn'), $('#mobile-header-gear')].forEach(function (b) { if (b) b.addEventListener('click', apOpen); });
+    if ($('#ap-close')) $('#ap-close').addEventListener('click', apClose);
+    if (apBd) apBd.addEventListener('click', apClose);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && apPanel && apPanel.classList.contains('open')) apClose();
+    });
+
+    /* ── Tema (mesma mecânica do menu do site: dm_tema + data-theme + evento) ── */
+    function currentTheme () { try { return localStorage.getItem('dm_tema') || 'original'; } catch (e) { return 'original'; } }
+    function markThemeActive () {
+      var cur = currentTheme();
+      $$('.ap-theme').forEach(function (b) { b.classList.toggle('active', b.dataset.themeId === cur); });
+    }
+    function applyTheme (t) {
+      try { localStorage.setItem('dm_tema', t); } catch (e) {}
+      if (t === 'original') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', t);
+      if (window.DMaiorPrefs && window.DMaiorPrefs.applyThemeMeta) window.DMaiorPrefs.applyThemeMeta();
+      window.dispatchEvent(new CustomEvent('dmaior:tema', { detail: { tema: t } }));
+      markThemeActive();
+    }
+    $$('.ap-theme').forEach(function (b) {
+      b.addEventListener('click', function () { applyTheme(b.dataset.themeId); });
+    });
+
+    /* ── Selects: tamanho de texto, idioma, fonte (via window.DMaiorPrefs) ── */
+    var selFs = $('#ap-fontsize'), selLg = $('#ap-lang'), selFf = $('#ap-fontfamily');
+    function syncAparencia () {
+      markThemeActive();
+      var P = window.DMaiorPrefs; if (!P) return;
+      if (selFs && P.getFontSize)   selFs.value = P.getFontSize();
+      if (selLg && P.getLang)       selLg.value = P.getLang();
+      if (selFf && P.getFontFamily) selFf.value = P.getFontFamily();
+    }
+    if (selFs) selFs.addEventListener('change', function () { if (window.DMaiorPrefs) window.DMaiorPrefs.setFontSize(selFs.value); });
+    if (selLg) selLg.addEventListener('change', function () { if (window.DMaiorPrefs) window.DMaiorPrefs.setLanguage(selLg.value); });
+    if (selFf) selFf.addEventListener('change', function () { if (window.DMaiorPrefs) window.DMaiorPrefs.setFontFamily(selFf.value); });
+
+    markThemeActive();
+    syncAparencia();
+    window.addEventListener('dmaior:preferences', syncAparencia);
+
+    /* ═══════ Navegação inferior flutuante (mobile) — padrão do demo ═══════ */
+    var SEC_META = {
+      dashboard:    { label: 'Dashboard',    ico: 'dashboard' },
+      streamers:    { label: 'Streamers',    ico: 'mic' },
+      buscauid:     { label: 'Buscar UID',   ico: 'search' },
+      lives:        { label: 'Ao Vivo',      ico: 'live' },
+      ranking:      { label: 'Ranking',      ico: 'trophy' },
+      desempenho:   { label: 'Desempenho',   ico: 'chart' },
+      convites:     { label: 'Convites',     ico: 'mail' },
+      migracao:     { label: 'Migração',     ico: 'refresh' },
+      solicitacoes: { label: 'Solicitações', ico: 'clipboard' }
+    };
+    var PRIMARY = ['dashboard', 'streamers', 'lives', 'ranking'];
+    var ic = (window.ico || function () { return ''; });
+
+    var mnav   = $('#ag-mnav');
+    var fab    = $('#ag-fab');
+    var msheet = $('#ag-msheet');
+
+    function currentSec () {
+      var on = document.querySelector('.nav-item.active');
+      return on ? on.dataset.section : 'dashboard';
+    }
+    function syncMnav (sec) {
+      sec = sec || currentSec();
+      $$('#ag-mnav button').forEach(function (b) {
+        b.toggleAttribute('aria-current', b.dataset.section === sec);
+        if (b.dataset.section === sec) b.setAttribute('aria-current', 'page');
+      });
+      $$('#ag-msheet-nav .mrow').forEach(function (b) {
+        if (b.dataset.section === sec) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
+    }
+    function goSec (sec) {
+      if (typeof navegarPara === 'function') navegarPara(sec);
+      closeSheet();
+      syncMnav(sec);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (mnav) {
+      mnav.querySelector('[data-grp="a"]').innerHTML = PRIMARY.slice(0, 2).map(function (s) {
+        return '<button data-section="' + s + '" aria-label="' + SEC_META[s].label + '">' + ic(SEC_META[s].ico, 23) + '</button>';
+      }).join('');
+      mnav.querySelector('[data-grp="b"]').innerHTML = PRIMARY.slice(2, 4).map(function (s) {
+        return '<button data-section="' + s + '" aria-label="' + SEC_META[s].label + '">' + ic(SEC_META[s].ico, 23) + '</button>';
+      }).join('');
+      $$('#ag-mnav button').forEach(function (b) {
+        b.addEventListener('click', function () { goSec(b.dataset.section); });
+      });
+    }
+
+    var sheetNav = $('#ag-msheet-nav');
+    if (sheetNav) {
+      sheetNav.innerHTML = Object.keys(SEC_META).map(function (s) {
+        return '<button class="mrow" data-section="' + s + '" type="button">' +
+          '<span class="qi">' + ic(SEC_META[s].ico, 17) + '</span>' + SEC_META[s].label + '</button>';
+      }).join('');
+      $$('#ag-msheet-nav .mrow').forEach(function (b) {
+        b.addEventListener('click', function () { goSec(b.dataset.section); });
+      });
+    }
+    $$('#ag-msheet [data-ico]').forEach(function (b) {
+      var q = b.querySelector('.qi'); if (q) q.innerHTML = ic(b.dataset.ico, 17);
+    });
+
+    function openSheet ()  { if (msheet) { msheet.classList.add('open'); fab.classList.add('open'); } }
+    function closeSheet () { if (msheet) { msheet.classList.remove('open'); fab.classList.remove('open'); } }
+    if (fab) fab.addEventListener('click', function () {
+      msheet.classList.contains('open') ? closeSheet() : openSheet();
+    });
+    if (msheet) msheet.addEventListener('click', function (e) { if (e.target === msheet) closeSheet(); });
+    var apShRow = $('#ag-msheet-aparencia');
+    if (apShRow) apShRow.addEventListener('click', function () { closeSheet(); apOpen(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && msheet && msheet.classList.contains('open')) closeSheet();
+    });
+
+    /* barra inferior: canto redondo fixo + entalhe em U (mesma geometria do demo) */
+    function notchBarPath (w, h) {
+      var r = Math.min(31, h / 2), c = r * 0.448;
+      var nw = 118, nd = 40, cx = w / 2, nl = cx - nw / 2, nr = cx + nw / 2;
+      return 'M' + r + ' 0' +
+        'H' + nl.toFixed(1) +
+        'C' + (nl + nw * 0.10).toFixed(1) + ' 0 ' + (nl + nw * 0.25).toFixed(1) + ' ' + nd + ' ' + cx.toFixed(1) + ' ' + nd +
+        'C' + (nr - nw * 0.25).toFixed(1) + ' ' + nd + ' ' + (nr - nw * 0.10).toFixed(1) + ' 0 ' + nr.toFixed(1) + ' 0' +
+        'H' + (w - r).toFixed(1) +
+        'C' + (w - c).toFixed(1) + ' 0 ' + w.toFixed(1) + ' ' + c.toFixed(1) + ' ' + w.toFixed(1) + ' ' + r +
+        'V' + (h - r).toFixed(1) +
+        'C' + w.toFixed(1) + ' ' + (h - c).toFixed(1) + ' ' + (w - c).toFixed(1) + ' ' + h + ' ' + (w - r).toFixed(1) + ' ' + h +
+        'H' + r +
+        'C' + c.toFixed(1) + ' ' + h + ' 0 ' + (h - c).toFixed(1) + ' 0 ' + (h - r).toFixed(1) +
+        'V' + r +
+        'C0 ' + c.toFixed(1) + ' ' + c.toFixed(1) + ' 0 ' + r + ' 0Z';
+    }
+    function updateNotchBar () {
+      if (!mnav) return;
+      var svg = mnav.querySelector('.mnav-bg'); if (!svg) return;
+      var w = Math.round(mnav.clientWidth), h = Math.round(mnav.clientHeight) || 62;
+      if (w < 40) return;
+      svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      svg.querySelector('path').setAttribute('d', notchBarPath(w, h));
+    }
+    window.addEventListener('resize', updateNotchBar);
+    window.addEventListener('orientationchange', function () { setTimeout(updateNotchBar, 120); });
+
+    // Toda navegação passa por navegarPara() — embrulha pra manter a barra em sincronia.
+    if (typeof window.navegarPara === 'function') {
+      var _navP = window.navegarPara;
+      window.navegarPara = function (sec) {
+        var r = _navP.apply(this, arguments);
+        syncMnav(sec);
+        return r;
+      };
+    }
+    // Observa mudança de seção ativa como rede de segurança (caso navegarPara seja chamado por binding léxico)
+    var navObserver = new MutationObserver(function () { syncMnav(); });
+    document.querySelectorAll('.nav-item').forEach(function (el) {
+      navObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    setTimeout(function () { updateNotchBar(); syncMnav(); }, 60);
+    window.addEventListener('DOMContentLoaded', function () { setTimeout(function () { updateNotchBar(); syncMnav(); }, 120); });
+  })();
+  </script>
+
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
 </body>
 </html>
