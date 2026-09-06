@@ -90,8 +90,16 @@ class KwaiLiveWidget extends HTMLElement {
     this.refreshTimer = setInterval(() => this.init(), 30000);
     this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
     this._themeHandler = () => this._syncThemeHost();
+    // Layout "Web Pro": o hero da home pede pra abrir a live em tela cheia
+    this._openLiveHandler = (e) => {
+      const url = e && e.detail && e.detail.url;
+      if (!url || !this.activePlayers.has(url)) return;
+      this.setMinimized(false);
+      this.openModal(url);
+    };
     window.addEventListener('storage', this._storageThemeHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
+    window.addEventListener('dmaior:openLive', this._openLiveHandler);
   }
 
   disconnectedCallback() {
@@ -102,6 +110,7 @@ class KwaiLiveWidget extends HTMLElement {
     }
     window.removeEventListener('storage', this._storageThemeHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
+    window.removeEventListener('dmaior:openLive', this._openLiveHandler);
   }
 
   _syncThemeHost() {
@@ -664,6 +673,88 @@ class KwaiLiveWidget extends HTMLElement {
     empty.textContent   = this.isFirstLoad ? 'A procurar transmissões ao vivo...' : 'Nenhuma live no momento...';
     if (visible.length === 0 && !this.isFirstLoad) this.setMinimized(true);
     else if (visible.length > 0 && !this.userMinimized) this.setMinimized(false);
+    this._emitLives();
+  }
+
+  // Publica a lista de lives atuais para outros componentes (ex: layout Web Pro
+  // usa as fotos no hero). Ordena por espectadores (desc). window.__dmaiorLives
+  // guarda a última lista para quem chegar depois do evento.
+  _emitLives() {
+    const lives = [...this.activePlayers.values()]
+      .map((p) => ({
+        name:      p.streamer.name,
+        url:       p.streamer.url,
+        image:     this._safeUrl(p.streamer.image) || '',
+        viewCount: (typeof p.streamer.viewCount === 'number') ? p.streamer.viewCount : null,
+        caption:   p.streamer.caption || '',
+        ready:     !!p.streamer.playUrl,
+      }))
+      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+    window.__dmaiorLives = lives;
+    try { window.dispatchEvent(new CustomEvent('dmaior:lives', { detail: { lives } })); } catch (_) {}
+  }
+
+  // Reproduz a live do streamer `url` num <video> EXTERNO (ex: quadro 3:4 do
+  // hero no layout Web Pro). Sempre muted/inline. Mesma lógica de fallback do
+  // mini-player (direto → proxy). Devolve uma função de cleanup, ou null.
+  playFeaturedInto(videoEl, url) {
+    const entry   = this.activePlayers.get(url);
+    const playUrl = entry && entry.streamer && entry.streamer.playUrl;
+    if (!videoEl || !playUrl) return null;
+
+    let hls = null, dead = false, watchdog = null, lastT = -1;
+
+    const cleanup = () => {
+      dead = true;
+      clearInterval(watchdog);
+      try { hls && hls.destroy(); } catch (_) {}
+      hls = null;
+      try { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); } catch (_) {}
+    };
+
+    const attach = (useProxy) => {
+      if (dead) return;
+      const src = useProxy ? this._proxyBase + encodeURIComponent(playUrl) : playUrl;
+      try { hls && hls.destroy(); } catch (_) {}
+      hls = null;
+      videoEl.muted = true;
+      videoEl.setAttribute('playsinline', '');
+      videoEl.setAttribute('webkit-playsinline', '');
+
+      if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+        videoEl.src = src;
+        videoEl.addEventListener('error', () => { if (!useProxy && !dead) attach(true); }, { once: true });
+        videoEl.play().catch(() => {});
+      } else if (window.Hls && window.Hls.isSupported()) {
+        hls = new window.Hls({
+          enableWorker: true, lowLatencyMode: false,
+          maxBufferLength: 6, maxMaxBufferLength: 12, liveSyncDurationCount: 3,
+          startFragPrefetch: true, manifestLoadingMaxRetry: 4, fragLoadingMaxRetry: 6,
+        });
+        hls.loadSource(src);
+        hls.attachMedia(videoEl);
+        hls.on(window.Hls.Events.MANIFEST_PARSED, () => videoEl.play().catch(() => {}));
+        let nr = 0;
+        hls.on(window.Hls.Events.ERROR, (_, d) => {
+          if (!d.fatal || dead) return;
+          if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && nr < 3) { nr++; hls.startLoad(); }
+          else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+          else if (!useProxy) { attach(true); }
+        });
+      }
+      clearInterval(watchdog);
+      watchdog = setInterval(() => {
+        if (dead) return;
+        if (!videoEl.paused && videoEl.currentTime === lastT) videoEl.play().catch(() => {});
+        lastT = videoEl.currentTime;
+      }, 8000);
+    };
+
+    const go = () => attach(false);
+    if (window.Hls || videoEl.canPlayType('application/vnd.apple.mpegurl')) go();
+    else (this.hlsReadyPromise || this.loadHlsLib()).then(() => { if (!dead) go(); });
+
+    return cleanup;
   }
 
   visibleList() {

@@ -36,9 +36,11 @@ class DmaiorHomeWebpro extends HTMLElement {
     };
     this._themeHandler  = () => this._syncThemeHost();
     this._layoutHandler = () => this._maybeRender();
+    this._livesHandler  = (e) => this._applyLives(e && e.detail && e.detail.lives);
     window.addEventListener('storage', this._storageHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
     window.addEventListener('dmaior:layout', this._layoutHandler);
+    window.addEventListener('dmaior:lives', this._livesHandler);
 
     this._maybeRender();
   }
@@ -47,7 +49,9 @@ class DmaiorHomeWebpro extends HTMLElement {
     window.removeEventListener('storage', this._storageHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
     window.removeEventListener('dmaior:layout', this._layoutHandler);
+    window.removeEventListener('dmaior:lives', this._livesHandler);
     this._clearTimers();
+    this._killHeroPlayers();
   }
 
   // ── Tema ────────────────────────────────────────────────────────────
@@ -67,15 +71,29 @@ class DmaiorHomeWebpro extends HTMLElement {
   // Renderiza só quando o layout Web Pro está ativo; limpa quando sai dele.
   _maybeRender() {
     if (this._isActive()) {
-      if (!this._rendered) { this.render(); this._bind(); this._rendered = true; this._scheduleBanners(); }
+      if (!this._rendered) {
+        this.render(); this._bind(); this._rendered = true;
+        this._scheduleBanners();
+        this._applyLives(window.__dmaiorLives);
+      }
     } else if (this._rendered) {
       this._clearTimers();
+      this._killHeroPlayers();
       this.shadowRoot.innerHTML = '';
       this._rendered = false;
     }
   }
 
   _clearTimers() { this._timers.forEach(clearInterval); this._timers = []; }
+
+  _killHeroPlayers() {
+    ['d', 'm'].forEach((k) => {
+      const fn = this['_heroCleanup_' + k];
+      if (typeof fn === 'function') { try { fn(); } catch (_) {} }
+      this['_heroCleanup_' + k] = null;
+      this['_heroUrl_' + k] = null;
+    });
+  }
 
   // ── Render ──────────────────────────────────────────────────────────
   render() {
@@ -142,7 +160,8 @@ class DmaiorHomeWebpro extends HTMLElement {
     .proof{display:flex;align-items:center;gap:13px;margin-top:28px;flex-wrap:wrap;}
     .stack{display:flex;}
     .stack i{width:34px;height:34px;border-radius:50%;border:2px solid var(--dm-bg,#060B16);background:var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4));display:block;}
-    .stack i+i{margin-left:-11px;}
+    .stack img{width:34px;height:34px;border-radius:50%;border:2px solid var(--dm-bg,#060B16);object-fit:cover;display:block;background:var(--dm-bg-3);}
+    .stack i+i,.stack img+img{margin-left:-11px;}
     .proof p{font-size:.84rem;color:var(--dm-text-sub,#a0b8c8);line-height:1.4;margin:0;}
     .proof strong{color:var(--dm-text,#e2e8f0);font-weight:700;}
 
@@ -150,11 +169,23 @@ class DmaiorHomeWebpro extends HTMLElement {
     .hlive{position:relative;width:min(330px,100%);margin:0 auto;}
     .hlive .halo{position:absolute;inset:-16% -12%;background:radial-gradient(closest-side,var(--dm-cyan-25),transparent 72%);filter:blur(8px);}
     .frame{position:relative;aspect-ratio:3/4;border-radius:24px;overflow:hidden;border:1px solid var(--dm-cyan-25);background:radial-gradient(120% 80% at 50% 0%,var(--dm-bg-2) 0%,var(--dm-bg-3) 70%);box-shadow:0 36px 70px var(--dm-shadow-lg);display:flex;align-items:center;justify-content:center;}
-    .frame::after{content:"";position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent);animation:wpShine 3.6s ease-in-out infinite;}
+    .frame::after{content:"";position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent);animation:wpShine 3.6s ease-in-out infinite;z-index:2;}
+    .frame.has-live{background:#000;cursor:pointer;}
+    .frame.has-live::after{display:none;}
     .frame .ph{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--dm-text-sub,#a0b8c8);z-index:1;}
     .frame .ph svg{width:34px;height:34px;stroke:var(--dm-cyan,#00d4d4);}
     .frame .ph span{font-family:var(--f-title);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;}
-    .lp{position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:6px;background:var(--dm-red,#f87171);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.12em;padding:5px 10px;border-radius:8px;z-index:2;}
+    .frame .hf-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+    .frame .hf-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;opacity:0;transition:opacity .45s ease;}
+    .frame.playing .hf-video{opacity:1;}
+    .frame .hf-open{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(6,11,22,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;transition:opacity .3s;}
+    .frame .hf-open svg{width:22px;height:22px;stroke:#fff;fill:#fff;margin-left:3px;}
+    .frame.playing .hf-open{opacity:0;}
+    .frame .hf-who{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:10px;background:rgba(6,11,22,.72);backdrop-filter:blur(8px);border:1px solid var(--dm-bw06,rgba(255,255,255,.09));border-radius:14px;padding:9px 11px;z-index:3;}
+    .frame .hf-who img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+    .frame .hf-who b{font-weight:700;font-size:.82rem;color:#fff;display:block;line-height:1.2;}
+    .frame .hf-who .hf-vc{font-size:.68rem;color:#c9d6e5;}
+    .lp{position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:6px;background:var(--dm-red,#f87171);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.12em;padding:5px 10px;border-radius:8px;z-index:3;}
     .lp i{width:6px;height:6px;border-radius:50%;background:#fff;animation:wpPulse 1.6s infinite;}
     .hlive .stat{position:absolute;background:var(--dm-bg-2);border:1px solid var(--dm-border);border-radius:14px;padding:11px 13px;box-shadow:0 16px 36px var(--dm-shadow-md);z-index:2;}
     .hlive .stat b{font-family:var(--f-title);font-weight:700;font-size:1rem;display:block;color:var(--dm-text,#e2e8f0);}
@@ -297,7 +328,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       </div>
       <div class="hlive desktop-only">
         <div class="halo"></div>
-        <div class="frame">
+        <div class="frame" id="heroFrame">
           <span class="lp"><i></i>LIVE</span>
           <span class="ph">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -322,7 +353,7 @@ class DmaiorHomeWebpro extends HTMLElement {
 
     <!-- LIVE 3:4 — só mobile -->
     <section class="wrap livemob mobile-only" aria-label="Live acontecendo agora">
-      <div class="frame">
+      <div class="frame" id="heroFrameMob">
         <span class="lp"><i></i>LIVE</span>
         <span class="ph">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -525,6 +556,102 @@ class DmaiorHomeWebpro extends HTMLElement {
       }, { threshold: .18, rootMargin: '0px 0px -8% 0px' });
       grid.querySelectorAll('.ben').forEach(c => io.observe(c));
       setTimeout(() => grid.querySelectorAll('.ben:not(.in)').forEach(c => c.classList.add('in')), 3000);
+    }
+  }
+
+  // ── Lives (via evento 'dmaior:lives' do kwai-live-widget) ────────────
+  _applyLives(lives) {
+    if (!this._rendered || !this.shadowRoot) return;
+    lives = Array.isArray(lives) ? lives : [];
+    const s = this.shadowRoot;
+
+    // 1) pilha de avatares do hero — fotos reais dos streamers ao vivo
+    const stack = s.querySelector('.proof .stack');
+    if (stack) {
+      const pics = lives.filter(l => l.image).slice(0, 4);
+      if (pics.length) {
+        stack.innerHTML = pics.map(l => `<img src="${this._esc(l.image)}" alt="" loading="lazy">`).join('');
+      }
+    }
+
+    // 2) quadro(s) 3:4 do hero — streamer em destaque (mais espectadores) rodando
+    const featured = lives.find(l => l.ready) || lives[0] || null;
+    this._mountFeatured(s.getElementById('heroFrame'),    featured, 'd');
+    this._mountFeatured(s.getElementById('heroFrameMob'), featured, 'm');
+  }
+
+  _viewersText(n) {
+    return (typeof n === 'number' && n > 0)
+      ? n.toLocaleString('pt-BR') + ' assistindo agora'
+      : 'ao vivo agora · Kwai';
+  }
+
+  _framePlaceholderHTML() {
+    return `<span class="lp"><i></i>LIVE</span>
+      <span class="ph">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Live ao vivo · Kwai</span>
+      </span>`;
+  }
+
+  _mountFeatured(frame, live, key) {
+    if (!frame) return;
+    const ckey = '_heroCleanup_' + key;
+    const ukey = '_heroUrl_' + key;
+
+    if (!live) {
+      if (typeof this[ckey] === 'function') { try { this[ckey](); } catch (_) {} this[ckey] = null; }
+      this[ukey] = null;
+      frame.classList.remove('has-live', 'playing');
+      frame.onclick = null;
+      frame.innerHTML = this._framePlaceholderHTML();
+      return;
+    }
+
+    // mesmo streamer já montado — atualiza espectadores e, se o stream só
+    // resolveu agora (ready passou a true), tenta ligar o vídeo sem re-render.
+    if (this[ukey] === live.url && frame.classList.contains('has-live')) {
+      const vc = frame.querySelector('.hf-vc');
+      if (vc) vc.textContent = this._viewersText(live.viewCount);
+      if (!this[ckey] && live.ready && frame.offsetParent !== null) {
+        const lw = document.querySelector('kwai-live-widget');
+        const video = frame.querySelector('.hf-video');
+        if (lw && video && typeof lw.playFeaturedInto === 'function') {
+          const cleanup = lw.playFeaturedInto(video, live.url);
+          if (cleanup) { this[ckey] = cleanup; video.addEventListener('playing', () => frame.classList.add('playing'), { once: true }); }
+        }
+      }
+      return;
+    }
+
+    if (typeof this[ckey] === 'function') { try { this[ckey](); } catch (_) {} this[ckey] = null; }
+    this[ukey] = live.url;
+    frame.classList.add('has-live');
+    frame.classList.remove('playing');
+    frame.innerHTML = `
+      <img class="hf-poster" src="${this._esc(live.image)}" alt="">
+      <video class="hf-video" muted playsinline webkit-playsinline></video>
+      <span class="lp"><i></i>LIVE</span>
+      <span class="hf-open"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      <div class="hf-who">
+        <img src="${this._esc(live.image)}" alt="">
+        <div><b>${this._esc(live.name || 'Streamer')}</b><span class="hf-vc">${this._viewersText(live.viewCount)}</span></div>
+      </div>`;
+
+    // clique → abre a live em tela cheia (modal do kwai-live-widget)
+    frame.onclick = () => {
+      try { window.dispatchEvent(new CustomEvent('dmaior:openLive', { detail: { url: live.url } })); } catch (_) {}
+    };
+
+    // autoplay muted — só se o quadro está visível e a live tem stream resolvido
+    const lw = document.querySelector('kwai-live-widget');
+    if (live.ready && lw && typeof lw.playFeaturedInto === 'function' && frame.offsetParent !== null) {
+      const video = frame.querySelector('.hf-video');
+      const cleanup = lw.playFeaturedInto(video, live.url);
+      if (cleanup) {
+        this[ckey] = cleanup;
+        video.addEventListener('playing', () => frame.classList.add('playing'), { once: true });
+      }
     }
   }
 
