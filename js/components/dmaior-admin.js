@@ -95,6 +95,46 @@ class DimaiorAdmin extends HTMLElement {
       if(f&&P.getFontFamily) f.value=P.getFontFamily();
     }
   }
+
+  // ── Navegação inferior flutuante (mobile) ──────────────────────────
+  _buildMobileNav(s){
+    const mnav=s.getElementById('admMnav'), fab=s.getElementById('admFab'), sheet=s.getElementById('admMsheet');
+    if(!mnav||!fab||!sheet) return;
+    const PRIM=[['dashboard','dashboard','Dashboard'],['aoVivo','live','Ao Vivo'],['ranking','trophy','Ranking'],['streamers','users','Streamers']];
+    const btn=it=>`<button data-p="${it[0]}" aria-label="${it[2]}">${this._ico(it[1],22)}</button>`;
+    mnav.querySelector('[data-g="a"]').innerHTML=PRIM.slice(0,2).map(btn).join('');
+    mnav.querySelector('[data-g="b"]').innerHTML=PRIM.slice(2).map(btn).join('');
+    // sheet: reconstrói do .side (mesmas seções e itens)
+    let html='';
+    s.querySelectorAll('.side > .ns, .side .acc-body > .ni').forEach(el=>{
+      if(el.classList.contains('ns')){ html+=`<div class="ms-sec">${el.textContent.trim()}</div>`; }
+      else {
+        const p=el.dataset.p, ico=el.querySelector('.ico')?.innerHTML||'', lbl=el.querySelector('.nlb')?.textContent||p;
+        html+=`<button class="ms-row" data-p="${p}"><span class="msi">${ico}</span>${lbl}</button>`;
+      }
+    });
+    s.getElementById('admMsheetNav').innerHTML=html;
+    const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); };
+    const openSheet=()=>{ sheet.classList.add('on'); fab.classList.add('on'); };
+    const go=p=>{ this._ir(p); closeSheet(); this._syncMobileNav(p); try{window.scrollTo({top:0,behavior:'smooth'});}catch(_){}}
+    mnav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.p)));
+    s.querySelectorAll('#admMsheetNav .ms-row').forEach(b=>b.addEventListener('click',()=>go(b.dataset.p)));
+    fab.addEventListener('click',()=>sheet.classList.contains('on')?closeSheet():openSheet());
+    sheet.addEventListener('click',e=>{ if(e.target===sheet) closeSheet(); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheet.classList.contains('on')) closeSheet(); });
+    const path=(w,h)=>{ const r=Math.min(30,h/2),c=r*.448,nw=116,nd=38,cx=w/2,nl=cx-nw/2,nr=cx+nw/2;
+      return 'M'+r+' 0H'+nl.toFixed(1)+'C'+(nl+nw*.1).toFixed(1)+' 0 '+(nl+nw*.25).toFixed(1)+' '+nd+' '+cx.toFixed(1)+' '+nd+'C'+(nr-nw*.25).toFixed(1)+' '+nd+' '+(nr-nw*.1).toFixed(1)+' 0 '+nr.toFixed(1)+' 0H'+(w-r).toFixed(1)+'C'+(w-c).toFixed(1)+' 0 '+w.toFixed(1)+' '+c.toFixed(1)+' '+w.toFixed(1)+' '+r+'V'+(h-r).toFixed(1)+'C'+w.toFixed(1)+' '+(h-c).toFixed(1)+' '+(w-c).toFixed(1)+' '+h+' '+(w-r).toFixed(1)+' '+h+'H'+r+'C'+c.toFixed(1)+' '+h+' 0 '+(h-c).toFixed(1)+' 0 '+(h-r).toFixed(1)+'V'+r+'C0 '+c.toFixed(1)+' '+c.toFixed(1)+' 0 '+r+' 0Z'; };
+    this._updNotch=()=>{ const svg=mnav.querySelector('.mnav-bg'); if(!svg) return; const w=Math.round(mnav.clientWidth),h=Math.round(mnav.clientHeight)||60; if(w<40) return; svg.setAttribute('viewBox','0 0 '+w+' '+h); svg.querySelector('path').setAttribute('d',path(w,h)); };
+    window.addEventListener('resize',this._updNotch);
+    if(window.ResizeObserver){ new ResizeObserver(()=>this._updNotch()).observe(mnav); }
+    setTimeout(this._updNotch,60);
+  }
+  _syncMobileNav(p){
+    const s=this.shadowRoot; if(!s) return;
+    if(!p){ const on=s.querySelector('.ni.on'); p=on?on.dataset.p:'dashboard'; }
+    s.querySelectorAll('#admMnav button').forEach(b=>{ b.dataset.p===p?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'); });
+    s.querySelectorAll('#admMsheetNav .ms-row').forEach(b=>{ b.dataset.p===p?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'); });
+  }
   disconnectedCallback(){
     this._widthObs?.disconnect();
     this._ro?.disconnect();
@@ -274,6 +314,7 @@ class DimaiorAdmin extends HTMLElement {
     const secao=DimaiorAdmin._NAV_SECAO_POR_PAGINA[pag];
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
+    this._syncMobileNav?.(pag);
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
     const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa[pag]?.();
@@ -1839,6 +1880,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     this._bindAparencia(s);
+    this._buildMobileNav(s);
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
     s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('dashFonteToggle')?.addEventListener('change',e=>this._salvarDashFonteToggle(e.target.checked));s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
@@ -4959,6 +5001,34 @@ class DimaiorAdmin extends HTMLElement {
     input,select,textarea{color:var(--t1);}
     .modal-box,.modal{background:var(--panel-solid);}
     .mc select option,.cfg-inp option,select option{background:var(--panel-solid);color:var(--t1);}
+
+    /* ── Navegação inferior flutuante (mobile) — padrão do demo/agente ── */
+    .mnav,.msheet,.fab{display:none;}
+    @media(max-width:700px){
+      .btn-ham{display:none !important;}
+      .content{padding-bottom:118px;}
+      .mnav{display:flex;align-items:center;justify-content:space-between;position:fixed;left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:280;height:60px;padding:0 24px;color:var(--panel-solid);filter:drop-shadow(0 12px 26px rgba(4,6,20,.5));}
+      .mnav-bg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+      .mnav-bg path{stroke:var(--brd);stroke-width:1;}
+      .mnav .grp{display:flex;gap:32px;position:relative;z-index:1;}
+      .mnav button{display:grid;place-items:center;background:none;border:none;color:var(--t3);padding:8px;cursor:pointer;}
+      .mnav button svg{width:22px;height:22px;opacity:.6;}
+      .mnav button[aria-current="page"]{color:var(--azul);}
+      .mnav button[aria-current="page"] svg{opacity:1;}
+      .fab{display:flex;align-items:center;justify-content:center;z-index:282;position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom) + 22px);transform:translateX(-50%);width:54px;height:54px;border:none;border-radius:50%;background:var(--grad);color:#fff;cursor:pointer;box-shadow:0 12px 28px -6px var(--cyan-d);}
+      .fab svg{width:22px;height:22px;}
+      .fab.on{transform:translateX(-50%) rotate(45deg);}
+      .msheet{display:block;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s ease;}
+      .msheet.on{opacity:1;pointer-events:auto;}
+      .msheet .inner{position:absolute;left:0;right:0;bottom:0;background:var(--panel-solid);border-top:1px solid var(--brd);border-radius:20px 20px 0 0;padding:8px 12px calc(18px + env(safe-area-inset-bottom));max-height:82vh;overflow-y:auto;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);}
+      .msheet.on .inner{transform:translateY(0);}
+      .msheet .grab{width:38px;height:4px;border-radius:4px;background:var(--brd);margin:4px auto 10px;}
+      .msheet .ms-sec{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--t3);padding:12px 8px 4px;}
+      .msheet .ms-row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 8px;border:none;border-radius:11px;background:none;font:inherit;font-size:14px;color:var(--t1);text-align:left;cursor:pointer;font-family:var(--dm-font-body,'Exo 2',sans-serif);}
+      .msheet .ms-row[aria-current="page"]{background:rgba(59,130,246,.12);color:var(--azul);}
+      .msheet .ms-row .msi{width:34px;height:34px;border-radius:10px;flex:none;background:var(--glass);border:1px solid var(--brd);display:grid;place-items:center;color:var(--cyan);}
+      .msheet .ms-row .msi svg{width:16px;height:16px;}
+    }
   `;}
 
   _html(){
@@ -5001,6 +5071,9 @@ class DimaiorAdmin extends HTMLElement {
             <p class="ap-note">Fica salvo neste aparelho. O tema é o mesmo do site e do painel do agente.</p>
           </div>
         </aside>
+        <nav class="mnav" id="admMnav" aria-label="Navegação rápida"><svg class="mnav-bg" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor"></path></svg><div class="grp" data-g="a"></div><div class="grp" data-g="b"></div></nav>
+        <button class="fab" id="admFab" type="button" aria-label="Abrir menu">${this._ico('plus',22)}</button>
+        <div class="msheet" id="admMsheet"><div class="inner"><div class="grab"></div><div id="admMsheetNav"></div></div></div>
         <div class="shell">
           <div class="side" id="side">
             ${navSec('principal','Principal',
