@@ -37,10 +37,14 @@ class DmaiorHomeWebpro extends HTMLElement {
     this._themeHandler  = () => this._syncThemeHost();
     this._layoutHandler = () => this._maybeRender();
     this._livesHandler  = (e) => this._applyLives(e && e.detail && e.detail.lives);
+    // breakpoint desktop<->mobile: move a live pro quadro que está visível
+    this._mq = window.matchMedia('(max-width:1000px)');
+    this._mqHandler = () => { if (this._rendered) this._renderFeatured(); };
     window.addEventListener('storage', this._storageHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
     window.addEventListener('dmaior:layout', this._layoutHandler);
     window.addEventListener('dmaior:lives', this._livesHandler);
+    try { this._mq.addEventListener('change', this._mqHandler); } catch (_) { this._mq.addListener(this._mqHandler); }
 
     this._maybeRender();
   }
@@ -50,6 +54,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     window.removeEventListener('dmaior:tema', this._themeHandler);
     window.removeEventListener('dmaior:layout', this._layoutHandler);
     window.removeEventListener('dmaior:lives', this._livesHandler);
+    try { this._mq.removeEventListener('change', this._mqHandler); } catch (_) { this._mq && this._mq.removeListener(this._mqHandler); }
     this._clearTimers();
     this._killHeroPlayers();
   }
@@ -87,12 +92,8 @@ class DmaiorHomeWebpro extends HTMLElement {
   _clearTimers() { this._timers.forEach(clearInterval); this._timers = []; }
 
   _killHeroPlayers() {
-    ['d', 'm'].forEach((k) => {
-      const fn = this['_heroCleanup_' + k];
-      if (typeof fn === 'function') { try { fn(); } catch (_) {} }
-      this['_heroCleanup_' + k] = null;
-      this['_heroUrl_' + k] = null;
-    });
+    clearInterval(this._featTimer);
+    this._stopFeatured();
   }
 
   // ── Render ──────────────────────────────────────────────────────────
@@ -178,9 +179,10 @@ class DmaiorHomeWebpro extends HTMLElement {
     .frame .hf-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
     .frame .hf-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;opacity:0;transition:opacity .45s ease;}
     .frame.playing .hf-video{opacity:1;}
-    .frame .hf-open{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(6,11,22,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;transition:opacity .3s;}
-    .frame .hf-open svg{width:22px;height:22px;stroke:#fff;fill:#fff;margin-left:3px;}
-    .frame.playing .hf-open{opacity:0;}
+    .frame .hf-sound{position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(6,11,22,.6);backdrop-filter:blur(4px);border:1px solid var(--dm-bw06,rgba(255,255,255,.09));color:#fff;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:5px 9px;border-radius:999px;z-index:3;transition:opacity .3s;}
+    .frame .hf-sound svg{width:13px;height:13px;stroke:#fff;}
+    .frame.sound .hf-sound{opacity:0;pointer-events:none;}
+    .frame:not(.playing) .hf-sound{opacity:0;}
     .frame .hf-who{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:10px;background:rgba(6,11,22,.72);backdrop-filter:blur(8px);border:1px solid var(--dm-bw06,rgba(255,255,255,.09));border-radius:14px;padding:9px 11px;z-index:3;}
     .frame .hf-who img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;}
     .frame .hf-who b{font-weight:700;font-size:.82rem;color:#fff;display:block;line-height:1.2;}
@@ -565,7 +567,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     lives = Array.isArray(lives) ? lives : [];
     const s = this.shadowRoot;
 
-    // 1) pilha de avatares do hero — fotos reais dos streamers ao vivo
+    // pilha de avatares do hero — fotos reais dos streamers ao vivo
     const stack = s.querySelector('.proof .stack');
     if (stack) {
       const pics = lives.filter(l => l.image).slice(0, 4);
@@ -574,10 +576,29 @@ class DmaiorHomeWebpro extends HTMLElement {
       }
     }
 
-    // 2) quadro(s) 3:4 do hero — streamer em destaque (mais espectadores) rodando
-    const featured = lives.find(l => l.ready) || lives[0] || null;
-    this._mountFeatured(s.getElementById('heroFrame'),    featured, 'd');
-    this._mountFeatured(s.getElementById('heroFrameMob'), featured, 'm');
+    // streamer em destaque = mais espectadores (com stream pronto na frente)
+    this._featured = lives.find(l => l.ready) || lives[0] || null;
+    this._renderFeatured();
+
+    // insiste até a live tocar de fato dentro do quadro (cobre: componente
+    // ainda display:none na 1ª tentativa, stream que só resolveu depois,
+    // autoplay que não pegou de primeira)
+    clearInterval(this._featTimer);
+    let tries = 0;
+    this._featTimer = setInterval(() => {
+      const f = this.shadowRoot && this.shadowRoot.getElementById(
+        window.matchMedia('(max-width:1000px)').matches ? 'heroFrameMob' : 'heroFrame');
+      if ((f && f.classList.contains('playing')) || !this._featured || !this._featured.ready || ++tries > 12) {
+        clearInterval(this._featTimer); return;
+      }
+      if (!this._featuredCleanup) {
+        this._renderFeatured();
+      } else {
+        const v = f && f.querySelector('.hf-video');
+        if (v) v.play().catch(() => {});
+      }
+    }, 2000);
+    this._timers.push(this._featTimer);
   }
 
   _viewersText(n) {
@@ -594,63 +615,86 @@ class DmaiorHomeWebpro extends HTMLElement {
       </span>`;
   }
 
-  _mountFeatured(frame, live, key) {
-    if (!frame) return;
-    const ckey = '_heroCleanup_' + key;
-    const ukey = '_heroUrl_' + key;
+  _stopFeatured() {
+    if (typeof this._featuredCleanup === 'function') { try { this._featuredCleanup(); } catch (_) {} }
+    this._featuredCleanup = null;
+    this._featuredUrl = null;
+  }
 
-    if (!live) {
-      if (typeof this[ckey] === 'function') { try { this[ckey](); } catch (_) {} this[ckey] = null; }
-      this[ukey] = null;
-      frame.classList.remove('has-live', 'playing');
-      frame.onclick = null;
-      frame.innerHTML = this._framePlaceholderHTML();
-      return;
+  // Monta a live SÓ no quadro ativo do viewport atual (desktop OU mobile).
+  // Nunca abre modal — a live roda dentro do quadro; tocar liga/desliga o som.
+  _renderFeatured() {
+    if (!this._rendered || !this.shadowRoot) return;
+    const s = this.shadowRoot;
+    const mobile = window.matchMedia('(max-width:1000px)').matches;
+    const active = s.getElementById(mobile ? 'heroFrameMob' : 'heroFrame');
+    const idle   = s.getElementById(mobile ? 'heroFrame' : 'heroFrameMob');
+
+    // quadro que não está em uso volta ao placeholder
+    if (idle && idle.dataset.url) {
+      idle.classList.remove('has-live', 'playing', 'sound');
+      idle.onclick = null;
+      idle.innerHTML = this._framePlaceholderHTML();
+      delete idle.dataset.url;
     }
 
-    // mesmo streamer já montado — atualiza espectadores e, se o stream só
-    // resolveu agora (ready passou a true), tenta ligar o vídeo sem re-render.
-    if (this[ukey] === live.url && frame.classList.contains('has-live')) {
-      const vc = frame.querySelector('.hf-vc');
-      if (vc) vc.textContent = this._viewersText(live.viewCount);
-      if (!this[ckey] && live.ready && frame.offsetParent !== null) {
-        const lw = document.querySelector('kwai-live-widget');
-        const video = frame.querySelector('.hf-video');
-        if (lw && video && typeof lw.playFeaturedInto === 'function') {
-          const cleanup = lw.playFeaturedInto(video, live.url);
-          if (cleanup) { this[ckey] = cleanup; video.addEventListener('playing', () => frame.classList.add('playing'), { once: true }); }
-        }
+    if (!active) return;
+    const live = this._featured;
+
+    if (!live) {
+      this._stopFeatured();
+      if (active.dataset.url) {
+        active.classList.remove('has-live', 'playing', 'sound');
+        active.onclick = null;
+        active.innerHTML = this._framePlaceholderHTML();
+        delete active.dataset.url;
       }
       return;
     }
 
-    if (typeof this[ckey] === 'function') { try { this[ckey](); } catch (_) {} this[ckey] = null; }
-    this[ukey] = live.url;
-    frame.classList.add('has-live');
-    frame.classList.remove('playing');
-    frame.innerHTML = `
-      <img class="hf-poster" src="${this._esc(live.image)}" alt="">
-      <video class="hf-video" muted playsinline webkit-playsinline></video>
-      <span class="lp"><i></i>LIVE</span>
-      <span class="hf-open"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      <div class="hf-who">
-        <img src="${this._esc(live.image)}" alt="">
-        <div><b>${this._esc(live.name || 'Streamer')}</b><span class="hf-vc">${this._viewersText(live.viewCount)}</span></div>
-      </div>`;
+    // troca de streamer (ou 1ª montagem)
+    if (active.dataset.url !== live.url) {
+      this._stopFeatured();
+      this._featuredUrl = live.url;
+      active.dataset.url = live.url;
+      active.classList.add('has-live');
+      active.classList.remove('playing', 'sound');
+      active.innerHTML = `
+        <img class="hf-poster" src="${this._esc(live.image)}" alt="">
+        <video class="hf-video" muted playsinline webkit-playsinline autoplay></video>
+        <span class="lp"><i></i>LIVE</span>
+        <span class="hf-sound" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          <span>toque p/ som</span>
+        </span>
+        <div class="hf-who">
+          <img src="${this._esc(live.image)}" alt="">
+          <div><b>${this._esc(live.name || 'Streamer')}</b><span class="hf-vc">${this._viewersText(live.viewCount)}</span></div>
+        </div>`;
+      // tocar no quadro = liga/desliga o som (não abre modal, não sai da página)
+      active.onclick = () => {
+        const v = active.querySelector('.hf-video');
+        if (!v) return;
+        v.muted = !v.muted;
+        active.classList.toggle('sound', !v.muted);
+      };
+    } else {
+      const vc = active.querySelector('.hf-vc');
+      if (vc) vc.textContent = this._viewersText(live.viewCount);
+    }
 
-    // clique → abre a live em tela cheia (modal do kwai-live-widget)
-    frame.onclick = () => {
-      try { window.dispatchEvent(new CustomEvent('dmaior:openLive', { detail: { url: live.url } })); } catch (_) {}
-    };
-
-    // autoplay muted — só se o quadro está visível e a live tem stream resolvido
-    const lw = document.querySelector('kwai-live-widget');
-    if (live.ready && lw && typeof lw.playFeaturedInto === 'function' && frame.offsetParent !== null) {
-      const video = frame.querySelector('.hf-video');
-      const cleanup = lw.playFeaturedInto(video, live.url);
-      if (cleanup) {
-        this[ckey] = cleanup;
-        video.addEventListener('playing', () => frame.classList.add('playing'), { once: true });
+    // liga o player (se ainda não estiver ligado e a live tem stream resolvido)
+    if (!this._featuredCleanup && live.ready) {
+      const lw = document.querySelector('kwai-live-widget');
+      const video = active.querySelector('.hf-video');
+      if (lw && video && typeof lw.playFeaturedInto === 'function') {
+        const cleanup = lw.playFeaturedInto(video, live.url);
+        if (cleanup) {
+          this._featuredCleanup = cleanup;
+          const reveal = () => active.classList.add('playing');
+          video.addEventListener('playing', reveal, { once: true });
+          video.addEventListener('timeupdate', reveal, { once: true });
+        }
       }
     }
   }
