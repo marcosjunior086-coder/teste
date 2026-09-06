@@ -200,7 +200,7 @@ class DimaiorAdmin extends HTMLElement {
     else{err.textContent=d?.erro||'Credenciais inválidas';err.style.display='block';}
   }
   _doLogout(){this._token='';localStorage.removeItem(this.TK_KEY);const s=this.shadowRoot;s.getElementById('app').classList.remove('on');s.getElementById('login').style.display='flex';s.getElementById('iP').value='';}
-  _abrirApp(){const s=this.shadowRoot;s.getElementById('login').style.display='none';s.getElementById('app').classList.add('on');this._ir('dashboard');this._carregarLives();}
+  _abrirApp(){const s=this.shadowRoot;s.getElementById('login').style.display='none';s.getElementById('app').classList.add('on');try{if(localStorage.getItem('dm_admin_nav_col')==='1'&&window.matchMedia('(min-width:701px)').matches)s.getElementById('app').classList.add('nav-collapsed');}catch(_){}this._ir('dashboard');this._carregarLives();}
   _fecharMenuMobile(){
     const s=this.shadowRoot;
     s.getElementById('side')?.classList.remove('open');
@@ -1780,7 +1780,14 @@ class DimaiorAdmin extends HTMLElement {
       const url  = window.location.origin + base;
       try{ window.top.location.href=url; }catch{ window.location.href=url; }
     });
-    s.getElementById('btnHam').addEventListener('click',e=>{e.stopPropagation();const side=s.getElementById('side');side?.classList.contains('open')?this._fecharMenuMobile():this._abrirMenuMobile();});
+    s.getElementById('btnHam').addEventListener('click',e=>{e.stopPropagation();
+      if(window.matchMedia('(min-width:701px)').matches){
+        const app=s.getElementById('app');const col=app.classList.toggle('nav-collapsed');
+        try{localStorage.setItem('dm_admin_nav_col',col?'1':'0');}catch(_){}
+        return;
+      }
+      const side=s.getElementById('side');side?.classList.contains('open')?this._fecharMenuMobile():this._abrirMenuMobile();
+    });
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
@@ -4005,8 +4012,15 @@ class DimaiorAdmin extends HTMLElement {
     .top-chip{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.3);color:var(--cyan);border-radius:99px;padding:2px 9px}.top-sp{flex:1}
     .btn-sair{padding:5px 10px;border:1px solid var(--brddim);border-radius:var(--rs);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}.btn-sair:hover{border-color:var(--verm);color:var(--verm)}
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
+    .btn-ham:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
     .shell{display:flex;flex:1;min-height:548px;}
     .side{width:220px;flex-shrink:0;background:rgba(8,8,20,.95);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;transform:translateZ(0);will-change:transform;}
+    /* Menu recolhível no desktop (nada some — o trilho só recolhe/volta pelo botão do topo) */
+    @media(min-width:701px){
+      .btn-ham{display:flex;}
+      .side{transition:width .22s ease,padding .22s ease,opacity .16s ease;}
+      #app.nav-collapsed .side{width:0;padding-top:0;padding-bottom:0;opacity:0;pointer-events:none;overflow:hidden;border-right-width:0;}
+    }
     .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,212,212,.55);font-family:var(--dm-font-title,'Rajdhani',sans-serif);display:flex;align-items:center;user-select:none}
     .side .acc-body{overflow:visible;max-height:none;transition:none}
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
@@ -4035,6 +4049,22 @@ class DimaiorAdmin extends HTMLElement {
     .dc2-roxo{background:linear-gradient(135deg,rgba(126,34,206,.78),rgba(219,39,119,.42));border-color:rgba(192,132,252,.82);}.dc2-roxo .dc2-ico,.dc2-roxo .dc2-val{color:#e9d5ff;text-shadow:0 0 18px rgba(192,132,252,.7)}
     .dc2-azul{background:linear-gradient(135deg,rgba(29,78,216,.78),rgba(56,189,248,.45));border-color:rgba(96,165,250,.82);}.dc2-azul .dc2-ico,.dc2-azul .dc2-val{color:#bfdbfe;text-shadow:0 0 18px rgba(96,165,250,.7)}
     .dc2-spin{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+
+    /* ══ Redesign v1 — cards do dashboard: gradiente forte -> tinta sutil sobre vidro,
+       sem glow. Mantém 1 cor por card (número + borda). Nada some, só suaviza. ══ */
+    .dc2{background:var(--glass);border:1px solid var(--brd);box-shadow:0 4px 16px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.04);}
+    .dc2-val{color:var(--t1);text-shadow:none;}
+    .dc2-lbl{opacity:.62;}
+    .dc2-ico{opacity:.5;}
+    @media(hover:hover){.dc2:hover{transform:translateY(-2px);filter:none;box-shadow:0 10px 26px rgba(0,0,0,.32);}}
+    .dc2-indigo{background-image:linear-gradient(150deg,rgba(168,85,247,.18),rgba(168,85,247,0) 62%);border-color:rgba(168,85,247,.32);}.dc2-indigo .dc2-ico,.dc2-indigo .dc2-val{color:#c4b5fd;text-shadow:none;}
+    .dc2-verm{background-image:linear-gradient(150deg,rgba(248,113,113,.18),rgba(248,113,113,0) 62%);border-color:rgba(248,113,113,.32);}.dc2-verm .dc2-ico,.dc2-verm .dc2-val{color:#fca5a5;text-shadow:none;}
+    .dc2-verde{background-image:linear-gradient(150deg,rgba(34,197,94,.18),rgba(34,197,94,0) 62%);border-color:rgba(74,222,128,.32);}.dc2-verde .dc2-ico,.dc2-verde .dc2-val{color:#86efac;text-shadow:none;}
+    .dc2-cyan{background-image:linear-gradient(150deg,rgba(0,212,212,.18),rgba(0,212,212,0) 62%);border-color:rgba(34,211,238,.34);}.dc2-cyan .dc2-ico,.dc2-cyan .dc2-val{color:#67e8f9;text-shadow:none;}
+    .dc2-gold{background-image:linear-gradient(150deg,rgba(245,158,11,.18),rgba(245,158,11,0) 62%);border-color:rgba(251,191,36,.34);}.dc2-gold .dc2-ico,.dc2-gold .dc2-val{color:#fcd34d;text-shadow:none;}
+    .dc2-slate{background-image:linear-gradient(150deg,rgba(148,163,184,.16),rgba(148,163,184,0) 62%);border-color:rgba(148,163,184,.3);}.dc2-slate .dc2-ico,.dc2-slate .dc2-val{color:#cbd5e1;text-shadow:none;}
+    .dc2-roxo{background-image:linear-gradient(150deg,rgba(192,132,252,.18),rgba(192,132,252,0) 62%);border-color:rgba(192,132,252,.32);}.dc2-roxo .dc2-ico,.dc2-roxo .dc2-val{color:#e0c8fd;text-shadow:none;}
+    .dc2-azul{background-image:linear-gradient(150deg,rgba(96,165,250,.19),rgba(96,165,250,0) 62%);border-color:rgba(96,165,250,.34);}.dc2-azul .dc2-ico,.dc2-azul .dc2-val{color:#93c5fd;text-shadow:none;}
 
     /* ══ Dashboard de Desempenho ══ */
     .dd-row2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
