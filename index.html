@@ -54,7 +54,7 @@
   <script charset=utf-8 src="js/auth.js"></script>
   <script charset=utf-8 src="js/router.js"></script>
   <script charset=utf-8 src="js/components/menu-mobile.js?v=20260906-webpro"></script>
-  <script charset=utf-8 src="js/components/live-widget.js?v=20260906-webpro-hero"></script>
+  <script charset=utf-8 src="js/components/live-widget.js?v=20260906-webpro-hero2"></script>
   <script charset=utf-8 src="js/components/services-menu.js?v=20260801-pk-diario"></script>
   <script charset=utf-8 src="js/components/beneficios.js?v=20260624-3"></script>
   <script charset=utf-8 src="js/components/home-webpro.js?v=20260906-webpro-3"></script>
@@ -66,10 +66,13 @@
       var sec      = document.getElementById('section-beneficios');
       var services = document.querySelector('dmaior-services-menu');
       var webpro   = document.querySelector('dmaior-home-webpro');
+      var live     = document.querySelector('kwai-live-widget');
       // Benefícios/FAQ: aparece só no layout "Antigo" (Web Pro e Padrão têm os seus)
       if (sec)      sec.style.display      = (isWeb || layout === 'dinamico') ? 'none' : '';
       if (services) services.style.display = isWeb ? 'none' : '';
       if (webpro)   webpro.style.display   = isWeb ? '' : 'none';
+      // Web Pro: a faixa "AO VIVO" vira um card arredondado, solto (não colada no topo)
+      if (live) { if (isWeb) live.setAttribute('data-layout', 'webpro'); else live.removeAttribute('data-layout'); }
     }
 
     // Aplica o layout salvo imediatamente ao carregar a página (default: Web Pro)

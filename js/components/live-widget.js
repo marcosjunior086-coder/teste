@@ -150,6 +150,24 @@ class KwaiLiveWidget extends HTMLElement {
         #liveWidget::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-effect-blue,var(--dm-rank-blue,#3b82f6)),var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)),transparent);}
         #liveWidget.minimized{padding-bottom:6px;}
 
+        /* ── Layout "Web Pro": a faixa vira um card arredondado, solto ── */
+        :host([data-layout="webpro"]) #rootWrap{
+          max-width:1200px;
+          margin:clamp(16px,3vw,24px) auto 0;
+          padding:0 clamp(16px,4vw,40px);
+        }
+        :host([data-layout="webpro"]) #liveWidget{
+          border:1px solid var(--dm-border, var(--dm-effect-20, rgba(0,212,212,.20)));
+          border-bottom:1px solid var(--dm-border, var(--dm-effect-20, rgba(0,212,212,.20)));
+          border-radius:26px;
+          overflow:hidden;
+          padding:14px clamp(12px,2vw,22px) 16px;
+        }
+        :host([data-layout="webpro"]) #liveWidget.minimized{ padding-bottom:12px; }
+        @media (max-width:560px){
+          :host([data-layout="webpro"]) #liveWidget{ border-radius:20px; }
+        }
+
         #liveTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding:0 8px;}
         /* Cor do texto "N AO VIVO" e bolinha — usa --dm-green que já adapta por tema */
         #liveCount{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm-green,#4ade80);display:flex;align-items:center;gap:6px;}
@@ -444,8 +462,22 @@ class KwaiLiveWidget extends HTMLElement {
   // guerra permanente entre cards igualmente visíveis disputando as mesmas
   // vagas, expulsando uns aos outros sem nenhum realmente ficar estável.
   get MAX_MINI_PLAYERS() {
+    // Enquanto a live principal do hero (layout Web Pro) está tocando, a faixa
+    // segura só 2 mini-players decodificando — o resto fica na foto parada —
+    // pra não disputar banda/CPU com a view principal.
+    if (this._featuredActive) return 2;
     const visible = [...this.activePlayers.keys()].filter((u) => this._isReallyVisible(u)).length;
     return Math.max(6, visible + 2);
+  }
+
+  // Corta o excesso de mini-players quando o limite baixa (ex: hero começou a
+  // tocar). stopMiniPlayer volta o card pra foto parada — nada some.
+  _trimMiniPlayers() {
+    if (!this._miniPlayerOrder) return;
+    let guard = 0;
+    while (this._miniPlayerOrder.length > this.MAX_MINI_PLAYERS && guard++ < 40) {
+      this.stopMiniPlayer(this._miniPlayerOrder[0]);
+    }
   }
 
   // ── Cache localStorage (já protegido com try/catch) ─────────────────────
@@ -702,10 +734,16 @@ class KwaiLiveWidget extends HTMLElement {
     const playUrl = entry && entry.streamer && entry.streamer.playUrl;
     if (!videoEl || !playUrl) return null;
 
+    // hero = view principal → prioridade: derruba o excesso de mini-players da
+    // faixa (viram foto parada) pra essa live carregar sem travar.
+    this._featuredActive = true;
+    this._trimMiniPlayers();
+
     let hls = null, dead = false, watchdog = null, lastT = -1;
 
     const cleanup = () => {
       dead = true;
+      this._featuredActive = false;
       clearInterval(watchdog);
       try { hls && hls.destroy(); } catch (_) {}
       hls = null;
@@ -726,10 +764,15 @@ class KwaiLiveWidget extends HTMLElement {
         videoEl.addEventListener('error', () => { if (!useProxy && !dead) attach(true); }, { once: true });
         videoEl.play().catch(() => {});
       } else if (window.Hls && window.Hls.isSupported()) {
+        // Buffer de view principal (não de "preview") — segura melhor a
+        // oscilação da rede sem travar, como o player do modal.
         hls = new window.Hls({
           enableWorker: true, lowLatencyMode: false,
-          maxBufferLength: 6, maxMaxBufferLength: 12, liveSyncDurationCount: 3,
-          startFragPrefetch: true, manifestLoadingMaxRetry: 4, fragLoadingMaxRetry: 6,
+          maxBufferLength: 24, maxMaxBufferLength: 48, backBufferLength: 8,
+          liveSyncDurationCount: 3,
+          startFragPrefetch: true,
+          manifestLoadingMaxRetry: 5, manifestLoadingRetryDelay: 800,
+          fragLoadingMaxRetry: 8, fragLoadingRetryDelay: 800,
         });
         hls.loadSource(src);
         hls.attachMedia(videoEl);
@@ -737,7 +780,7 @@ class KwaiLiveWidget extends HTMLElement {
         let nr = 0;
         hls.on(window.Hls.Events.ERROR, (_, d) => {
           if (!d.fatal || dead) return;
-          if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && nr < 3) { nr++; hls.startLoad(); }
+          if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && nr < 4) { nr++; hls.startLoad(); }
           else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
           else if (!useProxy) { attach(true); }
         });
