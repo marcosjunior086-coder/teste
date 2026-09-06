@@ -1241,7 +1241,7 @@ class DimaiorAdmin extends HTMLElement {
       premiacao_automatica_ativa:{label:'Premiação automática do dia 1º',hint:'Desligado: o pagamento do ranking do mês anterior não roda sozinho — precisa processar manualmente em Premiações.',bool:true},
     };
     const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;};
-    el.innerHTML=`<div style="padding:12px 14px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const isBool=lbl?.bool;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';const campo=isBool?`<label class="tog-switch"><input type="checkbox" class="cfg-bool-inp" id="cfg_${this._esc(c.chave)}" ${c.valor==='true'?'checked':''}><span class="tog-slider"></span></label>`:isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`;return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${campo}${isRO||isBool?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
+    el.innerHTML=`<div style="padding:12px 14px;background:var(--sunk);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const isBool=lbl?.bool;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';const campo=isBool?`<label class="tog-switch"><input type="checkbox" class="cfg-bool-inp" id="cfg_${this._esc(c.chave)}" ${c.valor==='true'?'checked':''}><span class="tog-slider"></span></label>`:isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`;return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${campo}${isRO||isBool?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
     d.config.filter(c=>labels[c.chave]?.bool).forEach(c=>{
       s.getElementById(`cfg_${c.chave}`)?.addEventListener('change',async e=>{
         const val=e.target.checked?'true':'false';
@@ -4140,7 +4140,7 @@ class DimaiorAdmin extends HTMLElement {
       .side{transition:width .22s ease,padding .22s ease,opacity .16s ease;}
       #app.nav-collapsed .side{width:0;padding-top:0;padding-bottom:0;opacity:0;pointer-events:none;overflow:hidden;border-right-width:0;}
     }
-    .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,212,212,.55);font-family:var(--dm-font-title,'Rajdhani',sans-serif);display:flex;align-items:center;user-select:none}
+    .ns{padding:8px 14px 2px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);display:flex;align-items:center;user-select:none}
     .side .acc-body{overflow:visible;max-height:none;transition:none}
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
@@ -4993,15 +4993,20 @@ class DimaiorAdmin extends HTMLElement {
     .qa-card,.qa-indigo,.qa-verm,.qa-verde,.qa-cyan,.qa-gold,.qa-slate{background:var(--glass);border-color:var(--brd);--qa-cor:var(--cyan);}
     .qa-card .qa-lbl{color:var(--t1);}
     .qa-card .qa-sub{color:var(--t3);}
-    /* Nos temas claros os cards do Acesso Rápido ficam no acento do tema (letra branca) — dão presença */
-    :host([data-theme="branco"]) .qa-card,:host([data-theme="rosa"]) .qa-card,:host([data-theme="laranja"]) .qa-card{background:var(--grad);border-color:transparent;box-shadow:0 8px 22px -4px var(--cyan-d);}
+    /* Nos temas claros: Acesso Rápido no acento do tema — cor CHAPADA (sem degradê/brilho),
+       igual ao card "Fechamento de setembro" da referência. Letra branca. */
+    :host([data-theme="branco"]) .qa-card,:host([data-theme="rosa"]) .qa-card,:host([data-theme="laranja"]) .qa-card{background:var(--azul);background-image:none;border-color:transparent;box-shadow:0 4px 14px rgba(0,0,0,.1);}
     :host([data-theme="branco"]) .qa-card .qa-lbl,:host([data-theme="rosa"]) .qa-card .qa-lbl,:host([data-theme="laranja"]) .qa-card .qa-lbl{color:#fff;}
     :host([data-theme="branco"]) .qa-card .qa-sub,:host([data-theme="rosa"]) .qa-card .qa-sub,:host([data-theme="laranja"]) .qa-card .qa-sub{color:rgba(255,255,255,.82);}
-    :host([data-theme="branco"]) .qa-ico-wrap,:host([data-theme="rosa"]) .qa-ico-wrap,:host([data-theme="laranja"]) .qa-ico-wrap{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff;box-shadow:none;}
-    :host([data-theme="branco"]) .qa-config-btn,:host([data-theme="rosa"]) .qa-config-btn,:host([data-theme="laranja"]) .qa-config-btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.32);color:#fff;}
-    :host([data-theme="branco"]) .qa-card:hover,:host([data-theme="rosa"]) .qa-card:hover,:host([data-theme="laranja"]) .qa-card:hover{background:var(--grad);filter:brightness(1.06);}
-    /* dc2: rótulo/valor seguem o tema (número mantém a cor da variante) */
+    :host([data-theme="branco"]) .qa-ico-wrap,:host([data-theme="rosa"]) .qa-ico-wrap,:host([data-theme="laranja"]) .qa-ico-wrap{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.28);color:#fff;box-shadow:none;}
+    :host([data-theme="branco"]) .qa-config-btn,:host([data-theme="rosa"]) .qa-config-btn,:host([data-theme="laranja"]) .qa-config-btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff;}
+    :host([data-theme="branco"]) .qa-card:hover,:host([data-theme="rosa"]) .qa-card:hover,:host([data-theme="laranja"]) .qa-card:hover{background:var(--azul);filter:brightness(.95);}
+    /* dc2 (cards de cima): nos temas claros, superfície CHAPADA de vidro, sem tinta em degradê.
+       Identidade fica na borda + no número colorido. */
     .dc2 .dc2-lbl{color:var(--t2);}
+    :host([data-theme="branco"]) .dc2,:host([data-theme="rosa"]) .dc2,:host([data-theme="laranja"]) .dc2{background-image:none!important;background:var(--glass);}
+    :host([data-theme="branco"]) .dc2 .dc2-val,:host([data-theme="rosa"]) .dc2 .dc2-val,:host([data-theme="laranja"]) .dc2 .dc2-val{color:var(--t1)!important;text-shadow:none!important;}
+    :host([data-theme="branco"]) .dc2 .dc2-ico,:host([data-theme="rosa"]) .dc2 .dc2-ico,:host([data-theme="laranja"]) .dc2 .dc2-ico{opacity:.42;text-shadow:none!important;}
     .box .bhead{background:var(--row-alt);}
     /* Textos/inputs que estavam com #fff/preto fixo e sumiam nos temas claros */
     .dd-headline,.lv-dc2-val{color:var(--t1);}
@@ -5015,6 +5020,8 @@ class DimaiorAdmin extends HTMLElement {
     /* Textos que continuavam #fff fixo em telas profundas */
     .titulo,.btitulo,.dd-headline,.rk-nome,.hist-nome,.saque-nome,.saque-valor,.uid-kwai,.premio-pos{color:var(--t1);}
     .rk-sub,.hist-meta,.saque-meta,.uid-row-meta{color:var(--t3);}
+    /* Rótulos que eram só ciano fixo -> neutros (ficavam laranja/rosa gritante nos temas) */
+    .cfg-chave,.lv-cfg-label,.mc label,.mc-field label{color:var(--t2);}
 
     /* ── Navegação inferior flutuante (mobile) — padrão do demo/agente ── */
     .mnav,.msheet,.fab{display:none;}
