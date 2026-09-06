@@ -4081,8 +4081,7 @@ class DimaiorAdmin extends HTMLElement {
     :host([data-theme="rosa"]){background:#fff5f8;--bg0:#fff5f8;--bg1:#fffafc;--glass:#fff;--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:#fff0f5;--brd:rgba(233,30,140,.22);--brddim:rgba(233,30,140,.1);--t1:#1a0010;--t2:#4a0028;--t3:#80004a;--cyan:#e91e8c;--cyan-d:rgba(233,30,140,.1);--azul:#e91e8c;--grad:linear-gradient(135deg,#e91e8c,#c2185b);--gold:#c2185b;--verde:#2e7d32;--verm:#c2185b;--row-alt:rgba(233,30,140,.025);--input-bg:#fff;--sunk:rgba(233,30,140,.035);--shadow:rgba(233,30,140,.1);}
     :host([data-theme="laranja"]){background:#fff8f0;--bg0:#fff8f0;--bg1:#fffcf7;--glass:#fff;--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:#fff7ec;--brd:rgba(249,115,22,.22);--brddim:rgba(249,115,22,.1);--t1:#1a0a00;--t2:#4a2000;--t3:#7c3a00;--cyan:#f97316;--cyan-d:rgba(249,115,22,.1);--azul:#f97316;--grad:linear-gradient(135deg,#f97316,#ea580c);--gold:#ea580c;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(249,115,22,.025);--input-bg:#fff;--sunk:rgba(249,115,22,.035);--shadow:rgba(249,115,22,.1);}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    #root{width:100%;min-height:100dvh;overflow:visible;background:linear-gradient(180deg,var(--bg1),var(--bg0));color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
-    #app{flex:1;}
+    #root{width:100%;min-height:100dvh;overflow:visible;background:var(--bg0);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
     .glass{background:var(--glass);border:1px solid var(--brd);border-radius:20px;position:relative;overflow:hidden;backdrop-filter:blur(12px)}.glass::after{content:'';position:absolute;bottom:0;left:0;right:0;background:var(--grad);height:2px}
     #login{position:fixed;inset:0;min-height:100dvh;background:rgba(4,4,14,.98);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px}
     /* Login — padrão "app moderno" (mesmo do painel do agente): campos em pílula + selo de ícone */
@@ -4133,9 +4132,13 @@ class DimaiorAdmin extends HTMLElement {
     .btn-sair{padding:5px 10px;border:1px solid var(--brddim);border-radius:var(--rs);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}.btn-sair:hover{border-color:var(--verm);color:var(--verm)}
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .btn-ham:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
-    .shell{display:flex;flex:1;min-height:calc(100dvh - 52px);align-items:stretch;}
+    .shell{display:flex;flex:1;min-height:calc(100dvh - 52px);align-items:stretch;
+      /* faixa da esquerda sempre na cor da sidebar — sem "corte seco" quando a
+         sidebar (fixa) é mais curta que a página */
+      background:linear-gradient(to right, var(--sidebar) 0 221px, transparent 221px);}
+    #app.nav-collapsed .shell{background:transparent;}
     .side{width:220px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;
-      align-self:flex-start;position:sticky;top:52px;max-height:calc(100dvh - 52px);}
+      align-self:stretch;position:sticky;top:52px;max-height:calc(100dvh - 52px);}
     /* Menu recolhível no desktop (nada some — o trilho só recolhe/volta pelo botão do topo) */
     @media(min-width:701px){
       .btn-ham{display:flex;}
@@ -4147,7 +4150,7 @@ class DimaiorAdmin extends HTMLElement {
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
     .nb{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,212,.3);border-radius:99px;padding:1px 6px}.nb.live{background:rgba(248,113,113,.2);color:var(--verm);border-color:rgba(248,113,113,.4);animation:bl 1.8s infinite}.nb.gold{background:rgba(240,192,64,.2);color:var(--gold);border-color:rgba(240,192,64,.4)}
-    .content{flex:1;padding:20px;background:transparent;min-height:calc(100dvh - 52px);}
+    .content{flex:1;padding:20px;background:transparent;min-height:0;}
     .pag{display:none}.pag.on{display:block;animation:fadeUp .3s ease both}
     .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
     .titulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1rem,3vw,1.4rem);font-weight:700;letter-spacing:2px;color:var(--t1);text-transform:uppercase;display:flex;align-items:center;gap:8px}.psub{font-size:11px;color:var(--t3);margin-top:3px}.ph-r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
@@ -4587,7 +4590,7 @@ class DimaiorAdmin extends HTMLElement {
       .btn-sair{font-size:10px;padding:4px 8px;flex-shrink:0;}
       #btnVoltarSite{flex-shrink:0;padding:4px 8px;}
       #btnVoltarSite .btn-voltar-txt{display:none;}
-      .content{padding:10px;overflow-x:clip;max-width:100%;}.shell{min-height:auto;}
+      .content{padding:10px;overflow-x:clip;max-width:100%;}.shell{min-height:auto;background:transparent;}
 
       /* ── Page Header ── */
       .ph{flex-direction:column;gap:6px;margin-bottom:12px;}
