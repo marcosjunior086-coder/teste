@@ -4074,12 +4074,12 @@ class DimaiorAdmin extends HTMLElement {
       --cyan:#00d4d4;--cyan-d:rgba(0,212,212,.15);--azul:#3b82f6;--grad:linear-gradient(135deg,#3b82f6 0%,#00e5e5 100%);
       --bg0:#04040e;--bg1:#0b0b1a;--brd:rgba(0,230,230,.18);--brddim:rgba(0,212,212,.08);--glass:rgba(18,18,32,.85);
       --t1:#fff;--t2:#d0d8e8;--t3:#a0b8c8;--verde:#4ade80;--verm:#f87171;--gold:#f0c040;--r:16px;--rs:10px;
-      --topbar:rgba(11,11,26,.95);--sidebar:rgba(8,8,20,.95);--panel-solid:#0b0b1a;--row-alt:rgba(0,0,0,.3);}
+      --topbar:rgba(11,11,26,.95);--sidebar:rgba(8,8,20,.95);--panel-solid:#0b0b1a;--row-alt:rgba(0,0,0,.3);--input-bg:rgba(0,0,0,.4);--sunk:rgba(0,0,0,.28);}
     /* ── Temas (aba Aparência) — mesmo dm_tema do site/agente ── */
-    :host([data-theme="dark"]){background:#000;--bg0:#000;--bg1:#050608;--glass:rgba(9,10,13,.9);--panel-solid:#050608;--topbar:rgba(4,4,8,.96);--sidebar:rgba(3,3,7,.96);--brd:rgba(0,196,196,.16);--brddim:rgba(0,196,196,.07);--t1:#e8edf5;--t2:#aab6c8;--t3:#7a8698;--cyan:#00c4c4;--cyan-d:rgba(0,196,196,.14);--row-alt:rgba(255,255,255,.03);}
-    :host([data-theme="branco"]){background:#e8eef5;--bg0:#dfe6ef;--bg1:#f4f7fb;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(248,250,252,.98);--brd:rgba(0,149,168,.24);--brddim:rgba(0,149,168,.1);--t1:#0d1117;--t2:#2d3748;--t3:#5a6577;--cyan:#0095a8;--cyan-d:rgba(0,149,168,.1);--gold:#b8860b;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(0,0,0,.03);}
-    :host([data-theme="rosa"]){background:#fce4ec;--bg0:#f8d3e0;--bg1:#fff0f5;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,245,249,.98);--brd:rgba(233,30,140,.26);--brddim:rgba(233,30,140,.1);--t1:#1a0010;--t2:#4a0028;--t3:#80004a;--cyan:#e91e8c;--cyan-d:rgba(233,30,140,.1);--azul:#e91e8c;--grad:linear-gradient(135deg,#e91e8c,#c2185b);--gold:#c2185b;--verde:#2e7d32;--verm:#c2185b;--row-alt:rgba(233,30,140,.03);}
-    :host([data-theme="laranja"]){background:#fff1e0;--bg0:#ffe4c4;--bg1:#fff7ec;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,247,236,.98);--brd:rgba(249,115,22,.26);--brddim:rgba(249,115,22,.1);--t1:#1a0a00;--t2:#4a2000;--t3:#7c3a00;--cyan:#f97316;--cyan-d:rgba(249,115,22,.1);--azul:#f97316;--grad:linear-gradient(135deg,#f97316,#ea580c);--gold:#ea580c;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(249,115,22,.03);}
+    :host([data-theme="dark"]){background:#000;--bg0:#000;--bg1:#050608;--glass:rgba(9,10,13,.9);--panel-solid:#050608;--topbar:rgba(4,4,8,.96);--sidebar:rgba(3,3,7,.96);--brd:rgba(0,196,196,.16);--brddim:rgba(0,196,196,.07);--t1:#e8edf5;--t2:#aab6c8;--t3:#7a8698;--cyan:#00c4c4;--cyan-d:rgba(0,196,196,.14);--row-alt:rgba(255,255,255,.03);--input-bg:rgba(255,255,255,.04);--sunk:rgba(255,255,255,.03);}
+    :host([data-theme="branco"]){background:#e8eef5;--bg0:#dfe6ef;--bg1:#f4f7fb;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(248,250,252,.98);--brd:rgba(0,149,168,.24);--brddim:rgba(0,149,168,.1);--t1:#0d1117;--t2:#2d3748;--t3:#5a6577;--cyan:#0095a8;--cyan-d:rgba(0,149,168,.1);--gold:#b8860b;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(0,0,0,.03);--input-bg:#fff;--sunk:rgba(0,0,0,.035);}
+    :host([data-theme="rosa"]){background:#fce4ec;--bg0:#f8d3e0;--bg1:#fff0f5;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,245,249,.98);--brd:rgba(233,30,140,.26);--brddim:rgba(233,30,140,.1);--t1:#1a0010;--t2:#4a0028;--t3:#80004a;--cyan:#e91e8c;--cyan-d:rgba(233,30,140,.1);--azul:#e91e8c;--grad:linear-gradient(135deg,#e91e8c,#c2185b);--gold:#c2185b;--verde:#2e7d32;--verm:#c2185b;--row-alt:rgba(233,30,140,.03);--input-bg:#fff;--sunk:rgba(233,30,140,.04);}
+    :host([data-theme="laranja"]){background:#fff1e0;--bg0:#ffe4c4;--bg1:#fff7ec;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,247,236,.98);--brd:rgba(249,115,22,.26);--brddim:rgba(249,115,22,.1);--t1:#1a0a00;--t2:#4a2000;--t3:#7c3a00;--cyan:#f97316;--cyan-d:rgba(249,115,22,.1);--azul:#f97316;--grad:linear-gradient(135deg,#f97316,#ea580c);--gold:#ea580c;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(249,115,22,.03);--input-bg:#fff;--sunk:rgba(249,115,22,.04);}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     #root{width:100%;min-height:600px;overflow:visible;background:linear-gradient(180deg,var(--bg1),var(--bg0));color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
     .glass{background:var(--glass);border:1px solid var(--brd);border-radius:20px;position:relative;overflow:hidden;backdrop-filter:blur(12px)}.glass::after{content:'';position:absolute;bottom:0;left:0;right:0;background:var(--grad);height:2px}
@@ -4993,14 +4993,28 @@ class DimaiorAdmin extends HTMLElement {
     .qa-card,.qa-indigo,.qa-verm,.qa-verde,.qa-cyan,.qa-gold,.qa-slate{background:var(--glass);border-color:var(--brd);--qa-cor:var(--cyan);}
     .qa-card .qa-lbl{color:var(--t1);}
     .qa-card .qa-sub{color:var(--t3);}
+    /* Nos temas claros os cards do Acesso Rápido ficam no acento do tema (letra branca) — dão presença */
+    :host([data-theme="branco"]) .qa-card,:host([data-theme="rosa"]) .qa-card,:host([data-theme="laranja"]) .qa-card{background:var(--grad);border-color:transparent;box-shadow:0 8px 22px -4px var(--cyan-d);}
+    :host([data-theme="branco"]) .qa-card .qa-lbl,:host([data-theme="rosa"]) .qa-card .qa-lbl,:host([data-theme="laranja"]) .qa-card .qa-lbl{color:#fff;}
+    :host([data-theme="branco"]) .qa-card .qa-sub,:host([data-theme="rosa"]) .qa-card .qa-sub,:host([data-theme="laranja"]) .qa-card .qa-sub{color:rgba(255,255,255,.82);}
+    :host([data-theme="branco"]) .qa-ico-wrap,:host([data-theme="rosa"]) .qa-ico-wrap,:host([data-theme="laranja"]) .qa-ico-wrap{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff;box-shadow:none;}
+    :host([data-theme="branco"]) .qa-config-btn,:host([data-theme="rosa"]) .qa-config-btn,:host([data-theme="laranja"]) .qa-config-btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.32);color:#fff;}
+    :host([data-theme="branco"]) .qa-card:hover,:host([data-theme="rosa"]) .qa-card:hover,:host([data-theme="laranja"]) .qa-card:hover{background:var(--grad);filter:brightness(1.06);}
     /* dc2: rótulo/valor seguem o tema (número mantém a cor da variante) */
     .dc2 .dc2-lbl{color:var(--t2);}
     .box .bhead{background:var(--row-alt);}
     /* Textos/inputs que estavam com #fff/preto fixo e sumiam nos temas claros */
     .dd-headline,.lv-dc2-val{color:var(--t1);}
-    input,select,textarea{color:var(--t1);}
     .modal-box,.modal{background:var(--panel-solid);}
-    .mc select option,.cfg-inp option,select option{background:var(--panel-solid);color:var(--t1);}
+    /* Inputs/selects: eram rgba(0,0,0,.5) fixo -> caixa preta nos temas claros.
+       Escopado em #app pra não pegar o login (que é sempre escuro). */
+    #app select,#app textarea,#app input:not([type=checkbox]):not([type=radio]){background:var(--input-bg)!important;color:var(--t1)!important;border-color:var(--brd)!important;}
+    #app select option{background:var(--panel-solid)!important;color:var(--t1)!important;}
+    /* Painéis "afundados" que eram rgba(0,0,0,.3/.4) fixo */
+    .lv-cfg-painel,.dash-live-config,.busca,.qa-config-btn,.month-tab,.dd-chart-wrap,.uid-row-acoes,.saque-pix,.rk-body,.hist-body,.rec-body,.ph-acc-body,.sc-body{background:var(--sunk);}
+    /* Textos que continuavam #fff fixo em telas profundas */
+    .titulo,.btitulo,.dd-headline,.rk-nome,.hist-nome,.saque-nome,.saque-valor,.uid-kwai,.premio-pos{color:var(--t1);}
+    .rk-sub,.hist-meta,.saque-meta,.uid-row-meta{color:var(--t3);}
 
     /* ── Navegação inferior flutuante (mobile) — padrão do demo/agente ── */
     .mnav,.msheet,.fab{display:none;}
