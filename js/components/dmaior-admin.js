@@ -5040,7 +5040,7 @@ class DimaiorAdmin extends HTMLElement {
       .mnav button svg{width:22px;height:22px;opacity:.6;}
       .mnav button[aria-current="page"]{color:var(--azul);}
       .mnav button[aria-current="page"] svg{opacity:1;}
-      .fab{display:flex;align-items:center;justify-content:center;z-index:282;position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom) + 22px);transform:translateX(-50%);width:54px;height:54px;border:none;border-radius:50%;background:var(--grad);color:#fff;cursor:pointer;box-shadow:0 12px 28px -6px var(--cyan-d);}
+      .fab{display:flex;align-items:center;justify-content:center;z-index:282;position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom) + 36px);transform:translateX(-50%);width:54px;height:54px;border:none;border-radius:50%;background:var(--grad);color:#fff;cursor:pointer;box-shadow:0 12px 28px -6px var(--cyan-d);}
       .fab svg{width:22px;height:22px;}
       .fab.on{transform:translateX(-50%) rotate(45deg);}
       .msheet{display:block;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s ease;}
