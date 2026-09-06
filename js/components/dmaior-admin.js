@@ -4128,13 +4128,14 @@ class DimaiorAdmin extends HTMLElement {
     .lerr{margin-top:10px;padding:8px 12px;border-radius:var(--rs);background:rgba(248,113,113,.12);border:1px solid var(--verm);color:var(--verm);font-size:12px;text-align:center;display:none}
     .lload{display:none;align-items:center;justify-content:center;gap:8px;margin-top:10px;color:var(--t3);font-size:12px}.lload.on{display:flex}
     #app{display:none;flex-direction:column;min-height:600px}#app.on{display:flex}
-    .top{height:52px;background:var(--topbar);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;backdrop-filter:blur(10px)}.top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}
+    .top{height:52px;background:var(--topbar);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:200;backdrop-filter:blur(10px)}.top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}
     .top-chip{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;background:var(--cyan-d);border:1px solid var(--brd);color:var(--cyan);border-radius:99px;padding:2px 9px}.top-sp{flex:1}
     .btn-sair{padding:5px 10px;border:1px solid var(--brddim);border-radius:var(--rs);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}.btn-sair:hover{border-color:var(--verm);color:var(--verm)}
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .btn-ham:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
-    .shell{display:flex;flex:1;min-height:548px;}
-    .side{width:220px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;transform:translateZ(0);will-change:transform;}
+    .shell{display:flex;flex:1;min-height:calc(100dvh - 52px);align-items:stretch;}
+    .side{width:220px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;
+      align-self:flex-start;position:sticky;top:52px;max-height:calc(100dvh - 52px);}
     /* Menu recolhível no desktop (nada some — o trilho só recolhe/volta pelo botão do topo) */
     @media(min-width:701px){
       .btn-ham{display:flex;}
@@ -4146,7 +4147,7 @@ class DimaiorAdmin extends HTMLElement {
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
     .nb{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,212,.3);border-radius:99px;padding:1px 6px}.nb.live{background:rgba(248,113,113,.2);color:var(--verm);border-color:rgba(248,113,113,.4);animation:bl 1.8s infinite}.nb.gold{background:rgba(240,192,64,.2);color:var(--gold);border-color:rgba(240,192,64,.4)}
-    .content{flex:1;padding:20px;background:transparent;min-height:0;}
+    .content{flex:1;padding:20px;background:transparent;min-height:calc(100dvh - 52px);}
     .pag{display:none}.pag.on{display:block;animation:fadeUp .3s ease both}
     .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
     .titulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1rem,3vw,1.4rem);font-weight:700;letter-spacing:2px;color:var(--t1);text-transform:uppercase;display:flex;align-items:center;gap:8px}.psub{font-size:11px;color:var(--t3);margin-top:3px}.ph-r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
@@ -4991,6 +4992,13 @@ class DimaiorAdmin extends HTMLElement {
     @media(max-width:600px){.bloq-item{flex-direction:column;align-items:flex-start}.impulso-toggle-row{flex-wrap:wrap}}
 
     /* ═══════════ REDESIGN — overrides finais (vencem por ordem de fonte) ═══════════ */
+    /* Fora o "quadradinho azul" ao clicar (outline de foco do mouse) e o realce de toque.
+       Foco por teclado (:focus-visible) segue com um anel sutil pra acessibilidade. */
+    :host,*{-webkit-tap-highlight-color:transparent;}
+    #app :focus,#app :focus-within{outline:none;}
+    #app :focus-visible{outline:2px solid var(--cyan);outline-offset:1px;}
+    ::selection{background:var(--cyan-d);color:var(--t1);}
+    .ni.on svg{filter:none;}
     /* Acesso Rápido: sem a barra colorida por card (poluía) — cards uniformes de vidro */
     .qa-card::before{display:none!important;}
     .qa-card::after{display:none!important;}
@@ -5005,12 +5013,14 @@ class DimaiorAdmin extends HTMLElement {
     :host([data-theme="branco"]) .qa-ico-wrap,:host([data-theme="rosa"]) .qa-ico-wrap,:host([data-theme="laranja"]) .qa-ico-wrap{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.28);color:#fff;box-shadow:none;}
     :host([data-theme="branco"]) .qa-config-btn,:host([data-theme="rosa"]) .qa-config-btn,:host([data-theme="laranja"]) .qa-config-btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff;}
     :host([data-theme="branco"]) .qa-card:hover,:host([data-theme="rosa"]) .qa-card:hover,:host([data-theme="laranja"]) .qa-card:hover{background:var(--azul);filter:brightness(.95);}
-    /* dc2 (cards de cima): nos temas claros, superfície CHAPADA de vidro, sem tinta em degradê.
-       Identidade fica na borda + no número colorido. */
+    /* dc2 (cards de cima): nos temas claros ficam iguais ao Acesso Rápido —
+       cor CHAPADA do tema, ícone e texto brancos. */
     .dc2 .dc2-lbl{color:var(--t2);}
-    :host([data-theme="branco"]) .dc2,:host([data-theme="rosa"]) .dc2,:host([data-theme="laranja"]) .dc2{background-image:none!important;background:var(--glass);}
-    :host([data-theme="branco"]) .dc2 .dc2-val,:host([data-theme="rosa"]) .dc2 .dc2-val,:host([data-theme="laranja"]) .dc2 .dc2-val{color:var(--t1)!important;text-shadow:none!important;}
-    :host([data-theme="branco"]) .dc2 .dc2-ico,:host([data-theme="rosa"]) .dc2 .dc2-ico,:host([data-theme="laranja"]) .dc2 .dc2-ico{opacity:.42;text-shadow:none!important;}
+    :host([data-theme="branco"]) .dc2,:host([data-theme="rosa"]) .dc2,:host([data-theme="laranja"]) .dc2{background-image:none!important;background:var(--azul)!important;border-color:transparent!important;box-shadow:0 4px 14px rgba(0,0,0,.1)!important;}
+    :host([data-theme="branco"]) .dc2 .dc2-val,:host([data-theme="rosa"]) .dc2 .dc2-val,:host([data-theme="laranja"]) .dc2 .dc2-val,
+    :host([data-theme="branco"]) .dc2 .dc2-ico,:host([data-theme="rosa"]) .dc2 .dc2-ico,:host([data-theme="laranja"]) .dc2 .dc2-ico{color:#fff!important;text-shadow:none!important;opacity:1;}
+    :host([data-theme="branco"]) .dc2 .dc2-lbl,:host([data-theme="rosa"]) .dc2 .dc2-lbl,:host([data-theme="laranja"]) .dc2 .dc2-lbl{color:rgba(255,255,255,.82)!important;}
+    :host([data-theme="branco"]) .dc2 .dc2-ico,:host([data-theme="rosa"]) .dc2 .dc2-ico,:host([data-theme="laranja"]) .dc2 .dc2-ico{opacity:.85;}
     .box .bhead{background:var(--row-alt);}
     /* Textos/inputs que estavam com #fff/preto fixo e sumiam nos temas claros */
     .dd-headline,.lv-dc2-val{color:var(--t1);}
