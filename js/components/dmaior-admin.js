@@ -4070,18 +4070,19 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   _css(){return`
-    :host{display:block;width:100%;height:auto;min-height:600px;overflow:visible;background:#040414;
+    :host{display:block;width:100%;height:auto;min-height:600px;overflow:visible;background:#060B16;
       --cyan:#00d4d4;--cyan-d:rgba(0,212,212,.15);--azul:#3b82f6;--grad:linear-gradient(135deg,#3b82f6 0%,#00e5e5 100%);
-      --bg0:#04040e;--bg1:#0b0b1a;--brd:rgba(0,230,230,.18);--brddim:rgba(0,212,212,.08);--glass:rgba(18,18,32,.85);
+      --bg0:#060B16;--bg1:#0b0b1a;--brd:rgba(0,230,230,.18);--brddim:rgba(0,212,212,.08);--glass:rgba(18,18,32,.85);
       --t1:#fff;--t2:#d0d8e8;--t3:#a0b8c8;--verde:#4ade80;--verm:#f87171;--gold:#f0c040;--r:16px;--rs:10px;
-      --topbar:rgba(11,11,26,.95);--sidebar:rgba(8,8,20,.95);--panel-solid:#0b0b1a;--row-alt:rgba(0,0,0,.3);--input-bg:rgba(0,0,0,.4);--sunk:rgba(0,0,0,.28);}
-    /* ── Temas (aba Aparência) — mesmo dm_tema do site/agente ── */
-    :host([data-theme="dark"]){background:#000;--bg0:#000;--bg1:#050608;--glass:rgba(9,10,13,.9);--panel-solid:#050608;--topbar:rgba(4,4,8,.96);--sidebar:rgba(3,3,7,.96);--brd:rgba(0,196,196,.16);--brddim:rgba(0,196,196,.07);--t1:#e8edf5;--t2:#aab6c8;--t3:#7a8698;--cyan:#00c4c4;--cyan-d:rgba(0,196,196,.14);--row-alt:rgba(255,255,255,.03);--input-bg:rgba(255,255,255,.04);--sunk:rgba(255,255,255,.03);}
-    :host([data-theme="branco"]){background:#e8eef5;--bg0:#dfe6ef;--bg1:#f4f7fb;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(248,250,252,.98);--brd:rgba(0,149,168,.24);--brddim:rgba(0,149,168,.1);--t1:#0d1117;--t2:#2d3748;--t3:#5a6577;--cyan:#0095a8;--cyan-d:rgba(0,149,168,.1);--gold:#b8860b;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(0,0,0,.03);--input-bg:#fff;--sunk:rgba(0,0,0,.035);}
-    :host([data-theme="rosa"]){background:#fce4ec;--bg0:#f8d3e0;--bg1:#fff0f5;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,245,249,.98);--brd:rgba(233,30,140,.26);--brddim:rgba(233,30,140,.1);--t1:#1a0010;--t2:#4a0028;--t3:#80004a;--cyan:#e91e8c;--cyan-d:rgba(233,30,140,.1);--azul:#e91e8c;--grad:linear-gradient(135deg,#e91e8c,#c2185b);--gold:#c2185b;--verde:#2e7d32;--verm:#c2185b;--row-alt:rgba(233,30,140,.03);--input-bg:#fff;--sunk:rgba(233,30,140,.04);}
-    :host([data-theme="laranja"]){background:#fff1e0;--bg0:#ffe4c4;--bg1:#fff7ec;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,247,236,.98);--brd:rgba(249,115,22,.26);--brddim:rgba(249,115,22,.1);--t1:#1a0a00;--t2:#4a2000;--t3:#7c3a00;--cyan:#f97316;--cyan-d:rgba(249,115,22,.1);--azul:#f97316;--grad:linear-gradient(135deg,#f97316,#ea580c);--gold:#ea580c;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(249,115,22,.03);--input-bg:#fff;--sunk:rgba(249,115,22,.04);}
+      --topbar:rgba(11,11,26,.95);--sidebar:rgba(8,8,20,.95);--panel-solid:#0b0b1a;--row-alt:rgba(0,0,0,.3);--input-bg:rgba(0,0,0,.4);--sunk:rgba(0,0,0,.28);--shadow:rgba(0,0,0,.32);}
+    /* ── Temas (aba Aparência) — o fundo :host = mesmo --dm-bg do site/global.css ── */
+    :host([data-theme="dark"]){background:#000;--bg0:#000;--bg1:#050608;--glass:rgba(9,10,13,.9);--panel-solid:#050608;--topbar:rgba(4,4,8,.96);--sidebar:rgba(3,3,7,.96);--brd:rgba(0,196,196,.16);--brddim:rgba(0,196,196,.07);--t1:#e8edf5;--t2:#aab6c8;--t3:#7a8698;--cyan:#00c4c4;--cyan-d:rgba(0,196,196,.14);--row-alt:rgba(255,255,255,.03);--input-bg:rgba(255,255,255,.04);--sunk:rgba(255,255,255,.03);--shadow:rgba(0,0,0,.5);}
+    :host([data-theme="branco"]){background:#f0f4f8;--bg0:#f0f4f8;--bg1:#f7f9fc;--glass:#fff;--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:#f4f7fb;--brd:rgba(0,149,168,.22);--brddim:rgba(0,149,168,.1);--t1:#0d1117;--t2:#2d3748;--t3:#5a6577;--cyan:#0095a8;--cyan-d:rgba(0,149,168,.1);--gold:#b8860b;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(0,0,0,.025);--input-bg:#fff;--sunk:rgba(0,0,0,.03);--shadow:rgba(0,60,80,.1);}
+    :host([data-theme="rosa"]){background:#fff5f8;--bg0:#fff5f8;--bg1:#fffafc;--glass:#fff;--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:#fff0f5;--brd:rgba(233,30,140,.22);--brddim:rgba(233,30,140,.1);--t1:#1a0010;--t2:#4a0028;--t3:#80004a;--cyan:#e91e8c;--cyan-d:rgba(233,30,140,.1);--azul:#e91e8c;--grad:linear-gradient(135deg,#e91e8c,#c2185b);--gold:#c2185b;--verde:#2e7d32;--verm:#c2185b;--row-alt:rgba(233,30,140,.025);--input-bg:#fff;--sunk:rgba(233,30,140,.035);--shadow:rgba(233,30,140,.1);}
+    :host([data-theme="laranja"]){background:#fff8f0;--bg0:#fff8f0;--bg1:#fffcf7;--glass:#fff;--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:#fff7ec;--brd:rgba(249,115,22,.22);--brddim:rgba(249,115,22,.1);--t1:#1a0a00;--t2:#4a2000;--t3:#7c3a00;--cyan:#f97316;--cyan-d:rgba(249,115,22,.1);--azul:#f97316;--grad:linear-gradient(135deg,#f97316,#ea580c);--gold:#ea580c;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(249,115,22,.025);--input-bg:#fff;--sunk:rgba(249,115,22,.035);--shadow:rgba(249,115,22,.1);}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    #root{width:100%;min-height:600px;overflow:visible;background:linear-gradient(180deg,var(--bg1),var(--bg0));color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
+    #root{width:100%;min-height:100dvh;overflow:visible;background:linear-gradient(180deg,var(--bg1),var(--bg0));color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
+    #app{flex:1;}
     .glass{background:var(--glass);border:1px solid var(--brd);border-radius:20px;position:relative;overflow:hidden;backdrop-filter:blur(12px)}.glass::after{content:'';position:absolute;bottom:0;left:0;right:0;background:var(--grad);height:2px}
     #login{position:fixed;inset:0;min-height:100dvh;background:rgba(4,4,14,.98);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px}
     /* Login — padrão "app moderno" (mesmo do painel do agente): campos em pílula + selo de ícone */
@@ -4104,7 +4105,7 @@ class DimaiorAdmin extends HTMLElement {
     .btn-login:active{transform:scale(.98)}
 
     /* ── Aba Aparência (slide-over) ── */
-    .ap-gear{width:32px;height:32px;flex-shrink:0;border-radius:var(--rs);border:1px solid var(--brddim);background:rgba(0,0,0,.25);color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+    .ap-gear{width:32px;height:32px;flex-shrink:0;border-radius:var(--rs);border:1px solid var(--brddim);background:var(--sunk);color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
     .ap-gear:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
     .ap-backdrop{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s ease}
     .ap-backdrop.on{opacity:1;pointer-events:auto}
@@ -4128,7 +4129,7 @@ class DimaiorAdmin extends HTMLElement {
     .lload{display:none;align-items:center;justify-content:center;gap:8px;margin-top:10px;color:var(--t3);font-size:12px}.lload.on{display:flex}
     #app{display:none;flex-direction:column;min-height:600px}#app.on{display:flex}
     .top{height:52px;background:var(--topbar);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;backdrop-filter:blur(10px)}.top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}
-    .top-chip{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.3);color:var(--cyan);border-radius:99px;padding:2px 9px}.top-sp{flex:1}
+    .top-chip{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;background:var(--cyan-d);border:1px solid var(--brd);color:var(--cyan);border-radius:99px;padding:2px 9px}.top-sp{flex:1}
     .btn-sair{padding:5px 10px;border:1px solid var(--brddim);border-radius:var(--rs);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}.btn-sair:hover{border-color:var(--verm);color:var(--verm)}
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .btn-ham:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
@@ -4145,7 +4146,7 @@ class DimaiorAdmin extends HTMLElement {
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
     .nb{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,212,.3);border-radius:99px;padding:1px 6px}.nb.live{background:rgba(248,113,113,.2);color:var(--verm);border-color:rgba(248,113,113,.4);animation:bl 1.8s infinite}.nb.gold{background:rgba(240,192,64,.2);color:var(--gold);border-color:rgba(240,192,64,.4)}
-    .content{flex:1;padding:20px;background:linear-gradient(180deg,var(--bg1),var(--bg0));min-height:0;}
+    .content{flex:1;padding:20px;background:transparent;min-height:0;}
     .pag{display:none}.pag.on{display:block;animation:fadeUp .3s ease both}
     .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
     .titulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1rem,3vw,1.4rem);font-weight:700;letter-spacing:2px;color:var(--t1);text-transform:uppercase;display:flex;align-items:center;gap:8px}.psub{font-size:11px;color:var(--t3);margin-top:3px}.ph-r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
@@ -4306,11 +4307,11 @@ class DimaiorAdmin extends HTMLElement {
     .qa-gold{--qa-cor:#facc15;background:linear-gradient(90deg,rgba(250,204,21,.1),rgba(0,212,212,.025))}
     .qa-slate{--qa-cor:#38bdf8;background:linear-gradient(90deg,rgba(56,189,248,.1),rgba(0,212,212,.025))}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
-    .card{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:16px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s;box-shadow:0 4px 20px rgba(0,0,0,.3)}@media(hover:hover){.card:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.4);}}.card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--grad)}.card::before{content:'';position:absolute;top:-20px;right:-20px;width:60px;height:60px;border-radius:50%;filter:blur(24px);opacity:.12}
+    .card{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:16px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s;box-shadow:0 3px 12px var(--shadow)}@media(hover:hover){.card:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow);}}.card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--grad)}.card::before{content:'';position:absolute;top:-20px;right:-20px;width:60px;height:60px;border-radius:50%;filter:blur(24px);opacity:.12}
     .card.az::before,.card.cy::before{background:var(--cyan)}.card.vd::before{background:var(--verde)}.card.vm::before{background:var(--verm)}
     .card svg{margin-bottom:4px;opacity:.4;width:14px;height:14px}.card-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1.1rem,4vw,1.8rem);font-weight:700;line-height:1.1;word-break:break-word;overflow-wrap:anywhere;}
     .card.az .card-val,.card.cy .card-val{color:var(--cyan);text-shadow:0 0 15px var(--cyan-d)}.card.vd .card-val{color:var(--verde)}.card.vm .card-val{color:var(--verm)}.card-lbl{font-size:10px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-top:4px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
-    .box{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;margin-bottom:16px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.3);transition:border-color .2s}
+    .box{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;margin-bottom:16px;position:relative;box-shadow:0 4px 16px var(--shadow);transition:border-color .2s}
     .box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}
     .box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,212,.15),transparent)}
     .bhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--brddim);flex-wrap:wrap;gap:8px;background:rgba(0,0,0,.1)}.btitulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:6px}.bacoes{display:flex;gap:7px;align-items:center}
@@ -4572,10 +4573,11 @@ class DimaiorAdmin extends HTMLElement {
     #root.very-narrow .lc-footer{gap:4px;}
     @media(max-width:700px){
       /* ── Base ── */
-      :host{background:#04040e !important;}
-      #root{background:#04040e !important;min-width:0;max-width:100vw;overflow:visible;}
+      :host{background:var(--bg0) !important;}
+      #root{background:var(--bg0) !important;min-width:0;max-width:100vw;overflow:visible;min-height:100dvh;}
       *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-sizing:border-box;}
-      .glass,.box,.card,.modal,.modal-box,.content{background-color:var(--panel-solid) !important;}
+      .glass,.box,.card,.modal,.modal-box{background-color:var(--panel-solid) !important;}
+      .content{background:transparent !important;}
       .side{background:var(--sidebar) !important;position:fixed;left:0;top:52px;bottom:0;width:min(82vw,320px);max-width:320px;z-index:260;transform:translateX(-105%);transition:transform .25s ease;max-height:none;box-shadow:18px 0 40px rgba(0,0,0,.42);border-right:1px solid rgba(0,212,212,.28);}.side.open{transform:translateX(0);}
       .side-backdrop{display:none;position:fixed;inset:52px 0 0 0;background:rgba(0,0,0,.55);z-index:240;}.side-backdrop.on{display:block;}
       .top{background:var(--topbar) !important;flex-wrap:nowrap;gap:6px;position:sticky;top:0;z-index:300;}
@@ -4624,8 +4626,10 @@ class DimaiorAdmin extends HTMLElement {
       .btitulo{font-size:12px;}
       .bacoes{flex-wrap:wrap;gap:4px;}
       .busca{flex:1;min-width:0;}.busca input{width:100%;min-width:0;}
-      /* Tabelas genéricas: scroll dentro do box */
-      .box > table, .box > div > table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;}
+      /* Tabelas: NUNCA empurram a página — scroll horizontal dentro do próprio container.
+         (regra do usuário: no mobile nada rola pra horizontal, só o conteúdo interno) */
+      .content table,.box table,#tbConfigForm table,#tbSolicForm table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;width:100%;}
+      .content table td[style*="flex"]{flex-wrap:wrap;}
       th{padding:5px 6px;font-size:9px;white-space:nowrap;}
       td{padding:6px 6px;font-size:11px;}
 
