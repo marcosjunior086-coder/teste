@@ -44,15 +44,63 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   connectedCallback() {
-    this._loadFonts(); this._render(); this._bindEvents();
+    this._loadFonts(); this._syncThemeHost(); this._render(); this._bindEvents();
+    this._themeHandler = () => this._syncThemeHost();
+    this._storageHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
+    window.addEventListener('dmaior:tema', this._themeHandler);
+    window.addEventListener('storage', this._storageHandler);
     const tk = localStorage.getItem(this.TK_KEY)||'';
     if (tk) { this._token=tk; this._validarSessao(); }
     this._startHeightObserver();
+  }
+  // Espelha o dm_tema do site no atributo data-theme do host (mesmo mecanismo do menu/agente)
+  _syncThemeHost(){
+    let t='original';
+    try{ t = localStorage.getItem('dm_tema') || 'original'; }catch(_){}
+    if(t==='original') this.removeAttribute('data-theme');
+    else this.setAttribute('data-theme', t);
+    const s=this.shadowRoot; if(!s) return;
+    s.querySelectorAll('.ap-theme').forEach(b=>b.classList.toggle('on', b.dataset.themeId===t));
+    if(t!=='original') document.documentElement.setAttribute('data-theme',t);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  _bindAparencia(s){
+    const panel=s.getElementById('apPanel'), bd=s.getElementById('apBackdrop');
+    const open=()=>{panel.classList.add('on');bd.classList.add('on');panel.setAttribute('aria-hidden','false');this._syncAparencia();};
+    const close=()=>{panel.classList.remove('on');bd.classList.remove('on');panel.setAttribute('aria-hidden','true');};
+    s.getElementById('btnAparencia')?.addEventListener('click',open);
+    s.getElementById('apClose')?.addEventListener('click',close);
+    bd?.addEventListener('click',close);
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&panel.classList.contains('on')) close(); });
+    s.querySelectorAll('.ap-theme').forEach(b=>b.addEventListener('click',()=>{
+      const t=b.dataset.themeId;
+      try{ localStorage.setItem('dm_tema',t); }catch(_){}
+      this._syncThemeHost();
+      if(window.DMaiorPrefs?.applyThemeMeta) window.DMaiorPrefs.applyThemeMeta();
+      window.dispatchEvent(new CustomEvent('dmaior:tema',{detail:{tema:t}}));
+    }));
+    const selLang=s.getElementById('apLang'), selFont=s.getElementById('apFont');
+    selLang?.addEventListener('change',()=>{ window.DMaiorPrefs?.setLanguage?.(selLang.value); });
+    selFont?.addEventListener('change',()=>{ window.DMaiorPrefs?.setFontFamily?.(selFont.value); });
+    window.addEventListener('dmaior:preferences',()=>this._syncAparencia());
+    this._syncAparencia();
+  }
+  _syncAparencia(){
+    const s=this.shadowRoot, P=window.DMaiorPrefs; if(!s) return;
+    let t='original'; try{ t=localStorage.getItem('dm_tema')||'original'; }catch(_){}
+    s.querySelectorAll('.ap-theme').forEach(b=>b.classList.toggle('on', b.dataset.themeId===t));
+    if(P){
+      const l=s.getElementById('apLang'), f=s.getElementById('apFont');
+      if(l&&P.getLang) l.value=P.getLang();
+      if(f&&P.getFontFamily) f.value=P.getFontFamily();
+    }
   }
   disconnectedCallback(){
     this._widthObs?.disconnect();
     this._ro?.disconnect();
     this._ro2?.disconnect();
+    window.removeEventListener('dmaior:tema', this._themeHandler);
+    window.removeEventListener('storage', this._storageHandler);
     clearTimeout(this._debounceTimer);
     clearInterval(this._initInterval);
   }
@@ -1790,6 +1838,7 @@ class DimaiorAdmin extends HTMLElement {
     });
     s.getElementById('sideBackdrop')?.addEventListener('click',()=>this._fecharMenuMobile());
     s.getElementById('root').addEventListener('click',e=>{const side=s.getElementById('side'),ham=s.getElementById('btnHam');if(side?.classList.contains('open')&&!side.contains(e.target)&&e.target!==ham&&!ham.contains(e.target))this._fecharMenuMobile();});
+    this._bindAparencia(s);
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
     s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('dashFonteToggle')?.addEventListener('change',e=>this._salvarDashFonteToggle(e.target.checked));s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
@@ -3982,7 +4031,13 @@ class DimaiorAdmin extends HTMLElement {
     :host{display:block;width:100%;height:auto;min-height:600px;overflow:visible;background:#040414;
       --cyan:#00d4d4;--cyan-d:rgba(0,212,212,.15);--azul:#3b82f6;--grad:linear-gradient(135deg,#3b82f6 0%,#00e5e5 100%);
       --bg0:#04040e;--bg1:#0b0b1a;--brd:rgba(0,230,230,.18);--brddim:rgba(0,212,212,.08);--glass:rgba(18,18,32,.85);
-      --t1:#fff;--t2:#d0d8e8;--t3:#a0b8c8;--verde:#4ade80;--verm:#f87171;--gold:#f0c040;--r:16px;--rs:10px;}
+      --t1:#fff;--t2:#d0d8e8;--t3:#a0b8c8;--verde:#4ade80;--verm:#f87171;--gold:#f0c040;--r:16px;--rs:10px;
+      --topbar:rgba(11,11,26,.95);--sidebar:rgba(8,8,20,.95);--panel-solid:#0b0b1a;--row-alt:rgba(0,0,0,.3);}
+    /* ── Temas (aba Aparência) — mesmo dm_tema do site/agente ── */
+    :host([data-theme="dark"]){background:#000;--bg0:#000;--bg1:#050608;--glass:rgba(9,10,13,.9);--panel-solid:#050608;--topbar:rgba(4,4,8,.96);--sidebar:rgba(3,3,7,.96);--brd:rgba(0,196,196,.16);--brddim:rgba(0,196,196,.07);--t1:#e8edf5;--t2:#aab6c8;--t3:#7a8698;--cyan:#00c4c4;--cyan-d:rgba(0,196,196,.14);--row-alt:rgba(255,255,255,.03);}
+    :host([data-theme="branco"]){background:#e8eef5;--bg0:#dfe6ef;--bg1:#f4f7fb;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(248,250,252,.98);--brd:rgba(0,149,168,.24);--brddim:rgba(0,149,168,.1);--t1:#0d1117;--t2:#2d3748;--t3:#5a6577;--cyan:#0095a8;--cyan-d:rgba(0,149,168,.1);--gold:#b8860b;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(0,0,0,.03);}
+    :host([data-theme="rosa"]){background:#fce4ec;--bg0:#f8d3e0;--bg1:#fff0f5;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,245,249,.98);--brd:rgba(233,30,140,.26);--brddim:rgba(233,30,140,.1);--t1:#1a0010;--t2:#4a0028;--t3:#80004a;--cyan:#e91e8c;--cyan-d:rgba(233,30,140,.1);--azul:#e91e8c;--grad:linear-gradient(135deg,#e91e8c,#c2185b);--gold:#c2185b;--verde:#2e7d32;--verm:#c2185b;--row-alt:rgba(233,30,140,.03);}
+    :host([data-theme="laranja"]){background:#fff1e0;--bg0:#ffe4c4;--bg1:#fff7ec;--glass:rgba(255,255,255,.94);--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:rgba(255,247,236,.98);--brd:rgba(249,115,22,.26);--brddim:rgba(249,115,22,.1);--t1:#1a0a00;--t2:#4a2000;--t3:#7c3a00;--cyan:#f97316;--cyan-d:rgba(249,115,22,.1);--azul:#f97316;--grad:linear-gradient(135deg,#f97316,#ea580c);--gold:#ea580c;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(249,115,22,.03);}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     #root{width:100%;min-height:600px;overflow:visible;background:linear-gradient(180deg,var(--bg1),var(--bg0));color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
     .glass{background:var(--glass);border:1px solid var(--brd);border-radius:20px;position:relative;overflow:hidden;backdrop-filter:blur(12px)}.glass::after{content:'';position:absolute;bottom:0;left:0;right:0;background:var(--grad);height:2px}
@@ -4005,16 +4060,38 @@ class DimaiorAdmin extends HTMLElement {
     .btn-login{width:100%;height:54px;padding:0;background:var(--grad);border:none;border-radius:999px;color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:opacity .2s,transform .2s;box-shadow:0 14px 30px -6px rgba(59,130,246,.5);margin-top:8px}
     .btn-login:hover{opacity:.95}
     .btn-login:active{transform:scale(.98)}
+
+    /* ── Aba Aparência (slide-over) ── */
+    .ap-gear{width:32px;height:32px;flex-shrink:0;border-radius:var(--rs);border:1px solid var(--brddim);background:rgba(0,0,0,.25);color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+    .ap-gear:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
+    .ap-backdrop{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s ease}
+    .ap-backdrop.on{opacity:1;pointer-events:auto}
+    .ap-panel{position:fixed;top:0;right:0;bottom:0;z-index:401;width:min(360px,92vw);transform:translateX(102%);background:var(--panel-solid);border-left:1px solid var(--brd);box-shadow:-22px 0 55px rgba(0,0,0,.4);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto}
+    .ap-panel.on{transform:translateX(0)}
+    .ap-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--brd);position:sticky;top:0;background:var(--panel-solid)}
+    .ap-head h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t1)}
+    .ap-close{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.1);color:var(--verm);cursor:pointer}
+    .ap-body{padding:18px;display:flex;flex-direction:column;gap:22px}
+    .ap-label{display:block;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+    .ap-themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+    .ap-theme{display:flex;align-items:center;gap:7px;padding:9px 10px;border-radius:10px;border:1px solid var(--brd);background:var(--glass);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
+    .ap-theme:hover{border-color:rgba(59,130,246,.4)}
+    .ap-theme.on{border-color:var(--azul);color:var(--t1);background:rgba(59,130,246,.1)}
+    .ap-theme .sw{width:15px;height:15px;border-radius:5px;flex:none}
+    .ap-field+.ap-field{margin-top:11px}
+    .ap-field label{display:block;font-size:11px;color:var(--t3);margin-bottom:6px}
+    .ap-select{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--brd);background:var(--glass);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;cursor:pointer}
+    .ap-note{font-size:11px;color:var(--t3);line-height:1.55}
     .lerr{margin-top:10px;padding:8px 12px;border-radius:var(--rs);background:rgba(248,113,113,.12);border:1px solid var(--verm);color:var(--verm);font-size:12px;text-align:center;display:none}
     .lload{display:none;align-items:center;justify-content:center;gap:8px;margin-top:10px;color:var(--t3);font-size:12px}.lload.on{display:flex}
     #app{display:none;flex-direction:column;min-height:600px}#app.on{display:flex}
-    .top{height:52px;background:rgba(11,11,26,.95);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;backdrop-filter:blur(10px)}.top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}
+    .top{height:52px;background:var(--topbar);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;backdrop-filter:blur(10px)}.top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad)}
     .top-chip{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.3);color:var(--cyan);border-radius:99px;padding:2px 9px}.top-sp{flex:1}
     .btn-sair{padding:5px 10px;border:1px solid var(--brddim);border-radius:var(--rs);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}.btn-sair:hover{border-color:var(--verm);color:var(--verm)}
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .btn-ham:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
     .shell{display:flex;flex:1;min-height:548px;}
-    .side{width:220px;flex-shrink:0;background:rgba(8,8,20,.95);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;transform:translateZ(0);will-change:transform;}
+    .side{width:220px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;transform:translateZ(0);will-change:transform;}
     /* Menu recolhível no desktop (nada some — o trilho só recolhe/volta pelo botão do topo) */
     @media(min-width:701px){
       .btn-ham{display:flex;}
@@ -4065,6 +4142,7 @@ class DimaiorAdmin extends HTMLElement {
     .dc2-slate{background-image:linear-gradient(150deg,rgba(148,163,184,.16),rgba(148,163,184,0) 62%);border-color:rgba(148,163,184,.3);}.dc2-slate .dc2-ico,.dc2-slate .dc2-val{color:#cbd5e1;text-shadow:none;}
     .dc2-roxo{background-image:linear-gradient(150deg,rgba(192,132,252,.18),rgba(192,132,252,0) 62%);border-color:rgba(192,132,252,.32);}.dc2-roxo .dc2-ico,.dc2-roxo .dc2-val{color:#e0c8fd;text-shadow:none;}
     .dc2-azul{background-image:linear-gradient(150deg,rgba(96,165,250,.19),rgba(96,165,250,0) 62%);border-color:rgba(96,165,250,.34);}.dc2-azul .dc2-ico,.dc2-azul .dc2-val{color:#93c5fd;text-shadow:none;}
+
 
     /* ══ Dashboard de Desempenho ══ */
     .dd-row2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
@@ -4195,7 +4273,7 @@ class DimaiorAdmin extends HTMLElement {
     .box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,212,.15),transparent)}
     .bhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--brddim);flex-wrap:wrap;gap:8px;background:rgba(0,0,0,.1)}.btitulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:6px}.bacoes{display:flex;gap:7px;align-items:center}
     .busca{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.4);border:1px solid var(--brd);border-radius:var(--rs);padding:5px 9px}.busca input{background:none;border:none;outline:none;color:var(--t1);font-size:12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);width:130px}
-    table{width:100%;border-collapse:collapse}thead tr{background:rgba(0,0,0,.3)}th{padding:8px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--brddim);font-family:var(--dm-font-title,'Rajdhani',sans-serif)}td{padding:10px 14px;border-bottom:1px solid var(--brddim);font-size:12px;color:var(--t2);vertical-align:middle}tbody tr:last-child td{border-bottom:none}@media(hover:hover){tbody tr:hover{background:var(--cyan-d)}}
+    table{width:100%;border-collapse:collapse}thead tr{background:var(--row-alt)}th{padding:8px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--brddim);font-family:var(--dm-font-title,'Rajdhani',sans-serif)}td{padding:10px 14px;border-bottom:1px solid var(--brddim);font-size:12px;color:var(--t2);vertical-align:middle}tbody tr:last-child td{border-bottom:none}@media(hover:hover){tbody tr:hover{background:var(--cyan-d)}}
     .rank-mobile-only,.hist-mobile-only{display:none !important}
     .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:.5px}.badge::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor}.badge.on{background:rgba(74,222,128,.12);color:var(--verde);border:1px solid rgba(74,222,128,.3)}.badge.off{background:rgba(248,113,113,.12);color:var(--verm);border:1px solid rgba(248,113,113,.25)}.badge.neutro{background:rgba(255,255,255,.05);color:var(--t3);border:1px solid rgba(255,255,255,.1)}.badge.live{background:rgba(248,113,113,.15);color:var(--verm);border:1px solid rgba(248,113,113,.4);animation:bl 1.8s infinite}
     .vbadge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;font-family:var(--dm-font-title,'Rajdhani',sans-serif)}.vbadge.up{background:rgba(74,222,128,.12);color:var(--verde);border:1px solid rgba(74,222,128,.3)}.vbadge.down{background:rgba(248,113,113,.12);color:var(--verm);border:1px solid rgba(248,113,113,.3)}.vbadge.neutro{background:rgba(255,255,255,.05);color:var(--t3);border:1px solid rgba(255,255,255,.1)}
@@ -4455,10 +4533,10 @@ class DimaiorAdmin extends HTMLElement {
       :host{background:#04040e !important;}
       #root{background:#04040e !important;min-width:0;max-width:100vw;overflow:visible;}
       *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-sizing:border-box;}
-      .glass,.box,.card,.modal,.modal-box,.side,.top,.content{background-color:#0b0b1a !important;}
-      .side{background:#060614 !important;position:fixed;left:0;top:52px;bottom:0;width:min(82vw,320px);max-width:320px;z-index:260;transform:translateX(-105%);transition:transform .25s ease;max-height:none;box-shadow:18px 0 40px rgba(0,0,0,.42);border-right:1px solid rgba(0,212,212,.28);}.side.open{transform:translateX(0);}
+      .glass,.box,.card,.modal,.modal-box,.content{background-color:var(--panel-solid) !important;}
+      .side{background:var(--sidebar) !important;position:fixed;left:0;top:52px;bottom:0;width:min(82vw,320px);max-width:320px;z-index:260;transform:translateX(-105%);transition:transform .25s ease;max-height:none;box-shadow:18px 0 40px rgba(0,0,0,.42);border-right:1px solid rgba(0,212,212,.28);}.side.open{transform:translateX(0);}
       .side-backdrop{display:none;position:fixed;inset:52px 0 0 0;background:rgba(0,0,0,.55);z-index:240;}.side-backdrop.on{display:block;}
-      .top{background:#060614 !important;flex-wrap:nowrap;gap:6px;position:sticky;top:0;z-index:300;}
+      .top{background:var(--topbar) !important;flex-wrap:nowrap;gap:6px;position:sticky;top:0;z-index:300;}
       .top-chip{font-size:8px;padding:2px 7px;letter-spacing:1px;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       .btn-ham{display:flex;flex-shrink:0;}
       .btn-sair{font-size:10px;padding:4px 8px;flex-shrink:0;}
@@ -4865,6 +4943,22 @@ class DimaiorAdmin extends HTMLElement {
     .bloq-motivo{font-size:12px;color:var(--t2);font-style:italic;margin-bottom:3px}
     .bloq-meta{font-size:10px;color:var(--t3)}
     @media(max-width:600px){.bloq-item{flex-direction:column;align-items:flex-start}.impulso-toggle-row{flex-wrap:wrap}}
+
+    /* ═══════════ REDESIGN — overrides finais (vencem por ordem de fonte) ═══════════ */
+    /* Acesso Rápido: sem a barra colorida por card (poluía) — cards uniformes de vidro */
+    .qa-card::before{display:none!important;}
+    .qa-card::after{display:none!important;}
+    .qa-card,.qa-indigo,.qa-verm,.qa-verde,.qa-cyan,.qa-gold,.qa-slate{background:var(--glass);border-color:var(--brd);--qa-cor:var(--cyan);}
+    .qa-card .qa-lbl{color:var(--t1);}
+    .qa-card .qa-sub{color:var(--t3);}
+    /* dc2: rótulo/valor seguem o tema (número mantém a cor da variante) */
+    .dc2 .dc2-lbl{color:var(--t2);}
+    .box .bhead{background:var(--row-alt);}
+    /* Textos/inputs que estavam com #fff/preto fixo e sumiam nos temas claros */
+    .dd-headline,.lv-dc2-val{color:var(--t1);}
+    input,select,textarea{color:var(--t1);}
+    .modal-box,.modal{background:var(--panel-solid);}
+    .mc select option,.cfg-inp option,select option{background:var(--panel-solid);color:var(--t1);}
   `;}
 
   _html(){
@@ -4877,8 +4971,36 @@ class DimaiorAdmin extends HTMLElement {
     return`<div id="root">
       <div id="login"><div class="lbox"><img class="llogo" src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency"/><h2>Painel Admin</h2><div class="lsub">Acesso restrito</div><div class="lf"><span class="lf-ic">${this._ico('users',20)}</span><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="lf"><span class="lf-ic">${this._ico('lock_r',20)}</span><input id="iP" type="password" placeholder="Senha" autocomplete="current-password"/><button class="lf-eye" id="btnEyeAdm" type="button" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
       <div id="app">
-        <div class="top"><button class="btn-ham" id="btnHam" aria-label="Abrir menu" aria-expanded="false">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="btn btn-o btn-sm" id="btnVoltarSite">${this._ico('home',13)} <span class="btn-voltar-txt">Voltar ao Site</span></button><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
+        <div class="top"><button class="btn-ham" id="btnHam" aria-label="Recolher menu" aria-expanded="false">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="ap-gear" id="btnAparencia" type="button" aria-label="Aparência" title="Aparência">${this._ico('settings',15)}</button><button class="btn btn-o btn-sm" id="btnVoltarSite">${this._ico('home',13)} <span class="btn-voltar-txt">Voltar ao Site</span></button><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
         <div class="side-backdrop" id="sideBackdrop"></div>
+        <div class="ap-backdrop" id="apBackdrop"></div>
+        <aside class="ap-panel" id="apPanel" aria-hidden="true" aria-label="Aparência">
+          <div class="ap-head"><h3>Aparência</h3><button class="ap-close" id="apClose" type="button" aria-label="Fechar">${this._ico('x_circle',16)}</button></div>
+          <div class="ap-body">
+            <div class="ap-group"><span class="ap-label">Tema</span>
+              <div class="ap-themes" id="apThemes">
+                <button class="ap-theme" type="button" data-theme-id="original"><span class="sw" style="background:#0a0e27;border:1.5px solid rgba(0,212,212,.5)"></span>Padrão</button>
+                <button class="ap-theme" type="button" data-theme-id="dark"><span class="sw" style="background:#0d0f14;border:1.5px solid rgba(180,180,200,.3)"></span>Escuro</button>
+                <button class="ap-theme" type="button" data-theme-id="branco"><span class="sw" style="background:#f0f4f8;border:1.5px solid rgba(0,0,0,.25)"></span>Branco</button>
+                <button class="ap-theme" type="button" data-theme-id="rosa"><span class="sw" style="background:#fce4ec;border:1.5px solid #e91e8c"></span>Rosa</button>
+                <button class="ap-theme" type="button" data-theme-id="laranja"><span class="sw" style="background:#fff3e0;border:1.5px solid #f97316"></span>Laranja</button>
+              </div>
+            </div>
+            <div class="ap-group"><span class="ap-label">Acessibilidade</span>
+              <div class="ap-field"><label for="apLang">Idioma</label>
+                <select class="ap-select" id="apLang" data-pref-lang-select>
+                  <option value="pt-BR">Português BR</option><option value="en">English</option><option value="es">Español</option><option value="zh">中文</option>
+                </select>
+              </div>
+              <div class="ap-field"><label for="apFont">Fonte</label>
+                <select class="ap-select" id="apFont">
+                  <option value="dmaior">DMaior (Padrão)</option><option value="inter">Inter</option><option value="manrope">Manrope</option><option value="montserrat">Montserrat</option><option value="opensans">Open Sans</option><option value="plusjakarta">Plus Jakarta Sans</option><option value="poppins">Poppins</option><option value="sistema">Sistema</option>
+                </select>
+              </div>
+            </div>
+            <p class="ap-note">Fica salvo neste aparelho. O tema é o mesmo do site e do painel do agente.</p>
+          </div>
+        </aside>
         <div class="shell">
           <div class="side" id="side">
             ${navSec('principal','Principal',

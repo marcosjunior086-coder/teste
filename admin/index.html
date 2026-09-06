@@ -15,21 +15,28 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DMaior Admin">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="dark light">
   <title>Admin — DMaior Agency</title>
+
+  <!-- Boot de tema: aplica data-theme antes do 1º paint (mesmo dm_tema do site/agente) -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('dm_tema');
+        if (t && t !== 'original') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
-    /* Fundo escuro fixo para o admin — não depende de temas globais */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      background: #0a0e27;
-      min-height: 100%;
-      width: 100%;
-    }
-    dmaior-admin {
-      display: block;
-      width: 100%;
-      min-height: 100vh;
-    }
+    html, body { background: #0a0e27; min-height: 100%; width: 100%; }
+    /* Fundo acompanha o tema escolhido na aba Aparência */
+    html[data-theme="dark"],    html[data-theme="dark"] body    { background: #000; }
+    html[data-theme="branco"],  html[data-theme="branco"] body  { background: #e8eef5; }
+    html[data-theme="rosa"],    html[data-theme="rosa"] body    { background: #fce4ec; }
+    html[data-theme="laranja"], html[data-theme="laranja"] body { background: #fff1e0; }
+    dmaior-admin { display: block; width: 100%; min-height: 100vh; }
   </style>
 </head>
 <body>
@@ -39,8 +46,10 @@
   <!-- api.js expõe DmaiorConfig (URLs dos workers) para o componente usar -->
   <script charset=utf-8 src="js/utils/helpers.js"></script>
   <script charset=utf-8 src="js/api.js?v=20260903-push-url"></script>
+  <!-- Motor de preferências (tema/fonte/idioma) — mesmo do site/agente. Expõe window.DMaiorPrefs -->
+  <script charset=utf-8 src="js/preferences.js?v=20260905-admin-aparencia"></script>
   <!-- Componente admin original — contém todo visual e lógica de login/painel -->
-  <script charset=utf-8 src="js/components/dmaior-admin.js?v=20260905-redesign-1"></script>
+  <script charset=utf-8 src="js/components/dmaior-admin.js?v=20260905-redesign-2"></script>
   <!-- router.js NÃO é carregado aqui: o admin tem login próprio embutido -->
   <dmaior-cookie-consent></dmaior-cookie-consent>
   <script charset=utf-8 src="js/components/cookie-consent.js"></script>
