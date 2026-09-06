@@ -33,10 +33,14 @@
     <!-- 1º — Widget de live (abaixo da barra de menu) -->
     <kwai-live-widget></kwai-live-widget>
 
-    <!-- 2º — Menu de serviços -->
+    <!-- Layout "Web Pro" (default) — carrossel + hero + recarga + acesso + benefícios + FAQ + CTA.
+         Só aparece quando dm_layout === 'webpro'; aplicarLayout() controla a visibilidade. -->
+    <dmaior-home-webpro style="display:none"></dmaior-home-webpro>
+
+    <!-- 2º — Menu de serviços (layouts "Padrão" e "Antigo") -->
     <dmaior-services-menu></dmaior-services-menu>
 
-    <!-- 3º — Benefícios e FAQ (oculto no tema Dinâmico Pro) -->
+    <!-- 3º — Benefícios e FAQ (oculto nos layouts Padrão e Web Pro) -->
     <div id="section-beneficios" class="dm-container">
       <widget-beneficios></widget-beneficios>
     </div>
@@ -49,28 +53,33 @@
   <script charset=utf-8 src="js/api.js"></script>
   <script charset=utf-8 src="js/auth.js"></script>
   <script charset=utf-8 src="js/router.js"></script>
-  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260801-sino-rapido-fix"></script>
+  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260906-webpro"></script>
   <script charset=utf-8 src="js/components/live-widget.js?v=20260824-buffer-mini-player"></script>
   <script charset=utf-8 src="js/components/services-menu.js?v=20260801-pk-diario"></script>
   <script charset=utf-8 src="js/components/beneficios.js?v=20260624-3"></script>
+  <script charset=utf-8 src="js/components/home-webpro.js?v=20260906-webpro-1"></script>
 
   <script>
-    // -- Controle de layout — oculta benefícios no tema Dinâmico Pro ----------
+    // -- Controle de layout: 'webpro' (default) | 'dinamico' (Padrão) | 'original' (Antigo) --
     function aplicarLayout(layout) {
-      var sec = document.getElementById('section-beneficios');
-      if (!sec) return;
-      // Dinâmico Pro: esconde seção de benefícios; Original: mostra
-      sec.style.display = (layout === 'dinamico') ? 'none' : '';
+      var isWeb    = (layout === 'webpro');
+      var sec      = document.getElementById('section-beneficios');
+      var services = document.querySelector('dmaior-services-menu');
+      var webpro   = document.querySelector('dmaior-home-webpro');
+      // Benefícios/FAQ: aparece só no layout "Antigo" (Web Pro e Padrão têm os seus)
+      if (sec)      sec.style.display      = (isWeb || layout === 'dinamico') ? 'none' : '';
+      if (services) services.style.display = isWeb ? 'none' : '';
+      if (webpro)   webpro.style.display   = isWeb ? '' : 'none';
     }
 
-    // Aplica o tema salvo imediatamente ao carregar a página
+    // Aplica o layout salvo imediatamente ao carregar a página (default: Web Pro)
     try {
-      aplicarLayout(localStorage.getItem('dm_layout') || 'dinamico');
-    } catch (e) { /* localStorage bloqueado — mantém padrão */ }
+      aplicarLayout(localStorage.getItem('dm_layout') || 'webpro');
+    } catch (e) { aplicarLayout('webpro'); }
 
-    // Reage em tempo real quando o usuário troca o tema via engrenagem
+    // Reage em tempo real quando o usuário troca o layout via engrenagem
     window.addEventListener('dmaior:layout', function(e) {
-      try { aplicarLayout(e.detail && e.detail.layout ? e.detail.layout : 'dinamico'); }
+      try { aplicarLayout(e.detail && e.detail.layout ? e.detail.layout : 'webpro'); }
       catch (e) {}
     });
   </script>

@@ -329,6 +329,9 @@ class MenuMobileDMaior extends HTMLElement {
           <div class="layout-dropdown" id="layoutDropdown">
             <div class="dd-label">Layout</div>
             <div class="dd-divider"></div>
+            <button class="dd-option" id="ddWebpro" data-layout="webpro">
+              <span class="dd-dot" style="background:#3b82f6;"></span><span class="dd-copy"><span class="dd-marquee">Web Pro</span></span><span class="dd-arrow">&rsaquo;</span>
+            </button>
             <button class="dd-option" id="ddDinamico" data-layout="dinamico">
               <span class="dd-dot" style="background:#f0c040;"></span><span class="dd-copy"><span class="dd-marquee">Padrão</span></span><span class="dd-arrow">&rsaquo;</span>
             </button>
@@ -508,13 +511,15 @@ class MenuMobileDMaior extends HTMLElement {
     const layoutDropdown = root.getElementById('layoutDropdown');
     const ddOriginal     = root.getElementById('ddOriginal');
     const ddDinamico     = root.getElementById('ddDinamico');
+    const ddWebpro       = root.getElementById('ddWebpro');
 
-    // Lê layout salvo e marca opção ativa
+    // Lê layout salvo e marca opção ativa (default = 'webpro' — layout Web Pro)
     const updateGearActive = () => {
-      let saved = 'dinamico';
-      try { saved = localStorage.getItem('dm_layout') || 'dinamico'; } catch (_) {}
+      let saved = 'webpro';
+      try { saved = localStorage.getItem('dm_layout') || 'webpro'; } catch (_) {}
       ddOriginal.classList.toggle('active', saved === 'original');
       ddDinamico.classList.toggle('active', saved === 'dinamico');
+      if (ddWebpro) ddWebpro.classList.toggle('active', saved === 'webpro');
     };
     updateGearActive();
 
@@ -532,8 +537,9 @@ class MenuMobileDMaior extends HTMLElement {
       gearBtn.classList.remove('open');
     });
 
-    // Seleciona layout e notifica o services-menu via evento customizado
-    [ddOriginal, ddDinamico].forEach(btn => {
+    // Seleciona layout e notifica o services-menu / home-webpro via evento customizado
+    [ddOriginal, ddDinamico, ddWebpro].forEach(btn => {
+      if (!btn) return;
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const layout = btn.dataset.layout;
