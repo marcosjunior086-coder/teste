@@ -1770,6 +1770,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;const dbc=this._dbc.bind(this);
     const _bind=(id,ev,fn)=>{const el=s.getElementById(id);if(el)el.addEventListener(ev,fn);else console.warn('[admin] elemento não encontrado no _bindEvents:',id);};
     s.getElementById('btnL').addEventListener('click',()=>this._doLogin());s.getElementById('iP').addEventListener('keydown',e=>{if(e.key==='Enter')this._doLogin();});s.getElementById('iU').addEventListener('keydown',e=>{if(e.key==='Enter')s.getElementById('iP').focus();});
+    _bind('btnEyeAdm','click',()=>{const ip=s.getElementById('iP');const on=ip.type==='password';ip.type=on?'text':'password';s.getElementById('btnEyeAdm').style.color=on?'var(--azul)':'';});
     s.getElementById('btnSair').addEventListener('click',()=>this._doLogout());
     s.getElementById('btnVoltarSite').addEventListener('click',()=>{
       // Mantém a mesma origem (mesmo domínio/subdominio) de onde o admin foi
@@ -3978,12 +3979,25 @@ class DimaiorAdmin extends HTMLElement {
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     #root{width:100%;min-height:600px;overflow:visible;background:linear-gradient(180deg,var(--bg1),var(--bg0));color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
     .glass{background:var(--glass);border:1px solid var(--brd);border-radius:20px;position:relative;overflow:hidden;backdrop-filter:blur(12px)}.glass::after{content:'';position:absolute;bottom:0;left:0;right:0;background:var(--grad);height:2px}
-    #login{position:absolute;inset:0;min-height:600px;background:rgba(4,4,14,.98);display:flex;align-items:center;justify-content:center;z-index:90}
-    .lbox{padding:36px 28px;width:90%;max-width:370px;text-align:center}.lbox h2{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1.2rem,4vw,1.7rem);background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
-    .lchip{display:inline-flex;align-items:center;gap:6px;background:var(--cyan-d);border:1px solid rgba(0,212,212,.4);border-radius:99px;padding:3px 12px;font-size:10px;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:2px;margin-bottom:20px}
-    .ldot{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:bl 1.6s infinite}
-    .campo{margin-bottom:13px;text-align:left}.campo input{width:100%;padding:12px 13px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}.campo input:focus{border-color:var(--cyan);box-shadow:0 0 10px var(--cyan-d)}
-    .btn-login{width:100%;padding:12px;background:var(--grad);border:none;border-radius:var(--rs);color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s}.btn-login:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(59,130,246,.4)}
+    #login{position:fixed;inset:0;min-height:100dvh;background:rgba(4,4,14,.98);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px}
+    /* Login — padrão "app moderno" (mesmo do painel do agente): campos em pílula + selo de ícone */
+    .lbox{padding:32px 22px;width:100%;max-width:400px;text-align:center;background:none;border:none;box-shadow:none;overflow:visible}
+    .lbox::after{display:none}
+    .llogo{height:44px;width:auto;margin:0 auto 16px;display:block}
+    .lbox h2{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:22px;font-weight:700;color:var(--t1);background:none;-webkit-text-fill-color:currentColor;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    .lsub{color:var(--t3);font-size:13px;margin-bottom:26px}
+    .lf{position:relative;display:flex;align-items:center;background:rgba(0,0,0,.35);border:1px solid var(--brd);border-radius:999px;padding:6px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}
+    .lf:focus-within{border-color:var(--azul);box-shadow:0 0 0 4px rgba(59,130,246,.16)}
+    .lf-ic{width:44px;height:44px;flex:none;border-radius:999px;display:grid;place-items:center;color:#fff;background:var(--grad)}
+    .lf-ic svg{width:20px;height:20px}
+    .lf input{flex:1;min-width:0;border:none;background:transparent;outline:none;padding:0 14px;height:44px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:15px;box-shadow:none}
+    .lf input::placeholder{color:var(--t3)}
+    .lf-eye{width:40px;height:44px;flex:none;display:grid;place-items:center;background:none;border:none;color:var(--t3);cursor:pointer}
+    .lf-eye svg{width:19px;height:19px}
+    .lf-eye:hover{color:var(--t2)}
+    .btn-login{width:100%;height:54px;padding:0;background:var(--grad);border:none;border-radius:999px;color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:opacity .2s,transform .2s;box-shadow:0 14px 30px -6px rgba(59,130,246,.5);margin-top:8px}
+    .btn-login:hover{opacity:.95}
+    .btn-login:active{transform:scale(.98)}
     .lerr{margin-top:10px;padding:8px 12px;border-radius:var(--rs);background:rgba(248,113,113,.12);border:1px solid var(--verm);color:var(--verm);font-size:12px;text-align:center;display:none}
     .lload{display:none;align-items:center;justify-content:center;gap:8px;margin-top:10px;color:var(--t3);font-size:12px}.lload.on{display:flex}
     #app{display:none;flex-direction:column;min-height:600px}#app.on{display:flex}
@@ -4831,7 +4845,7 @@ class DimaiorAdmin extends HTMLElement {
     const navSec=(chave,titulo,itensHtml)=>`<div class="ns" data-nav-sec="${chave}"><span>${titulo}</span></div><div class="acc-body" id="navSec-${chave}">${itensHtml}</div>`;
     const ph=(titulo,icoN,sub,btnId,extra='')=>`<div class="ph"><div><div class="titulo">${this._ico(icoN,18)} ${titulo}</div><div class="psub">${sub}</div></div><div class="ph-r"><button class="btn btn-o" id="${btnId}">${this._ico('refresh',13)} Atualizar</button>${extra}</div></div>`;
     return`<div id="root">
-      <div id="login"><div class="glass lbox"><h2>DMAIOR<br>ADMIN MASTER</h2><div style="text-align:center"><span class="lchip"><span class="ldot"></span>ACESSO RESTRITO</span></div><div class="campo"><label>Usuário</label><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="campo"><label>Senha</label><input id="iP" type="password" placeholder="••••••••" autocomplete="current-password"/></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
+      <div id="login"><div class="lbox"><img class="llogo" src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency"/><h2>Painel Admin</h2><div class="lsub">Acesso restrito</div><div class="lf"><span class="lf-ic">${this._ico('users',20)}</span><input id="iU" type="text" placeholder="Usuário" autocomplete="username"/></div><div class="lf"><span class="lf-ic">${this._ico('lock_r',20)}</span><input id="iP" type="password" placeholder="Senha" autocomplete="current-password"/><button class="lf-eye" id="btnEyeAdm" type="button" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div><button class="btn-login" id="btnL">ENTRAR NO PAINEL</button><div class="lerr" id="lErr"></div><div class="lload" id="lLoad"><div class="sp" style="width:18px;height:18px;margin:0"></div><span>Autenticando...</span></div></div></div>
       <div id="app">
         <div class="top"><button class="btn-ham" id="btnHam" aria-label="Abrir menu" aria-expanded="false">${this._ico('menu',16)}</button><span class="top-chip">ADMIN MASTER</span><div class="top-sp"></div><button class="btn btn-o btn-sm" id="btnVoltarSite">${this._ico('home',13)} <span class="btn-voltar-txt">Voltar ao Site</span></button><button class="btn-sair" id="btnSair">${this._ico('logout',13)} Sair</button></div>
         <div class="side-backdrop" id="sideBackdrop"></div>

@@ -311,8 +311,23 @@
             .prule.ok{color:var(--green);}.prule.fail{color:var(--red);}
             .view{display:none;width:100%;animation:fi .4s ease;}
             .view.on{display:block;}
-            .auth-view{max-width:580px;margin:0 auto;}
+            .auth-view{max-width:420px;margin:0 auto;}
             .dash-view{max-width:1100px;margin:0 auto;}
+            /* Login/cadastro/recuperar — padrão "app moderno" (mesmo do painel do agente):
+               campo em pílula + selo de ícone circular em gradiente + botão pílula com brilho */
+            .vlogo{height:44px;width:auto;margin:0 auto 16px;display:block;}
+            [data-theme="branco"] .vlogo,[data-theme="rosa"] .vlogo,[data-theme="laranja"] .vlogo{filter:brightness(0);}
+            #vL .card{background:none;border:none;box-shadow:none;padding:24px 6px;margin-top:6vh;}
+            .auth-view .iw{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:999px;padding:6px;transition:border-color .25s,box-shadow .25s;}
+            [data-theme="branco"] .auth-view .iw,[data-theme="rosa"] .auth-view .iw,[data-theme="laranja"] .auth-view .iw{background:rgba(0,0,0,.04);}
+            .auth-view .iw:focus-within{border-color:var(--cyan);box-shadow:0 0 0 4px var(--cyan-d);}
+            .auth-view .iw .ico{position:static;width:44px;height:44px;flex:none;border-radius:999px;display:grid;place-items:center;padding:0;background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));fill:#fff;}
+            .auth-view .iw .ico svg{width:20px;height:20px;fill:#fff;}
+            .auth-view .iw input{background:none;border:none;padding:0 14px;height:44px;box-shadow:none;}
+            .auth-view .iw input:focus{background:none;border:none;box-shadow:none;}
+            .auth-view .iw .eye{position:static;margin-left:auto;margin-right:10px;flex:none;}
+            .auth-view .btn{border-radius:999px;height:54px;padding:0;color:#fff;}
+            .auth-view .btn:disabled{color:#666;}
             @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
             .dash-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:20px;align-items:start;}
             .dash-left,.dash-right{min-width:0;}
@@ -684,8 +699,9 @@
 
                 <!-- ══════ LOGIN ══════ -->
                 <div id="vL" class="view auth-view">
-                    <div class="card" style="margin-top:10vh;text-align:center;padding:40px 25px;">
-                        <p class="raaj" style="font-size:1rem;color:var(--cyan);margin-bottom:30px;">ACESSO STREAMER</p>
+                    <div class="card" style="text-align:center;">
+                        <img class="vlogo" src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency">
+                        <p class="raaj" style="font-size:1rem;color:var(--cyan);margin-bottom:26px;">Acesso do Streamer</p>
                         <div id="alL" class="al"></div>
                         <div class="ig"><label class="raaj">UID NUMERICO</label>
                             <div class="iw"><span class="ico">${this.svgUser()}</span>
