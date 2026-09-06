@@ -1025,6 +1025,11 @@
 
     /* painel-resumo em gradiente do tema (estilo board-detail do demo) */
     .dash-resumo { background: var(--grad); border-radius: var(--r-lg); padding: 18px; color: #fff; }
+    /* h4 aqui herdaria a cor escura do global.css (h1..h6{color:--dm-text}) e
+       sumiria sobre o gradiente nos temas claros — força branco. */
+    .dash-resumo h4,
+    .dash-resumo b,
+    .dash-resumo strong { color: #fff; }
     .dash-resumo h4 { font-size: 13px; letter-spacing: .02em; margin-bottom: 13px; display: flex; align-items: center; gap: 8px; opacity: .95; }
     .dash-resumo h4 svg { width: 15px; height: 15px; }
     .dash-resumo .rz-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
