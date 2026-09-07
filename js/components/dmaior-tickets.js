@@ -262,6 +262,12 @@ class DmaiorTickets extends HTMLElement {
       .btn-resgatar.bloq{background:rgba(255,255,255,.04);border:1px solid var(--dm-border);color:var(--dm-text-muted);cursor:not-allowed}
       .btn-resgatar[disabled]{opacity:.6;pointer-events:none}
 
+      /* Desktop (painel): aproveita o espaço — galeria com 6 por linha */
+      @media(min-width:1200px){
+        .wrap{max-width:1160px}
+        .galeria-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+      }
+
       .hist-tabs{display:flex;gap:6px;margin-bottom:12px}
       .hist-tab{padding:7px 14px;border-radius:8px;border:1px solid var(--dm-border);background:transparent;color:var(--dm-text-muted);font-family:'Rajdhani',sans-serif;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;cursor:pointer}
       .hist-tab.on{background:rgba(var(--dm-cyan-rgb),.1);border-color:rgba(var(--dm-cyan-rgb),.35);color:var(--dm-cyan)}
