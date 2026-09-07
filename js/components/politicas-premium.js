@@ -186,6 +186,37 @@ class PoliticasPremium extends HTMLElement {
             .alert-text { font-size: 0.75rem; line-height: 1.3; color: #f87171; font-weight: 600; }
             .info .alert-text { color: var(--sub); font-weight: 400; }
 
+            /* ===== DESKTOP: distribui o conteúdo na largura da tela ===== */
+            @media (min-width: 760px) {
+                .container { max-width: 1060px; padding: 22px 14px; gap: 18px; }
+                .header-hero { padding: 20px 16px; }
+                .header-title { font-size: clamp(1.3rem, 2.4vw, 1.6rem); }
+                .header-sub { font-size: 0.82rem; }
+                .audio-player { max-width: 240px; }
+                .tabs-nav { flex-wrap: wrap; justify-content: center; gap: 8px; }
+                .tab-btn { flex: 0 1 auto; padding: 11px 26px; font-size: 0.82rem; }
+                .tab-content.active {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+                    gap: 16px;
+                    align-items: start;
+                }
+                .tab-content.active > .content-box:only-child { max-width: 820px; margin: 0 auto; }
+                .tab-content.active > .content-box:last-child:nth-child(odd) { grid-column: 1 / -1; }
+                .content-box { padding: 20px 24px; }
+                .box-title { font-size: 1.05rem; padding-bottom: 8px; margin-bottom: 12px; }
+                .box-title img { height: 26px; }
+                .text-block h4 { font-size: 0.95rem; }
+                .text-block p, .text-block ul li { font-size: 0.88rem; line-height: 1.6; }
+                .text-block ul li { padding-left: 16px; }
+                thead tr th { font-size: 0.74rem; padding: 9px 6px; letter-spacing: 0; }
+                td { font-size: 0.9rem; padding: 10px 6px; }
+                .def-cat { font-size: 0.82rem; }
+                .def-desc { font-size: 0.84rem; }
+                .alert-grid { grid-template-columns: 1fr 1fr; }
+                .alert-text { font-size: 0.82rem; }
+            }
+
             @media (max-width: 480px) {
                 .tabs-nav { flex-wrap: wrap; }
                 .tab-btn { flex: 1 1 calc(50% - 5px); font-size: 0.7rem; padding: 8px; }

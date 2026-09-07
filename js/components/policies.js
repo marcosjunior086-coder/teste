@@ -115,6 +115,13 @@ class DMaiorPolicies extends HTMLElement {
       .contact-note{margin-top:14px;font-size:.78rem;color:var(--text-dim)}
       .footer-note{margin-top:48px;padding:16px 20px;background:rgba(255,255,255,0.02);border:1px solid var(--cyan-border);border-radius:10px;font-size:.8rem;color:var(--text-dim);line-height:1.65}
       .footer-note strong{color:var(--text-muted)}
+      /* Desktop largo: aproveita a largura do container (até 1200px) em vez de travar em 980px */
+      @media(min-width:1000px){
+        .root{max-width:100%}
+        .body{grid-template-columns:260px 1fr}
+        .scroll-area{padding:44px 56px}
+        .rights-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+      }
       @media(max-width:700px){
         :host{height:auto;min-height:400px}
         .root{height:auto;border-radius:14px;overflow:visible}

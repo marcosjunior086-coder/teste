@@ -28,13 +28,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       background: var(--dm-bg, #0c0c0c);
-      min-height: 100%;
       width: 100%;
     }
+    /* body em coluna: menu do topo + painel ocupando toda a altura restante da
+       janela. Assim a sidebar do painel estica 100% até a base da tela, sem
+       "cortar" o fundo quando o conteúdo é curto. */
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    menu-mobile-dmaior { flex: 0 0 auto; }
     dmaior-app {
-      display: block;
+      display: flex;
+      flex: 1 0 auto;
       width: 100%;
-      min-height: 100vh;
+      min-height: 0;
     }
   </style>
 </head>
@@ -62,7 +67,7 @@
   <!-- Componente Tickets & Presentes — carregado antes do painel para estar definido quando usado -->
   <script charset=utf-8 src="js/components/dmaior-tickets.js?v=20260820-tema"></script>
   <!-- Componente painel original — todo visual e fluxo completo -->
-  <script charset=utf-8 src="js/components/dmaior-app.js?v=20260907-dash-v3"></script>
+  <script charset=utf-8 src="js/components/dmaior-app.js?v=20260907-layout-v4"></script>
   <!-- Menu mobile (inicializa tema e área de login no topo) -->
   <script charset=utf-8 src="js/components/menu-mobile.js?v=20260906-webpro-nav"></script>
   <!-- Notificações push (Fase 1) — convite + controle no Perfil + registro do aparelho -->

@@ -241,11 +241,12 @@
                 --text:#fff; --muted:#a0b8c8;
                 --ftitle:clamp(1.2rem,5vw,1.8rem); --fval:clamp(1.1rem,4vw,1.5rem);
                 font-family:var(--dm-font-body,'Exo 2',sans-serif); font-size:calc(16px * var(--dm-font-scale, 1)); background:transparent; color:var(--text);
-                min-height:100%; display:flex; flex-direction:row; width:100%; overflow-x:hidden; position:relative;
+                min-height:100%; flex:1 1 auto; display:flex; flex-direction:row; width:100%; overflow-x:hidden; overflow-x:clip; position:relative;
             }
-            .content { flex:1; display:flex; flex-direction:column; align-items:flex-start; padding:24px 32px; min-width:0; overflow-x:hidden; }
-            /* Sidebar do desktop — mesmo estilo do painel do Agente (linhas full-width, acento na borda esquerda) */
-            .bnav { order:-1; width:220px; min-width:220px; flex-shrink:0; display:none; flex-direction:column; align-items:stretch; justify-content:flex-start; position:relative; height:100%; background:var(--glass); border-right:1px solid var(--border); padding:14px 0 0; z-index:100; }
+            .content { flex:1; display:flex; flex-direction:column; align-items:flex-start; padding:24px 32px; min-width:0; overflow-x:hidden; overflow-x:clip; }
+            /* Sidebar do desktop — mesmo estilo do painel do Agente (linhas full-width, acento na borda esquerda).
+               position:sticky + height:100vh: acompanha o scroll e ocupa a tela toda até a base, sem cortar o fundo. */
+            .bnav { order:-1; width:220px; min-width:220px; flex-shrink:0; display:none; flex-direction:column; align-items:stretch; justify-content:flex-start; position:sticky; top:0; align-self:flex-start; height:100vh; overflow-y:auto; scrollbar-width:thin; background:var(--glass); border-right:1px solid var(--border); padding:14px 0 0; z-index:100; }
             .bnav.on { display:flex; }
             .bnav-head { padding:4px 20px 14px; margin:0 0 8px; border-bottom:1px solid var(--border); font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.6rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
             .nit { display:flex; flex-direction:row; align-items:center; justify-content:flex-start; color:var(--muted); font-size:.88rem; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; letter-spacing:.02em; text-transform:uppercase; gap:12px; cursor:pointer; transition:background .18s,color .18s,border-color .18s; border:none; border-left:3px solid transparent; background:none; padding:12px 20px; text-decoration:none; }
@@ -392,7 +393,7 @@
             @media(max-width:992px){.dash-grid{grid-template-columns:1fr;gap:0;}}
 
             /* ── DASHBOARD do streamer — versão prévia (Finnova-like) ── */
-            .dash-view{max-width:960px;margin:0;align-self:flex-start;}
+            .dash-view{max-width:1160px;margin:0;align-self:flex-start;}
             .greet{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:14px;}
             .greet .ava{width:52px;height:52px;}
             .greet-txt{flex:1;min-width:0;}
@@ -409,9 +410,13 @@
             .dstat .dv small{font-size:.72rem;color:var(--muted);font-weight:400;}
             .dstat .dsub{font-size:.68rem;color:var(--muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);}
 
-            .dwide{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start;margin-bottom:14px;}
+            .dwide{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start;margin-bottom:14px;}
             @media(max-width:900px){.dwide{grid-template-columns:1fr;}}
-            .dwide .dstack{display:flex;flex-direction:column;gap:14px;min-width:0;}
+            .dwide .dcol-main,.dwide .dcol-side{display:flex;flex-direction:column;gap:14px;min-width:0;}
+            /* Histórico diário — no máx. ~8 linhas visíveis; o resto rola dentro do card */
+            .hist-card #hList{max-height:480px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 -4px;padding:0 4px;}
+            .hist-card #hList::-webkit-scrollbar{width:5px;}
+            .hist-card #hList::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
             .card > h3.dcard-h{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 
             #chLegend{display:none;align-items:center;gap:16px;margin-top:10px;font-size:.7rem;color:var(--muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);}
@@ -486,6 +491,16 @@
 
             /* ── CARTEIRA — topo azul + card branco sobreposto (demo redesign) ── */
             .cart-view{max-width:660px;margin:0;align-self:flex-start;}
+
+            /* Layout da carteira: coluna única no mobile; 2 colunas no desktop
+               (dados à esquerda, transações ocupando o espaço vazio à direita) */
+            #cMain{display:flex;flex-direction:column;}
+            .wallet-col,.txn-col{display:flex;flex-direction:column;min-width:0;}
+            @media(min-width:900px){
+                .cart-view{max-width:1060px;}
+                #cMain{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:26px;align-items:start;}
+                .txn-col{padding-top:4px;}
+            }
 
             .wallet-head{
                 background:linear-gradient(155deg,#3b82f6 0%,#1e40af 100%);
@@ -574,9 +589,14 @@
             /* Transações — estilo demo (.txn) */
             .txn-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 12px;flex-wrap:wrap;}
             .txn-head h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;}
-            .txn-seg{display:flex;gap:3px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:3px;}
+            .txn-seg{display:flex;flex-wrap:wrap;gap:3px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:3px;}
             .txn-seg button{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;padding:6px 11px;border-radius:8px;transition:background .15s,color .15s;}
             .txn-seg button.on{background:var(--cyan-d);color:var(--cyan);}
+
+            /* Lista de transações — no máx. ~8 itens visíveis; o resto rola no container */
+            #cTxLista{max-height:590px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 -4px;padding:0 4px;}
+            #cTxLista::-webkit-scrollbar{width:5px;}
+            #cTxLista::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
             .txn{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--glass);}
             .txn + .txn{margin-top:9px;}
@@ -1012,33 +1032,33 @@
                     </div>
 
                     <div class="dwide">
-                        <!-- Evolução diária -->
-                        <div class="card">
-                            <div class="ctogs">
-                                <h3 class="raaj" style="font-size:.9rem;color:var(--text);margin:0;">EVOLUÇÃO DIÁRIA</h3>
-                                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-                                    <div class="tgrp">
-                                        <button class="tbtn on" id="tDi">Diamantes</button>
-                                        <button class="tbtn" id="tHo">Horas</button>
-                                    </div>
-                                    <div class="tgrp">
-                                        <button class="tbtn on" id="t7d">7 dias</button>
-                                        <button class="tbtn" id="t30d">30 dias</button>
-                                    </div>
-                                    <div class="tgrp">
-                                        <button class="tbtn on" id="tMesAtual">Mês atual</button>
-                                        <button class="tbtn" id="tMesComp">Comparar</button>
+                        <div class="dcol-main">
+                            <!-- Evolução diária -->
+                            <div class="card">
+                                <div class="ctogs">
+                                    <h3 class="raaj" style="font-size:.9rem;color:var(--text);margin:0;">EVOLUÇÃO DIÁRIA</h3>
+                                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+                                        <div class="tgrp">
+                                            <button class="tbtn on" id="tDi">Diamantes</button>
+                                            <button class="tbtn" id="tHo">Horas</button>
+                                        </div>
+                                        <div class="tgrp">
+                                            <button class="tbtn on" id="t7d">7 dias</button>
+                                            <button class="tbtn" id="t30d">30 dias</button>
+                                        </div>
+                                        <div class="tgrp">
+                                            <button class="tbtn on" id="tMesAtual">Mês atual</button>
+                                            <button class="tbtn" id="tMesComp">Comparar</button>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="chwrap"><canvas id="pChart"></canvas></div>
+                                <div id="chLegend">
+                                    <span><i style="background:#3b82f6"></i>Mês atual</span>
+                                    <span><i style="background:#f0c040"></i>Mês anterior</span>
+                                </div>
                             </div>
-                            <div class="chwrap"><canvas id="pChart"></canvas></div>
-                            <div id="chLegend">
-                                <span><i style="background:#3b82f6"></i>Mês atual</span>
-                                <span><i style="background:#f0c040"></i>Mês anterior</span>
-                            </div>
-                        </div>
 
-                        <div class="dstack">
                             <!-- Metas do mês -->
                             <div class="card">
                                 <h3 class="dcard-h">Metas do mês</h3>
@@ -1061,12 +1081,14 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Histórico diário -->
-                    <div class="card">
-                        <h3 class="dcard-h">Histórico diário <span class="raaj" style="font-size:.7rem;color:var(--muted);font-weight:400;" id="hRes">— válidos · — 💎</span></h3>
-                        <div id="hList"><p class="txn-empty">Carregando...</p></div>
+                        <div class="dcol-side">
+                            <!-- Histórico diário -->
+                            <div class="card hist-card">
+                                <h3 class="dcard-h">Histórico diário <span class="raaj" style="font-size:.7rem;color:var(--muted);font-weight:400;" id="hRes">— válidos · — 💎</span></h3>
+                                <div id="hList"><p class="txn-empty">Carregando...</p></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1153,6 +1175,8 @@
                     <!-- ── Painel principal ── -->
                     <div id="cMain">
 
+                      <!-- Coluna esquerda: saldo, totais e saque -->
+                      <div class="wallet-col">
                         <!-- Topo azul: voltar · Carteira · ir para transações -->
                         <div class="wallet-head">
                             <div class="wbar">
@@ -1205,17 +1229,22 @@
                             </div>
                             <button class="btn" id="btnSaque">SOLICITAR SAQUE</button>
                         </div>
+                      </div><!-- /wallet-col -->
 
-                        <!-- Transações (inline, com filtro) -->
+                      <!-- Coluna direita: transações (ocupa o espaço vazio no desktop) -->
+                      <div class="txn-col">
                         <div class="txn-head">
-                            <h3>Transações</h3>
+                            <h3>Transações <span id="cTxCount" style="color:var(--muted);font-weight:400;font-size:.8rem;"></span></h3>
                             <div class="txn-seg" id="cTxnSeg">
-                                <button type="button" data-f="all" class="on">Tudo</button>
+                                <button type="button" data-f="7d">7 dias</button>
+                                <button type="button" data-f="30d" class="on">30 dias</button>
+                                <button type="button" data-f="all">Tudo</button>
                                 <button type="button" data-f="in">Entradas</button>
                                 <button type="button" data-f="out">Saídas</button>
                             </div>
                         </div>
                         <div id="cTxLista"><p class="txn-empty">Carregando...</p></div>
+                      </div><!-- /txn-col -->
 
                     </div><!-- /cMain -->
 
@@ -1860,14 +1889,24 @@
 
     _renderCartTxns(){
         const el = this.qs('#cTxLista'); if(!el) return;
-        const filtro = this._cartTxFilter || 'all';
+        const filtro = this._cartTxFilter || '30d';
         const todas  = this._cartTxns || [];
+        const agora  = Date.now();
+        const janela = filtro === '7d' ? 7 : filtro === '30d' ? 30 : 0; // 0 = sem limite de data
         const lista  = todas.filter(tx => {
             const inn = this._cartTxEntrada(tx.tipo);
-            return filtro === 'all' || (filtro === 'in' && inn) || (filtro === 'out' && !inn);
+            if (filtro === 'in')  return inn;
+            if (filtro === 'out') return !inn;
+            if (janela) {
+                const t = new Date(tx.criado_em).getTime();
+                if (!isNaN(t) && (agora - t) > janela * 86400000) return false;
+            }
+            return true;
         });
+        const cnt = this.qs('#cTxCount');
+        if (cnt) cnt.textContent = lista.length ? `(${lista.length})` : '';
         if (!todas.length) { el.innerHTML = `<p class="txn-empty">Nenhuma movimentação ainda.</p>`; return; }
-        if (!lista.length)  { el.innerHTML = `<p class="txn-empty">Nada nesse filtro.</p>`; return; }
+        if (!lista.length)  { el.innerHTML = `<p class="txn-empty">Nada nesse período.</p>`; return; }
 
         const tipoLabel = {
             credito:'Crédito', debito:'Débito',
