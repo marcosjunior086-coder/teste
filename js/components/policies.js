@@ -55,7 +55,6 @@ class DMaiorPolicies extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap');
       /* Mapeia vars locais para as globais — adapta-se automaticamente ao tema ativo */
       :host{display:block;width:100%;box-sizing:border-box;font-family:var(--dm-font-body,'Exo 2',sans-serif);--cyan:var(--dm-cyan);--cyan-dim:var(--dm-cyan-dim);--cyan-glow:var(--dm-cyan-08);--cyan-border:var(--dm-border);--bg-deep:var(--dm-bg-1);--bg-card:var(--dm-bg-card);--text-main:var(--dm-text);--text-muted:var(--dm-text-sub);--text-dim:var(--dm-text-muted);--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}

@@ -44,6 +44,11 @@
   Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=14400, must-revalidate
 
+# llms.txt — servido como text/plain (Markdown pra LLMs / navegação agêntica)
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=14400, must-revalidate
+
 # security.txt real (RFC 9116) — precisa ser servido como text/plain.
 # Fica na raiz porque o Pages não serve pastas com "." (.well-known);
 # o /_redirects reescreve /.well-known/security.txt -> /security.txt (200).

@@ -95,7 +95,6 @@ class MenuDesktopDMaior extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;500;600&display=swap');
       *{ box-sizing:border-box; margin:0; padding:0; }
       :host{ display:block; font-family:var(--dm-font-body,'Exo 2',sans-serif); width:100%; height:80px; }
       .hd{ display:flex; align-items:center; width:100%; height:80px; padding:0 40px; background:transparent; }

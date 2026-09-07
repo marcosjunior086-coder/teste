@@ -21,7 +21,6 @@ class WidgetBeneficios extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap');
       *{margin:0;padding:0;box-sizing:border-box;max-width:100%}
       :host{display:block;width:100%;font-family:var(--dm-font-body,'Exo 2',sans-serif);color:var(--dm-text);background:transparent}
 

@@ -91,7 +91,7 @@ class MenuMobileDMaior extends HTMLElement {
   }
 
   render() {
-    const URL_LOGO   = `https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png`;
+    const URL_LOGO   = `https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png/v1/fill/w_320,h_98,al_c,q_90,enc_auto/dmaior_logo.png`;
     // Todos os ícones usam stroke="currentColor" — a cor é controlada por CSS via var(--dm-*)
     const SVG_MENU   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
     const SVG_CLOSE  = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
@@ -154,7 +154,6 @@ class MenuMobileDMaior extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600&display=swap');
       *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
       :host{ display:block; font-family:var(--dm-font-body,'Exo 2',sans-serif); width:100%; }
       /* No mobile o menu do topo acompanha a rolagem (fixo no topo, em todas as páginas).
@@ -363,7 +362,7 @@ class MenuMobileDMaior extends HTMLElement {
     </style>
 
     <div class="topbar">
-      <img src="${URL_LOGO}" alt="DMaior Agency" class="logo">
+      <img src="${URL_LOGO}" alt="DMaior Agency" class="logo" width="150" height="46" fetchpriority="high" decoding="async">
 
       <!-- Nav do site — visível só no layout "Web Pro" em telas largas -->
       <nav class="topnav" aria-label="Navegação do site">
@@ -458,7 +457,7 @@ class MenuMobileDMaior extends HTMLElement {
           <span class="bell-dot hidden" id="bellDot"></span>
         </button>
 
-        <button class="hamburger" id="openSb">${SVG_MENU}</button>
+        <button class="hamburger" id="openSb" type="button" aria-label="Abrir menu">${SVG_MENU}</button>
       </div>
     </div>
 
@@ -467,7 +466,7 @@ class MenuMobileDMaior extends HTMLElement {
     <div class="sidebar" id="sidebar">
       <div class="sb-header">
         <div class="sb-title">Menu</div>
-        <button class="close-btn" id="closeSb">${SVG_CLOSE}</button>
+        <button class="close-btn" id="closeSb" type="button" aria-label="Fechar menu">${SVG_CLOSE}</button>
       </div>
 
       <div class="auth-area">

@@ -198,7 +198,6 @@ class DmaiorServicesMenu extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Rajdhani:wght@700&display=swap');
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         :host { display:block; width:100%; }
         .container { background-color:transparent; font-family:var(--dm-font-body,'Exo 2',sans-serif); display:flex; justify-content:center; align-items:center; padding:30px 10px; width:100%; }

@@ -96,7 +96,6 @@ class DmaiorVotacao extends HTMLElement {
   _renderShell() {
     this.shadowRoot.innerHTML = `
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600;700&display=swap');
 
         :host {
           display: block;

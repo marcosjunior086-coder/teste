@@ -4,6 +4,7 @@
     <script>
     document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
   </script>
+  <script>try{var d=document.documentElement,s=localStorage,t=s.getItem('dm_tema'),f=s.getItem('dm_tamanho_texto');if(t&&t!=='original')d.setAttribute('data-theme',t);if(f&&f!=='normal')d.setAttribute('data-font-size',f);}catch(e){}</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#060B16">
@@ -20,7 +21,10 @@
   <!-- CSS global — define variáveis de tema usadas pelo menu-mobile e componentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://static.wixstatic.com" crossorigin>
+  <link rel="preconnect" href="https://rank.agencydmaior.com.br" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap"></noscript>
   <link rel="stylesheet" href="css/global.css?v=20260701-ios-1">
   <link rel="stylesheet" href="css/components.css">
   <style>
@@ -51,31 +55,31 @@
   <dmaior-app></dmaior-app>
 
   <!-- api.js centraliza URLs dos workers -->
-  <script charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
-  <script charset=utf-8 src="js/utils/helpers.js"></script>
-  <script charset=utf-8 src="js/api.js?v=20260903-push-url"></script>
+  <script defer charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
+  <script defer charset=utf-8 src="js/utils/helpers.js"></script>
+  <script defer charset=utf-8 src="js/api.js?v=20260903-push-url"></script>
   <!-- auth.js para sessão compartilhada com o menu -->
-  <script charset=utf-8 src="js/auth.js"></script>
+  <script defer charset=utf-8 src="js/auth.js"></script>
   <!-- Componente impulso — carregado antes do painel para estar definido quando usado -->
-  <script charset=utf-8 src="js/components/dmaior-impulso.js?v=20260826-xss-fix"></script>
+  <script defer charset=utf-8 src="js/components/dmaior-impulso.js?v=20260907-perf"></script>
   <!-- Componente votação — carregado antes do painel para estar definido quando usado -->
-  <script charset=utf-8 src="js/components/dmaior-votacao.js?v=20260826-xss-fix"></script>
+  <script defer charset=utf-8 src="js/components/dmaior-votacao.js?v=20260907-perf"></script>
   <!-- Componente ranking inline — mesma versão completa do rank geral (tema, layout dinâmico, comunicados) -->
-  <script charset=utf-8 src="js/components/ranking.js?v=20260906-webpro-rank"></script>
+  <script defer charset=utf-8 src="js/components/ranking.js?v=20260906-webpro-rank"></script>
   <!-- Componente PK Diário — carregado antes do painel para estar definido quando usado -->
-  <script charset=utf-8 src="js/components/painel-pk.js?v=20260809-banner-no-topo"></script>
+  <script defer charset=utf-8 src="js/components/painel-pk.js?v=20260809-banner-no-topo"></script>
   <!-- Componente Tickets & Presentes — carregado antes do painel para estar definido quando usado -->
-  <script charset=utf-8 src="js/components/dmaior-tickets.js?v=20260907-galeria-6col"></script>
+  <script defer charset=utf-8 src="js/components/dmaior-tickets.js?v=20260907-galeria-6col"></script>
   <!-- Componente painel original — todo visual e fluxo completo -->
-  <script charset=utf-8 src="js/components/dmaior-app.js?v=20260907-scroll-mobile-fix"></script>
+  <script defer charset=utf-8 src="js/components/dmaior-app.js?v=20260907-perf"></script>
   <!-- Menu mobile (inicializa tema e área de login no topo) -->
-  <script charset=utf-8 src="js/components/menu-mobile.js?v=20260907-menu-sticky"></script>
+  <script defer charset=utf-8 src="js/components/menu-mobile.js?v=20260907-perf"></script>
   <!-- Notificações push (Fase 1) — convite + controle no Perfil + registro do aparelho -->
-  <script charset=utf-8 src="js/push.js?v=20260902-push-fase1"></script>
+  <script defer charset=utf-8 src="js/push.js?v=20260902-push-fase1"></script>
   <!-- router.js NÃO é carregado aqui: o painel tem fluxo de login próprio -->
   <dmaior-cookie-consent></dmaior-cookie-consent>
-  <script charset=utf-8 src="js/components/cookie-consent.js?v=20260624-3"></script>
-  <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
+  <script defer charset=utf-8 src="js/components/cookie-consent.js?v=20260624-3"></script>
+  <script defer charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
 </body>
 </html>
 

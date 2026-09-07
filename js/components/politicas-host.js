@@ -21,7 +21,6 @@ class PoliticasHost extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Exo+2:wght@400;600;700&display=swap');
             
             * { box-sizing: border-box; margin: 0; padding: 0; }
             

@@ -45,11 +45,10 @@ class DmaiorFooter extends HTMLElement {
     const SVG_KWAI = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>`;
 
     // URL do logo (mesmo do menu)
-    const URL_LOGO = 'https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png';
+    const URL_LOGO = 'https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png/v1/fill/w_320,h_98,al_c,q_90,enc_auto/dmaior_logo.png';
 
     this.shadowRoot.innerHTML = `
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap');
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
         :host { display:block; width:100%; }
 
@@ -208,7 +207,7 @@ class DmaiorFooter extends HTMLElement {
 
           <!-- Logo + tagline -->
           <div class="col-logo">
-            <img src="${URL_LOGO}" alt="DMaior Agency" class="footer-logo">
+            <img src="${URL_LOGO}" alt="DMaior Agency" class="footer-logo" width="150" height="46" loading="lazy" decoding="async">
             <p>Agency - Lives</p>
           </div>
 

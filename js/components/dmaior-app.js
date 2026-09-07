@@ -225,7 +225,6 @@
     render() {
         this.innerHTML = `
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600;700&display=swap');
             *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
             .shell {
@@ -870,7 +869,7 @@
                 <!-- ══════ LOGIN ══════ -->
                 <div id="vL" class="view auth-view">
                     <div class="card" style="text-align:center;">
-                        <img class="vlogo" src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png" alt="DMaior Agency">
+                        <img class="vlogo" src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png/v1/fill/w_320,h_98,al_c,q_90,enc_auto/dmaior_logo.png" alt="DMaior Agency" width="150" height="46" decoding="async">
                         <p class="raaj" style="font-size:1rem;color:var(--cyan);margin-bottom:26px;">Acesso do Streamer</p>
                         <div id="alL" class="al"></div>
                         <div class="ig"><label class="raaj">UID NUMERICO</label>
