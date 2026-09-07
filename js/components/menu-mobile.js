@@ -157,6 +157,14 @@ class MenuMobileDMaior extends HTMLElement {
       @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600&display=swap');
       *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
       :host{ display:block; font-family:var(--dm-font-body,'Exo 2',sans-serif); width:100%; }
+      /* No mobile o menu do topo acompanha a rolagem (fixo no topo, em todas as páginas).
+         z-index:1050 no :host cria um contexto de empilhamento: o menu inteiro (topbar +
+         gaveta + overlay, que internamente ficam em 9998-10001) passa a valer 1050 na
+         página — acima do conteúdo e da nav flutuante do painel (1000-1003), abaixo do
+         loader do painel (9999) e do banner de cookies (99999). */
+      @media (max-width:768px){
+        :host{ position:sticky; top:0; z-index:1050; }
+      }
       .topbar{ display:flex; align-items:center; justify-content:space-between; width:100%; padding:12px 20px; background:var(--dm-grad-card); border-bottom:1px solid var(--dm-border); box-shadow:0 4px 15px var(--dm-shadow-md); }
       .logo{ height:38px; width:auto; max-width:150px; object-fit:contain; display:block; flex-shrink:1; min-width:0; transition:filter .3s; }
       .hamburger{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .2s,opacity .2s; margin-right:-8px; flex-shrink:0; }
