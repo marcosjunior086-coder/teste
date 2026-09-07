@@ -23,9 +23,17 @@ class KwaiLiveWidget extends HTMLElement {
 
     // ── Configurações de cache e lote ──────────────────────────────────────
     this.CACHE_KEY     = 'widget_live_v6';
-    this.CACHE_TTL     = 50000;
+    this.CACHE_TTL     = 70000;
     this.BATCH_SIZE    = 5;
-    this.ENABLE_MINI_PREVIEW = true;
+    // Prévia em vídeo nas bolinhas: só no desktop. No celular, decodificar
+    // vários HLS ao mesmo tempo (ainda mais junto da live grande do hero)
+    // satura a CPU do aparelho — era o que dava o "travando". No mobile a
+    // faixa fica só com as fotos + "AO VIVO"; tocar de verdade só no modal.
+    this._smallScreen = (() => {
+      try { return window.matchMedia('(max-width: 820px)').matches; } catch (_) { return false; }
+    })();
+    this.ENABLE_MINI_PREVIEW = !this._smallScreen;
+    this._docHidden = (typeof document !== 'undefined' && document.hidden) || false;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
@@ -86,8 +94,10 @@ class KwaiLiveWidget extends HTMLElement {
     this._scheduleHlsLib();
     this.initObserver();
     this.init();
-    // Atualiza as lives a cada 30 segundos — timer guardado para limpeza
-    this.refreshTimer = setInterval(() => this.init(), 30000);
+    // Atualiza as lives a cada 60 segundos — timer guardado para limpeza.
+    // (era 30s; a lista de quem está ao vivo não muda tão rápido e cada
+    // ciclo remexe nos cards, atrapalhando o vídeo que já está tocando.)
+    this.refreshTimer = setInterval(() => this.init(), 60000);
     this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
     this._themeHandler = () => this._syncThemeHost();
     // Layout "Web Pro": o hero da home pede pra abrir a live em tela cheia
@@ -97,9 +107,15 @@ class KwaiLiveWidget extends HTMLElement {
       this.setMinimized(false);
       this.openModal(url);
     };
+    // Aba escondida: para os mini-players (voltam a foto) e segura o init().
+    this._visHandler = () => {
+      this._docHidden = document.hidden;
+      if (document.hidden) this._trimMiniPlayers();
+    };
     window.addEventListener('storage', this._storageThemeHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
     window.addEventListener('dmaior:openLive', this._openLiveHandler);
+    document.addEventListener('visibilitychange', this._visHandler);
   }
 
   disconnectedCallback() {
@@ -111,6 +127,7 @@ class KwaiLiveWidget extends HTMLElement {
     window.removeEventListener('storage', this._storageThemeHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
     window.removeEventListener('dmaior:openLive', this._openLiveHandler);
+    document.removeEventListener('visibilitychange', this._visHandler);
   }
 
   _syncThemeHost() {
@@ -485,12 +502,15 @@ class KwaiLiveWidget extends HTMLElement {
   // guerra permanente entre cards igualmente visíveis disputando as mesmas
   // vagas, expulsando uns aos outros sem nenhum realmente ficar estável.
   get MAX_MINI_PLAYERS() {
-    // Enquanto a live principal do hero (layout Web Pro) está tocando, a faixa
-    // segura só 2 mini-players decodificando — o resto fica na foto parada —
-    // pra não disputar banda/CPU com a view principal.
-    if (this._featuredActive) return 2;
+    // Live grande do hero tocando, ou aba escondida: NENHUM mini-player
+    // decodificando — a faixa inteira vira foto parada e devolve toda a
+    // CPU/banda pra live principal. Era isso que fazia a "live grande travar".
+    if (this._featuredActive || this._docHidden) return 0;
+    // Fora disso, teto duro de 3 tocando ao mesmo tempo. Antes era
+    // Math.max(6, visíveis+2), que numa tela larga jogava 8-14 streams HLS
+    // pra decodificar de uma vez só — o navegador não dá conta e todos travam.
     const visible = [...this.activePlayers.keys()].filter((u) => this._isReallyVisible(u)).length;
-    return Math.max(6, visible + 2);
+    return Math.min(3, Math.max(2, visible));
   }
 
   // Corta o excesso de mini-players quando o limite baixa (ex: hero começou a
@@ -580,6 +600,9 @@ class KwaiLiveWidget extends HTMLElement {
 
   async init() {
     if (this.isChecking) return;
+    // Aba em segundo plano: não bate na API nem remexe nos cards (só deixa a
+    // primeira carga passar, pra quem abre a página já num tab de fundo).
+    if (document.hidden && !this.isFirstLoad) return;
     this.isChecking = true;
 
     // Primeira carga: exibe cache enquanto busca dados frescos
@@ -792,11 +815,15 @@ class KwaiLiveWidget extends HTMLElement {
         hls = new window.Hls({
           enableWorker: true, lowLatencyMode: false,
           capLevelToPlayerSize: true, // quadro do hero é pequeno — não puxa 720p/1080p à toa
-          maxBufferLength: 14, maxMaxBufferLength: 24, backBufferLength: 6,
+          // Buffer de player "de assistir" — igual em espírito ao do admin, que
+          // roda liso: 30s à frente / 60s de teto aguentam a oscilação da rede
+          // sem congelar a imagem. Antes eram 14/24s (copiados da miniatura) e
+          // qualquer engasgo da rede estourava o buffer e travava.
+          maxBufferLength: 30, maxMaxBufferLength: 60, backBufferLength: 12,
           liveSyncDurationCount: 3,
           startFragPrefetch: true,
-          manifestLoadingMaxRetry: 5, manifestLoadingRetryDelay: 800,
-          fragLoadingMaxRetry: 8, fragLoadingRetryDelay: 800,
+          manifestLoadingMaxRetry: 6, manifestLoadingRetryDelay: 800,
+          fragLoadingMaxRetry: 12, fragLoadingRetryDelay: 800,
         });
         hls.loadSource(src);
         hls.attachMedia(videoEl);
@@ -918,6 +945,8 @@ class KwaiLiveWidget extends HTMLElement {
   startMiniPlayer(url) {
     const entry = this.activePlayers.get(url);
     if (!entry || !entry.streamer.playUrl) return;
+    // Sem vaga nenhuma agora (hero tocando / aba escondida): nem começa.
+    if (this.MAX_MINI_PLAYERS <= 0) return;
     // "starting" cobre a janela entre chamar _startHls e o vídeo de fato
     // tocar — necessário porque no HLS nativo (Safari/iOS) "entry.hlsInst"
     // nunca é preenchido (só a branch HLS.js usa essa variável), então sem
