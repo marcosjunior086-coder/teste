@@ -143,7 +143,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .banner .bc{position:relative;width:100%;max-width:820px;margin:0 auto;border-radius:16px;overflow:hidden;}
     .banner .bc-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);will-change:transform;}
     .banner .bc-slide{flex:0 0 100%;width:100%;min-width:100%;position:relative;display:block;}
-    .banner .bc-slide img{display:block;width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
+    .banner .bc-slide img{display:block;width:100%;height:auto;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
     .banner .bc-cap{position:absolute;bottom:0;left:0;right:0;padding:8px 14px 10px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);border-radius:0 0 16px 16px;pointer-events:none;}
     .banner .bc-cap span{font-family:var(--f-title);font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
     .banner .bc-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
@@ -756,11 +756,14 @@ class DmaiorHomeWebpro extends HTMLElement {
     const imgs = slides.map((s, i) => {
       const tag  = s.link_url ? 'a' : 'div';
       const href = s.link_url ? ` href="${this._esc(s.link_url)}" target="_blank" rel="noopener noreferrer"` : '';
-      // 1º slide: eager (fica acima da dobra) mas SEM fetchpriority — no mobile
-      // 4G a imagem do Drive competia com o texto do hero e piorava a LCP.
-      const load = i === 0 ? 'loading="eager" fetchpriority="low"' : 'loading="lazy"';
+      // 1º slide é o elemento de LCP (fica acima da dobra): eager + fetchpriority=high,
+      // como o Lighthouse pede. O peso vem do srcset — no mobile puxa a versão w480.
+      const load   = i === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+      const src    = this._normUrl(s.imagem_url, 720);
+      const set    = this._srcSet(s.imagem_url);
+      const srcset = set ? ` srcset="${this._esc(set)}" sizes="(min-width:860px) 820px, 100vw"` : '';
       return `<${tag} class="bc-slide"${href}>
-        <img src="${this._esc(this._normUrl(s.imagem_url))}" alt="${this._esc(s.titulo || 'Banner')}" width="720" height="203" decoding="async" ${load}>
+        <img src="${this._esc(src)}"${srcset} alt="${this._esc(s.titulo || 'Banner')}" width="1280" height="360" decoding="async" ${load}>
         ${s.titulo ? `<span class="bc-cap"><span>${this._esc(s.titulo)}</span></span>` : ''}
       </${tag}>`;
     }).join('');
@@ -800,19 +803,39 @@ class DmaiorHomeWebpro extends HTMLElement {
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  _normUrl(u) {
-    if (!u || typeof u !== 'string') return '';
+  _driveId(u) {
+    if (!u || typeof u !== 'string') return null;
     try {
       const url = new URL(u.trim());
-      if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
       const host = url.hostname.toLowerCase();
       if (host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')) {
         const m = url.pathname.match(/\/file\/d\/([^/]+)/);
         const id = m?.[1] || url.searchParams.get('id');
-        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w720`;
+        if (id && /^[\w-]{10,}$/.test(id)) return id;
       }
+    } catch (_) {}
+    return null;
+  }
+
+  _normUrl(u, w = 720) {
+    const id = this._driveId(u);
+    if (id) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
+    if (!u || typeof u !== 'string') return '';
+    try {
+      const url = new URL(u.trim());
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
       return url.href;
     } catch (_) { return ''; }
+  }
+
+  // srcset só pra imagens do Drive (as únicas em que dá pra pedir tamanhos).
+  _srcSet(u) {
+    const id = this._driveId(u);
+    if (!id) return '';
+    return [480, 720, 1080]
+      .map(w => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w} ${w}w`)
+      .join(', ');
   }
 }
 
