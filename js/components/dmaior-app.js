@@ -413,10 +413,13 @@
             .dwide{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start;margin-bottom:14px;}
             @media(max-width:900px){.dwide{grid-template-columns:1fr;}}
             .dwide .dcol-main,.dwide .dcol-side{display:flex;flex-direction:column;gap:14px;min-width:0;}
-            /* Histórico diário — no máx. ~8 linhas visíveis; o resto rola dentro do card */
-            .hist-card #hList{max-height:480px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:6px;}
+            /* Histórico diário — SÓ no desktop limita a ~8 linhas e rola dentro do card.
+               No mobile fica solto: scroll aninhado prende o gesto de arrastar o dedo. */
             .hist-card #hList::-webkit-scrollbar{width:5px;}
             .hist-card #hList::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+            @media(min-width:900px){
+                .hist-card #hList{max-height:480px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:6px;}
+            }
             .card > h3.dcard-h{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 
             #chLegend{display:none;align-items:center;gap:16px;margin-top:10px;font-size:.7rem;color:var(--muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);}
@@ -593,10 +596,13 @@
             .txn-seg button{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;padding:6px 11px;border-radius:8px;transition:background .15s,color .15s;}
             .txn-seg button.on{background:var(--cyan-d);color:var(--cyan);}
 
-            /* Lista de transações — no máx. ~8 itens visíveis; o resto rola no container */
-            #cTxLista{max-height:590px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:6px;}
+            /* Lista de transações — SÓ no desktop limita a ~8 itens e rola no container.
+               No mobile fica solta (scroll aninhado prende o gesto de arrastar). */
             #cTxLista::-webkit-scrollbar{width:5px;}
             #cTxLista::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+            @media(min-width:900px){
+                #cTxLista{max-height:590px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:6px;}
+            }
 
             .txn{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--glass);}
             .txn + .txn{margin-top:9px;}
