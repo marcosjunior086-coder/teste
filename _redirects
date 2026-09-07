@@ -1,3 +1,6 @@
+# security.txt (RFC 9116): serve o arquivo da raiz no caminho .well-known
+/.well-known/security.txt   /security.txt   200
+
 # Old Wix redirects
 /rank-geral     /painel/index.html 301
 /rank-geral/    /painel/index.html 301
