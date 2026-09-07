@@ -178,9 +178,11 @@ class KwaiLiveWidget extends HTMLElement {
           border-radius:26px;
           overflow:hidden;
           padding:14px clamp(12px,2vw,22px) 16px;
-          /* reserva a altura do estado aberto — a faixa fica no topo da home,
-             se ela cresce quando as lives chegam empurra tudo (CLS) */
-          min-height:132px;
+        }
+        /* reserva a altura do estado aberto só no desktop — no mobile essa
+           faixa fica no topo e 130px reservados atrasam o Speed Index */
+        @media (min-width:1001px){
+          :host([data-layout="webpro"]) #liveWidget{ min-height:132px; }
         }
         :host([data-layout="webpro"]) #liveWidget.minimized{ padding-bottom:12px; }
         @media (max-width:560px){

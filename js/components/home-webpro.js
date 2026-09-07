@@ -756,11 +756,11 @@ class DmaiorHomeWebpro extends HTMLElement {
     const imgs = slides.map((s, i) => {
       const tag  = s.link_url ? 'a' : 'div';
       const href = s.link_url ? ` href="${this._esc(s.link_url)}" target="_blank" rel="noopener noreferrer"` : '';
-      const eager = i === 0
-        ? 'loading="eager" fetchpriority="high"'
-        : 'loading="lazy"';
+      // 1º slide: eager (fica acima da dobra) mas SEM fetchpriority — no mobile
+      // 4G a imagem do Drive competia com o texto do hero e piorava a LCP.
+      const load = i === 0 ? 'loading="eager" fetchpriority="low"' : 'loading="lazy"';
       return `<${tag} class="bc-slide"${href}>
-        <img src="${this._esc(this._normUrl(s.imagem_url))}" alt="${this._esc(s.titulo || 'Banner')}" width="1000" height="281" decoding="async" ${eager}>
+        <img src="${this._esc(this._normUrl(s.imagem_url))}" alt="${this._esc(s.titulo || 'Banner')}" width="720" height="203" decoding="async" ${load}>
         ${s.titulo ? `<span class="bc-cap"><span>${this._esc(s.titulo)}</span></span>` : ''}
       </${tag}>`;
     }).join('');
@@ -809,7 +809,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       if (host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')) {
         const m = url.pathname.match(/\/file\/d\/([^/]+)/);
         const id = m?.[1] || url.searchParams.get('id');
-        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1000`;
+        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w720`;
       }
       return url.href;
     } catch (_) { return ''; }
