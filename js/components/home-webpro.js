@@ -106,9 +106,10 @@ class DmaiorHomeWebpro extends HTMLElement {
     :host{
       display:block;
       --f-title:var(--dm-font-body,'Exo 2',sans-serif);
-      --btn-grad:var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4));
-      --btn-glow:var(--dm-rank-glow,rgba(59,130,246,.28));
-      padding-bottom:clamp(44px,7vw,80px);
+      --btn-grad:var(--dm-grad-effect,linear-gradient(135deg,#3b82f6,#00d4d4));
+      --btn-glow:var(--dm-effect-glow,rgba(59,130,246,.28));
+      /* !important: o *{padding:0} do global.css (árvore externa) ganha do :host sem ele */
+      padding-bottom:clamp(44px,7vw,80px) !important;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     a{color:var(--dm-cyan,#00d4d4);text-decoration:none;transition:color .2s,background .2s,border-color .2s,transform .2s;}
@@ -125,9 +126,9 @@ class DmaiorHomeWebpro extends HTMLElement {
     @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 
     .surface{background:var(--dm-grad-card);border:1px solid var(--dm-border);border-radius:20px;position:relative;overflow:hidden;}
-    .surface.strip::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-rank-blue,#3b82f6),var(--dm-rank-cyan,#00d4d4),transparent);opacity:.75;}
+    .surface.strip::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-effect-blue,#3b82f6),var(--dm-effect-accent,#00d4d4),transparent);opacity:.75;}
 
-    .btn-grad{display:inline-flex;align-items:center;gap:10px;background:var(--btn-grad);color:#fff;font-weight:700;border:1px solid var(--dm-rank-cyan-35,rgba(0,212,212,.35));border-radius:999px;box-shadow:0 12px 30px var(--btn-glow);}
+    .btn-grad{display:inline-flex;align-items:center;gap:10px;background:var(--btn-grad);color:#fff;font-weight:700;border:1px solid var(--dm-effect-35,rgba(0,212,212,.35));border-radius:999px;box-shadow:0 12px 30px var(--btn-glow);}
     .btn-grad:hover{color:#fff;transform:translateY(-2px);}
     .btn-outline{display:inline-flex;align-items:center;gap:10px;background:transparent;color:var(--dm-text,#e2e8f0);font-weight:700;border:1px solid var(--dm-bw06,rgba(255,255,255,.09));border-radius:999px;}
     .btn-outline:hover{color:var(--dm-text,#e2e8f0);border-color:var(--dm-cyan-30);background:var(--dm-cyan-08);}
@@ -146,7 +147,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .banner .bc-dot{width:7px;height:7px;border-radius:50%;border:none;background:rgba(255,255,255,.4);cursor:pointer;padding:0;transition:background .25s,transform .25s;}
     .banner .bc-dot.on{background:#fff;transform:scale(1.25);}
     .banner .bc-fallback{width:100%;max-width:820px;margin:0 auto;aspect-ratio:32/9;border-radius:16px;position:relative;overflow:hidden;background:var(--dm-grad-card-alt);border:1px solid var(--dm-border);display:flex;align-items:flex-end;padding:14px 18px;}
-    .banner .bc-fallback::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-rank-blue,#3b82f6),var(--dm-rank-cyan,#00d4d4),transparent);opacity:.75;}
+    .banner .bc-fallback::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-effect-blue,#3b82f6),var(--dm-effect-accent,#00d4d4),transparent);opacity:.75;}
     .banner .bc-fallback span{font-family:var(--f-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.5px;color:var(--dm-text,#e2e8f0);}
 
     /* HERO */
@@ -160,7 +161,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .cta .btn-grad,.cta .btn-outline{font-size:1rem;padding:15px 26px;}
     .proof{display:flex;align-items:center;gap:13px;margin-top:28px;flex-wrap:wrap;}
     .stack{display:flex;}
-    .stack i{width:34px;height:34px;border-radius:50%;border:2px solid var(--dm-bg,#060B16);background:var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4));display:block;}
+    .stack i{width:34px;height:34px;border-radius:50%;border:2px solid var(--dm-bg,#060B16);background:var(--dm-grad-effect,linear-gradient(135deg,#3b82f6,#00d4d4));display:block;}
     .stack img{width:34px;height:34px;border-radius:50%;border:2px solid var(--dm-bg,#060B16);object-fit:cover;display:block;background:var(--dm-bg-3);}
     .stack i+i,.stack img+img{margin-left:-11px;}
     .proof p{font-size:.84rem;color:var(--dm-text-sub,#a0b8c8);line-height:1.4;margin:0;}
@@ -236,6 +237,13 @@ class DmaiorHomeWebpro extends HTMLElement {
     .ben .ic svg{width:24px;height:24px;stroke:var(--dm-cyan,#00d4d4);}
     .ben.gold .ic{background:var(--dm-gold-10);border-color:var(--dm-gold-20);} .ben.gold .ic svg{stroke:var(--dm-gold,#f0c040);}
     .ben.green .ic{background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.22);} .ben.green .ic svg{stroke:var(--dm-green,#4ade80);}
+    /* rosa/laranja: sem verde/dourado destoando — tudo no acento do tema */
+    :host([data-theme="rosa"]) .ben.gold .ic,:host([data-theme="laranja"]) .ben.gold .ic,
+    :host([data-theme="rosa"]) .ben.green .ic,:host([data-theme="laranja"]) .ben.green .ic{background:var(--dm-cyan-08);border-color:var(--dm-cyan-20);}
+    :host([data-theme="rosa"]) .ben.gold .ic svg,:host([data-theme="laranja"]) .ben.gold .ic svg,
+    :host([data-theme="rosa"]) .ben.green .ic svg,:host([data-theme="laranja"]) .ben.green .ic svg{stroke:var(--dm-cyan);}
+    :host([data-theme="rosa"]) .qa .ic,:host([data-theme="laranja"]) .qa .ic{background:var(--dm-cyan-10)!important;}
+    :host([data-theme="rosa"]) .qa .ic svg[fill^="#"],:host([data-theme="laranja"]) .qa .ic svg[fill^="#"]{fill:var(--dm-cyan);}
     .ben h3{font-size:1.04rem;font-weight:700;letter-spacing:.02em;margin:0 0 8px;}
     .ben p{font-size:.88rem;line-height:1.6;color:var(--dm-text-sub,#a0b8c8);margin:0;}
     .ben-grid.reveal .ben{opacity:0;transform:translateY(32px);transition:opacity .55s ease,transform .6s cubic-bezier(.2,.7,.2,1);}

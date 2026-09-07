@@ -66,8 +66,8 @@ class DmaiorFooter extends HTMLElement {
         .footer-grid {
           display: flex;
           flex-wrap: wrap;
-          gap: 32px;
-          max-width: 960px;
+          gap: 24px clamp(32px, 6vw, 64px);
+          max-width: 980px;
           margin: 0 auto;
           padding-bottom: 28px;
           border-bottom: 1px solid var(--dm-bw05, rgba(255,255,255,.05));
@@ -107,8 +107,8 @@ class DmaiorFooter extends HTMLElement {
 
         /* Colunas de conteúdo */
         .col {
-          flex: 1 1 130px;
-          min-width: 120px;
+          flex: 1 1 160px;
+          min-width: 150px;
         }
         .col-title {
           font-family: var(--dm-font-title,'Rajdhani',sans-serif);
