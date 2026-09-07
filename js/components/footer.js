@@ -234,7 +234,7 @@ class DmaiorFooter extends HTMLElement {
               <a class="social-btn" href="https://www.instagram.com/dmaioragency/" target="_blank" rel="noopener noreferrer" title="Instagram">
                 ${SVG_INSTA}
               </a>
-              <a class="social-btn kwai" href="https://www.kwai.com/@dmaioragency" target="_blank" rel="noopener noreferrer" title="Kwai">
+              <a class="social-btn kwai" href="https://www.kwai.com/@KWAIRES" target="_blank" rel="noopener noreferrer" title="Kwai">
                 ${SVG_KWAI}
               </a>
             </div>

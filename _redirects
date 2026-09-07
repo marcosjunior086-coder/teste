@@ -9,9 +9,9 @@
 /recarga        https://rocketbunny.club/@DMAIOR_AGENCY  301
 /recarga/       https://rocketbunny.club/@DMAIOR_AGENCY  301
 /recarga.html   https://rocketbunny.club/@DMAIOR_AGENCY  301
-/politicas      /politicas.html     301
-/politicas/     /politicas.html     301
-/tutoriais      /tutoriais.html     301
-/tutoriais/     /tutoriais.html     301
 /formulario     /recrutamento.html  301
 /formulario/    /recrutamento.html  301
+
+# NÃO redirecionar /politicas -> /politicas.html nem /tutoriais -> /tutoriais.html:
+# o Cloudflare Pages já serve a URL limpa e faz o 301 de /*.html -> /* sozinho.
+# As duas regras juntas geravam loop (ERR_TOO_MANY_REDIRECTS).
