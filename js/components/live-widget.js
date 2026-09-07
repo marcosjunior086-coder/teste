@@ -83,7 +83,7 @@ class KwaiLiveWidget extends HTMLElement {
     // (userMinimized continua false, então o auto-abrir não fica bloqueado).
     this.setMinimized(true);
     this.setupListeners();
-    this.hlsReadyPromise = this.loadHlsLib();
+    this._scheduleHlsLib();
     this.initObserver();
     this.init();
     // Atualiza as lives a cada 30 segundos — timer guardado para limpeza
@@ -122,13 +122,30 @@ class KwaiLiveWidget extends HTMLElement {
 
   // Carrega HLS.js do CDN de forma assíncrona (não bloqueia se CDN falhar)
   loadHlsLib() {
-    return new Promise((resolve) => {
+    return this._hlsLibPromise || (this._hlsLibPromise = new Promise((resolve) => {
       if (window.Hls) return resolve();
+      const pc = document.createElement('link');
+      pc.rel = 'preconnect'; pc.href = 'https://cdn.jsdelivr.net'; pc.crossOrigin = '';
+      document.head.appendChild(pc);
       const s   = document.createElement('script');
       s.src     = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20'; // versão fixada — evita quebra por update automático
       s.onload  = resolve;
       s.onerror = resolve; // não bloqueia se CDN falhar
       document.head.appendChild(s);
+    }));
+  }
+
+  // Adia o hls.js (123 KB) pra depois do 1º paint / load — assim ele não
+  // disputa banda com o conteúdo da página. A live ainda entra sozinha, só
+  // ~1s mais tarde. Quem pedir a lib antes (raro) cai no loadHlsLib() na hora.
+  _scheduleHlsLib() {
+    this.hlsReadyPromise = new Promise((resolve) => {
+      const run = () => {
+        if ('requestIdleCallback' in window) requestIdleCallback(() => this.loadHlsLib().then(resolve), { timeout: 3000 });
+        else setTimeout(() => this.loadHlsLib().then(resolve), 1200);
+      };
+      if (document.readyState === 'complete') run();
+      else window.addEventListener('load', run, { once: true });
     });
   }
 
@@ -137,6 +154,7 @@ class KwaiLiveWidget extends HTMLElement {
       <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         :host{display:block;width:100%;}
+        @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 
         #liveWidget{
           background:var(--dm-grad-sidebar);
@@ -144,7 +162,6 @@ class KwaiLiveWidget extends HTMLElement {
           padding:8px 6px 12px;color:var(--dm-text);
           position:relative;width:100%;
           font-family:var(--dm-font-body,'Exo 2',system-ui,sans-serif);
-          transition:padding .3s ease;
         }
         #liveWidget::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-effect-blue,var(--dm-rank-blue,#3b82f6)),var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)),transparent);}
         #liveWidget.minimized{padding-bottom:6px;}
@@ -161,6 +178,9 @@ class KwaiLiveWidget extends HTMLElement {
           border-radius:26px;
           overflow:hidden;
           padding:14px clamp(12px,2vw,22px) 16px;
+          /* reserva a altura do estado aberto — a faixa fica no topo da home,
+             se ela cresce quando as lives chegam empurra tudo (CLS) */
+          min-height:132px;
         }
         :host([data-layout="webpro"]) #liveWidget.minimized{ padding-bottom:12px; }
         @media (max-width:560px){
@@ -171,7 +191,8 @@ class KwaiLiveWidget extends HTMLElement {
         /* Cor do texto "N AO VIVO" e bolinha — usa --dm-green que já adapta por tema */
         #liveCount{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm-green,#4ade80);display:flex;align-items:center;gap:6px;}
         .live-dot{width:6px;height:6px;border-radius:50%;background:var(--dm-green,#4ade80);box-shadow:0 0 6px var(--dm-green,#4ade80);animation:dotPulse 2s infinite;}
-        @keyframes dotPulse{0%,100%{box-shadow:0 0 6px var(--dm-green,#4ade80);}50%{box-shadow:0 0 2px var(--dm-green,#4ade80);opacity:.4;}}
+        /* só opacity (composited) — antes animava box-shadow e travava a thread */
+        @keyframes dotPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
         .top-right{display:flex;align-items:center;gap:8px;}
 
@@ -197,7 +218,7 @@ class KwaiLiveWidget extends HTMLElement {
           display:flex;gap:8px;overflow-x:auto;overflow-y:visible;
           scrollbar-width:none;padding:8px;align-items:flex-start;
           min-height:80px;max-height:300px;
-          transition:max-height .3s ease,opacity .3s ease,padding .3s ease,min-height .3s ease;
+          transition:opacity .3s ease;
         }
         #liveRow::-webkit-scrollbar{display:none;}
         #liveRow.collapsed{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important;min-height:0!important;overflow:hidden;}
@@ -209,9 +230,10 @@ class KwaiLiveWidget extends HTMLElement {
         /* Anel do avatar — usa var(--dm-cyan) para seguir o tema atual */
         .avatar-wrap{position:relative;width:52px;height:52px;margin:0 auto;border-radius:50%;
           background:var(--dm-grad-cyan,linear-gradient(135deg,var(--dm-cyan,#00e5e5),#007f9f,var(--dm-cyan,#00e5e5)));padding:2.5px;
-          animation:ringGlow 2s ease-in-out infinite;}
+          box-shadow:0 0 0 3px var(--dm-cyan-08,rgba(0,212,212,.18)),0 0 14px var(--dm-cyan-30,rgba(0,212,212,.6));}
         @media(min-width:600px){.live-card{width:60px;}.avatar-wrap{width:60px;height:60px;}#liveRow{gap:10px;}}
-        @keyframes ringGlow{0%,100%{box-shadow:0 0 0 0 transparent,0 0 8px var(--dm-cyan-20,rgba(0,212,212,.4));}50%{box-shadow:0 0 0 4px var(--dm-cyan-08,rgba(0,212,212,.18)),0 0 16px var(--dm-cyan-40,rgba(0,212,212,.7));}}
+        /* o "pulso" do anel fica no ::after (transform/opacity = composited);
+           o glow do box-shadow agora e estatico (antes animava e travava a thread) */
         /* Ring pulse — usa var(--dm-cyan-30) para seguir a cor de acento do tema */
         .avatar-wrap::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--dm-cyan-30,rgba(0,229,229,.5));animation:ringPulse 2s ease-in-out infinite;pointer-events:none;}
         @keyframes ringPulse{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.28);opacity:0;}}
@@ -767,7 +789,8 @@ class KwaiLiveWidget extends HTMLElement {
         // oscilação da rede sem travar, como o player do modal.
         hls = new window.Hls({
           enableWorker: true, lowLatencyMode: false,
-          maxBufferLength: 24, maxMaxBufferLength: 48, backBufferLength: 8,
+          capLevelToPlayerSize: true, // quadro do hero é pequeno — não puxa 720p/1080p à toa
+          maxBufferLength: 14, maxMaxBufferLength: 24, backBufferLength: 6,
           liveSyncDurationCount: 3,
           startFragPrefetch: true,
           manifestLoadingMaxRetry: 5, manifestLoadingRetryDelay: 800,

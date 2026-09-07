@@ -136,7 +136,10 @@ class DmaiorHomeWebpro extends HTMLElement {
     .sec{padding-top:clamp(38px,6vw,68px);}
 
     /* CARROSSEL DE CAMPANHA (igual ao bc-carousel do services-menu) */
-    .banner{padding-top:14px;}
+    /* min-height reserva o espaço do carrossel enquanto ele carrega (anti-CLS);
+       .empty zera quando a API confirma que não há banner. */
+    .banner{padding-top:14px;min-height:calc(min(820px, 100vw - 60px) * .281 + 14px);}
+    .banner.empty{min-height:0;}
     .banner .bc{position:relative;width:100%;max-width:820px;margin:0 auto;border-radius:16px;overflow:hidden;}
     .banner .bc-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);will-change:transform;}
     .banner .bc-slide{flex:0 0 100%;width:100%;min-width:100%;position:relative;display:block;}
@@ -144,7 +147,8 @@ class DmaiorHomeWebpro extends HTMLElement {
     .banner .bc-cap{position:absolute;bottom:0;left:0;right:0;padding:8px 14px 10px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);border-radius:0 0 16px 16px;pointer-events:none;}
     .banner .bc-cap span{font-family:var(--f-title);font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
     .banner .bc-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
-    .banner .bc-dot{width:7px;height:7px;border-radius:50%;border:none;background:rgba(255,255,255,.4);cursor:pointer;padding:0;transition:background .25s,transform .25s;}
+    .banner .bc-dot{position:relative;width:7px;height:7px;border-radius:50%;border:none;background:rgba(255,255,255,.4);cursor:pointer;padding:0;transition:background .25s,transform .25s;}
+    .banner .bc-dot::before{content:"";position:absolute;inset:-9px;}
     .banner .bc-dot.on{background:#fff;transform:scale(1.25);}
     .banner .bc-fallback{width:100%;max-width:820px;margin:0 auto;aspect-ratio:32/9;border-radius:16px;position:relative;overflow:hidden;background:var(--dm-grad-card-alt);border:1px solid var(--dm-border);display:flex;align-items:flex-end;padding:14px 18px;}
     .banner .bc-fallback::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-effect-blue,#3b82f6),var(--dm-effect-accent,#00d4d4),transparent);opacity:.75;}
@@ -153,7 +157,9 @@ class DmaiorHomeWebpro extends HTMLElement {
     /* HERO */
     .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,60px);align-items:center;padding-top:clamp(36px,6vw,68px);padding-bottom:clamp(24px,4vw,40px);}
     .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--dm-cyan-10);border:1px solid var(--dm-cyan-30);color:var(--dm-cyan,#00d4d4);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:7px 14px;border-radius:999px;}
-    .hero h1{font-size:clamp(2rem,4.6vw,3.3rem);font-weight:700;margin:18px 0 0;letter-spacing:.01em;}
+    /* min-height reserva o caso de 3 linhas (a frase rotativa longa quebra),
+       pra o título não pular quando as frases trocam (anti-CLS). */
+    .hero h1{font-size:clamp(2rem,4.4vw,3.1rem);font-weight:700;margin:18px 0 0;letter-spacing:.01em;min-height:3.5em;}
     .hero h1 .rot{color:var(--dm-cyan,#00d4d4);display:inline-block;transition:opacity .35s ease,transform .35s ease;}
     .hero h1 .rot.out{opacity:0;transform:translateY(6px);}
     .hero .sub{font-size:clamp(1rem,1.5vw,1.1rem);line-height:1.6;color:var(--dm-text-sub,#a0b8c8);margin:16px 0 0;max-width:50ch;}
@@ -188,7 +194,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .frame .hf-who img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;}
     .frame .hf-who b{font-weight:700;font-size:.82rem;color:#fff;display:block;line-height:1.2;}
     .frame .hf-who .hf-vc{font-size:.68rem;color:#c9d6e5;}
-    .lp{position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:6px;background:var(--dm-red,#f87171);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.12em;padding:5px 10px;border-radius:8px;z-index:3;}
+    .lp{position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:6px;background:#dc2626;color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.12em;padding:5px 10px;border-radius:8px;z-index:3;}
     .lp i{width:6px;height:6px;border-radius:50%;background:#fff;animation:wpPulse 1.6s infinite;}
     .hlive .stat{position:absolute;background:var(--dm-bg-2);border:1px solid var(--dm-border);border-radius:14px;padding:11px 13px;box-shadow:0 16px 36px var(--dm-shadow-md);z-index:2;}
     .hlive .stat b{font-family:var(--f-title);font-weight:700;font-size:1rem;display:block;color:var(--dm-text,#e2e8f0);}
@@ -202,7 +208,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .recarga .l{display:flex;align-items:center;gap:15px;min-width:0;}
     .recarga .ic{width:50px;height:50px;flex-shrink:0;border-radius:16px;background:var(--dm-cyan-10);border:1px solid var(--dm-cyan-30);display:flex;align-items:center;justify-content:center;}
     .recarga .ic svg{stroke:var(--dm-cyan,#00d4d4);}
-    .recarga h3{font-size:clamp(1.1rem,2vw,1.45rem);font-weight:700;letter-spacing:.02em;}
+    .recarga h2{font-size:clamp(1.1rem,2vw,1.45rem);font-weight:700;letter-spacing:.02em;}
     .recarga .l div p{font-size:.9rem;color:var(--dm-text-sub,#a0b8c8);margin-top:4px;}
     .recarga .go{padding:13px 22px;font-size:.92rem;white-space:nowrap;}
 
@@ -291,12 +297,12 @@ class DmaiorHomeWebpro extends HTMLElement {
     .fq.open .fq-body{display:flex;}
     .note{background:var(--dm-bg-1);border-left:3px solid var(--dm-cyan,#00d4d4);border-radius:11px;padding:15px;}
     .note.g{border-left-color:var(--dm-green,#4ade80);} .note.r{border-left-color:var(--dm-red,#f87171);}
-    .note h4{font-family:var(--f-title);font-weight:700;font-size:.92rem;margin:0 0 5px;color:var(--dm-cyan,#00d4d4);text-transform:uppercase;letter-spacing:.02em;}
-    .note.g h4{color:var(--dm-green,#4ade80);} .note.r h4{color:var(--dm-red,#f87171);}
+    .note h3{font-family:var(--f-title);font-weight:700;font-size:.92rem;margin:0 0 5px;color:var(--dm-cyan,#00d4d4);text-transform:uppercase;letter-spacing:.02em;}
+    .note.g h3{color:var(--dm-green,#4ade80);} .note.r h3{color:var(--dm-red,#f87171);}
     .note p{margin:0;font-size:.88rem;line-height:1.6;color:var(--dm-text-sub,#a0b8c8);}
     .hl{color:var(--dm-cyan,#00d4d4);font-weight:700;} .hl.g{color:var(--dm-green,#4ade80);} .hl.r{color:var(--dm-red,#f87171);}
     .bonus{background:var(--dm-gold-10);border:1px solid var(--dm-gold-20);border-radius:13px;padding:18px;}
-    .bonus h4{font-family:var(--f-title);font-weight:700;font-size:.92rem;margin:0 0 13px;color:var(--dm-gold,#f0c040);text-transform:uppercase;letter-spacing:.02em;}
+    .bonus h3{font-family:var(--f-title);font-weight:700;font-size:.92rem;margin:0 0 13px;color:var(--dm-gold,#f0c040);text-transform:uppercase;letter-spacing:.02em;}
     .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
     .bonus-c{background:var(--dm-gold-10);border:1px solid var(--dm-gold-20);border-radius:11px;padding:15px;text-align:center;}
     .bonus-c b{font-family:var(--f-title);font-weight:700;font-size:1.25rem;color:var(--dm-gold,#f0c040);display:block;}
@@ -315,7 +321,6 @@ class DmaiorHomeWebpro extends HTMLElement {
     @media (max-width:1000px){
       .desktop-only{display:none;} .mobile-only{display:block;}
       .hero{grid-template-columns:1fr;}
-      .hero h1{min-height:3.4em;}
       .recarga{grid-template-columns:1fr;}
       .cols2{grid-template-columns:1fr;}
       .cta-band{grid-template-columns:1fr;}
@@ -326,7 +331,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     @media (max-width:560px){
       .qa{grid-template-columns:1fr;}
       .bonus-grid{grid-template-columns:1fr;}
-      .hero h1{font-size:1.8rem;min-height:3.2em;}
+      .hero h1{font-size:1.75rem;}
     }
   `; }
 
@@ -374,7 +379,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       <a href="https://rocketbunny.club/@DMAIOR_AGENCY" target="_blank" rel="noopener noreferrer" class="surface strip recarga">
         <div class="l">
           <span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg></span>
-          <div><h3>Recarga de Diamantes</h3><p>Rápido, seguro e pelo melhor preço — direto no seu perfil Kwai.</p></div>
+          <div><h2>Recarga de Diamantes</h2><p>Rápido, seguro e pelo melhor preço — direto no seu perfil Kwai.</p></div>
         </div>
         <span class="btn-grad go">Recarregar agora ${ARROW}</span>
       </a>
@@ -489,8 +494,8 @@ class DmaiorHomeWebpro extends HTMLElement {
               <b>1. Processo de Seleção</b><i class="fq-pm">+</i>
             </button>
             <div class="fq-body">
-              <div class="note"><h4>Como funciona o processo de seleção?</h4><p>O processo é <span class="hl">100% gratuito e imediato</span>. Basta preencher nosso formulário e nossa equipe entra em contato em até 24h.</p></div>
-              <div class="note"><h4>Quanto custa para ser agenciado?</h4><p>Ser agenciado é <span class="hl">totalmente grátis</span>, com acompanhamento personalizado focado em maximizar seus ganhos.</p></div>
+              <div class="note"><h3>Como funciona o processo de seleção?</h3><p>O processo é <span class="hl">100% gratuito e imediato</span>. Basta preencher nosso formulário e nossa equipe entra em contato em até 24h.</p></div>
+              <div class="note"><h3>Quanto custa para ser agenciado?</h3><p>Ser agenciado é <span class="hl">totalmente grátis</span>, com acompanhamento personalizado focado em maximizar seus ganhos.</p></div>
             </div>
           </div>
           <div class="surface strip fq">
@@ -499,10 +504,10 @@ class DmaiorHomeWebpro extends HTMLElement {
               <b>2. Ganhos e Pagamentos</b><i class="fq-pm">+</i>
             </button>
             <div class="fq-body">
-              <div class="note g"><h4>Quanto tempo leva para começar a ganhar?</h4><p>Você pode começar a ganhar <span class="hl g">desde a primeira live</span>.</p></div>
-              <div class="note"><h4>Como recebo os pagamentos?</h4><p>Os pagamentos são feitos em <span class="hl">dólar diretamente pelo aplicativo</span>. Saque via Pix no mesmo dia.</p></div>
+              <div class="note g"><h3>Quanto tempo leva para começar a ganhar?</h3><p>Você pode começar a ganhar <span class="hl g">desde a primeira live</span>.</p></div>
+              <div class="note"><h3>Como recebo os pagamentos?</h3><p>Os pagamentos são feitos em <span class="hl">dólar diretamente pelo aplicativo</span>. Saque via Pix no mesmo dia.</p></div>
               <div class="bonus">
-                <h4>Como são calculados os bônus?</h4>
+                <h3>Como são calculados os bônus?</h3>
                 <div class="bonus-grid">
                   <div class="bonus-c"><b>200 ◆</b><span>≈ US$ 1,00</span></div>
                   <div class="bonus-c"><b>500 ◆</b><span>≈ US$ 2,50</span></div>
@@ -517,7 +522,7 @@ class DmaiorHomeWebpro extends HTMLElement {
               <b>3. Suporte e Treinamento</b><i class="fq-pm">+</i>
             </button>
             <div class="fq-body">
-              <div class="note"><h4>Qual suporte é oferecido?</h4><p>Suporte humano real e treinamento completo em vídeo, com acompanhamento diário da sua evolução. Inclui: suporte humano, vídeos de treinamento, estatísticas reais e acompanhamento.</p></div>
+              <div class="note"><h3>Qual suporte é oferecido?</h3><p>Suporte humano real e treinamento completo em vídeo, com acompanhamento diário da sua evolução. Inclui: suporte humano, vídeos de treinamento, estatísticas reais e acompanhamento.</p></div>
             </div>
           </div>
           <div class="surface strip fq">
@@ -526,8 +531,8 @@ class DmaiorHomeWebpro extends HTMLElement {
               <b>4. Requisitos</b><i class="fq-pm">+</i>
             </button>
             <div class="fq-body">
-              <div class="note r"><h4>Qual a idade mínima para participar?</h4><p>É necessário ter <span class="hl r">18 anos ou mais</span>. Não existe limite máximo.</p></div>
-              <div class="note g"><h4>Preciso ter muitos seguidores?</h4><p><span class="hl g">Não. Você pode começar do zero.</span> Seguidores e audiência crescem com o treinamento e a consistência nas lives.</p></div>
+              <div class="note r"><h3>Qual a idade mínima para participar?</h3><p>É necessário ter <span class="hl r">18 anos ou mais</span>. Não existe limite máximo.</p></div>
+              <div class="note g"><h3>Preciso ter muitos seguidores?</h3><p><span class="hl g">Não. Você pode começar do zero.</span> Seguidores e audiência crescem com o treinamento e a consistência nas lives.</p></div>
             </div>
           </div>
         </div>
@@ -735,20 +740,27 @@ class DmaiorHomeWebpro extends HTMLElement {
       const data   = await window.DmaiorAPI.rank.getComunicados('home');
       const slides = (data.comunicados || []).filter(c => c.imagem_url);
       const wrap   = this.shadowRoot?.getElementById('bcWrap');
+      const band   = this.shadowRoot?.querySelector('.banner');
       if (!wrap) return;
-      if (!slides.length) { wrap.style.display = 'none'; return; }
+      if (!slides.length) { wrap.style.display = 'none'; band?.classList.add('empty'); return; }
+      band?.classList.remove('empty');
       wrap.style.display = '';
       wrap.innerHTML = this._carouselHTML(slides);
       this._bindCarousel(slides.length);
-    } catch (_) { /* API indisponível — carrossel fica oculto */ }
+    } catch (_) { /* API indisponível — carrossel fica oculto */
+      this.shadowRoot?.querySelector('.banner')?.classList.add('empty');
+    }
   }
 
   _carouselHTML(slides) {
     const imgs = slides.map((s, i) => {
       const tag  = s.link_url ? 'a' : 'div';
       const href = s.link_url ? ` href="${this._esc(s.link_url)}" target="_blank" rel="noopener noreferrer"` : '';
+      const eager = i === 0
+        ? 'loading="eager" fetchpriority="high"'
+        : 'loading="lazy"';
       return `<${tag} class="bc-slide"${href}>
-        <img src="${this._esc(this._normUrl(s.imagem_url))}" alt="${this._esc(s.titulo || 'Banner')}" loading="lazy">
+        <img src="${this._esc(this._normUrl(s.imagem_url))}" alt="${this._esc(s.titulo || 'Banner')}" width="1000" height="281" decoding="async" ${eager}>
         ${s.titulo ? `<span class="bc-cap"><span>${this._esc(s.titulo)}</span></span>` : ''}
       </${tag}>`;
     }).join('');
@@ -797,7 +809,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       if (host === 'drive.google.com' || host === 'docs.google.com' || host.endsWith('.googleusercontent.com')) {
         const m = url.pathname.match(/\/file\/d\/([^/]+)/);
         const id = m?.[1] || url.searchParams.get('id');
-        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`;
+        if (id && /^[\w-]{10,}$/.test(id)) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1000`;
       }
       return url.href;
     } catch (_) { return ''; }
