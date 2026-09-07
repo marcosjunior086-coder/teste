@@ -414,7 +414,7 @@
             @media(max-width:900px){.dwide{grid-template-columns:1fr;}}
             .dwide .dcol-main,.dwide .dcol-side{display:flex;flex-direction:column;gap:14px;min-width:0;}
             /* Histórico diário — no máx. ~8 linhas visíveis; o resto rola dentro do card */
-            .hist-card #hList{max-height:480px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 -4px;padding:0 4px;}
+            .hist-card #hList{max-height:480px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:6px;}
             .hist-card #hList::-webkit-scrollbar{width:5px;}
             .hist-card #hList::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
             .card > h3.dcard-h{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -594,7 +594,7 @@
             .txn-seg button.on{background:var(--cyan-d);color:var(--cyan);}
 
             /* Lista de transações — no máx. ~8 itens visíveis; o resto rola no container */
-            #cTxLista{max-height:590px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 -4px;padding:0 4px;}
+            #cTxLista{max-height:590px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:6px;}
             #cTxLista::-webkit-scrollbar{width:5px;}
             #cTxLista::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
@@ -1906,7 +1906,12 @@
         const cnt = this.qs('#cTxCount');
         if (cnt) cnt.textContent = lista.length ? `(${lista.length})` : '';
         if (!todas.length) { el.innerHTML = `<p class="txn-empty">Nenhuma movimentação ainda.</p>`; return; }
-        if (!lista.length)  { el.innerHTML = `<p class="txn-empty">Nada nesse período.</p>`; return; }
+        if (!lista.length) {
+            const msg = (filtro === 'in') ? 'Nenhuma entrada.'
+                      : (filtro === 'out') ? 'Nenhuma saída.'
+                      : 'Nada nesse período.';
+            el.innerHTML = `<p class="txn-empty">${msg}</p>`; return;
+        }
 
         const tipoLabel = {
             credito:'Crédito', debito:'Débito',
