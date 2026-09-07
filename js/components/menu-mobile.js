@@ -31,6 +31,8 @@ class MenuMobileDMaior extends HTMLElement {
     } catch (_) {}
     this._syncThemeHost();
 
+    this._syncLayoutHost();
+
     this.render();
     this.bindEvents();
     this.applyPreferences();
@@ -39,18 +41,22 @@ class MenuMobileDMaior extends HTMLElement {
     this._storageHandler = (e) => {
       if (['dm_token', 'dm_foto', 'dm_nome', 'dm_atalho_admin', 'dm_atalho_agente'].includes(e.key)) this.checkAuth();
       if (e.key === 'dm_tema') this._syncThemeHost();
+      if (e.key === 'dm_layout') this._syncLayoutHost();
     };
     this._authHandler = (e) => this.updateAuthUI(e.detail);
     this._themeHandler = () => this._syncThemeHost();
+    this._layoutHandler = () => this._syncLayoutHost();
     window.addEventListener('storage', this._storageHandler);
     window.addEventListener('dmaior:auth', this._authHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
+    window.addEventListener('dmaior:layout', this._layoutHandler);
   }
 
   disconnectedCallback() {
     window.removeEventListener('storage',     this._storageHandler);
     window.removeEventListener('dmaior:auth', this._authHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
+    window.removeEventListener('dmaior:layout', this._layoutHandler);
   }
 
   _syncThemeHost() {
@@ -58,6 +64,18 @@ class MenuMobileDMaior extends HTMLElement {
     try { tema = localStorage.getItem('dm_tema') || 'original'; } catch (_) {}
     if (tema === 'original') this.removeAttribute('data-theme');
     else this.setAttribute('data-theme', tema);
+  }
+
+  // Reflete o layout salvo (webpro | dinamico | original) num atributo no host,
+  // pra nav do topo e foto do usuário aparecerem só no "Web Pro" via :host([data-layout="webpro"]).
+  // Dentro do painel (<dmaior-app> na página) a nav do site fica escondida — ali é app, não site.
+  _syncLayoutHost() {
+    let layout = 'webpro';
+    try { layout = localStorage.getItem('dm_layout') || 'webpro'; } catch (_) {}
+    this.setAttribute('data-layout', layout);
+    if (typeof document !== 'undefined' && document.querySelector('dmaior-app')) {
+      this.setAttribute('data-app-shell', '');
+    }
   }
 
   checkAuth() {
@@ -172,8 +190,30 @@ class MenuMobileDMaior extends HTMLElement {
       :host-context([data-theme="branco"]) .close-btn svg,
       :host-context([data-theme="rosa"]) .close-btn svg,
       :host-context([data-theme="laranja"]) .close-btn svg { color: #1a1a1a; }
+      /* ── Nav do site no topo — só no layout "Web Pro", só desktop ── */
+      .topnav{ display:none; align-items:center; gap:2px; margin-left:14px; }
+      .topnav a{ font-size:.84rem; font-weight:600; color:var(--dm-text-sub); padding:8px 12px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; text-decoration:none; white-space:nowrap; transition:background .2s,color .2s; }
+      .topnav a:hover, .topnav a.on{ background:var(--dm-cyan-08); color:var(--dm-text); }
+      :host([data-layout="webpro"]) .topnav{ display:flex; }
+      @media (max-width:920px){ :host([data-layout="webpro"]) .topnav{ display:none; } }
+      :host([data-app-shell]) .topnav,
+      :host([data-app-shell]) .top-enter,
+      :host([data-app-shell]) .top-me{ display:none !important; }
+
+      /* ── Botão "Entrar na Agência" + foto do usuário no topo (Web Pro) ── */
+      .top-enter{ display:none; align-items:center; padding:9px 16px; border-radius:999px; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; text-decoration:none; color:#fff; background:var(--dm-grad-effect,var(--dm-grad-rank,linear-gradient(135deg,#3b82f6,#00d4d4))); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); box-shadow:0 0 14px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); white-space:nowrap; transition:opacity .2s,box-shadow .2s; }
+      .top-enter:hover{ box-shadow:0 0 22px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
+      .top-enter:active{ opacity:.85; }
+      :host([data-layout="webpro"]) .top-enter{ display:inline-flex; }
+      @media (max-width:920px){ :host([data-layout="webpro"]) .top-enter{ display:none; } }
+      .top-me{ display:none; width:34px; height:34px; border-radius:50%; overflow:hidden; border:2px solid var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); flex-shrink:0; background:var(--dm-bg-1); align-items:center; justify-content:center; box-shadow:0 0 12px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); text-decoration:none; }
+      .top-me img{ width:100%; height:100%; object-fit:cover; }
+      .top-me .top-me-ph{ display:inline-flex; }
+      .top-me .top-me-ph svg{ width:20px; height:20px; color:var(--dm-text-sub); }
+      :host([data-layout="webpro"]) .top-me.logged{ display:inline-flex; }
+
       /* ── Engrenagem de layout ── */
-      .topbar-right{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
+      .topbar-right{ display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:auto; }
       .gear-btn{ background:transparent; border:none; padding:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--dm-text-sub); transition:color .2s; position:relative; }
       .gear-btn:hover{ color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
       .gear-btn svg{ transition:transform .4s; }
@@ -316,7 +356,21 @@ class MenuMobileDMaior extends HTMLElement {
 
     <div class="topbar">
       <img src="${URL_LOGO}" alt="DMaior Agency" class="logo">
+
+      <!-- Nav do site — visível só no layout "Web Pro" em telas largas -->
+      <nav class="topnav" aria-label="Navegação do site">
+        <a href="index.html"        data-nav="index">Início</a>
+        <a href="cursos.html"       data-nav="cursos">Cursos</a>
+        <a href="ferramentas.html"  data-nav="ferramentas">Ferramentas</a>
+        <a href="quem-somos.html"   data-nav="quem-somos">Portfólio</a>
+        <a href="politicas-host.html" data-nav="politicas">Políticas</a>
+      </nav>
+
       <div class="topbar-right">
+
+        <!-- Web Pro: "Entrar na Agência" (deslogado) OU foto do usuário (logado) -->
+        <a href="recrutamento.html" class="top-enter" id="topEnter">Entrar na Agência</a>
+        <a href="painel/index.html" class="top-me" id="topMe" title="Meu painel" aria-label="Meu painel"><span class="top-me-ph">${SVG_USER}</span></a>
 
         <!-- Engrenagem: alterna entre layout Original e Dinâmico Pro -->
         <div style="position:relative;">
@@ -446,7 +500,12 @@ class MenuMobileDMaior extends HTMLElement {
     const bellBtn    = root.getElementById('bellBtn');
     const linkAdmin  = root.getElementById('linkAdmin');
     const linkAgente = root.getElementById('linkAgente');
+    const topEnter   = root.getElementById('topEnter');
+    const topMe      = root.getElementById('topMe');
     if (!btnAccess || !userCard) return;
+    // Topbar do Web Pro: alterna botão "Entrar" ↔ foto do usuário
+    if (topEnter) topEnter.classList.toggle('hidden', !!detail.logado);
+    if (topMe)    topMe.classList.toggle('logged',  !!detail.logado);
     if (detail.logado) {
       btnAccess.classList.add('hidden');
       userCard.classList.remove('hidden');
@@ -466,18 +525,23 @@ class MenuMobileDMaior extends HTMLElement {
       }
       // Cria <img> via DOM para evitar XSS — valida esquema antes de atribuir src
       if (detail.foto) {
-        let fotoSrc = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const FALLBACK = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        let fotoSrc = FALLBACK;
         try {
           const u = new URL(String(detail.foto));
           if (u.protocol === 'http:' || u.protocol === 'https:') fotoSrc = detail.foto;
         } catch {}
-        const imgEl = document.createElement('img');
-        imgEl.src = fotoSrc;
-        imgEl.alt = 'Avatar';
-        imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-        imgEl.onerror = () => { imgEl.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; };
+        const mkImg = () => {
+          const im = document.createElement('img');
+          im.src = fotoSrc;
+          im.alt = 'Avatar';
+          im.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+          im.onerror = () => { im.src = FALLBACK; };
+          return im;
+        };
         avatarWrap.innerHTML = '';
-        avatarWrap.appendChild(imgEl);
+        avatarWrap.appendChild(mkImg());
+        if (topMe) { topMe.innerHTML = ''; topMe.appendChild(mkImg()); }
       }
       if (detail.nome) userName.textContent = detail.nome.split(' ')[0];
     } else {
@@ -646,6 +710,16 @@ class MenuMobileDMaior extends HTMLElement {
         setTimeout(() => toggle(false), 200);
       });
     });
+
+    // Marca o item ativo da nav do site (Web Pro)
+    try {
+      let page = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '') || 'index';
+      root.querySelectorAll('.topnav a').forEach(a => {
+        const nav = (a.dataset.nav || '').toLowerCase();
+        const on  = nav === page || (nav === 'politicas' && page.startsWith('politicas'));
+        a.classList.toggle('on', on);
+      });
+    } catch (_) {}
 
     // Abre/fecha a lista de atalhos (Painel do Host/Admin/Agente/Sair) — fica
     // recolhida por padrão pra não ocupar espaço, só expande ao clicar no nome.

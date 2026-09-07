@@ -1018,7 +1018,11 @@ class RankingDmaior extends HTMLElement {
   }
 
   _isDinamico() {
-    try { return (localStorage.getItem('dm_layout') || 'dinamico') === 'dinamico'; } catch { return true; }
+    // "Web Pro" usa o mesmo ranking do "Padrão" (dinâmico); só o "Antigo" fica no visual legado.
+    try {
+      const l = localStorage.getItem('dm_layout') || 'dinamico';
+      return l === 'dinamico' || l === 'webpro';
+    } catch { return true; }
   }
 
   _applyLayout() {

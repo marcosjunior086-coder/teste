@@ -33,6 +33,9 @@
             this._resizeObserver.disconnect();
             this._resizeObserver = null;
         }
+        if (this._updNotch) window.removeEventListener('resize', this._updNotch);
+        if (this._mEscHandler) document.removeEventListener('keydown', this._mEscHandler);
+        this._mNavRO?.disconnect();
     }
 
     _startHeightObserver() {
@@ -247,38 +250,75 @@
             .nav-more { display:contents; }
             .nit.nav-toggle { display:none; }
 
+            /* ══ Menu móvel: barra flutuante com entalhe em U + FAB central
+                  (mesmo padrão do painel Admin e do painel do Agente) ══ */
+            .mnav, .mfab, .msheet { display:none; }
+            .mnav-bg { position:absolute; inset:0; width:100%; height:100%; display:block; }
+            .mnav-bg path { stroke:var(--border); stroke-width:1; }
+
             @media(max-width:768px){
                 .shell { flex-direction:column; }
-                .content { padding:15px 10px 90px; }
+                .content { padding:15px 10px 24px; }
+                #bNav.on ~ .content { padding-bottom:calc(104px + env(safe-area-inset-bottom)); }
                 .card { background:rgba(26,26,26,.97); backdrop-filter:none; padding:15px; }
                 .earn .usd { font-size:1.8rem; }
                 .mbox { padding:12px; }
-                .bnav { order:0; position:fixed; top:auto; bottom:0; left:0; width:100%; height:70px; min-height:0; flex-direction:row; justify-content:space-around; align-items:center; border-right:none; border-top:1px solid var(--border); padding:0; background:rgba(18,18,18,0.97); z-index:1000; backdrop-filter:blur(10px); }
-                .nit { flex-direction:column; justify-content:center; font-size:.6rem; gap:3px; padding:6px 8px; margin:0; width:auto; border-radius:0; background:none; }
-                .nit svg { width:20px; height:20px; }
-                .nit:hover,.nit.sair:hover { background:none; }
-                .nit.on { background:none; }
-                .nit.sair { margin-top:0; }
 
-                /* Só 3 abas fixas + a seta no mobile — o resto vira um
-                   grid que abre por cima da barra, em vez de espremer
-                   7 botões numa linha só. */
-                .nit.nav-toggle { display:flex; }
-                .nit.nav-toggle svg { transition:transform .25s ease; }
-                .bnav.expanded .nit.nav-toggle svg { transform:rotate(180deg); }
-                .bnav.expanded .nit.nav-toggle { color:var(--cyan); }
+                /* A lista .bnav é só desktop; no mobile ela some e entra a barra flutuante */
+                .bnav, .bnav.on { display:none !important; }
 
-                .nav-more {
-                    display:none; position:absolute; left:10px; right:10px; bottom:78px;
-                    grid-template-columns:1fr 1fr; gap:8px;
-                    background:rgba(18,18,18,0.97); border:1px solid var(--border); border-radius:16px;
-                    padding:12px; backdrop-filter:blur(10px); box-shadow:0 -10px 30px rgba(0,0,0,.4);
+                #bNav.on ~ .mnav { display:flex; }
+                #bNav.on ~ .mfab { display:flex; }
+                #bNav.on ~ .msheet { display:block; }
+
+                .mnav {
+                    align-items:center; justify-content:space-between;
+                    position:fixed; left:14px; right:14px; bottom:calc(12px + env(safe-area-inset-bottom));
+                    height:62px; padding:0 26px; z-index:1000;
+                    color:var(--glass);
+                    filter:drop-shadow(0 12px 26px rgba(0,0,0,.5));
                 }
-                .bnav.expanded .nav-more { display:grid; animation:fi .2s ease; }
-                .nav-more .nit { background:rgba(255,255,255,.04); border-radius:12px; padding:12px 6px; }
-                .nav-more .nit.sair { background:rgba(248,113,113,.06); }
+                .mnav .mgrp { display:flex; gap:34px; position:relative; z-index:1; }
+                .mnav button { display:grid; place-items:center; background:none; border:none; color:var(--muted); padding:8px; cursor:pointer; }
+                .mnav button svg { width:23px; height:23px; fill:currentColor; opacity:.58; transition:opacity .2s,color .2s; }
+                .mnav button[aria-current="page"] { color:var(--cyan); }
+                .mnav button[aria-current="page"] svg { opacity:1; filter:drop-shadow(0 0 5px var(--cyan)); }
 
-                .molduras-frame{height:calc(100vh - 98px);min-height:620px;border-radius:0;}
+                .mfab {
+                    align-items:center; justify-content:center;
+                    position:fixed; left:50%; bottom:calc(12px + env(safe-area-inset-bottom) + 34px);
+                    transform:translateX(-50%);
+                    width:54px; height:54px; border:none; border-radius:50%;
+                    background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));
+                    color:#fff; cursor:pointer; z-index:1002;
+                    box-shadow:0 12px 28px -6px rgba(0,0,0,.55), 0 0 18px var(--rank-glow,rgba(59,130,246,.28));
+                    transition:transform .25s ease;
+                }
+                .mfab svg { width:24px; height:24px; }
+                .mfab.on { transform:translateX(-50%) rotate(45deg); }
+
+                .msheet { position:fixed; inset:0; z-index:1003; background:rgba(0,0,0,.5); opacity:0; pointer-events:none; transition:opacity .22s ease; }
+                .msheet.on { opacity:1; pointer-events:auto; }
+                .msheet-in {
+                    position:absolute; left:0; right:0; bottom:0;
+                    background:var(--glass); backdrop-filter:blur(12px);
+                    border-top:1px solid var(--border); border-radius:22px 22px 0 0;
+                    padding:8px 14px calc(20px + env(safe-area-inset-bottom));
+                    max-height:82vh; overflow-y:auto;
+                    transform:translateY(100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
+                }
+                .msheet.on .msheet-in { transform:translateY(0); }
+                .msheet-grab { width:38px; height:4px; border-radius:4px; background:var(--border); margin:4px auto 12px; }
+                .msheet-sec { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.62rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); padding:10px 8px 6px; }
+                .msheet-rows { display:flex; flex-direction:column; gap:2px; }
+                .msrow { display:flex; align-items:center; gap:13px; width:100%; padding:12px 8px; border:none; border-radius:12px; background:none; font:inherit; font-size:.95rem; color:var(--text); text-align:left; cursor:pointer; font-family:var(--dm-font-body,'Exo 2',sans-serif); }
+                .msrow[aria-current="page"] { background:var(--cyan-d); color:var(--cyan); }
+                .msrow.sair { color:var(--red); }
+                .msrow .msi { width:34px; height:34px; border-radius:10px; flex:none; background:var(--glass); border:1px solid var(--border); display:grid; place-items:center; color:var(--cyan); }
+                .msrow.sair .msi { color:var(--red); border-color:rgba(248,113,113,.28); }
+                .msrow .msi svg { width:16px; height:16px; fill:currentColor; }
+
+                .molduras-frame{height:calc(100vh - 130px);min-height:620px;border-radius:0;}
             }
 
             .raaj{font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.08em;}
@@ -388,87 +428,117 @@
             .fEmail-box .fe-lbl{font-size:.7rem;color:var(--muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;margin-bottom:4px;}
             .fEmail-box .fe-val{font-size:1rem;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;word-break:break-all;}
 
-            /* ── CARTEIRA v2 ── */
-            .cart-view{max-width:620px;margin:0 auto;}
-            .cart-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px;}
+            /* ── CARTEIRA — topo azul + card branco sobreposto (demo redesign) ── */
+            .cart-view{max-width:640px;margin:0 auto;}
 
-            /* Hero card saldo — gradiente azul escuro → ciano (de cima pra baixo) */
-            .cart-hero{
-                width:100%;
-                background:linear-gradient(0deg,#05051a 0%,#003f4f 55%,#00d4d4 100%);
+            .wallet-head{
+                background:linear-gradient(155deg,#3b82f6 0%,#1e40af 100%);
                 border-radius:20px;
-                padding:24px 20px 22px;
+                padding:14px 18px 42px;
+                color:#fff;
+                text-align:center;
                 position:relative;
-                margin-bottom:15px;
-                border:1px solid rgba(0,212,212,.3);
-                box-shadow:0 8px 40px rgba(0,212,212,.18);
                 overflow:hidden;
             }
-            /* brilho sutil no canto superior */
-            .cart-hero::before{
-                content:'';position:absolute;top:-40px;right:-40px;
-                width:160px;height:160px;border-radius:50%;
-                background:radial-gradient(circle,rgba(0,212,212,.12) 0%,transparent 70%);
+            .wallet-head::before{
+                content:'';position:absolute;top:-55px;right:-45px;
+                width:180px;height:180px;border-radius:50%;
+                background:radial-gradient(circle,rgba(255,255,255,.14) 0%,transparent 70%);
                 pointer-events:none;
             }
-            .cart-hero .hero-lbl{
-                font-size:.72rem;color:rgba(255,255,255,.65);
-                font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;
-                letter-spacing:1.5px;margin-bottom:8px;
+            .wallet-head .wbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1;}
+            .wallet-head .wbar button{
+                width:34px;height:34px;border-radius:11px;flex:none;
+                background:rgba(255,255,255,.16);border:none;color:#fff;
+                display:flex;align-items:center;justify-content:center;cursor:pointer;
+                transition:background .2s;
             }
-            .cart-hero .hero-valor{
-                font-size:2.8rem;color:#fff;font-weight:700;
-                font-family:var(--dm-font-title,'Rajdhani',sans-serif);line-height:1;
-                text-shadow:0 0 24px rgba(0,212,212,.5);
-                margin-bottom:6px;
+            .wallet-head .wbar button:hover{background:rgba(255,255,255,.28);}
+            .wallet-head .wbar button svg{width:16px;height:16px;fill:#fff;}
+            .wallet-head .wbar b{
+                flex:1;font-family:var(--dm-font-title,'Rajdhani',sans-serif);
+                font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
             }
-            .cart-hero .hero-sub{
-                font-size:.75rem;color:rgba(255,255,255,.55);
+            .wallet-head .wlbl{
+                font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;
+                color:rgba(255,255,255,.85);font-weight:700;
                 font-family:var(--dm-font-title,'Rajdhani',sans-serif);
+                position:relative;z-index:1;
             }
-            /* Botão Histórico no canto superior direito */
-            .cart-hist-btn{
-                position:absolute;top:18px;right:16px;
-                background:rgba(255,255,255,.12);
-                border:1px solid rgba(255,255,255,.22);
-                border-radius:20px;padding:5px 13px;
-                display:flex;align-items:center;gap:5px;
-                color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);
-                font-size:.72rem;font-weight:700;cursor:pointer;
-                backdrop-filter:blur(6px);transition:background .2s;
-                text-transform:uppercase;letter-spacing:.05em;
-                white-space:nowrap;
-            }
-            .cart-hist-btn:hover{background:rgba(255,255,255,.22);}
-            .cart-hist-btn svg{width:13px;height:13px;fill:#fff;flex-shrink:0;}
-
-            /* Sub-view histórico */
-            .hist-panel{display:none;animation:fi .3s ease;}
-            .hist-panel.on{display:block;}
-            .hist-back{
-                display:flex;align-items:center;gap:8px;
-                background:none;border:none;color:var(--cyan);
+            .wallet-head .wbig{
                 font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;
-                font-size:.9rem;cursor:pointer;padding:0;
-                margin-bottom:16px;text-transform:uppercase;
+                font-size:2.5rem;margin-top:7px;line-height:1;color:#fff;
+                text-shadow:0 0 24px rgba(255,255,255,.25);
+                position:relative;z-index:1;
             }
-            .hist-back svg{width:20px;height:20px;fill:var(--cyan);}
+            .wallet-head .wsub{
+                font-size:.72rem;color:rgba(255,255,255,.7);margin-top:9px;
+                font-family:var(--dm-font-title,'Rajdhani',sans-serif);
+                position:relative;z-index:1;
+            }
 
-            .tx-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-            .tx-row:last-child{border-bottom:none;}
-            .tx-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-            .tx-icon.in{background:rgba(74,222,128,.15);}
-            .tx-icon.out{background:rgba(248,113,113,.12);}
-            .tx-icon svg{width:14px;height:14px;}
-            .tx-icon.in svg{fill:var(--green);}
-            .tx-icon.out svg{fill:var(--red);}
-            .tx-info{flex:1;min-width:0;}
-            .tx-tipo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.8rem;font-weight:700;color:var(--text);}
-            .tx-desc{font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-            .tx-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;text-align:right;}
-            .tx-val.in{color:var(--green);}
-            .tx-val.out{color:var(--red);}
-            .tx-data{font-size:.65rem;color:var(--muted);text-align:right;}
+            .wallet-panel{
+                background:var(--glass);
+                border:1px solid var(--border);
+                border-radius:18px;
+                margin:-30px 12px 16px;
+                padding:16px;
+                position:relative;z-index:2;
+                box-shadow:0 12px 34px rgba(0,0,0,.3);
+            }
+            .wallet-figs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+            .wallet-figs > div + div{border-left:1px solid var(--border);padding-left:14px;}
+            .wallet-figs .k{
+                font-size:.66rem;color:var(--muted);font-weight:700;
+                font-family:var(--dm-font-title,'Rajdhani',sans-serif);
+                text-transform:uppercase;letter-spacing:.04em;
+                display:flex;align-items:center;gap:6px;
+            }
+            .wallet-figs .k svg{width:13px;height:13px;flex-shrink:0;fill:currentColor;}
+            .wallet-figs .k img{width:13px;height:13px;object-fit:contain;flex-shrink:0;}
+            .wallet-figs .v{
+                font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;
+                font-size:1.3rem;margin-top:6px;color:var(--text);
+            }
+            .wallet-cta{
+                display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+                padding:14px;border:none;border-radius:12px;
+                background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));
+                color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;
+                font-size:.95rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
+                transition:transform .15s,box-shadow .2s,opacity .2s;
+            }
+            .wallet-cta:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(59,130,246,.3);}
+            .wallet-cta:disabled{background:#333;color:#777;cursor:not-allowed;transform:none;box-shadow:none;}
+            .wallet-cta svg{width:15px;height:15px;fill:currentColor;}
+            [data-theme="branco"] .shell .wallet-cta,
+            [data-theme="rosa"] .shell .wallet-cta,
+            [data-theme="laranja"] .shell .wallet-cta{ background:var(--bloom, var(--rank-grad)); }
+
+            /* Transações — estilo demo (.txn) */
+            .txn-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 12px;flex-wrap:wrap;}
+            .txn-head h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;}
+            .txn-seg{display:flex;gap:3px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:3px;}
+            .txn-seg button{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;padding:6px 11px;border-radius:8px;transition:background .15s,color .15s;}
+            .txn-seg button.on{background:var(--cyan-d);color:var(--cyan);}
+
+            .txn{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--glass);}
+            .txn + .txn{margin-top:9px;}
+            .txn .ti{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+            .txn .ti svg{width:17px;height:17px;}
+            .txn .ti.in{background:rgba(74,222,128,.14);}
+            .txn .ti.in svg{fill:var(--green);}
+            .txn .ti.out{background:rgba(248,113,113,.12);}
+            .txn .ti.out svg{fill:var(--red);}
+            .txn .tb{flex:1;min-width:0;}
+            .txn .tb b{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.85rem;font-weight:700;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+            .txn .tb .m{display:flex;align-items:center;gap:7px;margin-top:3px;font-size:.68rem;color:var(--muted);min-width:0;}
+            .txn .tb .m .tag{font-size:.58rem;padding:2px 6px;border-radius:5px;background:var(--cyan-d);color:var(--cyan);font-weight:700;white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em;}
+            .txn .tb .m .dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+            .txn .amt{text-align:right;flex:none;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--muted);}
+            .txn .amt.pos{color:var(--green);}
+            .txn-empty{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0;}
+
             .saque-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;text-transform:uppercase;}
             .saque-badge.pendente{background:rgba(240,192,64,.1);color:var(--gold);border:1px solid rgba(240,192,64,.3);}
             .saque-badge.aprovado{background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.3);}
@@ -615,6 +685,12 @@
             [data-theme="laranja"] .shell .btn {
                 background: var(--bloom, linear-gradient(90deg,var(--cyan),#008c8c));
             }
+            /* FAB do menu móvel segue o bloom do tema (igual Admin/Agente) */
+            [data-theme="branco"] .shell .mfab,
+            [data-theme="rosa"] .shell .mfab,
+            [data-theme="laranja"] .shell .mfab {
+                background: var(--bloom, var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4)));
+            }
             /* Barra de progresso */
             [data-theme="branco"] .shell .progf,
             [data-theme="rosa"] .shell .progf,
@@ -646,22 +722,10 @@
                     background: rgba(0,0,0,0.04);
                 }
             }
-            /* Cart-hero — saldo disponível — segue bloom do tema */
-            [data-theme="branco"] .shell .cart-hero {
-                background: linear-gradient(0deg,#0d1a2e 0%,#0369a1 55%,#0095a8 100%);
-                border-color: rgba(0,149,168,0.4);
-                box-shadow: 0 8px 40px rgba(0,149,168,0.2);
-            }
-            [data-theme="rosa"] .shell .cart-hero {
-                background: linear-gradient(0deg,#1a0010 0%,#880040 55%,#e91e8c 100%);
-                border-color: rgba(233,30,140,0.4);
-                box-shadow: 0 8px 40px rgba(233,30,140,0.2);
-            }
-            [data-theme="laranja"] .shell .cart-hero {
-                background: linear-gradient(0deg,#1a0800 0%,#92400e 55%,#f97316 100%);
-                border-color: rgba(249,115,22,0.4);
-                box-shadow: 0 8px 40px rgba(249,115,22,0.2);
-            }
+            /* Topo da carteira — segue a cor do tema */
+            [data-theme="branco"] .shell .wallet-head { background: linear-gradient(155deg,#0284c7 0%,#0c4a6e 100%); }
+            [data-theme="rosa"] .shell .wallet-head { background: linear-gradient(155deg,#e91e8c 0%,#831843 100%); }
+            [data-theme="laranja"] .shell .wallet-head { background: linear-gradient(155deg,#f97316 0%,#7c2d12 100%); }
             /* Loading overlay */
             [data-theme="branco"] #vLoading,
             [data-theme="rosa"] #vLoading,
@@ -694,6 +758,29 @@
                     <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
                 </div>
             </nav>
+
+            <!-- ══════ MENU MÓVEL — barra flutuante com entalhe + FAB (padrão Admin/Agente) ══════ -->
+            <nav class="mnav" id="mNav" aria-label="Navegação rápida">
+                <svg class="mnav-bg" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor"></path></svg>
+                <div class="mgrp" data-g="a">
+                    <button type="button" data-nav="nD" aria-label="Resumo">${this.svgGrid()}</button>
+                    <button type="button" data-nav="nC" aria-label="Carteira">${this.svgWallet()}</button>
+                </div>
+                <div class="mgrp" data-g="b">
+                    <button type="button" data-nav="nImpulso" aria-label="Impulso">${this.svgBoost()}</button>
+                    <button type="button" data-nav="nRank" aria-label="Ranking">${this.svgRank()}</button>
+                </div>
+            </nav>
+            <button class="mfab" id="mFab" type="button" aria-label="Abrir menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <div class="msheet" id="mSheet">
+                <div class="msheet-in">
+                    <div class="msheet-grab"></div>
+                    <div class="msheet-sec">Menu</div>
+                    <div class="msheet-rows" id="mSheetRows"></div>
+                </div>
+            </div>
 
             <div class="content">
 
@@ -1033,39 +1120,43 @@
                     <!-- ── Painel principal ── -->
                     <div id="cMain">
 
-                        <!-- Hero card saldo com botão Histórico -->
-                        <div class="cart-hero">
-                            <div class="hero-lbl">Saldo Disponível</div>
-                            <div class="hero-valor" id="cSaldo">R$ 0,00</div>
-                            <div class="hero-sub" id="cPendente">Nenhum saque pendente</div>
-                            <button class="cart-hist-btn" id="btnHistorico">
-                                ${this.svgClock()} HISTÓRICO
+                        <!-- Topo azul: voltar · Carteira · ir para transações -->
+                        <div class="wallet-head">
+                            <div class="wbar">
+                                <button id="btnCartBack" type="button" title="Voltar ao resumo">${this.svgBack()}</button>
+                                <b>Carteira</b>
+                                <button id="btnCartExtrato" type="button" title="Ver transações">${this.svgClock()}</button>
+                            </div>
+                            <div class="wlbl">Saldo disponível</div>
+                            <div class="wbig" id="cSaldo">R$ 0,00</div>
+                            <div class="wsub" id="cPendente">Nenhum saque pendente</div>
+                        </div>
+
+                        <!-- Card branco sobreposto: totais + solicitar saque -->
+                        <div class="wallet-panel">
+                            <div class="wallet-figs">
+                                <div>
+                                    <div class="k">${this.svgSend()} Total recebido</div>
+                                    <div class="v" id="cRecebido">R$ 0,00</div>
+                                </div>
+                                <div>
+                                    <div class="k"><img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" alt="pix"> Total sacado</div>
+                                    <div class="v" id="cSacado">R$ 0,00</div>
+                                </div>
+                            </div>
+
+                            <!-- Aviso PIX inválido -->
+                            <div id="cPixWarn" class="pix-warn" style="display:none;">
+                                ${this.svgInfo()}
+                                <span>Para solicitar saque, cadastre uma chave PIX do tipo <strong>CPF</strong> ou <strong>Celular</strong> na aba <strong>PERFIL</strong>. Chaves do tipo E-mail, CNPJ e Aleatória não são aceitas para saque.</span>
+                            </div>
+
+                            <button class="wallet-cta" id="btnAbrirSaque" type="button">
+                                Solicitar saque <svg viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
                             </button>
                         </div>
 
-                        <!-- Mini stats -->
-                        <div class="cart-mini-grid">
-                            <div class="mbox">
-                                <span class="mlbl">${this.svgSend()} TOTAL RECEBIDO</span>
-                                <span class="val" id="cRecebido" style="color:var(--green);">R$ 0,00</span>
-                            </div>
-                            <div class="mbox">
-                                <span class="mlbl" style="display:flex;align-items:center;gap:5px;">
-                                    <img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp"
-                                         style="width:16px;height:16px;object-fit:contain;flex-shrink:0;" alt="pix">
-                                    TOTAL SACADO
-                                </span>
-                                <span class="val" id="cSacado" style="color:var(--muted);">R$ 0,00</span>
-                            </div>
-                        </div>
-
-                        <!-- Aviso PIX inválido -->
-                        <div id="cPixWarn" class="pix-warn" style="display:none;">
-                            ${this.svgInfo()}
-                            <span>Para solicitar saque, cadastre uma chave PIX do tipo <strong>CPF</strong> ou <strong>Celular</strong> na aba <strong>PERFIL</strong>. Chaves do tipo E-mail, CNPJ e Aleatória não são aceitas para saque.</span>
-                        </div>
-
-                        <!-- Formulário de saque -->
+                        <!-- Formulário de saque (abre pelo botão acima) -->
                         <div class="saque-form" id="cSaqueForm" style="display:none;">
                             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                                 <img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp"
@@ -1082,18 +1173,18 @@
                             <button class="btn" id="btnSaque">SOLICITAR SAQUE</button>
                         </div>
 
-                    </div><!-- /cMain -->
-
-                    <!-- ── Sub-view Histórico de movimentações ── -->
-                    <div id="cHistPanel" class="hist-panel">
-                        <button class="hist-back" id="btnHistBack">
-                            ${this.svgBack()} VOLTAR
-                        </button>
-                        <div class="card">
-                            <h3 class="raaj" style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">HISTÓRICO DE MOVIMENTAÇÕES</h3>
-                            <div id="cTxLista"><p style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0;">Carregando...</p></div>
+                        <!-- Transações (inline, com filtro) -->
+                        <div class="txn-head">
+                            <h3>Transações</h3>
+                            <div class="txn-seg" id="cTxnSeg">
+                                <button type="button" data-f="all" class="on">Tudo</button>
+                                <button type="button" data-f="in">Entradas</button>
+                                <button type="button" data-f="out">Saídas</button>
+                            </div>
                         </div>
-                    </div>
+                        <div id="cTxLista"><p class="txn-empty">Carregando...</p></div>
+
+                    </div><!-- /cMain -->
 
                 </div><!-- /vC -->
 
@@ -1197,10 +1288,10 @@
             this.qs('#fs1')?.classList.add('on');
             this.qs('#alF')?.classList.remove('on');
         }
-        // Garante que carteira abre sempre no painel principal
+        // Fecha o formulário de saque ao (re)abrir a carteira
         if(id==='vC'){
-            this.qs('#cMain').style.display = 'block';
-            this.qs('#cHistPanel').classList.remove('on');
+            const sf = this.qs('#cSaqueForm');
+            if(sf) sf.style.display = 'none';
         }
         setTimeout(() => { if(this._sendHeight) this._sendHeight(); }, 100);
     }
@@ -1212,6 +1303,83 @@
         });
         const el = this.qs(`#${id}`);
         if(el){ el.classList.add('on'); el.style.color='var(--cyan)'; }
+        this._syncMobileNav(id);
+    }
+
+    // ── Menu móvel (barra flutuante + FAB) — mesmo padrão do Admin/Agente ──
+    _buildMobileNav(){
+        const nav = this.qs('#mNav'), fab = this.qs('#mFab'), sheet = this.qs('#mSheet'), rowsEl = this.qs('#mSheetRows');
+        if(!nav || !fab || !sheet || !rowsEl) return;
+
+        const closeSheet = () => { sheet.classList.remove('on'); fab.classList.remove('on'); };
+        const openSheet  = () => { this._fillMobileSheet(); sheet.classList.add('on'); fab.classList.add('on'); };
+
+        // Barra: cada botão dispara o clique do item real do .bnav (reusa toda a lógica de navegação)
+        nav.querySelectorAll('button[data-nav]').forEach(b=>{
+            b.addEventListener('click', ()=>{ this.qs('#'+b.dataset.nav)?.click(); });
+        });
+        fab.addEventListener('click', ()=> sheet.classList.contains('on') ? closeSheet() : openSheet());
+        sheet.addEventListener('click', e=>{ if(e.target === sheet) closeSheet(); });
+        this._mSheetClose = closeSheet;
+        this._mEscHandler = e=>{ if(e.key === 'Escape' && sheet.classList.contains('on')) closeSheet(); };
+        document.addEventListener('keydown', this._mEscHandler);
+
+        // Entalhe em U — mesma geometria do Admin/Agente
+        const path = (w,h) => {
+            const r = Math.min(31, h/2), c = r*0.448, nw = 118, nd = 40, cx = w/2, nl = cx-nw/2, nr = cx+nw/2;
+            return 'M'+r+' 0H'+nl.toFixed(1)
+                +'C'+(nl+nw*0.10).toFixed(1)+' 0 '+(nl+nw*0.25).toFixed(1)+' '+nd+' '+cx.toFixed(1)+' '+nd
+                +'C'+(nr-nw*0.25).toFixed(1)+' '+nd+' '+(nr-nw*0.10).toFixed(1)+' 0 '+nr.toFixed(1)+' 0'
+                +'H'+(w-r).toFixed(1)
+                +'C'+(w-c).toFixed(1)+' 0 '+w.toFixed(1)+' '+c.toFixed(1)+' '+w.toFixed(1)+' '+r
+                +'V'+(h-r).toFixed(1)
+                +'C'+w.toFixed(1)+' '+(h-c).toFixed(1)+' '+(w-c).toFixed(1)+' '+h+' '+(w-r).toFixed(1)+' '+h
+                +'H'+r
+                +'C'+c.toFixed(1)+' '+h+' 0 '+(h-c).toFixed(1)+' 0 '+(h-r).toFixed(1)
+                +'V'+r+'C0 '+c.toFixed(1)+' '+c.toFixed(1)+' 0 '+r+' 0Z';
+        };
+        this._updNotch = () => {
+            const svg = nav.querySelector('.mnav-bg'); if(!svg) return;
+            const w = Math.round(nav.clientWidth), h = Math.round(nav.clientHeight) || 62;
+            if(w < 40) return;
+            svg.setAttribute('viewBox', '0 0 '+w+' '+h);
+            svg.querySelector('path').setAttribute('d', path(w,h));
+        };
+        window.addEventListener('resize', this._updNotch);
+        window.addEventListener('orientationchange', ()=> setTimeout(this._updNotch, 120));
+        if(window.ResizeObserver){ this._mNavRO = new ResizeObserver(()=>this._updNotch()); this._mNavRO.observe(nav); }
+        setTimeout(this._updNotch, 60);
+        setTimeout(this._updNotch, 500);
+
+        this._fillMobileSheet();
+        this._syncMobileNav();
+    }
+
+    // Reconstrói a lista do sheet a partir dos itens visíveis do .bnav
+    _fillMobileSheet(){
+        const rowsEl = this.qs('#mSheetRows'); if(!rowsEl) return;
+        let html = '';
+        this.querySelectorAll('#bNav .nit').forEach(nit=>{
+            if(nit.classList.contains('nav-toggle') || nit.classList.contains('hidden')) return;
+            const icon  = nit.querySelector('svg')?.outerHTML || '';
+            const label = nit.querySelector('span')?.textContent || '';
+            html += `<button type="button" class="msrow${nit.classList.contains('sair')?' sair':''}" data-nav="${nit.id}"><span class="msi">${icon}</span>${label}</button>`;
+        });
+        rowsEl.innerHTML = html;
+        rowsEl.querySelectorAll('.msrow').forEach(b=>{
+            b.addEventListener('click', ()=>{ this._mSheetClose?.(); this.qs('#'+b.dataset.nav)?.click(); });
+        });
+        this._syncMobileNav();
+    }
+
+    _syncMobileNav(id){
+        if(!id){ const on = this.qs('#bNav .nit.on'); id = on ? on.id : 'nD'; }
+        this.querySelectorAll('#mNav button[data-nav]').forEach(b=>{
+            b.dataset.nav === id ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current');
+        });
+        this.querySelectorAll('#mSheetRows .msrow').forEach(b=>{
+            b.dataset.nav === id ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current');
+        });
     }
 
     setToggle(g, activeId){
@@ -1283,6 +1451,8 @@
         return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     }
 
+    esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
     // ── Setup ───────────────────────────────────────────────────────
     setupNavigation(){
         this.qs('#goReg').addEventListener('click',e=>{e.preventDefault();this.navigate('vR');});
@@ -1314,6 +1484,7 @@
         this.qs('#btnMarkAllRead').addEventListener('click',()=>this._marcarTodosLidos());
         // Escuta o clique no sino do menu — navega para a view de avisos
         window.addEventListener('dmaior:avisos', this._avisosHandler);
+        this._buildMobileNav();
     }
 
     setupActionListeners(){
@@ -1326,17 +1497,30 @@
         this.qs('#btnRefCart').addEventListener('click',()=>this.loadCarteira());
         this.qs('#btnSaque').addEventListener('click',()=>this.doSolicSaque());
 
-        // Histórico: abrir sub-view
-        this.qs('#btnHistorico').addEventListener('click',()=>{
-            this.qs('#cMain').style.display = 'none';
-            this.qs('#cHistPanel').classList.add('on');
-            setTimeout(()=>{ if(this._sendHeight) this._sendHeight(); }, 100);
+        // Carteira: voltar ao resumo / rolar até as transações
+        this.qs('#btnCartBack')?.addEventListener('click',()=>{ this.navigate('vD'); this.navActive('nD'); });
+        this.qs('#btnCartExtrato')?.addEventListener('click',()=>{
+            this.qs('.txn-head')?.scrollIntoView({behavior:'smooth',block:'start'});
         });
-        // Histórico: voltar ao painel principal
-        this.qs('#btnHistBack').addEventListener('click',()=>{
-            this.qs('#cHistPanel').classList.remove('on');
-            this.qs('#cMain').style.display = 'block';
-            setTimeout(()=>{ if(this._sendHeight) this._sendHeight(); }, 100);
+        // Carteira: abre/fecha o formulário de saque
+        this.qs('#btnAbrirSaque')?.addEventListener('click',()=>{
+            const f = this.qs('#cSaqueForm');
+            if(!f) return;
+            const abrir = f.style.display === 'none' || !f.style.display;
+            f.style.display = abrir ? 'block' : 'none';
+            if(abrir){
+                f.scrollIntoView({behavior:'smooth',block:'center'});
+                this.qs('#cValor')?.focus();
+            }
+            setTimeout(()=>{ if(this._sendHeight) this._sendHeight(); }, 120);
+        });
+        // Carteira: filtro Tudo / Entradas / Saídas
+        this.qs('#cTxnSeg')?.addEventListener('click',e=>{
+            const b = e.target.closest('button[data-f]');
+            if(!b) return;
+            this.querySelectorAll('#cTxnSeg button').forEach(x=>x.classList.toggle('on', x===b));
+            this._cartTxFilter = b.dataset.f;
+            this._renderCartTxns();
         });
 
         const discBtn=this.qs('#discBtn'), discBody=this.qs('#discBody');
@@ -1534,10 +1718,6 @@
         const btn=this.qs('#btnRefCart');
         if(btn){ btn.disabled=true; }
 
-        // Sempre inicia no painel principal
-        this.qs('#cMain').style.display = 'block';
-        this.qs('#cHistPanel').classList.remove('on');
-
         try {
             const resCart = await this._fetchAutenticado(`${this.apiUrl}/api/carteira?uid=${this.sessionUid}`, {});
 
@@ -1561,13 +1741,26 @@
             const pixChave = this.qs('#sPixChave').value || localStorage.getItem('dm_pix_chave') || '';
             const pixOk    = ['CPF','Celular'].includes(pixTipo) && pixChave;
 
-            this.qs('#cPixWarn').style.display   = pixOk ? 'none' : 'flex';
-            this.qs('#cSaqueForm').style.display = pixOk ? 'block' : 'none';
+            this.qs('#cPixWarn').style.display = pixOk ? 'none' : 'flex';
+
+            // Botão "Solicitar saque" no card branco — controla a abertura do formulário
+            const cta = this.qs('#btnAbrirSaque');
+            if (cta) {
+                if (!pixOk) {
+                    cta.style.display = 'none';
+                    this.qs('#cSaqueForm').style.display = 'none';
+                } else {
+                    cta.style.display = 'flex';
+                    cta.disabled = saldo <= 0;
+                    cta.innerHTML = saldo <= 0
+                        ? 'Saldo indisponível'
+                        : `Solicitar saque <svg viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>`;
+                }
+            }
 
             if (pixOk) {
                 this.qs('#cPixInfo').textContent = `PIX ${pixTipo}: ${pixChave}`;
                 const btnSaque = this.qs('#btnSaque');
-
                 if (btnSaque) {
                     if (saldo <= 0) {
                         btnSaque.disabled = true;
@@ -1585,43 +1778,49 @@
                 }
             }
 
-            // Transações (ficam na sub-view Histórico)
-            const txs = cart.transacoes || [];
-            if (!txs.length) {
-                this.qs('#cTxLista').innerHTML = `<p style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0;">Nenhuma movimentação ainda.</p>`;
-            } else {
-                const tipoLabel = {
-                    credito:         '+ Crédito',
-                    debito:          '− Débito',
-                    saque_solicitado:'→ Saque Solicitado',
-                    saque_aprovado:  '✓ Saque Aprovado',
-                    saque_rejeitado: '✗ Saque Recusado',
-                    premio_ranking:  '🏆 Prêmio Ranking',
-                    estorno:         '↩ Estorno',
-                };
-                const isEntrada = t => ['credito','premio_ranking','estorno','saque_rejeitado'].includes(t);
-                this.qs('#cTxLista').innerHTML = txs.map(tx => `
-                    <div class="tx-row">
-                        <div class="tx-icon ${isEntrada(tx.tipo)?'in':'out'}">
-                            ${isEntrada(tx.tipo) ? this.svgDiamond() : this.svgSend()}
-                        </div>
-                        <div class="tx-info">
-                            <div class="tx-tipo">${tipoLabel[tx.tipo]||tx.tipo}</div>
-                            <div class="tx-desc">${tx.descricao||'—'}</div>
-                        </div>
-                        <div>
-                            <div class="tx-val ${isEntrada(tx.tipo)?'in':'out'}">${isEntrada(tx.tipo)?'+':'−'} ${this.brl(tx.valor)}</div>
-                            <div class="tx-data">${this.fdt(tx.criado_em)}</div>
-                        </div>
-                    </div>`).join('');
-            }
-
+            // Transações — guarda e renderiza pelo filtro atual
+            this._cartTxns = cart.transacoes || [];
+            this._renderCartTxns();
 
         } catch(e) {
-            this.qs('#cTxLista').innerHTML = `<p style="text-align:center;color:var(--red);font-size:.8rem;padding:20px 0;">${e.message}</p>`;
+            this.qs('#cTxLista').innerHTML = `<p class="txn-empty" style="color:var(--red)">${e.message}</p>`;
         } finally {
             if(btn) btn.disabled=false;
         }
+    }
+
+    // Entradas = crédito, prêmio, estorno, saque recusado (dinheiro volta pra carteira)
+    _cartTxEntrada(tipo){ return ['credito','premio_ranking','estorno','saque_rejeitado'].includes(tipo); }
+
+    _renderCartTxns(){
+        const el = this.qs('#cTxLista'); if(!el) return;
+        const filtro = this._cartTxFilter || 'all';
+        const todas  = this._cartTxns || [];
+        const lista  = todas.filter(tx => {
+            const inn = this._cartTxEntrada(tx.tipo);
+            return filtro === 'all' || (filtro === 'in' && inn) || (filtro === 'out' && !inn);
+        });
+        if (!todas.length) { el.innerHTML = `<p class="txn-empty">Nenhuma movimentação ainda.</p>`; return; }
+        if (!lista.length)  { el.innerHTML = `<p class="txn-empty">Nada nesse filtro.</p>`; return; }
+
+        const tipoLabel = {
+            credito:'Crédito', debito:'Débito',
+            saque_solicitado:'Saque solicitado', saque_aprovado:'Saque aprovado',
+            saque_rejeitado:'Saque recusado', premio_ranking:'Prêmio ranking', estorno:'Estorno',
+        };
+        el.innerHTML = lista.map(tx => {
+            const inn = this._cartTxEntrada(tx.tipo);
+            const tag = (tipoLabel[tx.tipo] || tx.tipo).split(' ')[0];
+            return `
+            <div class="txn">
+                <span class="ti ${inn?'in':'out'}">${inn ? this.svgDiamond() : this.svgSend()}</span>
+                <div class="tb">
+                    <b>${tipoLabel[tx.tipo] || tx.tipo}</b>
+                    <div class="m"><span class="tag">${tag}</span><span class="dt">${tx.descricao ? this.esc(tx.descricao) : this.fdt(tx.criado_em)}</span></div>
+                </div>
+                <div class="amt ${inn?'pos':''}">${inn?'+':'−'} ${this.brl(tx.valor)}</div>
+            </div>`;
+        }).join('');
     }
 
     async doSolicSaque(){
