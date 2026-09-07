@@ -44,6 +44,11 @@
   Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=14400, must-revalidate
 
+# security.txt real (RFC 9116) — precisa ser servido como text/plain
+/.well-known/security.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=86400, must-revalidate
+
 # Static text assets
 /js/*
   Content-Type: application/javascript; charset=utf-8

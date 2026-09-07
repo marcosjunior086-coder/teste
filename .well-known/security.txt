@@ -1,0 +1,12 @@
+# Divulgação Coordenada de Vulnerabilidades — DMaior Agency
+# https://agencydmaior.com.br
+#
+# Encontrou uma falha de segurança no site ou nos sistemas da agência?
+# Entre em contato pelo canal abaixo. Agradecemos o reporte responsável
+# e pedimos que a falha não seja divulgada publicamente antes da correção.
+
+Contact: https://wa.me/5517997176407
+Expires: 2027-08-01T00:00:00.000Z
+Preferred-Languages: pt-BR, en
+Canonical: https://www.agencydmaior.com.br/.well-known/security.txt
+Canonical: https://agencydmaior.com.br/.well-known/security.txt
