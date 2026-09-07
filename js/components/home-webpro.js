@@ -231,25 +231,45 @@ class DmaiorHomeWebpro extends HTMLElement {
     .ben-head{display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(18px,4vw,54px);align-items:end;margin-bottom:34px;}
     .ben-head h2{font-size:clamp(1.7rem,3.2vw,2.5rem);font-weight:700;letter-spacing:.02em;margin:0;}
     .ben-head p{font-size:1rem;line-height:1.65;color:var(--dm-text-sub,#a0b8c8);margin:0;max-width:44ch;}
-    .ben-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-    .ben{padding:26px 24px;}
-    .ben .ic{display:flex;width:48px;height:48px;border-radius:14px;background:var(--dm-cyan-08);border:1px solid var(--dm-cyan-20);align-items:center;justify-content:center;margin-bottom:15px;}
-    .ben .ic svg{width:24px;height:24px;stroke:var(--dm-cyan,#00d4d4);}
-    .ben.gold .ic{background:var(--dm-gold-10);border-color:var(--dm-gold-20);} .ben.gold .ic svg{stroke:var(--dm-gold,#f0c040);}
-    .ben.green .ic{background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.22);} .ben.green .ic svg{stroke:var(--dm-green,#4ade80);}
+    /* Cards que se sobrepõem no scroll (sticky stack, estilo whitebit.com) */
+    .ben-grid{display:flex;flex-direction:column;gap:16px;--ben-top:clamp(80px,12vh,112px);--ben-step:clamp(12px,1.7vh,20px);}
+    .ben{
+      position:sticky;
+      top:calc(var(--ben-top) + var(--i,0) * var(--ben-step));
+      min-height:clamp(200px,26vh,278px);
+      display:grid;grid-template-columns:auto minmax(0,1fr);
+      align-content:center;justify-content:start;
+      column-gap:clamp(20px,4vw,52px);row-gap:10px;
+      padding:clamp(24px,3.4vw,40px) clamp(22px,4vw,46px);
+      border-radius:24px;
+      box-shadow:0 -14px 44px -14px rgba(0,0,0,.5),0 28px 64px -22px rgba(0,0,0,.55);
+    }
+    .ben>.ic{
+      grid-row:1 / -1;align-self:center;margin:0;flex-shrink:0;
+      width:clamp(58px,7vw,88px);height:clamp(58px,7vw,88px);border-radius:20px;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--dm-cyan-08);border:1px solid var(--dm-cyan-20);
+    }
+    .ben>.ic svg{width:44%;height:44%;stroke:var(--dm-cyan,#00d4d4);}
+    .ben.gold>.ic{background:var(--dm-gold-10);border-color:var(--dm-gold-20);} .ben.gold>.ic svg{stroke:var(--dm-gold,#f0c040);}
+    .ben.green>.ic{background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.22);} .ben.green>.ic svg{stroke:var(--dm-green,#4ade80);}
     /* rosa/laranja: sem verde/dourado destoando — tudo no acento do tema */
-    :host([data-theme="rosa"]) .ben.gold .ic,:host([data-theme="laranja"]) .ben.gold .ic,
-    :host([data-theme="rosa"]) .ben.green .ic,:host([data-theme="laranja"]) .ben.green .ic{background:var(--dm-cyan-08);border-color:var(--dm-cyan-20);}
-    :host([data-theme="rosa"]) .ben.gold .ic svg,:host([data-theme="laranja"]) .ben.gold .ic svg,
-    :host([data-theme="rosa"]) .ben.green .ic svg,:host([data-theme="laranja"]) .ben.green .ic svg{stroke:var(--dm-cyan);}
+    :host([data-theme="rosa"]) .ben.gold>.ic,:host([data-theme="laranja"]) .ben.gold>.ic,
+    :host([data-theme="rosa"]) .ben.green>.ic,:host([data-theme="laranja"]) .ben.green>.ic{background:var(--dm-cyan-08);border-color:var(--dm-cyan-20);}
+    :host([data-theme="rosa"]) .ben.gold>.ic svg,:host([data-theme="laranja"]) .ben.gold>.ic svg,
+    :host([data-theme="rosa"]) .ben.green>.ic svg,:host([data-theme="laranja"]) .ben.green>.ic svg{stroke:var(--dm-cyan);}
     :host([data-theme="rosa"]) .qa .ic,:host([data-theme="laranja"]) .qa .ic{background:var(--dm-cyan-10)!important;}
     :host([data-theme="rosa"]) .qa .ic svg[fill^="#"],:host([data-theme="laranja"]) .qa .ic svg[fill^="#"]{fill:var(--dm-cyan);}
-    .ben h3{font-size:1.04rem;font-weight:700;letter-spacing:.02em;margin:0 0 8px;}
-    .ben p{font-size:.88rem;line-height:1.6;color:var(--dm-text-sub,#a0b8c8);margin:0;}
-    .ben-grid.reveal .ben{opacity:0;transform:translateY(32px);transition:opacity .55s ease,transform .6s cubic-bezier(.2,.7,.2,1);}
-    .ben-grid.reveal .ben:nth-child(even){transform:translateY(-32px);}
-    .ben-grid.reveal .ben.in{opacity:1;transform:none;}
-    @media (prefers-reduced-motion:reduce){ .ben-grid.reveal .ben{opacity:1!important;transform:none!important;} }
+    .ben>h3{grid-column:2;align-self:end;font-size:clamp(1.12rem,2.1vw,1.6rem);font-weight:700;letter-spacing:.01em;margin:0;}
+    .ben>p{grid-column:2;align-self:start;font-size:clamp(.9rem,1.35vw,1.04rem);line-height:1.62;color:var(--dm-text-sub,#a0b8c8);margin:0;max-width:54ch;}
+    @media (max-width:820px){
+      .ben-grid{--ben-top:clamp(64px,9vh,92px);}
+      .ben{grid-template-columns:1fr;justify-items:start;min-height:clamp(208px,38vh,282px);row-gap:8px;}
+      .ben>.ic{grid-row:auto;margin-bottom:4px;}
+      .ben>h3{grid-column:1;align-self:auto;}
+      .ben>p{grid-column:1;align-self:auto;}
+    }
+    @media (prefers-reduced-motion:reduce){ .ben{position:static;} }
 
     /* FAQ */
     .faq{padding-top:clamp(44px,7vw,86px);}
@@ -299,13 +319,11 @@ class DmaiorHomeWebpro extends HTMLElement {
       .cols2{grid-template-columns:1fr;}
       .cta-band{grid-template-columns:1fr;}
       .ben-head{grid-template-columns:1fr;}
-      .ben-grid{grid-template-columns:1fr 1fr;}
       .faq-cols{grid-template-columns:1fr;}
       .faq-side{position:static;}
     }
     @media (max-width:560px){
       .qa{grid-template-columns:1fr;}
-      .ben-grid{grid-template-columns:1fr;}
       .bonus-grid{grid-template-columns:1fr;}
       .hero h1{font-size:1.8rem;min-height:3.2em;}
     }
@@ -555,18 +573,9 @@ class DmaiorHomeWebpro extends HTMLElement {
       });
     });
 
-    // benefícios — revelação no scroll (só mobile)
+    // benefícios — empilhamento no scroll: cada card gruda um pouco mais embaixo (--i)
     const grid = s.getElementById('benGrid');
-    if (grid && 'IntersectionObserver' in window
-      && window.matchMedia('(max-width:1000px)').matches
-      && !window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
-      grid.classList.add('reveal');
-      const io = new IntersectionObserver((es) => {
-        es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-      }, { threshold: .18, rootMargin: '0px 0px -8% 0px' });
-      grid.querySelectorAll('.ben').forEach(c => io.observe(c));
-      setTimeout(() => grid.querySelectorAll('.ben:not(.in)').forEach(c => c.classList.add('in')), 3000);
-    }
+    if (grid) grid.querySelectorAll('.ben').forEach((c, i) => c.style.setProperty('--i', i));
   }
 
   // ── Lives (via evento 'dmaior:lives' do kwai-live-widget) ────────────
