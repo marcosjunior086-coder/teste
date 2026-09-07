@@ -502,15 +502,18 @@ class KwaiLiveWidget extends HTMLElement {
   // guerra permanente entre cards igualmente visíveis disputando as mesmas
   // vagas, expulsando uns aos outros sem nenhum realmente ficar estável.
   get MAX_MINI_PLAYERS() {
-    // Live grande do hero tocando, ou aba escondida: NENHUM mini-player
-    // decodificando — a faixa inteira vira foto parada e devolve toda a
-    // CPU/banda pra live principal. Era isso que fazia a "live grande travar".
-    if (this._featuredActive || this._docHidden) return 0;
-    // Fora disso, teto duro de 3 tocando ao mesmo tempo. Antes era
-    // Math.max(6, visíveis+2), que numa tela larga jogava 8-14 streams HLS
-    // pra decodificar de uma vez só — o navegador não dá conta e todos travam.
+    if (this._docHidden) return 0;
+    // Nos ~3s logo depois que a live grande do hero começa, a faixa segura os
+    // mini-players — assim a live principal pega a rede primeiro e "aparece
+    // primeiro". Passado esse tempo, os mini-players voltam a tocar.
+    if (this._heroWarmup) return 0;
+    // Teto de streams simultâneos. O painel admin roda ~14 lives lisas no
+    // desktop, então o gargalo real era a LARGADA (todos subindo de uma vez)
+    // + o buffer curto do hero — não o número em si. 8 no desktop; um pouco
+    // menos enquanto a live grande do hero também está tocando.
     const visible = [...this.activePlayers.keys()].filter((u) => this._isReallyVisible(u)).length;
-    return Math.min(3, Math.max(2, visible));
+    const teto = this._featuredActive ? 6 : 8;
+    return Math.min(teto, Math.max(3, visible));
   }
 
   // Corta o excesso de mini-players quando o limite baixa (ex: hero começou a
@@ -780,9 +783,20 @@ class KwaiLiveWidget extends HTMLElement {
     const playUrl = entry && entry.streamer && entry.streamer.playUrl;
     if (!videoEl || !playUrl) return null;
 
-    // hero = view principal → prioridade: derruba o excesso de mini-players da
-    // faixa (viram foto parada) pra essa live carregar sem travar.
+    // hero = view principal → prioridade: por ~3s a faixa segura os mini-players
+    // (viram foto), a live grande sobe primeiro, e aí os mini-players voltam.
     this._featuredActive = true;
+    this._heroWarmup = true;
+    clearTimeout(this._heroWarmupT);
+    this._heroWarmupT = setTimeout(() => {
+      this._heroWarmup = false;
+      // reacende os mini-players dos cards que estão visíveis agora
+      if (this.ENABLE_MINI_PREVIEW && !this._docHidden) {
+        this.activePlayers.forEach((_e, u) => {
+          if (this._isReallyVisible(u)) this.startMiniPlayer(u);
+        });
+      }
+    }, 3000);
     this._trimMiniPlayers();
 
     let hls = null, dead = false, watchdog = null, lastT = -1;
@@ -790,6 +804,8 @@ class KwaiLiveWidget extends HTMLElement {
     const cleanup = () => {
       dead = true;
       this._featuredActive = false;
+      this._heroWarmup = false;
+      clearTimeout(this._heroWarmupT);
       clearInterval(watchdog);
       try { hls && hls.destroy(); } catch (_) {}
       hls = null;
