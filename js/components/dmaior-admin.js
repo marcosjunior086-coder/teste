@@ -2311,9 +2311,14 @@ class DimaiorAdmin extends HTMLElement {
     if(/gif/i.test(file.type)){
       if(file.size>4*1024*1024){this._toast('GIF muito grande (máx 4 MB)','err');return null;}
     }else{
-      try{ blob=await this._resizeImageToBlob(file); ct='image/webp'; }
-      catch{ /* mantém original se o canvas falhar */ }
+      try{
+        blob=await this._resizeImageToBlob(file);
+        // iPhone antigo ignora 'image/webp' no toBlob e devolve PNG — usa o
+        // tipo real do blob, senão o servidor grava PNG rotulado como webp.
+        ct=(blob.type&&/^image\/(webp|png|jpe?g)$/i.test(blob.type))?blob.type:'image/png';
+      }catch{ blob=file; ct=file.type; }
     }
+    if(blob.size>4*1024*1024){this._toast('Imagem muito grande (máx 4 MB) — tente uma menor','err');return null;}
     let r;
     try{
       r=await fetch(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,{
