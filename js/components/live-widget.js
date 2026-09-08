@@ -31,7 +31,9 @@ class KwaiLiveWidget extends HTMLElement {
     // Agora sobem em fila, um a cada ~1,3s (ver _pumpMiniQueue).
     this.ENABLE_MINI_PREVIEW = true;
     this._docHidden = (typeof document !== 'undefined' && document.hidden) || false;
+    this._narrow    = this._isNarrow();
     this._maxMini   = this._calcMaxMini();  // teto fixo (recalc no resize)
+    this._pumpGap   = this._narrow ? 950 : 1300; // no mobile a fila anda mais rápido
     this._miniQueue = [];                   // urls esperando a vez de começar
     this._miniPumpT = null;
 
@@ -118,7 +120,12 @@ class KwaiLiveWidget extends HTMLElement {
     this._resizeHandler = () => {
       clearTimeout(this._resizeT);
       this._resizeT = setTimeout(() => {
+        const eraNarrow = this._narrow;
+        this._narrow  = this._isNarrow();
         this._maxMini = this._calcMaxMini();
+        this._pumpGap = this._narrow ? 950 : 1300;
+        // Trocou de faixa (mobile <-> desktop): refaz o observer com a margem certa.
+        if (eraNarrow !== this._narrow) this._reobserveCards();
         this._pumpMiniQueue();
       }, 300);
     };
@@ -472,8 +479,12 @@ class KwaiLiveWidget extends HTMLElement {
       return;
     }
     const row = this.shadowRoot.getElementById('liveRow');
-    // IntersectionObserver: inicia mini player quando o card entra na tela
-    // (ou perto dela, pela margem de antecipação abaixo)
+    // IntersectionObserver: só toca as lives que estão DE FATO na tela agora.
+    // Ao deslizar a faixa pro lado, os cards que entram começam a rodar e os
+    // que saem param — em vez de tentar abrir a faixa inteira de uma vez.
+    // Margem mínima (~meio card de antecipação) só pra o vídeo já estar
+    // pronto quando o card termina de entrar. No desktop, um pouco mais.
+    const margin = this._narrow ? '0px 24px 0px 24px' : '0px 90px 0px 90px';
     this.cardObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         const url = entry.target.dataset.url;
@@ -482,12 +493,16 @@ class KwaiLiveWidget extends HTMLElement {
       });
     }, {
       root: row,
-      // Margem pequena: só enfileira quando o card está quase entrando. A fila
-      // escalonada (_pumpMiniQueue) é que garante que não sobrecarrega — margem
-      // grande só empilhava card demais de uma vez no load.
-      rootMargin: '0px 120px 0px 120px',
+      rootMargin: margin,
       threshold: 0.01,
     });
+  }
+
+  // Refaz o observer (ex: virou de mobile pra desktop) e reobserva os cards.
+  _reobserveCards() {
+    try { this.cardObserver.disconnect?.(); } catch (_) {}
+    this.initObserver();
+    this.activePlayers.forEach((e) => { if (e.card) { try { this.cardObserver.observe(e.card); } catch (_) {} } });
   }
 
   // Calcula, de forma síncrona, se o card está de fato dentro da área visível
@@ -518,6 +533,10 @@ class KwaiLiveWidget extends HTMLElement {
   // Teto FIXO de mini-players tocando ao mesmo tempo — sem getBoundingClientRect
   // por chamada (isso forçava reflow em todos os cards e travava justo na hora
   // de dar play). Recalculado só no resize.
+  _isNarrow() {
+    try { return window.matchMedia('(max-width:600px)').matches; } catch (_) { return false; }
+  }
+
   _calcMaxMini() {
     try {
       if (window.matchMedia('(max-width:600px)').matches)  return 6;
@@ -954,6 +973,7 @@ class KwaiLiveWidget extends HTMLElement {
     const entry = this.activePlayers.get(url);
     if (!entry) return;
     clearInterval(entry.watchdog);
+    clearTimeout(entry._stopT); entry._stopT = null;
     try { entry.hlsInst?.destroy(); } catch (_) {}
     entry.hlsInst  = null;
     entry.playing  = false;
@@ -987,14 +1007,27 @@ class KwaiLiveWidget extends HTMLElement {
   _enqueueMini(url) {
     if (!this.ENABLE_MINI_PREVIEW || this._docHidden) return;
     const e = this.activePlayers.get(url);
-    if (!e || !e.streamer.playUrl || e.playing || e.starting) return;
+    if (!e || !e.streamer.playUrl) return;
+    // Voltou pra tela antes do grace terminar — cancela a parada e segue tocando.
+    if (e._stopT) { clearTimeout(e._stopT); e._stopT = null; }
+    if (e.playing || e.starting) return;
     if (!this._miniQueue.includes(url)) this._miniQueue.push(url);
     this._pumpMiniQueue();
   }
 
   _dequeueMini(url) {
     this._miniQueue = this._miniQueue.filter((u) => u !== url);
-    this.stopMiniPlayer(url);
+    const e = this.activePlayers.get(url);
+    if (!e) return;
+    // Grace de ~2,5s: se o card só passou rápido ao deslizar, não destrói o
+    // player na hora — se ele voltar pra tela nesse tempo, continua sem
+    // recarregar. Se ficou fora mesmo, aí para e libera a vaga.
+    if (e.playing || e.starting) {
+      clearTimeout(e._stopT);
+      e._stopT = setTimeout(() => { e._stopT = null; this.stopMiniPlayer(url); }, 2500);
+    } else {
+      this.stopMiniPlayer(url);
+    }
   }
 
   _pumpMiniQueue() {
@@ -1012,7 +1045,7 @@ class KwaiLiveWidget extends HTMLElement {
     this._miniPumpT = setTimeout(() => {
       this._miniPumpT = null;
       if (this._miniQueue.length) this._pumpMiniQueue();
-    }, 1300);
+    }, this._pumpGap || 1300);
   }
 
   startMiniPlayer(url) {
