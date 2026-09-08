@@ -165,6 +165,13 @@ window.DmaiorAPI = {
      * @param {string} local - 'ranking' | 'painel' | 'impulsionamento'
      */
     async getComunicados(local = '') {
+      // Reaproveita o prefetch inline do <head> da home (evita 2ª ida à rede).
+      if (local === 'home' && typeof window !== 'undefined' && window.__comunicadosHome) {
+        try {
+          const pre = await window.__comunicadosHome;
+          if (pre && Array.isArray(pre.comunicados)) return pre;
+        } catch (_) { /* cai no fetch normal abaixo */ }
+      }
       return window.DmaiorAPI._get(
         window.DmaiorConfig.workers.rank,
         `/comunicados${local ? `?local=${encodeURIComponent(local)}` : ''}`,

@@ -162,9 +162,9 @@ class KwaiLiveWidget extends HTMLElement {
   loadHlsLib() {
     return this._hlsLibPromise || (this._hlsLibPromise = new Promise((resolve) => {
       if (window.Hls) return resolve();
-      const pc = document.createElement('link');
-      pc.rel = 'preconnect'; pc.href = 'https://cdn.jsdelivr.net'; pc.crossOrigin = '';
-      document.head.appendChild(pc);
+      // Sem preconnect pro jsdelivr: o hls.js carrega adiado (load + idle),
+      // então o preconnect disparava cedo demais e o Lighthouse marcava como
+      // "não usado". O próprio <script> abre a conexão na hora certa.
       const s   = document.createElement('script');
       s.src     = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20'; // versão fixada — evita quebra por update automático
       s.onload  = resolve;
@@ -802,7 +802,8 @@ class KwaiLiveWidget extends HTMLElement {
       .map((p) => ({
         name:      p.streamer.name,
         url:       p.streamer.url,
-        image:     this._safeUrl(p.streamer.image) || '',
+        // foto do hero já redimensionada (WebP ~440px) — evita o JPEG 200px cru
+        image:     this._thumb(this._safeUrl(p.streamer.image) || '', 440),
         viewCount: (typeof p.streamer.viewCount === 'number') ? p.streamer.viewCount : null,
         caption:   p.streamer.caption || '',
         ready:     !!p.streamer.playUrl,
@@ -911,10 +912,21 @@ class KwaiLiveWidget extends HTMLElement {
     );
   }
 
+  // Redimensiona a foto do avatar via images.weserv.nl (já liberado no CSP e
+  // usado no admin): o Kwai serve JPEG 200px pra exibir num círculo de ~60px.
+  // Vira WebP ~120px = de ~15 KiB por foto pra ~3 KiB. Fallback do ui-avatars
+  // e URLs que já passam pelo weserv ficam como estão.
+  _thumb(url, w = 120) {
+    if (!url || /images\.weserv\.nl|ui-avatars\.com/.test(url)) return url;
+    if (!/^https?:\/\//i.test(url)) return url;
+    return `https://images.weserv.nl/?url=${encodeURIComponent(url.replace(/^https?:\/\//i, ''))}&w=${w}&h=${w}&fit=cover&output=webp&q=82`;
+  }
+
   addCard(streamer) {
     const row      = this.shadowRoot.getElementById('liveRow');
     const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(streamer.name)}&background=1a1a2e&color=00c8c8&bold=true`;
-    const imgSrc   = this._safeUrl(streamer.image) || fallback;
+    const rawImg   = this._safeUrl(streamer.image) || fallback;
+    const imgSrc   = this._thumb(rawImg, 120);
     const safeName = this._safe(streamer.name);
 
     const card = document.createElement('div');

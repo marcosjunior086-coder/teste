@@ -5,6 +5,9 @@
     document.write('<base href="' + (location.pathname.startsWith('/teste/') ? '/teste/' : '/') + '">');
   </script>
   <script>try{var d=document.documentElement,s=localStorage,t=s.getItem('dm_tema'),f=s.getItem('dm_tamanho_texto');if(t&&t!=='original')d.setAttribute('data-theme',t);if(f&&f!=='normal')d.setAttribute('data-font-size',f);}catch(e){}</script>
+  <!-- Dispara a busca do banner da home já aqui (não espera os scripts deferidos)
+       e, assim que souber a URL, faz preload da imagem — corta a LCP no mobile. -->
+  <script>try{window.__comunicadosHome=fetch('https://rank.agencydmaior.com.br/comunicados?local=home').then(function(r){return r.ok?r.json():null;}).then(function(d){try{var l=(d&&d.comunicados||[]).filter(function(x){return x&&x.imagem_url;})[0];if(l){var k=document.createElement('link');k.rel='preload';k.as='image';k.href=l.imagem_url;k.fetchPriority='high';document.head.appendChild(k);}}catch(e){}return d;}).catch(function(){return null;});}catch(e){}</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#060B16">
@@ -21,9 +24,10 @@
   <meta name="description" content="A maior agência de streamers do Kwai. Suporte exclusivo, método próprio e premiações reais.">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://rank.agencydmaior.com.br" crossorigin>
-  <link rel="preconnect" href="https://lh3.googleusercontent.com">
+  <link rel="preconnect" href="https://img.agencydmaior.com.br">
+  <link rel="preconnect" href="https://images.weserv.nl">
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-  <link rel="dns-prefetch" href="https://drive.google.com">
+  <link rel="dns-prefetch" href="https://aws-br-pic.kwai.net">
   <link rel="dns-prefetch" href="https://static.wixstatic.com">
   <link rel="dns-prefetch" href="https://live.agencydmaior.com.br">
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -57,14 +61,14 @@
   <!-- Scripts na ordem correta: API ? Auth ? componentes -->
   <script defer charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
   <script defer charset=utf-8 src="js/utils/helpers.js"></script>
-  <script defer charset=utf-8 src="js/api.js"></script>
+  <script defer charset=utf-8 src="js/api.js?v=20260908-prefetch"></script>
   <script defer charset=utf-8 src="js/auth.js"></script>
   <script defer charset=utf-8 src="js/router.js"></script>
   <script defer charset=utf-8 src="js/components/menu-mobile.js?v=20260907-perf"></script>
-  <script defer charset=utf-8 src="js/components/live-widget.js?v=20260908-visiveis"></script>
+  <script defer charset=utf-8 src="js/components/live-widget.js?v=20260908-img"></script>
   <script defer charset=utf-8 src="js/components/services-menu.js?v=20260907-perf"></script>
   <script defer charset=utf-8 src="js/components/beneficios.js?v=20260907-perf"></script>
-  <script defer charset=utf-8 src="js/components/home-webpro.js?v=20260907-perf4"></script>
+  <script defer charset=utf-8 src="js/components/home-webpro.js?v=20260908-dots"></script>
 
   <script>
     // -- Controle de layout: 'webpro' (default) | 'dinamico' (Padrão) | 'original' (Antigo) --

@@ -138,7 +138,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     /* CARROSSEL DE CAMPANHA (igual ao bc-carousel do services-menu) */
     /* min-height reserva o espaço do carrossel enquanto ele carrega (anti-CLS);
        .empty zera quando a API confirma que não há banner. */
-    .banner{padding-top:14px;min-height:calc(min(820px, 100vw - 60px) * .281 + 14px);}
+    .banner{padding-top:14px;min-height:calc(min(820px, 100vw - 60px) * .281 + 40px);}
     .banner.empty{min-height:0;}
     .banner .bc{position:relative;width:100%;max-width:820px;margin:0 auto;border-radius:16px;overflow:hidden;}
     .banner .bc-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);will-change:transform;}
@@ -146,10 +146,12 @@ class DmaiorHomeWebpro extends HTMLElement {
     .banner .bc-slide img{display:block;width:100%;height:auto;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
     .banner .bc-cap{position:absolute;bottom:0;left:0;right:0;padding:8px 14px 10px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);border-radius:0 0 16px 16px;pointer-events:none;}
     .banner .bc-cap span{font-family:var(--f-title);font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
-    .banner .bc-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
-    .banner .bc-dot{position:relative;width:7px;height:7px;border-radius:50%;border:none;background:rgba(255,255,255,.4);cursor:pointer;padding:0;transition:background .25s,transform .25s;}
-    .banner .bc-dot::before{content:"";position:absolute;inset:-9px;}
-    .banner .bc-dot.on{background:#fff;transform:scale(1.25);}
+    /* dots FORA da imagem (numa faixa embaixo) — assim não se sobrepõem ao
+       link do banner nem uns aos outros (Lighthouse: áreas de toque). */
+    .banner .bc-dots{display:flex;justify-content:center;gap:2px;margin:6px auto 0;max-width:820px;}
+    .banner .bc-dot{width:26px;height:24px;border:none;background:transparent;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;}
+    .banner .bc-dot::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--dm-text-muted,rgba(120,130,150,.5));transition:background .25s,transform .25s;}
+    .banner .bc-dot.on::after{background:var(--dm-cyan,#00d4d4);transform:scale(1.3);}
     .banner .bc-fallback{width:100%;max-width:820px;margin:0 auto;aspect-ratio:32/9;border-radius:16px;position:relative;overflow:hidden;background:var(--dm-grad-card-alt);border:1px solid var(--dm-border);display:flex;align-items:flex-end;padding:14px 18px;}
     .banner .bc-fallback::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--dm-effect-blue,#3b82f6),var(--dm-effect-accent,#00d4d4),transparent);opacity:.75;}
     .banner .bc-fallback span{font-family:var(--f-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.5px;color:var(--dm-text,#e2e8f0);}
@@ -770,7 +772,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     const dots = slides.length > 1
       ? `<div class="bc-dots" id="bcDots">${slides.map((_, i) => `<button class="bc-dot${i === 0 ? ' on' : ''}" data-i="${i}" aria-label="Banner ${i + 1}"></button>`).join('')}</div>`
       : '';
-    return `<div class="bc" id="bc"><div class="bc-track" id="bcTrack">${imgs}</div>${dots}</div>`;
+    return `<div class="bc" id="bc"><div class="bc-track" id="bcTrack">${imgs}</div></div>${dots}`;
   }
 
   _bindCarousel(n) {
