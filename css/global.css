@@ -382,6 +382,10 @@ html {
   font-size: calc(16px * var(--dm-font-scale, 1));
   /* Cobre overscroll no mobile (evita fundo branco ao rolar além do limite) */
   background-color: var(--dm-bg);
+  /* Tira o flash azul/cinza ao tocar em botão/link no mobile. É propriedade
+     herdada, então descendo daqui alcança TODOS os web components (shadow DOM)
+     via herança — sem precisar repetir em cada componente. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
