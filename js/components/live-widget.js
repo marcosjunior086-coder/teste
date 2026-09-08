@@ -25,15 +25,15 @@ class KwaiLiveWidget extends HTMLElement {
     this.CACHE_KEY     = 'widget_live_v6';
     this.CACHE_TTL     = 70000;
     this.BATCH_SIZE    = 5;
-    // Prévia em vídeo nas bolinhas: só no desktop. No celular, decodificar
-    // vários HLS ao mesmo tempo (ainda mais junto da live grande do hero)
-    // satura a CPU do aparelho — era o que dava o "travando". No mobile a
-    // faixa fica só com as fotos + "AO VIVO"; tocar de verdade só no modal.
-    this._smallScreen = (() => {
-      try { return window.matchMedia('(max-width: 820px)').matches; } catch (_) { return false; }
-    })();
-    this.ENABLE_MINI_PREVIEW = !this._smallScreen;
+    // Prévia em vídeo nas bolinhas — liga em mobile E desktop. O que travava
+    // NÃO era o número de streams (o site da Fox roda ~7 num celular fraco
+    // sem engasgo), era a LARGADA: todos os players subiam no mesmo instante.
+    // Agora sobem em fila, um a cada ~1,3s (ver _pumpMiniQueue).
+    this.ENABLE_MINI_PREVIEW = true;
     this._docHidden = (typeof document !== 'undefined' && document.hidden) || false;
+    this._maxMini   = this._calcMaxMini();  // teto fixo (recalc no resize)
+    this._miniQueue = [];                   // urls esperando a vez de começar
+    this._miniPumpT = null;
 
     // Ícones SVG para o botão de mute/som
     this.SVG_MUTED = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
@@ -111,10 +111,21 @@ class KwaiLiveWidget extends HTMLElement {
     this._visHandler = () => {
       this._docHidden = document.hidden;
       if (document.hidden) this._trimMiniPlayers();
+      else this._pumpMiniQueue();
+    };
+    // Recalcula o teto de mini-players quando a janela muda de tamanho
+    // (ex: girar o celular, redimensionar a janela).
+    this._resizeHandler = () => {
+      clearTimeout(this._resizeT);
+      this._resizeT = setTimeout(() => {
+        this._maxMini = this._calcMaxMini();
+        this._pumpMiniQueue();
+      }, 300);
     };
     window.addEventListener('storage', this._storageThemeHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
     window.addEventListener('dmaior:openLive', this._openLiveHandler);
+    window.addEventListener('resize', this._resizeHandler);
     document.addEventListener('visibilitychange', this._visHandler);
   }
 
@@ -124,9 +135,12 @@ class KwaiLiveWidget extends HTMLElement {
       clearInterval(this.refreshTimer);
       this.refreshTimer = null;
     }
+    clearTimeout(this._miniPumpT); this._miniPumpT = null;
+    clearTimeout(this._resizeT);
     window.removeEventListener('storage', this._storageThemeHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
     window.removeEventListener('dmaior:openLive', this._openLiveHandler);
+    window.removeEventListener('resize', this._resizeHandler);
     document.removeEventListener('visibilitychange', this._visHandler);
   }
 
@@ -463,16 +477,16 @@ class KwaiLiveWidget extends HTMLElement {
     this.cardObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         const url = entry.target.dataset.url;
-        if (entry.isIntersecting) this.startMiniPlayer(url);
-        else                      this.stopMiniPlayer(url);
+        if (entry.isIntersecting) this._enqueueMini(url);
+        else                      this._dequeueMini(url);
       });
     }, {
       root: row,
-      // Margem maior que a largura de um card (52-60px) — assim o próximo
-      // card já começa a preparar o HLS antes do usuário chegar nele ao
-      // deslizar, em vez de só reagir quando ele já está na tela.
-      rootMargin: '0px 200px 0px 200px',
-      threshold: 0.1,
+      // Margem pequena: só enfileira quando o card está quase entrando. A fila
+      // escalonada (_pumpMiniQueue) é que garante que não sobrecarrega — margem
+      // grande só empilhava card demais de uma vez no load.
+      rootMargin: '0px 120px 0px 120px',
+      threshold: 0.01,
     });
   }
 
@@ -501,19 +515,23 @@ class KwaiLiveWidget extends HTMLElement {
   // largas — onde cabem mais cards visíveis do que o limite — num cabo de
   // guerra permanente entre cards igualmente visíveis disputando as mesmas
   // vagas, expulsando uns aos outros sem nenhum realmente ficar estável.
+  // Teto FIXO de mini-players tocando ao mesmo tempo — sem getBoundingClientRect
+  // por chamada (isso forçava reflow em todos os cards e travava justo na hora
+  // de dar play). Recalculado só no resize.
+  _calcMaxMini() {
+    try {
+      if (window.matchMedia('(max-width:600px)').matches)  return 6;
+      if (window.matchMedia('(max-width:1000px)').matches) return 9;
+    } catch (_) {}
+    return 12;
+  }
+
   get MAX_MINI_PLAYERS() {
-    if (this._docHidden) return 0;
+    if (this._docHidden)  return 0;
     // Nos ~3s logo depois que a live grande do hero começa, a faixa segura os
-    // mini-players — assim a live principal pega a rede primeiro e "aparece
-    // primeiro". Passado esse tempo, os mini-players voltam a tocar.
+    // mini-players — assim a live principal pega a rede primeiro.
     if (this._heroWarmup) return 0;
-    // Teto de streams simultâneos. O painel admin roda ~14 lives lisas no
-    // desktop, então o gargalo real era a LARGADA (todos subindo de uma vez)
-    // + o buffer curto do hero — não o número em si. 8 no desktop; um pouco
-    // menos enquanto a live grande do hero também está tocando.
-    const visible = [...this.activePlayers.keys()].filter((u) => this._isReallyVisible(u)).length;
-    const teto = this._featuredActive ? 6 : 8;
-    return Math.min(teto, Math.max(3, visible));
+    return this._maxMini;
   }
 
   // Corta o excesso de mini-players quando o limite baixa (ex: hero começou a
@@ -790,10 +808,11 @@ class KwaiLiveWidget extends HTMLElement {
     clearTimeout(this._heroWarmupT);
     this._heroWarmupT = setTimeout(() => {
       this._heroWarmup = false;
-      // reacende os mini-players dos cards que estão visíveis agora
+      // reenfileira os cards visíveis (o IntersectionObserver não re-dispara
+      // sozinho) — a fila escalonada sobe eles um a um.
       if (this.ENABLE_MINI_PREVIEW && !this._docHidden) {
         this.activePlayers.forEach((_e, u) => {
-          if (this._isReallyVisible(u)) this.startMiniPlayer(u);
+          if (this._isReallyVisible(u)) this._enqueueMini(u);
         });
       }
     }, 3000);
@@ -956,19 +975,52 @@ class KwaiLiveWidget extends HTMLElement {
         if (img && img.src) vid.poster = img.src;
       }
     }
+    // Abriu uma vaga — deixa a fila andar.
+    this._pumpMiniQueue();
+  }
+
+  // ── Fila escalonada dos mini-players ──────────────────────────────────────
+  // O IntersectionObserver joga os cards visíveis aqui; a fila sobe UM por vez
+  // (~1,3s entre cada) até o teto. Isso evita a "largada" de N players HLS no
+  // mesmo instante — que era o que fazia todos travarem (o site da Fox roda
+  // ~7 num celular fraco justamente porque escalona a entrada).
+  _enqueueMini(url) {
+    if (!this.ENABLE_MINI_PREVIEW || this._docHidden) return;
+    const e = this.activePlayers.get(url);
+    if (!e || !e.streamer.playUrl || e.playing || e.starting) return;
+    if (!this._miniQueue.includes(url)) this._miniQueue.push(url);
+    this._pumpMiniQueue();
+  }
+
+  _dequeueMini(url) {
+    this._miniQueue = this._miniQueue.filter((u) => u !== url);
+    this.stopMiniPlayer(url);
+  }
+
+  _pumpMiniQueue() {
+    if (this._miniPumpT || this._docHidden || !this.ENABLE_MINI_PREVIEW) return;
+    const ativos = (this._miniPlayerOrder || []).length;
+    if (ativos >= this.MAX_MINI_PLAYERS) return;
+    let url = null;
+    while (this._miniQueue.length) {
+      const cand = this._miniQueue.shift();
+      const e = this.activePlayers.get(cand);
+      if (e && e.streamer.playUrl && !e.playing && !e.starting) { url = cand; break; }
+    }
+    if (!url) return;
+    this.startMiniPlayer(url);
+    this._miniPumpT = setTimeout(() => {
+      this._miniPumpT = null;
+      if (this._miniQueue.length) this._pumpMiniQueue();
+    }, 1300);
   }
 
   startMiniPlayer(url) {
     const entry = this.activePlayers.get(url);
     if (!entry || !entry.streamer.playUrl) return;
-    // Sem vaga nenhuma agora (hero tocando / aba escondida): nem começa.
     if (this.MAX_MINI_PLAYERS <= 0) return;
-    // "starting" cobre a janela entre chamar _startHls e o vídeo de fato
-    // tocar — necessário porque no HLS nativo (Safari/iOS) "entry.hlsInst"
-    // nunca é preenchido (só a branch HLS.js usa essa variável), então sem
-    // esse terceiro flag a guarda não bloqueava uma segunda chamada pra
-    // mesma URL enquanto ela ainda carregava, deixando a mesma URL entrar
-    // duplicada em _miniPlayerOrder.
+    // "starting" cobre a janela entre chamar _startHls e o vídeo tocar de fato
+    // (no HLS nativo do iOS "hlsInst" nunca é preenchido).
     if (entry.playing || entry.hlsInst || entry.starting) return;
     const circleEl = this.shadowRoot.getElementById(entry.circleId);
     if (!circleEl) return;
@@ -976,32 +1028,14 @@ class KwaiLiveWidget extends HTMLElement {
     if (!vid)  return;
 
     if (!this._miniPlayerOrder) this._miniPlayerOrder = [];
+    // Já no teto: volta pra fila e espera abrir vaga (o pump reencaixa quando
+    // algum player para). Sem expulsar ninguém — a expulsão em cadeia era o
+    // "cabo de guerra" que deixava os cards piscando.
     if (this._miniPlayerOrder.length >= this.MAX_MINI_PLAYERS) {
-      // Prefere expulsar alguém que NÃO está realmente visível agora (só
-      // "de passagem" pela margem de antecipação) — evita que cards
-      // visíveis à esquerda sejam expulsos por cards que ainda nem
-      // chegaram na tela, o que fazia só os últimos (direita) sobreviverem
-      // quando muitos cards entravam em cena de uma vez no carregamento.
-      const victim = this._miniPlayerOrder.find((u) => !this._isReallyVisible(u));
-      if (victim) {
-        this.stopMiniPlayer(victim);
-      } else if (!this._isReallyVisible(url)) {
-        // Fila cheia de cards já visíveis, e este candidato ainda não está
-        // na tela de verdade — espera abrir espaço em vez de furar a fila.
-        return;
-      } else {
-        // Candidato também visível e fila cheia de visíveis: não há quem
-        // sacrificar sem tirar prioridade de alguém igualmente visível —
-        // cede o mais antigo.
-        this.stopMiniPlayer(this._miniPlayerOrder[0]);
-      }
+      if (!this._miniQueue.includes(url)) this._miniQueue.push(url);
+      return;
     }
-    // Nunca duplica: se a URL já está na fila (ex.: uma tentativa anterior
-    // ainda não foi limpa por qualquer caminho), não empurra de novo — isso
-    // inflava a contagem de vagas ocupadas e fazia o sistema achar que
-    // estava cheio (8/8) quando só metade eram streamers de fato tocando.
     if (!this._miniPlayerOrder.includes(url)) this._miniPlayerOrder.push(url);
-
     this._startHls(vid, entry.streamer.playUrl, false, entry, url);
   }
 
@@ -1043,7 +1077,9 @@ class KwaiLiveWidget extends HTMLElement {
         }
         entry.retries = (entry.retries || 0) + 1;
         if (entry.retries < 6)
-          setTimeout(() => this.startMiniPlayer(url), Math.min(5000 * entry.retries, 50000));
+          setTimeout(() => this._enqueueMini(url), Math.min(5000 * entry.retries, 50000));
+        else
+          this._pumpMiniQueue(); // desistiu deste — deixa a fila seguir
       }
     };
 
@@ -1074,10 +1110,10 @@ class KwaiLiveWidget extends HTMLElement {
       const hlsCfg = {
         enableWorker:              true,
         lowLatencyMode:            false,
-        autoLevelCapping:          0,
-        maxBufferLength:           4,
-        maxMaxBufferLength:        8,
-        liveSyncDurationCount:     2,
+        autoLevelCapping:          0,      // menor rendição — é uma bolinha de 56px
+        maxBufferLength:           6,      // +2s de folga: um engasgo da rede não congela na hora
+        maxMaxBufferLength:        12,
+        liveSyncDurationCount:     3,
         startFragPrefetch:         true,
         manifestLoadingMaxRetry:   4,
         fragLoadingMaxRetry:       6,
