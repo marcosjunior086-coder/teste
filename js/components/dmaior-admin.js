@@ -1924,6 +1924,21 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mComCancel').addEventListener('click',()=>this._fechaModal('mCom'));
     // Preview ao colar/digitar URL de imagem
     s.getElementById('mComImagem').addEventListener('input',e=>this._atualizarPreviewImagem(e.target.value));
+    // Enviar imagem direto pro R2 (em vez de colar link do Drive)
+    s.getElementById('mComImgUpBtn')?.addEventListener('click',()=>s.getElementById('mComImgFile')?.click());
+    s.getElementById('mComImgFile')?.addEventListener('change',async ev=>{
+      const f=ev.target.files?.[0]; ev.target.value='';
+      if(!f) return;
+      const btn=s.getElementById('mComImgUpBtn'), stat=s.getElementById('mComImgUpStatus');
+      if(btn) btn.disabled=true; if(stat) stat.textContent='enviando…';
+      const url=await this._uploadImagem(f,'home');
+      if(btn) btn.disabled=false;
+      if(url){
+        s.getElementById('mComImagem').value=url;
+        this._atualizarPreviewImagem(url);
+        if(stat) stat.textContent='✔ enviada';
+      } else if(stat) stat.textContent='';
+    });
     // Notificações push
     s.getElementById('btnAtuNotif')?.addEventListener('click',()=>this._carregarNotificacoes());
     s.getElementById('btnEnviarNotif')?.addEventListener('click',()=>this._enviarNotificacao());
@@ -2263,6 +2278,57 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   _esc(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  // ── Upload de imagem pro R2 ────────────────────────────────────────────────
+  // Redimensiona no navegador (canvas → WebP) antes de subir, então o que
+  // chega no servidor já é leve. GIF sobe cru pra não perder a animação.
+  _resizeImageToBlob(file,maxW=1440,quality=0.82){
+    return new Promise((resolve,reject)=>{
+      const fr=new FileReader();
+      fr.onerror=()=>reject(new Error('leitura'));
+      fr.onload=()=>{
+        const img=new Image();
+        img.onerror=()=>reject(new Error('decodificação'));
+        img.onload=()=>{
+          const scale=Math.min(1,maxW/(img.naturalWidth||maxW));
+          const w=Math.max(1,Math.round(img.naturalWidth*scale));
+          const h=Math.max(1,Math.round(img.naturalHeight*scale));
+          const cv=document.createElement('canvas');
+          cv.width=w; cv.height=h;
+          cv.getContext('2d').drawImage(img,0,0,w,h);
+          cv.toBlob(b=>b?resolve(b):reject(new Error('conversão')),'image/webp',quality);
+        };
+        img.src=fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  async _uploadImagem(file,pasta='home'){
+    if(!file) return null;
+    if(!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type)){this._toast('Formato não suportado (use PNG, JPG, WebP ou GIF)','err');return null;}
+    let blob=file, ct=file.type;
+    if(/gif/i.test(file.type)){
+      if(file.size>4*1024*1024){this._toast('GIF muito grande (máx 4 MB)','err');return null;}
+    }else{
+      try{ blob=await this._resizeImageToBlob(file); ct='image/webp'; }
+      catch{ /* mantém original se o canvas falhar */ }
+    }
+    let r;
+    try{
+      r=await fetch(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,{
+        method:'POST',
+        headers:{'Content-Type':ct,Authorization:`Bearer ${this._token}`},
+        body:blob,
+      });
+    }catch{ this._toast('Sem conexão com o servidor','err'); return null; }
+    if(r.status===401||r.status===403){this._doLogout();return null;}
+    let d=null; try{ d=await r.json(); }catch{}
+    if(r.status===501){this._toast('Upload ainda não ligado no servidor — cole um link por enquanto','err');return null;}
+    if(!r.ok||!d?.ok||!d.url){this._toast(d?.erro||'Falha ao enviar a imagem','err');return null;}
+    return d.url;
+  }
+
   // Valida que a URL é http/https antes de colocar em src (previne javascript: e data: URIs)
   _normalizarImagemUrl(u){
     if(!u||typeof u!=='string')return'';
@@ -5969,7 +6035,7 @@ class DimaiorAdmin extends HTMLElement {
           <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
           <div class="mc"><label>Subtítulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
           <div class="mc"><label>Descrição / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: Não perca tempo! Garanta já o seu lugar na Copa Arena."></textarea></div>
-          <div class="mc"><label>Imagem (URL) <span style="color:var(--t3);font-size:11px">(Wix, Google Drive público ou link direto)</span></label><input id="mComImagem" type="url" placeholder="https://drive.google.com/file/d/.../view"/><div style="font-size:10px;color:var(--t3);margin-top:4px;line-height:1.45">No Google Drive, use arquivo compartilhado como “qualquer pessoa com o link”. O sistema converte automaticamente para thumbnail.</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;max-width:220px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
+          <div class="mc"><label>Imagem</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">📤 Enviar imagem</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole um link (Wix, Drive público, R2...)"/><div style="font-size:10px;color:var(--t3);margin-top:4px;line-height:1.45">Enviar direto é o recomendado — a imagem vira WebP otimizado e carrega rápido. Link do Drive ainda funciona, mas é mais lento.</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;max-width:220px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="mc" style="margin:0"><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
             <div class="mc" style="margin:0"><label>Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
