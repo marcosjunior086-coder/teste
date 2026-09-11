@@ -7165,6 +7165,10 @@ class DimaiorAdmin extends HTMLElement {
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:26px;max-width:420px;width:100%">
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;color:var(--t1);margin-bottom:8px">Fechamento de comissão</div>
         <div style="font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
+        <label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Recrutador</label>
+        <select id="fechAgente" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-size:14px;margin-bottom:14px">
+          <option value="">Todos os recrutadores</option>
+        </select>
         <label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Período</label>
         <select id="fechMes" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-size:14px;margin-bottom:18px">
           <option value="">Histórico completo</option>
@@ -7179,14 +7183,27 @@ class DimaiorAdmin extends HTMLElement {
     const wrap = document.createElement('div'); wrap.innerHTML = html;
     this.shadowRoot.appendChild(wrap.firstChild);
     const m = this.shadowRoot.getElementById('mFech');
+    // popula o seletor de recrutadores
+    this._get('/admin/agentes').then(d => {
+      const sel = m.querySelector('#fechAgente');
+      if (!sel) return;
+      (d.agentes || []).forEach(a => {
+        const o = document.createElement('option');
+        o.value = a.id; o.textContent = a.nome + (a.ativo === false ? ' (inativo)' : '');
+        sel.appendChild(o);
+      });
+    }).catch(() => {});
     m.querySelector('#fechCancel').addEventListener('click', () => m.remove());
     m.querySelector('#fechBaixar').addEventListener('click', async () => {
       const mes = m.querySelector('#fechMes').value;
+      const agSel = m.querySelector('#fechAgente');
+      const agenteId = agSel.value;
+      const agenteNome = agenteId ? agSel.options[agSel.selectedIndex].textContent.replace(/ \(inativo\)$/, '') : '';
       const btn = m.querySelector('#fechBaixar');
       const st  = m.querySelector('#fechStatus');
       btn.disabled = true; st.textContent = 'Gerando planilha…';
       try {
-        await this._baixarFechamento(mes);
+        await this._baixarFechamento(mes, agenteId, agenteNome);
         st.textContent = 'Pronto! O download começou.';
         setTimeout(() => m.remove(), 1200);
       } catch (e) {
@@ -7196,12 +7213,21 @@ class DimaiorAdmin extends HTMLElement {
     });
   }
 
-  async _baixarFechamento(mes) {
+  async _baixarFechamento(mes, agenteId = '', agenteNome = '') {
     const [d, XLSX] = await Promise.all([
       this._api('GET', `/admin/fechamento${mes ? `?mes=${encodeURIComponent(mes)}` : ''}`),
       this._carregarSheetJS(),
     ]);
     if (!d || !d.ok) throw new Error((d && d.erro) || 'Erro ao gerar o fechamento');
+
+    // Fechamento individual: filtra pro recrutador escolhido e recalcula o total.
+    if (agenteId) {
+      d.agentes = (d.agentes || []).filter(a => String(a.agente_id) === String(agenteId));
+      d.total_geral_brl = Math.round((d.agentes.reduce((s, a) => s + Number(a.total_brl || 0), 0)) * 100) / 100;
+    }
+    const slug = agenteNome
+      ? '-' + agenteNome.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      : '';
 
     const resumo = (d.agentes || []).map(a => ({
       Recrutador: a.agente_nome, Login: a.agente_login,
@@ -7222,9 +7248,12 @@ class DimaiorAdmin extends HTMLElement {
     })));
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resumo.length ? resumo : [{ Aviso: 'Sem dados no período' }]), 'Resumo');
+    // Fechamento individual não precisa da aba "Resumo" (é 1 linha só).
+    if (!agenteId) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resumo.length ? resumo : [{ Aviso: 'Sem dados no período' }]), 'Resumo');
+    }
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(det.length ? det : [{ Aviso: 'Sem dados no período' }]), 'Detalhado');
-    XLSX.writeFile(wb, `fechamento-comissao-${mes || 'historico'}.xlsx`);
+    XLSX.writeFile(wb, `fechamento-comissao${slug}-${mes || 'historico'}.xlsx`);
   }
 
   _mostrarListaAgentes() {
