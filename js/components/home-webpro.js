@@ -158,6 +158,10 @@ class DmaiorHomeWebpro extends HTMLElement {
 
     /* HERO */
     .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,60px);align-items:center;padding-top:clamp(36px,6vw,68px);padding-bottom:clamp(24px,4vw,40px);}
+    /* Sem ninguém ao vivo: o card de live (com o placeholder genérico) some
+       de vez em vez de ficar mostrando "Live ao vivo · Kwai" sem live nenhuma —
+       o texto ocupa a largura toda no lugar. */
+    .hero.no-live{grid-template-columns:1fr;}
     .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--dm-cyan-10);border:1px solid var(--dm-cyan-30);color:var(--dm-cyan,#00d4d4);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:7px 14px;border-radius:999px;}
     /* min-height reserva o caso de 3 linhas (a frase rotativa longa quebra),
        pra o título não pular quando as frases trocam (anti-CLS). */
@@ -655,6 +659,19 @@ class DmaiorHomeWebpro extends HTMLElement {
   _renderFeatured() {
     if (!this._rendered || !this.shadowRoot) return;
     const s = this.shadowRoot;
+
+    // Sem NENHUM streamer ao vivo (nem placeholder): some com o card de live
+    // inteiro (desktop e mobile) em vez de mostrar "Live ao vivo · Kwai" à
+    // toa. `style.display=''` devolve o controle pro CSS responsivo
+    // (.desktop-only/.mobile-only) assim que uma live aparecer de novo.
+    const hasLive = !!this._featured;
+    const hliveEl   = s.querySelector('.hlive');
+    const livemobEl = s.querySelector('.livemob');
+    if (hliveEl)   hliveEl.style.display   = hasLive ? '' : 'none';
+    if (livemobEl) livemobEl.style.display = hasLive ? '' : 'none';
+    const heroEl = s.querySelector('.hero');
+    if (heroEl) heroEl.classList.toggle('no-live', !hasLive);
+
     const mobile = window.matchMedia('(max-width:1000px)').matches;
     const active = s.getElementById(mobile ? 'heroFrameMob' : 'heroFrame');
     const idle   = s.getElementById(mobile ? 'heroFrame' : 'heroFrameMob');
