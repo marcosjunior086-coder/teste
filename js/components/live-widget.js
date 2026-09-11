@@ -657,10 +657,20 @@ class KwaiLiveWidget extends HTMLElement {
 
     const entries  = await this.fetchEntries();
 
-    // Se a API retornou vazio provavelmente foi erro de rede — não remove ninguém
+    // Vazio pode ser erro de rede pontual — não remove ninguém na primeira vez.
+    // Mas se vier vazio DE NOVO no ciclo seguinte (~60s depois), já não é rede:
+    // todo mundo saiu do ar de verdade, e sem esse 2º gatilho o widget ficava
+    // preso mostrando os cards antigos (ou "Nenhuma live" sem nunca fechar)
+    // pra sempre, porque esse "return" também pulava o updateTop() que fecha
+    // a faixa quando não tem ninguém ao vivo.
     if (entries.length === 0 && this.activePlayers.size > 0) {
-      this.isChecking = false;
-      return;
+      this._emptyStreak = (this._emptyStreak || 0) + 1;
+      if (this._emptyStreak < 2) {
+        this.isChecking = false;
+        return;
+      }
+    } else {
+      this._emptyStreak = 0;
     }
 
     const liveUrls = new Set(entries.map((e) => e.url));
