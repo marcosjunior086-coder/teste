@@ -47,7 +47,6 @@ class KwaiLiveWidget extends HTMLElement {
     this.isChecking     = false;
     this.isFirstLoad    = true;
     this.isMinimized    = false;
-    this.userMinimized  = false;
 
     this.hlsModal        = null;
     this.hlsReadyPromise = null;
@@ -85,12 +84,11 @@ class KwaiLiveWidget extends HTMLElement {
   async connectedCallback() {
     this._syncThemeHost();
     this.render();
-    // Nasce fechado (só a barra "N AO VIVO" aparece) em vez de já mostrar a
-    // fileira vazia com "A procurar transmissões...". updateTop() já reabre
-    // sozinho assim que os primeiros streamers chegam (mesma lógica que já
-    // fecha o widget quando não há ninguém ao vivo) — aqui só adiantamos
-    // esse estado pro momento inicial, sem marcar como ação do usuário
-    // (userMinimized continua false, então o auto-abrir não fica bloqueado).
+    // Nasce fechado (só a barra "N AO VIVO" + a faixa compacta de fotinhas)
+    // e continua fechado mesmo depois que os streamers chegam — não abre
+    // sozinho mais. O usuário decide quando expandir (botão "+"). A única
+    // coisa automática que updateTop() ainda faz é FECHAR quando não sobra
+    // ninguém ao vivo, mesmo que o usuário tenha expandido antes.
     this.setMinimized(true);
     this.setupListeners();
     this._scheduleHlsLib();
@@ -453,7 +451,7 @@ class KwaiLiveWidget extends HTMLElement {
     this.shadowRoot.getElementById('modalClose').addEventListener('click', () => this.closeModal());
     this.shadowRoot.getElementById('btnFechar').addEventListener('click',  () => this.closeModal());
     this.shadowRoot.getElementById('muteBadge').addEventListener('click',  () => this.toggleMute());
-    this.shadowRoot.getElementById('toggleMin').addEventListener('click',  () => this.setMinimized(!this.isMinimized, true));
+    this.shadowRoot.getElementById('toggleMin').addEventListener('click',  () => this.setMinimized(!this.isMinimized));
     this.shadowRoot.getElementById('catFilter').addEventListener('change', (e) => {
       this.activeCategory = e.target.value;
       this.activePlayers.forEach(({ streamer, card }) => {
@@ -465,9 +463,8 @@ class KwaiLiveWidget extends HTMLElement {
     });
   }
 
-  setMinimized(val, byUser = false) {
+  setMinimized(val) {
     this.isMinimized = val;
-    if (byUser) this.userMinimized = val;
     const row    = this.shadowRoot.getElementById('liveRow');
     const btn    = this.shadowRoot.getElementById('toggleMin');
     const widget = this.shadowRoot.getElementById('liveWidget');
@@ -811,8 +808,10 @@ class KwaiLiveWidget extends HTMLElement {
     const empty = this.shadowRoot.getElementById('emptyMsg');
     empty.style.display = visible.length === 0 ? '' : 'none';
     empty.textContent   = this.isFirstLoad ? 'A procurar transmissões ao vivo...' : 'Nenhuma live no momento...';
+    // Só fecha sozinho quando não sobra ninguém ao vivo — nunca abre sozinho
+    // (nem na 1ª carga, nem quando novos streamers entram). Expandir é
+    // sempre ação do usuário, no botão "+".
     if (visible.length === 0 && !this.isFirstLoad) this.setMinimized(true);
-    else if (visible.length > 0 && !this.userMinimized) this.setMinimized(false);
     this._emitLives();
   }
 
