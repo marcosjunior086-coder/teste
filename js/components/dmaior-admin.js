@@ -2371,8 +2371,8 @@ class DimaiorAdmin extends HTMLElement {
     if(badge){
       badge.textContent = isImp ? '📌 Importante' : '⚡ Rápido';
       badge.style.cssText = isImp
-        ? 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(0,212,212,.12);color:var(--cyan);border:1px solid rgba(0,212,212,.3);margin-bottom:12px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:.05em'
-        : 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);margin-bottom:12px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:.05em';
+        ? 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(0,212,212,.12);color:var(--cyan);border:1px solid rgba(0,212,212,.3);margin-bottom:12px;font-family:var(--dm-font-title,Rajdhani,sans-serif);font-weight:700;letter-spacing:.05em'
+        : 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);margin-bottom:12px;font-family:var(--dm-font-title,Rajdhani,sans-serif);font-weight:700;letter-spacing:.05em';
     }
 
     // Guarda o tipo para o salvar
@@ -7087,10 +7087,10 @@ class DimaiorAdmin extends HTMLElement {
     const id = this._agenteAtualId;
     if (!id) return;
     const t = regra || {};
-    const inp = (idc, lbl, val, extra = '') => `<div style="flex:1"><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;margin-bottom:5px">${lbl}</label><input id="${idc}" ${extra} value="${val ?? ''}" style="width:100%;padding:9px 11px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;box-sizing:border-box;font-size:14px"></div>`;
-    const html = `<div id="mTarefaAg" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center">
-      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:24px;min-width:320px;max-width:420px;width:92%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:19px;margin-bottom:16px;color:#e2e8f0">${regra ? 'Editar tarefa' : 'Nova tarefa exclusiva'}</div>
+    const inp = (idc, lbl, val, extra = '') => `<div style="flex:1"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px">${lbl}</label><input id="${idc}" ${extra} value="${val ?? ''}" style="width:100%;padding:9px 11px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);box-sizing:border-box;font-size:14px"></div>`;
+    const html = `<div id="mTarefaAg" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center">
+      <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:24px;min-width:320px;max-width:420px;width:92%">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:19px;margin-bottom:16px;color:var(--t1)">${regra ? 'Editar tarefa' : 'Nova tarefa exclusiva'}</div>
         <div style="margin-bottom:12px">${inp('tAgNome', 'Nome', this._esc(t.nome || ''), 'type="text"')}</div>
         <div style="display:flex;gap:10px;margin-bottom:14px">
           ${inp('tAgDias', 'Dias mín.', t.dias_minimos, 'type="number" min="0"')}
@@ -7098,14 +7098,14 @@ class DimaiorAdmin extends HTMLElement {
           ${inp('tAgPct', '%', t.percentual, 'type="number" min="0" step="0.1"')}
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="tAgCancel" style="padding:8px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;cursor:pointer">Cancelar</button>
-          <button id="tAgSave" style="padding:8px 16px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-weight:700;cursor:pointer">Salvar</button>
+          <button id="tAgCancel" style="padding:8px 16px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);cursor:pointer">Cancelar</button>
+          <button id="tAgSave" style="padding:8px 16px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-weight:700;cursor:pointer">Salvar</button>
         </div>
-        <div id="tAgErro" style="color:#f87171;font-size:12px;margin-top:8px;min-height:16px"></div>
+        <div id="tAgErro" style="color:var(--verm);font-size:12px;margin-top:8px;min-height:16px"></div>
       </div></div>`;
     const wrap = document.createElement('div'); wrap.innerHTML = html;
-    document.body.appendChild(wrap.firstChild);
-    const m = document.getElementById('mTarefaAg');
+    this.shadowRoot.appendChild(wrap.firstChild);
+    const m = this.shadowRoot.getElementById('mTarefaAg');
     m.querySelector('#tAgCancel').addEventListener('click', () => m.remove());
     m.querySelector('#tAgSave').addEventListener('click', async () => {
       const payload = {
@@ -7159,24 +7159,24 @@ class DimaiorAdmin extends HTMLElement {
       const v = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       meses.push(`<option value="${v}">${d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}${i === 0 ? ' (atual)' : ''}</option>`);
     }
-    const html = `<div id="mFech" style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
-      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:26px;max-width:420px;width:100%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;color:#e2e8f0;margin-bottom:8px">Fechamento de comissão</div>
-        <div style="font-size:12px;color:#7a9ab4;margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
-        <label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;margin-bottom:6px">Período</label>
-        <select id="fechMes" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-size:14px;margin-bottom:18px">
+    const html = `<div id="mFech" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:26px;max-width:420px;width:100%">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;color:var(--t1);margin-bottom:8px">Fechamento de comissão</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
+        <label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Período</label>
+        <select id="fechMes" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-size:14px;margin-bottom:18px">
           <option value="">Histórico completo</option>
           ${meses.join('')}
         </select>
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="fechCancel" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;cursor:pointer">Cancelar</button>
-          <button id="fechBaixar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-weight:700;cursor:pointer">Baixar Excel</button>
+          <button id="fechCancel" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);cursor:pointer">Cancelar</button>
+          <button id="fechBaixar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-weight:700;cursor:pointer">Baixar Excel</button>
         </div>
-        <div id="fechStatus" style="font-size:12px;color:#7a9ab4;margin-top:10px;min-height:16px"></div>
+        <div id="fechStatus" style="font-size:12px;color:var(--t3);margin-top:10px;min-height:16px"></div>
       </div></div>`;
     const wrap = document.createElement('div'); wrap.innerHTML = html;
-    document.body.appendChild(wrap.firstChild);
-    const m = document.getElementById('mFech');
+    this.shadowRoot.appendChild(wrap.firstChild);
+    const m = this.shadowRoot.getElementById('mFech');
     m.querySelector('#fechCancel').addEventListener('click', () => m.remove());
     m.querySelector('#fechBaixar').addEventListener('click', async () => {
       const mes = m.querySelector('#fechMes').value;
@@ -7236,36 +7236,36 @@ class DimaiorAdmin extends HTMLElement {
   async _abrirConfigComissaoAgentes() {
     const html = `<div id="modalComissaoAgentes" class="mc-overlay">
       <style>
-        #modalComissaoAgentes{--mc-bg:#060b16;--mc-panel:#0b1220;--mc-soft:#10192a;--mc-line:rgba(0,212,212,.18);--mc-line-2:rgba(59,130,246,.22);--mc-text:#e8f2ff;--mc-muted:#8aa3ba;--mc-cyan:#00d4d4;--mc-blue:#3b82f6;--mc-red:#f87171;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
+        #modalComissaoAgentes{--mc-bg:var(--bg0,#060b16);--mc-panel:var(--glass,#0b1220);--mc-soft:var(--input-bg,#10192a);--mc-line:var(--brd,rgba(0,212,212,.18));--mc-line-2:var(--brddim,rgba(59,130,246,.22));--mc-text:var(--t1,#e8f2ff);--mc-muted:var(--t3,#8aa3ba);--mc-cyan:var(--cyan,#00d4d4);--mc-blue:var(--azul,#3b82f6);--mc-red:var(--verm,#f87171);font-family:var(--dm-font-body,'Exo 2',sans-serif)}
         #modalComissaoAgentes *{box-sizing:border-box}
-        #modalComissaoAgentes.mc-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:18px}
-        #modalComissaoAgentes .mc-panel{width:min(980px,calc(100vw - 28px));max-height:calc(100vh - 36px);overflow:auto;background:linear-gradient(180deg,#0d1627,#07101d);border:1px solid var(--mc-line);border-radius:18px;box-shadow:0 22px 70px rgba(0,0,0,.5)}
+        #modalComissaoAgentes.mc-overlay{position:fixed;inset:0;z-index:9999;background:rgba(4,4,14,.9);display:flex;align-items:center;justify-content:center;padding:18px}
+        #modalComissaoAgentes .mc-panel{width:min(980px,calc(100vw - 28px));max-height:calc(100vh - 36px);overflow:auto;background:var(--glass,linear-gradient(180deg,#0d1627,#07101d));border:1px solid var(--mc-line);border-radius:18px;box-shadow:0 22px 70px rgba(0,0,0,.5)}
         #modalComissaoAgentes .mc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 22px;border-bottom:1px solid rgba(0,212,212,.12);background:rgba(255,255,255,.015)}
-        #modalComissaoAgentes .mc-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif),Arial,sans-serif;font-size:23px;line-height:1;font-weight:800;letter-spacing:.03em;color:var(--mc-text)}
+        #modalComissaoAgentes .mc-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:23px;line-height:1;font-weight:800;letter-spacing:.03em;color:var(--mc-text)}
         #modalComissaoAgentes .mc-sub{font-size:12px;color:var(--mc-muted);margin-top:7px}
         #modalComissaoAgentes .mc-body{padding:20px 22px 22px}
-        #modalComissaoAgentes .mc-btn{height:38px;border:1px solid var(--mc-line);border-radius:11px;background:rgba(255,255,255,.04);color:#b9cbe0;padding:0 14px;font-family:var(--dm-font-title,'Rajdhani',sans-serif),Arial,sans-serif;font-size:14px;font-weight:800;letter-spacing:.03em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
-        #modalComissaoAgentes .mc-btn:hover{border-color:rgba(0,212,212,.38);color:#fff}
-        #modalComissaoAgentes .mc-primary{border:0;background:linear-gradient(135deg,var(--mc-blue),var(--mc-cyan));color:#04101c;box-shadow:0 10px 24px rgba(0,212,212,.14)}
-        #modalComissaoAgentes .mc-danger{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#ff9a9a}
+        #modalComissaoAgentes .mc-btn{height:38px;border:1px solid var(--mc-line);border-radius:11px;background:rgba(255,255,255,.04);color:var(--mc-muted);padding:0 14px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:800;letter-spacing:.03em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+        #modalComissaoAgentes .mc-btn:hover{border-color:rgba(0,212,212,.38);color:var(--t1)}
+        #modalComissaoAgentes .mc-primary{border:0;background:linear-gradient(135deg,var(--mc-blue),var(--mc-cyan));color:var(--bg0,#04101c);box-shadow:0 10px 24px rgba(0,212,212,.14)}
+        #modalComissaoAgentes .mc-danger{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:var(--verm)}
         #modalComissaoAgentes .mc-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-bottom:14px}
         #modalComissaoAgentes .mc-field{display:grid;gap:7px;min-width:0}
-        #modalComissaoAgentes .mc-label{font-family:var(--dm-font-title,'Rajdhani',sans-serif),Arial,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--mc-cyan);font-weight:800}
-        #modalComissaoAgentes .mc-input{width:100%;height:40px;padding:0 12px;border:1px solid rgba(0,212,212,.16);border-radius:10px;background:rgba(0,0,0,.42);color:var(--mc-text);font:600 13px 'Exo 2',Arial,sans-serif;outline:none}
+        #modalComissaoAgentes .mc-label{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--mc-cyan);font-weight:800}
+        #modalComissaoAgentes .mc-input{width:100%;height:40px;padding:0 12px;border:1px solid var(--mc-line);border-radius:10px;background:var(--input-bg,rgba(0,0,0,.42));color:var(--mc-text);font-weight:600;font-size:13px;font-family:var(--dm-font-body,'Exo 2',sans-serif);outline:none}
         #modalComissaoAgentes .mc-input:focus{border-color:rgba(0,212,212,.45);box-shadow:0 0 0 3px rgba(0,212,212,.08)}
-        #modalComissaoAgentes .mc-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 16px;border:1px solid rgba(59,130,246,.18);border-radius:12px;background:rgba(59,130,246,.07);color:#b9cbe0;font-size:12px;line-height:1.45}
-        #modalComissaoAgentes .mc-section-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif),Arial,sans-serif;color:var(--mc-text);font-weight:800;font-size:15px;letter-spacing:.06em;margin:0 0 10px}
+        #modalComissaoAgentes .mc-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 16px;border:1px solid rgba(59,130,246,.18);border-radius:12px;background:rgba(59,130,246,.07);color:var(--mc-muted);font-size:12px;line-height:1.45}
+        #modalComissaoAgentes .mc-section-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);color:var(--mc-text);font-weight:800;font-size:15px;letter-spacing:.06em;margin:0 0 10px}
         #modalComissaoAgentes .mc-rules{display:grid;gap:9px;margin-bottom:16px}
         #modalComissaoAgentes .mc-rule{display:grid;grid-template-columns:minmax(170px,1.4fr) repeat(4,minmax(82px,.65fr)) minmax(70px,.45fr) minmax(150px,.7fr);gap:8px;align-items:center;padding:10px;border:1px solid rgba(0,212,212,.12);border-radius:13px;background:rgba(255,255,255,.025)}
-        #modalComissaoAgentes .mc-rule-head{padding:0 10px;background:transparent;border:0;color:var(--mc-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif),Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:800}
+        #modalComissaoAgentes .mc-rule-head{padding:0 10px;background:transparent;border:0;color:var(--mc-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:800}
         #modalComissaoAgentes .mc-rule:not(.mc-rule-head) .mc-label{display:none}
         #modalComissaoAgentes .mc-actions{display:flex;gap:7px;justify-content:flex-end}
-        #modalComissaoAgentes .mc-check{display:flex;align-items:center;gap:8px;color:#cfe7f7;font-size:12px;font-weight:700}
+        #modalComissaoAgentes .mc-check{display:flex;align-items:center;gap:8px;color:var(--t2,#cfe7f7);font-size:12px;font-weight:700}
         #modalComissaoAgentes .mc-check input{width:16px;height:16px;accent-color:var(--mc-cyan)}
         #modalComissaoAgentes .mc-new{padding:15px;border:1px solid rgba(0,212,212,.18);border-radius:14px;background:rgba(0,212,212,.045)}
         #modalComissaoAgentes .mc-new-grid{display:grid;grid-template-columns:minmax(150px,1.35fr) repeat(4,minmax(90px,.8fr)) auto;gap:9px}
         #modalComissaoAgentes .mc-empty{padding:18px;border:1px dashed rgba(0,212,212,.22);border-radius:14px;color:var(--mc-muted);text-align:center}
-        #modalComissaoAgentes .mc-error{padding:16px;border:1px solid rgba(248,113,113,.28);border-radius:12px;background:rgba(248,113,113,.08);color:#ff9a9a}
+        #modalComissaoAgentes .mc-error{padding:16px;border:1px solid rgba(248,113,113,.28);border-radius:12px;background:rgba(248,113,113,.08);color:var(--verm)}
         @media(max-width:760px){
           #modalComissaoAgentes.mc-overlay{align-items:flex-start;padding:10px 10px max(28px,env(safe-area-inset-bottom))}
           #modalComissaoAgentes .mc-panel{width:100%;max-height:calc(100vh - 56px);max-height:calc(100dvh - 56px);border-radius:16px}
@@ -7294,8 +7294,8 @@ class DimaiorAdmin extends HTMLElement {
         <div id="mComAgBody" class="mc-body">${this._loading()}</div>
       </div>
     </div>`;
-    const wrap=document.createElement('div');wrap.innerHTML=html;document.body.appendChild(wrap.firstChild);
-    const modal=document.getElementById('modalComissaoAgentes');
+    const wrap=document.createElement('div');wrap.innerHTML=html;this.shadowRoot.appendChild(wrap.firstChild);
+    const modal=this.shadowRoot.getElementById('modalComissaoAgentes');
     const body=modal.querySelector('#mComAgBody');
     modal.querySelector('#mComAgClose').addEventListener('click',()=>modal.remove());
 
@@ -7403,22 +7403,22 @@ class DimaiorAdmin extends HTMLElement {
       { l:'UID Kwai (para a foto no painel)', id:'mAgKwaiUid', v:'', t:'text' },
       { l:'Observação',id:'mAgObs',  v:'', t:'text' },
     ];
-    const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalAgente">
-      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:340px;max-width:440px;width:90%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:#e2e8f0">${titulo}</div>
-        ${campos.map(c=>`<div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${c.l}</label>
-          <input id="${c.id}" type="${c.t}" value="${c.v}" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>`).join('')}
-        ${agente ? `<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0b8c8"><input type="checkbox" id="mAgAtivo" ${agente.ativo?'checked':''}> Ativo</label></div>` : ''}
+    const html = `<div style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalAgente">
+      <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:28px;min-width:340px;max-width:440px;width:90%">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:var(--t1)">${titulo}</div>
+        ${campos.map(c=>`<div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${c.l}</label>
+          <input id="${c.id}" type="${c.t}" value="${c.v}" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>`).join('')}
+        ${agente ? `<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--t2)"><input type="checkbox" id="mAgAtivo" ${agente.ativo?'checked':''}> Ativo</label></div>` : ''}
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
-          <button id="mAgCancelar" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
-          <button id="mAgSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+          <button id="mAgCancelar" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
+          <button id="mAgSalvar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
         </div>
-        <div id="mAgErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:20px"></div>
+        <div id="mAgErro" style="color:var(--verm);font-size:13px;margin-top:10px;min-height:20px"></div>
       </div>
     </div>`;
     const el = document.createElement('div'); el.innerHTML = html;
-    document.body.appendChild(el.firstChild);
-    const modal = document.getElementById('modalAgente');
+    this.shadowRoot.appendChild(el.firstChild);
+    const modal = this.shadowRoot.getElementById('modalAgente');
     modal.querySelector('#mAgCancelar').addEventListener('click', () => modal.remove());
     modal.querySelector('#mAgSalvar').addEventListener('click', async () => {
       const nome   = modal.querySelector('#mAgNome')?.value.trim();
@@ -7464,21 +7464,21 @@ class DimaiorAdmin extends HTMLElement {
 
   _alterarSenhaAgenteAtual() {
     if (!this._agenteAtualId) return;
-    const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalSenhaAgente">
-      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:28px;min-width:300px;width:90%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:#e2e8f0">Alterar Senha</div>
-        <div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nova Senha</label>
-          <input id="mSenNova" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
+    const html = `<div style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalSenhaAgente">
+      <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:28px;min-width:300px;width:90%">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:var(--t1)">Alterar Senha</div>
+        <div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nova Senha</label>
+          <input id="mSenNova" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="mSenCancel" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
-          <button id="mSenSalvar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+          <button id="mSenCancel" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
+          <button id="mSenSalvar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
         </div>
-        <div id="mSenErro" style="color:#f87171;font-size:13px;margin-top:10px;min-height:18px"></div>
+        <div id="mSenErro" style="color:var(--verm);font-size:13px;margin-top:10px;min-height:18px"></div>
       </div>
     </div>`;
     const el = document.createElement('div'); el.innerHTML = html;
-    document.body.appendChild(el.firstChild);
-    const modal = document.getElementById('modalSenhaAgente');
+    this.shadowRoot.appendChild(el.firstChild);
+    const modal = this.shadowRoot.getElementById('modalSenhaAgente');
     modal.querySelector('#mSenCancel').addEventListener('click', () => modal.remove());
     modal.querySelector('#mSenSalvar').addEventListener('click', async () => {
       const senha = modal.querySelector('#mSenNova').value.trim();
