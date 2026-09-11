@@ -219,6 +219,10 @@ class KwaiLiveWidget extends HTMLElement {
            faixa fica no topo e 130px reservados atrasam o Speed Index */
         @media (min-width:1001px){
           :host([data-layout="webpro"]) #liveWidget{ min-height:132px; }
+          /* Minimizado no desktop: tira a reserva de altura — senão o card
+             ficava com espaço vazio sobrando embaixo da barra "N AO VIVO"
+             em vez de fechar de verdade (a reserva é só pro estado aberto). */
+          :host([data-layout="webpro"]) #liveWidget.minimized{ min-height:0; }
         }
         :host([data-layout="webpro"]) #liveWidget.minimized{ padding-bottom:12px; }
         @media (max-width:560px){
