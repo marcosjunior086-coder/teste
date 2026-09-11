@@ -17,19 +17,19 @@ const DMAIOR_COURSES = [
         id: 'aula-1',
         title: 'Guia Streamer',
         summary: 'Primeiros passos, postura, rotina e boas práticas para começar com clareza.',
-        vimeoUrl: 'https://player.vimeo.com/video/1128625974?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479'
+        vimeoUrl: 'https://player.vimeo.com/video/1128625974?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479&dnt=1'
       },
       {
         id: 'aula-2',
         title: 'Oratoria e Comunicacao',
         summary: 'Como se comunicar melhor, manter o público presente e conduzir a live.',
-        vimeoUrl: 'https://player.vimeo.com/video/1128642404?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479'
+        vimeoUrl: 'https://player.vimeo.com/video/1128642404?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479&dnt=1'
       },
       {
         id: 'aula-3',
         title: 'Ferramentas Digitais',
         summary: 'Recursos e ferramentas para melhorar organização, visual e acompanhamento.',
-        vimeoUrl: 'https://player.vimeo.com/video/1128681490?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479'
+        vimeoUrl: 'https://player.vimeo.com/video/1128681490?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479&dnt=1'
       }
     ]
   }
@@ -52,15 +52,24 @@ class DMaiorCursos extends HTMLElement {
     window.addEventListener('dmaior:preferences', this._prefsHandler);
     this._storageThemeHandler = (e) => { if (e.key === 'dm_tema') this._syncThemeHost(); };
     this._themeHandler = () => this._syncThemeHost();
+    // Consentimento de "conteúdo incorporado" mudou → repinta a aula (libera
+    // ou bloqueia o player do Vimeo).
+    this._consentHandler = () => { if (this.view === 'lesson') this.render(); };
     window.addEventListener('storage', this._storageThemeHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
+    window.addEventListener('dmaior:consent', this._consentHandler);
   }
 
   disconnectedCallback() {
     window.removeEventListener('dmaior:preferences', this._prefsHandler);
     window.removeEventListener('storage', this._storageThemeHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
+    window.removeEventListener('dmaior:consent', this._consentHandler);
     this._destroyPlayer();
+  }
+
+  _embedsPermitido() {
+    return !!(window.DMaiorConsent && window.DMaiorConsent.allows('embeds'));
   }
 
   _syncThemeHost() {
@@ -100,6 +109,8 @@ class DMaiorCursos extends HTMLElement {
         nextLesson: 'Próxima aula',
         finishCourse: 'Finalizar curso',
         videoSoon: 'Adicione o link do Vimeo desta aula no arquivo cursos.js.',
+        videoBlocked: 'O vídeo é carregado do Vimeo, um serviço de terceiros. Para assistir, autorize o conteúdo incorporado.',
+        allowVideo: 'Autorizar e assistir',
         important: 'Importante',
         certNote: 'Este certificado é emitido pela DMaior Agency como comprovação interna de participação e treinamento.',
         noMec: 'Não é homologado pelo MEC ou por qualquer órgão governamental. Trata-se de um documento interno da agência.'
@@ -131,6 +142,8 @@ class DMaiorCursos extends HTMLElement {
         nextLesson: 'Next lesson',
         finishCourse: 'Finish course',
         videoSoon: 'Add this lesson Vimeo link in cursos.js.',
+        videoBlocked: 'The video is loaded from Vimeo, a third-party service. To watch it, allow embedded content.',
+        allowVideo: 'Allow and watch',
         important: 'Important',
         certNote: 'This certificate is issued by DMaior Agency as internal proof of participation and training.',
         noMec: 'It is not certified by MEC or any government institution. It is an internal agency document.'
@@ -162,6 +175,8 @@ class DMaiorCursos extends HTMLElement {
         nextLesson: 'Siguiente clase',
         finishCourse: 'Finalizar curso',
         videoSoon: 'Agrega el link de Vimeo de esta clase en cursos.js.',
+        videoBlocked: 'El video se carga desde Vimeo, un servicio de terceros. Para verlo, autoriza el contenido incrustado.',
+        allowVideo: 'Autorizar y ver',
         important: 'Importante',
         certNote: 'Este certificado es emitido por DMaior Agency como comprobante interno de participacion y entrenamiento.',
         noMec: 'No esta homologado por el MEC ni por ningun organismo gubernamental. Es un documento interno de la agencia.'
@@ -193,6 +208,8 @@ class DMaiorCursos extends HTMLElement {
         nextLesson: '下一课',
         finishCourse: '完成课程',
         videoSoon: '请在 cursos.js 中添加本课 Vimeo 链接。',
+        videoBlocked: '视频由第三方服务 Vimeo 加载。若要观看，请允许嵌入内容。',
+        allowVideo: '允许并观看',
         important: '重要',
         certNote: '该证书由 DMaior Agency 作为内部参与和培训证明发放。',
         noMec: '该证书不是政府或官方学历认证文件，仅作为机构内部文件。'
@@ -246,7 +263,13 @@ class DMaiorCursos extends HTMLElement {
     if (!raw) return '';
     try {
       const url = new URL(raw);
-      if (url.hostname.includes('player.vimeo.com')) return url.href;
+      // dnt=1 (Do Not Track): o Vimeo não grava cookie de rastreamento nem
+      // envia dados a terceiros. Mantém o player funcional (o evento 'ended'
+      // continua vindo pela player.js). Garantido em qualquer caminho abaixo.
+      if (url.hostname.includes('player.vimeo.com')) {
+        url.searchParams.set('dnt', '1');
+        return url.href;
+      }
       const parts = url.pathname.split('/').filter(Boolean);
       const id = parts.find(part => /^\d+$/.test(part));
       if (!id) return '';
@@ -255,7 +278,8 @@ class DMaiorCursos extends HTMLElement {
       if (hash) params.set('h', hash);
       params.set('badge', '0');
       params.set('autopause', '0');
-      return `https://player.vimeo.com/video/${id}${params.toString() ? `?${params}` : ''}`;
+      params.set('dnt', '1');
+      return `https://player.vimeo.com/video/${id}?${params}`;
     } catch (_) {
       return '';
     }
@@ -268,6 +292,9 @@ class DMaiorCursos extends HTMLElement {
 
   _setupVimeo(lesson) {
     this._destroyPlayer();
+    // Sem consentimento de conteúdo incorporado, o iframe nem é renderizado
+    // e a player.js (script de terceiro) não é carregada.
+    if (!this._embedsPermitido()) return;
     const iframe = this.shadowRoot.getElementById('course-video');
     if (!iframe || !lesson?.vimeoUrl) return;
     const init = () => {
@@ -365,8 +392,17 @@ class DMaiorCursos extends HTMLElement {
   _lesson() {
     const lesson = this.course.lessons[this.lessonIndex] || this.course.lessons[0];
     const embed = this._embedUrl(lesson.vimeoUrl);
+    const podeEmbed = this._embedsPermitido();
     const done = this._isDone(lesson.id);
     const nextIndex = Math.min(this.lessonIndex + 1, this.course.lessons.length - 1);
+    let videoHtml;
+    if (!embed) {
+      videoHtml = `<div class="video-empty">${this._icon('play')}<span>${this._t('videoSoon')}</span></div>`;
+    } else if (!podeEmbed) {
+      videoHtml = `<div class="video-empty">${this._icon('play')}<span>${this._t('videoBlocked')}</span><button class="main-btn" data-action="consent" type="button">${this._t('allowVideo')}</button></div>`;
+    } else {
+      videoHtml = `<iframe id="course-video" src="${embed}" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="${lesson.title}"></iframe>`;
+    }
     return `
       <section class="lesson-view">
         <button class="ghost-btn" data-action="course" type="button">${this._t('backCourse')}</button>
@@ -376,7 +412,7 @@ class DMaiorCursos extends HTMLElement {
           <p>${lesson.summary}</p>
         </div>
         <div class="video-shell">
-          ${embed ? `<iframe id="course-video" src="${embed}" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="${lesson.title}"></iframe>` : `<div class="video-empty">${this._icon('play')}<span>${this._t('videoSoon')}</span></div>`}
+          ${videoHtml}
         </div>
         <div class="lesson-actions">
           <button class="outline-btn ${done ? 'done' : ''}" data-action="complete" data-lesson="${lesson.id}" type="button">${done ? this._t('doneLesson') : this._t('markDone')}</button>
@@ -459,13 +495,17 @@ class DMaiorCursos extends HTMLElement {
         if (action === 'course') this._open('course');
         if (action === 'lesson') this._open('lesson', Number(el.dataset.index || 0));
         if (action === 'complete') this._completeLesson(el.dataset.lesson);
+        if (action === 'consent') {
+          event.preventDefault();
+          if (window.DMaiorConsent) { window.DMaiorConsent.set(true); this.render(); }
+        }
         if (action === 'locked') {
           event.preventDefault();
           this.shadowRoot.querySelector('.certificate')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       });
     });
-    if (this.view === 'lesson') this._setupVimeo(this.course.lessons[this.lessonIndex]);
+    if (this.view === 'lesson' && this._embedsPermitido()) this._setupVimeo(this.course.lessons[this.lessonIndex]);
     window.DMaiorPrefs?.bind?.(this.shadowRoot);
   }
 }

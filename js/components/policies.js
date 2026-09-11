@@ -137,7 +137,7 @@ class DMaiorPolicies extends HTMLElement {
       <div class="header">
         <div class="header-badge"><span class="badge-dot"></span> Documentos Oficiais</div>
         <h1>Políticas <em>DMaior</em></h1>
-        <p class="header-sub">Atualizado em: <span>01 de Maio de 2025</span> &nbsp;·&nbsp; Versão 3.0 &nbsp;·&nbsp; Conformidade LGPD — Lei nº 13.709/2018</p>
+        <p class="header-sub">Atualizado em: <span>10 de Setembro de 2026</span> &nbsp;·&nbsp; Versão 4.0 &nbsp;·&nbsp; Conformidade LGPD — Lei nº 13.709/2018</p>
       </div>
       <div class="body">
         <nav class="toc" aria-label="Navegação das políticas">
@@ -176,14 +176,20 @@ class DMaiorPolicies extends HTMLElement {
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Endereço — Painel:</strong> Endereço completo coletado opcionalmente para entregas de premiações físicas.</span></div>
             </div></div>
             <div class="sub"><h3>Dados Financeiros</h3><div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Chave PIX — Painel:</strong> Utilizada para pagamento de bonificações e premiações de eventos internos.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Chave PIX — Painel:</strong> Utilizada para pagamento de bonificações e premiações de eventos internos. A chave pode ser um CPF, número de celular ou e-mail, conforme a opção do próprio streamer.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Solicitações de saque:</strong> Chave PIX e valor de cada pedido, processados via provedor de pagamentos (Mercado Pago).</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Histórico de bonificações:</strong> Registro de pagamentos acessível apenas pelo streamer e equipe autorizada.</span></div>
             </div></div>
             <div class="sub"><h3>Dados de Desempenho</h3><div class="ilist">
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Métricas de live:</strong> Diamantes recebidos, horas transmitidas, seguidores e ranking — coletados via API.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Status de transmissão:</strong> Monitoramento em tempo real (online/offline) para gestão de metas.</span></div>
             </div></div>
-            <div class="sub"><h3>Retenção</h3><p>Dados mantidos pelo período de vínculo e por até <strong>12 meses</strong> após encerramento do contrato.</p></div>
+            <div class="sub"><h3>Notificações e Formulários</h3><div class="ilist">
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Notificações push:</strong> Ao ativar o sino no painel, o navegador gera um endereço de entrega (endpoint) e informamos o tipo de aparelho/navegador para enviar avisos. Você pode revogar a qualquer momento no próprio painel.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Formulários oficiais:</strong> Dados que você preenche em formulários internos da agência (ex.: cadastro e regularização junto às plataformas parceiras).</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Candidatura pública:</strong> No formulário "Entrar para a Agência" coletamos nome, WhatsApp, ID no Kwai, categoria, a confirmação de maioridade e o endereço IP da solicitação (segurança e prevenção a fraude).</span></div>
+            </div></div>
+            <div class="sub"><h3>Retenção</h3><p>Dados de streamers ativos são mantidos durante todo o vínculo e por até <strong>12 meses</strong> após o encerramento (salvo prazos fiscais/legais mais longos). Candidaturas que não resultam em agenciamento e registros de acesso são mantidos por período limitado e depois eliminados ou anonimizados.</p></div>
           </div>
           <div class="divider"></div>
           <div class="policy-section animate" id="baselegal">
@@ -199,34 +205,38 @@ class DMaiorPolicies extends HTMLElement {
           <div class="divider"></div>
           <div class="policy-section animate" id="cookies">
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="8.5" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><circle cx="11.5" cy="14" r="1.5" fill="currentColor"/></svg></div><h2>Cookies e Armazenamento Local</h2></div>
-            <p>O painel utiliza <strong>sessionStorage</strong> e <strong>localStorage</strong> exclusivamente para funcionalidades técnicas. Não há rastreamento de terceiros.</p>
+            <p>Usamos <strong>localStorage</strong> e <strong>sessionStorage</strong> do navegador para funcionalidades técnicas. Não carregamos Google Analytics, Meta Pixel nem qualquer rastreador de marketing.</p>
             <div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Session Token:</strong> Mantém a sessão autenticada. Expira ao fechar o navegador ou após inatividade.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Preferências de Interface:</strong> Configurações de abas e filtros salvas apenas no dispositivo do usuário.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Sem cookies de terceiros:</strong> Nenhum script de analytics é carregado no painel dos streamers.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Sessão (token de acesso):</strong> Guardado no armazenamento local do navegador para manter você conectado. Removido ao sair da conta; renovado automaticamente enquanto a sessão estiver ativa.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Preferências de interface:</strong> Tema, idioma, tamanho de fonte, abas e filtros — salvos apenas no seu dispositivo.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Medição de audiência:</strong> Usamos o Cloudflare Web Analytics, que é agregado e <strong>não usa cookies</strong> nem identifica você individualmente.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Vídeos incorporados:</strong> A página de cursos incorpora vídeos do Vimeo com a opção "Do Not Track" ativada, para evitar cookies de rastreamento de terceiros.</span></div>
             </div>
           </div>
           <div class="divider"></div>
           <div class="policy-section animate" id="compartilha">
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div><h2>Compartilhamento de Dados</h2></div>
-            <p>A DMaior Agency <strong>não vende, aluga nem comercializa</strong> dados dos streamers. O compartilhamento ocorre somente em:</p>
+            <p>A DMaior Agency <strong>não vende, aluga nem comercializa</strong> dados dos streamers. O compartilhamento ocorre somente com:</p>
             <div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Kwai / Plataformas Parceiras:</strong> ID e dados de agenciamento utilizados via APIs oficiais.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Infraestrutura Técnica:</strong> Supabase, Cloudflare e Hostinger — todos com conformidade LGPD.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Obrigação Legal:</strong> Mediante ordem judicial ou requisição de autoridade competente.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Consentimento Explícito:</strong> Em qualquer outro caso, somente com autorização expressa e por escrito.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Kwai / plataformas parceiras:</strong> ID e dados de agenciamento, via APIs oficiais, para vínculo e gestão de carreira.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Infraestrutura técnica (operadores):</strong> Supabase (banco de dados) e Cloudflare (rede, segurança e hospedagem do site), que tratam os dados apenas conforme nossas instruções.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Google (Google Workspace / Google Sheets):</strong> Planilhas internas de cadastro e pagamento de premiações podem armazenar nome, contato, chave PIX e endereço para operação administrativa da agência.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Mercado Pago:</strong> Processamento dos pagamentos de premiações via PIX.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Obrigação legal:</strong> Mediante ordem judicial ou requisição de autoridade competente.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Consentimento explícito:</strong> Em qualquer outro caso, somente com autorização expressa e por escrito.</span></div>
             </div>
           </div>
           <div class="divider"></div>
           <div class="policy-section animate" id="inter">
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h2>Transferência Internacional de Dados</h2></div>
-            <p>Alguns provedores podem processar dados em servidores fora do Brasil, com as devidas salvaguardas conforme art. 33 da LGPD:</p>
+            <p>Nosso banco de dados fica hospedado <strong>na região de São Paulo, Brasil</strong>. Ainda assim, alguns provedores podem processar dados em servidores no exterior, com as salvaguardas do art. 33 da LGPD:</p>
             <div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Supabase Inc. (EUA):</strong> Banco de dados com conformidade SOC 2 Type II. Dados criptografados em repouso e em trânsito.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Cloudflare Inc. (EUA):</strong> Proxy e segurança com certificação ISO 27001 e conformidade GDPR.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Hostinger (LT):</strong> Hospedagem do site com conformidade GDPR e cláusulas de proteção de dados adequadas.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Supabase Inc. (EUA):</strong> Fornecedor do banco de dados (instância na região São Paulo). Conformidade SOC 2 Type II; dados criptografados em repouso e em trânsito.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Cloudflare Inc. (EUA):</strong> Rede, segurança e hospedagem do site. Certificação ISO 27001 e cláusulas-padrão de proteção de dados.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Google LLC (EUA):</strong> Google Workspace / Sheets para planilhas administrativas de cadastro e pagamento.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Vimeo Inc. (EUA):</strong> Hospedagem dos vídeos de curso (com "Do Not Track" ativado).</span></div>
             </div>
-            <div class="alert"><strong>Garantia:</strong> Todos os provedores estão contratualmente vinculados a tratar os dados exclusivamente conforme as instruções da DMaior Agency.</div>
+            <div class="alert"><strong>Garantia:</strong> Todos os provedores atuam como operadores, contratualmente vinculados a tratar os dados apenas conforme as instruções da DMaior Agency.</div>
           </div>
           <div class="divider"></div>
           <div class="policy-section animate" id="direitos">
@@ -264,8 +274,8 @@ class DMaiorPolicies extends HTMLElement {
           <div class="divider"></div>
           <div class="policy-section animate" id="menores">
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h2>Menores de Idade</h2></div>
-            <p>Os serviços da DMaior Agency são destinados a pessoas com <strong>18 anos ou mais</strong>. Streamers com <strong>16 ou 17 anos</strong> podem ser agenciados mediante autorização por escrito dos responsáveis legais. Menores de 16 anos não são aceitos.</p>
-            <div class="alert warn"><strong>Atenção:</strong> Caso identifiquemos dados de um menor coletados sem autorização, procederemos com a exclusão imediata e notificação dos responsáveis.</div>
+            <p>Os serviços da DMaior Agency são destinados <strong>exclusivamente a pessoas com 18 anos ou mais</strong>, em linha com os Termos de Uso das plataformas parceiras. No formulário de candidatura o interessado precisa confirmar expressamente que é maior de 18 anos.</p>
+            <div class="alert warn"><strong>Atenção:</strong> Não agenciamos menores de 18 anos. Caso identifiquemos dados de um menor, procederemos com a exclusão imediata dos registros.</div>
           </div>
           <div class="divider"></div>
           <div class="policy-section animate" id="termos">

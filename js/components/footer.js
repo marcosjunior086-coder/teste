@@ -244,6 +244,7 @@ class DmaiorFooter extends HTMLElement {
             <ul class="legal-list">
               <li><a href="politicas.html">Política de Privacidade</a></li>
               <li><a href="politicas.html">Termos e Condições</a></li>
+              <li><a href="#" id="dm-gerenciar-cookies">Gerenciar cookies</a></li>
             </ul>
           </div>
 
@@ -255,6 +256,11 @@ class DmaiorFooter extends HTMLElement {
         </div>
       </footer>
     `;
+    const gc = this.shadowRoot.getElementById('dm-gerenciar-cookies');
+    if (gc) gc.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.DMaiorConsent?.open();
+    });
     window.DMaiorPrefs?.bind(this.shadowRoot);
   }
 }

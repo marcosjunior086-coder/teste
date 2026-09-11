@@ -236,6 +236,10 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               <span data-i18n="infoData">Seus dados são usados apenas para o processo de agenciamento.</span>
             </div>
+            <div class="rc-info-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span id="rc-info-idade">A DMaior Agency agencia apenas pessoas com 18 anos ou mais.</span>
+            </div>
           </div>
 
           <button type="button" class="dm-btn-secondary" id="btn-como-aceitar-topo" data-i18n="howAcceptInvite" style="width:100%;padding:12px;margin-bottom:18px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;">Como aceitar o convite</button>
@@ -308,6 +312,11 @@
           <select id="f-recrutador" style="display:none" aria-hidden="true">
             <option value="">Dan — padrão da agência (dono)</option>
           </select>
+
+          <div class="rc-termos">
+            <input type="checkbox" id="f-idade">
+            <label for="f-idade" id="lbl-idade">Declaro que tenho 18 anos ou mais.</label>
+          </div>
 
           <div class="rc-termos">
             <input type="checkbox" id="f-aceite">
@@ -430,6 +439,23 @@
 
     const $ = id => document.getElementById(id);
     const tt = (key, params) => window.DMaiorPrefs?.t ? window.DMaiorPrefs.t(key, params) : key;
+
+    // i18n local do bloqueio de menores (LGPD / política 18+). Fica aqui em vez
+    // de preferences.js pra não forçar cache-bust de ~15 páginas por causa de
+    // 3 chaves. recrutamento.html é servido sem cache (max-age=0).
+    const IDADE_I18N = {
+      'pt-BR': { info: 'A DMaior Agency agencia apenas pessoas com 18 anos ou mais.', check: 'Declaro que tenho 18 anos ou mais.', erro: 'Você precisa confirmar que tem 18 anos ou mais.' },
+      en:      { info: 'DMaior Agency only manages people aged 18 or older.', check: 'I confirm that I am 18 years old or older.', erro: 'You must confirm that you are 18 or older.' },
+      es:      { info: 'DMaior Agency solo agencia a personas de 18 años o más.', check: 'Declaro que tengo 18 años o más.', erro: 'Debes confirmar que tienes 18 años o más.' },
+      zh:      { info: 'DMaior Agency 仅代理年满 18 周岁的用户。', check: '我确认我已年满 18 周岁。', erro: '你必须确认已年满 18 周岁。' },
+    };
+    const ttIdade = key => (IDADE_I18N[window.DMaiorPrefs?.getLang?.() || 'pt-BR'] || IDADE_I18N['pt-BR'])[key];
+    function localizarIdade() {
+      const info = $('rc-info-idade'), lbl = $('lbl-idade');
+      if (info) info.textContent = ttIdade('info');
+      if (lbl)  lbl.textContent  = ttIdade('check');
+    }
+    window.addEventListener('dmaior:preferences', localizarIdade);
     const WHATSAPP_AGENCIA = '5517997176407';
     const AGENCIA_KWAI_ID = 'KWAIRES';
 
@@ -509,6 +535,7 @@
         if (lang) lang.value = window.DMaiorPrefs.getLang();
         if (font) font.value = window.DMaiorPrefs.getFontSize();
       }
+      localizarIdade();
       if (lang) lang.addEventListener('change', e => window.DMaiorPrefs?.setLanguage(e.target.value));
       if (font) font.addEventListener('change', e => window.DMaiorPrefs?.setFontSize(e.target.value));
     }
@@ -677,11 +704,13 @@
       const nome      = $('f-nome').value.trim();
       const whatsapp  = $('f-whatsapp').value.replace(/\D/g, '');
       const categoria = $('f-categoria').value;
+      const maiorIdade = $('f-idade').checked;
       const aceite    = $('f-aceite').checked;
 
       if (!nome)            { alerta('alerta-3', 'error', tt('informName')); return; }
       if (whatsapp.length < 10) { alerta('alerta-3', 'error', tt('invalidWhatsapp')); return; }
       if (!categoria)       { alerta('alerta-3', 'error', tt('selectCategory')); return; }
+      if (!maiorIdade)      { alerta('alerta-3', 'error', ttIdade('erro')); return; }
       if (!aceite)          { alerta('alerta-3', 'error', tt('acceptTerms')); return; }
 
       $('btn-enviar').disabled = true;
@@ -696,6 +725,7 @@
           recrutador_id: $('f-recrutador').value || null,
           agente_id: _agenteVinculo?.id || null,
           aceite: true,
+          maior_idade: true,
         });
 
         if (!r.ok) {
@@ -888,7 +918,7 @@
       _perfil = null; _verificacao = null; _candidaturaId = null;
       $('f-uid').value = ''; $('f-nome').value = '';
       $('f-whatsapp').value = ''; $('f-categoria').value = '';
-      $('f-aceite').checked = false;
+      $('f-aceite').checked = false; $('f-idade').checked = false;
       irParaEtapa(1);
     });
 
@@ -909,9 +939,9 @@
   </script>
 
   <dmaior-footer></dmaior-footer>
-  <script defer charset=utf-8 src="js/components/footer.js?v=20260907-perf"></script>
+  <script defer charset=utf-8 src="js/components/footer.js?v=20260910-lgpd"></script>
   <dmaior-cookie-consent></dmaior-cookie-consent>
-  <script defer charset=utf-8 src="js/components/cookie-consent.js?v=20260624-3"></script>
+  <script defer charset=utf-8 src="js/components/cookie-consent.js?v=20260910-lgpd"></script>
   <script defer charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
 </body>
 </html>
