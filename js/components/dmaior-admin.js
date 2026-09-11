@@ -7305,6 +7305,8 @@ class DimaiorAdmin extends HTMLElement {
         const d=await this._get('/admin/agentes/comissao');
         const cfg=d.config||{};
         const regras=d.regras||[];
+        const agentes=d.agentes||[];
+        const optAgentes=(sel)=>`<option value="">Todos os recrutadores (geral)</option>`+agentes.map(a=>`<option value="${a.id}" ${sel===a.id?'selected':''}>${this._esc(a.nome)}</option>`).join('');
         body.innerHTML=`
           <div class="mc-grid">
             <label class="mc-field"><span class="mc-label">Koin por dólar</span>
@@ -7322,9 +7324,14 @@ class DimaiorAdmin extends HTMLElement {
             <span>diamantes x percentual = Koin de comissão; Koin / ${Number(cfg.koin_por_dolar||100)} = US$; US$ x R$ ${Number(cfg.cotacao_dolar||5).toFixed(2)} = comissão em reais.</span>
           </div>
           <div class="mc-section-title">Regras ativas e metas</div>
+          <div class="mc-note" style="margin-bottom:12px"><span>Geral x específica:</span><span>Uma regra "Todos" vale pra todo recrutador. Ao escolher um recrutador, a regra passa a valer <b>só pra ele</b> — e as regras dele substituem as gerais no cálculo da comissão.</span></div>
           <div class="mc-rules">
             <div class="mc-rule mc-rule-head"><span>Nome</span><span>Dias</span><span>Horas</span><span>%</span><span>Ordem</span><span>Ativo</span><span>Ações</span></div>
             ${regras.length?regras.map(r=>`<div class="mc-rule" data-regra-id="${r.id}">
+              <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span style="font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--mc-muted)">Vale para</span>
+                <select class="mc-input" data-k="agente_id" style="max-width:260px;flex:1">${optAgentes(r.agente_id||'')}</select>
+              </div>
               <label class="mc-field"><span class="mc-label">Nome</span><input class="mc-input" data-k="nome" value="${this._esc(r.nome||'')}"></label>
               <label class="mc-field"><span class="mc-label">Dias</span><input class="mc-input" data-k="dias_minimos" type="number" value="${Number(r.dias_minimos||0)}"></label>
               <label class="mc-field"><span class="mc-label">Horas</span><input class="mc-input" data-k="horas_minimas" type="number" step="0.01" value="${Number(r.horas_minimas||0)}"></label>
@@ -7336,6 +7343,9 @@ class DimaiorAdmin extends HTMLElement {
           </div>
           <div class="mc-new">
             <div class="mc-section-title">Nova regra</div>
+            <div style="margin-bottom:9px">
+              <select id="novaRegraAgente" class="mc-input" style="width:100%;max-width:320px">${optAgentes('')}</select>
+            </div>
             <div class="mc-new-grid">
               <input id="novaRegraNome" class="mc-input" placeholder="Nome">
               <input id="novaRegraDias" class="mc-input" type="number" placeholder="Dias">
@@ -7367,6 +7377,7 @@ class DimaiorAdmin extends HTMLElement {
             horas_minimas:body.querySelector('#novaRegraHoras').value,
             percentual:body.querySelector('#novaRegraPct').value,
             ordem:body.querySelector('#novaRegraOrdem').value,
+            agente_id:body.querySelector('#novaRegraAgente').value||null,
             ativo:true,
           });
           this._toast('Regra criada','ok');render();
