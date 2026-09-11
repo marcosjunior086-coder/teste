@@ -261,7 +261,16 @@ class KwaiLiveWidget extends HTMLElement {
           transition:opacity .3s ease;
         }
         #liveRow::-webkit-scrollbar{display:none;}
-        #liveRow.collapsed{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important;min-height:0!important;overflow:hidden;}
+        /* Minimizado (botão −): vira uma faixa baixinha só com as fotos, sem
+           nome/badge — dá pra ver que ainda tem gente ao vivo sem ocupar
+           espaço. Clicar de novo volta ao tamanho normal. */
+        #liveRow.collapsed{max-height:42px;min-height:0;padding-top:5px;padding-bottom:5px;align-items:center;}
+        #liveRow.collapsed .live-name,
+        #liveRow.collapsed .live-badge{display:none;}
+        #liveRow.collapsed .live-card{width:28px;}
+        #liveRow.collapsed .avatar-wrap{width:28px;height:28px;padding:1.5px;}
+        /* Sem ninguém ao vivo mesmo: aí sim some de vez — não tem o que mostrar. */
+        #liveRow.collapsed.no-content{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important;overflow:hidden;}
         #emptyMsg{color:var(--dm-text-sub);font-size:.7rem;padding:8px 0;align-self:center;}
 
         .live-card{flex-shrink:0;text-align:center;cursor:pointer;width:52px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s;}
@@ -786,6 +795,9 @@ class KwaiLiveWidget extends HTMLElement {
     const visible = this.visibleList();
     this.shadowRoot.getElementById('liveCount').innerHTML =
       `<span class="live-dot"></span>${visible.length} AO VIVO`;
+    // Minimizado sem ninguém ao vivo: some de vez (compacto não faz sentido
+    // com 0 fotos pra mostrar). Com gente ao vivo, o minimizado vira compacto.
+    this.shadowRoot.getElementById('liveRow').classList.toggle('no-content', visible.length === 0);
     const cats = [...new Set([...this.activePlayers.values()].map((p) => p.streamer.category).filter(Boolean))];
     const sel  = this.shadowRoot.getElementById('catFilter');
     if (cats.length > 1) {
