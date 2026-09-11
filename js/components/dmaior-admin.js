@@ -7144,10 +7144,24 @@ class DimaiorAdmin extends HTMLElement {
     if (window.XLSX) return Promise.resolve(window.XLSX);
     if (this._xlsxLoading) return this._xlsxLoading;
     this._xlsxLoading = new Promise((resolve, reject) => {
+      let acabou = false;
+      const limpar = () => { sc.onload = null; sc.onerror = null; };
+      const falhar = (msg) => {
+        if (acabou) return;
+        acabou = true; limpar(); sc.remove();
+        this._xlsxLoading = null; // não guarda promise rejeitada — próximo clique tenta de novo
+        reject(new Error(msg));
+      };
+      const timeout = setTimeout(() => falhar('Excel não carregou (tempo esgotado). Tente de novo.'), 15000);
       const sc = document.createElement('script');
       sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-      sc.onload = () => window.XLSX ? resolve(window.XLSX) : reject(new Error('Biblioteca de Excel não carregou'));
-      sc.onerror = () => reject(new Error('Falha ao carregar a biblioteca de Excel'));
+      sc.onload = () => {
+        clearTimeout(timeout);
+        if (acabou) return;
+        acabou = true; limpar();
+        window.XLSX ? resolve(window.XLSX) : falhar('Biblioteca de Excel não carregou');
+      };
+      sc.onerror = () => { clearTimeout(timeout); falhar('Falha ao carregar a biblioteca de Excel'); };
       document.head.appendChild(sc);
     });
     return this._xlsxLoading;
@@ -7214,8 +7228,14 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   async _baixarFechamento(mes, agenteId = '', agenteNome = '') {
-    const [d, XLSX] = await Promise.all([
+    // Timeout próprio pra essa chamada — _api() não tem um, e sem isso o botão
+    // fica preso em "Gerando planilha..." pra sempre se o Worker/Supabase travar.
+    const buscarComTimeout = () => Promise.race([
       this._api('GET', `/admin/fechamento${mes ? `?mes=${encodeURIComponent(mes)}` : ''}`),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('O servidor demorou demais pra responder. Tente de novo.')), 20000)),
+    ]);
+    const [d, XLSX] = await Promise.all([
+      buscarComTimeout(),
       this._carregarSheetJS(),
     ]);
     if (!d || !d.ok) throw new Error((d && d.erro) || 'Erro ao gerar o fechamento');
