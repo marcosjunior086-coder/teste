@@ -7089,7 +7089,7 @@ class DimaiorAdmin extends HTMLElement {
     const id = this._agenteAtualId;
     if (!id) return;
     const t = regra || {};
-    const inp = (idc, lbl, val, extra = '') => `<div style="flex:1"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px">${lbl}</label><input id="${idc}" ${extra} value="${val ?? ''}" style="width:100%;padding:9px 11px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);box-sizing:border-box;font-size:14px"></div>`;
+    const inp = (idc, lbl, val, extra = '') => `<div style="flex:1"><label style="display:block;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px">${lbl}</label><input id="${idc}" ${extra} value="${val ?? ''}" style="width:100%;padding:9px 11px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);box-sizing:border-box;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px"></div>`;
     const html = `<div id="mTarefaAg" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:24px;min-width:320px;max-width:420px;width:92%">
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:19px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;color:var(--t1)">${regra ? 'Editar tarefa' : 'Nova tarefa exclusiva'}</div>
@@ -7100,8 +7100,8 @@ class DimaiorAdmin extends HTMLElement {
           ${inp('tAgPct', '%', t.percentual, 'type="number" min="0" step="0.1"')}
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="tAgCancel" style="padding:8px 16px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);cursor:pointer">Cancelar</button>
-          <button id="tAgSave" style="padding:8px 16px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-weight:700;cursor:pointer">Salvar</button>
+          <button id="tAgCancel" style="padding:8px 16px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:.05em;cursor:pointer">Cancelar</button>
+          <button id="tAgSave" style="padding:8px 16px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:.05em;cursor:pointer">Salvar</button>
         </div>
         <div id="tAgErro" style="color:var(--verm);font-size:12px;margin-top:8px;min-height:16px"></div>
       </div></div>`;
@@ -7178,21 +7178,21 @@ class DimaiorAdmin extends HTMLElement {
     const html = `<div id="mFech" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:26px;max-width:420px;width:100%">
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t1);margin-bottom:8px">Fechamento de comissão</div>
-        <div style="font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
-        <label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Recrutador</label>
-        <select id="fechAgente" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-size:14px;margin-bottom:14px">
+        <div style="font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
+        <label style="display:block;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Recrutador</label>
+        <select id="fechAgente" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;margin-bottom:14px">
           <option value="">Todos os recrutadores</option>
         </select>
-        <label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Período</label>
-        <select id="fechMes" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-size:14px;margin-bottom:18px">
+        <label style="display:block;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Período</label>
+        <select id="fechMes" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;margin-bottom:18px">
           <option value="">Histórico completo</option>
           ${meses.join('')}
         </select>
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="fechCancel" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);cursor:pointer">Cancelar</button>
-          <button id="fechBaixar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-weight:700;cursor:pointer">Baixar Excel</button>
+          <button id="fechCancel" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:.05em;cursor:pointer">Cancelar</button>
+          <button id="fechBaixar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:.05em;cursor:pointer">Baixar Excel</button>
         </div>
-        <div id="fechStatus" style="font-size:12px;color:var(--t3);margin-top:10px;min-height:16px"></div>
+        <div id="fechStatus" style="font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;color:var(--t3);margin-top:10px;min-height:16px"></div>
       </div></div>`;
     const wrap = document.createElement('div'); wrap.innerHTML = html;
     this.shadowRoot.appendChild(wrap.firstChild);
@@ -7457,14 +7457,14 @@ class DimaiorAdmin extends HTMLElement {
     const html = `<div style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalAgente">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:28px;min-width:340px;max-width:440px;width:90%">
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;color:var(--t1)">${titulo}</div>
-        ${campos.map(c=>`<div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${c.l}</label>
+        ${campos.map(c=>`<div style="margin-bottom:14px"><label style="display:block;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${c.l}</label>
           <input id="${c.id}" type="${c.t}" value="${c.v}" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>`).join('')}
-        ${agente ? `<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--t2)"><input type="checkbox" id="mAgAtivo" ${agente.ativo?'checked':''}> Ativo</label></div>` : ''}
+        ${agente ? `<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;color:var(--t2)"><input type="checkbox" id="mAgAtivo" ${agente.ativo?'checked':''}> Ativo</label></div>` : ''}
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
-          <button id="mAgCancelar" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
-          <button id="mAgSalvar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+          <button id="mAgCancelar" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:.05em;cursor:pointer">Cancelar</button>
+          <button id="mAgSalvar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;letter-spacing:.05em;cursor:pointer">Salvar</button>
         </div>
-        <div id="mAgErro" style="color:var(--verm);font-size:13px;margin-top:10px;min-height:20px"></div>
+        <div id="mAgErro" style="font-family:var(--dm-font-body,'Exo 2',sans-serif);color:var(--verm);font-size:13px;margin-top:10px;min-height:20px"></div>
       </div>
     </div>`;
     const el = document.createElement('div'); el.innerHTML = html;
@@ -7518,13 +7518,13 @@ class DimaiorAdmin extends HTMLElement {
     const html = `<div style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalSenhaAgente">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:28px;min-width:300px;width:90%">
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;color:var(--t1)">Alterar Senha</div>
-        <div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nova Senha</label>
+        <div style="margin-bottom:14px"><label style="display:block;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nova Senha</label>
           <input id="mSenNova" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="mSenCancel" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-body,'Exo 2',sans-serif);cursor:pointer">Cancelar</button>
-          <button id="mSenSalvar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;cursor:pointer">Salvar</button>
+          <button id="mSenCancel" style="padding:9px 18px;background:var(--sunk,rgba(255,255,255,.05));border:1px solid var(--brd);border-radius:8px;color:var(--t2);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:.05em;cursor:pointer">Cancelar</button>
+          <button id="mSenSalvar" style="padding:9px 18px;background:var(--grad);border:none;border-radius:8px;color:var(--bg0,#060B16);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;letter-spacing:.05em;cursor:pointer">Salvar</button>
         </div>
-        <div id="mSenErro" style="color:var(--verm);font-size:13px;margin-top:10px;min-height:18px"></div>
+        <div id="mSenErro" style="font-family:var(--dm-font-body,'Exo 2',sans-serif);color:var(--verm);font-size:13px;margin-top:10px;min-height:18px"></div>
       </div>
     </div>`;
     const el = document.createElement('div'); el.innerHTML = html;
