@@ -7092,7 +7092,7 @@ class DimaiorAdmin extends HTMLElement {
     const inp = (idc, lbl, val, extra = '') => `<div style="flex:1"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px">${lbl}</label><input id="${idc}" ${extra} value="${val ?? ''}" style="width:100%;padding:9px 11px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);box-sizing:border-box;font-size:14px"></div>`;
     const html = `<div id="mTarefaAg" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:24px;min-width:320px;max-width:420px;width:92%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:19px;margin-bottom:16px;color:var(--t1)">${regra ? 'Editar tarefa' : 'Nova tarefa exclusiva'}</div>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:19px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;color:var(--t1)">${regra ? 'Editar tarefa' : 'Nova tarefa exclusiva'}</div>
         <div style="margin-bottom:12px">${inp('tAgNome', 'Nome', this._esc(t.nome || ''), 'type="text"')}</div>
         <div style="display:flex;gap:10px;margin-bottom:14px">
           ${inp('tAgDias', 'Dias mín.', t.dias_minimos, 'type="number" min="0"')}
@@ -7163,7 +7163,7 @@ class DimaiorAdmin extends HTMLElement {
     }
     const html = `<div id="mFech" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:26px;max-width:420px;width:100%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;color:var(--t1);margin-bottom:8px">Fechamento de comissão</div>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t1);margin-bottom:8px">Fechamento de comissão</div>
         <div style="font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
         <label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Recrutador</label>
         <select id="fechAgente" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-size:14px;margin-bottom:14px">
@@ -7272,23 +7272,23 @@ class DimaiorAdmin extends HTMLElement {
         #modalComissaoAgentes.mc-overlay{position:fixed;inset:0;z-index:9999;background:rgba(4,4,14,.9);display:flex;align-items:center;justify-content:center;padding:18px}
         #modalComissaoAgentes .mc-panel{width:min(980px,calc(100vw - 28px));max-height:calc(100vh - 36px);overflow:auto;background:var(--glass,linear-gradient(180deg,#0d1627,#07101d));border:1px solid var(--mc-line);border-radius:18px;box-shadow:0 22px 70px rgba(0,0,0,.5)}
         #modalComissaoAgentes .mc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 22px;border-bottom:1px solid rgba(0,212,212,.12);background:rgba(255,255,255,.015)}
-        #modalComissaoAgentes .mc-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:23px;line-height:1;font-weight:800;letter-spacing:.03em;color:var(--mc-text)}
+        #modalComissaoAgentes .mc-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:23px;line-height:1;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--mc-text)}
         #modalComissaoAgentes .mc-sub{font-size:12px;color:var(--mc-muted);margin-top:7px}
         #modalComissaoAgentes .mc-body{padding:20px 22px 22px}
-        #modalComissaoAgentes .mc-btn{height:38px;border:1px solid var(--mc-line);border-radius:11px;background:rgba(255,255,255,.04);color:var(--mc-muted);padding:0 14px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:800;letter-spacing:.03em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+        #modalComissaoAgentes .mc-btn{height:38px;border:1px solid var(--mc-line);border-radius:11px;background:rgba(255,255,255,.04);color:var(--mc-muted);padding:0 14px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;letter-spacing:.03em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
         #modalComissaoAgentes .mc-btn:hover{border-color:rgba(0,212,212,.38);color:var(--t1)}
         #modalComissaoAgentes .mc-primary{border:0;background:linear-gradient(135deg,var(--mc-blue),var(--mc-cyan));color:var(--bg0,#04101c);box-shadow:0 10px 24px rgba(0,212,212,.14)}
         #modalComissaoAgentes .mc-danger{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:var(--verm)}
         #modalComissaoAgentes .mc-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-bottom:14px}
         #modalComissaoAgentes .mc-field{display:grid;gap:7px;min-width:0}
-        #modalComissaoAgentes .mc-label{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--mc-cyan);font-weight:800}
+        #modalComissaoAgentes .mc-label{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--mc-cyan);font-weight:700}
         #modalComissaoAgentes .mc-input{width:100%;height:40px;padding:0 12px;border:1px solid var(--mc-line);border-radius:10px;background:var(--input-bg,rgba(0,0,0,.42));color:var(--mc-text);font-weight:600;font-size:13px;font-family:var(--dm-font-body,'Exo 2',sans-serif);outline:none}
         #modalComissaoAgentes .mc-input:focus{border-color:rgba(0,212,212,.45);box-shadow:0 0 0 3px rgba(0,212,212,.08)}
         #modalComissaoAgentes .mc-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 16px;border:1px solid rgba(59,130,246,.18);border-radius:12px;background:rgba(59,130,246,.07);color:var(--mc-muted);font-size:12px;line-height:1.45}
-        #modalComissaoAgentes .mc-section-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);color:var(--mc-text);font-weight:800;font-size:15px;letter-spacing:.06em;margin:0 0 10px}
+        #modalComissaoAgentes .mc-section-title{font-family:var(--dm-font-title,'Rajdhani',sans-serif);color:var(--mc-text);font-weight:700;font-size:15px;letter-spacing:.06em;margin:0 0 10px}
         #modalComissaoAgentes .mc-rules{display:grid;gap:9px;margin-bottom:16px}
         #modalComissaoAgentes .mc-rule{display:grid;grid-template-columns:minmax(170px,1.4fr) repeat(4,minmax(82px,.65fr)) minmax(70px,.45fr) minmax(150px,.7fr);gap:8px;align-items:center;padding:10px;border:1px solid rgba(0,212,212,.12);border-radius:13px;background:rgba(255,255,255,.025)}
-        #modalComissaoAgentes .mc-rule-head{padding:0 10px;background:transparent;border:0;color:var(--mc-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:800}
+        #modalComissaoAgentes .mc-rule-head{padding:0 10px;background:transparent;border:0;color:var(--mc-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:700}
         #modalComissaoAgentes .mc-rule:not(.mc-rule-head) .mc-label{display:none}
         #modalComissaoAgentes .mc-actions{display:flex;gap:7px;justify-content:flex-end}
         #modalComissaoAgentes .mc-check{display:flex;align-items:center;gap:8px;color:var(--t2,#cfe7f7);font-size:12px;font-weight:700}
@@ -7436,7 +7436,7 @@ class DimaiorAdmin extends HTMLElement {
     ];
     const html = `<div style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalAgente">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:28px;min-width:340px;max-width:440px;width:90%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:var(--t1)">${titulo}</div>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;color:var(--t1)">${titulo}</div>
         ${campos.map(c=>`<div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${c.l}</label>
           <input id="${c.id}" type="${c.t}" value="${c.v}" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>`).join('')}
         ${agente ? `<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--t2)"><input type="checkbox" id="mAgAtivo" ${agente.ativo?'checked':''}> Ativo</label></div>` : ''}
@@ -7497,7 +7497,7 @@ class DimaiorAdmin extends HTMLElement {
     if (!this._agenteAtualId) return;
     const html = `<div style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalSenhaAgente">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:28px;min-width:300px;width:90%">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;margin-bottom:20px;color:var(--t1)">Alterar Senha</div>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;color:var(--t1)">Alterar Senha</div>
         <div style="margin-bottom:14px"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nova Senha</label>
           <input id="mSenNova" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;box-sizing:border-box"></div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
