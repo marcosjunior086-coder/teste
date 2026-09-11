@@ -2017,6 +2017,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAgentesKwai')?.addEventListener('click',()=>this._toggleAgentesKwai());
     s.getElementById('btnAtuAgentesKwai')?.addEventListener('click',()=>this._carregarAgentesKwai());
     s.getElementById('btnConfigComissaoAgentes')?.addEventListener('click',()=>this._abrirConfigComissaoAgentes());
+    s.getElementById('btnFechamentoComissao')?.addEventListener('click',()=>this._abrirFechamentoComissao());
     s.getElementById('btnAgenteVoltarLista')?.addEventListener('click',()=>this._mostrarListaAgentes());
     s.getElementById('btnAgenteEditar')?.addEventListener('click',()=>this._editarAgenteAtual());
     s.getElementById('btnAgenteSenha')?.addEventListener('click',()=>this._alterarSenhaAgenteAtual());
@@ -5936,7 +5937,7 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <!-- ── AGENTES DE TALENTOS ── -->
             <div class="pag" id="pag-agentes">
-              ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-o" id="btnAgentesKwai">${this._ico('refresh',13)} Visão Kwai</button><button class="btn btn-o" id="btnConfigComissaoAgentes">${this._ico('settings',13)} Comissões</button><button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
+              ${ph('Agentes de Talentos','users','Gestão de agentes e seus streamers','btnAtuAgentes',`<button class="btn btn-o" id="btnAgentesKwai">${this._ico('refresh',13)} Visão Kwai</button><button class="btn btn-o" id="btnConfigComissaoAgentes">${this._ico('settings',13)} Comissões</button><button class="btn btn-o" id="btnFechamentoComissao">${this._ico('download',13)} Fechamento (Excel)</button><button class="btn btn-g" id="btnNovoAgente">${this._ico('plus',13)} Novo Agente</button>`)}
               <!-- Lista de agentes -->
               <div class="box" id="agentesListaBox">
                 <div class="bhead"><div class="btitulo">${this._ico('users',14)} Agentes</div></div>
@@ -5986,6 +5987,14 @@ class DimaiorAdmin extends HTMLElement {
                     </div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Observação</span><div id="aDObs" style="font-size:15px;margin-top:4px"></div></div>
                   </div>
+                </div>
+                <!-- #5 — Tarefas (regras de comissão) exclusivas deste recrutador -->
+                <div class="box" style="margin-top:14px">
+                  <div class="bhead">
+                    <div class="btitulo">${this._ico('trend',14)} Tarefas de comissão deste recrutador</div>
+                    <button class="btn btn-sm btn-g" id="btnNovaTarefaAgente">${this._ico('plus',12)} Nova tarefa</button>
+                  </div>
+                  <div id="aDTarefas" style="padding:14px">${this._loading()}</div>
                 </div>
                 <!-- Streamers do agente -->
                 <div class="box" style="margin-top:14px">
@@ -7026,9 +7035,194 @@ class DimaiorAdmin extends HTMLElement {
           btn.addEventListener('click', () => this._desvincularStreamer(id, btn.dataset.desvincularUid));
         });
       }
+      // #5 — tarefas de comissão do recrutador
+      this._renderTarefasAgente(detalhe.regras);
+      const btnNovaTarefa = s.getElementById('btnNovaTarefaAgente');
+      if (btnNovaTarefa) btnNovaTarefa.onclick = () => this._modalTarefaAgente(null);
     } catch(e) {
       s.getElementById('tbAgenteStreamers').innerHTML = `<div style="padding:20px;color:var(--verm)">${e.message}</div>`;
     }
+  }
+
+  // #5 — regras de comissão ("tarefas") do recrutador. detalhe.regras vem do
+  // GET /admin/agentes/:id como { proprias, globais, efetivas }.
+  _renderTarefasAgente(regras) {
+    const box = this.shadowRoot.getElementById('aDTarefas');
+    if (!box) return;
+    const r = regras || { proprias: [], globais: [] };
+    const proprias = r.proprias || [];
+    const globais  = r.globais  || [];
+    const usaProprias = proprias.length > 0;
+    const lista = usaProprias ? proprias : globais;
+    const linha = (rg) => `<tr>
+      <td style="padding:8px 10px">${this._esc(rg.nome)}</td>
+      <td style="padding:8px 10px;text-align:right">${rg.dias_minimos || 0}d</td>
+      <td style="padding:8px 10px;text-align:right">${Number(rg.horas_minimas || 0)}h</td>
+      <td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--cyan)">${Number(rg.percentual || 0)}%</td>
+      <td style="padding:8px 10px;text-align:right">${usaProprias
+        ? `<button class="btn btn-sm btn-o" data-edit-tarefa="${rg.id}" style="padding:3px 7px">${this._ico('edit',11)}</button> <button class="btn btn-sm" data-del-tarefa="${rg.id}" style="padding:3px 7px;border:1px solid rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',11)}</button>`
+        : `<span style="color:var(--t3);font-size:11px">global</span>`}</td>
+    </tr>`;
+    box.innerHTML = `
+      <div style="font-size:12px;color:var(--t3);margin-bottom:10px;line-height:1.5">
+        ${usaProprias
+          ? 'Este recrutador tem tarefas próprias — elas <b>substituem</b> as globais no cálculo da comissão dele.'
+          : 'Sem tarefas próprias — usando as <b>tarefas globais</b>. Crie uma aqui para personalizar só este recrutador.'}
+      </div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="color:var(--t3);text-align:left">
+          <th style="padding:8px 10px">Tarefa</th><th style="padding:8px 10px;text-align:right">Dias mín.</th>
+          <th style="padding:8px 10px;text-align:right">Horas mín.</th><th style="padding:8px 10px;text-align:right">%</th>
+          <th style="padding:8px 10px;text-align:right"></th>
+        </tr></thead>
+        <tbody>${lista.map(linha).join('') || '<tr><td colspan="5" style="padding:14px;text-align:center;color:var(--t3)">Nenhuma tarefa.</td></tr>'}</tbody>
+      </table></div>`;
+    box.querySelectorAll('[data-del-tarefa]').forEach(b => b.addEventListener('click', () => this._excluirTarefaAgente(b.dataset.delTarefa)));
+    box.querySelectorAll('[data-edit-tarefa]').forEach(b => b.addEventListener('click', () => {
+      this._modalTarefaAgente(proprias.find(x => String(x.id) === b.dataset.editTarefa) || null);
+    }));
+  }
+
+  _modalTarefaAgente(regra = null) {
+    const id = this._agenteAtualId;
+    if (!id) return;
+    const t = regra || {};
+    const inp = (idc, lbl, val, extra = '') => `<div style="flex:1"><label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;margin-bottom:5px">${lbl}</label><input id="${idc}" ${extra} value="${val ?? ''}" style="width:100%;padding:9px 11px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;box-sizing:border-box;font-size:14px"></div>`;
+    const html = `<div id="mTarefaAg" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center">
+      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:24px;min-width:320px;max-width:420px;width:92%">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:19px;margin-bottom:16px;color:#e2e8f0">${regra ? 'Editar tarefa' : 'Nova tarefa exclusiva'}</div>
+        <div style="margin-bottom:12px">${inp('tAgNome', 'Nome', this._esc(t.nome || ''), 'type="text"')}</div>
+        <div style="display:flex;gap:10px;margin-bottom:14px">
+          ${inp('tAgDias', 'Dias mín.', t.dias_minimos, 'type="number" min="0"')}
+          ${inp('tAgHoras', 'Horas mín.', t.horas_minimas, 'type="number" min="0" step="0.5"')}
+          ${inp('tAgPct', '%', t.percentual, 'type="number" min="0" step="0.1"')}
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="tAgCancel" style="padding:8px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;cursor:pointer">Cancelar</button>
+          <button id="tAgSave" style="padding:8px 16px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-weight:700;cursor:pointer">Salvar</button>
+        </div>
+        <div id="tAgErro" style="color:#f87171;font-size:12px;margin-top:8px;min-height:16px"></div>
+      </div></div>`;
+    const wrap = document.createElement('div'); wrap.innerHTML = html;
+    document.body.appendChild(wrap.firstChild);
+    const m = document.getElementById('mTarefaAg');
+    m.querySelector('#tAgCancel').addEventListener('click', () => m.remove());
+    m.querySelector('#tAgSave').addEventListener('click', async () => {
+      const payload = {
+        nome: m.querySelector('#tAgNome').value.trim(),
+        dias_minimos: m.querySelector('#tAgDias').value || 0,
+        horas_minimas: m.querySelector('#tAgHoras').value || 0,
+        percentual: m.querySelector('#tAgPct').value || 0,
+        agente_id: id,
+      };
+      if (!payload.nome) { m.querySelector('#tAgErro').textContent = 'Nome obrigatório'; return; }
+      try {
+        if (regra) await this._patch(`/admin/agentes/comissao/regras/${regra.id}`, payload);
+        else await this._post('/admin/agentes/comissao/regras', payload);
+        m.remove();
+        this._toast(regra ? 'Tarefa atualizada' : 'Tarefa criada', 'ok');
+        this._abrirDetalheAgente(id);
+      } catch (e) { m.querySelector('#tAgErro').textContent = e.message || 'Erro ao salvar'; }
+    });
+  }
+
+  async _excluirTarefaAgente(regraId) {
+    if (!window.confirm('Excluir esta tarefa exclusiva? Sem nenhuma tarefa própria, o recrutador volta a usar as tarefas globais.')) return;
+    try {
+      await this._delete(`/admin/agentes/comissao/regras/${regraId}`);
+      this._toast('Tarefa excluída', 'ok');
+      this._abrirDetalheAgente(this._agenteAtualId);
+    } catch (e) { this._toast(e.message, 'err'); }
+  }
+
+  // #6/#7 — Fechamento de comissão (Excel). Consome GET /admin/fechamento e
+  // monta o .xlsx no navegador com SheetJS (carregado sob demanda do
+  // cdn.jsdelivr.net — permitido pela CSP; não entra no carregamento da página).
+  _carregarSheetJS() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (this._xlsxLoading) return this._xlsxLoading;
+    this._xlsxLoading = new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+      sc.onload = () => window.XLSX ? resolve(window.XLSX) : reject(new Error('Biblioteca de Excel não carregou'));
+      sc.onerror = () => reject(new Error('Falha ao carregar a biblioteca de Excel'));
+      document.head.appendChild(sc);
+    });
+    return this._xlsxLoading;
+  }
+
+  async _abrirFechamentoComissao() {
+    const hoje = new Date();
+    const meses = [];
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const v = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      meses.push(`<option value="${v}">${d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}${i === 0 ? ' (atual)' : ''}</option>`);
+    }
+    const html = `<div id="mFech" style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#0e1525;border:1px solid rgba(0,212,212,.2);border-radius:14px;padding:26px;max-width:420px;width:100%">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;color:#e2e8f0;margin-bottom:8px">Fechamento de comissão</div>
+        <div style="font-size:12px;color:#7a9ab4;margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
+        <label style="display:block;font-size:11px;color:#7a9ab4;text-transform:uppercase;margin-bottom:6px">Período</label>
+        <select id="fechMes" style="width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#e2e8f0;font-size:14px;margin-bottom:18px">
+          <option value="">Histórico completo</option>
+          ${meses.join('')}
+        </select>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="fechCancel" style="padding:9px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(0,212,212,.15);border-radius:8px;color:#a0b8c8;cursor:pointer">Cancelar</button>
+          <button id="fechBaixar" style="padding:9px 18px;background:linear-gradient(135deg,#00b4b4,#00d4d4);border:none;border-radius:8px;color:#060B16;font-weight:700;cursor:pointer">Baixar Excel</button>
+        </div>
+        <div id="fechStatus" style="font-size:12px;color:#7a9ab4;margin-top:10px;min-height:16px"></div>
+      </div></div>`;
+    const wrap = document.createElement('div'); wrap.innerHTML = html;
+    document.body.appendChild(wrap.firstChild);
+    const m = document.getElementById('mFech');
+    m.querySelector('#fechCancel').addEventListener('click', () => m.remove());
+    m.querySelector('#fechBaixar').addEventListener('click', async () => {
+      const mes = m.querySelector('#fechMes').value;
+      const btn = m.querySelector('#fechBaixar');
+      const st  = m.querySelector('#fechStatus');
+      btn.disabled = true; st.textContent = 'Gerando planilha…';
+      try {
+        await this._baixarFechamento(mes);
+        st.textContent = 'Pronto! O download começou.';
+        setTimeout(() => m.remove(), 1200);
+      } catch (e) {
+        st.textContent = e.message || 'Erro ao gerar';
+        btn.disabled = false;
+      }
+    });
+  }
+
+  async _baixarFechamento(mes) {
+    const [d, XLSX] = await Promise.all([
+      this._api('GET', `/admin/fechamento${mes ? `?mes=${encodeURIComponent(mes)}` : ''}`),
+      this._carregarSheetJS(),
+    ]);
+    if (!d || !d.ok) throw new Error((d && d.erro) || 'Erro ao gerar o fechamento');
+
+    const resumo = (d.agentes || []).map(a => ({
+      Recrutador: a.agente_nome, Login: a.agente_login,
+      Streamers: (a.streamers || []).length,
+      Diamantes: a.total_diamantes, Koin: a.total_koin, USD: a.total_usd,
+      'Comissao (R$)': a.total_brl,
+    }));
+    resumo.push({ Recrutador: 'TOTAL', Login: '', Streamers: '', Diamantes: '', Koin: '', USD: '', 'Comissao (R$)': d.total_geral_brl });
+
+    const det = [];
+    (d.agentes || []).forEach(a => (a.streamers || []).forEach(s => det.push({
+      Recrutador: a.agente_nome, Streamer: s.streamer_nome,
+      'Kwai ID': s.streamer_kwai_id || '', UID: s.streamer_uid,
+      'Dias ativos': s.dias_ativos, Horas: s.horas, Diamantes: s.diamantes,
+      Tarefa: s.regra || '—', 'Meta dias': s.meta_dias == null ? '' : s.meta_dias,
+      'Meta horas': s.meta_horas == null ? '' : s.meta_horas,
+      '%': s.percentual, Koin: s.koin, USD: s.usd, 'Comissao (R$)': s.brl,
+    })));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resumo.length ? resumo : [{ Aviso: 'Sem dados no período' }]), 'Resumo');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(det.length ? det : [{ Aviso: 'Sem dados no período' }]), 'Detalhado');
+    XLSX.writeFile(wb, `fechamento-comissao-${mes || 'historico'}.xlsx`);
   }
 
   _mostrarListaAgentes() {
@@ -7188,12 +7382,14 @@ class DimaiorAdmin extends HTMLElement {
     const campos = agente ? [
       { l:'Nome',     id:'mAgNome',   v:agente.nome       || '', t:'text' },
       { l:'Telefone', id:'mAgTel',    v:agente.telefone   || '', t:'text' },
+      { l:'UID Kwai (para a foto no painel)', id:'mAgKwaiUid', v:agente.kwai_uid || '', t:'text' },
       { l:'Observação',id:'mAgObs',   v:agente.observacao || '', t:'text' },
     ] : [
       { l:'Nome',     id:'mAgNome',   v:'', t:'text' },
       { l:'Login',    id:'mAgLogin',  v:'', t:'text' },
       { l:'Senha',    id:'mAgSenha',  v:'', t:'password' },
       { l:'Telefone', id:'mAgTel',    v:'', t:'text' },
+      { l:'UID Kwai (para a foto no painel)', id:'mAgKwaiUid', v:'', t:'text' },
       { l:'Observação',id:'mAgObs',  v:'', t:'text' },
     ];
     const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center" id="modalAgente">
@@ -7218,6 +7414,7 @@ class DimaiorAdmin extends HTMLElement {
       const login  = modal.querySelector('#mAgLogin')?.value.trim();
       const senha  = modal.querySelector('#mAgSenha')?.value.trim();
       const tel    = modal.querySelector('#mAgTel')?.value.trim();
+      const kwaiUid = (modal.querySelector('#mAgKwaiUid')?.value || '').replace(/^@+/, '').trim();
       const obs    = modal.querySelector('#mAgObs')?.value.trim();
       const ativo  = modal.querySelector('#mAgAtivo')?.checked;
       const erroEl = modal.querySelector('#mAgErro');
@@ -7227,9 +7424,9 @@ class DimaiorAdmin extends HTMLElement {
       if (!agente && senha.length < 6) { erroEl.textContent = 'Senha mínima de 6 caracteres'; return; }
       try {
         if (agente) {
-          await this._patch(`/admin/agentes/${agente.id}`, { nome, telefone: tel, ativo: ativo !== undefined ? ativo : agente.ativo, observacao: obs });
+          await this._patch(`/admin/agentes/${agente.id}`, { nome, telefone: tel, ativo: ativo !== undefined ? ativo : agente.ativo, observacao: obs, kwai_uid: kwaiUid });
         } else {
-          await this._post('/admin/agentes', { nome, login, senha, telefone: tel, observacao: obs });
+          await this._post('/admin/agentes', { nome, login, senha, telefone: tel, observacao: obs, kwai_uid: kwaiUid });
         }
         modal.remove(); this._toast(agente ? 'Agente atualizado!' : 'Agente criado!', 'ok');
         this._carregarAgentes();
