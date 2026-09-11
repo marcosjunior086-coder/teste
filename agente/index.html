@@ -1189,6 +1189,14 @@
           <div class="loading"><div class="spinner"></div></div>
         </div>
 
+        <div class="card" id="comissao-mes-card" style="margin-top:14px;display:none">
+          <div class="chart-hd">
+            <h3>Comissão por mês</h3>
+            <select id="sel-mes-comissao" style="background:var(--bg2);color:var(--txt);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px"></select>
+          </div>
+          <div id="comissao-mes-body"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+
         <div class="dash-split" id="dash-split" style="display:none">
           <div class="card">
             <div class="chart-hd">
@@ -1571,10 +1579,16 @@ window.addEventListener('DOMContentLoaded', () => {
   const token = getToken();
   if (token) {
     _token = token; _agente = getAgente();
-    // Valida sessão no servidor
+    // Valida sessão no servidor e atualiza os dados do agente (inclui a foto
+    // resolvida pelo kwai_uid — #1).
     api('/agente/me').then(r => {
-      if (r.ok) iniciarPainel();
-      else logout();
+      if (r.ok) {
+        if (r.agente) {
+          _agente = { ...(getAgente() || {}), ...r.agente };
+          try { localStorage.setItem(AGENTE_KEY, JSON.stringify(_agente)); } catch (_) {}
+        }
+        iniciarPainel();
+      } else logout();
     }).catch(logout);
   }
 });
@@ -2011,7 +2025,9 @@ async function carregarDashboard() {
     const primeiro = (ag.nome || '').trim().split(/\s+/)[0] || 'Agente';
     const iniciais = (ag.nome || 'A').trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
     const avEl = document.getElementById('dash-av');
-    const fotoS = fotoStreamerVinculada();
+    // #1 — foto do próprio agente (resolvida no backend pelo kwai_uid). Só cai
+    // na foto do painel do streamer no mesmo aparelho, e depois nas iniciais.
+    const fotoS = ag.foto || fotoStreamerVinculada();
     if (fotoS) {
       const img = new Image();
       img.alt = '';
@@ -2060,9 +2076,82 @@ async function carregarDashboard() {
       bindGraficoTabs();
       renderizarGrafico(_graficoDados);
     }
+
+    // #2 — comissão por mês (histórico). O backend /agente/comissao já aceita ?mes=YYYY-MM.
+    montarSeletorMesComissao(c);
   } catch (e) {
     container.innerHTML = `<div class="empty"><p>Erro ao carregar dashboard: ${e.message}</p></div>`;
   }
+}
+
+// #2 — seletor de mês da comissão (últimos 12 meses) + render do detalhe.
+let _comissaoMesInit = false;
+function montarSeletorMesComissao(comissaoAtual) {
+  const card = document.getElementById('comissao-mes-card');
+  const sel  = document.getElementById('sel-mes-comissao');
+  if (!card || !sel) return;
+  card.style.display = '';
+  if (!_comissaoMesInit) {
+    const hoje = new Date();
+    const opts = [];
+    for (let i = 0; i < 12; i++) {
+      const dt = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const val = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+      const lbl = dt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      opts.push(`<option value="${val}">${i === 0 ? lbl + ' (atual)' : lbl}</option>`);
+    }
+    sel.innerHTML = opts.join('');
+    sel.addEventListener('change', () => carregarComissaoMes(sel.value));
+    _comissaoMesInit = true;
+  }
+  // 1ª renderização: reaproveita o que o dashboard já buscou (mês atual)
+  renderComissaoMes(comissaoAtual);
+}
+
+async function carregarComissaoMes(mes) {
+  const body = document.getElementById('comissao-mes-body');
+  if (!body) return;
+  body.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+  try {
+    const c = await api('/agente/comissao?mes=' + encodeURIComponent(mes));
+    renderComissaoMes(c);
+  } catch (e) {
+    body.innerHTML = `<div class="empty"><p>Erro: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function renderComissaoMes(c) {
+  const body = document.getElementById('comissao-mes-body');
+  if (!body) return;
+  const com = (c && c.comissao) || {};
+  const tot = (c && c.totais) || {};
+  const streamers = (c && c.streamers) || [];
+  const regra = c && c.regra_aplicada ? esc(c.regra_aplicada.nome) : '—';
+  const linhas = streamers
+    .slice()
+    .sort((a, b) => (b.diamantes || 0) - (a.diamantes || 0))
+    .map(s => `<tr>
+      <td style="padding:8px 10px">${esc(s.streamer_nome || s.streamer_uid)}</td>
+      <td style="padding:8px 10px;text-align:right">${fmtNum(s.diamantes || 0)}</td>
+      <td style="padding:8px 10px;text-align:right">${s.dias_ativos || 0}d · ${Number(s.horas || 0).toFixed(1)}h</td>
+      <td style="padding:8px 10px;text-align:right">${Number((s.comissao && s.comissao.percentual) || 0)}%</td>
+      <td style="padding:8px 10px;text-align:right">${fmtBRL((s.comissao && s.comissao.brl) || 0)}</td>
+    </tr>`).join('');
+  body.innerHTML = `
+    <div class="scards" style="margin-bottom:12px">
+      ${scard({ k: 'Comissão do mês', v: fmtBRL(com.brl || 0), d: `${Number(com.percentual || 0)}% médio · ${fmtNum(com.koin || 0)} Koin`, ico: 'chart', icc: 'blue' })}
+      ${scard({ k: 'Diamantes no mês', v: fmtNum(tot.diamantes || 0), d: `${tot.dias_ativos || 0} dias · ${Number(tot.horas || 0).toFixed(1)}h`, ico: 'diamond', icc: 'gold' })}
+    </div>
+    <div class="rz-note" style="margin-bottom:10px">Meta aplicada: <b>${regra}</b></div>
+    ${streamers.length ? `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="color:var(--dim);text-align:left">
+        <th style="padding:8px 10px">Streamer</th>
+        <th style="padding:8px 10px;text-align:right">Diamantes</th>
+        <th style="padding:8px 10px;text-align:right">Atividade</th>
+        <th style="padding:8px 10px;text-align:right">%</th>
+        <th style="padding:8px 10px;text-align:right">Comissão</th>
+      </tr></thead><tbody>${linhas}</tbody></table></div>` : `<div class="empty"><p>Sem dados neste mês.</p></div>`}
+  `;
 }
 
 // Helpers do dashboard novo
