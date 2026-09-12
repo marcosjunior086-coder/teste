@@ -606,6 +606,14 @@ class DmaiorHomeWebpro extends HTMLElement {
       const pics = lives.filter(l => l.image).slice(0, 4);
       if (pics.length) {
         stack.innerHTML = pics.map(l => `<img src="${this._esc(l.image)}" alt="" loading="lazy">`).join('');
+        // Fallback: se a miniatura via weserv falhar (bloqueado por DNS/
+        // ad-block em alguns Android/Xiaomi), troca pra foto original do Kwai.
+        stack.querySelectorAll('img').forEach((img, i) => {
+          const raw = pics[i]?.imageRaw;
+          if (raw && raw !== pics[i].image) {
+            img.addEventListener('error', () => { img.src = raw; }, { once: true });
+          }
+        });
       }
     }
 
