@@ -869,7 +869,7 @@
                 <!-- ══════ LOGIN ══════ -->
                 <div id="vL" class="view auth-view">
                     <div class="card" style="text-align:center;">
-                        <img class="vlogo" src="https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png/v1/fill/w_320,h_98,al_c,q_90,enc_auto/dmaior_logo.png" alt="DMaior Agency" width="150" height="46" decoding="async">
+                        <img class="vlogo" src="assets/icons/dmaior-logo.png" alt="DMaior Agency" width="150" height="46" decoding="async">
                         <p class="raaj" style="font-size:1rem;color:var(--cyan);margin-bottom:26px;">Acesso do Streamer</p>
                         <div id="alL" class="al"></div>
                         <div class="ig"><label class="raaj">UID NUMERICO</label>
@@ -1202,7 +1202,7 @@
                                     <div class="v" id="cRecebido">R$ 0,00</div>
                                 </div>
                                 <div>
-                                    <div class="k"><img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" alt="pix"> Total sacado</div>
+                                    <div class="k"><img src="assets/icons/pix.webp" alt="pix"> Total sacado</div>
                                     <div class="v" id="cSacado">R$ 0,00</div>
                                 </div>
                             </div>
@@ -1221,7 +1221,7 @@
                         <!-- Formulário de saque (abre pelo botão acima) -->
                         <div class="saque-form" id="cSaqueForm" style="display:none;">
                             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                                <img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp"
+                                <img src="assets/icons/pix.webp"
                                      style="width:32px;height:32px;object-fit:contain;flex-shrink:0;" alt="pix">
                                 <span style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.85rem;color:var(--cyan);font-weight:700;letter-spacing:.06em;text-transform:uppercase;" id="cSaqueFormTitle">SOLICITAR SAQUE</span>
                             </div>
@@ -1868,7 +1868,7 @@
                         btnSaque.style.background = '#333';
                     } else {
                         btnSaque.disabled = false;
-                        btnSaque.innerHTML = `<img src="https://static.wixstatic.com/media/ac74b3_47887b03b957463eafa996b70580ec90~mv2.webp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0" alt="pix"> SOLICITAR SAQUE`;
+                        btnSaque.innerHTML = `<img src="assets/icons/pix.webp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0" alt="pix"> SOLICITAR SAQUE`;
                         btnSaque.style.background = 'var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4))';
                         const h3 = this.qs('#cSaqueForm h3');
                         if(h3) h3.textContent = 'SOLICITAR SAQUE';

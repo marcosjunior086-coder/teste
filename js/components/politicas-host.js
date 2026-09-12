@@ -323,7 +323,7 @@ class PoliticasHost extends HTMLElement {
             <div class="tab-content" id="tab-novos">
                 <div class="content-box">
                     <div class="box-title">
-                        <img src="https://static.wixstatic.com/media/ac74b3_7a0f84632cbe42169e17d7d60bd550a2~mv2.png/v1/crop/x_0,y_13,w_1146,h_1331/fill/w_68,h_79,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/melhada%20bronze_edited.png" alt="Bronze">
+                        <img src="assets/icons/medalha-bronze.png" alt="Bronze">
                         Novos Streamers
                     </div>
                     <div class="text-block"><p>Pagamento em Koins. <strong>100 koins = 1 USD</strong>.</p></div>
@@ -360,7 +360,7 @@ class PoliticasHost extends HTMLElement {
             <div class="tab-content" id="tab-cresc">
                 <div class="content-box">
                     <div class="box-title">
-                        <img src="https://static.wixstatic.com/media/ac74b3_bf3a48256e3b4bd3ab1f8e187e7baaf0~mv2.png/v1/crop/x_30,y_0,w_1133,h_1316/fill/w_68,h_79,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/medalha%20ouro_edited.png" alt="Ouro">
+                        <img src="assets/icons/medalha-ouro.png" alt="Ouro">
                         Em Crescimento
                     </div>
                     <table class="t-tarefas">
@@ -396,7 +396,7 @@ class PoliticasHost extends HTMLElement {
             <div class="tab-content" id="tab-pro">
                 <div class="content-box">
                     <div class="box-title">
-                        <img src="https://static.wixstatic.com/media/ac74b3_f0a3ffb2e43c462b909ace96f52522ad~mv2.png/v1/crop/x_0,y_4,w_1011,h_1175/fill/w_68,h_79,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/medalaha%20pro_edited.png" alt="Pro">
+                        <img src="assets/icons/medalha-pro.png" alt="Pro">
                         Streamer PRO
                     </div>
                     <table class="t-tarefas">
@@ -433,7 +433,7 @@ class PoliticasHost extends HTMLElement {
                     </table>
 
                     <div class="box-title" style="margin-top:24px;">
-                        <img src="https://static.wixstatic.com/media/ac74b3_f0a3ffb2e43c462b909ace96f52522ad~mv2.png/v1/crop/x_0,y_4,w_1011,h_1175/fill/w_68,h_79,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/medalaha%20pro_edited.png" alt="Pro">
+                        <img src="assets/icons/medalha-pro.png" alt="Pro">
                         Bônus Tarefa 2
                     </div>
                     <table class="t-horas" style="min-width: 100%; margin-bottom: 16px;">

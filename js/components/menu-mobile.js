@@ -91,7 +91,9 @@ class MenuMobileDMaior extends HTMLElement {
   }
 
   render() {
-    const URL_LOGO   = `https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png/v1/fill/w_320,h_98,al_c,q_90,enc_auto/dmaior_logo.png`;
+    // Hospedado localmente (era wixstatic) — em alguns Android/Xiaomi o DNS/
+    // ad-block do aparelho bloqueia static.wixstatic.com e a logo quebrava.
+    const URL_LOGO   = `assets/icons/dmaior-logo.png`;
     // Todos os ícones usam stroke="currentColor" — a cor é controlada por CSS via var(--dm-*)
     const SVG_MENU   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
     const SVG_CLOSE  = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;

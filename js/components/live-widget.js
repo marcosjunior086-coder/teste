@@ -819,6 +819,9 @@ class KwaiLiveWidget extends HTMLElement {
         url:       p.streamer.url,
         // foto do hero já redimensionada (WebP ~440px) — evita o JPEG 200px cru
         image:     this._thumb(this._safeUrl(p.streamer.image) || '', 440),
+        // original, sem passar pelo weserv — usado como fallback se o proxy
+        // falhar (bloqueado por algum DNS/ad-block, visto em alguns Xiaomi)
+        imageRaw:  this._safeUrl(p.streamer.image) || '',
         viewCount: (typeof p.streamer.viewCount === 'number') ? p.streamer.viewCount : null,
         caption:   p.streamer.caption || '',
         ready:     !!p.streamer.playUrl,
@@ -973,6 +976,18 @@ class KwaiLiveWidget extends HTMLElement {
         <div class="live-badge">LIVE</div>
       </div>
       <div class="live-name">${safeName}</div>`;
+
+    // Se a miniatura via weserv falhar (proxy bloqueado por DNS/ad-block em
+    // alguns Android/Xiaomi — visto em produção), troca pra foto original do
+    // Kwai em vez de deixar o ícone de imagem quebrada.
+    if (imgSrc !== rawImg) {
+      const imgEl = card.querySelector('.avatar-circle img');
+      const vidEl = card.querySelector('.avatar-circle video');
+      imgEl?.addEventListener('error', () => {
+        imgEl.src = rawImg;
+        if (vidEl) vidEl.poster = rawImg;
+      }, { once: true });
+    }
 
     card.addEventListener('click', () => this.openModal(streamer.url));
     row.appendChild(card);

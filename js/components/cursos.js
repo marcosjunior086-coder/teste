@@ -4,7 +4,7 @@ const DMAIOR_COURSES = [
   {
     id: 'guia-streamer',
     title: 'Guia de Streamer',
-    coverImage: 'https://static.wixstatic.com/media/ac74b3_eb0e517db9c34147b3f7b9ae7e1e2e4c~mv2.png',
+    coverImage: 'assets/icons/cursos-cover.png',
     coverLabel: 'Guia de Streamers',
     duration: '1h',
     deadline: '1 dia',

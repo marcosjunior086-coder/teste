@@ -46,7 +46,9 @@ class MenuDesktopDMaior extends HTMLElement {
   }
 
   render() {
-    const URL_LOGO   = `https://static.wixstatic.com/media/ac74b3_a9a577806ac34acbb663f4cd05e8c70f~mv2.png`;
+    // Local (era wixstatic original 3785x1155 sem redimensionar pra exibir a
+    // 38px de altura — 129 KiB à toa; também bloqueado em alguns Xiaomi).
+    const URL_LOGO   = `assets/icons/dmaior-logo.png`;
     const SVG_CHEV   = `<svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
     const SVG_HOME   = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
     const SVG_FOLDER = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;

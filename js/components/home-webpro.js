@@ -724,6 +724,14 @@ class DmaiorHomeWebpro extends HTMLElement {
         v.muted = !v.muted;
         active.classList.toggle('sound', !v.muted);
       };
+      // Fallback: se a foto redimensionada (weserv) falhar — proxy bloqueado
+      // por DNS/ad-block em alguns Android/Xiaomi — troca pra foto original
+      // do Kwai em vez de deixar o ícone de imagem quebrada.
+      if (live.imageRaw && live.imageRaw !== live.image) {
+        active.querySelectorAll('img').forEach((img) => {
+          img.addEventListener('error', () => { img.src = live.imageRaw; }, { once: true });
+        });
+      }
     } else {
       const vc = active.querySelector('.hf-vc');
       if (vc) vc.textContent = this._viewersText(live.viewCount);
