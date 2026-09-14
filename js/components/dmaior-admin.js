@@ -1231,9 +1231,11 @@ class DimaiorAdmin extends HTMLElement {
           </div>
         </div>`;
       el.insertAdjacentHTML('afterend',`<div class="box" id="boxUltimosImpulsos" style="margin-top:16px">
-        <div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Últimos Impulsionamentos</div></div>
-        <div class="met-table-wrap"><table><thead><tr><th>Streamer</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(linhaDesktop).join('')}</tbody></table></div>
-        <div class="met-mobile-only">${ultimos.map(cardMobile).join('')}</div>
+        <div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Impulsionamentos do Mês</div><span style="font-size:11px;color:var(--t3)">${ultimos.length} no total</span></div>
+        <div class="met-scroll">
+          <div class="met-table-wrap"><table><thead><tr><th>Streamer</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(linhaDesktop).join('')}</tbody></table></div>
+          <div class="met-mobile-only">${ultimos.map(cardMobile).join('')}</div>
+        </div>
       </div>`);
       const boxU=s.getElementById('boxUltimosImpulsos');
       boxU?.querySelectorAll('.met-preview').forEach(p=>p.addEventListener('click',()=>p.closest('.met-item')?.classList.toggle('open')));
@@ -4949,9 +4951,15 @@ class DimaiorAdmin extends HTMLElement {
       .rank-mobile-only{display:block !important}
     }
     /* ── Métricas (Últimos Impulsionamentos): tabela desktop / accordion mobile ── */
+    /* Card com altura travada + scroll interno — o mês inteiro pode ter
+       centenas de linhas, então em vez do card crescer sem fim, só a lista
+       rola por dentro (mesmo padrão de altura fixa já usado em .ag-kwai-streamers). */
+    .met-scroll{max-height:520px;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--brddim)}
     .met-table-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
     .met-table-wrap table{min-width:640px;width:100%}
+    .met-table-wrap thead th{position:sticky;top:0;background:var(--panel-solid);z-index:1;box-shadow:0 1px 0 var(--brddim)}
     .met-mobile-only{display:none !important}
+    @media(max-width:700px){.met-scroll{max-height:min(60vh,520px)}}
     .met-item{border-bottom:1px solid var(--brddim)}.met-item:last-child{border-bottom:none}
     .met-preview{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:background .15s}
     @media(hover:hover){.met-preview:hover{background:var(--cyan-d)}}
