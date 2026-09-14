@@ -1200,7 +1200,63 @@ class DimaiorAdmin extends HTMLElement {
       <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${c.com_erro}</div><div class="dc2-lbl">Com Erro</div></div>`;
     const ultimos=d.ultimos||[];
     s.getElementById('boxUltimosImpulsos')?.remove();
-    if(ultimos.length)el.insertAdjacentHTML('afterend',`<div class="box" id="boxUltimosImpulsos" style="margin-top:16px"><div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Últimos Impulsionamentos</div></div><table><thead><tr><th>UID</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}><td style="font-size:11px">${this._esc(u.uid_solicitante||'—')}${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:2px" title="A live desse link pertence a outro UID">⚠ live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
+    s.getElementById('boxRankingMesImpulso')?.remove();
+    if(ultimos.length){
+      const linhaDesktop=u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}>
+          <td><div style="display:flex;align-items:center;gap:8px;min-width:0">${this._avatar(u.foto_streamer,u.nome_streamer||u.uid_solicitante,'av')}<div style="min-width:0"><div style="font-size:12px;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${this._esc(u.nome_streamer||u.uid_solicitante||'—')}</div><div style="font-size:10px;color:var(--t3)">${this._esc(u.uid_solicitante||'—')}</div></div></div>${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:4px" title="A live desse link pertence a outro UID">⚠ live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td>
+          <td style="font-size:11px;max-width:220px"><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-link">${this._esc(u.kwai_link||'—')}</a></td>
+          <td>${this._esc(u.tempo_escolhido||'—')}</td>
+          <td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td>
+          <td style="white-space:nowrap">${this._fdt(u.created_at)}</td>
+        </tr>`;
+      const cardMobile=(u,i)=>`<div class="met-item" data-met-idx="${i}">
+          <div class="met-preview">
+            <div class="met-av">${this._avatar(u.foto_streamer,u.nome_streamer||u.uid_solicitante,'av')}</div>
+            <div class="met-info">
+              <div class="met-nome">${this._esc(u.nome_streamer||u.uid_solicitante||'—')}</div>
+              <div class="met-uid">${this._esc(u.uid_solicitante||'—')}</div>
+            </div>
+            <div class="met-right">
+              <span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span>
+              <span class="met-data">${this._fdt(u.created_at)}</span>
+            </div>
+            <span class="met-chevron">${this._ico('down',12)}</span>
+          </div>
+          <div class="met-body">
+            ${u.uid_divergente?`<div style="color:#f87171;font-size:11px;margin-bottom:6px">⚠ a live desse link pertence a outro UID: ${this._esc(u.uid_divergente)}</div>`:''}
+            <div class="met-body-grid">
+              <div class="met-cel"><div class="met-lbl">Link<button class="btn-copy-uid met-copy-link" data-copy="${this._esc(u.kwai_link||'')}" title="Copiar link">${this._ico('clipboard',11)}</button></div><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-val met-link">${this._esc(u.kwai_link||'—')}</a></div>
+              <div class="met-cel"><div class="met-lbl">Tempo</div><div class="met-val">${this._esc(u.tempo_escolhido||'—')}</div></div>
+            </div>
+          </div>
+        </div>`;
+      el.insertAdjacentHTML('afterend',`<div class="box" id="boxUltimosImpulsos" style="margin-top:16px">
+        <div class="bhead"><div class="btitulo">${this._ico('bolt',14)} Últimos Impulsionamentos</div></div>
+        <div class="met-table-wrap"><table><thead><tr><th>Streamer</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${ultimos.map(linhaDesktop).join('')}</tbody></table></div>
+        <div class="met-mobile-only">${ultimos.map(cardMobile).join('')}</div>
+      </div>`);
+      const boxU=s.getElementById('boxUltimosImpulsos');
+      boxU?.querySelectorAll('.met-preview').forEach(p=>p.addEventListener('click',()=>p.closest('.met-item')?.classList.toggle('open')));
+      boxU?.querySelectorAll('.met-copy-link').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();navigator.clipboard?.writeText(btn.dataset.copy||'').then(()=>this._toast('Link copiado!')).catch(()=>this._toast('Não foi possível copiar','err'));}));
+    }
+    const rankingMes=d.ranking_mes||[];
+    if(rankingMes.length){
+      const medalCor=pos=>pos===1?'var(--gold)':pos===2?'#94a3b8':pos===3?'#a86c31':'var(--t3)';
+      el.insertAdjacentHTML('afterend',`<div class="box" id="boxRankingMesImpulso" style="margin-top:16px">
+        <div class="bhead"><div class="btitulo">${this._ico('trophy',14)} Rank de Uso do Impulso — Mês Atual</div></div>
+        <div class="rank-table-wrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="text-align:left;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:1px"><th style="padding:8px">#</th><th></th><th>Streamer</th><th>UID</th><th style="text-align:right;padding-right:14px">Boosts no mês</th></tr></thead>
+          <tbody>${rankingMes.map((r,i)=>`<tr style="border-top:1px solid var(--brddim)">
+            <td style="padding:8px;color:${medalCor(i+1)};font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${i+1}</td>
+            <td style="padding:4px">${this._avatar(r.foto,r.nome)}</td>
+            <td style="color:var(--t1)">${this._esc(r.nome||r.uid)}</td>
+            <td style="color:var(--t3);font-size:11px">${this._esc(r.uid)}</td>
+            <td style="text-align:right;padding-right:14px;font-weight:700;color:var(--cyan)">${r.total}</td>
+          </tr>`).join('')}</tbody>
+        </table></div>
+        <div class="rank-mobile-only">${rankingMes.map((r,i)=>`<div class="rk-item"><div class="rk-preview" style="cursor:default"><span class="rk-pos" style="color:${medalCor(i+1)}">${i+1}</span><div class="rk-av">${this._avatar(r.foto,r.nome)}</div><div class="rk-info"><div class="rk-nome">${this._esc(r.nome||r.uid)}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">${this._esc(r.uid)}</div></div><div class="rk-right"><div class="rk-diam" style="color:var(--cyan)">${r.total} boosts</div></div></div></div>`).join('')}</div>
+      </div>`);
+    }
   }
   async _carregarRecrutamento(){
     const s=this.shadowRoot;s.getElementById('tbRec').innerHTML=this._loading();
@@ -4868,7 +4924,15 @@ class DimaiorAdmin extends HTMLElement {
       .ph-acc-grid{grid-template-columns:1fr 1fr;gap:6px;}
       .ph-acc-val{font-size:13px;}
 
-      /* ── Histórico: tabela desktop / accordion mobile ── */
+    /* Fecha aqui o @media "Base" mais cedo de propósito: os blocos de
+       Agentes (locais e Kwai) abaixo tinham ficado presos dentro dele por
+       engano, o que fazia o "table-wrap"/"mobile-only" nunca alternar
+       certo no desktop (Viram os dois ao mesmo tempo, sem estilo). Cada
+       um já tem seu próprio @media interno pra alternar sozinho. O mesmo
+       engano prendia Histórico e Ranking/Diário logo abaixo — movidos
+       pra cá por corrigir o mesmo bug (tabela + accordion juntos no desktop). */
+    }
+    /* ── Histórico: tabela desktop / accordion mobile ── */
     .hist-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block}
     .hist-table-wrap table{min-width:520px;width:100%}
     .hist-mobile-only{display:none !important}
@@ -4884,11 +4948,29 @@ class DimaiorAdmin extends HTMLElement {
       .rank-table-wrap{display:none !important}
       .rank-mobile-only{display:block !important}
     }
-    /* Fecha aqui o @media "Base" mais cedo de propósito: os blocos de
-       Agentes (locais e Kwai) abaixo tinham ficado presos dentro dele por
-       engano, o que fazia o "table-wrap"/"mobile-only" nunca alternar
-       certo no desktop (Viram os dois ao mesmo tempo, sem estilo). Cada
-       um já tem seu próprio @media interno pra alternar sozinho. */
+    /* ── Métricas (Últimos Impulsionamentos): tabela desktop / accordion mobile ── */
+    .met-table-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .met-table-wrap table{min-width:640px;width:100%}
+    .met-mobile-only{display:none !important}
+    .met-item{border-bottom:1px solid var(--brddim)}.met-item:last-child{border-bottom:none}
+    .met-preview{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:background .15s}
+    @media(hover:hover){.met-preview:hover{background:var(--cyan-d)}}
+    .met-av{flex-shrink:0}
+    .met-info{flex:1;min-width:0}
+    .met-nome{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .met-uid{font-size:10px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .met-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+    .met-data{font-size:10px;color:var(--t3)}
+    .met-chevron{flex-shrink:0;color:var(--t3);transition:transform .2s;margin-left:2px}.met-item.open .met-chevron{transform:rotate(180deg)}
+    .met-body{display:none;padding:0 14px 12px;border-top:1px solid var(--brddim)}.met-item.open .met-body{display:block}
+    .met-body-grid{display:grid;gap:8px;margin-top:10px}
+    .met-cel{background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:var(--rs);padding:8px 10px}
+    .met-lbl{font-size:9px;color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+    .met-val{font-size:12px;color:var(--t1);word-break:break-all}
+    .met-link{color:var(--cyan);word-break:break-all}
+    @media(max-width:700px){
+      .met-table-wrap{display:none !important}
+      .met-mobile-only{display:block !important}
     }
     /* ── Agentes locais: tabela desktop / cards mobile ── */
     .ag-local-table-wrap{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
