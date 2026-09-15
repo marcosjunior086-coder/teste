@@ -478,7 +478,15 @@ class DimaiorAdmin extends HTMLElement {
           <div class="btitulo">${this._ico('bolt',14)} Acesso Rápido</div>
         </div>
         <div class="qa-lista" id="qaLista"></div>
+      </div>
+      <div class="box" id="dashSubsBox">
+        <div class="bhead">
+          <div class="btitulo">${this._ico('users',14)} Sub-agências (Kwai)</div>
+          <button class="btn btn-o btn-sm" id="btnCarregarDashSubs">${this._ico('refresh',12)} Carregar</button>
+        </div>
+        <div id="dashSubsArea" style="padding:14px;font-size:12px;color:var(--t3)">Diamantes e streamers ativos do mês, por sub-agência + total geral (principal + subs). Consulta direto na Kwai — pode levar alguns segundos.</div>
       </div>`;
+    s.getElementById('btnCarregarDashSubs')?.addEventListener('click',()=>this._carregarDashSubs());
 
     const ql=s.getElementById('qaLista');
     qas.forEach(q=>{
@@ -510,6 +518,40 @@ class DimaiorAdmin extends HTMLElement {
         this.shadowRoot.getElementById('btnDashLiveConfig')?.click();
       });
     });
+  }
+
+  // Resultado do mês por sub-agência (Kwai) + total geral (principal + subs).
+  // Consulta sob demanda (botão "Carregar") — não entra no carregamento
+  // automático do Dashboard porque bate direto na Kwai paginando member/list
+  // por org, pode levar alguns segundos.
+  async _carregarDashSubs(){
+    const s=this.shadowRoot;
+    const area=s.getElementById('dashSubsArea');
+    const btn=s.getElementById('btnCarregarDashSubs');
+    if(!area)return;
+    if(btn)btn.disabled=true;
+    area.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/dashboard/subs');
+    if(btn)btn.disabled=false;
+    if(!d?.ok){area.innerHTML=this._empty('warning',d?.erro||'Erro ao buscar sub-agências');return;}
+    const orgs=d.por_org||[];
+    if(!orgs.length){area.innerHTML=this._empty('users','Nenhuma sub-agência configurada (Config > IDs das sub-agências)');return;}
+    const linhas=orgs.map(o=>`
+      <tr>
+        <td>${this._esc(o.nome)}${o.kwai_id?` <span style="color:var(--t3);font-size:11px">(${this._esc(o.kwai_id)})</span>`:''}</td>
+        <td style="text-align:right">${this._num(o.streamers_ativos_mes)}</td>
+        <td style="text-align:right;color:var(--cyan);font-weight:700">${this._num(o.diamantes_mes)} 💎</td>
+      </tr>`).join('');
+    area.innerHTML=`
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Período: ${this._esc(d.periodo||'')}</div>
+      <table class="tb" style="width:100%">
+        <thead><tr><th>Org</th><th style="text-align:right">Streamers ativos</th><th style="text-align:right">Diamantes</th></tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--brd);font-weight:700">
+        <span>Total geral (principal + subs)</span>
+        <span style="color:var(--cyan)">${this._num(d.total_geral_diamantes||0)} 💎 · ${this._num(d.total_geral_streamers||0)} streamers</span>
+      </div>`;
   }
 
   async _carregarLives(){
