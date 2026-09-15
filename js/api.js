@@ -253,8 +253,8 @@ window.DmaiorAPI = {
       return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/buscar-perfil', { uid });
     },
     /** Envia candidatura completa com perfil confirmado. */
-    async enviar({ uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite }) {
-      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite });
+    async enviar({ uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite, maior_idade }) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite, maior_idade });
     },
     /** Consulta status pelo protocolo gerado no envio. */
     async status(protocolo) {
