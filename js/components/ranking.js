@@ -37,6 +37,10 @@ class RankingDmaior extends HTMLElement {
     this.prevRows      = [];
     this.prizesD       = [];
     this.prizesH       = [];
+    // Requisitos mensais. Manter em sincronia com REQ_PLATAFORMA/REQ_AGENCIA de dmaior-app.js.
+    //   plataforma = bônus da tarefa de diamantes da plataforma
+    //   agencia    = premiações de incentivo da agência (rankings com prêmio em dinheiro)
+    this.REQ = { plataforma: { dias: 20, horas: 40 }, agencia: { dias: 23, horas: 60 } };
     this.cache         = {};
     this.timerInterval = null;
     this.liveSet       = new Set();
@@ -334,6 +338,13 @@ class RankingDmaior extends HTMLElement {
       .panel-divider{height:1px;background:var(--border-dim);margin:14px 0}
       #rule-text{font-size:0.75rem;color:var(--text-sub);line-height:1.5;text-align:left;padding:0;margin-bottom:0}
       #rule-text b{color:var(--azul)}
+      /* ── Requisitos: plataforma × agência ── */
+      #rule-req{font-size:0.75rem;color:var(--text-sub);line-height:1.5;text-align:left}
+      #rule-req b{color:var(--azul)}
+      #rule-req .req-blk{margin-bottom:11px}
+      #rule-req .req-h{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:0.66rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:var(--text-muted);margin-bottom:2px}
+      #rule-req .req-h.ag{color:var(--gold)}
+      #rule-req .req-def{font-size:0.7rem;color:var(--text-muted)}
       .btn-refresh{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px}
       .btn-refresh:hover{border-color:var(--azul);color:var(--azul);background:var(--border-dim)}
       .btn-refresh:disabled{opacity:0.35;cursor:not-allowed}
@@ -498,6 +509,8 @@ class RankingDmaior extends HTMLElement {
           <div class="panel-divider"></div>
           <div id="rule-text"></div>
           <div class="panel-divider"></div>
+          <div id="rule-req"></div>
+          <div class="panel-divider"></div>
           <button id="btn-refresh" class="btn-refresh">
             <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
             ATUALIZAR
@@ -601,6 +614,27 @@ class RankingDmaior extends HTMLElement {
     el.innerHTML = this.currentTab === 'diamonds'
       ? 'Somente streamers com <b>1.000 diamantes</b> ou mais são exibidos no ranking.'
       : 'Horas em <b>Live de Áudio</b> não são contabilizadas no ranking de horas.';
+    const req = this.shadowRoot.getElementById('rule-req');
+    if (req) req.innerHTML = this.requisitosHtml();
+  }
+
+  // Regras completas: requisitos da plataforma e da agência lado a lado, cada um
+  // com o seu título, pra ninguém confundir 20/40 com 23/60.
+  requisitosHtml() {
+    const { plataforma: P, agencia: A } = this.REQ;
+    return `
+      <div class="req-blk">
+        <div class="req-h">Bônus da plataforma</div>
+        Tarefa de diamantes da plataforma: exige <b>${P.dias} dias válidos</b> e <b>${P.horas} horas válidas</b> no mês, além de cumprir a meta correspondente.
+      </div>
+      <div class="req-blk">
+        <div class="req-h ag">Premiação da agência</div>
+        Vale para os rankings com premiação em dinheiro, nas posições premiadas de cada um: exige <b>${A.dias} dias válidos</b> e <b>${A.horas} horas válidas</b> no mês.
+      </div>
+      <div class="req-blk">
+        Estar entre os primeiros colocados <b>não garante</b>, por si só, a premiação da agência. É preciso cumprir os dias e as horas exigidos <b>dentro do mesmo mês</b>.
+      </div>
+      <div class="req-def"><b>Dia válido</b> = dia com pelo menos 1 hora de live.</div>`;
   }
 
   startTimer(periodStr) {

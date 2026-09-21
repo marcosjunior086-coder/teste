@@ -10,6 +10,11 @@
         this.chartMetrica   = 'diamantes';
         this.chartPeriodo   = 'semanal';
         this.mesSelecionado = 'atual';
+        // Requisitos mensais. Manter em sincronia com REQ de ranking.js.
+        //   PLATAFORMA = bônus da tarefa de diamantes da plataforma
+        //   AGENCIA    = premiações de incentivo da agência (rankings com prêmio em dinheiro)
+        this.REQ_PLATAFORMA = { dias: 20, horas: 40 };
+        this.REQ_AGENCIA    = { dias: 23, horas: 60 };
     }
 
     connectedCallback() {
@@ -210,6 +215,7 @@
     svgInfo()    { return `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`; }
     svgRank()    { return `<svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>`; }
     svgPk()      { return `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`; }
+    svgRules()   { return `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
     svgTicket()  { return `<svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/></svg>`; }
     svgFrame()   { return `<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v2.17A3 3 0 0 0 16.17 5H19zM5 5h2.83A3 3 0 0 0 5 7.83V5zm0 14v-2.83A3 3 0 0 0 7.83 19H5zm14 0h-2.83A3 3 0 0 0 19 16.17V19zM9 19a5 5 0 0 1 10-5V10a5 5 0 0 1-5-5h-4a5 5 0 0 1-5 5v4a5 5 0 0 1 4 5z"/></svg>`; }
@@ -429,6 +435,18 @@
             .metas-bar:last-child{margin-bottom:0;}
             .metas-bar .mb-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:7px;}
             .metas-bar .mb-top span:last-child{color:var(--muted);font-size:.72rem;}
+            /* Selo do tipo de requisito (plataforma × agência) e texto de apoio dos cards */
+            .req-tag{flex:none;font-size:.6rem;font-weight:700;font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--muted);}
+            .req-tag.ag{color:var(--gold);border-color:var(--gold);}
+            .req-sub{font-size:.74rem;color:var(--muted);line-height:1.5;margin:-4px 0 14px;}
+            /* Premiação da agência: posição em cada ranking premiado + progresso 23/60 */
+            .ag-rank{padding:11px 14px;border-radius:14px;border:1px solid var(--gold);margin-bottom:10px;}
+            .ag-rank .lbl{display:block;font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-family:var(--dm-font-title,'Rajdhani',sans-serif);margin-bottom:3px;}
+            .ag-rank .st{font-size:.8rem;color:var(--text);line-height:1.5;}
+            .ag-rank .st b{color:var(--gold);}
+            .ag-msg{font-size:.8rem;line-height:1.55;color:var(--text);margin:4px 0 16px;}
+            .ag-msg b{color:var(--gold);}
+            .ag-msg.done b{color:var(--green);}
 
             .hist-row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--border);}
             .hist-row:last-child{border-bottom:none;}
@@ -834,6 +852,7 @@
                     <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
                     <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
+                    <button class="nit" id="nRegras">${this.svgRules()} <span data-i18n="rules">REGRAS</span></button>
                     <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
                     <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
                     <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
@@ -1027,17 +1046,32 @@
                         <div class="dstat">
                             <span class="dk">${this.svgClock()} Horas de live</span>
                             <span class="dv" id="dHoras">0h</span>
-                            <span class="dsub" id="dHorasMeta">de 40h · 0%</span>
+                            <span class="dsub" id="dHorasMeta">Plataforma: ${this.REQ_PLATAFORMA.horas}h · 0%</span>
                         </div>
                         <div class="dstat">
                             <span class="dk">${this.svgCal()} Dias de live</span>
                             <span class="dv" id="dDias">0</span>
-                            <span class="dsub" id="dDiasMeta">de 20 dias · 0%</span>
+                            <span class="dsub" id="dDiasMeta">Plataforma: ${this.REQ_PLATAFORMA.dias} dias · 0%</span>
                         </div>
                     </div>
 
                     <div class="dwide">
                         <div class="dcol-main">
+                            <!-- Premiação da agência: posição nos rankings premiados + progresso dos requisitos (só aparece pra quem está numa posição premiada) -->
+                            <div class="card" id="agCard" style="display:none;">
+                                <h3 class="dcard-h">Premiação da agência <span class="req-tag ag">${this.REQ_AGENCIA.dias} dias · ${this.REQ_AGENCIA.horas} h</span></h3>
+                                <div id="agRanks"></div>
+                                <p class="ag-msg" id="agMsg"></p>
+                                <div class="metas-bar">
+                                    <div class="mb-top"><span>Dias válidos</span><span id="agDias">0 / ${this.REQ_AGENCIA.dias} dias</span></div>
+                                    <div class="prog"><div class="progf" id="agPD" style="width:0%"></div></div>
+                                </div>
+                                <div class="metas-bar">
+                                    <div class="mb-top"><span>Horas válidas</span><span id="agHoras">0 / ${this.REQ_AGENCIA.horas} h</span></div>
+                                    <div class="prog"><div class="progf" id="agPH" style="width:0%"></div></div>
+                                </div>
+                            </div>
+
                             <!-- Evolução diária -->
                             <div class="card">
                                 <div class="ctogs">
@@ -1064,15 +1098,16 @@
                                 </div>
                             </div>
 
-                            <!-- Metas do mês -->
+                            <!-- Bônus da plataforma (metas de 20 dias / 40 horas — separado da premiação da agência) -->
                             <div class="card">
-                                <h3 class="dcard-h">Metas do mês</h3>
+                                <h3 class="dcard-h">Bônus da plataforma <span class="req-tag">${this.REQ_PLATAFORMA.dias} dias · ${this.REQ_PLATAFORMA.horas} h</span></h3>
+                                <p class="req-sub">Tarefa de diamantes da plataforma: exige ${this.REQ_PLATAFORMA.dias} dias válidos e ${this.REQ_PLATAFORMA.horas} horas válidas no mês, além de cumprir a meta correspondente.</p>
                                 <div class="metas-bar">
-                                    <div class="mb-top"><span>Horas de live</span><span id="mHoras">0 / 40 h</span></div>
+                                    <div class="mb-top"><span>Horas válidas</span><span id="mHoras">0 / ${this.REQ_PLATAFORMA.horas} h</span></div>
                                     <div class="prog"><div class="progf" id="pH" style="width:0%"></div></div>
                                 </div>
                                 <div class="metas-bar">
-                                    <div class="mb-top"><span>Dias válidos</span><span id="mDias">0 / 20 dias</span></div>
+                                    <div class="mb-top"><span>Dias válidos</span><span id="mDias">0 / ${this.REQ_PLATAFORMA.dias} dias</span></div>
                                     <div class="prog"><div class="progf" id="pD" style="width:0%"></div></div>
                                 </div>
                             </div>
@@ -1288,6 +1323,11 @@
                 <div id="vTickets" class="view" style="width:100%;">
                     <button class="iframe-back" id="btnBackTickets">${this.svgBack()} VOLTAR AO PAINEL</button>
                     <dmaior-tickets id="ticketsEl" worker-url="https://dashboard.agencydmaior.com.br"></dmaior-tickets>
+                </div>
+
+                <!-- ══════ REGRAS E DIRETRIZES (componente nativo, conteúdo estático) ══════ -->
+                <div id="vRegras" class="view" style="width:100%;">
+                    <regras-dmaior id="regrasEl"></regras-dmaior>
                 </div>
 
                 <!-- Gerador local de molduras, carregado somente após autenticação -->
@@ -1542,6 +1582,7 @@
         this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
         this.qs('#nPk').addEventListener('click',()=>this.goPk());
         this.qs('#btnBackPk')?.addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
+        this.qs('#nRegras').addEventListener('click',()=>this.goRegras());
         this.qs('#nTickets').addEventListener('click',()=>this.goTickets());
         this.qs('#btnBackTickets')?.addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#nMore').addEventListener('click',()=>{
@@ -1712,18 +1753,20 @@
             this.qs('#dDiaUsd').textContent=`≈ $ ${usd} USD`;
             this.qs('#dHrVid').textContent=t.horas_video||'00:00';
             this.qs('#dHrAud').textContent=t.horas_audio||'00:00';
+            const rp=this.REQ_PLATAFORMA;
             const hrD=this.h2dec(t.horas_totais);
-            const pHr=Math.min((hrD/40)*100,100);
+            const pHr=Math.min((hrD/rp.horas)*100,100);
             this.qs('#dHoras').textContent=`${hrD.toFixed(1)}h`;
-            this.qs('#dHorasMeta').textContent=`de 40h · ${pHr.toFixed(0)}%`;
-            this.qs('#mHoras').textContent=`${hrD.toFixed(1)} / 40 h`;
+            this.qs('#dHorasMeta').textContent=`Plataforma: ${rp.horas}h · ${pHr.toFixed(0)}%`;
+            this.qs('#mHoras').textContent=`${hrD.toFixed(1)} / ${rp.horas} h`;
             this.qs('#pH').style.width=`${pHr}%`;
             const dias=Number(t.dias_validos||0);
-            const pDia=Math.min((dias/20)*100,100);
+            const pDia=Math.min((dias/rp.dias)*100,100);
             this.qs('#dDias').textContent=dias;
-            this.qs('#dDiasMeta').textContent=`de 20 dias · ${pDia.toFixed(0)}%`;
-            this.qs('#mDias').textContent=`${dias} / 20 dias`;
+            this.qs('#dDiasMeta').textContent=`Plataforma: ${rp.dias} dias · ${pDia.toFixed(0)}%`;
+            this.qs('#mDias').textContent=`${dias} / ${rp.dias} dias`;
             this.qs('#pD').style.width=`${pDia}%`;
+            this.carregarPremiacaoAgencia(t); // sem await: o painel não espera o ranking pra abrir
             this.qs('#sEmail').value=p.email||this.sessionEmail;
             this.qs('#sName').value=p.nome||'';
             this.qs('#sWpp').value=p.whatsapp||'';
@@ -1739,6 +1782,78 @@
             if(hl) hl.innerHTML=`<p class="txn-empty" style="color:var(--red)">Erro ao carregar dados: ${e.message}</p>`;
         }
         finally{ if(btn){ btn.disabled=false; btn.innerHTML=`<span>${this.svgRefresh()}</span> ATUALIZAR`; } }
+    }
+
+    // ── Premiação da agência ───────────────────────────────────────────
+    // Card só pra quem está numa posição premiada de algum ranking com prêmio em
+    // dinheiro: mostra a posição em cada um desses rankings + progresso dos requisitos
+    // da agência (23 dias / 60 horas válidas). Quem está fora das posições premiadas
+    // (ou nem aparece no ranking) não vê nada da agência — só as metas da plataforma.
+    // Usa os mesmos endpoints públicos da aba Ranking (/api/ranking/v2 e /premios),
+    // então a posição bate com a que ele vê lá; as posições premiadas vêm do cadastro
+    // de prêmios (não é fixo top 3). Qualquer falha esconde o card em vez de mostrar
+    // dado errado.
+    async carregarPremiacaoAgencia(t){
+        const card=this.qs('#agCard'); if(!card) return;
+        try{
+            const [rk,pr]=await Promise.all([window.DmaiorAPI.rank.getRanking(),window.DmaiorAPI.rank.getPrizes()]);
+            const premiadas={
+                diamantes:(pr?.premiosD||[]).filter(p=>p.valor>0).map(p=>Number(p.posicao)),
+                horas:(pr?.premiosH||[]).filter(p=>p.valor>0).map(p=>Number(p.posicao)),
+            };
+
+            // Mesma regra do ranking.js: Diamantes só a partir de 1.000; Horas conta só vídeo.
+            const uid=String(this.sessionUid);
+            const linhas=(rk?.streamers||[]).map(s=>({uid:String(s.kwai_uid),diamantes:Number(s.diamantes_acumulados)||0,min:this._hMin(s.horas_video)}));
+            const listas={
+                diamantes:linhas.filter(l=>l.diamantes>=1000).sort((a,b)=>b.diamantes-a.diamantes),
+                horas:[...linhas].sort((a,b)=>b.min-a.min),
+            };
+            const emPosicaoPremiada=[['diamantes','Diamantes'],['horas','Horas']]
+                .map(([k,nome])=>({nome,pos:listas[k].findIndex(l=>l.uid===uid)+1,premiadas:premiadas[k]})) // pos 0 = fora do ranking
+                .filter(r=>r.pos>0&&r.premiadas.includes(r.pos));
+            if(!emPosicaoPremiada.length){ card.style.display='none'; return; }
+
+            this.qs('#agRanks').innerHTML=emPosicaoPremiada.map(r=>
+                `<div class="ag-rank"><span class="lbl">Ranking de ${r.nome}</span><span class="st">Você está em <b>${r.pos}º lugar</b> e concorrendo à premiação da agência.</span></div>`
+            ).join('');
+
+            // Requisitos: trabalha em minutos inteiros pra não errar arredondamento de horas.
+            const R=this.REQ_AGENCIA;
+            const dias=Number(t.dias_validos||0);
+            const minTot=this._hMin(t.horas_totais);
+            const faltaDias=Math.max(0,R.dias-dias);
+            const faltaMin=Math.max(0,R.horas*60-minTot);
+            const msg=this.qs('#agMsg');
+            if(!faltaDias&&!faltaMin){
+                msg.classList.add('done');
+                msg.innerHTML=`Você cumpriu os <b>${R.dias} dias válidos</b> e as <b>${R.horas} horas válidas</b> deste mês! Para receber a premiação, também é necessário encerrar o mês em uma posição premiada.`;
+            }else{
+                msg.classList.remove('done');
+                const faltas=[];
+                if(faltaDias) faltas.push(`<b>${faltaDias} ${faltaDias===1?'dia válido':'dias válidos'}</b>`);
+                let faltaH=0;
+                if(faltaMin){
+                    faltaH=Math.ceil(faltaMin/6)/10; // arredonda pra cima: nunca diz que falta menos do que falta
+                    faltas.push(`<b>${faltaH.toLocaleString('pt-BR')} ${faltaH>1?'horas válidas':'hora válida'}</b>`);
+                }
+                const plural=faltas.length>1||faltaDias>1||faltaH>1;
+                msg.innerHTML=`Para completar os requisitos deste mês, ${plural?'faltam':'falta'} ${faltas.join(' e ')}. O recebimento depende de encerrar o mês em uma posição premiada e cumprir os ${R.dias} dias e as ${R.horas} horas válidas.`;
+            }
+            this.qs('#agDias').textContent=`${dias} / ${R.dias} dias`;
+            this.qs('#agHoras').textContent=`${(Math.floor(minTot/6)/10).toFixed(1)} / ${R.horas} h`; // pra baixo, casando com o "falta" acima
+            this.qs('#agPD').style.width=`${Math.min(dias/R.dias*100,100)}%`;
+            this.qs('#agPH').style.width=`${Math.min(minTot/(R.horas*60)*100,100)}%`;
+            card.style.display='';
+        }catch(e){
+            console.error('carregarPremiacaoAgencia erro:',e);
+            card.style.display='none';
+        }
+    }
+
+    _hMin(str){
+        const [h,m]=String(str||'').split(':').map(n=>parseInt(n,10)||0);
+        return h*60+(m||0);
     }
 
     // ── Gráfico "Evolução diária" ──────────────────────────────────────
@@ -2156,6 +2271,12 @@
         this.qs('#pkEl')?.verificarSessao?.();
         this.navigate('vPk');
         this.navActive('nPk');
+    }
+    goRegras(){
+        // regras-dmaior é conteúdo estático (sem sessão nem rede) — só navegar.
+        this.navigate('vRegras');
+        this.navActive('nRegras');
+        window.scrollTo({top:0});
     }
     goTickets(){
         // dmaior-tickets já existe no DOM desde antes do login terminar — reconfirma
