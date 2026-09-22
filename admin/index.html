@@ -37,11 +37,15 @@
     html[data-theme="rosa"],    html[data-theme="rosa"] body    { background: #fff5f8; }
     html[data-theme="laranja"], html[data-theme="laranja"] body { background: #fff8f0; }
     dmaior-admin { display: block; width: 100%; min-height: 100dvh; }
+    /* Rodapé do site: no celular a barra flutuante de baixo fica por cima,
+       então o rodapé ganha espaço embaixo pra não esconder o final */
+    @media (max-width: 700px) { dmaior-footer { padding-bottom: calc(92px + env(safe-area-inset-bottom)); } }
   </style>
 </head>
 <body>
   <!-- Componente admin completo — login + painel embutidos no custom element -->
   <dmaior-admin></dmaior-admin>
+  <dmaior-footer></dmaior-footer>
 
   <!-- api.js expõe DmaiorConfig (URLs dos workers) para o componente usar -->
   <script charset=utf-8 src="js/utils/helpers.js"></script>
@@ -49,8 +53,9 @@
   <!-- Motor de preferências (tema/fonte/idioma) — mesmo do site/agente. Expõe window.DMaiorPrefs -->
   <script charset=utf-8 src="js/preferences.js?v=20260905-admin-aparencia"></script>
   <!-- Componente admin original — contém todo visual e lógica de login/painel -->
-  <script charset=utf-8 src="js/components/dmaior-admin.js?v=20260922-voltar"></script>
+  <script charset=utf-8 src="js/components/dmaior-admin.js?v=20260922-aceite-painel"></script>
   <!-- router.js NÃO é carregado aqui: o admin tem login próprio embutido -->
+  <script defer charset=utf-8 src="js/components/footer.js?v=20260911-logolocal"></script>
   <dmaior-cookie-consent></dmaior-cookie-consent>
   <script charset=utf-8 src="js/components/cookie-consent.js"></script>
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>

@@ -1365,7 +1365,7 @@
                 <!-- ══════ REGRAS E DIRETRIZES (componente nativo, conteúdo estático) ══════ -->
                 <div id="vRegras" class="view" style="width:100%;">
                     <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
-                    <regras-dmaior id="regrasEl"></regras-dmaior>
+                    <regras-dmaior id="regrasEl" com-aceite></regras-dmaior>
                 </div>
 
                 <!-- Gerador local de molduras, carregado somente após autenticação -->
@@ -1719,6 +1719,7 @@
         this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
         this.qs('#nPk').addEventListener('click',()=>this.goPk());
         this.qs('#nRegras').addEventListener('click',()=>this.goRegras());
+        this.qs('#regrasEl')?.addEventListener('regras-aceitar', e=>this._aceitarTermo(e.detail || {}));
         this.qs('#nTickets').addEventListener('click',()=>this.goTickets());
         this.qs('#nMore').addEventListener('click',()=>{
             this.qs('#bNav').classList.toggle('expanded');
@@ -2456,10 +2457,37 @@
         this.navActive('nPk');
     }
     goRegras(){
-        // regras-dmaior é conteúdo estático (sem sessão nem rede) — só navegar.
+        // O texto do regras-dmaior é estático; o que vem da rede é só o
+        // aceite dos termos (com-aceite), buscado toda vez que a aba abre.
         this.navigate('vRegras');
         this.navActive('nRegras');
         window.scrollTo({top:0});
+        this._carregarAceitesTermos();
+    }
+
+    // ── Aceite do Termo de Cooperação / Diretrizes do Kwai no painel ──
+    // Pra quem já é da agência e não passou pelo aceite do recrutamento.
+    // Grava em termos_aceites (worker dashboard) — o admin mostra o selo.
+    async _carregarAceitesTermos(){
+        const el = this.qs('#regrasEl'); if(!el?.setAceites || !this.sessionUid) return;
+        try{
+            const r = await this._fetchAutenticado(`${this.apiUrl}/api/termos?uid=${this.sessionUid}`, {});
+            if(r.status === 401) return;
+            const d = r.ok ? await r.json() : {};
+            el.setAceites(d.aceites || []);
+        }catch(e){ el.setAceites([]); }
+    }
+    async _aceitarTermo({ documento, versao }){
+        const el = this.qs('#regrasEl');
+        try{
+            const r = await this._fetchAutenticado(`${this.apiUrl}/api/termos/aceitar`, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ uid:this.sessionUid, documento, versao }),
+            });
+            if(r.status === 401) return;
+            if(!r.ok){ const e = await r.json().catch(()=>({})); el?.setErroAceite?.(e.erro); return; }
+            await this._carregarAceitesTermos();
+        }catch(e){ el?.setErroAceite?.('Sem conexão. Tente novamente.'); }
     }
     goTickets(){
         // dmaior-tickets já existe no DOM desde antes do login terminar — reconfirma

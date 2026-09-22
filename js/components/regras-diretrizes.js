@@ -151,8 +151,12 @@
     { id: 'agencia', rotulo: 'Termo da agência', html: HTML_AGENCIA },
   ];
 
-  // Usado pela candidatura (recrutamento.html) pra gravar QUAL versão foi aceita
-  window.DmaiorTermos = { versaoAgencia: TERMO_AGENCIA_VERSAO, versaoKwai: '2H2026' };
+  // Versão atual de cada documento. A candidatura (recrutamento.html) grava
+  // qual foi aceita; o painel compara com termos_aceites pra saber se o
+  // streamer ainda precisa aceitar (versão nova = aceitar de novo).
+  const VERSOES = { agencia: TERMO_AGENCIA_VERSAO, kwai: '2H2026' };
+  const NOME_DOC = { agencia: 'o Termo de Cooperação da DMaior Agency', kwai: 'as Diretrizes do Kwai' };
+  window.DmaiorTermos = { versaoAgencia: VERSOES.agencia, versaoKwai: VERSOES.kwai };
 
   const CSS = `
     regras-dmaior{display:block;width:100%;}
@@ -209,6 +213,18 @@
     /* Listas a) b) c) do termo da agência (a letra já vem no texto) */
     regras-dmaior .rg-lista{list-style:none;margin:0 0 10px;padding-left:10px;}
     regras-dmaior .rg-lista li{margin-bottom:5px;}
+
+    /* Aceite no painel (atributo com-aceite) */
+    regras-dmaior .rg-tab .rg-pend{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff3b5c;margin-left:6px;vertical-align:middle;}
+    regras-dmaior .rg-aceite{border-color:var(--cyan);}
+    regras-dmaior .rg-aceite h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.98rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin:0 0 8px;}
+    regras-dmaior .rg-aceite p{color:var(--muted);}
+    regras-dmaior .rg-aceite-btn{margin-top:12px;width:100%;padding:13px 16px;border:none;border-radius:12px;background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
+    regras-dmaior .rg-aceite-btn:disabled{opacity:.6;cursor:wait;}
+    regras-dmaior .rg-aceite-erro{color:var(--red) !important;margin-top:10px;font-size:.8rem;}
+    regras-dmaior .rg-aceite.ok{display:flex;gap:12px;align-items:flex-start;border-color:#4ade80;}
+    regras-dmaior .rg-aceite-ico{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(74,222,128,.15);color:#4ade80;font-weight:700;}
+    regras-dmaior .rg-aceite.ok b{display:block;color:#4ade80;margin-bottom:2px;}
   `;
 
   class RegrasDmaior extends HTMLElement {
@@ -219,6 +235,7 @@
       // ele, sem título/abas (é assim que o recrutamento usa, dentro da janela "Ler")
       const pedida = this.getAttribute('secao');
       this._ativa = SECOES.some(s => s.id === pedida) ? pedida : SECOES[0].id;
+      this._aceites = null; // null = ainda carregando (só importa com com-aceite)
       this._render();
     }
 
@@ -227,7 +244,7 @@
       const unica = this.hasAttribute('unica');
       const abas = !unica && SECOES.length > 1
         ? `<div class="rg-tabs" role="tablist">${SECOES.map(s =>
-            `<button type="button" role="tab" class="rg-tab${s.id === sec.id ? ' on' : ''}" data-id="${s.id}" aria-selected="${s.id === sec.id}">${s.rotulo}</button>`
+            `<button type="button" role="tab" class="rg-tab${s.id === sec.id ? ' on' : ''}" data-id="${s.id}" aria-selected="${s.id === sec.id}">${s.rotulo}${this._pendente(s.id) ? '<span class="rg-pend" title="Aceite pendente"></span>' : ''}</button>`
           ).join('')}</div>`
         : '';
       this.innerHTML = `
@@ -237,10 +254,40 @@
           <p class="rg-sub">Diretrizes da plataforma Kwai e Termo de Cooperação da DMaior Agency. Mantenha-se atualizado.</p>`}
           ${abas}
           ${sec.html}
+          ${this._blocoAceite(sec.id)}
         </div>`;
       this.querySelectorAll('.rg-tab').forEach(b => {
         b.addEventListener('click', () => { this._ativa = b.dataset.id; this._render(); });
       });
+      const btn = this.querySelector('.rg-aceite-btn');
+      if (btn) btn.addEventListener('click', () => {
+        btn.disabled = true; btn.textContent = 'Registrando…';
+        // Quem grava é o painel (dmaior-app.js): ele escuta este evento
+        this.dispatchEvent(new CustomEvent('regras-aceitar', { bubbles: true, detail: { documento: btn.dataset.doc, versao: VERSOES[btn.dataset.doc] } }));
+      });
+    }
+
+    // ── Aceite pelo painel (só com o atributo com-aceite) ──────────────
+    // Lista vinda de GET /api/termos: [{ documento, versao, aceito_em }]
+    setAceites(lista) { this._aceites = Array.isArray(lista) ? lista : []; this._erroAceite = null; if (this._iniciado) this._render(); }
+    setErroAceite(msg) { this._erroAceite = msg || 'Não foi possível registrar o aceite.'; if (this._iniciado) this._render(); }
+    _aceiteDe(doc) { return (this._aceites || []).find(a => a.documento === doc && a.versao === VERSOES[doc]) || null; }
+    _pendente(doc) { return this.hasAttribute('com-aceite') && Array.isArray(this._aceites) && !this._aceiteDe(doc); }
+    _blocoAceite(doc) {
+      if (!this.hasAttribute('com-aceite') || !VERSOES[doc]) return '';
+      if (!Array.isArray(this._aceites)) return `<div class="card rg-aceite"><p>Verificando seu aceite…</p></div>`;
+      const a = this._aceiteDe(doc);
+      if (a) {
+        const d = new Date(a.aceito_em);
+        const quando = isNaN(d) ? '' : `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+        return `<div class="card rg-aceite ok"><span class="rg-aceite-ico">✓</span><div><b>Você aceitou ${NOME_DOC[doc]}</b><p>${quando ? `Em ${quando} · ` : ''}versão ${VERSOES[doc]}</p></div></div>`;
+      }
+      return `<div class="card rg-aceite">
+          <h3>Aceite do documento</h3>
+          <p>Ao tocar em <b>Li e aceito</b>, você declara que leu e concorda com ${NOME_DOC[doc]} (versão ${VERSOES[doc]}). O aceite fica registrado com data e hora.</p>
+          <button type="button" class="rg-aceite-btn" data-doc="${doc}">Li e aceito</button>
+          ${this._erroAceite ? `<p class="rg-aceite-erro">${this._erroAceite}</p>` : ''}
+        </div>`;
     }
   }
 

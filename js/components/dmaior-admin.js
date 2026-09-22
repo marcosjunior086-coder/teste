@@ -1035,9 +1035,10 @@ class DimaiorAdmin extends HTMLElement {
   async _carregarStreamers(){
     const s=this.shadowRoot;s.getElementById('tbS').innerHTML=this._loading();
     const busca=s.getElementById('bS')?.value||'';
-    const [d,dExt]=await Promise.all([
+    const [d,dExt,termos]=await Promise.all([
       this._api('GET',`/admin/streamers?pagina=${this._pg.s}&busca=${encodeURIComponent(busca)}`),
       this._pg.s===1?this._api('GET','/admin/streamers/externos'):Promise.resolve({ok:true,externos:[]}),
+      this._termosAceitesMapa(),
     ]);
     const el=s.getElementById('tbS');
     const lista=d?.perfis||d?.streamers||[];
@@ -1058,7 +1059,7 @@ class DimaiorAdmin extends HTMLElement {
       const campos=isExterno
         ?[['UID',uid],['Kwai ID',sv.kwai_id||'—'],['Adicionado em',this._fdt(sv.adicionado_em)]]
         :[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]];
-      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px;flex-wrap:wrap">${this._esc(nome)} ${_badge(isVerif,isPremium)} ${isExterno?_extTag:''}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${campos.map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">${acoesBtns}<button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
+      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px;flex-wrap:wrap">${this._esc(nome)} ${_badge(isVerif,isPremium)} ${isExterno?_extTag:''}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div>${this._seloTermos(termos.get(String(uid)))}</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${campos.map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">${acoesBtns}<button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
     };
     el.innerHTML=`<div id="listaUsers"></div>`;
     const lu=s.getElementById('listaUsers');
@@ -5312,7 +5313,7 @@ class DimaiorAdmin extends HTMLElement {
       .pm-voltar{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:2px 0 14px;cursor:pointer;}
       .pm-voltar svg{width:20px;height:20px;fill:currentColor;}
       .pm-voltar[hidden]{display:none;}
-      .content{padding-bottom:118px;}
+      .content{padding-bottom:28px;} /* o espaço pra barra flutuante de baixo fica no rodapé (admin/index.html) */
       .mnav{display:flex;align-items:center;justify-content:space-between;position:fixed;left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:280;height:60px;padding:0 24px;color:var(--panel-solid);filter:drop-shadow(0 12px 26px rgba(4,6,20,.5));}
       .mnav-bg{position:absolute;inset:0;width:100%;height:100%;display:block;}
       .mnav-bg path{stroke:var(--brd);stroke-width:1;}
@@ -6411,12 +6412,39 @@ class DimaiorAdmin extends HTMLElement {
     else{this._toast('Erro ao salvar modo','err');}
   }
 
+  // ── Selos de aceite dos termos (Termo de Cooperação + Diretrizes do Kwai) ──
+  // Fonte: GET /admin/termos-aceites (tabela termos_aceites = aceites da
+  // candidatura + aceites feitos no painel do streamer). Guardado 60s pra não
+  // buscar de novo a cada troca de página/filtro.
+  async _termosAceitesMapa(){
+    if(this._termosCache&&Date.now()-this._termosCache.em<60000)return this._termosCache.mapa;
+    const d=await this._api('GET','/admin/termos-aceites');
+    const mapa=new Map();
+    (d?.aceites||[]).forEach(a=>{ // vem do mais recente pro mais antigo: fica o último aceite de cada documento
+      const k=String(a.kwai_uid);if(!mapa.has(k))mapa.set(k,{});
+      const m=mapa.get(k);if(!m[a.documento])m[a.documento]=a;
+    });
+    if(d?.ok)this._termosCache={em:Date.now(),mapa};
+    return mapa;
+  }
+  _seloTermos(aceites){
+    const a=aceites||{};
+    const pill=(ok,txt,title)=>`<span title="${this._esc(title)}" style="display:inline-flex;align-items:center;gap:4px;font-size:9.5px;padding:2px 8px;border-radius:10px;white-space:nowrap;${ok?'background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.45);color:var(--verde)':'background:rgba(127,127,127,.1);border:1px solid rgba(127,127,127,.3);color:var(--t3)'}">${this._esc(txt)}</span>`;
+    const um=(doc,nome)=>{
+      const x=a[doc];
+      if(!x)return pill(false,`${nome}: sem aceite registrado`,`Nenhum aceite de ${nome} registrado pra esse UID`);
+      const d=new Date(x.aceito_em);const quando=isNaN(d)?'':`${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+      return pill(true,`✓ ${nome} aceito · ${quando} · v${x.versao}`,`Aceito ${x.origem==='painel'?'no painel do streamer':'na candidatura'} em ${quando} (versão ${x.versao})`);
+    };
+    return `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${um('agencia','Termo')}${um('kwai','Diretrizes Kwai')}</div>`;
+  }
+
   async _carregarCandidaturas(){
     const s=this.shadowRoot;const el=s.getElementById('tbCandidaturas');if(!el)return;
     el.innerHTML=this._loading();
     const filtro=s.getElementById('candFiltro')?.value||'';
     const q=filtro?`?status=${encodeURIComponent(filtro)}`:'';
-    const d=await this._api('GET',`/admin/candidaturas${q}`);
+    const [d,termos]=await Promise.all([this._api('GET',`/admin/candidaturas${q}`),this._termosAceitesMapa()]);
     if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar candidaturas');return;}
     const lista=d.candidaturas||[];
     if(!lista.length){el.innerHTML=this._empty('clipboard','Nenhuma candidatura encontrada');return;}
@@ -6444,7 +6472,11 @@ class DimaiorAdmin extends HTMLElement {
         const erroDetalhe=c.status==='erro'?`<div title="${this._esc(motivoErro||'Falha não detalhada pelo Voyager')}" style="max-width:230px;margin-top:5px;color:var(--verm);font-size:10px;line-height:1.3;white-space:normal;overflow-wrap:anywhere">${this._esc(motivoErro||'Falha não detalhada pelo Voyager')}</div>`:'';
         const canAprovar=c.status==='perfil_consultado'&&c.member_id;
         return`<tr style="border-bottom:1px solid var(--brddim)">
-          <td style="padding:8px 12px">${foto}<strong style="color:var(--t1)">${nome}</strong>${wpp}</td>
+          <td style="padding:8px 12px">${foto}<strong style="color:var(--t1)">${nome}</strong>${wpp}${this._seloTermos(termos.get(String(c.uid))||{
+            // candidatura com aceite mas ainda sem linha em termos_aceites (ex.: cache de 60s)
+            ...(c.aceite_termo_agencia_em?{agencia:{aceito_em:c.aceite_termo_agencia_em,versao:c.termo_agencia_versao||'?',origem:'candidatura'}}:{}),
+            ...(c.aceite_diretrizes_kwai_em?{kwai:{aceito_em:c.aceite_diretrizes_kwai_em,versao:'2H2026',origem:'candidatura'}}:{}),
+          })}</td>
           <td style="padding:8px">${cat}</td>
           <td style="padding:8px;color:var(--t2)">${recrutador}${viaAgente}</td>
           <td style="padding:8px">${stBadge}${erroDetalhe}</td>

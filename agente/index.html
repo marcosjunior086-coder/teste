@@ -891,6 +891,13 @@
     .mnav { display: none; }
     .msheet { display: none; }
     .pm-voltar { display: none; }
+
+    /* Rodapé: acompanha a barra lateral fixa (220px) no computador */
+    .ag-footer { margin-left: 220px; }
+    @media (min-width: 601px) {
+      .ag-footer { transition: margin-left var(--ease); }
+      body.nav-collapsed .ag-footer { margin-left: 0; }
+    }
     @media (max-width: 600px) {
       /* esconde o hambúrguer: a barra inferior + FAB substituem a gaveta */
       .mobile-menu-btn { display: none !important; }
@@ -901,7 +908,9 @@
       }
       .pm-voltar svg { width: 20px; height: 20px; fill: currentColor; }
       .pm-voltar[hidden] { display: none; }
-      .main { padding-bottom: 122px; }
+      .main { padding-bottom: 28px; }
+      /* no celular o espaço pra barra flutuante de baixo fica no rodapé */
+      .ag-footer { margin-left: 0; padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 
       .mnav {
         display: flex; align-items: center; justify-content: space-between;
@@ -1399,6 +1408,9 @@
 
     </main>
   </div>
+
+  <!-- Rodapé do site (mesmo das páginas públicas) -->
+  <dmaior-footer class="ag-footer"></dmaior-footer>
 
   <!-- Navegação inferior flutuante (mobile) — preenchida por JS -->
   <nav class="mnav" id="ag-mnav" aria-label="Navegação rápida">
@@ -3610,6 +3622,7 @@ async function carregarMigracoes() {
   })();
   </script>
 
+  <script defer charset=utf-8 src="js/components/footer.js?v=20260911-logolocal"></script>
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
 </body>
 </html>
