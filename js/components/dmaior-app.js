@@ -318,26 +318,55 @@
                 .mfab svg { width:24px; height:24px; }
                 .mfab.on { transform:translateX(-50%) rotate(45deg); }
 
-                .msheet { position:fixed; inset:0; z-index:1003; background:rgba(0,0,0,.5); opacity:0; pointer-events:none; transition:opacity .22s ease; }
-                .msheet.on { opacity:1; pointer-events:auto; }
-                .msheet-in {
-                    position:absolute; left:0; right:0; bottom:0;
-                    background:var(--glass); backdrop-filter:blur(12px);
-                    border-top:1px solid var(--border); border-radius:22px 22px 0 0;
-                    padding:8px 14px calc(20px + env(safe-area-inset-bottom));
-                    max-height:82vh; overflow-y:auto;
-                    transform:translateY(100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
+                /* ── Menu do "+" em tela cheia, por categorias + busca. Mesmo
+                      padrão (.pm-*) do Admin e do Agente — mudou lá, muda aqui ── */
+                .msheet {
+                    --pm-bg:var(--dm-bg,#060B16); --pm-card:var(--card-solid); --pm-brd:var(--border);
+                    --pm-text:var(--text); --pm-muted:var(--muted); --pm-acc:var(--cyan); --pm-acc-d:var(--cyan-d);
+                    --pm-red:var(--red); --pm-sep:rgba(127,127,127,.13);
+                    position:fixed; inset:0; z-index:1060; background:var(--pm-bg); color:var(--pm-text);
+                    overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+                    font-family:var(--dm-font-body,'Exo 2',sans-serif);
+                    opacity:0; visibility:hidden; pointer-events:none; transform:translateY(22px);
+                    transition:opacity .2s ease, transform .26s cubic-bezier(.4,0,.2,1), visibility 0s linear .26s;
                 }
-                .msheet.on .msheet-in { transform:translateY(0); }
-                .msheet-grab { width:38px; height:4px; border-radius:4px; background:var(--border); margin:4px auto 12px; }
-                .msheet-sec { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.62rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); padding:10px 8px 6px; }
-                .msheet-rows { display:flex; flex-direction:column; gap:2px; }
-                .msrow { display:flex; align-items:center; gap:13px; width:100%; padding:12px 8px; border:none; border-radius:12px; background:none; font:inherit; font-size:.95rem; color:var(--text); text-align:left; cursor:pointer; font-family:var(--dm-font-body,'Exo 2',sans-serif); }
-                .msrow[aria-current="page"] { background:var(--cyan-d); color:var(--cyan); }
-                .msrow.sair { color:var(--red); }
-                .msrow .msi { width:34px; height:34px; border-radius:10px; flex:none; background:var(--glass); border:1px solid var(--border); display:grid; place-items:center; color:var(--cyan); }
-                .msrow.sair .msi { color:var(--red); border-color:rgba(248,113,113,.28); }
-                .msrow .msi svg { width:16px; height:16px; fill:currentColor; }
+                .msheet.on { opacity:1; visibility:visible; pointer-events:auto; transform:none; transition:opacity .2s ease, transform .26s cubic-bezier(.4,0,.2,1); }
+                .msheet .pm-ri svg, .msheet .pm-btn svg, .msheet .pm-back svg { fill:currentColor; }
+                .pm-in { max-width:560px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom)); }
+                .pm-top { height:44px; display:flex; align-items:center; justify-content:space-between; }
+                .pm-back { width:42px; height:42px; margin-left:-9px; display:grid; place-items:center; background:none; border:none; border-radius:50%; color:var(--pm-text); cursor:pointer; }
+                .pm-back svg { width:26px; height:26px; }
+                .pm-h1 { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:38px; line-height:1.05; margin:8px 4px 16px; color:var(--pm-text); text-transform:none; letter-spacing:0; }
+                .pm-perfil { display:flex; align-items:center; gap:12px; width:100%; background:var(--pm-card); border:1px solid var(--pm-brd); border-radius:18px; padding:13px 14px; margin-bottom:14px; color:var(--pm-text); font:inherit; text-align:left; cursor:pointer; }
+                .pm-av { width:46px; height:46px; border-radius:50%; flex:none; overflow:hidden; background:linear-gradient(135deg,#3b82f6,var(--pm-acc)); display:grid; place-items:center; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:17px; color:#fff; }
+                .pm-av img { width:100%; height:100%; object-fit:cover; }
+                .pm-pinfo { flex:1; min-width:0; }
+                .pm-pinfo b { display:block; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+                .pm-pinfo small { font-size:12px; color:var(--pm-muted); }
+                .pm-busca { display:flex; align-items:center; gap:10px; background:var(--pm-card); border:1px solid var(--pm-brd); border-radius:14px; padding:0 14px; color:var(--pm-muted); }
+                .pm-busca:focus-within { border-color:var(--pm-acc); }
+                .pm-busca svg { width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2; }
+                .pm-busca input { flex:1; min-width:0; background:none !important; border:none !important; box-shadow:none !important; border-radius:0; outline:none; color:var(--pm-text); font:inherit; font-size:16px; padding:13px 0; }
+                .pm-busca input::placeholder { color:var(--pm-muted); opacity:1; }
+                .pm-gt { font-size:13px; font-weight:500; color:var(--pm-muted); margin:22px 4px 9px; }
+                .pm-grp { background:var(--pm-card); border:1px solid var(--pm-brd); border-radius:18px; padding:4px 0; overflow:hidden; }
+                .pm-row { width:100%; display:flex; align-items:center; gap:14px; background:none; border:none; border-top:1px solid var(--pm-sep); color:var(--pm-text); font:inherit; font-size:15.5px; padding:13px 16px; text-align:left; cursor:pointer; text-decoration:none; }
+                .pm-row.pm-1a { border-top:none; }
+                .pm-row:active { background:var(--pm-acc-d); }
+                .pm-row[aria-current="page"] { color:var(--pm-acc); font-weight:600; }
+                .pm-ri { width:24px; display:grid; place-items:center; color:var(--pm-acc); flex:none; }
+                .pm-ri svg { width:21px; height:21px; }
+                .pm-rt { flex:1; min-width:0; }
+                .pm-chev { width:22px; height:22px; fill:var(--pm-muted); opacity:.6; flex:none; }
+                .pm-val { font-size:13px; color:var(--pm-acc); font-weight:600; }
+                .pm-dot { width:9px; height:9px; border-radius:50%; background:#ff3b5c; flex:none; }
+                .pm-fim { display:grid; gap:10px; margin-top:26px; }
+                .pm-btn { display:flex; align-items:center; justify-content:center; gap:8px; border-radius:16px; padding:14px; font:inherit; font-size:15px; font-weight:600; cursor:pointer; background:var(--pm-card); border:1px solid var(--pm-brd); color:var(--pm-text); }
+                .pm-btn svg { width:19px; height:19px; }
+                .pm-btn.sair { background:rgba(248,113,113,.08); border-color:rgba(248,113,113,.3); color:var(--pm-red); }
+                .pm-vazio { text-align:center; color:var(--pm-muted); padding:40px 10px; font-size:14px; }
+                .pm-ver { text-align:center; font-size:11px; color:var(--pm-muted); opacity:.55; margin-top:18px; }
+                .msheet [hidden], .msheet.buscando .pm-sobusca-some { display:none !important; }
 
                 .molduras-frame{height:calc(100vh - 130px);min-height:620px;border-radius:0;}
             }
@@ -875,11 +904,16 @@
             <button class="mfab" id="mFab" type="button" aria-label="Abrir menu">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
-            <div class="msheet" id="mSheet">
-                <div class="msheet-in">
-                    <div class="msheet-grab"></div>
-                    <div class="msheet-sec">Menu</div>
-                    <div class="msheet-rows" id="mSheetRows"></div>
+            <div class="msheet" id="mSheet" role="dialog" aria-modal="true" aria-label="Menu">
+                <div class="pm-in">
+                    <div class="pm-top"><button type="button" class="pm-back" id="mSheetBack" aria-label="Fechar menu">${this.svgBack()}</button></div>
+                    <h2 class="pm-h1">Menu</h2>
+                    <button type="button" class="pm-perfil pm-sobusca-some" id="mSheetPerfil"></button>
+                    <label class="pm-busca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="mSheetBusca" type="search" placeholder="Buscar no menu…" autocomplete="off" enterkeyhint="go" aria-label="Buscar no menu"></label>
+                    <div id="mSheetRows"></div>
+                    <div class="pm-vazio" id="mSheetVazio" hidden>Nada encontrado no menu.</div>
+                    <div class="pm-fim pm-sobusca-some"><button type="button" class="pm-btn sair" id="mSheetSair">${this.svgLogout()} Sair da conta</button></div>
+                    <div class="pm-ver">DMaior Agency · Painel do Host</div>
                 </div>
             </div>
 
@@ -1418,15 +1452,36 @@
         const nav = this.qs('#mNav'), fab = this.qs('#mFab'), sheet = this.qs('#mSheet'), rowsEl = this.qs('#mSheetRows');
         if(!nav || !fab || !sheet || !rowsEl) return;
 
-        const closeSheet = () => { sheet.classList.remove('on'); fab.classList.remove('on'); };
-        const openSheet  = () => { this._fillMobileSheet(); sheet.classList.add('on'); fab.classList.add('on'); };
+        // Menu em tela cheia: trava a rolagem da página por trás enquanto aberto
+        const closeSheet = () => {
+            sheet.classList.remove('on'); fab.classList.remove('on');
+            document.documentElement.style.overflow = '';
+        };
+        const openSheet  = () => {
+            const busca = this.qs('#mSheetBusca'); if(busca) busca.value = '';
+            this._fillMobileSheet();
+            sheet.scrollTop = 0;
+            sheet.classList.add('on'); fab.classList.add('on');
+            document.documentElement.style.overflow = 'hidden';
+            this._atualizarSaldoMenu();
+        };
 
         // Barra: cada botão dispara o clique do item real do .bnav (reusa toda a lógica de navegação)
         nav.querySelectorAll('button[data-nav]').forEach(b=>{
             b.addEventListener('click', ()=>{ this.qs('#'+b.dataset.nav)?.click(); });
         });
         fab.addEventListener('click', ()=> sheet.classList.contains('on') ? closeSheet() : openSheet());
-        sheet.addEventListener('click', e=>{ if(e.target === sheet) closeSheet(); });
+        this.qs('#mSheetBack')?.addEventListener('click', closeSheet);
+        this.qs('#mSheetPerfil')?.addEventListener('click', ()=>{ closeSheet(); this.qs('#nS')?.click(); });
+        this.qs('#mSheetSair')?.addEventListener('click', ()=>{ closeSheet(); this.qs('#nO')?.click(); });
+        const busca = this.qs('#mSheetBusca');
+        busca?.addEventListener('input', ()=> this._filtrarMenu(busca.value));
+        // Enter com um único resultado já abre ele
+        busca?.addEventListener('keydown', e=>{
+            if(e.key !== 'Enter') return;
+            const vis = [...sheet.querySelectorAll('.pm-row')].filter(r=>!r.hidden && !r.closest('.pm-sec')?.hidden);
+            if(vis.length === 1){ e.preventDefault(); vis[0].click(); }
+        });
         this._mSheetClose = closeSheet;
         this._mEscHandler = e=>{ if(e.key === 'Escape' && sheet.classList.contains('on')) closeSheet(); };
         document.addEventListener('keydown', this._mEscHandler);
@@ -1462,21 +1517,87 @@
         this._syncMobileNav();
     }
 
-    // Reconstrói a lista do sheet a partir dos itens visíveis do .bnav
+    // Categorias do menu do "+" (mobile). Cada item aponta pro id do item real
+    // do .bnav — se ele estiver .hidden (Tickets não liberado, Carteira/Impulso
+    // desligados no admin, atalhos sem permissão), some daqui também; categoria
+    // sem nenhum item some inteira. 3º campo = palavras extras pra busca.
+    static get MENU_GRUPOS(){ return [
+        ['Meu desempenho', [['nD','Resumo','inicio dashboard diamantes horas'], ['nRank','Ranking','posicao'], ['nPk','PK Diário','batalha']]],
+        ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate']]],
+        ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
+        ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
+        ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente']]],
+    ]; }
+
     _fillMobileSheet(){
         const rowsEl = this.qs('#mSheetRows'); if(!rowsEl) return;
+        const bell = `<svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
+        const chev = `<svg class="pm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>`;
+        const visivel = id => id === 'avisos' || (this.qs('#'+id) && !this.qs('#'+id).classList.contains('hidden'));
         let html = '';
-        this.querySelectorAll('#bNav .nit').forEach(nit=>{
-            if(nit.classList.contains('nav-toggle') || nit.classList.contains('hidden')) return;
-            const icon  = nit.querySelector('svg')?.outerHTML || '';
-            const label = nit.querySelector('span')?.textContent || '';
-            html += `<button type="button" class="msrow${nit.classList.contains('sair')?' sair':''}" data-nav="${nit.id}"><span class="msi">${icon}</span>${label}</button>`;
-        });
+        for(const [titulo, itens] of this.constructor.MENU_GRUPOS){
+            const rows = itens.filter(([id])=>visivel(id)).map(([id, label, chaves=''])=>{
+                const icon = id === 'avisos' ? bell : (this.qs('#'+id)?.querySelector('svg')?.outerHTML || '');
+                let extra = '';
+                if(id === 'nC' && this._saldoCarteira != null) extra = `<span class="pm-val">${this.brl(this._saldoCarteira)}</span>`;
+                if(id === 'avisos' && this._avisosNovos) extra = `<span class="pm-dot" title="Aviso novo"></span>`;
+                return `<button type="button" class="pm-row" data-nav="${id}" data-busca="${this.esc(label+' '+chaves)}"><span class="pm-ri">${icon}</span><span class="pm-rt">${this.esc(label)}</span>${extra}${chev}</button>`;
+            });
+            if(rows.length) html += `<section class="pm-sec"><div class="pm-gt">${titulo}</div><div class="pm-grp">${rows.join('')}</div></section>`;
+        }
         rowsEl.innerHTML = html;
-        rowsEl.querySelectorAll('.msrow').forEach(b=>{
-            b.addEventListener('click', ()=>{ this._mSheetClose?.(); this.qs('#'+b.dataset.nav)?.click(); });
+        rowsEl.querySelectorAll('.pm-row').forEach(b=>{
+            b.addEventListener('click', ()=>{
+                this._mSheetClose?.();
+                if(b.dataset.nav === 'avisos') this.goAvisos();
+                else this.qs('#'+b.dataset.nav)?.click();
+            });
         });
+        // Cartão do topo: foto, nome e UID do streamer (toca = Perfil)
+        const perfil = this.qs('#mSheetPerfil');
+        if(perfil){
+            const nome = (this.qs('#dName')?.textContent || '').trim() || localStorage.getItem('dm_nome') || 'Streamer DMaior';
+            const foto = localStorage.getItem('dm_foto') || '';
+            const ini  = nome.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase() || 'DM';
+            perfil.innerHTML = `<span class="pm-av">${foto ? `<img src="${this.esc(foto)}" alt="" onerror="this.remove()">` : ''}${foto ? '' : this.esc(ini)}</span><span class="pm-pinfo"><b>${this.esc(nome)}</b><small>UID ${this.esc(this.sessionUid || '—')} · DMaior</small></span>${chev}`;
+        }
+        this._filtrarMenu(this.qs('#mSheetBusca')?.value || '');
         this._syncMobileNav();
+    }
+
+    // Busca do menu: ignora acento e maiúscula; todas as palavras digitadas
+    // precisam bater (no nome ou nas palavras extras do item)
+    _filtrarMenu(q){
+        const sheet = this.qs('#mSheet'); if(!sheet) return;
+        const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+        const termos = norm(q).split(/\s+/).filter(Boolean);
+        sheet.classList.toggle('buscando', termos.length > 0);
+        let total = 0;
+        sheet.querySelectorAll('.pm-sec').forEach(sec=>{
+            let n = 0;
+            sec.querySelectorAll('.pm-row').forEach(r=>{
+                const alvo = norm(r.dataset.busca);
+                const ok = termos.every(t=>alvo.includes(t));
+                r.hidden = !ok;
+                r.classList.toggle('pm-1a', ok && n === 0);
+                if(ok) n++;
+            });
+            sec.hidden = !n; total += n;
+        });
+        const vazio = this.qs('#mSheetVazio'); if(vazio) vazio.hidden = total > 0;
+    }
+
+    // Saldo ao lado de "Carteira" no menu — busca uma vez por visita (depois
+    // disso quem atualiza é o loadCarteira)
+    async _atualizarSaldoMenu(){
+        if(this._saldoCarteira != null || this._saldoMenuBuscando) return;
+        if(this._recursos?.carteira === false || !this.sessionUid) return;
+        this._saldoMenuBuscando = true;
+        try{
+            const r = await this._fetchAutenticado(`${this.apiUrl}/api/carteira?uid=${this.sessionUid}`, {});
+            if(r.ok){ const c = await r.json(); this._saldoCarteira = Number(c.saldo || 0); this._fillMobileSheet(); }
+        }catch(e){}
+        this._saldoMenuBuscando = false;
     }
 
     _syncMobileNav(id){
@@ -1484,7 +1605,7 @@
         this.querySelectorAll('#mNav button[data-nav]').forEach(b=>{
             b.dataset.nav === id ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current');
         });
-        this.querySelectorAll('#mSheetRows .msrow').forEach(b=>{
+        this.querySelectorAll('#mSheetRows .pm-row').forEach(b=>{
             b.dataset.nav === id ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current');
         });
     }
@@ -1599,6 +1720,50 @@
         // Escuta o clique no sino do menu — navega para a view de avisos
         window.addEventListener('dmaior:avisos', this._avisosHandler);
         this._buildMobileNav();
+        // Aplica o último estado conhecido já na abertura, pra Carteira/Impulso
+        // desligados não piscarem no menu até o /api/dashboard responder
+        try { this._aplicarRecursos(JSON.parse(localStorage.getItem('dm_recursos') || 'null')); } catch(e) {}
+    }
+
+    // ── Recursos que o admin desliga pra TODOS (Configurações > Painel do Streamer) ──
+    // Vem do /api/dashboard (sistema_config painel_<recurso>_ativa). Pra
+    // adicionar um novo recurso: entra aqui no MAPA + no RECURSOS_PAINEL do worker.
+    _aplicarRecursos(rec){
+        if(!rec || typeof rec !== 'object') return;
+        rec = this._recursos = { ...(this._recursos || {}), ...rec };
+        try { localStorage.setItem('dm_recursos', JSON.stringify(rec)); } catch(e) {}
+        const MAPA = { carteira:{ nav:'nC', view:'vC' }, impulso:{ nav:'nImpulso', view:'vImpulso' } };
+        let estavaNaViewDesligada = false;
+        for(const [k, { nav, view }] of Object.entries(MAPA)){
+            const off = rec[k] === false;
+            this.qs('#'+nav)?.classList.toggle('hidden', off);
+            if(off && this.qs('#'+view)?.classList.contains('on')) estavaNaViewDesligada = true;
+        }
+        this._montarBarraMobile();
+        this._fillMobileSheet();
+        if(estavaNaViewDesligada){ this.navigate('vD'); this.navActive('nD'); }
+    }
+
+    // A barra de baixo (mobile) tem 4 vagas. Se um dos atalhos padrão estiver
+    // escondido, a vaga passa pro próximo item visível do menu, pra barra não
+    // ficar torta com um buraco.
+    _montarBarraMobile(){
+        const vagas = [...this.querySelectorAll('#mNav button[data-nav]')];
+        if(!vagas.length) return;
+        const ordem = ['nD','nC','nImpulso','nRank','nS','nMolduras','nVotacao','nPk','nRegras'];
+        const ids = ordem.filter(id=>{ const el=this.qs('#'+id); return el && !el.classList.contains('hidden'); }).slice(0, vagas.length);
+        vagas.forEach((b,i)=>{
+            const id = ids[i];
+            if(!id){ b.style.display='none'; return; }
+            b.style.display='';
+            if(b.dataset.nav === id) return;
+            const nit = this.qs('#'+id);
+            b.dataset.nav = id;
+            const label = (nit.querySelector('span')?.textContent || '').trim();
+            b.setAttribute('aria-label', label.charAt(0) + label.slice(1).toLowerCase());
+            b.innerHTML = nit.querySelector('svg')?.outerHTML || '';
+        });
+        this._syncMobileNav();
     }
 
     setupActionListeners(){
@@ -1747,6 +1912,7 @@
             // tickets_streamers_liberados) — quem não foi selecionado nem
             // sabe que a função existe.
             this.qs('#nTickets')?.classList.toggle('hidden', !p.tickets_liberado);
+            this._aplicarRecursos(data.recursos);
             const usd=Number(t.dolar||0).toFixed(2);
             const diam=Number(t.diamantes||0);
             this.qs('#dDia').textContent=diam.toLocaleString('pt-BR');
@@ -1937,10 +2103,13 @@
             const resCart = await this._fetchAutenticado(`${this.apiUrl}/api/carteira?uid=${this.sessionUid}`, {});
 
             if (resCart.status === 401) return; // _fetchAutenticado já limpou a sessão e avisou
+            // Admin desligou a Carteira enquanto a aba estava aberta — esconde e volta pro Resumo
+            if (resCart.status === 403) { this._aplicarRecursos({ carteira:false }); return; }
             if (!resCart.ok) throw new Error('Erro ao carregar carteira');
             const cart   = await resCart.json();
 
             const saldo    = Number(cart.saldo          || 0);
+            this._saldoCarteira = saldo; // saldo no menu do "+" (mobile)
             const pendente = Number(cart.saldo_pendente  || 0);
             const recebido = Number(cart.total_recebido  || 0);
             const sacado   = Number(cart.total_sacado    || 0);
@@ -2220,6 +2389,7 @@
                     const seenRaw = localStorage.getItem(`dm_avisos_ids_${uid}`);
                     const seen    = seenRaw ? JSON.parse(seenRaw) : [];
                     const hasNew  = importantes.some(c => !seen.includes(String(c.id)));
+                    this._avisosNovos = hasNew; // bolinha em "Avisos" no menu do "+"
                     const menu    = document.querySelector('menu-mobile-dmaior');
                     if (menu?.shadowRoot) {
                         const dot = menu.shadowRoot.getElementById('bellDot');
@@ -2383,6 +2553,7 @@
             const uid = localStorage.getItem('dm_uid') || 'anon';
             const ids = lista.map(c => String(c.id));
             localStorage.setItem(`dm_avisos_ids_${uid}`, JSON.stringify(ids));
+            this._avisosNovos = false;
             const menu = document.querySelector('menu-mobile-dmaior');
             if(menu?.shadowRoot){
                 const dot = menu.shadowRoot.getElementById('bellDot');

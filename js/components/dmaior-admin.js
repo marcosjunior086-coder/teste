@@ -104,24 +104,23 @@ class DimaiorAdmin extends HTMLElement {
     const btn=it=>`<button data-p="${it[0]}" aria-label="${it[2]}">${this._ico(it[1],22)}</button>`;
     mnav.querySelector('[data-g="a"]').innerHTML=PRIM.slice(0,2).map(btn).join('');
     mnav.querySelector('[data-g="b"]').innerHTML=PRIM.slice(2).map(btn).join('');
-    // sheet: reconstrói do .side (mesmas seções e itens)
-    let html='';
-    s.querySelectorAll('.side > .ns, .side .acc-body > .ni').forEach(el=>{
-      if(el.classList.contains('ns')){ html+=`<div class="ms-sec">${el.textContent.trim()}</div>`; }
-      else {
-        const p=el.dataset.p, ico=el.querySelector('.ico')?.innerHTML||'', lbl=el.querySelector('.nlb')?.textContent||p;
-        html+=`<button class="ms-row" data-p="${p}"><span class="msi">${ico}</span>${lbl}</button>`;
-      }
-    });
-    s.getElementById('admMsheetNav').innerHTML=html;
-    const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); };
-    const openSheet=()=>{ sheet.classList.add('on'); fab.classList.add('on'); };
-    const go=p=>{ this._ir(p); closeSheet(); this._syncMobileNav(p); try{window.scrollTo({top:0,behavior:'smooth'});}catch(_){}}
-    mnav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.p)));
-    s.querySelectorAll('#admMsheetNav .ms-row').forEach(b=>b.addEventListener('click',()=>go(b.dataset.p)));
+    // Menu do "+" em tela cheia: trava a rolagem da página por trás enquanto aberto
+    const html=document.documentElement;
+    const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); html.style.overflow=''; };
+    const openSheet=()=>{ const q=s.getElementById('admMsBusca'); if(q) q.value=''; this._montarMenuMobile(); sheet.scrollTop=0; sheet.classList.add('on'); fab.classList.add('on'); html.style.overflow='hidden'; };
+    this._msGo=p=>{ this._ir(p); closeSheet(); this._syncMobileNav(p); try{window.scrollTo({top:0,behavior:'smooth'});}catch(_){}};
+    this._msAparencia=()=>{ closeSheet(); s.getElementById('btnAparencia')?.click(); };
+    mnav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>this._msGo(b.dataset.p)));
     fab.addEventListener('click',()=>sheet.classList.contains('on')?closeSheet():openSheet());
-    sheet.addEventListener('click',e=>{ if(e.target===sheet) closeSheet(); });
+    s.getElementById('admMsBack')?.addEventListener('click',closeSheet);
+    s.getElementById('admMsSite')?.addEventListener('click',()=>{ closeSheet(); s.getElementById('btnVoltarSite')?.click(); });
+    s.getElementById('admMsSair')?.addEventListener('click',()=>{ closeSheet(); s.getElementById('btnSair')?.click(); });
+    const busca=s.getElementById('admMsBusca');
+    busca?.addEventListener('input',()=>this._filtrarMenuMobile(busca.value));
+    // Enter com um único resultado já abre ele
+    busca?.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const vis=[...s.querySelectorAll('#admMsheetNav .pm-row')].filter(r=>!r.hidden&&!r.closest('.pm-sec')?.hidden); if(vis.length===1){e.preventDefault();vis[0].click();} });
     document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheet.classList.contains('on')) closeSheet(); });
+    this._montarMenuMobile();
     const path=(w,h)=>{ const r=Math.min(30,h/2),c=r*.448,nw=116,nd=38,cx=w/2,nl=cx-nw/2,nr=cx+nw/2;
       return 'M'+r+' 0H'+nl.toFixed(1)+'C'+(nl+nw*.1).toFixed(1)+' 0 '+(nl+nw*.25).toFixed(1)+' '+nd+' '+cx.toFixed(1)+' '+nd+'C'+(nr-nw*.25).toFixed(1)+' '+nd+' '+(nr-nw*.1).toFixed(1)+' 0 '+nr.toFixed(1)+' 0H'+(w-r).toFixed(1)+'C'+(w-c).toFixed(1)+' 0 '+w.toFixed(1)+' '+c.toFixed(1)+' '+w.toFixed(1)+' '+r+'V'+(h-r).toFixed(1)+'C'+w.toFixed(1)+' '+(h-c).toFixed(1)+' '+(w-c).toFixed(1)+' '+h+' '+(w-r).toFixed(1)+' '+h+'H'+r+'C'+c.toFixed(1)+' '+h+' 0 '+(h-c).toFixed(1)+' 0 '+(h-r).toFixed(1)+'V'+r+'C0 '+c.toFixed(1)+' '+c.toFixed(1)+' 0 '+r+' 0Z'; };
     this._updNotch=()=>{ const svg=mnav.querySelector('.mnav-bg'); if(!svg) return; const w=Math.round(mnav.clientWidth),h=Math.round(mnav.clientHeight)||60; if(w<40) return; svg.setAttribute('viewBox','0 0 '+w+' '+h); svg.querySelector('path').setAttribute('d',path(w,h)); };
@@ -133,7 +132,54 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot; if(!s) return;
     if(!p){ const on=s.querySelector('.ni.on'); p=on?on.dataset.p:'dashboard'; }
     s.querySelectorAll('#admMnav button').forEach(b=>{ b.dataset.p===p?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'); });
-    s.querySelectorAll('#admMsheetNav .ms-row').forEach(b=>{ b.dataset.p===p?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'); });
+    s.querySelectorAll('#admMsheetNav .pm-row').forEach(b=>{ b.dataset.p===p?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'); });
+  }
+  // Categorias do menu do "+" (mobile). Só reorganiza a VISÃO mobile — o menu
+  // lateral do desktop continua com as seções dele. Ícone, nome e contador vêm
+  // do item real do .side; item novo que não estiver aqui cai em "Outros"
+  // sozinho (não some). 2º campo = nome no menu (vazio = o do .side), 3º = palavras extras pra busca.
+  static get MENU_GRUPOS(){ return [
+    ['Principal',[['dashboard'],['aoVivo','','lives transmissao']]],
+    ['Ranking e resultados',[['ranking','Ranking do Mês'],['diario'],['desempenho'],['historico'],['mesesRanking'],['dashDesemp','','comparativo grafico']]],
+    ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['metricas']]],
+    ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms']]],
+    ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
+    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive']]],
+    ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
+  ]; }
+  _montarMenuMobile(){
+    const s=this.shadowRoot; const nav=s?.getElementById('admMsheetNav'); if(!nav) return;
+    const chev='<svg class="pm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';
+    const nis=new Map([...s.querySelectorAll('.side .ni[data-p]')].map(n=>[n.dataset.p,n]));
+    const usados=new Set();
+    const cont=n=>{ const b=n?.querySelector('.nb'); if(!b||b.style.display==='none') return null; const v=(b.textContent||'').trim(); return /^[1-9]\d*\+?$/.test(v)?{v,cls:b.classList.contains('gold')?'gold':b.classList.contains('live')?'live':''}:null; };
+    const linha=(p,lbl,chaves,ico,c)=>`<button type="button" class="pm-row" data-p="${p}" data-busca="${this._esc(lbl+' '+(chaves||''))}"><span class="pm-ri">${ico}</span><span class="pm-rt">${this._esc(lbl)}</span>${c?`<span class="pm-bdg ${c.cls}">${this._esc(c.v)}</span>`:''}${chev}</button>`;
+    const grupos=this.constructor.MENU_GRUPOS.map(([t,itens])=>[t,itens.map(([p,lbl,chaves])=>{
+      if(p==='__aparencia') return linha(p,lbl,chaves,this._ico('settings',20),null);
+      const n=nis.get(p); if(!n) return ''; usados.add(p);
+      return linha(p,lbl||n.querySelector('.nlb')?.textContent||p,chaves,n.querySelector('.ico')?.innerHTML||'',cont(n));
+    }).join('')]);
+    const sobra=[...nis.keys()].filter(p=>!usados.has(p)).map(p=>{const n=nis.get(p);return linha(p,n.querySelector('.nlb')?.textContent||p,'',n.querySelector('.ico')?.innerHTML||'',cont(n));}).join('');
+    if(sobra) grupos.push(['Outros',sobra]);
+    nav.innerHTML=grupos.filter(g=>g[1]).map(([t,h])=>`<section class="pm-sec"><div class="pm-gt">${t}</div><div class="pm-grp">${h}</div></section>`).join('');
+    nav.querySelectorAll('.pm-row').forEach(b=>b.addEventListener('click',()=>b.dataset.p==='__aparencia'?this._msAparencia?.():this._msGo?.(b.dataset.p)));
+    // "Precisa de atenção": os mesmos contadores do menu lateral, só os que têm pendência
+    const ATN=[['nbSaques','saques','Saques pendentes'],['nbTicketsResgates','tickets','Resgates de tickets'],['nbMigracoesAgente','agenteMigracoes','Migrações de agente'],['nbSolicForm','solicitacoesFormularios','Solicitações de formulário'],['nbCand','convites','Candidaturas novas'],['nbRec','recrutamento','Recrutamento'],['nbLive','aoVivo','Ao vivo agora']];
+    const cards=ATN.map(([id,p,lbl])=>{ const b=s.getElementById(id); if(!b||b.style.display==='none') return ''; const v=parseInt(b.textContent,10); if(!(v>0)) return ''; return `<button type="button" class="pm-ac${id==='nbLive'?' live':''}" data-p="${p}"><b>${v}</b><small>${lbl}</small></button>`; }).join('');
+    const atn=s.getElementById('admMsAtencao');
+    if(atn){ atn.innerHTML=cards?`<div class="pm-gt">Precisa de atenção</div><div class="pm-atn">${cards}</div>`:''; atn.querySelectorAll('.pm-ac').forEach(b=>b.addEventListener('click',()=>this._msGo?.(b.dataset.p))); }
+    this._filtrarMenuMobile(s.getElementById('admMsBusca')?.value||'');
+    this._syncMobileNav();
+  }
+  // Busca do menu: ignora acento e maiúscula; todas as palavras precisam bater
+  _filtrarMenuMobile(q){
+    const s=this.shadowRoot; const sheet=s?.getElementById('admMsheet'); if(!sheet) return;
+    const norm=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+    const termos=norm(q).split(/\s+/).filter(Boolean);
+    sheet.classList.toggle('buscando',termos.length>0);
+    let total=0;
+    sheet.querySelectorAll('.pm-sec').forEach(sec=>{ let n=0; sec.querySelectorAll('.pm-row').forEach(r=>{ const ok=termos.every(t=>norm(r.dataset.busca).includes(t)); r.hidden=!ok; r.classList.toggle('pm-1a',ok&&n===0); if(ok) n++; }); sec.hidden=!n; total+=n; });
+    const vz=s.getElementById('admMsVazio'); if(vz) vz.hidden=total>0;
   }
   disconnectedCallback(){
     this._widthObs?.disconnect();
@@ -1339,11 +1385,20 @@ class DimaiorAdmin extends HTMLElement {
       badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão laranja.',preview:true},
       sub_org_ids:{label:'IDs das sub-agências (Kwai)',hint:'Separados por vírgula (ex: 1005856,1005733). A correção busca o org principal + cada uma dessas subs, pra não deixar ninguém de fora.'},
       premiacao_automatica_ativa:{label:'Premiação automática do dia 1º',hint:'Desligado: o pagamento do ranking do mês anterior não roda sozinho — precisa processar manualmente em Premiações.',bool:true},
+      // grupo:'painel' = liga/desliga recurso do painel do streamer pra TODOS.
+      // Pra um novo: linha painel_<recurso>_ativa no sistema_config + entrada aqui
+      // + RECURSOS_PAINEL no worker dashboard + MAPA no dmaior-app.js (_aplicarRecursos)
+      painel_carteira_ativa:{label:'Carteira',hint:'Desligado: a aba Carteira some do painel de todos os streamers e o saque fica bloqueado. Saldo e créditos (inclusive premiação) continuam normais — só não aparecem até religar.',bool:true,grupo:'painel'},
+      painel_impulso_ativa:{label:'Impulso',hint:'Desligado: a aba Impulso some do painel de todos os streamers, novos pedidos são recusados e os agendamentos automáticos ficam pausados (voltam sozinhos ao religar).',bool:true,grupo:'painel'},
     };
     const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;};
-    el.innerHTML=`<div style="padding:12px 14px;background:var(--sunk);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('settings',12)} Configurações financeiras e de exibição.</div>${d.config.map(c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const isBool=lbl?.bool;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';const campo=isBool?`<label class="tog-switch"><input type="checkbox" class="cfg-bool-inp" id="cfg_${this._esc(c.chave)}" ${c.valor==='true'?'checked':''}><span class="tog-slider"></span></label>`:isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`;return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${campo}${isRO||isBool?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;}).join('')}`;
+    const _cfgRow=c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const isBool=lbl?.bool;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';const campo=isBool?`<label class="tog-switch"><input type="checkbox" class="cfg-bool-inp" id="cfg_${this._esc(c.chave)}" ${c.valor==='true'?'checked':''}><span class="tog-slider"></span></label>`:isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`;return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${campo}${isRO||isBool?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;};
+    const _cfgHead=(ico,txt)=>`<div style="padding:12px 14px;background:var(--sunk);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico(ico,12)} ${txt}</div>`;
+    const cfgPainel=d.config.filter(c=>labels[c.chave]?.grupo==='painel'),cfgResto=d.config.filter(c=>labels[c.chave]?.grupo!=='painel');
+    el.innerHTML=(cfgPainel.length?_cfgHead('users','<strong style="color:var(--t2)">Painel do Streamer</strong> — liga/desliga recursos para <strong>todos</strong> os streamers.')+cfgPainel.map(_cfgRow).join(''):'')+_cfgHead('settings','Configurações financeiras e de exibição.')+cfgResto.map(_cfgRow).join('');
     d.config.filter(c=>labels[c.chave]?.bool).forEach(c=>{
       s.getElementById(`cfg_${c.chave}`)?.addEventListener('change',async e=>{
+        if(labels[c.chave].grupo==='painel'&&!e.target.checked&&!confirm(`Desligar "${labels[c.chave].label}" para TODOS os streamers?\n\n${labels[c.chave].hint.replace(/^Desligado: /,'')}`)){e.target.checked=true;return;}
         const val=e.target.checked?'true':'false';
         const r=await this._api('POST','/admin/config',{chave:c.chave,valor:val});
         if(r?.ok)this._toast(e.target.checked?'Ativado!':'Desativado!');
@@ -5262,16 +5317,43 @@ class DimaiorAdmin extends HTMLElement {
       .fab{display:flex;align-items:center;justify-content:center;z-index:282;position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom) + 36px);transform:translateX(-50%);width:54px;height:54px;border:none;border-radius:50%;background:var(--grad);color:#fff;cursor:pointer;box-shadow:0 12px 28px -6px var(--cyan-d);}
       .fab svg{width:22px;height:22px;}
       .fab.on{transform:translateX(-50%) rotate(45deg);}
-      .msheet{display:block;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s ease;}
-      .msheet.on{opacity:1;pointer-events:auto;}
-      .msheet .inner{position:absolute;left:0;right:0;bottom:0;background:var(--panel-solid);border-top:1px solid var(--brd);border-radius:20px 20px 0 0;padding:8px 12px calc(18px + env(safe-area-inset-bottom));max-height:82vh;overflow-y:auto;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);}
-      .msheet.on .inner{transform:translateY(0);}
-      .msheet .grab{width:38px;height:4px;border-radius:4px;background:var(--brd);margin:4px auto 10px;}
-      .msheet .ms-sec{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--t3);padding:12px 8px 4px;}
-      .msheet .ms-row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 8px;border:none;border-radius:11px;background:none;font:inherit;font-size:14px;color:var(--t1);text-align:left;cursor:pointer;font-family:var(--dm-font-body,'Exo 2',sans-serif);}
-      .msheet .ms-row[aria-current="page"]{background:rgba(59,130,246,.12);color:var(--azul);}
-      .msheet .ms-row .msi{width:34px;height:34px;border-radius:10px;flex:none;background:var(--glass);border:1px solid var(--brd);display:grid;place-items:center;color:var(--cyan);}
-      .msheet .ms-row .msi svg{width:16px;height:16px;}
+      /* Menu do "+" em tela cheia, por categorias + busca. Mesmo padrão (.pm-*) do painel do streamer e do agente */
+      .msheet{display:block;position:fixed;inset:0;z-index:300;background:var(--bg0);color:var(--t1);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:var(--dm-font-body,'Exo 2',sans-serif);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(22px);transition:opacity .2s ease,transform .26s cubic-bezier(.4,0,.2,1),visibility 0s linear .26s;}
+      .msheet.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .26s cubic-bezier(.4,0,.2,1);}
+      .pm-in{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom));}
+      .pm-top{height:44px;display:flex;align-items:center;justify-content:space-between;}
+      .pm-back{width:42px;height:42px;margin-left:-9px;display:grid;place-items:center;background:none;border:none;border-radius:50%;color:var(--t1);cursor:pointer;}
+      .pm-back svg{width:26px;height:26px;fill:currentColor;}
+      .pm-h1{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:38px;line-height:1.05;margin:8px 4px 16px;color:var(--t1);text-transform:none;letter-spacing:0;}
+      .pm-busca{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--brd);border-radius:14px;padding:0 14px;color:var(--t3);}
+      .pm-busca:focus-within{border-color:var(--cyan);}
+      .pm-busca svg{width:18px;height:18px;flex:none;}
+      .pm-busca input{flex:1;min-width:0;background:none !important;border:none !important;box-shadow:none !important;border-radius:0;outline:none;color:var(--t1);font:inherit;font-size:16px;padding:13px 0;}
+      .pm-busca input::placeholder{color:var(--t3);opacity:1;}
+      .pm-gt{font-size:13px;font-weight:500;color:var(--t3);margin:22px 4px 9px;}
+      .pm-atn{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+      .pm-ac{display:block;text-align:left;background:var(--glass);border:1px solid rgba(240,192,64,.32);border-radius:14px;padding:10px 10px 11px;color:var(--t1);font:inherit;cursor:pointer;}
+      .pm-ac b{display:block;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:24px;color:var(--gold);line-height:1;}
+      .pm-ac small{display:block;font-size:11px;color:var(--t3);line-height:1.25;margin-top:3px;}
+      .pm-ac.live{border-color:rgba(255,59,92,.35);}.pm-ac.live b{color:#ff3b5c;}
+      .pm-grp{background:var(--glass);border:1px solid var(--brd);border-radius:18px;padding:4px 0;overflow:hidden;}
+      .pm-row{width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;border-top:1px solid rgba(127,127,127,.13);color:var(--t1);font:inherit;font-size:15.5px;padding:13px 16px;text-align:left;cursor:pointer;}
+      .pm-row.pm-1a{border-top:none;}
+      .pm-row:active{background:var(--cyan-d);}
+      .pm-row[aria-current="page"]{color:var(--cyan);font-weight:600;}
+      .pm-ri{width:24px;display:grid;place-items:center;color:var(--cyan);flex:none;}
+      .pm-ri svg{width:20px;height:20px;}
+      .pm-rt{flex:1;min-width:0;}
+      .pm-chev{width:22px;height:22px;fill:var(--t3);opacity:.6;flex:none;}
+      .pm-bdg{min-width:22px;height:20px;padding:0 7px;border-radius:10px;background:var(--cyan-d);color:var(--cyan);font-size:12px;font-weight:600;display:grid;place-items:center;}
+      .pm-bdg.gold{background:rgba(240,192,64,.18);color:var(--gold);}.pm-bdg.live{background:rgba(255,59,92,.16);color:#ff3b5c;}
+      .pm-fim{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px;}
+      .pm-btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:16px;padding:14px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;background:var(--glass);border:1px solid var(--brd);color:var(--t1);}
+      .pm-btn svg{width:18px;height:18px;}
+      .pm-btn.sair{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--verm);}
+      .pm-vazio{text-align:center;color:var(--t3);padding:40px 10px;font-size:14px;}
+      .pm-ver{text-align:center;font-size:11px;color:var(--t3);opacity:.55;margin-top:18px;}
+      .msheet [hidden],.msheet.buscando .pm-sobusca-some{display:none !important;}
     }
   `;}
 
@@ -5317,7 +5399,7 @@ class DimaiorAdmin extends HTMLElement {
         </aside>
         <nav class="mnav" id="admMnav" aria-label="Navegação rápida"><svg class="mnav-bg" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor"></path></svg><div class="grp" data-g="a"></div><div class="grp" data-g="b"></div></nav>
         <button class="fab" id="admFab" type="button" aria-label="Abrir menu">${this._ico('plus',22)}</button>
-        <div class="msheet" id="admMsheet"><div class="inner"><div class="grab"></div><div id="admMsheetNav"></div></div></div>
+        <div class="msheet" id="admMsheet" role="dialog" aria-modal="true" aria-label="Menu"><div class="pm-in"><div class="pm-top"><button type="button" class="pm-back" id="admMsBack" aria-label="Fechar menu"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button><span class="top-chip">ADMIN MASTER</span></div><h2 class="pm-h1">Menu</h2><label class="pm-busca">${this._ico('search',18)}<input id="admMsBusca" type="search" placeholder="Buscar no menu…" autocomplete="off" enterkeyhint="go" aria-label="Buscar no menu"></label><div class="pm-sobusca-some" id="admMsAtencao"></div><div id="admMsheetNav"></div><div class="pm-vazio" id="admMsVazio" hidden>Nada encontrado no menu.</div><div class="pm-fim pm-sobusca-some"><button type="button" class="pm-btn" id="admMsSite">${this._ico('home',18)} Voltar ao site</button><button type="button" class="pm-btn sair" id="admMsSair">${this._ico('logout',18)} Sair</button></div><div class="pm-ver">DMaior Agency · Painel Admin</div></div></div>
         <div class="shell">
           <div class="side" id="side">
             ${navSec('principal','Principal',
