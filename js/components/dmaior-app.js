@@ -1168,6 +1168,7 @@
 
                 <!-- ══════ PERFIL ══════ -->
                 <div id="vS" class="view auth-view">
+                    <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
                     <div class="hd"><h1 class="raaj" style="font-size:1.3rem;color:var(--text);" data-i18n="profileControl">CONTROLE DE PERFIL</h1></div>
                     <div class="card">
                         <h2 class="raaj" style="font-size:.9rem;margin-bottom:15px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;" data-i18n="personalData">DADOS PESSOAIS</h2>
@@ -1254,7 +1255,7 @@
                         <!-- Topo azul: voltar · Carteira · ir para transações -->
                         <div class="wallet-head">
                             <div class="wbar">
-                                <button id="btnCartBack" type="button" title="Voltar ao resumo">${this.svgBack()}</button>
+                                <button id="btnCartBack" class="pm-voltar" type="button" title="Voltar" aria-label="Voltar">${this.svgBack()}</button>
                                 <b>Carteira</b>
                                 <button id="btnCartExtrato" type="button" title="Ver transações">${this.svgClock()}</button>
                             </div>
@@ -1326,12 +1327,13 @@
 
                 <!-- ══════ RANKING (componente nativo) ══════ -->
                 <div id="vRank" class="view" style="width:100%;">
-                    <button class="iframe-back" id="btnBackRank">${this.svgBack()} VOLTAR AO PAINEL</button>
+                    <button class="iframe-back pm-voltar" id="btnBackRank">${this.svgBack()} VOLTAR</button>
                     <ranking-dmaior id="rankingEl" style="display:block;width:100%;min-height:80vh;"></ranking-dmaior>
                 </div>
 
                 <!-- ══════ IMPULSO (componente nativo) ══════ -->
                 <div id="vImpulso" class="view" style="width:100%;">
+                    <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
                     <dmaior-impulso id="impulsoEl" worker-url="https://dashboard.agencydmaior.com.br"></dmaior-impulso>
                 </div>
 
@@ -1340,13 +1342,14 @@
                      rodando aqui dentro do painel já autenticado, pula direto pra
                      lista de votações sem pedir UID de novo. -->
                 <div id="vVotacao" class="view" style="width:100%;">
+                    <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
                     <dmaior-votacao id="votacaoEl"></dmaior-votacao>
                 </div>
 
                 <!-- ══════ PK DIÁRIO (componente nativo) ══════ -->
                 <!-- painel-pk detecta sozinho dm_uid/dm_token, igual dmaior-votacao. -->
                 <div id="vPk" class="view" style="width:100%;">
-                    <button class="iframe-back" id="btnBackPk">${this.svgBack()} VOLTAR AO PAINEL</button>
+                    <button class="iframe-back pm-voltar" id="btnBackPk">${this.svgBack()} VOLTAR</button>
                     <painel-pk id="pkEl"></painel-pk>
                 </div>
 
@@ -1355,24 +1358,26 @@
                      dmaior-impulso — mas precisa do worker-url pra falar com o
                      mesmo worker do painel (dashboard). -->
                 <div id="vTickets" class="view" style="width:100%;">
-                    <button class="iframe-back" id="btnBackTickets">${this.svgBack()} VOLTAR AO PAINEL</button>
+                    <button class="iframe-back pm-voltar" id="btnBackTickets">${this.svgBack()} VOLTAR</button>
                     <dmaior-tickets id="ticketsEl" worker-url="https://dashboard.agencydmaior.com.br"></dmaior-tickets>
                 </div>
 
                 <!-- ══════ REGRAS E DIRETRIZES (componente nativo, conteúdo estático) ══════ -->
                 <div id="vRegras" class="view" style="width:100%;">
+                    <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
                     <regras-dmaior id="regrasEl"></regras-dmaior>
                 </div>
 
                 <!-- Gerador local de molduras, carregado somente após autenticação -->
                 <div id="vMolduras" class="view" style="width:100%;">
+                    <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
                     <iframe id="moldurasFrame" class="molduras-frame" title="Gerador de molduras da DMaior Agency" allow="clipboard-write"></iframe>
                 </div>
 
                 <!-- ══════ AVISOS ══════ -->
                 <div id="vAvisos" class="view" style="width:100%;">
                     <div class="avisos-topbar">
-                        <button class="iframe-back" id="btnBackAvisos">${this.svgBack()} VOLTAR</button>
+                        <button class="iframe-back pm-voltar" id="btnBackAvisos">${this.svgBack()} VOLTAR</button>
                         <button class="btn-mark-all" id="btnMarkAllRead">
                             <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                             MARCAR TODOS COMO LIDOS
@@ -1483,6 +1488,7 @@
             if(vis.length === 1){ e.preventDefault(); vis[0].click(); }
         });
         this._mSheetClose = closeSheet;
+        this._mSheetOpen  = openSheet;
         this._mEscHandler = e=>{ if(e.key === 'Escape' && sheet.classList.contains('on')) closeSheet(); };
         document.addEventListener('keydown', this._mEscHandler);
 
@@ -1515,6 +1521,16 @@
 
         this._fillMobileSheet();
         this._syncMobileNav();
+    }
+
+    // Seta de voltar das abas: no celular reabre o menu do "+" (é de lá que o
+    // streamer navega, sem precisar caçar o botão); no computador o menu lateral
+    // já está à vista, então volta pro Resumo como antes.
+    _voltar(){
+        if(this._mSheetOpen && window.matchMedia('(max-width:768px)').matches){ this._mSheetOpen(); return; }
+        const eraRank = this.qs('#vRank')?.classList.contains('on');
+        this.navigate('vD'); this.navActive('nD');
+        if(eraRank) this.loadDash();
     }
 
     // Categorias do menu do "+" (mobile). Cada item aponta pro id do item real
@@ -1702,10 +1718,8 @@
         this.qs('#nMolduras').addEventListener('click',()=>this.goMolduras());
         this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
         this.qs('#nPk').addEventListener('click',()=>this.goPk());
-        this.qs('#btnBackPk')?.addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#nRegras').addEventListener('click',()=>this.goRegras());
         this.qs('#nTickets').addEventListener('click',()=>this.goTickets());
-        this.qs('#btnBackTickets')?.addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
         this.qs('#nMore').addEventListener('click',()=>{
             this.qs('#bNav').classList.toggle('expanded');
         });
@@ -1714,8 +1728,8 @@
             const nav = this.qs('#bNav');
             if(nav && nav.classList.contains('expanded') && !nav.contains(e.target)) nav.classList.remove('expanded');
         });
-        this.qs('#btnBackRank').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');this.loadDash();});
-        this.qs('#btnBackAvisos').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
+        // Todas as setas de voltar das abas (ver _voltar)
+        this.querySelectorAll('.pm-voltar').forEach(b=>b.addEventListener('click',()=>this._voltar()));
         this.qs('#btnMarkAllRead').addEventListener('click',()=>this._marcarTodosLidos());
         // Escuta o clique no sino do menu — navega para a view de avisos
         window.addEventListener('dmaior:avisos', this._avisosHandler);
@@ -1777,7 +1791,6 @@
         this.qs('#btnSaque').addEventListener('click',()=>this.doSolicSaque());
 
         // Carteira: voltar ao resumo / rolar até as transações
-        this.qs('#btnCartBack')?.addEventListener('click',()=>{ this.navigate('vD'); this.navActive('nD'); });
         this.qs('#btnCartExtrato')?.addEventListener('click',()=>{
             this.qs('.txn-head')?.scrollIntoView({behavior:'smooth',block:'start'});
         });

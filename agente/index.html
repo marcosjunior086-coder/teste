@@ -890,9 +890,17 @@
     /* ═══ Navegação inferior flutuante (mobile) — padrão do demo ═══ */
     .mnav { display: none; }
     .msheet { display: none; }
+    .pm-voltar { display: none; }
     @media (max-width: 600px) {
       /* esconde o hambúrguer: a barra inferior + FAB substituem a gaveta */
       .mobile-menu-btn { display: none !important; }
+      .pm-voltar {
+        display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--azul);
+        font-family: var(--font-t); font-weight: 700; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;
+        padding: 2px 0 14px; cursor: pointer;
+      }
+      .pm-voltar svg { width: 20px; height: 20px; fill: currentColor; }
+      .pm-voltar[hidden] { display: none; }
       .main { padding-bottom: 122px; }
 
       .mnav {
@@ -1158,6 +1166,8 @@
 
     <!-- CONTEÚDO -->
     <main class="main">
+      <!-- Seta de voltar (só celular, some no Dashboard): reabre o menu do "+" -->
+      <button type="button" class="pm-voltar" id="ag-voltar" hidden onclick="document.getElementById('ag-fab')?.click()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Voltar ao menu</button>
 
       <!-- Barra do painel: recolher menu + Aparência (desktop/tablet) -->
       <div class="ag-chrome">
@@ -1662,6 +1672,7 @@ document.querySelectorAll('.nav-item').forEach(el => {
 function navegarPara(sec) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.section === sec));
   SECOES.forEach(s => { document.getElementById(`sec-${s}`).style.display = s === sec ? 'block' : 'none'; });
+  const voltar = document.getElementById('ag-voltar'); if (voltar) voltar.hidden = sec === 'dashboard';
   const loaders = {
     dashboard:  carregarDashboard,
     streamers:  carregarStreamers,

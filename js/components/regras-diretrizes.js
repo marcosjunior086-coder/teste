@@ -2,9 +2,10 @@
 // ============================================================
 //  DMaior Agency — Custom Element: <regras-dmaior>
 //  Aba "Regras e Diretrizes" do painel do streamer: regulamento da
-//  campanha de livestream da plataforma (+ políticas da agência, quando
-//  chegarem). Conteúdo estático, sem chamada de rede.
-//  Exclusivo do painel do streamer logado (dmaior-app.js).
+//  campanha de livestream da plataforma + Termo de Cooperação da agência.
+//  Conteúdo estático, sem chamada de rede.
+//  Usado no painel do streamer (aba Regras) e no recrutamento.html (janela
+//  "Ler" dos aceites, com secao="..." unica) — texto num lugar só.
 //
 //  Renderiza no DOM normal (sem shadow) de propósito: herda as variáveis
 //  de tema do painel (--text, --muted, --border, --glass, --gold, --red,
@@ -85,10 +86,73 @@
       <p>O Kwai reserva-se o direito de adaptar, modificar e decidir a aplicação das regras da plataforma conforme a necessidade da campanha de livestreaming, sem aviso prévio. Mantenha-se atualizado com este documento.</p>
     </div>`;
 
+  // ── Termo de Cooperação DMaior Agency (lido no painel e aceito no recrutamento) ──
+  // Texto do PDF "Termos Dmaior Agency" (2026-09). Única adaptação: os campos
+  // em branco (nome/CPF/endereço) e o bloco de assinatura viraram aceite
+  // digital — o streamer é identificado pelo UID e pelos dados da candidatura,
+  // e o aceite (data/hora + TERMO_AGENCIA_VERSAO) é gravado em `candidaturas`.
+  // Mudou o texto? Troque a versão, pra dar pra saber quem aceitou qual.
+  const TERMO_AGENCIA_VERSAO = '2026-09';
+  const sec = (n, titulo, corpo) => `
+    <details class="card rg-sec" open>
+      <summary><span class="rg-num">${n}</span>${titulo}</summary>
+      <div class="rg-body">${corpo}</div>
+    </details>`;
+  const HTML_AGENCIA = `
+    <div class="card rg-head">
+      <span class="rg-kicker">DMaior Agency · Versão 09/2026</span>
+      <h2>Termo de Cooperação para Criador de Conteúdo (Streamer)</h2>
+      <p><b>Partes.</b> De um lado, <b>DMaior Agency – Danilo Duarte</b>, inscrita no CNPJ sob o nº 64.207.221/0001-18, doravante denominada <b>AGÊNCIA</b>; e, de outro lado, o(a) criador(a) de conteúdo que aceita este Termo, identificado(a) pelo seu UID Kwai e pelos dados informados na candidatura, doravante denominado(a) <b>STREAMER</b>.</p>
+      <p>As partes resolvem celebrar o presente TERMO DE COOPERAÇÃO, de natureza civil, regido pelas leis brasileiras, mediante as cláusulas e condições a seguir:</p>
+    </div>
+    ${sec(1, 'Objeto', `<p>O presente Termo tem por objeto a cooperação entre as partes para a criação, desenvolvimento e realização de transmissões ao vivo (“lives”) de conteúdo digital na plataforma Kwai, com foco em entretenimento e engajamento.</p>`)}
+    ${sec(2, 'Natureza da relação e prazo', `
+      <p><b>2.1.</b> O presente instrumento possui natureza estritamente civil e colaborativa, não configurando, em hipótese alguma:</p>
+      <ul class="rg-lista"><li>a) Vínculo empregatício;</li><li>b) Relação de trabalho regida pela CLT;</li><li>c) Sociedade, associação ou representação comercial.</li></ul>
+      <p><b>2.2.</b> O presente Termo é celebrado por prazo indeterminado, iniciando-se na data de sua aceitação e assinatura digital.</p>
+      <p><b>2.3.</b> A rescisão poderá ser solicitada por qualquer das partes, mediante aviso prévio mínimo de 90 (noventa) dias, respeitando obrigatoriamente as diretrizes da plataforma Kwai.</p>
+      <p><b>2.4.</b> Para fins de desligamento formal, será observado o critério da plataforma Kwai, consistente em 90 (noventa) dias de inatividade, sendo este o meio válido para liberação do vínculo dentro da plataforma.</p>
+      <p><b>2.5.</b> Fica vedada qualquer tentativa de burlar as regras da plataforma, incluindo a criação de novas contas para evitar o cumprimento do prazo de inatividade.</p>`)}
+    ${sec(3, 'Obrigações da agência', `
+      <p>A AGÊNCIA poderá, a seu critério:</p>
+      <ul class="rg-lista"><li>a) Oferecer suporte técnico e operacional;</li><li>b) Fornecer orientação estratégica para crescimento;</li><li>c) Compartilhar boas práticas e direcionamento de conteúdo;</li><li>d) Acompanhar o desempenho do STREAMER, sem garantia de resultados.</li></ul>`)}
+    ${sec(4, 'Obrigações do streamer', `
+      <p>O STREAMER compromete-se a:</p>
+      <ul class="rg-lista"><li>a) Produzir conteúdo original, lícito e adequado às diretrizes da plataforma;</li><li>b) Cumprir integralmente as regras do Kwai;</li><li>c) Manter conduta ética e respeitosa;</li><li>d) Não prejudicar a imagem da AGÊNCIA;</li><li>e) Não utilizar práticas fraudulentas (contas falsas, manipulação de métricas, etc.).</li></ul>`)}
+    ${sec(5, 'Uso de imagem e conteúdo', `<p>O STREAMER autoriza, de forma gratuita, o uso de sua imagem, nome e conteúdo para fins de divulgação, marketing e portfólio da AGÊNCIA durante a vigência deste Termo.</p>`)}
+    ${sec(6, 'Confidencialidade', `<p>As partes comprometem-se a manter sigilo absoluto sobre informações estratégicas, comerciais e operacionais, não podendo divulgá-las sem autorização prévia por escrito.</p>`)}
+    ${sec(7, 'Condições financeiras', `
+      <p><b>7.1.</b> Este Termo não estabelece qualquer pagamento, salário ou remuneração por parte da AGÊNCIA ao STREAMER.</p>
+      <p><b>7.2.</b> Os ganhos do STREAMER são provenientes exclusivamente da plataforma Kwai, de acordo com as regras de monetização da mesma e o desempenho do STREAMER.</p>
+      <p><b>7.3.</b> A AGÊNCIA não garante resultados financeiros de nenhuma espécie.</p>`)}
+    ${sec(8, 'Concorrência desleal e parcerias', `
+      <p><b>8.1.</b> O STREAMER poderá atuar de forma independente, desde que não haja conflito com este Termo ou com as diretrizes da plataforma.</p>
+      <p><b>8.2.</b> É expressamente proibido:</p>
+      <ul class="rg-lista"><li>a) Prejudicar, direta ou indiretamente, a imagem da AGÊNCIA;</li><li>b) Compartilhar informações internas da AGÊNCIA com terceiros;</li><li>c) Aliciar streamers vinculados à AGÊNCIA;</li><li>d) Firmar parcerias com o objetivo de prejudicar a AGÊNCIA;</li><li>e) Praticar atos de concorrência desleal ou má-fé.</li></ul>
+      <p><b>8.3.</b> O descumprimento das proibições acima poderá resultar em rescisão imediata do presente Termo, sem prejuízo das medidas legais e judiciais cabíveis.</p>`)}
+    ${sec(9, 'Não aliciamento', `
+      <p><b>9.1.</b> O STREAMER compromete-se a não recrutar, influenciar, aliciar ou induzir streamers da AGÊNCIA a saírem ou migrarem para outras agências.</p>
+      <p><b>9.2.</b> Esta obrigação de não aliciamento permanece válida durante a vigência deste Termo e pelo prazo de 12 (doze) meses após o seu encerramento.</p>
+      <p><b>9.3.</b> Considera-se aliciamento, dentre outras condutas:</p>
+      <ul class="rg-lista"><li>a) Convites diretos ou indiretos para saída da agência;</li><li>b) Intermediação de contatos com concorrentes;</li><li>c) Tentativas de enfraquecer a base de agenciados da AGÊNCIA;</li><li>d) Parcerias ou consórcios para captação de streamers da AGÊNCIA.</li></ul>
+      <p><b>9.4.</b> O mero relacionamento social, sem qualquer intenção ou ato de captação, não configura violação desta cláusula.</p>
+      <p><b>9.5.</b> O descumprimento desta obrigação sujeita o infrator à rescisão imediata do contrato, além de perdas e danos e demais medidas judiciais cabíveis.</p>`)}
+    ${sec(10, 'Disposições gerais', `
+      <ul class="rg-lista"><li>a) As partes declaram atuar com total independência e autonomia;</li><li>b) Não há exclusividade de prestação de serviços, salvo se houver acordo específico em contrário;</li><li>c) O STREAMER é o único responsável pelo cumprimento de suas obrigações legais, fiscais e tributárias decorrentes de sua atividade;</li><li>d) Este instrumento representa o acordo integral entre as partes, revogando e substituindo quaisquer entendimentos anteriores.</li></ul>`)}
+    ${sec(11, 'Foro', `<p>Fica eleito o foro da comarca da sede da AGÊNCIA (DMaior Agency), com renúncia expressa a qualquer outro, por mais privilegiado que seja, para dirimir eventuais dúvidas ou conflitos oriundos deste Termo.</p>`)}
+    <div class="card rg-final">
+      <h3>Aceite e assinatura digital</h3>
+      <p>E, por estarem em perfeito acordo com as cláusulas estipuladas, as partes firmam o presente instrumento para que produza seus regulares efeitos de direito.</p>
+      <p>O aceite do STREAMER é feito eletronicamente, ao marcar a concordância com este Termo na candidatura da DMaior Agency, e fica registrado com data e hora.</p>
+    </div>`;
+
   const SECOES = [
-    { id: 'kwai', rotulo: 'Campanha Kwai', html: HTML_KWAI },
-    // { id: 'agencia', rotulo: 'Políticas da agência', html: HTML_AGENCIA },
+    { id: 'kwai',    rotulo: 'Diretrizes Kwai',  html: HTML_KWAI },
+    { id: 'agencia', rotulo: 'Termo da agência', html: HTML_AGENCIA },
   ];
+
+  // Usado pela candidatura (recrutamento.html) pra gravar QUAL versão foi aceita
+  window.DmaiorTermos = { versaoAgencia: TERMO_AGENCIA_VERSAO, versaoKwai: '2H2026' };
 
   const CSS = `
     regras-dmaior{display:block;width:100%;}
@@ -141,19 +205,27 @@
     /* Considerações finais */
     regras-dmaior .rg-final h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.98rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin:0 0 8px;}
     regras-dmaior .rg-final p{color:var(--muted);}
+
+    /* Listas a) b) c) do termo da agência (a letra já vem no texto) */
+    regras-dmaior .rg-lista{list-style:none;margin:0 0 10px;padding-left:10px;}
+    regras-dmaior .rg-lista li{margin-bottom:5px;}
   `;
 
   class RegrasDmaior extends HTMLElement {
     connectedCallback() {
       if (this._iniciado) return;
       this._iniciado = true;
-      this._ativa = SECOES[0].id;
+      // secao="agencia" abre direto num documento; o atributo unica mostra só
+      // ele, sem título/abas (é assim que o recrutamento usa, dentro da janela "Ler")
+      const pedida = this.getAttribute('secao');
+      this._ativa = SECOES.some(s => s.id === pedida) ? pedida : SECOES[0].id;
       this._render();
     }
 
     _render() {
       const sec = SECOES.find(s => s.id === this._ativa) || SECOES[0];
-      const abas = SECOES.length > 1
+      const unica = this.hasAttribute('unica');
+      const abas = !unica && SECOES.length > 1
         ? `<div class="rg-tabs" role="tablist">${SECOES.map(s =>
             `<button type="button" role="tab" class="rg-tab${s.id === sec.id ? ' on' : ''}" data-id="${s.id}" aria-selected="${s.id === sec.id}">${s.rotulo}</button>`
           ).join('')}</div>`
@@ -161,8 +233,8 @@
       this.innerHTML = `
         <style>${CSS}</style>
         <div class="rg-wrap">
-          <h1 class="rg-title">Regras e Diretrizes</h1>
-          <p class="rg-sub">Regulamento e diretrizes para streamers. Mantenha-se atualizado.</p>
+          ${unica ? '' : `<h1 class="rg-title">Regras e Diretrizes</h1>
+          <p class="rg-sub">Diretrizes da plataforma Kwai e Termo de Cooperação da DMaior Agency. Mantenha-se atualizado.</p>`}
           ${abas}
           ${sec.html}
         </div>`;

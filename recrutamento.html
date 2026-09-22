@@ -118,6 +118,26 @@
     .rc-termos { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 20px; }
     .rc-termos input[type=checkbox] { appearance: auto; -webkit-appearance: checkbox; margin-top: 3px; flex-shrink: 0; accent-color: var(--dm-cyan); width: 16px; height: 16px; cursor: pointer; }
     .rc-termos label { font-size: .83rem; color: var(--dm-text-muted); line-height: 1.5; cursor: pointer; }
+    .rc-termos .rc-ler { background: none; border: none; padding: 0; margin-left: 4px; font: inherit; font-size: .83rem; font-weight: 600; color: var(--dm-cyan); text-decoration: underline; cursor: pointer; white-space: nowrap; }
+
+    /* -- Janela "Ler" dos termos (Diretrizes Kwai / Termo da agência) --
+       O texto vem do <regras-dmaior> (js/components/regras-diretrizes.js), o
+       mesmo da aba Regras do painel. Ele usa as variáveis do painel, então
+       aqui elas são mapeadas pros tokens do site. */
+    .rc-termo-ov { position: fixed; inset: 0; z-index: 1100; background: rgba(4,5,8,.88); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity .22s; }
+    .rc-termo-ov.on { opacity: 1; pointer-events: auto; }
+    .rc-termo-dlg {
+      --text: var(--dm-text); --muted: var(--dm-text-muted); --border: var(--dm-border);
+      --cyan: var(--dm-cyan); --cyan-d: rgba(0,212,212,.12); --gold: #f0c040; --red: #f87171;
+      width: 100%; max-width: 760px; max-height: calc(100vh - 32px); display: flex; flex-direction: column;
+      background: var(--dm-bg-2, #1a1a2e); border: 1px solid var(--dm-border); border-radius: 18px; overflow: hidden;
+    }
+    .rc-termo-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--dm-border); }
+    .rc-termo-head b { flex: 1; font-family: var(--dm-font-title); font-size: 1rem; text-transform: uppercase; letter-spacing: .04em; color: var(--dm-text); }
+    .rc-termo-body { overflow-y: auto; overscroll-behavior: contain; padding: 16px; }
+    .rc-termo-body .card { background: var(--dm-bg-card); border: 1px solid var(--dm-border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    .rc-termo-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid var(--dm-border); }
+    .rc-termo-foot button { padding: 11px 18px; }
 
     /* -- Info chips -- */
     .rc-info-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
@@ -318,6 +338,16 @@
           </div>
 
           <div class="rc-termos">
+            <input type="checkbox" id="f-diretrizes">
+            <div><label for="f-diretrizes" id="lbl-diretrizes">Li e aceito as Diretrizes do Kwai (Regulamento da Campanha de Livestream).</label><button type="button" class="rc-ler" data-termo="kwai" id="ler-diretrizes">Ler</button></div>
+          </div>
+
+          <div class="rc-termos">
+            <input type="checkbox" id="f-termo">
+            <div><label for="f-termo" id="lbl-termo">Li e aceito o Termo de Cooperação da DMaior Agency.</label><button type="button" class="rc-ler" data-termo="agencia" id="ler-termo">Ler</button></div>
+          </div>
+
+          <div class="rc-termos">
             <input type="checkbox" id="f-aceite">
             <label for="f-aceite" data-i18n="consent">Autorizo o contato pela DMaior Agency e concordo que minhas informações sejam usadas exclusivamente para o processo de agenciamento.</label>
           </div>
@@ -392,6 +422,18 @@
     </div><!-- /rc-page -->
   </main>
 
+  <!-- -- Janela "Ler" dos termos (Diretrizes Kwai / Termo da agência) -- -->
+  <div class="rc-termo-ov" id="rc-termo-ov" role="dialog" aria-modal="true" aria-labelledby="rc-termo-titulo">
+    <div class="rc-termo-dlg">
+      <div class="rc-termo-head"><b id="rc-termo-titulo"></b><button type="button" class="rc-tut-close" id="rc-termo-fechar" aria-label="Fechar">&times;</button></div>
+      <div class="rc-termo-body" id="rc-termo-body"></div>
+      <div class="rc-termo-foot">
+        <button type="button" class="dm-btn-secondary" id="rc-termo-voltar">Fechar</button>
+        <button type="button" class="dm-btn-primary" id="rc-termo-aceitar">Li e aceito</button>
+      </div>
+    </div>
+  </div>
+
   <!-- -- Tutorial "Como aceitar o convite" -- -->
   <div class="rc-tut-overlay" id="rc-tut-overlay">
     <div class="rc-tut-dialog">
@@ -421,7 +463,8 @@
 
   <script defer charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
   <script defer charset=utf-8 src="js/utils/helpers.js"></script>
-  <script defer charset=utf-8 src="js/api.js?v=20260915-maioridade"></script>
+  <script defer charset=utf-8 src="js/api.js?v=20260922-termos"></script>
+  <script defer charset=utf-8 src="js/components/regras-diretrizes.js?v=20260922-termos"></script>
   <script defer charset=utf-8 src="js/auth.js"></script>
   <script defer charset=utf-8 src="js/router.js"></script>
   <script defer charset=utf-8 src="js/components/menu-mobile.js?v=20260911-logolocal"></script>
@@ -455,6 +498,54 @@
       if (lbl)  lbl.textContent  = ttIdade('check');
     }
     window.addEventListener('dmaior:preferences', localizarIdade);
+
+    // Aceite dos 2 termos (Diretrizes Kwai + Termo de Cooperação da agência).
+    // O texto dos termos é só em português (documento jurídico); aqui
+    // traduzimos só os rótulos das caixas e as mensagens.
+    const TERMOS_I18N = {
+      'pt-BR': { kwai: 'Li e aceito as Diretrizes do Kwai (Regulamento da Campanha de Livestream).', agencia: 'Li e aceito o Termo de Cooperação da DMaior Agency.', ler: 'Ler', erroKwai: 'Você precisa aceitar as Diretrizes do Kwai.', erroAgencia: 'Você precisa aceitar o Termo de Cooperação da DMaior Agency.', tituloKwai: 'Diretrizes do Kwai', tituloAgencia: 'Termo de Cooperação', fechar: 'Fechar', aceitar: 'Li e aceito' },
+      en:      { kwai: 'I have read and accept the Kwai Guidelines (Livestream Campaign Rules).', agencia: 'I have read and accept the DMaior Agency Cooperation Agreement.', ler: 'Read', erroKwai: 'You must accept the Kwai Guidelines.', erroAgencia: 'You must accept the DMaior Agency Cooperation Agreement.', tituloKwai: 'Kwai Guidelines', tituloAgencia: 'Cooperation Agreement', fechar: 'Close', aceitar: 'I have read and accept' },
+      es:      { kwai: 'He leído y acepto las Directrices de Kwai (Reglamento de la Campaña de Livestream).', agencia: 'He leído y acepto el Término de Cooperación de DMaior Agency.', ler: 'Leer', erroKwai: 'Debes aceptar las Directrices de Kwai.', erroAgencia: 'Debes aceptar el Término de Cooperación de DMaior Agency.', tituloKwai: 'Directrices de Kwai', tituloAgencia: 'Término de Cooperación', fechar: 'Cerrar', aceitar: 'He leído y acepto' },
+      zh:      { kwai: '我已阅读并接受 Kwai 准则（直播活动规则）。', agencia: '我已阅读并接受 DMaior Agency 合作条款。', ler: '阅读', erroKwai: '你必须接受 Kwai 准则。', erroAgencia: '你必须接受 DMaior Agency 合作条款。', tituloKwai: 'Kwai 准则', tituloAgencia: '合作条款', fechar: '关闭', aceitar: '我已阅读并接受' },
+    };
+    const ttTermos = key => (TERMOS_I18N[window.DMaiorPrefs?.getLang?.() || 'pt-BR'] || TERMOS_I18N['pt-BR'])[key];
+    function localizarTermos() {
+      const set = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+      set('lbl-diretrizes', ttTermos('kwai'));
+      set('lbl-termo', ttTermos('agencia'));
+      set('ler-diretrizes', ttTermos('ler'));
+      set('ler-termo', ttTermos('ler'));
+      set('rc-termo-voltar', ttTermos('fechar'));
+      set('rc-termo-aceitar', ttTermos('aceitar'));
+    }
+    window.addEventListener('dmaior:preferences', localizarTermos);
+
+    // Janela "Ler": mostra o documento e o botão "Li e aceito" já marca a caixa
+    const CAIXA_DO_TERMO = { kwai: 'f-diretrizes', agencia: 'f-termo' };
+    let _termoAberto = null;
+    function abrirTermo(qual) {
+      _termoAberto = qual;
+      $('rc-termo-titulo').textContent = ttTermos(qual === 'kwai' ? 'tituloKwai' : 'tituloAgencia');
+      $('rc-termo-body').innerHTML = '<regras-dmaior unica secao="' + qual + '"></regras-dmaior>';
+      $('rc-termo-body').scrollTop = 0;
+      $('rc-termo-ov').classList.add('on');
+      document.documentElement.style.overflow = 'hidden';
+    }
+    function fecharTermo() {
+      $('rc-termo-ov').classList.remove('on');
+      document.documentElement.style.overflow = '';
+      _termoAberto = null;
+    }
+    document.querySelectorAll('.rc-ler[data-termo]').forEach(b => b.addEventListener('click', () => abrirTermo(b.dataset.termo)));
+    $('rc-termo-fechar').addEventListener('click', fecharTermo);
+    $('rc-termo-voltar').addEventListener('click', fecharTermo);
+    $('rc-termo-ov').addEventListener('click', e => { if (e.target === $('rc-termo-ov')) fecharTermo(); });
+    $('rc-termo-aceitar').addEventListener('click', () => {
+      const caixa = $(CAIXA_DO_TERMO[_termoAberto]);
+      if (caixa) caixa.checked = true;
+      fecharTermo();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('rc-termo-ov').classList.contains('on')) fecharTermo(); });
     const WHATSAPP_AGENCIA = '5517997176407';
     const AGENCIA_KWAI_ID = 'KWAIRES';
 
@@ -535,6 +626,7 @@
         if (font) font.value = window.DMaiorPrefs.getFontSize();
       }
       localizarIdade();
+      localizarTermos();
       if (lang) lang.addEventListener('change', e => window.DMaiorPrefs?.setLanguage(e.target.value));
       if (font) font.addEventListener('change', e => window.DMaiorPrefs?.setFontSize(e.target.value));
     }
@@ -705,11 +797,15 @@
       const categoria = $('f-categoria').value;
       const maiorIdade = $('f-idade').checked;
       const aceite    = $('f-aceite').checked;
+      const aceiteDiretrizes = $('f-diretrizes').checked;
+      const aceiteTermo      = $('f-termo').checked;
 
       if (!nome)            { alerta('alerta-3', 'error', tt('informName')); return; }
       if (whatsapp.length < 10) { alerta('alerta-3', 'error', tt('invalidWhatsapp')); return; }
       if (!categoria)       { alerta('alerta-3', 'error', tt('selectCategory')); return; }
       if (!maiorIdade)      { alerta('alerta-3', 'error', ttIdade('erro')); return; }
+      if (!aceiteDiretrizes) { alerta('alerta-3', 'error', ttTermos('erroKwai')); return; }
+      if (!aceiteTermo)      { alerta('alerta-3', 'error', ttTermos('erroAgencia')); return; }
       if (!aceite)          { alerta('alerta-3', 'error', tt('acceptTerms')); return; }
 
       $('btn-enviar').disabled = true;
@@ -725,6 +821,9 @@
           agente_id: _agenteVinculo?.id || null,
           aceite: true,
           maior_idade: true,
+          aceite_diretrizes_kwai: true,
+          aceite_termo_agencia: true,
+          termo_agencia_versao: window.DmaiorTermos?.versaoAgencia || null,
         });
 
         if (!r.ok) {
@@ -918,6 +1017,7 @@
       $('f-uid').value = ''; $('f-nome').value = '';
       $('f-whatsapp').value = ''; $('f-categoria').value = '';
       $('f-aceite').checked = false; $('f-idade').checked = false;
+      $('f-diretrizes').checked = false; $('f-termo').checked = false;
       irParaEtapa(1);
     });
 

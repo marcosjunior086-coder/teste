@@ -108,6 +108,8 @@ class DimaiorAdmin extends HTMLElement {
     const html=document.documentElement;
     const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); html.style.overflow=''; };
     const openSheet=()=>{ const q=s.getElementById('admMsBusca'); if(q) q.value=''; this._montarMenuMobile(); sheet.scrollTop=0; sheet.classList.add('on'); fab.classList.add('on'); html.style.overflow='hidden'; };
+    this._msAbrir=openSheet;
+    s.getElementById('admVoltar')?.addEventListener('click',openSheet);
     this._msGo=p=>{ this._ir(p); closeSheet(); this._syncMobileNav(p); try{window.scrollTo({top:0,behavior:'smooth'});}catch(_){}};
     this._msAparencia=()=>{ closeSheet(); s.getElementById('btnAparencia')?.click(); };
     mnav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>this._msGo(b.dataset.p)));
@@ -361,6 +363,7 @@ class DimaiorAdmin extends HTMLElement {
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
     this._syncMobileNav?.(pag);
+    const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
     const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa[pag]?.();
@@ -5302,9 +5305,13 @@ class DimaiorAdmin extends HTMLElement {
     .cfg-chave,.lv-cfg-label,.mc label,.mc-field label{color:var(--t2);}
 
     /* ── Navegação inferior flutuante (mobile) — padrão do demo/agente ── */
-    .mnav,.msheet,.fab{display:none;}
+    .mnav,.msheet,.fab,.pm-voltar{display:none;}
     @media(max-width:700px){
       .btn-ham{display:none !important;}
+      /* Seta de voltar no topo de toda página (menos Dashboard): reabre o menu do "+" */
+      .pm-voltar{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:2px 0 14px;cursor:pointer;}
+      .pm-voltar svg{width:20px;height:20px;fill:currentColor;}
+      .pm-voltar[hidden]{display:none;}
       .content{padding-bottom:118px;}
       .mnav{display:flex;align-items:center;justify-content:space-between;position:fixed;left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:280;height:60px;padding:0 24px;color:var(--panel-solid);filter:drop-shadow(0 12px 26px rgba(4,6,20,.5));}
       .mnav-bg{position:absolute;inset:0;width:100%;height:100%;display:block;}
@@ -5447,6 +5454,7 @@ class DimaiorAdmin extends HTMLElement {
             )}
           </div>
           <div class="content">
+            <button type="button" class="pm-voltar" id="admVoltar" hidden><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Voltar ao menu</button>
             <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash',`<div style="display:flex;align-items:center;gap:8px;margin-left:6px" title="Quando ativo, os números de diamantes/streamers ao vivo/horas vêm direto da Kwai (mais preciso, já soma sub-agências) em vez do nosso banco"><span style="font-size:11px;color:var(--t3);white-space:nowrap">Dados oficiais Kwai</span><label class="tog-switch"><input type="checkbox" id="dashFonteToggle"><span class="tog-slider"></span></label></div>`)}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
             <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive',`<button class="btn btn-o" id="btnLvCfg">${this._ico('settings',13)} Configurações<span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span></button>`)}<div id="gLives">${this._loading()}</div></div>
             <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank',`<button class="btn btn-o" id="btnOcultarRanking">${this._ico('settings',13)} Opções</button>`)}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
