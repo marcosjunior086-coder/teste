@@ -355,7 +355,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'gestao',streamersPremium:'gestao',statusStreamers:'gestao',uids:'gestao',buscaUid:'gestao',metricas:'gestao',recrutamento:'gestao',convites:'gestao',agentes:'gestao',agenteMigracoes:'gestao',solicitacoesFormularios:'gestao',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'sistema',comunicados:'sistema',notificacoes:'sistema',votacoes:'sistema',pkDiario:'sistema',historicoLive:'sistema',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
@@ -5410,29 +5410,32 @@ class DimaiorAdmin extends HTMLElement {
         <div class="msheet" id="admMsheet" role="dialog" aria-modal="true" aria-label="Menu"><div class="pm-in"><div class="pm-top"><button type="button" class="pm-back" id="admMsBack" aria-label="Fechar menu"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button><span class="top-chip">ADMIN MASTER</span></div><h2 class="pm-h1">Menu</h2><label class="pm-busca">${this._ico('search',18)}<input id="admMsBusca" type="search" placeholder="Buscar no menu…" autocomplete="off" enterkeyhint="go" aria-label="Buscar no menu"></label><div class="pm-sobusca-some" id="admMsAtencao"></div><div id="admMsheetNav"></div><div class="pm-vazio" id="admMsVazio" hidden>Nada encontrado no menu.</div><div class="pm-fim pm-sobusca-some"><button type="button" class="pm-btn" id="admMsSite">${this._ico('home',18)} Voltar ao site</button><button type="button" class="pm-btn sair" id="admMsSair">${this._ico('logout',18)} Sair</button></div><div class="pm-ver">DMaior Agency · Painel Admin</div></div></div>
         <div class="shell">
           <div class="side" id="side">
+            ${/* Mesmas 7 categorias e nomes do menu do "+" no celular (MENU_GRUPOS) */''}
             ${navSec('principal','Principal',
               ni('dashboard','dashboard','Dashboard')+
               ni('live','aoVivo','Ao Vivo',`<span class="nb live" id="nbLive">0</span>`)
             ,true)}
-            ${navSec('ranking','Ranking',
-              ni('trophy','ranking','Ranking Mês')+
+            ${navSec('ranking','Ranking e resultados',
+              ni('trophy','ranking','Ranking do Mês')+
               ni('chart','diario','Resultado Diário')+
               ni('trend','desempenho','Desempenho')+
               ni('history','historico','Histórico')+
               ni('calendar','mesesRanking','Meses Ranking')+
               ni('bars_up','dashDesemp','Evolução Mensal')
             )}
-            ${navSec('gestao','Gestão',
+            ${navSec('streamers','Streamers',
               ni('users','streamers','Streamers')+
               ni('star','streamersPremium','Streamers Premium')+
               ni('check_c','statusStreamers','Status de Streamers')+
-              ni('key_uid','uids','Autorização UIDs')+
+              ni('key_uid','uids','Autorização de UIDs')+
               ni('search','buscaUid','Buscar UID Kwai')+
-              ni('metrics','metricas','Métricas')+
+              ni('metrics','metricas','Métricas')
+            )}
+            ${navSec('recrutamento','Recrutamento e agentes',
               ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)+
               ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)+
               ni('users','agentes','Agentes')+
-              ni('refresh','agenteMigracoes','Migrações Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)+
+              ni('refresh','agenteMigracoes','Migrações de Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)+
               ni('clipboard','solicitacoesFormularios','Solicitações de Formulários',`<span class="nb gold" id="nbSolicForm" style="display:none">0</span>`)
             )}
             ${navSec('financeiro','Financeiro',
@@ -5441,13 +5444,15 @@ class DimaiorAdmin extends HTMLElement {
               ni('award','premios','Prêmios')+
               ni('star','tickets','Tickets',`<span class="nb gold" id="nbTicketsResgates" style="display:none">0</span>`)
             )}
-            ${navSec('sistema','Sistema',
-              ni('bolt','impulsoCtrl','Ctrl. Impulso')+
+            ${navSec('engajamento','Engajamento',
+              ni('bolt','impulsoCtrl','Controle do Impulso')+
               ni('bell','comunicados','Comunicados')+
               ni('megaphone','notificacoes','Notificações')+
               ni('vote','votacoes','Votações')+
               ni('zap','pkDiario','PK Diário')+
-              ni('play_circle','historicoLive','Histórico de Live')+
+              ni('play_circle','historicoLive','Histórico de Live')
+            )}
+            ${navSec('sistema','Sistema',
               ni('server','monitor','Monitor Kwai')+
               ni('search','logs','Auditoria')+
               ni('settings','config','Configurações')+
