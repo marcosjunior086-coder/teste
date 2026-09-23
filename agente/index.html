@@ -385,6 +385,8 @@
       padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.07);
     }
     .live-head .avatar, .live-head .no-foto { width: 38px; height: 38px; }
+    /* Selo da sub-agência no card (vazio = agência principal) */
+    .live-org { display: inline-block; margin-top: 3px; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; background: rgba(240,192,64,.14); border: 1px solid rgba(240,192,64,.4); color: var(--gold); }
     .live-name {
       font-family: var(--font-t); font-size: 16px; font-weight: 700; color: var(--text);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -1856,6 +1858,7 @@ function liveCard(l) {
           <div style="min-width:0">
             <div class="live-name">${esc(nome)}</div>
             <div class="live-id">ID:${esc(kwai || uid || '')}</div>
+            ${l.org_nome ? `<span class="live-org" title="Live de sub-agência">${esc(l.org_nome)}</span>` : ''}
           </div>
         </div>
         <div class="live-metrics">

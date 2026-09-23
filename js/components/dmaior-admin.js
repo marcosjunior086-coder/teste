@@ -635,6 +635,16 @@ class DimaiorAdmin extends HTMLElement {
     else if(ordenar==='presentes') lista.sort((a,b)=>(Number(b.gifts||0))-(Number(a.gifts||0)));
     else if(ordenar==='horas') lista.sort((a,b)=>(Number(a.inicio||Date.now()))-(Number(b.inicio||Date.now())));
 
+    // ── Filtro Todas / Principal / <sub> (lives das sub-agências vêm do
+    // radar separado — ver _livesSubs no Worker admin) ──────────────────────
+    const subsInfo=Array.isArray(d.subs)?d.subs:[];
+    const orgDe=l=>l.org_id||'principal';
+    let orgSel=this._livesOpts.org||'todas';
+    if(orgSel!=='todas'&&orgSel!=='principal'&&!subsInfo.some(x=>x.org_id===orgSel))orgSel='todas';
+    if(orgSel!=='todas')lista=lista.filter(l=>orgDe(l)===orgSel);
+    const contaOrg=id=>d.ao_vivo.filter(l=>orgDe(l)===id).length;
+    const orgsHtml=subsInfo.length?`<div class="lv-orgs">${[['todas','Todas',d.ao_vivo.length],['principal','Principal',contaOrg('principal')],...subsInfo.map(x=>[x.org_id,x.nome,contaOrg(x.org_id)])].map(([k,l,n])=>`<button type="button" class="lv-org-btn ${orgSel===k?'on':''}" data-org="${this._esc(k)}">${this._esc(l)}<b>${n}</b></button>`).join('')}${subsInfo.filter(x=>!x.ok&&x.erro).map(x=>`<span class="lv-org-aviso" title="${this._esc(x.erro)}">${this._ico('warning',11)} ${this._esc(x.nome)}: sessão indisponível</span>`).join('')}</div>`:'';
+
     // ── SVGs de colunas ──────────────────────────────────────────────────────
     const svgIcos={1:`<svg width="4"  height="14" viewBox="0 0 4  14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/></svg>`,2:`<svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/><rect x="6"  y="1" width="4" height="12" rx="1"/></svg>`,3:`<svg width="16" height="14" viewBox="0 0 16 14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/><rect x="6"  y="1" width="4" height="12" rx="1"/><rect x="12" y="1" width="4" height="12" rx="1"/></svg>`,4:`<svg width="22" height="14" viewBox="0 0 22 14" fill="currentColor"><rect x="0" y="1" width="4" height="12" rx="1"/><rect x="6"  y="1" width="4" height="12" rx="1"/><rect x="12" y="1" width="4" height="12" rx="1"/><rect x="18" y="1" width="4" height="12" rx="1"/></svg>`};
     const colOpts=isMobile?[{n:1},{n:2}]:[{n:2},{n:3},{n:4}];
@@ -716,6 +726,7 @@ class DimaiorAdmin extends HTMLElement {
         </div>
       </div>
 
+      ${orgsHtml}
       <!-- Grid das lives -->
       ${lista.length
         ? `<div class="lives-lista" id="livesLista" style="grid-template-columns:repeat(${cols},1fr);gap:14px">${lista.map((sv,i)=>this._livesCard(sv,i,modo,estiloEfetivo)).join('')}</div>`
@@ -744,6 +755,13 @@ class DimaiorAdmin extends HTMLElement {
         // Mobile com >1 col + estilo horizontal → força 1 coluna
         if(isMobile && this._livesOpts.estilo===1 && this._livesOpts.cols>1)
           this._livesOpts.cols=1;
+        if(this._livesData)this._renderLives(this._livesData,s.getElementById('gLives'));
+      });
+    });
+    // ── Bind filtro de org ───────────────────────────────────────────────────
+    el.querySelectorAll('.lv-org-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        this._livesOpts.org=btn.dataset.org;
         if(this._livesData)this._renderLives(this._livesData,s.getElementById('gLives'));
       });
     });
@@ -805,7 +823,7 @@ class DimaiorAdmin extends HTMLElement {
 
     const cardClass=`live-card-full${estilo===2?' lc-estilo2':' lc-horizontal'}`;
     return`<div class="${cardClass}">${mediaHtml}<div class="lc-info">
-      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'—')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'—')}</div></div></div>
+      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'—')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'—')}</div>${sv.org_id&&sv.org_id!=='principal'?`<span class="lc-org" title="Live de sub-agência">${this._esc(sv.org_nome||'Sub')}</span>`:''}</div></div>
       <div class="lc-stats"><div class="lc-stat-row">${this._ico('users',12)}<span class="lc-stat-lbl">Seguidores</span><strong>${Number(sv.fans||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('heart',12)}<span class="lc-stat-lbl">Curtidas</span><strong>${Number(sv.likes||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('gift',12)}<span class="lc-stat-lbl">Presentes</span><strong style="color:var(--gold)">${sv.gifts||0}</strong></div></div>
       <div class="lc-footer"><div class="lc-espects"><div style="font-size:11px;color:var(--t3);font-family:var(--dm-font-body,'Exo 2',sans-serif)">Espectadores</div><div style="font-size:24px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.espectadores||0}</div></div><div class="lc-acoes">${sv.stream_url?`<button class="btn btn-g btn-sm lc-play-btn" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${this._ico('live',12)} Assistir</button>`:''}${sv.jump_url&&/^https?:\/\//i.test(sv.jump_url)?`<a href="${this._esc(sv.jump_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="text-decoration:none">${this._ico('live',11)} Kwai</a>`:''}</div></div>
     </div></div>`;
@@ -1395,11 +1413,14 @@ class DimaiorAdmin extends HTMLElement {
       painel_carteira_ativa:{label:'Carteira',hint:'Desligado: a aba Carteira some do painel de todos os streamers e o saque fica bloqueado. Saldo e créditos (inclusive premiação) continuam normais — só não aparecem até religar.',bool:true,grupo:'painel'},
       painel_impulso_ativa:{label:'Impulso',hint:'Desligado: a aba Impulso some do painel de todos os streamers, novos pedidos são recusados e os agendamentos automáticos ficam pausados (voltam sozinhos ao religar).',bool:true,grupo:'painel'},
     };
+    // Lives das sub-agências: 1 linha lives_sub_<orgId>_visivel por sub
+    // (descricao = nome da sub). Nova sub = nova linha no sistema_config.
+    d.config.forEach(c=>{const m=/^lives_sub_(\d+)_visivel$/.exec(c.chave);if(!m)return;const nome=c.descricao||('Sub '+m[1]);labels[c.chave]={label:`${nome}: mostrar lives no site`,hint:`Ligado: as lives da ${nome} aparecem no site (widget de lives e contador "ao vivo"). Desligado: só aparecem no Ao Vivo do admin e pros agentes vinculados.`,bool:true,grupo:'subs'};});
     const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;};
     const _cfgRow=c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const isBool=lbl?.bool;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';const campo=isBool?`<label class="tog-switch"><input type="checkbox" class="cfg-bool-inp" id="cfg_${this._esc(c.chave)}" ${c.valor==='true'?'checked':''}><span class="tog-slider"></span></label>`:isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`;return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${campo}${isRO||isBool?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;};
     const _cfgHead=(ico,txt)=>`<div style="padding:12px 14px;background:var(--sunk);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico(ico,12)} ${txt}</div>`;
-    const cfgPainel=d.config.filter(c=>labels[c.chave]?.grupo==='painel'),cfgResto=d.config.filter(c=>labels[c.chave]?.grupo!=='painel');
-    el.innerHTML=(cfgPainel.length?_cfgHead('users','<strong style="color:var(--t2)">Painel do Streamer</strong> — liga/desliga recursos para <strong>todos</strong> os streamers.')+cfgPainel.map(_cfgRow).join(''):'')+_cfgHead('settings','Configurações financeiras e de exibição.')+cfgResto.map(_cfgRow).join('');
+    const cfgPainel=d.config.filter(c=>labels[c.chave]?.grupo==='painel'),cfgSubs=d.config.filter(c=>labels[c.chave]?.grupo==='subs'),cfgResto=d.config.filter(c=>!['painel','subs'].includes(labels[c.chave]?.grupo));
+    el.innerHTML=(cfgPainel.length?_cfgHead('users','<strong style="color:var(--t2)">Painel do Streamer</strong> — liga/desliga recursos para <strong>todos</strong> os streamers.')+cfgPainel.map(_cfgRow).join(''):'')+(cfgSubs.length?_cfgHead('live','<strong style="color:var(--t2)">Lives das sub-agências</strong>: mostrar ou não no site.')+cfgSubs.map(_cfgRow).join(''):'')+_cfgHead('settings','Configurações financeiras e de exibição.')+cfgResto.map(_cfgRow).join('');
     d.config.filter(c=>labels[c.chave]?.bool).forEach(c=>{
       s.getElementById(`cfg_${c.chave}`)?.addEventListener('change',async e=>{
         if(labels[c.chave].grupo==='painel'&&!e.target.checked&&!confirm(`Desligar "${labels[c.chave].label}" para TODOS os streamers?\n\n${labels[c.chave].hint.replace(/^Desligado: /,'')}`)){e.target.checked=true;return;}
@@ -5304,6 +5325,13 @@ class DimaiorAdmin extends HTMLElement {
     .rk-sub,.hist-meta,.saque-meta,.uid-row-meta{color:var(--t3);}
     /* Rótulos que eram só ciano fixo -> neutros (ficavam laranja/rosa gritante nos temas) */
     .cfg-chave,.lv-cfg-label,.mc label,.mc-field label{color:var(--t2);}
+    /* Ao Vivo: filtro Todas/Principal/<sub> + selo da sub no card */
+    .lv-orgs{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+    .lv-org-btn{padding:6px 12px;border-radius:99px;border:1px solid var(--brd);background:transparent;color:var(--t2);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;cursor:pointer}
+    .lv-org-btn b{margin-left:4px;color:var(--t1)}
+    .lv-org-btn.on{background:var(--cyan-d);border-color:var(--cyan);color:var(--cyan)}.lv-org-btn.on b{color:var(--cyan)}
+    .lv-org-aviso{font-size:10.5px;color:var(--gold);display:inline-flex;gap:4px;align-items:center}
+    .lc-org{display:inline-block;margin-top:4px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.4);color:var(--gold)}
 
     /* ── Navegação inferior flutuante (mobile) — padrão do demo/agente ── */
     .mnav,.msheet,.fab,.pm-voltar{display:none;}
