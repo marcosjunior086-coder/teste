@@ -714,6 +714,8 @@
             .viola-prova audio{display:block;width:100%;margin-top:10px;}
             .viola-ok{color:var(--green)!important;}
             .viola-cod{font-size:.7rem;color:var(--muted);}
+            .viola-video-info{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;font-size:.78rem;color:var(--text);}
+            .viola-video-info small{color:var(--muted);}
             .viola-faixa .viola-cod{color:inherit;opacity:.8;}
             .viola-nota{font-size:.74rem;color:var(--muted);margin-top:12px;line-height:1.5;}
             .dm-comunicado-txt{font-size:0.78rem;color:var(--muted);line-height:1.55;flex:1;}
@@ -2645,6 +2647,11 @@
             if(!r.ok) return falha('Não foi possível carregar a prova agora.');
             if(/^(image|audio|video)\//.test(ct)) return mostrar(await r.blob(), ct);
             const texto = (await r.text()).replace(/\\\//g, '/');
+            // Vídeo da Kwai: roteiro no formato do flv.js ({type:'flv', segments}).
+            let rot = null; try { rot = JSON.parse(texto); } catch(e) {}
+            if(rot && rot.type === 'flv' && Array.isArray(rot.segments) && rot.segments.length) {
+                return this._provaVideoFlv(rot, base, alvo, falha);
+            }
             const urls = [...new Set(texto.match(/https?:\/\/[^"'\s\\]+/g) || [])];
             const direto = urls.find(u => /\.(mp4|webm|mp3|m4a|aac|wav|ogg)(\?|$)/i.test(u));
             if(!direto) return falha('Essa prova está num formato que ainda não abre no painel. Peça pra agência te mostrar.');
@@ -2654,6 +2661,47 @@
             const tipo = /^(audio|video)\//.test(ct2) ? ct2 : (/\.(mp3|m4a|aac|wav|ogg)(\?|$)/i.test(direto) ? 'audio/mpeg' : 'video/mp4');
             mostrar(await r2.blob(), tipo);
         }catch(e){ falha('Não foi possível carregar a prova agora.'); }
+    }
+
+    // Vídeo-prova: pedaços .flv que o navegador não toca sozinho → mpegts.js
+    // (versão fixa + integridade SRI; cdn.jsdelivr.net já liberado na CSP).
+    // Cada pedaço passa pelo nosso worker (/api/violacoes/prova?...&sub=URL).
+    // Pesado (~20 MB a cada 15 s) → só baixa depois que ele toca no botão.
+    _carregarMpegts(){
+        if(window.mpegts) return Promise.resolve(window.mpegts);
+        return this._mpegtsPromise ||= new Promise((ok, erro) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/mpegts.js@1.8.2/dist/mpegts.js';
+            s.integrity = 'sha384-sQp+4cJv0jChNCYvgy6W0RSfQZB/w6d3ZTDoIBlY4Uorfw4PLS56T2yM2z47bSkl';
+            s.crossOrigin = 'anonymous';
+            s.onload = () => window.mpegts ? ok(window.mpegts) : erro(new Error('mpegts'));
+            s.onerror = () => { this._mpegtsPromise = null; erro(new Error('mpegts')); };
+            document.head.appendChild(s);
+        });
+    }
+    _provaVideoFlv(rot, base, alvo, falha){
+        const mb = Math.max(1, Math.round(rot.segments.reduce((t, x) => t + (Number(x.fileSize) || 0), 0) / 1048576));
+        const seg = Math.round((Number(rot.duration) || rot.segments.reduce((t, x) => t + (Number(x.duration) || 0), 0)) / 1000);
+        const dur = `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}`;
+        alvo.innerHTML = `<div class="viola-video-info">Vídeo de ${dur} · ≈ ${mb} MB <small>(use Wi-Fi se puder)</small><button type="button" class="btn-sm">Carregar vídeo</button></div>`;
+        alvo.querySelector('button').addEventListener('click', async () => {
+            alvo.innerHTML = '<p class="txn-empty">Carregando vídeo...</p>';
+            let mpegts;
+            try { mpegts = await this._carregarMpegts(); } catch(e) { return falha('Não foi possível carregar o player de vídeo agora.'); }
+            if(!mpegts.isSupported()) return falha('Este celular/navegador não consegue tocar esse vídeo. No iPhone precisa do iOS 17.1 ou mais novo; no computador funciona no Chrome/Edge.');
+            const video = document.createElement('video');
+            video.controls = true; video.playsInline = true; video.disableRemotePlayback = true;
+            alvo.innerHTML = ''; alvo.appendChild(video);
+            const player = mpegts.createPlayer({
+                type: 'flv', isLive: false, cors: true, duration: Number(rot.duration) || undefined,
+                hasAudio: rot.hasAudio !== false, hasVideo: rot.hasVideo !== false,
+                segments: rot.segments.map(x => ({ url: `${base}&sub=${encodeURIComponent(x.url)}`, duration: Number(x.duration) || 0, filesize: Number(x.fileSize) || undefined })),
+            }, { headers: { Authorization: `Bearer ${this.sessionToken}` }, enableWorker: false, lazyLoad: false });
+            player.on(mpegts.Events.ERROR, (tipo, det) => { console.warn('[prova vídeo]', tipo, det); try { player.destroy(); } catch(e) {} falha('Não foi possível tocar o vídeo agora.'); });
+            player.attachMediaElement(video);
+            player.load();
+            video.play().catch(() => {});
+        });
     }
 
     goTickets(){

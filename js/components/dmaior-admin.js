@@ -1337,6 +1337,41 @@ class DimaiorAdmin extends HTMLElement {
   }
   // Prova: imagem direto; vídeo/áudio da Kwai chegam como "roteiro" JSON —
   // procura dentro dele um arquivo que o navegador toca sozinho.
+  // Vídeo-prova (.flv em pedaços) → mpegts.js, versão fixa + SRI. Cada pedaço
+  // passa pelo worker admin (/admin/violacoes/prova?chave=…&sub=URL). ~20 MB a
+  // cada 15 s → só baixa depois do clique.
+  _carregarMpegts(){
+    if(window.mpegts) return Promise.resolve(window.mpegts);
+    return this._mpegtsPromise||=new Promise((ok,erro)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/mpegts.js@1.8.2/dist/mpegts.js';
+      s.integrity='sha384-sQp+4cJv0jChNCYvgy6W0RSfQZB/w6d3ZTDoIBlY4Uorfw4PLS56T2yM2z47bSkl';
+      s.crossOrigin='anonymous';
+      s.onload=()=>window.mpegts?ok(window.mpegts):erro(new Error('mpegts'));
+      s.onerror=()=>{this._mpegtsPromise=null;erro(new Error('mpegts'));};
+      document.head.appendChild(s);
+    });
+  }
+  _provaVideoFlvAdm(rot,base,alvo,falha){
+    const mb=Math.max(1,Math.round(rot.segments.reduce((t,x)=>t+(Number(x.fileSize)||0),0)/1048576));
+    const seg=Math.round((Number(rot.duration)||rot.segments.reduce((t,x)=>t+(Number(x.duration)||0),0))/1000);
+    const dur=`${Math.floor(seg/60)}:${String(seg%60).padStart(2,'0')}`;
+    alvo.innerHTML=`<div class="viol-acoes" style="margin-top:8px"><span class="viol-lin">Vídeo de ${dur} · ≈ ${mb} MB</span><button class="btn btn-o">Carregar vídeo</button></div>`;
+    alvo.querySelector('button').addEventListener('click',async()=>{
+      alvo.innerHTML=this._loading();
+      let mpegts; try{mpegts=await this._carregarMpegts();}catch{return falha('Não foi possível carregar o player de vídeo agora.');}
+      if(!mpegts.isSupported()) return falha('Este navegador não consegue tocar esse vídeo (no iPhone precisa do iOS 17.1+; no computador use Chrome/Edge).');
+      const video=document.createElement('video'); video.controls=true; video.playsInline=true; video.disableRemotePlayback=true;
+      alvo.innerHTML=''; alvo.appendChild(video);
+      const player=mpegts.createPlayer({
+        type:'flv',isLive:false,cors:true,duration:Number(rot.duration)||undefined,
+        hasAudio:rot.hasAudio!==false,hasVideo:rot.hasVideo!==false,
+        segments:rot.segments.map(x=>({url:`${base}&sub=${encodeURIComponent(x.url)}`,duration:Number(x.duration)||0,filesize:Number(x.fileSize)||undefined})),
+      },{headers:{Authorization:`Bearer ${this._token}`},enableWorker:false,lazyLoad:false});
+      player.on(mpegts.Events.ERROR,(tipo,det)=>{console.warn('[prova vídeo]',tipo,det);try{player.destroy();}catch{}falha('Não foi possível tocar o vídeo agora.');});
+      player.attachMediaElement(video); player.load(); video.play().catch(()=>{});
+    });
+  }
   async _carregarProvaViolacaoAdm(chave,alvo){
     if(!alvo) return;
     alvo.innerHTML=this._loading();
@@ -1353,6 +1388,9 @@ class DimaiorAdmin extends HTMLElement {
       if(!r.ok) return falha('Não foi possível carregar a prova agora.');
       if(/^(image|audio|video)\//.test(ct)) return mostrar(await r.blob(),ct);
       const texto=(await r.text()).replace(/\\\//g,'/');
+      // Vídeo da Kwai: roteiro no formato do flv.js ({type:'flv', segments}).
+      let rot=null; try{rot=JSON.parse(texto);}catch{}
+      if(rot&&rot.type==='flv'&&Array.isArray(rot.segments)&&rot.segments.length) return this._provaVideoFlvAdm(rot,base,alvo,falha);
       const urls=[...new Set(texto.match(/https?:\/\/[^"'\s\\]+/g)||[])];
       const direto=urls.find(u=>/\.(mp4|webm|mp3|m4a|aac|wav|ogg)(\?|$)/i.test(u));
       if(!direto){ console.info('[violações] roteiro da prova (formato não suportado):',texto.slice(0,2000)); return falha('Formato de prova ainda não suportado no painel (veja no Voyager). O conteúdo bruto foi registrado no console do navegador.'); }
