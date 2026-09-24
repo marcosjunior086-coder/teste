@@ -18,6 +18,7 @@ const Auth = {
     nome:         'dm_nome',
     atalhoAdmin:  'dm_atalho_admin',
     atalhoAgente: 'dm_atalho_agente',
+    atalhoSub:    'dm_atalho_sub',
   },
 
   /**

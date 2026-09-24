@@ -39,7 +39,7 @@ class MenuMobileDMaior extends HTMLElement {
     this.checkAuth();
     // Guarda referências para poder remover corretamente no disconnectedCallback
     this._storageHandler = (e) => {
-      if (['dm_token', 'dm_foto', 'dm_nome', 'dm_atalho_admin', 'dm_atalho_agente'].includes(e.key)) this.checkAuth();
+      if (['dm_token', 'dm_foto', 'dm_nome', 'dm_atalho_admin', 'dm_atalho_agente', 'dm_atalho_sub'].includes(e.key)) this.checkAuth();
       if (e.key === 'dm_tema') this._syncThemeHost();
       if (e.key === 'dm_layout') this._syncLayoutHost();
     };
@@ -86,7 +86,8 @@ class MenuMobileDMaior extends HTMLElement {
       const nome         = localStorage.getItem('dm_nome')  || '';
       const atalhoAdmin  = localStorage.getItem('dm_atalho_admin')  === 'true';
       const atalhoAgente = localStorage.getItem('dm_atalho_agente') === 'true';
-      this.updateAuthUI({ logado: !!token, foto, nome, atalhoAdmin, atalhoAgente });
+      const atalhoSub    = localStorage.getItem('dm_atalho_sub') === 'true';
+      this.updateAuthUI({ logado: !!token, foto, nome, atalhoAdmin, atalhoAgente, atalhoSub });
     } catch {}
   }
 
@@ -490,6 +491,7 @@ class MenuMobileDMaior extends HTMLElement {
               <a href="painel/index.html" class="auth-link">${SVG_PAINEL} Painel do Host</a>
               <a href="admin/index.html" class="auth-link hidden" id="linkAdmin">${SVG_SHIELD} Painel Admin</a>
               <a href="agente/index.html" class="auth-link hidden" id="linkAgente">${SVG_AGENTE} Painel Agente</a>
+              <a href="adminsub/index.html" class="auth-link hidden" id="linkSub">${SVG_SHIELD} Painel da Sub</a>
               <button class="auth-link danger" id="btnLogout">${SVG_LOGOUT} Sair</button>
             </div>
           </div>
@@ -509,6 +511,7 @@ class MenuMobileDMaior extends HTMLElement {
     const bellBtn    = root.getElementById('bellBtn');
     const linkAdmin  = root.getElementById('linkAdmin');
     const linkAgente = root.getElementById('linkAgente');
+    const linkSub    = root.getElementById('linkSub');
     const topEnter   = root.getElementById('topEnter');
     const topMe      = root.getElementById('topMe');
     if (!btnAccess || !userCard) return;
@@ -520,6 +523,7 @@ class MenuMobileDMaior extends HTMLElement {
       userCard.classList.remove('hidden');
       if (linkAdmin)  linkAdmin.classList.toggle('hidden', !detail.atalhoAdmin);
       if (linkAgente) linkAgente.classList.toggle('hidden', !detail.atalhoAgente);
+      if (linkSub)    linkSub.classList.toggle('hidden', !detail.atalhoSub);
       // Se a lista já estiver aberta e os links mudarem (ex: atalho ativado
       // depois do login), recalcula a altura pra não cortar o conteúdo novo.
       const userCardToggle = root.getElementById('userCardToggle');

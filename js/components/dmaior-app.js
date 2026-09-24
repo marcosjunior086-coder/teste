@@ -118,7 +118,7 @@
         this.sessionUid = ''; this.sessionToken = ''; this.sessionEmail = '';
         this.historicoCompleto = [];
         try {
-            ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome','dm_atalho_admin','dm_atalho_agente']
+            ['dm_uid','dm_token','dm_refresh','dm_email','dm_foto','dm_nome','dm_atalho_admin','dm_atalho_agente','dm_atalho_sub']
                 .forEach(k => localStorage.removeItem(k));
         } catch(e) {}
     }
@@ -923,6 +923,7 @@
                     <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
                     <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
                     <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
+                    <a class="nit hidden" id="nAtalhoSub" href="adminsub/index.html">${this.svgShield()} <span>SUB</span></a>
                     <button class="nit sair" id="nO">${this.svgLogout()} <span data-i18n="logout">SAIR</span></button>
                 </div>
             </nav>
@@ -1593,7 +1594,7 @@
         ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate']]],
         ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
         ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
-        ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente']]],
+        ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente'], ['nAtalhoSub','Painel da Sub','sub agencia']]],
     ]; }
 
     _fillMobileSheet(){
@@ -1929,7 +1930,8 @@
                 localStorage.setItem('dm_nome',data.nome||'');
                 localStorage.setItem('dm_atalho_admin',data.atalho_admin?'true':'false');
                 localStorage.setItem('dm_atalho_agente',data.atalho_agente?'true':'false');
-                window.dispatchEvent(new CustomEvent('dmaior:auth',{detail:{logado:true,foto:data.foto_url||'',nome:data.nome||'',uid,atalhoAdmin:!!data.atalho_admin,atalhoAgente:!!data.atalho_agente}}));
+                localStorage.setItem('dm_atalho_sub',data.atalho_sub?'true':'false');
+                window.dispatchEvent(new CustomEvent('dmaior:auth',{detail:{logado:true,foto:data.foto_url||'',nome:data.nome||'',uid,atalhoAdmin:!!data.atalho_admin,atalhoAgente:!!data.atalho_agente,atalhoSub:!!data.atalho_sub}}));
             } catch(e){}
             this.qs('#lPass').value='';
             this.navigate('vD');
@@ -1968,13 +1970,15 @@
                 if(fotoExibir) localStorage.setItem('dm_foto', fotoExibir);
                 localStorage.setItem('dm_atalho_admin',  p.atalho_admin  ? 'true' : 'false');
                 localStorage.setItem('dm_atalho_agente', p.atalho_agente ? 'true' : 'false');
+                localStorage.setItem('dm_atalho_sub', p.atalho_sub ? 'true' : 'false');
                 window.dispatchEvent(new CustomEvent('dmaior:auth', { detail: {
                     logado: true, foto: fotoExibir, nome: nomeExibir, uid: this.sessionUid,
-                    atalhoAdmin: !!p.atalho_admin, atalhoAgente: !!p.atalho_agente,
+                    atalhoAdmin: !!p.atalho_admin, atalhoAgente: !!p.atalho_agente, atalhoSub: !!p.atalho_sub,
                 } }));
             } catch(e) {}
             this.qs('#nAtalhoAdmin')?.classList.toggle('hidden', !p.atalho_admin);
             this.qs('#nAtalhoAgente')?.classList.toggle('hidden', !p.atalho_agente);
+            this.qs('#nAtalhoSub')?.classList.toggle('hidden', !p.atalho_sub);
             // Aba Tickets só aparece pra quem o admin liberou (ver
             // tickets_streamers_liberados) — quem não foi selecionado nem
             // sabe que a função existe.

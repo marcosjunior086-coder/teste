@@ -22,7 +22,7 @@ class MenuDesktopDMaior extends HTMLElement {
     this.checkAuth();
     // Atualiza quando outra aba mudar o token
     window.addEventListener('storage', (e) => {
-      if (['dm_token', 'dm_foto', 'dm_nome', 'dm_atalho_admin', 'dm_atalho_agente'].includes(e.key)) this.checkAuth();
+      if (['dm_token', 'dm_foto', 'dm_nome', 'dm_atalho_admin', 'dm_atalho_agente', 'dm_atalho_sub'].includes(e.key)) this.checkAuth();
     });
     // Atualiza quando auth.js disparar o evento de login/logout
     window.addEventListener('dmaior:auth', (e) => this.updateAuthUI(e.detail));
@@ -41,7 +41,8 @@ class MenuDesktopDMaior extends HTMLElement {
       const nome         = localStorage.getItem('dm_nome')  || '';
       const atalhoAdmin  = localStorage.getItem('dm_atalho_admin')  === 'true';
       const atalhoAgente = localStorage.getItem('dm_atalho_agente') === 'true';
-      this.updateAuthUI({ logado: !!token, foto, nome, atalhoAdmin, atalhoAgente });
+      const atalhoSub    = localStorage.getItem('dm_atalho_sub') === 'true';
+      this.updateAuthUI({ logado: !!token, foto, nome, atalhoAdmin, atalhoAgente, atalhoSub });
     } catch {}
   }
 
@@ -152,6 +153,7 @@ class MenuDesktopDMaior extends HTMLElement {
             <div class="ud-sep hidden" id="adminSep"></div>
             <a href="/admin/index.html" class="ud-link hidden" id="linkAdmin">${SVG_SHIELD} Painel Admin</a>
             <a href="/agente/index.html" class="ud-link hidden" id="linkAgente">${SVG_AGENTE} Painel Agente</a>
+            <a href="/adminsub/index.html" class="ud-link hidden" id="linkSub">${SVG_SHIELD} Painel da Sub</a>
             <div class="ud-sep"></div>
             <button class="ud-link danger" id="btnLogout">${SVG_LOGOUT} Sair</button>
           </div>
@@ -171,13 +173,15 @@ class MenuDesktopDMaior extends HTMLElement {
     const adminSep   = root.getElementById('adminSep');
     const linkAdmin  = root.getElementById('linkAdmin');
     const linkAgente = root.getElementById('linkAgente');
+    const linkSub    = root.getElementById('linkSub');
     if (!btnAccess || !userZone) return;
     if (detail.logado) {
       btnAccess.classList.add('hidden');
       userZone.classList.remove('hidden');
       if (linkAdmin)  linkAdmin.classList.toggle('hidden', !detail.atalhoAdmin);
       if (linkAgente) linkAgente.classList.toggle('hidden', !detail.atalhoAgente);
-      if (adminSep)   adminSep.classList.toggle('hidden', !(detail.atalhoAdmin || detail.atalhoAgente));
+      if (linkSub)    linkSub.classList.toggle('hidden', !detail.atalhoSub);
+      if (adminSep)   adminSep.classList.toggle('hidden', !(detail.atalhoAdmin || detail.atalhoAgente || detail.atalhoSub));
       if (detail.foto) avatarWrap.innerHTML = `<img src="${detail.foto}" alt="Avatar">`;
       if (detail.nome) userName.textContent = detail.nome.split(' ')[0];
     } else {

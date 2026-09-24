@@ -1553,6 +1553,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="mc"><label>Senha (mín. 8)</label><input id="saSenha" type="text" class="sa-inp" placeholder="Senha inicial" autocomplete="new-password"/></div>
             <div class="mc"><label>Nome no convite da Kwai</label><input id="saContNome" type="text" class="sa-inp" placeholder="Aparece pro streamer no convite"/></div>
             <div class="mc"><label>Telefone no convite (WhatsApp)</label><input id="saContTel" type="text" class="sa-inp" placeholder="(11) 99999-0000"/></div>
+            <div class="mc"><label>UID do streamer (opcional)</label><input id="saUid" type="text" inputmode="numeric" class="sa-inp" placeholder="Mostra o botão Painel da Sub pra ele"/></div>
             <div style="display:flex;align-items:flex-end"><button class="btn btn-g" id="btnSaCriar">${this._ico('plus',13)} Criar acesso</button></div>
           </div></div>
         <div class="box"><div class="bhead"><div class="btitulo">${this._ico('users',14)} Acessos criados</div></div><div id="saLista" style="padding:12px 18px 18px">${this._loading()}</div></div>
@@ -1572,14 +1573,22 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=contas.map(c=>`<div class="viol-item" data-id="${this._esc(c.id)}">
       <div class="viol-top"><div><b class="viol-nome">${this._esc(c.nome)}</b><span class="viol-ids">login <b>${this._esc(c.login)}</b> · ${this._esc(c.org_nome||c.org_id)}</span></div><span class="viol-st ${c.ativo?'ok':'nok'}">${c.ativo?'Ativo':'Desativado'}</span></div>
       <div class="viol-lin"><span>Convite sai como</span>${this._esc(c.contato_nome||c.nome)}${c.contato_telefone?` · ${this._esc(c.contato_telefone)}`:''}</div>
+      <div class="viol-lin"><span>Botão no painel do streamer</span>${c.kwai_uid?`UID ${this._esc(c.kwai_uid)}`:'nenhum UID vinculado'}</div>
       <div class="viol-lin"><span>Último acesso</span>${c.ultimo_login_em?this._fdt(c.ultimo_login_em):'nunca entrou'}</div>
       <div class="viol-acoes">
+        <button class="btn btn-o sa-uid">${this._ico('user',12)} ${c.kwai_uid?'Trocar UID':'Vincular UID'}</button>
         <button class="btn btn-o sa-senha">${this._ico('key_uid',12)} Trocar senha</button>
         <button class="btn btn-o sa-ativo">${c.ativo?'Desativar':'Reativar'}</button>
         <button class="btn btn-o sa-excluir" style="color:var(--verm)">${this._ico('trash',12)} Excluir</button>
       </div></div>`).join('');
     el.querySelectorAll('.viol-item').forEach(it=>{
       const id=it.dataset.id, c=contas.find(x=>x.id===id);
+      it.querySelector('.sa-uid').addEventListener('click',async()=>{
+        const novo=prompt(`UID do streamer que vai ver o botão "Painel da Sub" (${c.login}).\nDeixe vazio pra tirar o vínculo.`, c.kwai_uid||'');
+        if(novo===null) return;
+        const r=await this._api('PATCH',`/admin/subadmins/${id}`,{kwai_uid:novo.trim()});
+        r?.ok?(this._toast(novo.trim()?'UID vinculado':'Vínculo removido'),this._carregarAcessosSub()):this._toast(r?.erro||'Erro','err');
+      });
       it.querySelector('.sa-senha').addEventListener('click',async()=>{
         const nova=prompt(`Nova senha para ${c.login} (mínimo 8 caracteres):`); if(!nova) return;
         const r=await this._api('PATCH',`/admin/subadmins/${id}`,{senha:nova});
@@ -1599,14 +1608,14 @@ class DimaiorAdmin extends HTMLElement {
   async _criarAcessoSub(){
     const s=this.shadowRoot, v=id=>(s.getElementById(id)?.value||'').trim();
     const org=v('saOrg'), o=(this._subOrgs||[]).find(x=>String(x.org_id)===org);
-    const body={org_id:org,org_nome:o?.nome||'',nome:v('saNome'),login:v('saLogin'),senha:v('saSenha'),contato_nome:v('saContNome'),contato_telefone:v('saContTel')};
+    const body={org_id:org,org_nome:o?.nome||'',nome:v('saNome'),login:v('saLogin'),senha:v('saSenha'),contato_nome:v('saContNome'),contato_telefone:v('saContTel'),kwai_uid:v('saUid')};
     if(!body.org_id||!body.nome||!body.login||!body.senha){this._toast('Preencha sub, nome, login e senha','err');return;}
     const b=s.getElementById('btnSaCriar'); if(b) b.disabled=true;
     const r=await this._api('POST','/admin/subadmins',body);
     if(b) b.disabled=false;
     if(!r?.ok){this._toast(r?.erro||'Erro ao criar','err');return;}
     this._toast(`Acesso criado! Login: ${body.login}`);
-    ['saNome','saLogin','saSenha','saContNome','saContTel'].forEach(id=>{const e=s.getElementById(id);if(e)e.value='';});
+    ['saNome','saLogin','saSenha','saContNome','saContTel','saUid'].forEach(id=>{const e=s.getElementById(id);if(e)e.value='';});
     this._carregarAcessosSub();
   }
 
