@@ -1,5 +1,4 @@
-const CACHE_VERSION = 'dmaior-pwa-20260902-push-1';
-const IMG_CACHE = 'dmaior-imgs-v1';
+const CACHE_VERSION = 'dmaior-pwa-20260924-sem-fetch-1';
 const PUSH_CACHE = 'dmaior-push-v1';   // guarda a chave VAPID + subscription pendente
 
 self.addEventListener('install', () => {
@@ -11,38 +10,25 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((keys) => Promise.all(
         keys
-          .filter((key) => key.startsWith('dmaior-pwa-') && key !== CACHE_VERSION)
+          // 'dmaior-imgs-*' = cache antigo de fotos do weserv (removido, ver abaixo)
+          .filter((key) => (key.startsWith('dmaior-pwa-') && key !== CACHE_VERSION) || key.startsWith('dmaior-imgs-'))
           .map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
 });
 
-// Fotos de perfil e banners (votação, PK) sempre passam pelo proxy
-// images.weserv.nl (ver _proxyFoto/_imgUrl nos componentes). Cache-first só
-// pra esse host: baixa uma vez, fica salvo no aparelho, só busca de novo se
-// a URL mudar (o link do Drive some da URL do proxy assim que o admin troca
-// o banner_url — cache antigo nunca é servido pra um link novo). Se o admin
-// só trocar o CONTEÚDO do mesmo arquivo do Drive sem mudar o link, o cache
-// local não percebe sozinho — nesse caso preciso trocar o link mesmo (mesma
-// lógica do ?v= manual usado pros arquivos JS/CSS).
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  const url = new URL(event.request.url);
-  if (url.hostname === 'images.weserv.nl') {
-    event.respondWith(
-      caches.open(IMG_CACHE).then(async (cache) => {
-        const cached = await cache.match(event.request);
-        if (cached) return cached;
-        const resposta = await fetch(event.request);
-        if (resposta.ok) cache.put(event.request, resposta.clone());
-        return resposta;
-      })
-    );
-    return;
-  }
-  event.respondWith(fetch(event.request));
-});
+// SEM handler de 'fetch' de propósito. Antes o SW interceptava as fotos do
+// images.weserv.nl (e repassava todo o resto com fetch()), mas:
+//  1) o sw.js recebe a mesma CSP do site (Transform Rule da Cloudflare), e
+//     fetch() dentro do SW é checado contra connect-src — que não lista
+//     weserv/flaticon. O Safari do iPhone aplica isso à risca: toda foto de
+//     perfil (ranking, PK, lives) virava ícone "?" quebrado.
+//  2) <img> de outro domínio volta como resposta opaca (ok === false), então
+//     o cache "cache-first" nunca chegou a salvar nada.
+// O cache HTTP do navegador já guarda as fotos do weserv (max-age de 1 ano).
+// Não recolocar um 'fetch' que chame respondWith() pra recurso de outro
+// domínio sem liberar o host também no connect-src da CSP.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // NOTIFICAÇÕES PUSH (Fase 1) — aditivo, não mexe no cache/scope acima.
