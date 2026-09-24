@@ -445,19 +445,21 @@ class DmaiorImpulso extends HTMLElement {
   // acima da cota semanal (já liberado, mostrando o próximo degrau).
   _metaProgressoHtml(meta) {
     const fmt = n => Number(n || 0).toLocaleString('pt-BR');
+    // Diamante em SVG (mesmo desenho do ranking) no lugar do emoji
+    const D = '<svg class="ico-dia" viewBox="0 0 24 24" fill="currentColor" aria-label="diamantes" role="img"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>';
     if (!meta.proxima_meta) {
-      return `<div class="meta-lbl">Meta máxima do mês atingida 🎉 — <b>${meta.quantidade_atual} usos de impulso por semana</b> liberados.</div>`;
+      return `<div class="meta-lbl">Meta máxima do mês atingida — <b>${meta.quantidade_atual} usos de impulso por semana</b> liberados.</div>`;
     }
     const alvo   = meta.proxima_meta.diamantes;
     const pct    = Math.max(0, Math.min(100, (meta.diamantes_mes / alvo) * 100));
     const falta  = Math.max(0, alvo - meta.diamantes_mes);
     const rotulo = meta.quantidade_atual > 0
-      ? `Faltam <b>${fmt(falta)} 💎</b> este mês pra subir de ${meta.quantidade_atual} pra ${meta.proxima_meta.quantidade} usos de impulso por semana`
-      : `Faltam <b>${fmt(falta)} 💎</b> este mês pra liberar o impulso com ${meta.proxima_meta.quantidade} usos por semana`;
+      ? `Faltam <b>${fmt(falta)} ${D}</b> este mês pra subir de ${meta.quantidade_atual} pra ${meta.proxima_meta.quantidade} usos de impulso por semana`
+      : `Faltam <b>${fmt(falta)} ${D}</b> este mês pra liberar o impulso com ${meta.proxima_meta.quantidade} usos por semana`;
     return `
       <div class="meta-lbl">${rotulo}</div>
       <div class="meta-bar"><div class="meta-bar-fill" style="width:${pct}%"></div></div>
-      <div class="meta-vals"><span>${fmt(meta.diamantes_mes)} 💎 este mês</span><b>${fmt(alvo)} 💎</b></div>`;
+      <div class="meta-vals"><span>${fmt(meta.diamantes_mes)} ${D} este mês</span><b>${fmt(alvo)} ${D}</b></div>`;
   }
 
   _setLockedContent(painel, titulo, texto) {
@@ -637,6 +639,7 @@ class DmaiorImpulso extends HTMLElement {
         .meta-strip { background:rgba(0,0,0,0.3); border:1px solid rgba(0,212,212,0.25); border-radius:12px; padding:12px 14px; margin-bottom:20px; }
         .meta-lbl { font-size:0.74rem; color:var(--muted); font-family:var(--dm-font-title,'Rajdhani',sans-serif); letter-spacing:0.02em; margin-bottom:8px; line-height:1.5; text-align:left; }
         .meta-lbl b { color:var(--gold); }
+        .ico-dia { width:1em; height:1em; display:inline-block; vertical-align:-.125em; color:#4fc3f7; }
         .locked-txt .meta-lbl { text-align:center; }
         .meta-bar { height:8px; border-radius:5px; background:rgba(255,255,255,0.06); overflow:hidden; margin-bottom:6px; }
         .meta-bar-fill { height:100%; background:linear-gradient(90deg,var(--cyan),#3b82f6); border-radius:5px; transition:width .4s; }

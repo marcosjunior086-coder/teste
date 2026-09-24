@@ -345,7 +345,7 @@ class DmaiorTickets extends HTMLElement {
 
       <div class="hist-overlay" id="ticHistOverlay">
         <div class="hist-panel">
-          <div class="hist-panel-head"><span id="ticHistOverlayTitulo">Histórico</span><button class="hist-panel-close" id="ticHistOverlayClose">✕</button></div>
+          <div class="hist-panel-head"><span id="ticHistOverlayTitulo">Histórico</span><button class="hist-panel-close" id="ticHistOverlayClose" aria-label="Fechar"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"/></svg></button></div>
           <div class="hist-panel-body" id="ticHistOverlayBody"></div>
         </div>
       </div>

@@ -492,7 +492,7 @@ class RankingDmaior extends HTMLElement {
         <div id="info-panel" class="info-panel glass-card">
           <div class="panel-header">
             <span class="panel-title">Informações</span>
-            <button id="close-panel" class="close-panel" title="Fechar">✕</button>
+            <button id="close-panel" class="close-panel" title="Fechar" aria-label="Fechar"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"/></svg></button>
           </div>
           <div class="panel-row">
             <span class="panel-label">Período</span>

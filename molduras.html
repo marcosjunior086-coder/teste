@@ -160,7 +160,7 @@
   }
   .dl:hover:not(:disabled) .ultra{background:rgba(255,255,255,.22);color:#fff;border-color:transparent}
   .dl.selected{border-color:var(--blue);background:var(--panel2);box-shadow:0 0 0 2px var(--line2)}
-  .dl.selected::after{content:"✓";position:absolute;right:10px;bottom:9px;color:var(--blue);font-size:15px;font-weight:700}
+  .dl.selected::after{content:"";position:absolute;right:9px;bottom:8px;width:17px;height:17px;background:var(--blue);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9.55 15.15l8.475-8.475q.3-.3.7-.3t.7.3t.3.713t-.3.712l-9.175 9.2q-.3.3-.7.3t-.7-.3L4.55 13q-.3-.3-.288-.712t.313-.713t.713-.3t.712.3z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9.55 15.15l8.475-8.475q.3-.3.7-.3t.7.3t.3.713t-.3.712l-9.175 9.2q-.3.3-.7.3t-.7-.3L4.55 13q-.3-.3-.288-.712t.313-.713t.713-.3t.712.3z'/%3E%3C/svg%3E") center/contain no-repeat}
   .dl.selected .dl-px{color:var(--text)}
   .download-action{width:100%;margin-top:14px;min-height:48px;border-radius:8px;background:var(--grad);color:#061016;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:9px;transition:filter .15s,transform .15s,opacity .15s}
   .download-action:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
@@ -710,7 +710,7 @@
       }
       if (!blob) throw new Error("noblob");
       downloadBlob(blob, name, S);
-      setStatus("ok", "✓ Baixado: " + S + " × " + S + " px (" + (blob.size / 1048576).toFixed(1) + " MB)");
+      setStatus("ok", "Baixado: " + S + " × " + S + " px (" + (blob.size / 1048576).toFixed(1) + " MB)");
     } catch(e){
       if (String(e && e.message) === "no-compression")
         setStatus("err", "Seu navegador não suporta exportar nesta resolução. Use o Chrome atualizado em um computador.");

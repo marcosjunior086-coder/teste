@@ -227,6 +227,8 @@
     // Material Symbols Rounded (Apache 2.0), via api.iconify.design — mesmo estilo preenchido dos outros ícones do painel
     svgPlay()    { return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712"/></svg>`; }
     svgOk()      { return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>`; }
+    // Diamante "moeda" no meio do texto — mesmo desenho do ranking (ranking.js DSVG)
+    svgDia()     { return `<svg class="ico-dia" viewBox="0 0 24 24" fill="currentColor" aria-label="diamantes" role="img"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>`; }
     svgAlerta()  { return `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`; }
 
     // ── Formatação BRL ───────────────────────────────────────────────
@@ -717,6 +719,7 @@
             .viola-prova audio{display:block;width:100%;margin-top:10px;}
             .viola-ok{color:var(--green)!important;display:flex;flex-direction:column;align-items:center;gap:8px;}
             .viola-ok-ico svg{width:34px;height:34px;display:block;}
+            .ico-dia{width:1em;height:1em;display:inline-block;vertical-align:-.125em;color:#4fc3f7;}
             .viola-cod{font-size:.7rem;color:var(--muted);}
             .viola-video-info{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;font-size:.78rem;color:var(--text);}
             .viola-video-info small{color:var(--muted);}
@@ -1196,7 +1199,7 @@
                         <div class="dcol-side">
                             <!-- Histórico diário -->
                             <div class="card hist-card">
-                                <h3 class="dcard-h">Histórico diário <span class="raaj" style="font-size:.7rem;color:var(--muted);font-weight:400;" id="hRes">— válidos · — 💎</span></h3>
+                                <h3 class="dcard-h">Histórico diário <span class="raaj" style="font-size:.7rem;color:var(--muted);font-weight:400;" id="hRes">— válidos · — ${this.svgDia()}</span></h3>
                                 <div id="hList"><p class="txn-empty">Carregando...</p></div>
                             </div>
                         </div>
@@ -2141,7 +2144,7 @@
         if(!hist.length){ el.innerHTML=`<p class="txn-empty">Nenhum registro.</p>`; return; }
         const validos=hist.filter(d=>d.minutos>=60).length;
         const totDia=hist.reduce((s,d)=>s+d.diamantes,0);
-        const res=this.qs('#hRes'); if(res) res.textContent=`${validos} válidos · ${totDia.toLocaleString('pt-BR')} 💎`;
+        const res=this.qs('#hRes'); if(res) res.innerHTML=`${validos} válidos · ${totDia.toLocaleString('pt-BR')} ${this.svgDia()}`;
         el.innerHTML=hist.map(dia=>{
             const dt=new Date(dia.data+'T12:00:00');
             const dd=String(dt.getDate()).padStart(2,'0');
@@ -2154,7 +2157,7 @@
                       :`<span class="hist-pill mut">não válido</span>`;
             const mid=semLive
                 ? `<b>—</b><span>sem transmissão</span>`
-                : `<b>${dia.diamantes.toLocaleString('pt-BR')} 💎</b><span>${h}h ${String(m).padStart(2,'0')}m de live</span>`;
+                : `<b>${dia.diamantes.toLocaleString('pt-BR')} ${this.svgDia()}</b><span>${h}h ${String(m).padStart(2,'0')}m de live</span>`;
             return `<div class="hist-row${semLive?' off':''}"><span class="hist-d">${dd}/${mm}</span><div class="hist-mid">${mid}</div>${pill}</div>`;
         }).join('');
     }
@@ -2310,7 +2313,7 @@
             if (!res.ok) throw new Error(data.erro || 'Erro ao solicitar saque.');
             this.qs('#cValor').value = '';
             if (data.pago) {
-                this.showAlert('#alC', `✓ ${data.mensagem}`, false);
+                this.showAlert('#alC', data.mensagem, false);
             } else {
                 this.showAlert('#alC','Saque solicitado! A agência processará em breve.',false);
             }
@@ -2724,7 +2727,7 @@
     }
     goMolduras(){
         const frame = this.qs('#moldurasFrame');
-        if(frame && !frame.getAttribute('src')) frame.setAttribute('src', 'molduras.html?v=20260622-1');
+        if(frame && !frame.getAttribute('src')) frame.setAttribute('src', 'molduras.html?v=20260924-icones-svg');
         this.navigate('vMolduras');
         this.navActive('nMolduras');
     }

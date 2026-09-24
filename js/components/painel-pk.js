@@ -510,9 +510,11 @@ class PainelPK extends HTMLElement {
         const total = diamA + diamB;
         const pctA = total > 0 ? (diamA / total) * 100 : 50;
         const pctB = 100 - pctA;
+        // Diamante em SVG (mesmo desenho do ranking) no lugar do emoji
+        const D = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-label="diamantes" role="img" style="margin-left:6px;flex:none"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>';
         barraHtml = `<div class="pk-scorebar">
-          <div class="side pink" style="flex:${pctA} 1 0%">${this._num(diamA)} 💎</div>
-          <div class="side blue" style="flex:${pctB} 1 0%">${this._num(diamB)} 💎</div>
+          <div class="side pink" style="flex:${pctA} 1 0%">${this._num(diamA)}${D}</div>
+          <div class="side blue" style="flex:${pctB} 1 0%">${this._num(diamB)}${D}</div>
         </div>`;
       } else if (pendente) {
         barraHtml = `<div class="pk-scorebar neutro"><div class="side">Ainda não começou</div></div>`;

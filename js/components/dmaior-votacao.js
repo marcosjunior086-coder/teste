@@ -12,6 +12,7 @@
 const SVG_VOTE   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
 const SVG_CHECK  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
 const SVG_USERS  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+const SVG_CHECK_TXT = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg>`;
 const SVG_BACK   = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`;
 
 class DmaiorVotacao extends HTMLElement {
@@ -312,7 +313,7 @@ class DmaiorVotacao extends HTMLElement {
           <div class="votacao-titulo">${this._esc(v.titulo)}</div>
           <div class="votacao-meta">
             <span>Encerra em ${this._fmtData(v.data_fim)}</span>
-            ${v.ja_votou ? '<span class="badge-votada">✓ Você já votou</span>' : ''}
+            ${v.ja_votou ? `<span class="badge-votada">${SVG_CHECK_TXT} Você já votou</span>` : ''}
           </div>
         </div>
       </div>`).join('');
@@ -420,7 +421,7 @@ class DmaiorVotacao extends HTMLElement {
   _renderObrigado() {
     const el = this.shadowRoot.getElementById('conteudo');
     el.innerHTML = `
-      <p class="empty-msg" style="color:var(--green);">✓ Voto registrado com sucesso!<br>Obrigado por participar.</p>
+      <p class="empty-msg" style="color:var(--green);">${SVG_CHECK_TXT} Voto registrado com sucesso!<br>Obrigado por participar.</p>
       <button class="btn-ghost" id="btn-voltar-lista" style="margin:0 auto;display:flex;">${SVG_BACK} Voltar às votações</button>
     `;
     this.shadowRoot.getElementById('btn-voltar-lista').addEventListener('click', () => this._carregarLista());

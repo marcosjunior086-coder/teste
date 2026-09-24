@@ -280,7 +280,7 @@
       if (a) {
         const d = new Date(a.aceito_em);
         const quando = isNaN(d) ? '' : `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-        return `<div class="card rg-aceite ok"><span class="rg-aceite-ico">✓</span><div><b>Você aceitou ${NOME_DOC[doc]}</b><p>${quando ? `Em ${quando} · ` : ''}versão ${VERSOES[doc]}</p></div></div>`;
+        return `<div class="card rg-aceite ok"><span class="rg-aceite-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m9.55 15.15l8.475-8.475q.3-.3.7-.3t.7.3t.3.713t-.3.712l-9.175 9.2q-.3.3-.7.3t-.7-.3L4.55 13q-.3-.3-.288-.712t.313-.713t.713-.3t.712.3z"/></svg></span><div><b>Você aceitou ${NOME_DOC[doc]}</b><p>${quando ? `Em ${quando} · ` : ''}versão ${VERSOES[doc]}</p></div></div>`;
       }
       return `<div class="card rg-aceite">
           <h3>Aceite do documento</h3>
