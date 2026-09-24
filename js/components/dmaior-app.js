@@ -713,6 +713,8 @@
             .viola-prova img,.viola-prova video{display:block;max-width:100%;max-height:420px;border-radius:10px;margin-top:10px;}
             .viola-prova audio{display:block;width:100%;margin-top:10px;}
             .viola-ok{color:var(--green)!important;}
+            .viola-cod{font-size:.7rem;color:var(--muted);}
+            .viola-faixa .viola-cod{color:inherit;opacity:.8;}
             .viola-nota{font-size:.74rem;color:var(--muted);margin-top:12px;line-height:1.5;}
             .dm-comunicado-txt{font-size:0.78rem;color:var(--muted);line-height:1.55;flex:1;}
             .dm-comunicado-txt strong,.dm-comunicado-txt b{color:var(--gold);}
@@ -2537,6 +2539,18 @@
     // por UID; aqui só lê as do próprio streamer (worker dashboard). Falha na
     // consulta NUNCA vira "sem violação" — mostra que não deu pra consultar.
     static get VIOLA_STATUS(){ return {'-1':'Sem permissão','0':'Solicitando','1':'Ativado','2':'Banido','3':'Banido temporariamente','4':'Cancelado','5':'Recusado'}; }
+    // punishResult vem em código da Kwai ("Ao vivoAnchorStop", "Ao vivoAnchorBan _ 1").
+    // Anchor = streamer (termo das plataformas chinesas). Tradução confirmada
+    // pelo dono em 2026-09-24; código desconhecido aparece como veio.
+    _violaResultado(raw){
+        const s = String(raw || '').trim(); if(!s) return '';
+        const cod = s.replace(/^(ao vivo|live)\s*/i, '').replace(/\s+/g, '');
+        const m = /^AnchorBan_?(\d+)?$/i.exec(cod);
+        const texto = /^AnchorStop$/i.test(cod) ? 'Live encerrada pela Kwai'
+            : /^AnchorMask$/i.test(cod) ? 'Live ocultada (fora das recomendações)'
+            : m ? `Suspenso de fazer live${m[1] ? ` (${m[1]} ${m[1] === '1' ? 'dia' : 'dias'})` : ''}` : null;
+        return texto ? `${this._escHtml(texto)} <span class="viola-cod">(${this._escHtml(cod)})</span>` : this._escHtml(s);
+    }
     _violaData(iso){
         if(!iso) return '—';
         try{ return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; }
@@ -2560,11 +2574,11 @@
             const txt = d.destaque.status_conta_texto || this.constructor.VIOLA_STATUS[String(d.destaque.status_conta)] || 'Punição ativa';
             el.innerHTML = `<button type="button" class="viola-faixa" data-viola-abrir>
                 <span class="viola-ico">${this.svgAlerta()}</span>
-                <span class="viola-txt"><b>Sua conta está: ${this._escHtml(txt)}</b>${d.destaque.resultado ? `<small>${this._escHtml(d.destaque.resultado)}</small>` : ''}<small>Toque para ver o motivo e a prova</small></span></button>`;
+                <span class="viola-txt"><b>Sua conta está: ${this._escHtml(txt)}</b>${d.destaque.resultado ? `<small>${this._violaResultado(d.destaque.resultado)}</small>` : ''}<small>Toque para ver o motivo</small></span></button>`;
         } else if(d.novas > 0){
             el.innerHTML = `<button type="button" class="viola-faixa leve" data-viola-abrir>
                 <span class="viola-ico">${this.svgAlerta()}</span>
-                <span class="viola-txt"><b>Você recebeu ${d.novas === 1 ? 'uma violação nova' : d.novas+' violações novas'}</b><small>Toque para ver o motivo e a prova</small></span></button>`;
+                <span class="viola-txt"><b>Você recebeu ${d.novas === 1 ? 'uma violação nova' : d.novas+' violações novas'}</b><small>Toque para ver o motivo</small></span></button>`;
         } else el.innerHTML = '';
     }
     async goViolacoes(){
@@ -2593,7 +2607,7 @@
                 <div class="viola-top"><span class="viola-data">${this._violaData(v.punido_em)}</span>${st ? `<span class="viola-st ${cls}">${this._escHtml(st)}</span>` : ''}</div>
                 <div class="viola-motivo">${this._escHtml(v.motivo || v.tipo || 'Violação')}</div>
                 ${v.tipo && v.motivo ? `<div class="viola-lin"><span>Tipo</span>${this._escHtml(v.tipo)}</div>` : ''}
-                ${v.resultado ? `<div class="viola-lin"><span>Resultado</span>${this._escHtml(v.resultado)}</div>` : ''}
+                ${v.resultado ? `<div class="viola-lin"><span>Punição</span>${this._violaResultado(v.resultado)}</div>` : ''}
                 ${extras ? `<ul class="viola-extras">${extras}</ul>` : ''}
                 ${v.tem_prova ? `<button type="button" class="btn-sm viola-prova-btn" data-chave="${this._escHtml(v.chave)}">Ver prova</button><div class="viola-prova"></div>` : ''}
             </div>`;

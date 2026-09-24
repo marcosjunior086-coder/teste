@@ -1272,6 +1272,8 @@ class DimaiorAdmin extends HTMLElement {
   // 30 dias) e grava em streamer_violacoes, ligadas pelo UID. "Verificar
   // agora" força a busca. "Conferida" = vista_admin_em (some do contador).
   static VIOLA_STATUS={'-1':'Sem permissão','0':'Solicitando','1':'Ativado','2':'Banido','3':'Banido temporariamente','4':'Cancelado','5':'Recusado'};
+  // punishResult em código da Kwai (Anchor = streamer). Tradução confirmada pelo dono 2026-09-24.
+  _violaResultado(raw){const t=String(raw||'').trim();if(!t)return'';const cod=t.replace(/^(ao vivo|live)\s*/i,'').replace(/\s+/g,'');const m=/^AnchorBan_?(\d+)?$/i.exec(cod);const txt=/^AnchorStop$/i.test(cod)?'Live encerrada pela Kwai':/^AnchorMask$/i.test(cod)?'Live ocultada (fora das recomendações)':m?`Suspenso de fazer live${m[1]?` (${m[1]} ${m[1]==='1'?'dia':'dias'})`:''}`:null;return txt?`${this._esc(txt)} <span class="viol-ids">(${this._esc(cod)})</span>`:this._esc(t);}
   _violaData(iso){if(!iso)return'—';try{return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return'—';}}
   async _contarViolacoesNovas(){
     const d=await this._api('GET','/admin/violacoes/contagem');
@@ -1307,7 +1309,7 @@ class DimaiorAdmin extends HTMLElement {
         </div>
         <div class="viol-motivo">${this._esc(v.motivo||v.tipo||'Violação')}</div>
         <div class="viol-lin"><span>Data</span>${this._violaData(v.punido_em)}${v.tipo&&v.motivo?` · <span>Tipo</span>${this._esc(v.tipo)}`:''}</div>
-        ${v.resultado?`<div class="viol-lin"><span>Resultado</span>${this._esc(v.resultado)}</div>`:''}
+        ${v.resultado?`<div class="viol-lin"><span>Punição</span>${this._violaResultado(v.resultado)}</div>`:''}
         ${extras?`<ul class="viol-extras">${extras}</ul>`:''}
         <div class="viol-acoes">
           ${v.prova_tipo&&!v.prova_interna?`<button class="btn btn-o viol-prova-btn" data-chave="${this._esc(v.chave)}">${this._ico('search',12)} Ver prova</button>`:''}${v.prova_interna?`<span class="viol-ids" title="A imagem fica no sistema interno da Kuaishou (login só de funcionários)">Prova só no sistema interno da Kwai</span>`:''}
