@@ -224,6 +224,7 @@
     svgShield()  { return `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.5 14.5L6 11l1.41-1.41L10.5 12.67l6.09-6.09L18 8l-7.5 7.5z"/></svg>`; }
     svgAgente()  { return `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`; }
     svgSend()    { return `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`; }
+    svgAlerta()  { return `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`; }
 
     // ── Formatação BRL ───────────────────────────────────────────────
     brl(n) { return 'R$ ' + Number(n||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
@@ -688,6 +689,31 @@
             /* ── Banners de comunicados ── */
             .dm-comunicado{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border-radius:12px;background:rgba(240,192,64,0.08);border:1px solid rgba(240,192,64,0.30);animation:fi .4s ease both;width:100%;}
             .dm-comunicado-ico{font-size:1.2rem;line-height:1;flex-shrink:0;}
+            /* Situação da conta — violações/punições da Kwai */
+            .viola-faixa{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px;padding:13px 16px;border-radius:12px;background:#dc2626;color:#fff;box-shadow:0 6px 18px rgba(220,38,38,.28);}
+            .viola-faixa.leve{background:rgba(248,113,113,.10);color:var(--text);border:1px solid rgba(248,113,113,.45);box-shadow:none;}
+            .viola-faixa .viola-ico svg{width:24px;height:24px;fill:currentColor;display:block;}
+            .viola-faixa.leve .viola-ico svg{fill:var(--red);}
+            .viola-txt{display:flex;flex-direction:column;gap:2px;font-size:.82rem;line-height:1.35;}
+            .viola-txt b{font-size:.9rem;}
+            .viola-txt small{opacity:.85;font-size:.74rem;}
+            .viola-item{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+            .viola-item.nova{border-color:rgba(248,113,113,.55);}
+            .viola-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+            .viola-data{font-size:.74rem;color:var(--muted);}
+            .viola-st{font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.02em;}
+            .viola-st.nok{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.3);}
+            .viola-st.ok{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3);}
+            .viola-st.warn{background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);}
+            .viola-motivo{font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:6px;overflow-wrap:anywhere;}
+            .viola-lin{font-size:.78rem;color:var(--text);margin-top:3px;overflow-wrap:anywhere;}
+            .viola-lin span{color:var(--muted);margin-right:6px;}
+            .viola-extras{margin:6px 0 0 18px;padding:0;font-size:.76rem;color:var(--muted);}
+            .viola-prova-btn{margin-top:10px;}
+            .viola-prova img,.viola-prova video{display:block;max-width:100%;max-height:420px;border-radius:10px;margin-top:10px;}
+            .viola-prova audio{display:block;width:100%;margin-top:10px;}
+            .viola-ok{color:var(--green)!important;}
+            .viola-nota{font-size:.74rem;color:var(--muted);margin-top:12px;line-height:1.5;}
             .dm-comunicado-txt{font-size:0.78rem;color:var(--muted);line-height:1.55;flex:1;}
             .dm-comunicado-txt strong,.dm-comunicado-txt b{color:var(--gold);}
             /* Temas claros */
@@ -882,6 +908,7 @@
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
                     <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
                     <button class="nit" id="nRegras">${this.svgRules()} <span data-i18n="rules">REGRAS</span></button>
+                    <button class="nit" id="nViolacoes">${this.svgAlerta()} <span>SITUAÇÃO DA CONTA</span></button>
                     <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
                     <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
                     <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
@@ -1058,6 +1085,8 @@
 
                 <!-- ══════ DASHBOARD ══════ -->
                 <div id="vD" class="view dash-view">
+                    <!-- Violações/punições da Kwai: faixa vermelha (banido) ou aviso (violação nova) -->
+                    <div id="violaAviso" style="width:100%;"></div>
                     <div id="painelComunicados" style="width:100%;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;"></div>
 
                     <!-- Saudação -->
@@ -1368,6 +1397,17 @@
                     <regras-dmaior id="regrasEl" com-aceite></regras-dmaior>
                 </div>
 
+                <!-- ══════ SITUAÇÃO DA CONTA (violações/punições da Kwai) ══════ -->
+                <div id="vViolacoes" class="view" style="width:100%;">
+                    <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
+                    <div class="card">
+                        <h3 class="dcard-h">Situação da conta</h3>
+                        <p class="req-sub" id="violaSub">Violações registradas pela Kwai nos últimos 30 dias.</p>
+                        <div id="violaLista"><p class="txn-empty">Carregando...</p></div>
+                        <p class="viola-nota">Não concorda com alguma violação? Fale com o seu agente ou com a agência, informando a data dela.</p>
+                    </div>
+                </div>
+
                 <!-- Gerador local de molduras, carregado somente após autenticação -->
                 <div id="vMolduras" class="view" style="width:100%;">
                     <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
@@ -1541,7 +1581,7 @@
         ['Meu desempenho', [['nD','Resumo','inicio dashboard diamantes horas'], ['nRank','Ranking','posicao'], ['nPk','PK Diário','batalha']]],
         ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate']]],
         ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
-        ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
+        ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
         ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente']]],
     ]; }
 
@@ -1719,6 +1759,8 @@
         this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
         this.qs('#nPk').addEventListener('click',()=>this.goPk());
         this.qs('#nRegras').addEventListener('click',()=>this.goRegras());
+        this.qs('#nViolacoes').addEventListener('click',()=>this.goViolacoes());
+        this.qs('#violaAviso').addEventListener('click',e=>{ if(e.target.closest('[data-viola-abrir]')) this.goViolacoes(); });
         this.qs('#regrasEl')?.addEventListener('regras-aceitar', e=>this._aceitarTermo(e.detail || {}));
         this.qs('#nTickets').addEventListener('click',()=>this.goTickets());
         this.qs('#nMore').addEventListener('click',()=>{
@@ -1947,6 +1989,7 @@
             this.qs('#mDias').textContent=`${dias} / ${rp.dias} dias`;
             this.qs('#pD').style.width=`${pDia}%`;
             this.carregarPremiacaoAgencia(t); // sem await: o painel não espera o ranking pra abrir
+            this.carregarViolacoes();         // idem: faixa/aviso de violação aparece quando chegar
             this.qs('#sEmail').value=p.email||this.sessionEmail;
             this.qs('#sName').value=p.nome||'';
             this.qs('#sWpp').value=p.whatsapp||'';
@@ -2489,6 +2532,114 @@
             await this._carregarAceitesTermos();
         }catch(e){ el?.setErroAceite?.('Sem conexão. Tente novamente.'); }
     }
+    // ── Situação da conta (violações/punições da Kwai) ──────────────────
+    // O monitor.kwai busca 1x/dia (03h) todas as violações da agência e grava
+    // por UID; aqui só lê as do próprio streamer (worker dashboard). Falha na
+    // consulta NUNCA vira "sem violação" — mostra que não deu pra consultar.
+    static get VIOLA_STATUS(){ return {'-1':'Sem permissão','0':'Solicitando','1':'Ativado','2':'Banido','3':'Banido temporariamente','4':'Cancelado','5':'Recusado'}; }
+    _violaData(iso){
+        if(!iso) return '—';
+        try{ return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; }
+    }
+    async carregarViolacoes(){
+        if(!this.sessionUid) return null;
+        try{
+            const r = await this._fetchAutenticado(`${this.apiUrl}/api/violacoes?uid=${encodeURIComponent(this.sessionUid)}`, {});
+            if(r.status === 401) return null;
+            if(!r.ok) throw new Error('http '+r.status);
+            this._violacoes = await r.json();
+        }catch(e){ this._violacoes = { erro:true }; }
+        this._renderViolaAviso();
+        return this._violacoes;
+    }
+    _renderViolaAviso(){
+        const el = this.qs('#violaAviso'); if(!el) return;
+        const d = this._violacoes;
+        if(!d || d.erro){ el.innerHTML=''; return; }
+        if(d.destaque){
+            const txt = d.destaque.status_conta_texto || this.constructor.VIOLA_STATUS[String(d.destaque.status_conta)] || 'Punição ativa';
+            el.innerHTML = `<button type="button" class="viola-faixa" data-viola-abrir>
+                <span class="viola-ico">${this.svgAlerta()}</span>
+                <span class="viola-txt"><b>Sua conta está: ${this._escHtml(txt)}</b>${d.destaque.resultado ? `<small>${this._escHtml(d.destaque.resultado)}</small>` : ''}<small>Toque para ver o motivo e a prova</small></span></button>`;
+        } else if(d.novas > 0){
+            el.innerHTML = `<button type="button" class="viola-faixa leve" data-viola-abrir>
+                <span class="viola-ico">${this.svgAlerta()}</span>
+                <span class="viola-txt"><b>Você recebeu ${d.novas === 1 ? 'uma violação nova' : d.novas+' violações novas'}</b><small>Toque para ver o motivo e a prova</small></span></button>`;
+        } else el.innerHTML = '';
+    }
+    async goViolacoes(){
+        this.navigate('vViolacoes');
+        this.navActive('nViolacoes');
+        window.scrollTo({top:0});
+        const lista = this.qs('#violaLista'); if(!lista) return;
+        lista.innerHTML = '<p class="txn-empty">Carregando...</p>';
+        const d = await this.carregarViolacoes();
+        if(!d) return;
+        const sub = this.qs('#violaSub');
+        if(sub) sub.textContent = d.ultima_verificacao
+            ? `Violações registradas pela Kwai nos últimos 30 dias · última verificação: ${this._violaData(d.ultima_verificacao)}`
+            : 'Violações registradas pela Kwai nos últimos 30 dias.';
+        if(d.erro){ lista.innerHTML = '<p class="txn-empty" style="color:var(--red)">Não foi possível consultar agora. Tente de novo em alguns minutos.</p>'; return; }
+        if(!d.ultima_verificacao){ lista.innerHTML = '<p class="txn-empty">A primeira verificação com a Kwai ainda não aconteceu. Volte mais tarde.</p>'; return; }
+        const itens = d.violacoes || [];
+        if(!itens.length){ lista.innerHTML = '<p class="txn-empty viola-ok">Nenhuma violação nos últimos 30 dias ✅</p>'; return; }
+        const ST = this.constructor.VIOLA_STATUS;
+        lista.innerHTML = itens.map(v => {
+            const st = v.status_conta_texto || ST[String(v.status_conta)] || '';
+            const cls = (v.status_conta === 2 || v.status_conta === 3) ? 'nok' : v.status_conta === 4 ? 'ok' : 'warn';
+            const extras = (v.motivos && typeof v.motivos === 'object')
+                ? Object.entries(v.motivos).filter(([k,x]) => k !== 'violationTopReason' && typeof x === 'string' && x.trim() && x !== v.motivo).map(([,x]) => `<li>${this._escHtml(x)}</li>`).join('') : '';
+            return `<div class="viola-item${v.vista_streamer_em ? '' : ' nova'}">
+                <div class="viola-top"><span class="viola-data">${this._violaData(v.punido_em)}</span>${st ? `<span class="viola-st ${cls}">${this._escHtml(st)}</span>` : ''}</div>
+                <div class="viola-motivo">${this._escHtml(v.motivo || v.tipo || 'Violação')}</div>
+                ${v.tipo && v.motivo ? `<div class="viola-lin"><span>Tipo</span>${this._escHtml(v.tipo)}</div>` : ''}
+                ${v.resultado ? `<div class="viola-lin"><span>Resultado</span>${this._escHtml(v.resultado)}</div>` : ''}
+                ${extras ? `<ul class="viola-extras">${extras}</ul>` : ''}
+                ${v.tem_prova ? `<button type="button" class="btn-sm viola-prova-btn" data-chave="${this._escHtml(v.chave)}">Ver prova</button><div class="viola-prova"></div>` : ''}
+            </div>`;
+        }).join('');
+        lista.querySelectorAll('.viola-prova-btn').forEach(b => b.addEventListener('click', () => {
+            const alvo = b.nextElementSibling; // pega antes de remover o botão
+            b.remove();
+            this._carregarProvaViolacao(b.dataset.chave, alvo);
+        }));
+        if(d.novas > 0){
+            this._fetchAutenticado(`${this.apiUrl}/api/violacoes/vistas`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ uid:this.sessionUid }),
+            }).then(() => { if(this._violacoes) { this._violacoes.novas = 0; this._renderViolaAviso(); } }).catch(()=>{});
+        }
+    }
+    // Prova: imagem vem direto; vídeo/áudio da Kwai vêm como um "roteiro" JSON
+    // que aponta pro arquivo — tenta achar um arquivo que o navegador toca
+    // sozinho (mp4/mp3/m4a/aac...). Formato que não toca aqui → avisa.
+    async _carregarProvaViolacao(chave, alvo){
+        if(!alvo) return;
+        alvo.innerHTML = '<p class="txn-empty">Carregando prova...</p>';
+        const base = `${this.apiUrl}/api/violacoes/prova?uid=${encodeURIComponent(this.sessionUid)}&chave=${encodeURIComponent(chave)}`;
+        const falha = (msg) => { alvo.innerHTML = `<p class="txn-empty" style="color:var(--red)">${msg}</p>`; };
+        const mostrar = (blob, tipo) => {
+            const url = URL.createObjectURL(blob);
+            if(tipo.startsWith('image/')) alvo.innerHTML = `<img src="${url}" alt="Prova da violação">`;
+            else if(tipo.startsWith('audio/')) alvo.innerHTML = `<audio controls src="${url}"></audio>`;
+            else alvo.innerHTML = `<video controls playsinline src="${url}"></video>`;
+        };
+        try{
+            const r = await this._fetchAutenticado(base, {});
+            if(!r.ok) return falha('Não foi possível carregar a prova agora.');
+            const ct = (r.headers.get('Content-Type') || '').toLowerCase();
+            if(/^(image|audio|video)\//.test(ct)) return mostrar(await r.blob(), ct);
+            const texto = (await r.text()).replace(/\\\//g, '/');
+            const urls = [...new Set(texto.match(/https?:\/\/[^"'\s\\]+/g) || [])];
+            const direto = urls.find(u => /\.(mp4|webm|mp3|m4a|aac|wav|ogg)(\?|$)/i.test(u));
+            if(!direto) return falha('Essa prova está num formato que ainda não abre no painel. Peça pra agência te mostrar.');
+            const r2 = await this._fetchAutenticado(`${base}&sub=${encodeURIComponent(direto)}`, {});
+            if(!r2.ok) return falha('Não foi possível carregar a prova agora.');
+            const ct2 = (r2.headers.get('Content-Type') || '').toLowerCase();
+            const tipo = /^(audio|video)\//.test(ct2) ? ct2 : (/\.(mp3|m4a|aac|wav|ogg)(\?|$)/i.test(direto) ? 'audio/mpeg' : 'video/mp4');
+            mostrar(await r2.blob(), tipo);
+        }catch(e){ falha('Não foi possível carregar a prova agora.'); }
+    }
+
     goTickets(){
         // dmaior-tickets já existe no DOM desde antes do login terminar — reconfirma
         // a sessão toda vez que a aba abre, igual dmaior-impulso.

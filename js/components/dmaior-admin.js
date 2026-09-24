@@ -143,7 +143,7 @@ class DimaiorAdmin extends HTMLElement {
   static get MENU_GRUPOS(){ return [
     ['Principal',[['dashboard'],['aoVivo','','lives transmissao']]],
     ['Ranking e resultados',[['ranking','Ranking do Mês'],['diario'],['desempenho'],['historico'],['mesesRanking'],['dashDesemp','','comparativo grafico']]],
-    ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['metricas']]],
+    ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms']]],
     ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
     ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive']]],
@@ -166,7 +166,7 @@ class DimaiorAdmin extends HTMLElement {
     nav.innerHTML=grupos.filter(g=>g[1]).map(([t,h])=>`<section class="pm-sec"><div class="pm-gt">${t}</div><div class="pm-grp">${h}</div></section>`).join('');
     nav.querySelectorAll('.pm-row').forEach(b=>b.addEventListener('click',()=>b.dataset.p==='__aparencia'?this._msAparencia?.():this._msGo?.(b.dataset.p)));
     // "Precisa de atenção": os mesmos contadores do menu lateral, só os que têm pendência
-    const ATN=[['nbSaques','saques','Saques pendentes'],['nbTicketsResgates','tickets','Resgates de tickets'],['nbMigracoesAgente','agenteMigracoes','Migrações de agente'],['nbSolicForm','solicitacoesFormularios','Solicitações de formulário'],['nbCand','convites','Candidaturas novas'],['nbRec','recrutamento','Recrutamento'],['nbLive','aoVivo','Ao vivo agora']];
+    const ATN=[['nbSaques','saques','Saques pendentes'],['nbTicketsResgates','tickets','Resgates de tickets'],['nbMigracoesAgente','agenteMigracoes','Migrações de agente'],['nbSolicForm','solicitacoesFormularios','Solicitações de formulário'],['nbViolacoes','violacoes','Violações novas'],['nbCand','convites','Candidaturas novas'],['nbRec','recrutamento','Recrutamento'],['nbLive','aoVivo','Ao vivo agora']];
     const cards=ATN.map(([id,p,lbl])=>{ const b=s.getElementById(id); if(!b||b.style.display==='none') return ''; const v=parseInt(b.textContent,10); if(!(v>0)) return ''; return `<button type="button" class="pm-ac${id==='nbLive'?' live':''}" data-p="${p}"><b>${v}</b><small>${lbl}</small></button>`; }).join('');
     const atn=s.getElementById('admMsAtencao');
     if(atn){ atn.innerHTML=cards?`<div class="pm-gt">Precisa de atenção</div><div class="pm-atn">${cards}</div>`:''; atn.querySelectorAll('.pm-ac').forEach(b=>b.addEventListener('click',()=>this._msGo?.(b.dataset.p))); }
@@ -355,7 +355,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema'};
   _ir(pag){
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
     s.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.p===pag));
@@ -365,7 +365,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa[pag]?.();
   }
 
@@ -477,6 +477,7 @@ class DimaiorAdmin extends HTMLElement {
 
   async _carregarDash(){
     const s=this.shadowRoot;
+    this._contarViolacoesNovas(); // badge "Violações" + "Precisa de atenção" (sem await)
     // Skeleton na hora: a grade de métricas já aparece com "—"/spinner em
     // vez de travar a tela toda esperando a rede — e o Acesso Rápido (que
     // não depende de nenhum dado do banco) nem precisa esperar nada.
@@ -1264,6 +1265,97 @@ class DimaiorAdmin extends HTMLElement {
       const r=await this._api('DELETE',`/admin/ranking/ocultos/${encodeURIComponent(uid)}`);
       if(r?.ok){this._toast('Streamer reexibido no ranking!');this._carregarListaOcultosRanking();this._carregarRanking();}else this._toast(r?.erro||'Erro','err');
     }));
+  }
+
+  // ── Violações / punições da Kwai ────────────────────────────────────────────
+  // O monitor.kwai busca 1x/dia (03h) todas as violações da agência (últimos
+  // 30 dias) e grava em streamer_violacoes, ligadas pelo UID. "Verificar
+  // agora" força a busca. "Conferida" = vista_admin_em (some do contador).
+  static VIOLA_STATUS={'-1':'Sem permissão','0':'Solicitando','1':'Ativado','2':'Banido','3':'Banido temporariamente','4':'Cancelado','5':'Recusado'};
+  _violaData(iso){if(!iso)return'—';try{return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return'—';}}
+  async _contarViolacoesNovas(){
+    const d=await this._api('GET','/admin/violacoes/contagem');
+    const b=this.shadowRoot.getElementById('nbViolacoes'); if(!b) return;
+    const n=d?.ok?Number(d.nao_vistas)||0:0;
+    b.textContent=n; b.style.display=n>0?'':'none';
+  }
+  async _carregarViolacoes(){
+    const s=this.shadowRoot, el=s.getElementById('listaViol'), info=s.getElementById('violSync'); if(!el) return;
+    el.innerHTML=this._loading();
+    const qs=new URLSearchParams({dias:s.getElementById('violDias')?.value||'30'});
+    const busca=(s.getElementById('violBusca')?.value||'').trim().replace(/^@/,''); if(busca) qs.set('busca',busca);
+    const st=s.getElementById('violStatus')?.value||''; if(st!=='') qs.set('status',st);
+    if(s.getElementById('violNovas')?.checked) qs.set('novas','1');
+    const d=await this._api('GET',`/admin/violacoes?${qs}`);
+    this._contarViolacoesNovas();
+    if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||'Não foi possível carregar as violações');return;}
+    const u=d.ultima_sincronizacao;
+    if(info) info.innerHTML=!u?'A primeira busca na Kwai ainda não rodou — use <b>Verificar agora</b>.'
+      :u.ok?`Última busca: ${this._violaData(u.executado_em)} (${u.origem==='manual'?'manual':'automática'}) · ${u.total} na Kwai · ${u.novas} nova(s)${u.erro?` · <span style="color:var(--warn)">aviso: ${this._esc(u.erro)}</span>`:''}`
+      :`<span style="color:var(--verm)">A última busca FALHOU em ${this._violaData(u.executado_em)}: ${this._esc(u.erro||'erro desconhecido')}. A lista abaixo pode estar desatualizada.</span>`;
+    const lista=d.violacoes||[];
+    if(!lista.length){el.innerHTML=this._empty('check_c','Nenhuma violação no período/filtro');return;}
+    const ST=DimaiorAdmin.VIOLA_STATUS;
+    el.innerHTML=lista.map(v=>{
+      const stT=v.status_conta_texto||ST[String(v.status_conta)]||'—';
+      const cls=(v.status_conta===2||v.status_conta===3)?'nok':v.status_conta===4?'ok':'warn';
+      const extras=(v.motivos&&typeof v.motivos==='object')?Object.entries(v.motivos).filter(([k,x])=>k!=='violationTopReason'&&typeof x==='string'&&x.trim()&&x!==v.motivo).map(([,x])=>`<li>${this._esc(x)}</li>`).join(''):'';
+      return`<div class="viol-item${v.vista_admin_em?'':' nova'}">
+        <div class="viol-top">
+          <div><b class="viol-nome">${this._esc(v.nome||v.kwai_id||v.kwai_uid)}</b><span class="viol-ids">@${this._esc(v.kwai_id||'—')} · UID ${this._esc(v.kwai_uid)}</span></div>
+          <span class="viol-st ${cls}">${this._esc(stT)}</span>
+        </div>
+        <div class="viol-motivo">${this._esc(v.motivo||v.tipo||'Violação')}</div>
+        <div class="viol-lin"><span>Data</span>${this._violaData(v.punido_em)}${v.tipo&&v.motivo?` · <span>Tipo</span>${this._esc(v.tipo)}`:''}</div>
+        ${v.resultado?`<div class="viol-lin"><span>Resultado</span>${this._esc(v.resultado)}</div>`:''}
+        ${extras?`<ul class="viol-extras">${extras}</ul>`:''}
+        <div class="viol-acoes">
+          ${v.prova_tipo?`<button class="btn btn-o viol-prova-btn" data-chave="${this._esc(v.chave)}">${this._ico('search',12)} Ver prova</button>`:''}
+          ${v.vista_admin_em?`<span class="viol-ok">${this._ico('check',12)} Conferida</span>`:`<button class="btn btn-o viol-vista-btn" data-chave="${this._esc(v.chave)}">${this._ico('check',12)} Marcar conferida</button>`}
+          <span class="viol-ids">${v.vista_streamer_em?'Streamer já viu':'Streamer ainda não viu'}</span>
+        </div>
+        <div class="viol-prova"></div>
+      </div>`;}).join('');
+    el.querySelectorAll('.viol-prova-btn').forEach(b=>b.addEventListener('click',()=>{const alvo=b.closest('.viol-item').querySelector('.viol-prova');b.remove();this._carregarProvaViolacaoAdm(b.dataset.chave,alvo);}));
+    el.querySelectorAll('.viol-vista-btn').forEach(b=>b.addEventListener('click',()=>this._marcarViolacoesVistas([b.dataset.chave])));
+  }
+  async _sincronizarViolacoes(){
+    const b=this.shadowRoot.getElementById('btnSyncViol');
+    if(b){b.disabled=true;b.innerHTML=`${this._ico('refresh',13)} Consultando a Kwai...`;}
+    const d=await this._api('POST','/admin/violacoes/sincronizar');
+    if(b){b.disabled=false;b.innerHTML=`${this._ico('refresh',13)} Verificar agora`;}
+    if(d?.ok) this._toast(d.novas?`${d.novas} violação(ões) nova(s) encontrada(s)`:'Busca concluída — nenhuma violação nova');
+    else this._toast(d?.erro||'Falha ao consultar a Kwai','err');
+    this._carregarViolacoes();
+  }
+  async _marcarViolacoesVistas(chaves){
+    const d=await this._api('POST','/admin/violacoes/vistas',chaves?{chaves}:{todas:true});
+    if(d?.ok){this._toast(chaves?'Marcada como conferida':'Todas marcadas como conferidas');this._carregarViolacoes();}
+    else this._toast(d?.erro||'Erro ao marcar','err');
+  }
+  // Prova: imagem direto; vídeo/áudio da Kwai chegam como "roteiro" JSON —
+  // procura dentro dele um arquivo que o navegador toca sozinho.
+  async _carregarProvaViolacaoAdm(chave,alvo){
+    if(!alvo) return;
+    alvo.innerHTML=this._loading();
+    const base=`${this.WORKER}/admin/violacoes/prova?chave=${encodeURIComponent(chave)}`;
+    const aut={headers:{Authorization:`Bearer ${this._token}`}};
+    const falha=m=>{alvo.innerHTML=`<p style="color:var(--verm);font-size:12px;margin-top:8px">${this._esc(m)}</p>`;};
+    const mostrar=(blob,tipo)=>{const url=URL.createObjectURL(blob);alvo.innerHTML=tipo.startsWith('image/')?`<img src="${url}" alt="Prova">`:tipo.startsWith('audio/')?`<audio controls src="${url}"></audio>`:`<video controls playsinline src="${url}"></video>`;};
+    try{
+      const r=await fetch(base,aut);
+      if(!r.ok) return falha('Não foi possível carregar a prova agora.');
+      const ct=(r.headers.get('Content-Type')||'').toLowerCase();
+      if(/^(image|audio|video)\//.test(ct)) return mostrar(await r.blob(),ct);
+      const texto=(await r.text()).replace(/\\\//g,'/');
+      const urls=[...new Set(texto.match(/https?:\/\/[^"'\s\\]+/g)||[])];
+      const direto=urls.find(u=>/\.(mp4|webm|mp3|m4a|aac|wav|ogg)(\?|$)/i.test(u));
+      if(!direto){ console.info('[violações] roteiro da prova (formato não suportado):',texto.slice(0,2000)); return falha('Formato de prova ainda não suportado no painel (veja no Voyager). O conteúdo bruto foi registrado no console do navegador.'); }
+      const r2=await fetch(`${base}&sub=${encodeURIComponent(direto)}`,aut);
+      if(!r2.ok) return falha('Não foi possível carregar a prova agora.');
+      const ct2=(r2.headers.get('Content-Type')||'').toLowerCase();
+      mostrar(await r2.blob(),/^(audio|video)\//.test(ct2)?ct2:(/\.(mp3|m4a|aac|wav|ogg)(\?|$)/i.test(direto)?'audio/mpeg':'video/mp4'));
+    }catch{falha('Não foi possível carregar a prova agora.');}
   }
 
   _prepararBuscaUid(){
@@ -2232,6 +2324,11 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAplicarAjusteTicket')?.addEventListener('click',()=>this._aplicarAjusteTicket());
     // Status de Streamers
     s.getElementById('btnAtuStatusStreamers')?.addEventListener('click',()=>this._carregarStatusStreamers());
+    s.getElementById('btnAtuViol')?.addEventListener('click',()=>this._carregarViolacoes());
+    s.getElementById('btnSyncViol')?.addEventListener('click',()=>this._sincronizarViolacoes());
+    s.getElementById('btnVistasViol')?.addEventListener('click',()=>this._marcarViolacoesVistas());
+    ['violDias','violStatus','violNovas'].forEach(id=>s.getElementById(id)?.addEventListener('change',()=>this._carregarViolacoes()));
+    s.getElementById('violBusca')?.addEventListener('keydown',e=>{if(e.key==='Enter')this._carregarViolacoes();});
     s.getElementById('btnAtualizarRosterStatus')?.addEventListener('click',()=>this._atualizarRosterStatus());
     s.getElementById('statusStreamersFiltro')?.addEventListener('change',e=>{
       this._statusStreamersFiltroAtual=e.target.value;
@@ -4404,6 +4501,25 @@ class DimaiorAdmin extends HTMLElement {
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
     .nb{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,212,.3);border-radius:99px;padding:1px 6px}.nb.live{background:rgba(248,113,113,.2);color:var(--verm);border-color:rgba(248,113,113,.4);animation:bl 1.8s infinite}.nb.gold{background:rgba(240,192,64,.2);color:var(--gold);border-color:rgba(240,192,64,.4)}
+    /* Violações / punições da Kwai */
+    .viol-sel{background:rgba(0,0,0,.35);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none}
+    .viol-item{border:1px solid var(--brd);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--glass)}
+    .viol-item.nova{border-color:rgba(248,113,113,.55)}
+    .viol-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+    .viol-nome{color:var(--t1);font-size:14px;margin-right:8px}
+    .viol-ids{font-size:11px;color:var(--t3)}
+    .viol-st{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+    .viol-st.nok{background:rgba(248,113,113,.14);color:var(--verm);border:1px solid rgba(248,113,113,.35)}
+    .viol-st.ok{background:rgba(74,222,128,.12);color:var(--verde);border:1px solid rgba(74,222,128,.3)}
+    .viol-st.warn{background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3)}
+    .viol-motivo{font-weight:700;color:var(--t1);font-size:13px;margin-bottom:4px;overflow-wrap:anywhere}
+    .viol-lin{font-size:12px;color:var(--t2);margin-top:2px;overflow-wrap:anywhere}
+    .viol-lin span{color:var(--t3);margin-right:5px}
+    .viol-extras{margin:6px 0 0 18px;padding:0;font-size:12px;color:var(--t3)}
+    .viol-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    .viol-ok{font-size:12px;color:var(--verde);display:inline-flex;gap:4px;align-items:center}
+    .viol-prova img,.viol-prova video{display:block;max-width:100%;max-height:420px;border-radius:10px;margin-top:10px}
+    .viol-prova audio{display:block;width:100%;margin-top:10px}
     .content{flex:1;padding:20px;background:transparent;min-height:0;}
     .pag{display:none}.pag.on{display:block;animation:fadeUp .3s ease both}
     .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
@@ -5457,6 +5573,7 @@ class DimaiorAdmin extends HTMLElement {
               ni('check_c','statusStreamers','Status de Streamers')+
               ni('key_uid','uids','Autorização de UIDs')+
               ni('search','buscaUid','Buscar UID Kwai')+
+              ni('warning','violacoes','Violações',`<span class="nb live" id="nbViolacoes" style="display:none">0</span>`)+
               ni('metrics','metricas','Métricas')
             )}
             ${navSec('recrutamento','Recrutamento e agentes',
@@ -5749,6 +5866,21 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                   <div id="buscaUidResultado" style="margin-top:18px"></div>
                 </div>
+              </div>
+            </div>
+            <div class="pag" id="pag-violacoes">${ph('Violações','warning','Punições registradas pela Kwai · busca automática 1x por dia (03h)','btnAtuViol',`<button class="btn btn-g" id="btnSyncViol">${this._ico('refresh',13)} Verificar agora</button>`)}
+              <div class="box">
+                <div class="bhead"><div class="btitulo">${this._ico('warning',14)} Violações dos streamers</div>
+                  <div class="bacoes" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                    <div class="busca">${this._ico('search',12)}<input id="violBusca" type="text" placeholder="Nome, @ ou UID (Enter)" style="width:170px"/></div>
+                    <select id="violDias" class="viol-sel"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option></select>
+                    <select id="violStatus" class="viol-sel"><option value="">Todos os status</option><option value="2">Banido</option><option value="3">Banido temporariamente</option><option value="1">Ativado</option><option value="4">Cancelado</option><option value="0">Solicitando</option><option value="5">Recusado</option><option value="-1">Sem permissão</option></select>
+                    <label style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--t2)"><input type="checkbox" id="violNovas"/> Só não conferidas</label>
+                    <button class="btn btn-o" id="btnVistasViol">${this._ico('check',13)} Marcar todas como conferidas</button>
+                  </div>
+                </div>
+                <div id="violSync" style="padding:10px 18px 0;font-size:12px;color:var(--t3)"></div>
+                <div id="listaViol" style="padding:12px 18px 18px">${this._loading()}</div>
               </div>
             </div>
             <div class="pag" id="pag-metricas">${ph('Métricas','metrics','Campanhas e boosts','btnAtuMet')}<div class="dc2-grid" id="gMet">${this._loading('grid-column:1/-1')}</div></div>
