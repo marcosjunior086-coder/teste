@@ -263,6 +263,8 @@ class DimaiorAdmin extends HTMLElement {
       star:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
       warning:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
       check:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+      // Lucide (ISC), via api.iconify.design — mesmo traço dos demais ícones do admin
+      play:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>`,
       server:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
       bolt:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
       heart:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
@@ -1356,7 +1358,7 @@ class DimaiorAdmin extends HTMLElement {
     const mb=Math.max(1,Math.round(rot.segments.reduce((t,x)=>t+(Number(x.fileSize)||0),0)/1048576));
     const seg=Math.round((Number(rot.duration)||rot.segments.reduce((t,x)=>t+(Number(x.duration)||0),0))/1000);
     const dur=`${Math.floor(seg/60)}:${String(seg%60).padStart(2,'0')}`;
-    alvo.innerHTML=`<div class="viol-acoes" style="margin-top:8px"><span class="viol-lin">Vídeo de ${dur} · ≈ ${mb} MB</span><button class="btn btn-o">▶ Assistir vídeo</button></div>`;
+    alvo.innerHTML=`<div class="viol-acoes" style="margin-top:8px"><span class="viol-lin">Vídeo de ${dur} · ≈ ${mb} MB</span><button class="btn btn-o">${this._ico('play',12)} Assistir vídeo</button></div>`;
     alvo.querySelector('button').addEventListener('click',async()=>{
       alvo.innerHTML=this._loading();
       let mpegts; try{mpegts=await this._carregarMpegts();}catch{return falha('Não foi possível carregar o player de vídeo agora.');}

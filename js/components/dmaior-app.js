@@ -224,6 +224,9 @@
     svgShield()  { return `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.5 14.5L6 11l1.41-1.41L10.5 12.67l6.09-6.09L18 8l-7.5 7.5z"/></svg>`; }
     svgAgente()  { return `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`; }
     svgSend()    { return `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`; }
+    // Material Symbols Rounded (Apache 2.0), via api.iconify.design — mesmo estilo preenchido dos outros ícones do painel
+    svgPlay()    { return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712"/></svg>`; }
+    svgOk()      { return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>`; }
     svgAlerta()  { return `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`; }
 
     // ── Formatação BRL ───────────────────────────────────────────────
@@ -712,7 +715,8 @@
             .viola-prova-btn{margin-top:10px;}
             .viola-prova img,.viola-prova video{display:block;max-width:100%;max-height:420px;border-radius:10px;margin-top:10px;}
             .viola-prova audio{display:block;width:100%;margin-top:10px;}
-            .viola-ok{color:var(--green)!important;}
+            .viola-ok{color:var(--green)!important;display:flex;flex-direction:column;align-items:center;gap:8px;}
+            .viola-ok-ico svg{width:34px;height:34px;display:block;}
             .viola-cod{font-size:.7rem;color:var(--muted);}
             .viola-video-info{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;font-size:.78rem;color:var(--text);}
             .viola-video-info small{color:var(--muted);}
@@ -2598,7 +2602,7 @@
         if(d.erro){ lista.innerHTML = '<p class="txn-empty" style="color:var(--red)">Não foi possível consultar agora. Tente de novo em alguns minutos.</p>'; return; }
         if(!d.ultima_verificacao){ lista.innerHTML = '<p class="txn-empty">A primeira verificação com a Kwai ainda não aconteceu. Volte mais tarde.</p>'; return; }
         const itens = d.violacoes || [];
-        if(!itens.length){ lista.innerHTML = '<p class="txn-empty viola-ok">Nenhuma violação nos últimos 30 dias ✅</p>'; return; }
+        if(!itens.length){ lista.innerHTML = `<p class="txn-empty viola-ok"><span class="viola-ok-ico">${this.svgOk()}</span>Nenhuma violação nos últimos 30 dias</p>`; return; }
         const ST = this.constructor.VIOLA_STATUS;
         lista.innerHTML = itens.map(v => {
             const st = v.status_conta_texto || ST[String(v.status_conta)] || '';
@@ -2683,7 +2687,7 @@
         const mb = Math.max(1, Math.round(rot.segments.reduce((t, x) => t + (Number(x.fileSize) || 0), 0) / 1048576));
         const seg = Math.round((Number(rot.duration) || rot.segments.reduce((t, x) => t + (Number(x.duration) || 0), 0)) / 1000);
         const dur = `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}`;
-        alvo.innerHTML = `<div class="viola-video-info">Vídeo de ${dur} · ≈ ${mb} MB <small>(começa na hora e vai carregando; use Wi-Fi se puder)</small><button type="button" class="btn-sm">▶ Assistir vídeo</button></div>`;
+        alvo.innerHTML = `<div class="viola-video-info">Vídeo de ${dur} · ≈ ${mb} MB <small>(começa na hora e vai carregando; use Wi-Fi se puder)</small><button type="button" class="btn-sm">${this.svgPlay()} Assistir vídeo</button></div>`;
         alvo.querySelector('button').addEventListener('click', async () => {
             alvo.innerHTML = '<p class="txn-empty">Carregando vídeo...</p>';
             let mpegts;
