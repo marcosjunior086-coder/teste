@@ -1106,9 +1106,9 @@ class DimaiorAdmin extends HTMLElement {
     const _renderItem=(sv,isExterno)=>{
       const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';
       const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;
-      const isAtalhoAdmin=sv.atalho_admin===true;const isAtalhoAgente=sv.atalho_agente===true;
+      const isAtalhoAdmin=sv.atalho_admin===true;const isAtalhoAgente=sv.atalho_agente===true;const isAtalhoSub=sv.atalho_sub===true;
       const rotaBase=isExterno?`/admin/streamers/externos/${encodeURIComponent(uid)}`:`/admin/streamers/${encodeURIComponent(uid)}`;
-      const atalhosBtns=isExterno?'':`<button class="btn btn-sm sv-toggle-atalho ${isAtalhoAdmin?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="atalho_admin" data-val="${isAtalhoAdmin}" style="${isAtalhoAdmin?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(129,140,248,.5);color:var(--info)'}">${this._ico(isAtalhoAdmin?'x_circle':'check_c',12)} ${isAtalhoAdmin?'Remover Atalho Admin':'Atalho Admin'}</button><button class="btn btn-sm sv-toggle-atalho ${isAtalhoAgente?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="atalho_agente" data-val="${isAtalhoAgente}" style="${isAtalhoAgente?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(129,140,248,.5);color:var(--info)'}">${this._ico(isAtalhoAgente?'x_circle':'check_c',12)} ${isAtalhoAgente?'Remover Atalho Agente':'Atalho Agente'}</button>`;
+      const atalhosBtns=isExterno?'':`<button class="btn btn-sm sv-toggle-atalho ${isAtalhoAdmin?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="atalho_admin" data-val="${isAtalhoAdmin}" style="${isAtalhoAdmin?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(129,140,248,.5);color:var(--info)'}">${this._ico(isAtalhoAdmin?'x_circle':'check_c',12)} ${isAtalhoAdmin?'Remover Atalho Admin':'Atalho Admin'}</button><button class="btn btn-sm sv-toggle-atalho ${isAtalhoAgente?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="atalho_agente" data-val="${isAtalhoAgente}" style="${isAtalhoAgente?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(129,140,248,.5);color:var(--info)'}">${this._ico(isAtalhoAgente?'x_circle':'check_c',12)} ${isAtalhoAgente?'Remover Atalho Agente':'Atalho Agente'}</button><button class="btn btn-sm sv-toggle-atalho ${isAtalhoSub?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="atalho_sub" data-val="${isAtalhoSub}" style="${isAtalhoSub?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(129,140,248,.5);color:var(--info)'}">${this._ico(isAtalhoSub?'x_circle':'check_c',12)} ${isAtalhoSub?'Remover Atalho Sub':'Atalho Sub'}</button>`;
       const acoesBtns=isExterno
         ?`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" data-externo="1" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" data-externo="1" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:var(--warn)'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-sm" data-uid="${this._esc(uid)}" data-externo-del="1" style="border-color:rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',12)} Remover</button>`
         :`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:var(--warn)'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button>${atalhosBtns}`;
@@ -1156,10 +1156,10 @@ class DimaiorAdmin extends HTMLElement {
     if(d?.ok){this._toast(isAtivo?`${tipo.charAt(0).toUpperCase()+tipo.slice(1)} removido`:`Streamer ${tipo}!`);this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
   }
   async _toggleAtalho(uid,campo,isAtivo){
-    const label=campo==='atalho_admin'?'Atalho Admin':'Atalho Agente';
+    const label={atalho_admin:'Atalho Admin',atalho_agente:'Atalho Agente',atalho_sub:'Atalho Sub'}[campo]||'Atalho';
     const acao=isAtivo?`Remover ${label}`:`Liberar ${label}`;
-    if(!confirm(`${acao} para o streamer ${uid}?`))return;
-    const rota=campo==='atalho_admin'?`/admin/streamers/${encodeURIComponent(uid)}/atalho-admin`:`/admin/streamers/${encodeURIComponent(uid)}/atalho-agente`;
+    if(!confirm(`${acao} para o streamer ${uid}?${campo==='atalho_sub'&&!isAtivo?'\n\nO botão "Painel da Sub" aparece no painel dele. Pra entrar, ele usa o login e a senha criados em Acessos das Subs.':''}`))return;
+    const rota=`/admin/streamers/${encodeURIComponent(uid)}/${{atalho_admin:'atalho-admin',atalho_agente:'atalho-agente',atalho_sub:'atalho-sub'}[campo]}`;
     const d=await this._api('PATCH',rota,{[campo]:!isAtivo});
     if(d?.ok){this._toast(isAtivo?`${label} removido`:`${label} liberado!`);this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
   }
@@ -1550,15 +1550,21 @@ class DimaiorAdmin extends HTMLElement {
             <div class="mc"><label>Sub-agência</label><select id="saOrg" class="viol-sel" style="width:100%;padding:9px 12px;font-size:14px"></select></div>
             <div class="mc"><label>Nome do responsável</label><input id="saNome" type="text" class="sa-inp" placeholder="Ex: João (dono da Sub 1)"/></div>
             <div class="mc"><label>Login</label><input id="saLogin" type="text" class="sa-inp" placeholder="ex: sub1.joao" autocapitalize="off" autocorrect="off" spellcheck="false"/></div>
-            <div class="mc"><label>Senha (mín. 8)</label><input id="saSenha" type="text" class="sa-inp" placeholder="Senha inicial" autocomplete="new-password"/></div>
+            <div class="mc"><label>Senha (mín. 8)</label><div class="sa-senha-box"><input id="saSenha" type="password" class="sa-inp" placeholder="Digite ou gere uma senha" autocomplete="new-password"/><button type="button" class="sa-olho" id="btnSaOlho" aria-label="Mostrar senha" title="Mostrar senha">${this._ico('eye',15)}</button></div><button type="button" class="sa-gerar" id="btnSaGerar">${this._ico('refresh',12)} Gerar senha</button></div>
             <div class="mc"><label>Nome no convite da Kwai</label><input id="saContNome" type="text" class="sa-inp" placeholder="Aparece pro streamer no convite"/></div>
-            <div class="mc"><label>Telefone no convite (WhatsApp)</label><input id="saContTel" type="text" class="sa-inp" placeholder="(11) 99999-0000"/></div>
-            <div class="mc"><label>UID do streamer (opcional)</label><input id="saUid" type="text" inputmode="numeric" class="sa-inp" placeholder="Mostra o botão Painel da Sub pra ele"/></div>
-            <div style="display:flex;align-items:flex-end"><button class="btn btn-g" id="btnSaCriar">${this._ico('plus',13)} Criar acesso</button></div>
+            <div class="mc"><label>Telefone no convite (WhatsApp)</label><input id="saContTel" type="text" class="sa-inp" placeholder="(11) 99999-0000"/></div>            <div style="display:flex;align-items:flex-end"><button class="btn btn-g" id="btnSaCriar">${this._ico('plus',13)} Criar acesso</button></div>
           </div></div>
         <div class="box"><div class="bhead"><div class="btitulo">${this._ico('users',14)} Acessos criados</div></div><div id="saLista" style="padding:12px 18px 18px">${this._loading()}</div></div>
       </div>`);
     s.getElementById('btnSaCriar')?.addEventListener('click',()=>this._criarAcessoSub());
+    const inpSenha=s.getElementById('saSenha');
+    s.getElementById('btnSaOlho')?.addEventListener('click',()=>{ if(inpSenha) inpSenha.type=inpSenha.type==='password'?'text':'password'; });
+    // Senha forte aleatória (sem letras/números parecidos: 0/O, 1/l/I) e já visível pra copiar e mandar pra pessoa
+    s.getElementById('btnSaGerar')?.addEventListener('click',()=>{
+      const abc='abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', v=new Uint32Array(10); crypto.getRandomValues(v);
+      if(inpSenha){ inpSenha.value=[...v].map(n=>abc[n%abc.length]).join(''); inpSenha.type='text'; inpSenha.select(); }
+      this._toast('Senha gerada — copie e mande pra pessoa antes de criar');
+    });
   }
   async _carregarAcessosSub(){
     const s=this.shadowRoot, el=s.getElementById('saLista'); if(!el) return;
@@ -1573,24 +1579,18 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=contas.map(c=>`<div class="viol-item" data-id="${this._esc(c.id)}">
       <div class="viol-top"><div><b class="viol-nome">${this._esc(c.nome)}</b><span class="viol-ids">login <b>${this._esc(c.login)}</b> · ${this._esc(c.org_nome||c.org_id)}</span></div><span class="viol-st ${c.ativo?'ok':'nok'}">${c.ativo?'Ativo':'Desativado'}</span></div>
       <div class="viol-lin"><span>Convite sai como</span>${this._esc(c.contato_nome||c.nome)}${c.contato_telefone?` · ${this._esc(c.contato_telefone)}`:''}</div>
-      <div class="viol-lin"><span>Botão no painel do streamer</span>${c.kwai_uid?`UID ${this._esc(c.kwai_uid)}`:'nenhum UID vinculado'}</div>
       <div class="viol-lin"><span>Último acesso</span>${c.ultimo_login_em?this._fdt(c.ultimo_login_em):'nunca entrou'}</div>
       <div class="viol-acoes">
-        <button class="btn btn-o sa-uid">${this._ico('user',12)} ${c.kwai_uid?'Trocar UID':'Vincular UID'}</button>
         <button class="btn btn-o sa-senha">${this._ico('key_uid',12)} Trocar senha</button>
         <button class="btn btn-o sa-ativo">${c.ativo?'Desativar':'Reativar'}</button>
         <button class="btn btn-o sa-excluir" style="color:var(--verm)">${this._ico('trash',12)} Excluir</button>
       </div></div>`).join('');
     el.querySelectorAll('.viol-item').forEach(it=>{
       const id=it.dataset.id, c=contas.find(x=>x.id===id);
-      it.querySelector('.sa-uid').addEventListener('click',async()=>{
-        const novo=prompt(`UID do streamer que vai ver o botão "Painel da Sub" (${c.login}).\nDeixe vazio pra tirar o vínculo.`, c.kwai_uid||'');
-        if(novo===null) return;
-        const r=await this._api('PATCH',`/admin/subadmins/${id}`,{kwai_uid:novo.trim()});
-        r?.ok?(this._toast(novo.trim()?'UID vinculado':'Vínculo removido'),this._carregarAcessosSub()):this._toast(r?.erro||'Erro','err');
-      });
       it.querySelector('.sa-senha').addEventListener('click',async()=>{
-        const nova=prompt(`Nova senha para ${c.login} (mínimo 8 caracteres):`); if(!nova) return;
+        const abc='abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', v=new Uint32Array(10); crypto.getRandomValues(v);
+        const sugerida=[...v].map(n=>abc[n%abc.length]).join('');
+        const nova=prompt(`Nova senha para ${c.login} (mínimo 8 caracteres).\nJá sugerimos uma senha forte: copie e mande pra pessoa antes de confirmar, ou troque por outra.`, sugerida); if(!nova) return;
         const r=await this._api('PATCH',`/admin/subadmins/${id}`,{senha:nova});
         r?.ok?this._toast('Senha trocada'):this._toast(r?.erro||'Erro','err');
       });
@@ -1608,14 +1608,15 @@ class DimaiorAdmin extends HTMLElement {
   async _criarAcessoSub(){
     const s=this.shadowRoot, v=id=>(s.getElementById(id)?.value||'').trim();
     const org=v('saOrg'), o=(this._subOrgs||[]).find(x=>String(x.org_id)===org);
-    const body={org_id:org,org_nome:o?.nome||'',nome:v('saNome'),login:v('saLogin'),senha:v('saSenha'),contato_nome:v('saContNome'),contato_telefone:v('saContTel'),kwai_uid:v('saUid')};
+    const body={org_id:org,org_nome:o?.nome||'',nome:v('saNome'),login:v('saLogin'),senha:v('saSenha'),contato_nome:v('saContNome'),contato_telefone:v('saContTel')};
     if(!body.org_id||!body.nome||!body.login||!body.senha){this._toast('Preencha sub, nome, login e senha','err');return;}
     const b=s.getElementById('btnSaCriar'); if(b) b.disabled=true;
     const r=await this._api('POST','/admin/subadmins',body);
     if(b) b.disabled=false;
     if(!r?.ok){this._toast(r?.erro||'Erro ao criar','err');return;}
     this._toast(`Acesso criado! Login: ${body.login}`);
-    ['saNome','saLogin','saSenha','saContNome','saContTel','saUid'].forEach(id=>{const e=s.getElementById(id);if(e)e.value='';});
+    ['saNome','saLogin','saSenha','saContNome','saContTel'].forEach(id=>{const e=s.getElementById(id);if(e)e.value='';});
+    const sn=s.getElementById('saSenha'); if(sn) sn.type='password';
     this._carregarAcessosSub();
   }
 
@@ -4761,6 +4762,10 @@ class DimaiorAdmin extends HTMLElement {
     .sub-escopo{display:inline-flex;gap:6px;flex-wrap:wrap}
     .sub-escopo .btn.on{background:var(--cyan-d);color:var(--cyan);border-color:var(--cyan)}
     .sa-inp{width:100%;padding:9px 12px;background:rgba(0,0,0,.35);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:14px;outline:none;box-sizing:border-box}
+    .sa-senha-box{position:relative}.sa-senha-box .sa-inp{padding-right:40px}
+    .sa-olho{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--t3);cursor:pointer;padding:4px;display:flex}
+    .sa-olho:hover{color:var(--cyan)}
+    .sa-gerar{margin-top:6px;background:none;border:0;color:var(--cyan);font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:0}
     /* Ícones SVG no lugar de emoji (_ii / _dia) */
     .ii{display:inline-flex;align-items:center;vertical-align:-2px;margin-right:4px}
     .ii-dia{color:var(--cyan);margin-right:0}
