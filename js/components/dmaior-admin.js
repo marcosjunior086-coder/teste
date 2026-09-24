@@ -1310,7 +1310,7 @@ class DimaiorAdmin extends HTMLElement {
         ${v.resultado?`<div class="viol-lin"><span>Resultado</span>${this._esc(v.resultado)}</div>`:''}
         ${extras?`<ul class="viol-extras">${extras}</ul>`:''}
         <div class="viol-acoes">
-          ${v.prova_tipo?`<button class="btn btn-o viol-prova-btn" data-chave="${this._esc(v.chave)}">${this._ico('search',12)} Ver prova</button>`:''}
+          ${v.prova_tipo&&!v.prova_interna?`<button class="btn btn-o viol-prova-btn" data-chave="${this._esc(v.chave)}">${this._ico('search',12)} Ver prova</button>`:''}${v.prova_interna?`<span class="viol-ids" title="A imagem fica no sistema interno da Kuaishou (login só de funcionários)">Prova só no sistema interno da Kwai</span>`:''}
           ${v.vista_admin_em?`<span class="viol-ok">${this._ico('check',12)} Conferida</span>`:`<button class="btn btn-o viol-vista-btn" data-chave="${this._esc(v.chave)}">${this._ico('check',12)} Marcar conferida</button>`}
           <span class="viol-ids">${v.vista_streamer_em?'Streamer já viu':'Streamer ainda não viu'}</span>
         </div>
@@ -1344,8 +1344,11 @@ class DimaiorAdmin extends HTMLElement {
     const mostrar=(blob,tipo)=>{const url=URL.createObjectURL(blob);alvo.innerHTML=tipo.startsWith('image/')?`<img src="${url}" alt="Prova">`:tipo.startsWith('audio/')?`<audio controls src="${url}"></audio>`:`<video controls playsinline src="${url}"></video>`;};
     try{
       const r=await fetch(base,aut);
-      if(!r.ok) return falha('Não foi possível carregar a prova agora.');
       const ct=(r.headers.get('Content-Type')||'').toLowerCase();
+      // Prova no sistema interno da Kuaishou: o monitor devolve 422 PROVA_INTERNA_KWAI
+      // (ou, versão antiga, a página HTML do login de funcionário deles).
+      if(r.status===422||ct.includes('text/html')) return falha('A Kwai guarda essa prova num sistema interno dela, que só funcionários da Kwai conseguem abrir. Não dá pra mostrar aqui.');
+      if(!r.ok) return falha('Não foi possível carregar a prova agora.');
       if(/^(image|audio|video)\//.test(ct)) return mostrar(await r.blob(),ct);
       const texto=(await r.text()).replace(/\\\//g,'/');
       const urls=[...new Set(texto.match(/https?:\/\/[^"'\s\\]+/g)||[])];

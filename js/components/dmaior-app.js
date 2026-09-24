@@ -2625,8 +2625,10 @@
         };
         try{
             const r = await this._fetchAutenticado(base, {});
-            if(!r.ok) return falha('Não foi possível carregar a prova agora.');
             const ct = (r.headers.get('Content-Type') || '').toLowerCase();
+            // Prova no sistema interno da Kuaishou (login só de funcionário deles)
+            if(r.status === 422 || ct.includes('text/html')) return falha('A Kwai guarda essa prova num sistema interno dela, que só funcionários da Kwai conseguem abrir. Não dá pra mostrar aqui.');
+            if(!r.ok) return falha('Não foi possível carregar a prova agora.');
             if(/^(image|audio|video)\//.test(ct)) return mostrar(await r.blob(), ct);
             const texto = (await r.text()).replace(/\\\//g, '/');
             const urls = [...new Set(texto.match(/https?:\/\/[^"'\s\\]+/g) || [])];
