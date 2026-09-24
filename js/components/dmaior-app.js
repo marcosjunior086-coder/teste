@@ -2683,20 +2683,27 @@
         const mb = Math.max(1, Math.round(rot.segments.reduce((t, x) => t + (Number(x.fileSize) || 0), 0) / 1048576));
         const seg = Math.round((Number(rot.duration) || rot.segments.reduce((t, x) => t + (Number(x.duration) || 0), 0)) / 1000);
         const dur = `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}`;
-        alvo.innerHTML = `<div class="viola-video-info">Vídeo de ${dur} · ≈ ${mb} MB <small>(use Wi-Fi se puder)</small><button type="button" class="btn-sm">Carregar vídeo</button></div>`;
+        alvo.innerHTML = `<div class="viola-video-info">Vídeo de ${dur} · ≈ ${mb} MB <small>(começa na hora e vai carregando; use Wi-Fi se puder)</small><button type="button" class="btn-sm">▶ Assistir vídeo</button></div>`;
         alvo.querySelector('button').addEventListener('click', async () => {
             alvo.innerHTML = '<p class="txn-empty">Carregando vídeo...</p>';
             let mpegts;
             try { mpegts = await this._carregarMpegts(); } catch(e) { return falha('Não foi possível carregar o player de vídeo agora.'); }
             if(!mpegts.isSupported()) return falha('Este celular/navegador não consegue tocar esse vídeo. No iPhone precisa do iOS 17.1 ou mais novo; no computador funciona no Chrome/Edge.');
+            // Só aceita pedaço vindo do CDN de vídeo da Kwai
+            const hostOk = u => { try { const h = new URL(u); return h.protocol === 'https:' && /(^|\.)yximgs\.com$/i.test(h.hostname); } catch(e) { return false; } };
+            if(!rot.segments.every(x => hostOk(x.url))) return falha('Essa prova veio num endereço que o painel não reconhece.');
             const video = document.createElement('video');
             video.controls = true; video.playsInline = true; video.disableRemotePlayback = true;
             alvo.innerHTML = ''; alvo.appendChild(video);
             const player = mpegts.createPlayer({
                 type: 'flv', isLive: false, cors: true, duration: Number(rot.duration) || undefined,
                 hasAudio: rot.hasAudio !== false, hasVideo: rot.hasVideo !== false,
-                segments: rot.segments.map(x => ({ url: `${base}&sub=${encodeURIComponent(x.url)}`, duration: Number(x.duration) || 0, filesize: Number(x.fileSize) || undefined })),
-            }, { headers: { Authorization: `Bearer ${this.sessionToken}` }, enableWorker: false, lazyLoad: false });
+                // Pedaços DIRETO do CDN da Kwai (públicos, CORS liberado) —
+                // passar pelos nossos workers quebrava (download lento
+                // cortado no meio). Precisa de https://*.yximgs.com:8443 no
+                // connect-src da CSP. Sem cabeçalho de login: vai pra terceiro.
+                segments: rot.segments.map(x => ({ url: String(x.url), duration: Number(x.duration) || 0, filesize: Number(x.fileSize) || undefined })),
+            }, { enableWorker: false, lazyLoad: false });
             player.on(mpegts.Events.ERROR, (tipo, det) => { console.warn('[prova vídeo]', tipo, det); try { player.destroy(); } catch(e) {} falha('Não foi possível tocar o vídeo agora.'); });
             player.attachMediaElement(video);
             player.load();

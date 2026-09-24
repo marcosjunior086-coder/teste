@@ -1356,18 +1356,23 @@ class DimaiorAdmin extends HTMLElement {
     const mb=Math.max(1,Math.round(rot.segments.reduce((t,x)=>t+(Number(x.fileSize)||0),0)/1048576));
     const seg=Math.round((Number(rot.duration)||rot.segments.reduce((t,x)=>t+(Number(x.duration)||0),0))/1000);
     const dur=`${Math.floor(seg/60)}:${String(seg%60).padStart(2,'0')}`;
-    alvo.innerHTML=`<div class="viol-acoes" style="margin-top:8px"><span class="viol-lin">Vídeo de ${dur} · ≈ ${mb} MB</span><button class="btn btn-o">Carregar vídeo</button></div>`;
+    alvo.innerHTML=`<div class="viol-acoes" style="margin-top:8px"><span class="viol-lin">Vídeo de ${dur} · ≈ ${mb} MB</span><button class="btn btn-o">▶ Assistir vídeo</button></div>`;
     alvo.querySelector('button').addEventListener('click',async()=>{
       alvo.innerHTML=this._loading();
       let mpegts; try{mpegts=await this._carregarMpegts();}catch{return falha('Não foi possível carregar o player de vídeo agora.');}
       if(!mpegts.isSupported()) return falha('Este navegador não consegue tocar esse vídeo (no iPhone precisa do iOS 17.1+; no computador use Chrome/Edge).');
+      // Só aceita pedaço vindo do CDN de vídeo da Kwai
+      const hostOk=u=>{try{const h=new URL(u);return h.protocol==='https:'&&/(^|\.)yximgs\.com$/i.test(h.hostname);}catch{return false;}};
+      if(!rot.segments.every(x=>hostOk(x.url))) return falha('Essa prova veio num endereço que o painel não reconhece.');
       const video=document.createElement('video'); video.controls=true; video.playsInline=true; video.disableRemotePlayback=true;
       alvo.innerHTML=''; alvo.appendChild(video);
       const player=mpegts.createPlayer({
         type:'flv',isLive:false,cors:true,duration:Number(rot.duration)||undefined,
         hasAudio:rot.hasAudio!==false,hasVideo:rot.hasVideo!==false,
-        segments:rot.segments.map(x=>({url:`${base}&sub=${encodeURIComponent(x.url)}`,duration:Number(x.duration)||0,filesize:Number(x.fileSize)||undefined})),
-      },{headers:{Authorization:`Bearer ${this._token}`},enableWorker:false,lazyLoad:false});
+        // Pedaços DIRETO do CDN da Kwai (públicos, CORS liberado); precisa de
+        // https://*.yximgs.com:8443 no connect-src da CSP. Sem cabeçalho de login.
+        segments:rot.segments.map(x=>({url:String(x.url),duration:Number(x.duration)||0,filesize:Number(x.fileSize)||undefined})),
+      },{enableWorker:false,lazyLoad:false});
       player.on(mpegts.Events.ERROR,(tipo,det)=>{console.warn('[prova vídeo]',tipo,det);try{player.destroy();}catch{}falha('Não foi possível tocar o vídeo agora.');});
       player.attachMediaElement(video); player.load(); video.play().catch(()=>{});
     });
