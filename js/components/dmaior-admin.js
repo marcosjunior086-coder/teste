@@ -2282,7 +2282,6 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('expPeriodoBtn').addEventListener('click',()=>this._abrirSeletorPeriodo('expPeriodoBtn','expDataDe','expDataAte','expPeriodoTexto'));
     s.getElementById('btnBaixarDados').addEventListener('click',()=>this._baixarDadosMonitor());
     s.getElementById('btnVerBuffer').addEventListener('click',()=>this._verBufferMonitor());
-    s.getElementById('btnTestarTelegram').addEventListener('click',()=>this._testarTelegram());
     // Agentes de Talentos
     s.getElementById('btnAtuAgentes')?.addEventListener('click',()=>this._carregarAgentes());
     s.getElementById('btnNovoAgente')?.addEventListener('click',()=>this._abrirModalAgente());
@@ -3977,11 +3976,6 @@ class DimaiorAdmin extends HTMLElement {
           <span style="color:var(--t3)">${i.minutos_live??0}min</span>
         </div>`).join('')}
       ${d.total_no_buffer>30?`<div style="color:var(--t3);font-size:11px">... +${d.total_no_buffer-30} mais</div>`:''}</div>`;
-  }
-  async _testarTelegram(){
-    const d=await this._api('POST','/admin/monitor/testar-telegram');
-    if(d?.status)this._toast('Mensagem enviada! Verifique o Telegram.');
-    else this._toast(d?.erro||'Erro ao enviar','err');
   }
 
   // ── CONTROLE DE IMPULSIONAMENTO ──────────────────────────────
@@ -6284,13 +6278,6 @@ class DimaiorAdmin extends HTMLElement {
               <div class="box mon-section">
                 <div class="bhead"><div class="btitulo">${this._ico('chart',14)} Buffer Atual</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnVerBuffer">${this._ico('refresh',12)} Ver Buffer</button></div></div>
                 <div id="monBufferResult" style="padding:16px;color:var(--t3);font-size:12px">Clique em "Ver Buffer" para inspecionar os dados pendentes de envio ao banco.</div>
-              </div>
-              <div class="box mon-section">
-                <div class="bhead"><div class="btitulo">${this._ico('send',14)} Telegram</div></div>
-                <div style="padding:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-                  <span style="font-size:12px;color:var(--t3);flex:1">Envia uma mensagem de teste para confirmar que o bot está funcionando.</span>
-                  <button class="btn btn-o" id="btnTestarTelegram">${this._ico('send',13)} Testar Bot</button>
-                </div>
               </div>
             </div>
             <div class="pag" id="pag-logs">${ph('Auditoria','search','Registro de ações','btnAtuLog')}<div class="box"><div class="bhead"><div class="btitulo">Logs</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bL" type="text" placeholder="Filtrar..."/></div></div></div><div id="tbL">${this._loading()}</div><div class="pag-bar" id="pgL"></div></div></div>
