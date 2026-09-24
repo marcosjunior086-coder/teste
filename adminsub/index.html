@@ -7,16 +7,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0e27">
-  <link rel="manifest" href="admin.webmanifest?v=20260723-logo-fix">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=20260703-favicon-1">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=20260703-favicon-1">
   <link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon.png?v=20260703-favicon-1">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="DMaior Admin">
+  <meta name="apple-mobile-web-app-title" content="DMaior Sub">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="color-scheme" content="dark light">
-  <title>Admin — DMaior Agency</title>
+  <title>Painel da Sub — DMaior Agency</title>
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- Boot de tema: aplica data-theme antes do 1º paint (mesmo dm_tema do site/agente) -->
   <script>
@@ -43,8 +43,8 @@
   </style>
 </head>
 <body>
-  <!-- Componente admin completo — login + painel embutidos no custom element -->
-  <dmaior-admin></dmaior-admin>
+  <!-- Painel da sub-agência: o MESMO componente do admin em modo="sub" (só as páginas da sub, rotas /sub/* com login próprio) -->
+  <dmaior-admin modo="sub"></dmaior-admin>
   <dmaior-footer></dmaior-footer>
 
   <!-- api.js expõe DmaiorConfig (URLs dos workers) para o componente usar -->
