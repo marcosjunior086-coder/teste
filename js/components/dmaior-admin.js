@@ -265,6 +265,17 @@ class DimaiorAdmin extends HTMLElement {
       check:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
       // Lucide (ISC), via api.iconify.design — mesmo traço dos demais ícones do admin
       play:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>`,
+      // Lucide (ISC) — no lugar dos emojis antigos (2026-09-24)
+      x:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
+      medal:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.21 15L2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15M11 12L5.12 2.2M13 12l5.88-9.8M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></svg>`,
+      pin:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4a1 1 0 0 1 1 1z"/></svg>`,
+      globe:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20a14.5 14.5 0 0 0 0-20M2 12h20"/></svg>`,
+      file_text:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8"/></svg>`,
+      msg:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092a10 10 0 1 0-4.777-4.719"/></svg>`,
+      upload:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m5-7l-5-5l-5 5m14 7v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>`,
+      user:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+      gamepad:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4m7-1h.01M18 10h.01m-.69-5H6.68a4 4 0 0 0-3.978 3.59l-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258q-.01-.075-.017-.151A4 4 0 0 0 17.32 5"/></svg>`,
+      drama:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11h.01M14 6h.01M18 6h.01M6.5 13.1h.01M22 5c0 9-4 12-6 12s-6-3-6-12q0-3 6-3c6 0 6 1 6 3"/><path d="M17.4 9.9c-.8.8-2 .8-2.8 0m-4.5-2.8C9 7.2 7.7 7.7 6 8.6c-3.5 2-4.7 3.9-3.7 5.6c4.5 7.8 9.5 8.4 11.2 7.4c.9-.5 1.9-2.1 1.9-4.7"/><path d="M9.1 16.5c.3-1.1 1.4-1.7 2.4-1.4"/></svg>`,
       server:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
       bolt:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
       heart:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
@@ -397,6 +408,10 @@ class DimaiorAdmin extends HTMLElement {
   }
   _avatar(foto,nome,cls='av'){const src=foto&&foto!=='null'&&foto!=='undefined'?this._safeImgSrc(foto):null;if(src)return`<img class="${cls}" src="${src}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="${cls}-fb" style="display:none">${this._ini(nome)}</div>`;return`<div class="${cls}-fb">${this._ini(nome)}</div>`;}
   _ini(n){return(n||'?').charAt(0).toUpperCase();}
+  // Ícone no meio do texto (substitui emoji): alinhado à linha e com respiro à direita.
+  _ii(nome,size=12){return`<span class="ii">${this._ico(nome,size)}</span>`;}
+  // Diamante "moeda" — mesmo ícone `diamond` do menu, em ciano
+  _dia(size=12){return`<span class="ii ii-dia" aria-label="diamantes">${this._ico('diamond',size)}</span>`;}
   _loading(st=''){return`<div class="loading" style="${st}"><div class="sp"></div><span>Carregando...</span></div>`;}
   _empty(ico,msg){return`<div class="empty">${this._ico(ico,32)}<p>${this._esc(msg)}</p></div>`;}
   _num(n){return Number(n||0).toLocaleString('pt-BR');}
@@ -592,7 +607,7 @@ class DimaiorAdmin extends HTMLElement {
       <tr>
         <td>${this._esc(o.nome)}${o.kwai_id?` <span style="color:var(--t3);font-size:11px">(${this._esc(o.kwai_id)})</span>`:''}</td>
         <td style="text-align:right">${this._num(o.streamers_ativos_mes)}</td>
-        <td style="text-align:right;color:var(--cyan);font-weight:700">${this._num(o.diamantes_mes)} 💎</td>
+        <td style="text-align:right;color:var(--cyan);font-weight:700">${this._num(o.diamantes_mes)} ${this._dia()}</td>
       </tr>`).join('');
     area.innerHTML=`
       <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Período: ${this._esc(d.periodo||'')}</div>
@@ -602,7 +617,7 @@ class DimaiorAdmin extends HTMLElement {
       </table>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--brd);font-weight:700">
         <span>Total geral (principal + subs)</span>
-        <span style="color:var(--cyan)">${this._num(d.total_geral_diamantes||0)} 💎 · ${this._num(d.total_geral_streamers||0)} streamers</span>
+        <span style="color:var(--cyan)">${this._num(d.total_geral_diamantes||0)} ${this._dia()} · ${this._num(d.total_geral_streamers||0)} streamers</span>
       </div>`;
   }
 
@@ -924,7 +939,7 @@ class DimaiorAdmin extends HTMLElement {
       const c=s.getElementById('monthContent');if(!m.rows?.length){c.innerHTML=this._empty('history','Sem dados');return;}
       const POR_PAG=30,total=m.rows.length,inicio=(pgHist[idx]-1)*POR_PAG,pagina=m.rows.slice(inicio,inicio+POR_PAG),totalPags=Math.ceil(total/POR_PAG);
       // Desktop: tabela — Mobile: accordion
-      const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>Diamantes</th><th>Var.💎</th><th>Horas</th><th>Var.⏱</th></tr></thead><tbody>${pagina.map(sv=>`<tr><td style="color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.posicao}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--t1)">${this._esc(sv.nome||'—')}</td><td style="color:var(--azul);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._num(sv.diamantes||0)}</td><td>${this._varBadge(sv.variacao)}</td><td style="color:var(--t2)">${sv.horas||'—'}</td><td>${this._varBadge(sv.var_horas)}</td></tr>`).join('')}</tbody></table></div>`;
+      const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>Diamantes</th><th>Var. ${this._dia()}</th><th>Horas</th><th>Var. ${this._ii('clock_r',12)}</th></tr></thead><tbody>${pagina.map(sv=>`<tr><td style="color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.posicao}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--t1)">${this._esc(sv.nome||'—')}</td><td style="color:var(--azul);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._num(sv.diamantes||0)}</td><td>${this._varBadge(sv.variacao)}</td><td style="color:var(--t2)">${sv.horas||'—'}</td><td>${this._varBadge(sv.var_horas)}</td></tr>`).join('')}</tbody></table></div>`;
       const accordionHtml=`<div class="hist-lista hist-mobile-only">${pagina.map(sv=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><span class="hist-pos">${sv.posicao}</span><div class="hist-av">${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</div><div class="hist-info"><div class="hist-nome">${this._esc(sv.nome||'—')}</div><div class="hist-diam">${this._ico('diamond',10)} ${this._num(sv.diamantes||0)}</div></div><div class="hist-right">${this._varBadge(sv.variacao)}</div><span class="hist-chevron">${this._ico('down',11)}</span></div><div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Diamantes</div><div class="hist-val" style="color:var(--azul)">${this._num(sv.diamantes||0)}</div></div><div class="hist-cel"><div class="hist-lbl">Var.</div><div class="hist-val">${this._varBadge(sv.variacao)}</div></div><div class="hist-cel"><div class="hist-lbl">Horas</div><div class="hist-val">${sv.horas||'—'}</div></div><div class="hist-cel"><div class="hist-lbl">Var. Horas</div><div class="hist-val">${this._varBadge(sv.var_horas)}</div></div></div></div></div>`).join('')}</div>`;
       c.innerHTML=tabelaHtml+accordionHtml+`${total>POR_PAG?`<div class="pag-bar"><button id="hPrev" ${pgHist[idx]<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${pgHist[idx]} / ${totalPags}</span><button id="hNext" ${pgHist[idx]>=totalPags?'disabled':''}>Próxima</button></div>`:''}`;
       if(total>POR_PAG){s.getElementById('hPrev')?.addEventListener('click',()=>{pgHist[idx]--;renderMes(idx);});s.getElementById('hNext')?.addEventListener('click',()=>{pgHist[idx]++;renderMes(idx);});}
@@ -1066,7 +1081,7 @@ class DimaiorAdmin extends HTMLElement {
     const externos=(dExt?.externos||[]).filter(e=>!lista.some(p=>p.kwai_uid===e.kwai_uid));
     const uidExternos=new Set((dExt?.externos||[]).map(e=>e.kwai_uid));
     if(!d?.ok&&!externos.length){el.innerHTML=this._empty('users','Nenhum cadastrado');this._renderPg('pgS',this._pg.s,0,20,n=>{this._pg.s=n;this._carregarStreamers();});return;}
-    const _badge=(isVerif,isPremium)=>isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:var(--warn);border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">✓ PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">✓ VERIFICADO</span>`:'';
+    const _badge=(isVerif,isPremium)=>isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:var(--warn);border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._ii('check',11)}PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._ii('check',11)}VERIFICADO</span>`:'';
     const _extTag=`<span style="font-size:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:var(--t3);border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)">SEM CONTA</span>`;
     const _renderItem=(sv,isExterno)=>{
       const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';
@@ -1135,7 +1150,7 @@ class DimaiorAdmin extends HTMLElement {
       over=document.createElement('div');over.id='mVerifExtOver';
       over.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
       over.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;width:100%;max-width:460px;padding:24px;position:relative">
-        <button id="mVerifExtFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px">✕</button>
+        <button id="mVerifExtFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px" aria-label="Fechar">${this._ico('x',18)}</button>
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:17px;font-weight:700;color:var(--t1);margin-bottom:16px">${this._ico('check_c',16)} Verificar Streamer Externo</div>
         <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Digite o UID ou o Kwai ID do streamer (sem conta no sistema).</div>
         <div style="display:flex;gap:8px;margin-bottom:16px">
@@ -1192,7 +1207,7 @@ class DimaiorAdmin extends HTMLElement {
       over=document.createElement('div');over.id='mOcultRankOver';
       over.style.cssText='position:fixed;inset:0;background:rgba(4,4,14,.97);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
       over.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:24px;position:relative">
-        <button id="mOcultRankFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px">✕</button>
+        <button id="mOcultRankFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px" aria-label="Fechar">${this._ico('x',18)}</button>
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:17px;font-weight:700;color:var(--t1);margin-bottom:16px">${this._ico('settings',16)} Ocultar do Ranking Geral</div>
         <div style="font-size:12px;color:var(--t3);margin-bottom:12px">O streamer some só da tela pública de ranking — diamantes, dólar e premiação continuam contabilizados normalmente.</div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -1455,7 +1470,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('boxRankingMesImpulso')?.remove();
     if(ultimos.length){
       const linhaDesktop=u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}>
-          <td><div style="display:flex;align-items:center;gap:8px;min-width:0">${this._avatar(u.foto_streamer,u.nome_streamer||u.uid_solicitante,'av')}<div style="min-width:0"><div style="font-size:12px;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${this._esc(u.nome_streamer||u.uid_solicitante||'—')}</div><div style="font-size:10px;color:var(--t3)">${this._esc(u.uid_solicitante||'—')}</div></div></div>${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:4px" title="A live desse link pertence a outro UID">⚠ live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td>
+          <td><div style="display:flex;align-items:center;gap:8px;min-width:0">${this._avatar(u.foto_streamer,u.nome_streamer||u.uid_solicitante,'av')}<div style="min-width:0"><div style="font-size:12px;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${this._esc(u.nome_streamer||u.uid_solicitante||'—')}</div><div style="font-size:10px;color:var(--t3)">${this._esc(u.uid_solicitante||'—')}</div></div></div>${u.uid_divergente?`<div style="color:#f87171;font-size:10px;margin-top:4px" title="A live desse link pertence a outro UID">${this._ii('warning',12)}live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td>
           <td style="font-size:11px;max-width:220px"><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-link">${this._esc(u.kwai_link||'—')}</a></td>
           <td>${this._esc(u.tempo_escolhido||'—')}</td>
           <td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td>
@@ -1475,7 +1490,7 @@ class DimaiorAdmin extends HTMLElement {
             <span class="met-chevron">${this._ico('down',12)}</span>
           </div>
           <div class="met-body">
-            ${u.uid_divergente?`<div style="color:#f87171;font-size:11px;margin-bottom:6px">⚠ a live desse link pertence a outro UID: ${this._esc(u.uid_divergente)}</div>`:''}
+            ${u.uid_divergente?`<div style="color:#f87171;font-size:11px;margin-bottom:6px">${this._ii('warning',12)}a live desse link pertence a outro UID: ${this._esc(u.uid_divergente)}</div>`:''}
             <div class="met-body-grid">
               <div class="met-cel"><div class="met-lbl">Link<button class="btn-copy-uid met-copy-link" data-copy="${this._esc(u.kwai_link||'')}" title="Copiar link">${this._ico('clipboard',11)}</button></div><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-val met-link">${this._esc(u.kwai_link||'—')}</a></div>
               <div class="met-cel"><div class="met-lbl">Tempo</div><div class="met-val">${this._esc(u.tempo_escolhido||'—')}</div></div>
@@ -1677,14 +1692,14 @@ class DimaiorAdmin extends HTMLElement {
       <div class="dd-compare-row">
         <div class="dd-compare-col">
           <p class="dd-compare-month">${this._esc(d.mes_anterior.nome)} · até dia ${d.dia_referencia}</p>
-          <div class="dd-compare-val" style="color:var(--t3)">${this._num(d.mes_anterior.total_ate_mesmo_dia)} 💎</div>
+          <div class="dd-compare-val" style="color:var(--t3)">${this._num(d.mes_anterior.total_ate_mesmo_dia)} ${this._dia()}</div>
           <p class="dd-compare-sub">mês fechou em ${this._num(d.mes_anterior.total_completo)}</p>
           <div class="dd-bar-compare"><div class="seg prev" style="height:${alturaPrev}%" title="${this._esc(d.mes_anterior.nome)}: ${this._num(d.mes_anterior.total_ate_mesmo_dia)}"></div></div>
         </div>
         <div class="dd-compare-arrow">→</div>
         <div class="dd-compare-col right">
           <p class="dd-compare-month">${this._esc(d.mes_atual.nome)} · até dia ${d.dia_referencia} (fechado)</p>
-          <div class="dd-compare-val">${this._num(d.mes_atual.total_ate_hoje)} 💎</div>
+          <div class="dd-compare-val">${this._num(d.mes_atual.total_ate_hoje)} ${this._dia()}</div>
           <p class="dd-compare-sub">${d.mes_atual.streamers_ativos} streamers ativos até aqui</p>
           <div class="dd-bar-compare"><div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div></div>
         </div>
@@ -1708,12 +1723,12 @@ class DimaiorAdmin extends HTMLElement {
         <div class="dd-hoje-compare">
           <div class="dd-hoje-col">
             <p class="dd-hoje-lbl">Dia ${eq.dia} de ${this._esc(eq.nome)}</p>
-            <div class="dd-hoje-val" style="color:var(--t3)">${this._num(eq.total_diamantes)} 💎</div>
+            <div class="dd-hoje-val" style="color:var(--t3)">${this._num(eq.total_diamantes)} ${this._dia()}</div>
             <div class="dd-hoje-bar"><div class="seg prev" style="height:${alturaEq}%"></div></div>
           </div>
           <div class="dd-hoje-col">
             <p class="dd-hoje-lbl">Hoje até agora</p>
-            <div class="dd-hoje-val">${this._num(h.total_diamantes)} 💎</div>
+            <div class="dd-hoje-val">${this._num(h.total_diamantes)} ${this._dia()}</div>
             <div class="dd-hoje-bar"><div class="seg cur" style="height:${alturaHoje}%"></div></div>
           </div>
           <div class="dd-hoje-delta" style="color:${corDelta}">
@@ -1734,7 +1749,7 @@ class DimaiorAdmin extends HTMLElement {
     }
     s.getElementById('ddStats').innerHTML=`
       <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('diamond',26)}</div><div class="dc2-val">${this._num(d.total_ano)}</div><div class="dc2-lbl">Acumulado ${d.ano}</div></div>
-      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('award',26)}</div><div class="dc2-val">${melhor?this._esc(melhor.nome):'—'}</div><div class="dc2-lbl">${melhor?this._num(melhor.total_diamantes)+' 💎 · melhor mês':'—'}</div></div>
+      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('award',26)}</div><div class="dc2-val">${melhor?this._esc(melhor.nome):'—'}</div><div class="dc2-lbl">${melhor?this._num(melhor.total_diamantes)+' '+this._dia()+' · melhor mês':'—'}</div></div>
       <div class="dc2 ${variacaoCls}"><div class="dc2-ico">${this._ico('bars_up',26)}</div><div class="dc2-val">${ultimo?this._esc(ultimo.nome):'—'}</div><div class="dc2-lbl">${variacaoTxt}</div></div>`;
   }
   _ddRenderChartAno(d){
@@ -1901,7 +1916,7 @@ class DimaiorAdmin extends HTMLElement {
     const btn=s.getElementById('btnCrConfirmar');btn.disabled=true;btn.innerHTML=`<div class="sp" style="width:14px;height:14px;margin:0;border-width:2px;display:inline-block;vertical-align:middle"></div> Processando...`;
     const d=await this._api('POST',`/admin/carteira/${uid}/operacao`,{tipo:'credito',valor:Number(valor),descricao});
     btn.disabled=false;btn.innerHTML=`${this._ico('check',13)} Confirmar Crédito`;
-    if(d?.ok){this._fechaModal('mCredito');this._toast(`✓ Saldo adicionado! Novo: ${this._brl(d.saldo_posterior)}`);this._carregarCarteiraDash();}else{this._toast(d?.erro||'Erro','err');}
+    if(d?.ok){this._fechaModal('mCredito');this._toast(`Saldo adicionado! Novo: ${this._brl(d.saldo_posterior)}`);this._carregarCarteiraDash();}else{this._toast(d?.erro||'Erro','err');}
   }
 
   // ── FIX v2.1: usa /admin/carteira/streamers que retorna TODOS (limit=1000 no worker v5)
@@ -2118,7 +2133,7 @@ class DimaiorAdmin extends HTMLElement {
     container.querySelectorAll('.premio-val-inp').forEach(inp=>{inp.addEventListener('focus',()=>inp.style.borderColor='var(--cyan)');inp.addEventListener('blur',()=>inp.style.borderColor='var(--brd)');inp.addEventListener('input',()=>{const pos=parseInt(inp.dataset.pos),val=parseFloat(inp.value.replace(',','.'))||0;const linha=this._premioLinhas[tipo].find(l=>l.posicao===pos);if(linha)linha.valor=val;});});
   }
   _premioLinhaHtml(posicao,valor){
-    const medal=posicao===1?'🥇':posicao===2?'🥈':posicao===3?'🥉':`#${posicao}`;
+    const medal=posicao<=3?`<span class="ii-medal m${posicao}">${this._ico('medal',16)}</span>`:`#${posicao}`;
     return`<tr data-pos="${posicao}"><td class="premio-pos">${medal} Top ${posicao}</td><td><div style="display:flex;align-items:center;gap:8px"><span style="color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700">R$</span><input class="premio-val-inp" data-pos="${posicao}" type="number" min="0.01" step="0.01" value="${valor>0?valor:''}" placeholder="0.00" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:7px 12px;width:150px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;transition:border-color .2s"/></div></td><td><button class="btn btn-sm btn-remove-linha" data-pos="${posicao}" style="border:1px solid rgba(248,113,113,.3);color:var(--verm);background:rgba(248,113,113,.06);padding:4px 8px">${this._ico('x_circle',13)}</button></td></tr>`;
   }
   _adicionarLinhaPremio(tipo){const linhas=this._premioLinhas[tipo];const proxPos=linhas.length>0?Math.max(...linhas.map(l=>l.posicao))+1:1;linhas.push({posicao:proxPos,valor:0});this._renderPremioTabela(tipo);setTimeout(()=>{const inp=this.shadowRoot.querySelector(`.premio-val-inp[data-pos="${proxPos}"]`);if(inp){inp.focus();inp.style.borderColor='var(--cyan)';}},50);}
@@ -2162,7 +2177,7 @@ class DimaiorAdmin extends HTMLElement {
   }
   async _confirmarProcessarPremios(){
     const s=this.shadowRoot;const mes=s.getElementById('mProcMes').value,tipo=s.getElementById('mProcTipo').value;if(!mes)return this._toast('Selecione o mês','err');
-    if(!confirm(`⚠️ Confirmar premiação ${tipo} para ${mes}?\n\nNÃO pode ser desfeita automaticamente.`))return;
+    if(!confirm(`Confirmar premiação ${tipo} para ${mes}?\n\nNÃO pode ser desfeita automaticamente.`))return;
     const btn=s.getElementById('mProcConfirmar');const statusEl=s.getElementById('mProcStatus');btn.disabled=true;btn.textContent='Processando...';statusEl.innerHTML=`<div style="text-align:center;padding:10px;color:var(--t3);font-size:12px">${this._ico('refresh',14)} Calculando...</div>`;
     const d=await this._api('POST','/admin/premios/processar',{mes_referencia:mes,tipo_ranking:tipo});btn.disabled=false;btn.textContent='Processar Premiação';
     if(d?.ok){statusEl.innerHTML=`<div class="mproc-sucesso">${this._ico('check_c',18)}<div><strong>${d.total_premiados} premiados</strong><br>${this._brl(d.total_valor)} distribuídos</div></div>${d.premiados?.map(p=>`<div class="mproc-item"><span class="prize-tag">Top ${p.posicao}</span><span>${this._esc(p.kwai_uid)}</span><span style="color:var(--verde);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._brl(p.valor)}</span></div>`).join('')||''}`;this._toast(`Premiação de ${mes} processada!`);setTimeout(()=>{this._fechaModal('mProc');this._carregarPremios();},3000);}
@@ -2230,7 +2245,7 @@ class DimaiorAdmin extends HTMLElement {
         const r=await this._api('POST',`/admin/saques/${saqueId}/processar`,{acao:'marcar_pago',observacao:'PIX pago manualmente'});
         console.log('[mPixConfirmar] resposta=',r);
         if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('check_c',15)} Já Paguei — Confirmar`;}
-        if(r?.ok){this._fechaModal('mPix');this._toast('✓ Saque marcado como pago!');setTimeout(()=>this._carregarSaques(),1000);}
+        if(r?.ok){this._fechaModal('mPix');this._toast('Saque marcado como pago!');setTimeout(()=>this._carregarSaques(),1000);}
         else{this._toast(r?.erro||r?.mensagem||'Erro ao confirmar pagamento','err');}
       }catch(e){console.error('[mPixConfirmar] erro:',e);this._toast('Erro interno: '+e.message,'err');}
     });
@@ -2258,7 +2273,7 @@ class DimaiorAdmin extends HTMLElement {
       if(url){
         s.getElementById('mComImagem').value=url;
         this._atualizarPreviewImagem(url);
-        if(stat) stat.textContent='✔ enviada';
+        if(stat) stat.innerHTML=`${this._ii('check',12)}enviada`;
       } else if(stat) stat.textContent='';
     });
     // Notificações push
@@ -2564,9 +2579,9 @@ class DimaiorAdmin extends HTMLElement {
         ?`<span class="com-status ativo">Ativo</span>`
         :`<span class="com-status inativo">Inativo</span>`;
       const tipoBadge=c.tipo==='importante'
-        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">📌 Importante</span>`
-        :`<span class="com-status" style="background:rgba(240,192,64,.1);color:var(--gold);border-color:rgba(240,192,64,.3)">⚡ Rápido</span>`;
-      const destaqueBadge=c.destaque?`<span class="com-status" style="background:rgba(240,192,64,.15);color:var(--gold);border-color:rgba(240,192,64,.3)">⭐ Destaque</span>`:'';
+        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">${this._ii('pin',11)}Importante</span>`
+        :`<span class="com-status" style="background:rgba(240,192,64,.1);color:var(--gold);border-color:rgba(240,192,64,.3)">${this._ii('zap',11)}Rápido</span>`;
+      const destaqueBadge=c.destaque?`<span class="com-status" style="background:rgba(240,192,64,.15);color:var(--gold);border-color:rgba(240,192,64,.3)">${this._ii('star',11)}Destaque</span>`:'';
       const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'—';
       const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` · atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
       const thumbHtml=c.imagem_url
@@ -2695,7 +2710,7 @@ class DimaiorAdmin extends HTMLElement {
     // Badge de tipo no modal
     const badge = s.getElementById('mComTipoBadge');
     if(badge){
-      badge.textContent = isImp ? '📌 Importante' : '⚡ Rápido';
+      badge.innerHTML = isImp ? `${this._ii('pin',11)}Importante` : `${this._ii('zap',11)}Rápido`;
       badge.style.cssText = isImp
         ? 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(0,212,212,.12);color:var(--cyan);border:1px solid rgba(0,212,212,.3);margin-bottom:12px;font-family:var(--dm-font-title,Rajdhani,sans-serif);font-weight:700;letter-spacing:.05em'
         : 'display:inline-block;font-size:11px;padding:2px 10px;border-radius:20px;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.3);margin-bottom:12px;font-family:var(--dm-font-title,Rajdhani,sans-serif);font-weight:700;letter-spacing:.05em';
@@ -2813,9 +2828,9 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div class="com-lista">${lista.map(v=>{
       const statusBadge=v.ativa?`<span class="com-status ativo">Ativa</span>`:`<span class="com-status inativo">Inativa</span>`;
       const visBadge=v.publica
-        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">🌐 Pública</span>`
-        :`<span class="com-status" style="background:rgba(168,85,247,.1);color:var(--purple);border-color:rgba(168,85,247,.3)">🔒 Privada</span>`;
-      const tipoBadge=v.tipo==='foto'?`<span class="com-local">📷 Foto</span>`:`<span class="com-local">📝 Texto</span>`;
+        ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">${this._ii('globe',11)}Pública</span>`
+        :`<span class="com-status" style="background:rgba(168,85,247,.1);color:var(--purple);border-color:rgba(168,85,247,.3)">${this._ii('lock_r',11)}Privada</span>`;
+      const tipoBadge=v.tipo==='foto'?`<span class="com-local">${this._ii('image',11)}Foto</span>`:`<span class="com-local">${this._ii('file_text',11)}Texto</span>`;
       return`<div class="com-item is-fast">
         <div class="com-preview"><div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1);margin-bottom:2px">${this._esc(v.titulo)}</strong></div></div>
         <div class="com-meta">
@@ -3155,10 +3170,10 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div style="font-size:11px;color:var(--t3)">${fmtDataHora(l.inicio_em)} — ${fmtDataHora(l.fim_em)}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--t2)">
-                <div>💎 ${this._num(l.diamantes)}</div>
-                <div>👁 ${this._num(l.espectadores)}</div>
-                <div>❤️ ${this._num(l.curtidas)}</div>
-                <div>💬 ${this._num(l.comentarios)}</div>
+                <div>${this._dia()} ${this._num(l.diamantes)}</div>
+                <div>${this._ii('eye',12)}${this._num(l.espectadores)}</div>
+                <div>${this._ii('heart',12)}${this._num(l.curtidas)}</div>
+                <div>${this._ii('msg',12)}${this._num(l.comentarios)}</div>
               </div>
             </div>
           </div>`).join('')}
@@ -3278,7 +3293,7 @@ class DimaiorAdmin extends HTMLElement {
           <input type="checkbox" class="pk-elig-chk" data-pk-uid="${this._esc(st.kwai_uid)}" ${this._pkSelecionados.has(st.kwai_uid)?'checked':''} style="accent-color:var(--cyan)">
           ${this._avatar(st.foto,st.nome,'av')}
           <span style="flex:1;font-size:12px;color:var(--t1)">${this._esc(st.nome)}${st.novato?' <span style="color:var(--cyan);font-size:10px">· NOVATO</span>':''}</span>
-          <span style="font-size:11px;color:var(--t3)">${this._num(st.diamantes||0)} 💎</span>
+          <span style="font-size:11px;color:var(--t3)">${this._num(st.diamantes||0)} ${this._dia()}</span>
         </label>`).join('');
       area.querySelectorAll('.pk-elig-chk').forEach(chk=>chk.addEventListener('change',()=>{
         const uid=chk.dataset.pkUid,st=porUid.get(uid);
@@ -3508,7 +3523,7 @@ class DimaiorAdmin extends HTMLElement {
         <input type="checkbox" class="pk-det-elig-chk" data-pk-uid="${this._esc(st.kwai_uid)}" ${ativos.has(st.kwai_uid)?'checked':''} style="accent-color:var(--cyan)">
         ${this._avatar(st.foto,st.nome,'av')}
         <span style="flex:1;font-size:12px;color:var(--t1)">${this._esc(st.nome)}${st.novato?' <span style="color:var(--cyan);font-size:10px">· NOVATO</span>':''}</span>
-        <span style="font-size:11px;color:var(--t3)">${this._num(st.diamantes||0)} 💎</span>
+        <span style="font-size:11px;color:var(--t3)">${this._num(st.diamantes||0)} ${this._dia()}</span>
       </label>`).join('');
     area.querySelectorAll('.pk-det-elig-chk').forEach(chk=>chk.addEventListener('change',async()=>{
       const uid=chk.dataset.pkUid,st=this._pkDetElegiveis.find(x=>x.kwai_uid===uid);
@@ -3554,9 +3569,9 @@ class DimaiorAdmin extends HTMLElement {
           <div class="cfg-row" style="flex-wrap:wrap">
             <div style="flex:1;min-width:220px;font-size:12px;color:var(--t1)">
               <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_a,c.nome_a)}<strong>${c.ao_vivo_a?'🔴 ':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong>${c.score_a!=null?` <span style="color:var(--t3)">(${this._num(c.score_a)} 💎)</span>`:(c.diamantes_hoje_a!=null?` <span style="color:var(--cyan)">(${this._num(c.diamantes_hoje_a)} 💎 até agora)</span>`:'')}</span>
+                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_a,c.nome_a)}<strong>${c.ao_vivo_a?'<span class="ii-live" title="Ao vivo"></span>':''}${this._esc(c.nome_a||c.kwai_uid_a)}</strong>${c.score_a!=null?` <span style="color:var(--t3)">(${this._num(c.score_a)} ${this._dia()})</span>`:(c.diamantes_hoje_a!=null?` <span style="color:var(--cyan)">(${this._num(c.diamantes_hoje_a)} ${this._dia()} até agora)</span>`:'')}</span>
                 <span style="color:var(--t3);font-size:11px">vs</span>
-                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_b,c.nome_b)}<strong>${c.ao_vivo_b?'🔴 ':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>${c.score_b!=null?` <span style="color:var(--t3)">(${this._num(c.score_b)} 💎)</span>`:(c.diamantes_hoje_b!=null?` <span style="color:var(--cyan)">(${this._num(c.diamantes_hoje_b)} 💎 até agora)</span>`:'')}</span>
+                <span style="display:flex;align-items:center;gap:6px">${this._avatar(c.foto_b,c.nome_b)}<strong>${c.ao_vivo_b?'<span class="ii-live" title="Ao vivo"></span>':''}${this._esc(c.nome_b||c.kwai_uid_b)}</strong>${c.score_b!=null?` <span style="color:var(--t3)">(${this._num(c.score_b)} ${this._dia()})</span>`:(c.diamantes_hoje_b!=null?` <span style="color:var(--cyan)">(${this._num(c.diamantes_hoje_b)} ${this._dia()} até agora)</span>`:'')}</span>
               </div>
               <div style="font-size:10px;color:var(--t3);margin-top:4px">${c.fechado_automaticamente?'Fechado automaticamente':(c.gerado_automaticamente?'Gerado automaticamente':'Manual')}${c.observacao?` · ${this._esc(c.observacao)}`:''}</div>
             </div>
@@ -3997,12 +4012,12 @@ class DimaiorAdmin extends HTMLElement {
     ];
     if(d.inseridas?.length>0){
       linhas.push('','── Inseridas ──');
-      d.inseridas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | ${x.diamantes}💎${x.sobra_pk>0?` (inclui ${x.sobra_pk}💎 de PK/convidado)`:''}`));
+      d.inseridas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | ${x.diamantes} diam.${x.sobra_pk>0?` (inclui ${x.sobra_pk} diam. de PK/convidado)`:''}`));
       if(d.inseridas.length>20)linhas.push(`  ... +${d.inseridas.length-20} mais`);
     }
     if(d.corrigidas?.length>0){
       linhas.push('','── Corrigidas ──');
-      d.corrigidas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | banco:${x.banco_diamantes}💎/${x.banco_minutos}min → kwai:${x.kwai_diamantes}💎/${x.kwai_minutos}min${x.sobra_pk>0?` (inclui ${x.sobra_pk}💎 de PK/convidado)`:''}`));
+      d.corrigidas.slice(0,20).forEach(x=>linhas.push(`  ${x.nome||x.live_id} | ${x.data} | banco:${x.banco_diamantes} diam./${x.banco_minutos}min → kwai:${x.kwai_diamantes} diam./${x.kwai_minutos}min${x.sobra_pk>0?` (inclui ${x.sobra_pk} diam. de PK/convidado)`:''}`));
       if(d.corrigidas.length>20)linhas.push(`  ... +${d.corrigidas.length-20} mais`);
     }
     if(d.erros?.length>0){
@@ -4022,7 +4037,7 @@ class DimaiorAdmin extends HTMLElement {
         `<div style="display:flex;gap:8px;font-size:11px;color:var(--t2);border-bottom:1px solid var(--brddim);padding-bottom:4px">
           <span style="color:var(--t3);min-width:80px">${i.data||'—'}</span>
           <span style="flex:1">${this._esc(i.nome||'—')}</span>
-          <span style="color:var(--cyan)">${i.diamantes??0}💎</span>
+          <span style="color:var(--cyan)">${i.diamantes??0} ${this._dia()}</span>
           <span style="color:var(--t3)">${i.minutos_live??0}min</span>
         </div>`).join('')}
       ${d.total_no_buffer>30?`<div style="color:var(--t3);font-size:11px">... +${d.total_no_buffer-30} mais</div>`:''}</div>`;
@@ -4100,7 +4115,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="bloq-item">
         <div class="bloq-info">
           <div class="bloq-uid">${this._ico('unlock',13)} ${this._esc(l.nome)} <span style="color:var(--t3);font-weight:400">— UID: ${this._esc(l.kwai_uid)}</span></div>
-          <div class="bloq-motivo">${l.manual?'<span style="color:var(--verde)">Manual ✓</span>':'<span style="color:var(--t3)">Manual —</span>'} &nbsp;•&nbsp; ${l.automatico?'<span style="color:var(--verde)">Automático ✓</span>':'<span style="color:var(--t3)">Automático —</span>'}</div>
+          <div class="bloq-motivo">${l.manual?'<span style="color:var(--verde)">Manual '+this._ico('check',11)+'</span>':'<span style="color:var(--t3)">Manual —</span>'} &nbsp;•&nbsp; ${l.automatico?'<span style="color:var(--verde)">Automático '+this._ico('check',11)+'</span>':'<span style="color:var(--t3)">Automático —</span>'}</div>
         </div>
         <button class="btn btn-o btn-sm lib-rev" data-rev="${this._esc(l.kwai_uid)}" style="border-color:rgba(248,113,113,.4);color:var(--verm)">${this._ico('lock_r',12)} Revogar Tudo</button>
       </div>`).join('')}</div>`;
@@ -4119,7 +4134,7 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div class="bloq-lista">${lista.map(m=>`
       <div class="bloq-item">
         <div class="bloq-info">
-          <div class="bloq-uid">${this._ico('award',13)} ${this._num(m.meta_diamantes)} 💎 <span style="color:var(--t3);font-weight:400">→ ${m.quantidade} usos/semana</span></div>
+          <div class="bloq-uid">${this._ico('award',13)} ${this._num(m.meta_diamantes)} ${this._dia()} <span style="color:var(--t3);font-weight:400">→ ${m.quantidade} usos/semana</span></div>
         </div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-o btn-sm meta-edit" data-id="${m.id}" data-meta="${m.meta_diamantes}" data-qtd="${m.quantidade}">${this._ico('edit',12)} Editar</button>
@@ -4284,8 +4299,8 @@ class DimaiorAdmin extends HTMLElement {
         <td style="font-size:11px;color:var(--t3)">${this._esc(x.kwai_uid)}</td>
         <td style="font-size:11px;color:var(--t2)">${this._esc(x.org_name||'—')}</td>
         <td>${x.ativo?'<span class="badge on">Ativo</span>':'<span class="badge off">Inativo</span>'}${catBadge(x.categoria)}</td>
-        <td>${this._num(x.diamantes_atual)} 💎</td>
-        <td style="color:var(--t3)">${this._num(x.diamantes_anterior)} 💎</td>
+        <td>${this._num(x.diamantes_atual)} ${this._dia()}</td>
+        <td style="color:var(--t3)">${this._num(x.diamantes_anterior)} ${this._dia()}</td>
         <td>${varTxt(x)}</td>
         <td><button class="btn btn-o btn-sm ss-evol" data-uid="${this._esc(x.kwai_uid)}" data-alvo="ssEvol-${this._esc(x.kwai_uid)}">${this._ico('chart',12)} Evolução</button></td>
       </tr>
@@ -4308,8 +4323,8 @@ class DimaiorAdmin extends HTMLElement {
             <div class="hist-cel"><div class="hist-lbl">UID</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.kwai_uid)}</div></div>
             <div class="hist-cel"><div class="hist-lbl">Agência</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.org_name||'—')}</div></div>
             <div class="hist-cel"><div class="hist-lbl">Categoria</div><div class="hist-val">${catBadge(x.categoria)||'—'}</div></div>
-            <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAtual)}</div><div class="hist-val" style="color:var(--azul)">${this._num(x.diamantes_atual)}💎</div></div>
-            <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAnterior)}</div><div class="hist-val">${this._num(x.diamantes_anterior)}💎</div></div>
+            <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAtual)}</div><div class="hist-val" style="color:var(--azul)">${this._num(x.diamantes_atual)} ${this._dia()}</div></div>
+            <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAnterior)}</div><div class="hist-val">${this._num(x.diamantes_anterior)} ${this._dia()}</div></div>
             <div class="hist-cel" style="grid-column:1/-1"><div class="hist-lbl">Variação</div><div class="hist-val">${varTxt(x)}</div></div>
           </div>
           <button class="btn btn-o btn-sm ss-evol" data-uid="${this._esc(x.kwai_uid)}" data-alvo="ssEvolM-${this._esc(x.kwai_uid)}" style="margin-top:10px;width:100%">${this._ico('chart',12)} Ver Evolução</button>
@@ -4339,7 +4354,7 @@ class DimaiorAdmin extends HTMLElement {
     const meses=d?.meses||[];
     const nomesMes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     destino.innerHTML=meses.length
-      ?`<div style="display:flex;gap:14px;flex-wrap:wrap;padding:12px 6px">${meses.map(m=>`<div style="text-align:center;min-width:44px"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">${nomesMes[m.mes-1]}</div><div style="font-size:12.5px;font-weight:700;color:var(--t1);margin-top:3px">${this._num(m.diamantes)}💎</div></div>`).join('')}</div>`
+      ?`<div style="display:flex;gap:14px;flex-wrap:wrap;padding:12px 6px">${meses.map(m=>`<div style="text-align:center;min-width:44px"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">${nomesMes[m.mes-1]}</div><div style="font-size:12.5px;font-weight:700;color:var(--t1);margin-top:3px">${this._num(m.diamantes)} ${this._dia()}</div></div>`).join('')}</div>`
       :this._empty('chart','Sem dados neste ano');
   }
   _renderRankingAnoStatus(){
@@ -4354,7 +4369,7 @@ class DimaiorAdmin extends HTMLElement {
     const pager=totalPags>1?`<div class="pag-bar"><button ${this._pg.rankingAno<=1?'disabled':''} data-rapg="prev">Anterior</button><span class="pn">Pág ${this._pg.rankingAno} / ${totalPags}</span><button ${this._pg.rankingAno>=totalPags?'disabled':''} data-rapg="next">Próxima</button></div>`:'';
 
     const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Streamer</th><th>Diamantes no Ano</th></tr></thead><tbody>
-      ${top.map(r=>`<tr><td>${r.posicao}</td><td><div style="display:flex;align-items:center;gap:8px">${this._avatar(r.foto,r.nome)}<span>${this._esc(r.nome)}</span></div></td><td>${this._num(r.diamantes_ano)} 💎</td></tr>`).join('')}
+      ${top.map(r=>`<tr><td>${r.posicao}</td><td><div style="display:flex;align-items:center;gap:8px">${this._avatar(r.foto,r.nome)}<span>${this._esc(r.nome)}</span></div></td><td>${this._num(r.diamantes_ano)} ${this._dia()}</td></tr>`).join('')}
     </tbody></table></div>`;
     const accordionHtml=`<div class="hist-lista hist-mobile-only">${top.map(r=>`
       <div class="hist-item">
@@ -4362,7 +4377,7 @@ class DimaiorAdmin extends HTMLElement {
           <span class="hist-pos">${r.posicao}</span>
           <div class="hist-av">${this._avatar(r.foto,r.nome)}</div>
           <div class="hist-info"><div class="hist-nome">${this._esc(r.nome)}</div></div>
-          <div class="hist-right" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--azul)">${this._num(r.diamantes_ano)}💎</div>
+          <div class="hist-right" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--azul)">${this._num(r.diamantes_ano)} ${this._dia()}</div>
         </div>
       </div>`).join('')}</div>`;
     el.innerHTML=tabelaHtml+accordionHtml+pager;
@@ -4545,6 +4560,11 @@ class DimaiorAdmin extends HTMLElement {
     .ni{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--t3);font-size:12px;border-left:2px solid transparent;transition:all .15s;user-select:none;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.ni:hover{background:rgba(59,130,246,.08);color:var(--t1)}.ni.on{background:rgba(59,130,246,.12);border-left-color:var(--azul);color:var(--azul)}.ni.on svg{filter:drop-shadow(0 0 5px rgba(59,130,246,.6))}
     .ni .ico{width:16px;flex-shrink:0;display:flex;align-items:center}.ni .nlb{flex:1}
     .nb{font-size:9px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);background:var(--cyan-d);color:var(--cyan);border:1px solid rgba(0,212,212,.3);border-radius:99px;padding:1px 6px}.nb.live{background:rgba(248,113,113,.2);color:var(--verm);border-color:rgba(248,113,113,.4);animation:bl 1.8s infinite}.nb.gold{background:rgba(240,192,64,.2);color:var(--gold);border-color:rgba(240,192,64,.4)}
+    /* Ícones SVG no lugar de emoji (_ii / _dia) */
+    .ii{display:inline-flex;align-items:center;vertical-align:-2px;margin-right:4px}
+    .ii-dia{color:var(--cyan);margin-right:0}
+    .ii-medal{display:inline-flex;vertical-align:-3px;margin-right:4px}.ii-medal.m1{color:#f0c040}.ii-medal.m2{color:#c0c7d2}.ii-medal.m3{color:#d08a4f}
+    .ii-live{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:5px;vertical-align:1px;box-shadow:0 0 0 3px rgba(239,68,68,.2)}
     /* Violações / punições da Kwai */
     .viol-sel{background:rgba(0,0,0,.35);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none}
     .viol-item{border:1px solid var(--brd);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--glass)}
@@ -6400,15 +6420,15 @@ class DimaiorAdmin extends HTMLElement {
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Telefone</span><div id="aDTel" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Status</span><div id="aDStatus" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Streamers</span><div id="aDStreamers" style="font-size:15px;margin-top:4px"></div></div>
-                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">💎 Hoje</span><div id="aDDiamHoje" style="font-size:15px;margin-top:4px"></div></div>
-                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">💎 Mês</span><div id="aDDiamMes" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">${this._dia()} Hoje</span><div id="aDDiamHoje" style="font-size:15px;margin-top:4px"></div></div>
+                    <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">${this._dia()} Mês</span><div id="aDDiamMes" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Comissão</span><div id="aDComissao" style="font-size:15px;margin-top:4px;color:var(--verde)"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Meta</span><div id="aDComissaoMeta" style="font-size:15px;margin-top:4px"></div></div>
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">% Manual</span>
                       <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
                         <input id="aDComissaoOverride" type="number" min="0" max="100" step="0.01" placeholder="auto" style="width:64px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 7px;font-size:13px;outline:none">
                         <button class="btn btn-sm btn-o" id="btnSalvarComissaoOverride" style="padding:4px 8px">Salvar</button>
-                        <button class="btn btn-sm" id="btnLimparComissaoOverride" title="Voltar às regras automáticas" style="padding:4px 8px;border:1px solid var(--brddim);color:var(--t3)">✕</button>
+                        <button class="btn btn-sm" id="btnLimparComissaoOverride" title="Voltar às regras automáticas" style="padding:4px 8px;border:1px solid var(--brddim);color:var(--t3)" aria-label="Fechar">${this._ico('x',14)}</button>
                       </div>
                       <div style="font-size:9px;color:var(--t3);margin-top:2px">Vazio = usa as regras automáticas</div>
                     </div>
@@ -6458,10 +6478,10 @@ class DimaiorAdmin extends HTMLElement {
       <div class="ov" id="mCart"><div class="modal modal-lg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="m-titulo" id="mCartTitulo" style="margin-bottom:0">${this._ico('wallet',16)} Carteira</div><button class="btn btn-o btn-sm" id="btnFecharCart">${this._ico('x_circle',12)} Fechar</button></div><div id="mCartBody">${this._loading()}</div></div></div>
       <div class="ov" id="mOp"><div class="modal"><div class="m-titulo" id="mOpTitulo">${this._ico('wallet',16)} Operação</div><div class="mc"><label>Valor (R$)</label><input id="mOpValor" type="number" min="0.01" step="0.01" placeholder="0.00"/></div><div class="mc"><label>Descrição / Motivo <span style="color:var(--verm)">*</span></label><textarea id="mOpDesc" rows="3" placeholder="Ex: Fechamento maio..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarOp">Cancelar</button><button class="btn btn-g" id="mOpConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mCredito"><div class="modal"><div class="m-titulo">${this._ico('plus',16)} Adicionar Saldo</div><div id="mCrPasso1"><div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="mCrUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;transition:border-color .2s"/><button class="btn btn-g" id="btnCrBuscar">${this._ico('search',13)} Buscar</button></div></div><div id="mCrInfo" style="display:none;margin-top:12px"></div></div><div id="mCrPasso2" style="display:none"><div id="mCrStreamerCard" style="margin-bottom:14px"></div><div class="mc"><label>Valor (R$) <span style="color:var(--verm)">*</span></label><input id="mCrValor" type="number" min="0.01" step="0.01" placeholder="0.00" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:16px;outline:none;width:100%;transition:border-color .2s"/></div><div class="mc"><label>Motivo <span style="color:var(--verm)">*</span></label><textarea id="mCrDesc" rows="2" placeholder="Ex: Prêmio, fechamento..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;resize:none;transition:border-color .2s"></textarea></div></div><div class="mf" style="margin-top:14px"><button class="btn btn-o" id="btnCrCancelar">Cancelar</button><button class="btn btn-g" id="btnCrConfirmar" style="display:none">${this._ico('check',13)} Confirmar Crédito</button></div></div></div>
-      <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose">✕</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)">Valor a pagar</div><div id="mPixValor" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:var(--dm-font-body,'Exo 2',sans-serif)">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
+      <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose" aria-label="Fechar">${this._ico('x',16)}</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)">Valor a pagar</div><div id="mPixValor" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:var(--dm-font-body,'Exo 2',sans-serif)">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
       <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">Observação</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mMigracaoAg"><div class="modal"><div class="m-titulo" id="mMigracaoAgTitulo">${this._ico('refresh',16)} Processar Migração</div><div class="mc"><label>Observação (opcional)</label><textarea id="mMigracaoAgObs" rows="3" placeholder="Visível só pro admin, aparece no card..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarMigracaoAg">Cancelar</button><button class="btn btn-g" id="mMigracaoAgConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
-      <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="diamantes">💎 Ranking de Diamantes</option><option value="horas">⏱ Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
+      <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="diamantes">Ranking de Diamantes</option><option value="horas">Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
       <div class="ov" id="mCom"><div class="modal" style="max-width:500px"><div class="m-titulo" id="mComTit">Novo Aviso</div>
         <div id="mComTipoBadge"></div>
 
@@ -6476,21 +6496,21 @@ class DimaiorAdmin extends HTMLElement {
           <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
           <div class="mc"><label>Subtítulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
           <div class="mc"><label>Descrição / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: Não perca tempo! Garanta já o seu lugar na Copa Arena."></textarea></div>
-          <div class="mc"><label>Imagem</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">📤 Enviar imagem</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole um link (Wix, Drive público, R2...)"/><div style="font-size:10px;color:var(--t3);margin-top:4px;line-height:1.45">Enviar direto é o recomendado — a imagem vira WebP otimizado e carrega rápido. Link do Drive ainda funciona, mas é mais lento.</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;max-width:220px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
+          <div class="mc"><label>Imagem</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole um link (Wix, Drive público, R2...)"/><div style="font-size:10px;color:var(--t3);margin-top:4px;line-height:1.45">Enviar direto é o recomendado — a imagem vira WebP otimizado e carrega rápido. Link do Drive ainda funciona, mas é mais lento.</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;max-width:220px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="mc" style="margin:0"><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
             <div class="mc" style="margin:0"><label>Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
             <div class="mc" style="margin:0"><label>Botão secundário — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
             <div class="mc" style="margin:0"><label>Botão secundário — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
           </div>
-          <div class="mc" style="margin-top:10px"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;⭐ Destaque — exibe como card principal no topo das notificações</label></div>
+          <div class="mc" style="margin-top:10px"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;${this._ii('star',12)}Destaque — exibe como card principal no topo das notificações</label></div>
         </div>
 
         <!-- ── CAMPOS COMUNS ── -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
           <div class="mc" style="margin:0"><label>Status</label><select id="mComAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div>
         </div>
-        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> 🏠 Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
+        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> ${this._ii('home',12)}Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
         <div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div>
       </div></div>
       <div class="ov" id="mVotacao"><div class="modal" style="max-width:560px">
@@ -6636,7 +6656,7 @@ class DimaiorAdmin extends HTMLElement {
       const x=a[doc];
       if(!x)return pill(false,`${nome}: sem aceite registrado`,`Nenhum aceite de ${nome} registrado pra esse UID`);
       const d=new Date(x.aceito_em);const quando=isNaN(d)?'':`${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
-      return pill(true,`✓ ${nome} aceito · ${quando} · v${x.versao}`,`Aceito ${x.origem==='painel'?'no painel do streamer':'na candidatura'} em ${quando} (versão ${x.versao})`);
+      return pill(true,`${nome} aceito · ${quando} · v${x.versao}`,`Aceito ${x.origem==='painel'?'no painel do streamer':'na candidatura'} em ${quando} (versão ${x.versao})`);
     };
     return `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${um('agencia','Termo')}${um('kwai','Diretrizes Kwai')}</div>`;
   }
@@ -6663,7 +6683,7 @@ class DimaiorAdmin extends HTMLElement {
         const wpp=wppNum?`<br><a href="https://wa.me/${wppNum}?text=${wppMsg}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:3px;font-size:10px;color:#25d366;text-decoration:none;font-weight:600">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           ${wppNum}</a>`:'';
-        const cat=c.categoria==='games'?'🎮 Games':'🎭 Entretenimento';
+        const cat=c.categoria==='games'?`${this._ii('gamepad',12)}Games`:`${this._ii('drama',12)}Entretenimento`;
         const recrutador=this._esc(c.recrutador_nome||'Padrão da agência');
         const viaAgente=c.agente_nome?`<br><span style="font-size:10px;color:var(--cyan)">via agente: ${this._esc(c.agente_nome)}</span>`:'';
         const stBadge=`<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:${COR[c.status]||'var(--t2)'}">${BADGE[c.status]||c.status}</span>`;
@@ -6760,7 +6780,7 @@ class DimaiorAdmin extends HTMLElement {
         <td style="padding:8px 12px">
           <div style="display:flex;align-items:center;gap:8px">
             ${c.foto?`<img src="${this._esc(c.foto)}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy" onerror="this.style.display='none'">`:
-              `<div style="width:30px;height:30px;border-radius:50%;background:var(--brddim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px">👤</div>`}
+              `<div style="width:30px;height:30px;border-radius:50%;background:var(--brddim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px">${this._ico('user',15)}</div>`}
             <div><strong style="color:var(--t1)">${this._esc(c.memberName||c.kwaiId||'—')}</strong><br>
             <span style="color:var(--t3);font-size:10px">${this._esc(c.kwaiId||'')} · ID ${this._esc(String(c.id||''))}</span></div>
           </div>
@@ -6854,7 +6874,7 @@ class DimaiorAdmin extends HTMLElement {
         const opt=document.createElement('option');
         opt.value=r.id;
         const dono=String(r.nome||'').trim().toLowerCase()==='dan';
-        opt.textContent=`${r.nome} — ${r.telefone}${r.padrao?' ★ Padrão':''}${dono?' · Dono da agência':''}`;
+        opt.textContent=`${r.nome} — ${r.telefone}${r.padrao?' (padrão)':''}${dono?' · Dono da agência':''}`;
         sel.appendChild(opt);
       });
       if(!this._convRecrutadores.length){
@@ -6907,7 +6927,7 @@ class DimaiorAdmin extends HTMLElement {
       <tbody>${lista.map(r=>`<tr style="border-bottom:1px solid var(--brddim)">
         <td style="padding:10px 16px">
           <strong style="color:var(--t1)">${this._esc(r.nome)}</strong>
-          ${r.padrao?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:10px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);color:var(--cyan)">★ Padrão</span>`:''}
+          ${r.padrao?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:10px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);color:var(--cyan)">${this._ii('star',11)}Padrão</span>`:''}
         </td>
         <td style="padding:10px 8px;color:var(--t2)">${this._esc(r.telefone)}</td>
         <td style="padding:10px 8px;color:var(--t2)"><strong style="color:var(--t1)">${Number(r.comissao_percentual||0).toLocaleString('pt-BR')}%</strong></td>
@@ -7073,7 +7093,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('fSpUid').value=st.kwai_uid||q;
     if(st.nome&&st.nome!=='—')s.getElementById('fSpNome').value=st.nome;
     if(st.foto)s.getElementById('fSpFoto').value=st.foto;
-    if(info)info.textContent=d.ja_cadastrado?'⚠️ Este UID já tem cadastro premium.':`Encontrado: ${st.nome||st.kwai_uid}`;
+    if(info)info.textContent=d.ja_cadastrado?'Este UID já tem cadastro premium.':`Encontrado: ${st.nome||st.kwai_uid}`;
   }
 
   async _salvarStreamerPremium(){
@@ -7158,7 +7178,7 @@ class DimaiorAdmin extends HTMLElement {
     const voyagerOk=Number(r?.resposta?.result)===1&&r?.resposta?.data?.checkResult!==false&&r?.resposta?.data?.success!==false;
     const envioOk=r?.ok&&(dry||voyagerOk);
     if(envioOk){
-      if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'Simulação OK — sem envio real':'✅ Convite enviado com sucesso!'}</div>`;
+      if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'Simulação OK — sem envio real':this._ii('check_c',13)+'Convite enviado com sucesso!'}</div>`;
       this._toast(dry?'Simulado OK':'Convite enviado!','ok');
     }else{
       const motivo=r?.checkMessage||r?.motivoBloqueio||r?.mensagem||r?.resposta?.data?.checkMessage||r?.resposta?.data?.message||r?.resposta?.message||r?.erro||'O Kwai recusou o convite.';
@@ -8025,7 +8045,7 @@ class DimaiorAdmin extends HTMLElement {
       res.innerHTML = `<div style="padding:12px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.15);border-radius:8px">
         <div style="font-size:15px;font-weight:600">${this._esc(st.nome||st.uid||uid)}</div>
         <div style="font-size:12px;color:var(--t3);margin-top:4px">${st.kwai_id?'@'+this._esc(st.kwai_id):''} · UID: ${this._esc(st.uid||uid)}</div>
-        ${agAtual ? `<div style="margin-top:8px;font-size:12px;color:var(--verm)">⚠️ Este streamer já está vinculado ao agente <strong>${this._esc(agAtual.nome)}</strong>.</div>` : ''}
+        ${agAtual ? `<div style="margin-top:8px;font-size:12px;color:var(--verm)">${this._ii('warning',12)}Este streamer já está vinculado ao agente <strong>${this._esc(agAtual.nome)}</strong>.</div>` : ''}
       </div>`;
       this._buscaVincularStreamer = { uid: st.uid || uid, kwai_id: st.kwai_id || null, nome: st.nome || null, foto: st.foto || null, agente_atual_id: agAtual?.id || null };
       btnConf.style.display = '';
