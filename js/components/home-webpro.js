@@ -805,7 +805,6 @@ class DmaiorHomeWebpro extends HTMLElement {
         : `<img src="${this._esc(src)}"${srcset} alt="${this._esc(s.titulo || 'Banner')}" width="1280" height="360" decoding="async" ${load}>`;
       return `<${tag} class="bc-slide"${href}>
         ${media}
-        ${s.titulo ? `<span class="bc-cap"><span>${this._esc(s.titulo)}</span></span>` : ''}
       </${tag}>`;
     }).join('');
     const dots = slides.length > 1

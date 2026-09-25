@@ -89,7 +89,6 @@ class DmaiorServicesMenu extends HTMLElement {
         : `<img src="${this._escAttr(src)}" alt="${this._escAttr(s.titulo||'Banner')}" loading="lazy">`;
       return `<${tag} class="bc-slide"${href}${alt} data-idx="${i}">
         ${media}
-        ${s.titulo ? `<div class="bc-caption"><span>${this._escHtml(s.titulo)}</span></div>` : ''}
       </${tag}>`;
     }).join('');
     const dots = slides.map((_, i) =>

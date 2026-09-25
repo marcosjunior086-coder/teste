@@ -2457,6 +2457,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnNovoImportante').addEventListener('click',()=>this._abrirModalCom(null,'importante'));
     s.getElementById('mComSave').addEventListener('click',()=>this._salvarComunicado());
     s.getElementById('mComCancel').addEventListener('click',()=>this._fechaModal('mCom'));
+    // Marcar/desmarcar onde aparece troca os campos do formulário na hora
+    ['home','ranking','painel','impulsionamento'].forEach(l=>s.getElementById('mComLocal_'+l)?.addEventListener('change',()=>this._ajustarCamposCom()));
     // Preview ao colar/digitar URL de imagem
     s.getElementById('mComImagem').addEventListener('input',e=>this._atualizarPreviewImagem(e.target.value));
     // Enviar imagem direto pro R2 (em vez de colar link do Drive)
@@ -3008,7 +3010,31 @@ class DimaiorAdmin extends HTMLElement {
       const cb=s.getElementById('mComLocal_'+l);if(cb)cb.checked=locais.includes(l);
     });
     this._edtCom=c?.id||null;
+    // Push: marcado por padrão só em aviso NOVO (editar não reenvia sozinho)
+    const push=s.getElementById('mComPush'); if(push) push.checked=!c;
+    this._ajustarCamposCom();
     this._abrirModal('mCom');
+  }
+
+  _comLocais(){
+    const s=this.shadowRoot;
+    return ['home','ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
+  }
+
+  // Só "Home (carrossel)" marcado = banner: pede só imagem/vídeo + link.
+  // Qualquer outro local = aviso de verdade: título e descrição obrigatórios.
+  _ajustarCamposCom(){
+    const s=this.shadowRoot;
+    const locais=this._comLocais();
+    const isImp=(this._edtComTipo||'rapido')==='importante';
+    const soHome=isImp&&locais.length===1&&locais[0]==='home';
+    const mostra=(el,v)=>{if(el) el.style.display=v?'':'none';};
+    mostra(s.getElementById('mComCamposTexto'),!soHome);
+    s.querySelectorAll('#mComSecImportante [data-so-avisos]').forEach(el=>mostra(el,!soHome));
+    const grid=s.getElementById('mComGridLinks'); if(grid) grid.style.gridTemplateColumns=soHome?'1fr':'1fr 1fr';
+    const lbl=s.getElementById('mComLinkUrlLbl'); if(lbl) lbl.textContent=soHome?'Link ao clicar no banner (opcional)':'Botão principal — Link';
+    mostra(s.getElementById('mComModoHint'),soHome);
+    mostra(s.getElementById('mComPushWrap'),locais.includes('painel'));
   }
 
   _atualizarPreviewImagem(url){
@@ -3057,21 +3083,31 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;
     const tipo        = this._edtComTipo || 'rapido';
     const isImp       = tipo === 'importante';
-    const titulo      = s.getElementById('mComTitulo').value.trim();
-    const descricao   = s.getElementById('mComDescricao').value.trim();
+    const locais      = this._comLocais();
+    const soHome      = isImp && locais.length===1 && locais[0]==='home';
+    // Banner só da Home: campos de texto/botões ficam escondidos e não vão.
+    const val=id=>soHome?'':s.getElementById(id).value.trim();
+    const titulo      = val('mComTitulo');
+    const descricao   = val('mComDescricao');
     // Lê o campo de texto correto por tipo
     const textoEl     = isImp ? s.getElementById('mComTexto_imp') : s.getElementById('mComTexto');
-    const texto       = textoEl?.value.trim() || '';
+    let   texto       = soHome ? '' : (textoEl?.value.trim() || '');
     const imagem_url  = this._normalizarImagemUrl(s.getElementById('mComImagem').value.trim());
-    const link_label  = s.getElementById('mComLinkLabel').value.trim();
+    const link_label  = val('mComLinkLabel');
     const link_url    = s.getElementById('mComLinkUrl').value.trim();
-    const link2_label = s.getElementById('mComLink2Label').value.trim();
-    const link2_url   = s.getElementById('mComLink2Url').value.trim();
+    const link2_label = val('mComLink2Label');
+    const link2_url   = val('mComLink2Url');
     const emoji       = s.getElementById('mComEmoji').value.trim();
     const ativo       = s.getElementById('mComAtivo').value==='true';
-    const destaque    = s.getElementById('mComDestaque').checked;
-    const locais      = ['home','ranking','painel','impulsionamento'].filter(l=>s.getElementById('mComLocal_'+l)?.checked);
-    if(!texto){this._toast('Texto é obrigatório','err');return;}
+    const destaque    = soHome ? false : s.getElementById('mComDestaque').checked;
+    const notificar   = locais.includes('painel') && !!s.getElementById('mComPush')?.checked;
+    if(soHome){
+      if(!imagem_url){this._toast('Envie a imagem ou o vídeo do banner','err');return;}
+      texto='Banner da Home'; // o servidor exige texto; não aparece em lugar nenhum
+    }else if(isImp){
+      if(!titulo){this._toast('Título é obrigatório','err');return;}
+      if(!texto){this._toast('Descrição é obrigatória','err');return;}
+    }else if(!texto){this._toast('Texto é obrigatório','err');return;}
     const btn=s.getElementById('mComSave');btn.disabled=true;
     const payload={tipo,emoji,titulo,descricao,texto,imagem_url,link_url,link_label,link2_url,link2_label,destaque,ativo,locais};
     let r;
@@ -3081,8 +3117,22 @@ class DimaiorAdmin extends HTMLElement {
       r=await this._api('POST','/admin/comunicados',payload);
     }
     btn.disabled=false;
-    if(r?.ok){this._fechaModal('mCom');this._toast(this._edtCom?'Comunicado atualizado!':'Comunicado criado!');this._carregarComunicados();}
+    if(r?.ok){
+      this._fechaModal('mCom');this._toast(this._edtCom?'Comunicado atualizado!':'Comunicado criado!');this._carregarComunicados();
+      if(notificar&&ativo) this._notificarComunicado(r.comunicado?.id||this._edtCom,titulo||'Novo aviso da agência',texto);
+    }
     else{this._toast(r?.erro||'Erro ao salvar','err');}
+  }
+
+  // Push pra todas as streamers da agência que ativaram notificação no painel.
+  async _notificarComunicado(id,titulo,texto){
+    const body={scope:'agency',title:titulo.slice(0,120),body:(texto.length>180?texto.slice(0,177)+'…':texto),url:'/painel/#avisos'};
+    if(id) body.idempotency_key=`comunicado:${id}:${Date.now()}`;
+    const r=await this._api('POST','/admin/notificacoes/enviar',body);
+    if(r&&(r.ok||r.event_id)){
+      const n=r.enqueued!=null?` (${r.enqueued} aparelho(s))`:'';
+      this._toast(`Notificação enviada às streamers${n}`);
+    }else this._toast('Aviso salvo, mas a notificação falhou: '+(r?.erro||'erro'),'err');
   }
 
   async _excluirComunicado(id){
@@ -6777,6 +6827,9 @@ class DimaiorAdmin extends HTMLElement {
       <div class="ov" id="mCom"><div class="modal" style="max-width:500px"><div class="m-titulo" id="mComTit">Novo Aviso</div>
         <div id="mComTipoBadge"></div>
 
+        <!-- Onde aparece vem primeiro: define quais campos o formulário pede -->
+        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> ${this._ii('home',12)}Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App (avisos)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div><div id="mComModoHint" style="display:none;font-size:11px;color:var(--t3);margin-top:6px">Banner da Home: só a imagem/vídeo e o link. Não precisa de título.</div></div>
+
         <!-- ── SEÇÃO: AVISO RÁPIDO ── -->
         <div id="mComSecRapido">
           <div class="mc"><label>Emoji <span style="color:var(--t3);font-size:11px">(opcional)</span></label><input id="mComEmoji" type="text" placeholder="Ex: ⚡ 🏆 🔔" maxlength="8" style="font-size:1.3rem;letter-spacing:4px"/></div>
@@ -6785,24 +6838,26 @@ class DimaiorAdmin extends HTMLElement {
 
         <!-- ── SEÇÃO: AVISO IMPORTANTE ── -->
         <div id="mComSecImportante" style="display:none">
+          <div id="mComCamposTexto">
           <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
           <div class="mc"><label>Subtítulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
           <div class="mc"><label>Descrição / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: Não perca tempo! Garanta já o seu lugar na Copa Arena."></textarea></div>
-          <div class="mc"><label>Imagem ou vídeo</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem ou vídeo</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole o link"/><div style="font-size:11px;color:var(--t3);margin-top:5px">Tamanho ideal do banner da Home: <strong style="color:var(--t2)">1920 × 540 px</strong> (proporção 32:9)</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/><video id="mComVidEl" muted playsinline autoplay loop style="display:none;width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)"></video><div id="mComImgDim" style="font-size:11px;margin-top:4px;line-height:1.45"></div></div></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="mc" style="margin:0"><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
-            <div class="mc" style="margin:0"><label>Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
-            <div class="mc" style="margin:0"><label>Botão secundário — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
-            <div class="mc" style="margin:0"><label>Botão secundário — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
           </div>
-          <div class="mc" style="margin-top:10px"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;${this._ii('star',12)}Destaque — exibe como card principal no topo das notificações</label></div>
+          <div class="mc"><label>Imagem ou vídeo</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem ou vídeo</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole o link"/><div style="font-size:11px;color:var(--t3);margin-top:5px">Tamanho ideal do banner da Home: <strong style="color:var(--t2)">1920 × 540 px</strong> (proporção 32:9)</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/><video id="mComVidEl" muted playsinline autoplay loop style="display:none;width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)"></video><div id="mComImgDim" style="font-size:11px;margin-top:4px;line-height:1.45"></div></div></div>
+          <div id="mComGridLinks" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="mc" style="margin:0" data-so-avisos><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
+            <div class="mc" style="margin:0"><label id="mComLinkUrlLbl">Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
+            <div class="mc" style="margin:0" data-so-avisos><label>Botão secundário — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
+            <div class="mc" style="margin:0" data-so-avisos><label>Botão secundário — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
+          </div>
+          <div class="mc" style="margin-top:10px" data-so-avisos><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;${this._ii('star',12)}Destaque — exibe como card principal no topo das notificações</label></div>
         </div>
 
         <!-- ── CAMPOS COMUNS ── -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
           <div class="mc" style="margin:0"><label>Status</label><select id="mComAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div>
         </div>
-        <div class="mc"><label>Exibir em</label><div class="com-locais-check"><label class="com-check-label"><input type="checkbox" id="mComLocal_home"> ${this._ii('home',12)}Home (carrossel)</label><label class="com-check-label"><input type="checkbox" id="mComLocal_ranking"> Ranking Geral</label><label class="com-check-label"><input type="checkbox" id="mComLocal_painel"> Painel / App</label><label class="com-check-label"><input type="checkbox" id="mComLocal_impulsionamento"> Impulsionamento</label></div></div>
+        <div class="mc" id="mComPushWrap" style="display:none;margin-top:10px"><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComPush"> &nbsp;${this._ii('bell',12)}Notificar as streamers no celular</label><div style="font-size:11px;color:var(--t3);margin-top:3px">Chega pra quem ativou as notificações no painel. Ao tocar, abre a aba de avisos.</div></div>
         <div class="mf"><button class="btn btn-o" id="mComCancel">Cancelar</button><button class="btn btn-g" id="mComSave">${this._ico('check',13)} Salvar</button></div>
       </div></div>
       <div class="ov" id="mVotacao"><div class="modal" style="max-width:560px">
