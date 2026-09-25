@@ -143,7 +143,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .banner .bc{position:relative;width:100%;max-width:820px;margin:0 auto;border-radius:16px;overflow:hidden;}
     .banner .bc-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);will-change:transform;}
     .banner .bc-slide{flex:0 0 100%;width:100%;min-width:100%;position:relative;display:block;}
-    .banner .bc-slide img{display:block;width:100%;height:auto;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
+    .banner .bc-slide img,.banner .bc-slide video{display:block;width:100%;height:auto;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
     .banner .bc-cap{position:absolute;bottom:0;left:0;right:0;padding:8px 14px 10px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);border-radius:0 0 16px 16px;pointer-events:none;}
     .banner .bc-cap span{font-family:var(--f-title);font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
     /* dots FORA da imagem (numa faixa embaixo) — assim não se sobrepõem ao
@@ -797,8 +797,14 @@ class DmaiorHomeWebpro extends HTMLElement {
       const src    = this._normUrl(s.imagem_url, 720);
       const set    = this._srcSet(s.imagem_url);
       const srcset = set ? ` srcset="${this._esc(set)}" sizes="(min-width:860px) 820px, 100vw"` : '';
+      // Vídeo (MP4/WebM do R2): sempre mudo (autoplay só funciona assim) e
+      // playsinline (senão o iPhone abre em tela cheia). Só o 1º baixa de cara;
+      // os outros esperam virar o slide ativo (preload="none").
+      const media = this._isVideo(src)
+        ? `<video src="${this._esc(src)}" muted playsinline ${i === 0 ? 'autoplay preload="auto"' : 'preload="none"'}${slides.length === 1 ? ' loop' : ''} width="1280" height="360" aria-label="${this._esc(s.titulo || 'Banner')}"></video>`
+        : `<img src="${this._esc(src)}"${srcset} alt="${this._esc(s.titulo || 'Banner')}" width="1280" height="360" decoding="async" ${load}>`;
       return `<${tag} class="bc-slide"${href}>
-        <img src="${this._esc(src)}"${srcset} alt="${this._esc(s.titulo || 'Banner')}" width="1280" height="360" decoding="async" ${load}>
+        ${media}
         ${s.titulo ? `<span class="bc-cap"><span>${this._esc(s.titulo)}</span></span>` : ''}
       </${tag}>`;
     }).join('');
@@ -812,14 +818,27 @@ class DmaiorHomeWebpro extends HTMLElement {
     if (n <= 1) return;
     const s = this.shadowRoot;
     const bc = s.getElementById('bc'), track = s.getElementById('bcTrack'), dots = s.getElementById('bcDots');
+    const vids = [...track.children].map(el => el.querySelector('video'));
     let i = 0, timer = null;
     const go = (x) => {
       i = ((x % n) + n) % n;
       track.style.transform = `translateX(-${i * 100}%)`;
       dots && dots.querySelectorAll('.bc-dot').forEach((d, k) => d.classList.toggle('on', k === i));
+      // Só o vídeo do slide ativo toca; volta do começo toda vez que aparece.
+      vids.forEach((v, k) => { if (v && k !== i) v.pause(); });
+      const v = vids[i];
+      if (v) { try { v.currentTime = 0; } catch (_) {} v.play().catch(() => {}); }
     };
-    const start = () => { stop(); timer = setInterval(() => go(i + 1), 5000); this._timers.push(timer); };
-    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+    // Imagem fica 5s; vídeo fica até terminar (teto de 60s caso trave).
+    const start = () => {
+      stop();
+      const v = vids[i];
+      const ms = v ? (v.duration > 0 && isFinite(v.duration) ? Math.min(v.duration, 60) * 1000 + 300 : 60000) : 5000;
+      timer = setTimeout(() => { go(i + 1); start(); }, ms);
+      this._timers.push(timer);
+      if (v) v.onended = () => { go(i + 1); start(); };
+    };
+    const stop = () => { if (timer) { clearTimeout(timer); timer = null; } vids.forEach(v => { if (v) v.onended = null; }); };
     dots && dots.addEventListener('click', (e) => { const b = e.target.closest('.bc-dot'); if (!b) return; go(+b.dataset.i); start(); });
     let tx = null;
     bc.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
@@ -863,6 +882,8 @@ class DmaiorHomeWebpro extends HTMLElement {
       return url.href;
     } catch (_) { return ''; }
   }
+
+  _isVideo(u) { return /\.(mp4|webm)(?:[?#]|$)/i.test(String(u || '')); }
 
   // srcset só pra imagens do Drive (as únicas em que dá pra pedir tamanhos).
   _srcSet(u) {

@@ -82,8 +82,13 @@ class DmaiorServicesMenu extends HTMLElement {
       const tag  = s.link_url ? 'a' : 'div';
       const href = s.link_url ? ` href="${this._escAttr(s.link_url)}" target="_blank" rel="noopener noreferrer"` : '';
       const alt  = s.titulo   ? ` title="${this._escAttr(s.titulo)}"` : '';
+      const src  = this._normalizarImagemUrl(s.imagem_url);
+      // Vídeo do R2: mudo + playsinline (autoplay/iPhone); só o ativo toca.
+      const media = /\.(mp4|webm)(?:[?#]|$)/i.test(src)
+        ? `<video src="${this._escAttr(src)}" muted playsinline ${i===0?'autoplay preload="auto"':'preload="none"'}${slides.length===1?' loop':''} aria-label="${this._escAttr(s.titulo||'Banner')}"></video>`
+        : `<img src="${this._escAttr(src)}" alt="${this._escAttr(s.titulo||'Banner')}" loading="lazy">`;
       return `<${tag} class="bc-slide"${href}${alt} data-idx="${i}">
-        <img src="${this._escAttr(this._normalizarImagemUrl(s.imagem_url))}" alt="${this._escAttr(s.titulo||'Banner')}" loading="lazy">
+        ${media}
         ${s.titulo ? `<div class="bc-caption"><span>${this._escHtml(s.titulo)}</span></div>` : ''}
       </${tag}>`;
     }).join('');
@@ -138,6 +143,16 @@ class DmaiorServicesMenu extends HTMLElement {
     if (track) track.style.transform = `translateX(-${this._carouselIdx * 100}%)`;
     const dots = this.shadowRoot?.querySelectorAll('.bc-dot');
     if (dots) dots.forEach((d, i) => d.classList.toggle('bc-dot-active', i === this._carouselIdx));
+    this.shadowRoot?.querySelectorAll('.bc-slide').forEach((el, i) => {
+      const v = el.querySelector('video');
+      if (!v) return;
+      if (i === this._carouselIdx) { try { v.currentTime = 0; } catch (_) {} v.play().catch(() => {}); }
+      else v.pause();
+    });
+  }
+
+  _slideVideo() {
+    return this.shadowRoot?.querySelectorAll('.bc-slide')[this._carouselIdx || 0]?.querySelector('video') || null;
   }
 
   _nextSlide() { this._goSlide((this._carouselIdx || 0) + 1); }
@@ -145,13 +160,19 @@ class DmaiorServicesMenu extends HTMLElement {
 
   _startTimer() {
     this._stopCarousel();
-    this._carouselTimer = setInterval(() => this._nextSlide(), 5000);
+    // Imagem fica 5s; vídeo fica até terminar (teto de 60s caso trave).
+    const v  = this._slideVideo();
+    const ms = v ? (v.duration > 0 && isFinite(v.duration) ? Math.min(v.duration, 60) * 1000 + 300 : 60000) : 5000;
+    const next = () => { this._nextSlide(); this._startTimer(); };
+    this._carouselTimer = setTimeout(next, ms);
+    if (v) v.onended = next;
   }
 
   _resetTimer() { this._startTimer(); }
 
   _stopCarousel() {
-    if (this._carouselTimer) { clearInterval(this._carouselTimer); this._carouselTimer = null; }
+    if (this._carouselTimer) { clearTimeout(this._carouselTimer); this._carouselTimer = null; }
+    this.shadowRoot?.querySelectorAll('.bc-slide video').forEach(v => { v.onended = null; });
   }
 
   _escHtml(str) {
@@ -387,7 +408,7 @@ class DmaiorServicesMenu extends HTMLElement {
         .bc-track { display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1); will-change:transform; }
         .bc-slide { flex:0 0 100%; width:100%; min-width:100%; display:block; position:relative; text-decoration:none; cursor:default; }
         a.bc-slide { cursor:pointer; }
-        .bc-slide img { display:block; width:100%; aspect-ratio:32/9; object-fit:cover; border-radius:16px; }
+        .bc-slide img, .bc-slide video { display:block; width:100%; aspect-ratio:32/9; object-fit:cover; border-radius:16px; }
         .bc-caption { position:absolute; bottom:0; left:0; right:0; padding:8px 14px 10px; background:linear-gradient(to top,rgba(0,0,0,.65),transparent); border-radius:0 0 16px 16px; pointer-events:none; }
         .bc-caption span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.85rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,.6); }
         .bc-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }

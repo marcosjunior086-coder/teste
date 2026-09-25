@@ -7,7 +7,7 @@
   <script>try{var d=document.documentElement,s=localStorage,t=s.getItem('dm_tema'),f=s.getItem('dm_tamanho_texto');if(t&&t!=='original')d.setAttribute('data-theme',t);if(f&&f!=='normal')d.setAttribute('data-font-size',f);}catch(e){}</script>
   <!-- Dispara a busca do banner da home já aqui (não espera os scripts deferidos)
        e, assim que souber a URL, faz preload da imagem — corta a LCP no mobile. -->
-  <script>try{window.__comunicadosHome=fetch('https://rank.agencydmaior.com.br/comunicados?local=home').then(function(r){return r.ok?r.json():null;}).then(function(d){try{var l=(d&&d.comunicados||[]).filter(function(x){return x&&x.imagem_url;})[0];if(l){var k=document.createElement('link');k.rel='preload';k.as='image';k.href=l.imagem_url;k.fetchPriority='high';document.head.appendChild(k);}}catch(e){}return d;}).catch(function(){return null;});}catch(e){}</script>
+  <script>try{window.__comunicadosHome=fetch('https://rank.agencydmaior.com.br/comunicados?local=home').then(function(r){return r.ok?r.json():null;}).then(function(d){try{var l=(d&&d.comunicados||[]).filter(function(x){return x&&x.imagem_url;})[0];if(l&&!/\.(mp4|webm)([?#]|$)/i.test(l.imagem_url)){var k=document.createElement('link');k.rel='preload';k.as='image';k.href=l.imagem_url;k.fetchPriority='high';document.head.appendChild(k);}}catch(e){}return d;}).catch(function(){return null;});}catch(e){}</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#060B16">
@@ -65,9 +65,9 @@
   <script defer charset=utf-8 src="js/router.js"></script>
   <script defer charset=utf-8 src="js/components/menu-mobile.js?v=20260924-atalho-sub"></script>
   <script defer charset=utf-8 src="js/components/live-widget.js?v=20260924-icones-svg2"></script>
-  <script defer charset=utf-8 src="js/components/services-menu.js?v=20260907-perf"></script>
+  <script defer charset=utf-8 src="js/components/services-menu.js?v=20260925-banner-video"></script>
   <script defer charset=utf-8 src="js/components/beneficios.js?v=20260907-perf"></script>
-  <script defer charset=utf-8 src="js/components/home-webpro.js?v=20260911-fallbackstack"></script>
+  <script defer charset=utf-8 src="js/components/home-webpro.js?v=20260925-banner-video"></script>
 
   <script>
     // -- Controle de layout: 'webpro' (default) | 'dinamico' (Padrão) | 'original' (Antigo) --

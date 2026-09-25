@@ -2774,7 +2774,7 @@
             // ── Card destaque ────────────────────────────────────────
             if(destaque){
                 const imgHtml = destaque.imagem_url
-                    ? `<img class="aviso-destaque-img" src="${this._escHtml(this._normalizarImagemUrl(destaque.imagem_url))}" alt="${this._escHtml(destaque.titulo||destaque.texto)}" loading="lazy">`
+                    ? this._avisoMidia('aviso-destaque-img', destaque.imagem_url, destaque.titulo||destaque.texto)
                     : '';
                 const sub  = destaque.descricao ? `<div class="aviso-destaque-sub">${this._escHtml(destaque.descricao)}</div>` : '';
                 const desc = destaque.texto ? `<div class="aviso-destaque-desc">${this._escHtml(destaque.texto)}</div>` : '';
@@ -2799,7 +2799,7 @@
                 html += `<div class="avisos-sec-titulo">Últimos avisos</div>
                 <div class="avisos-list">${demais.map(c=>{
                     const thumbHtml = c.imagem_url
-                        ? `<img class="aviso-card-thumb" src="${this._escHtml(this._normalizarImagemUrl(c.imagem_url))}" alt="" loading="lazy">`
+                        ? this._avisoMidia('aviso-card-thumb', c.imagem_url, '')
                         : (c.emoji ? `<div class="aviso-card-emoji">${c.emoji}</div>` : '');
                     const titulo = this._escHtml(c.titulo || c.texto);
                     const desc   = c.titulo && c.texto ? `<div class="aviso-card-desc">${this._escHtml(c.texto)}</div>` : '';
@@ -2860,6 +2860,14 @@
             .replace(/>/g,'&gt;')
             .replace(/"/g,'&quot;')
             .replace(/'/g,'&#39;');
+    }
+
+    // Comunicado pode ter vídeo (MP4/WebM do R2) no lugar da imagem.
+    _avisoMidia(cls, u, alt){
+        const src = this._escHtml(this._normalizarImagemUrl(u));
+        return /\.(mp4|webm)(?:[?#]|$)/i.test(src)
+            ? `<video class="${cls}" src="${src}" muted playsinline autoplay loop preload="metadata" aria-label="${this._escHtml(alt)}"></video>`
+            : `<img class="${cls}" src="${src}" alt="${this._escHtml(alt)}" loading="lazy">`;
     }
 
     _normalizarImagemUrl(u){

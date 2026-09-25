@@ -2465,13 +2465,13 @@ class DimaiorAdmin extends HTMLElement {
       const f=ev.target.files?.[0]; ev.target.value='';
       if(!f) return;
       const btn=s.getElementById('mComImgUpBtn'), stat=s.getElementById('mComImgUpStatus');
-      if(btn) btn.disabled=true; if(stat) stat.textContent='enviando…';
+      if(btn) btn.disabled=true; if(stat) stat.textContent=/^video\//i.test(f.type)?'enviando vídeo… (pode levar alguns segundos)':'enviando…';
       const url=await this._uploadImagem(f,'home');
       if(btn) btn.disabled=false;
       if(url){
         s.getElementById('mComImagem').value=url;
         this._atualizarPreviewImagem(url);
-        if(stat) stat.innerHTML=`${this._ii('check',12)}enviada`;
+        if(stat) stat.innerHTML=`${this._ii('check',12)}pronto`;
       } else if(stat) stat.textContent='';
     });
     // Notificações push
@@ -2783,7 +2783,9 @@ class DimaiorAdmin extends HTMLElement {
       const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'—';
       const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` · atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
       const thumbHtml=c.imagem_url
-        ?`<img class="com-thumb" src="${this._safeImgSrc(c.imagem_url)}" alt="" onerror="this.style.display='none'">`
+        ?this._ehVideo(c.imagem_url)
+          ?`<video class="com-thumb" src="${this._safeImgSrc(c.imagem_url)}" muted playsinline preload="metadata"></video>`
+          :`<img class="com-thumb" src="${this._safeImgSrc(c.imagem_url)}" alt="" onerror="this.style.display='none'">`
         :(c.emoji?`<span class="com-emoji">${this._esc(c.emoji)}</span>`:'');
       const titulo=c.titulo?`<strong style="display:block;font-size:13px;color:var(--t1);margin-bottom:2px">${this._esc(c.titulo)}</strong>`:'';
       return`<div class="com-item ${c.tipo==='importante'?'is-important':'is-fast'}">
@@ -2846,9 +2848,12 @@ class DimaiorAdmin extends HTMLElement {
 
   async _uploadImagem(file,pasta='home'){
     if(!file) return null;
-    if(!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type)){this._toast('Formato não suportado (use PNG, JPG, WebP ou GIF)','err');return null;}
+    if(!/^(image\/(png|jpe?g|webp|gif)|video\/(mp4|webm))$/i.test(file.type)){this._toast('Formato não suportado (use PNG, JPG, WebP, GIF, MP4 ou WebM)','err');return null;}
     let blob=file, ct=file.type;
-    if(/gif/i.test(file.type)){
+    if(/^video\//i.test(file.type)){
+      // Vídeo sobe cru (sem recompressão no navegador).
+      if(file.size>20*1024*1024){this._toast('Vídeo muito grande (máx 20 MB) — exporte mais curto ou com menos qualidade','err');return null;}
+    }else if(/gif/i.test(file.type)){
       if(file.size>4*1024*1024){this._toast('GIF muito grande (máx 4 MB)','err');return null;}
     }else{
       try{
@@ -2858,7 +2863,7 @@ class DimaiorAdmin extends HTMLElement {
         ct=(blob.type&&/^image\/(webp|png|jpe?g)$/i.test(blob.type))?blob.type:'image/png';
       }catch{ blob=file; ct=file.type; }
     }
-    if(blob.size>4*1024*1024){this._toast('Imagem muito grande (máx 4 MB) — tente uma menor','err');return null;}
+    if(!/^video\//i.test(ct)&&blob.size>4*1024*1024){this._toast('Imagem muito grande (máx 4 MB) — tente uma menor','err');return null;}
     let r;
     try{
       r=await fetch(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,{
@@ -2954,18 +2959,43 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;
     const wrap=s.getElementById('mComImagemPreview');
     const img =s.getElementById('mComImgEl');
+    const vid =s.getElementById('mComVidEl');
+    const dim =s.getElementById('mComImgDim');
     if(!wrap||!img)return;
     const safe=this._normalizarImagemUrl(url);
-    if(safe){
-      img.src=safe;
+    const video=this._ehVideo(safe);
+    if(dim) dim.textContent='';
+    // Prévia já no formato do banner (32:9) + aviso se a proporção não bate.
+    const conferir=(w,h,extra='')=>{
+      if(!dim||!w||!h) return;
+      const r=w/h, ok=Math.abs(r-32/9)/(32/9)<0.04;
+      dim.style.color=ok?'var(--verde,#34d399)':'var(--warn,#fbbf24)';
+      dim.textContent=ok
+        ?`${w} × ${h} px${extra} — proporção certa, vai caber sem corte.`
+        :`${w} × ${h} px${extra} — não é 32:9, então o site mostra só a parte do meio (a prévia acima é o que vai aparecer). Sem corte: 1920 × 540.`;
+    };
+    if(safe&&video&&vid){
+      img.style.display='none'; img.removeAttribute('src');
+      vid.style.display='block';
+      vid.onloadedmetadata=()=>{const d=vid.duration;conferir(vid.videoWidth,vid.videoHeight,isFinite(d)&&d>0?`, ${Math.round(d)}s`:'');};
+      vid.onerror=()=>{if(dim){dim.style.color='var(--warn,#fbbf24)';dim.textContent='Não consegui carregar o vídeo — confira o link ou envie pelo botão.';}};
+      vid.src=safe;
+      wrap.style.display='block';
+    }else if(safe){
+      if(vid){vid.pause();vid.removeAttribute('src');vid.style.display='none';}
+      img.style.display='block';
       img.onerror=()=>{wrap.style.display='none';};
-      img.onload =()=>{wrap.style.display='block';};
+      img.onload =()=>{wrap.style.display='block';conferir(img.naturalWidth,img.naturalHeight);};
+      img.src=safe;
       wrap.style.display='block';
     }else{
       wrap.style.display='none';
       img.src='';
+      if(vid){vid.pause();vid.removeAttribute('src');}
     }
   }
+
+  _ehVideo(u){ return /\.(mp4|webm)(?:[?#]|$)/i.test(String(u||'')); }
 
   async _salvarComunicado(){
     const s=this.shadowRoot;
@@ -6702,7 +6732,7 @@ class DimaiorAdmin extends HTMLElement {
           <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
           <div class="mc"><label>Subtítulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
           <div class="mc"><label>Descrição / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: Não perca tempo! Garanta já o seu lugar na Copa Arena."></textarea></div>
-          <div class="mc"><label>Imagem</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole um link (Wix, Drive público, R2...)"/><div style="font-size:10px;color:var(--t3);margin-top:4px;line-height:1.45">Enviar direto é o recomendado — a imagem vira WebP otimizado e carrega rápido. Link do Drive ainda funciona, mas é mais lento.</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;max-width:220px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
+          <div class="mc"><label>Imagem ou vídeo</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem ou vídeo</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole um link (Wix, Drive público, R2...)"/><div style="font-size:11px;color:var(--t2);margin-top:8px;line-height:1.55;background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:var(--rs);padding:9px 11px"><strong style="color:var(--t1)">Formato do banner da Home (carrossel)</strong><br>• Proporção <strong>32:9</strong> (faixa larga) — tamanho ideal <strong>1920 × 540 px</strong> (ou 1440 × 405). Qualquer outra proporção é cortada nas bordas.<br>• <strong>Imagem:</strong> PNG, JPG, WebP ou GIF, até 4 MB (vira WebP otimizado sozinha).<br>• <strong>Vídeo:</strong> MP4 (H.264) ou WebM, até 20 MB, ideal <strong>até 8 segundos</strong>. Toca <strong>sem som</strong>, e o carrossel só passa pro próximo quando o vídeo acaba.<br>• Vídeo em <strong>16:9</strong> (padrão do Flow/IA) também funciona: o site mostra só a <strong>faixa do meio</strong> (corta em cima e embaixo). Na prévia abaixo você vê exatamente o que vai aparecer.<br>• O título aparece numa faixa escura em cima da parte de baixo, então deixe texto e rostos no centro. No celular o banner fica pequeno (~100 px de altura): use letras grandes.<br><span style="color:var(--t3)">Vídeo precisa ser enviado pelo botão (link do Drive não toca). Link do Drive ainda funciona pra imagem, mas é mais lento.</span></div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/><video id="mComVidEl" muted playsinline autoplay loop style="display:none;width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)"></video><div id="mComImgDim" style="font-size:11px;margin-top:4px;line-height:1.45"></div></div></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="mc" style="margin:0"><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
             <div class="mc" style="margin:0"><label>Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
