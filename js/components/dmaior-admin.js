@@ -2465,8 +2465,8 @@ class DimaiorAdmin extends HTMLElement {
       const f=ev.target.files?.[0]; ev.target.value='';
       if(!f) return;
       const btn=s.getElementById('mComImgUpBtn'), stat=s.getElementById('mComImgUpStatus');
-      if(btn) btn.disabled=true; if(stat) stat.textContent=/^video\//i.test(f.type)?'enviando vídeo… (pode levar alguns segundos)':'enviando…';
-      const url=await this._uploadImagem(f,'home');
+      if(btn) btn.disabled=true; if(stat) stat.textContent='enviando…';
+      const url=await this._uploadImagem(f,'home',txt=>{if(stat) stat.textContent=txt;});
       if(btn) btn.disabled=false;
       if(url){
         s.getElementById('mComImagem').value=url;
@@ -2846,13 +2846,69 @@ class DimaiorAdmin extends HTMLElement {
     });
   }
 
-  async _uploadImagem(file,pasta='home'){
+  // Vídeo de IA (Flow etc.) sai com ~22 Mbps e 16:9/21:9 — pesado demais pra
+  // home. Regrava no navegador já recortado em 1920×540 (32:9, corte central
+  // igual ao object-fit:cover do site), sem áudio, ~3,5 Mbps. Leva o tempo do
+  // próprio vídeo (reproduz em tempo real). Devolve null se já está leve e no
+  // formato, ou se o navegador não grava MP4 (aí sobe o original).
+  async _otimizarVideo(file,onProg){
+    if(typeof MediaRecorder==='undefined') return null;
+    const mime=['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1','video/mp4'].find(m=>{try{return MediaRecorder.isTypeSupported(m);}catch{return false;}});
+    if(!mime) return null;
+    const src=URL.createObjectURL(file);
+    const v=document.createElement('video');
+    v.muted=true; v.playsInline=true; v.preload='auto'; v.src=src;
+    try{
+      await new Promise((ok,err)=>{v.onloadedmetadata=ok;v.onerror=()=>err(new Error('video'));});
+      const W=1920,H=540,R=W/H, vw=v.videoWidth, vh=v.videoHeight;
+      if(!vw||!vh) return null;
+      const formatoOk=Math.abs(vw/vh-R)/R<0.04 && vw<=W;
+      if(formatoOk && file.size<=6*1024*1024) return null;
+      let sw=vw, sh=vw/R; if(sh>vh){sh=vh; sw=vh*R;}
+      const sx=(vw-sw)/2, sy=(vh-sh)/2;
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const ctx=cv.getContext('2d');
+      const rec=new MediaRecorder(cv.captureStream(30),{mimeType:mime,videoBitsPerSecond:3500000});
+      const partes=[]; rec.ondataavailable=e=>{if(e.data&&e.data.size) partes.push(e.data);};
+      const parou=new Promise(r=>{rec.onstop=r;});
+      let vivo=true;
+      const desenha=()=>{
+        if(!vivo) return;
+        ctx.drawImage(v,sx,sy,sw,sh,0,0,W,H);
+        if(onProg&&v.duration>0) onProg(Math.min(99,Math.round(v.currentTime/v.duration*100)));
+        v.requestVideoFrameCallback?v.requestVideoFrameCallback(desenha):requestAnimationFrame(desenha);
+      };
+      await new Promise(r=>{v.oncanplay=r; if(v.readyState>=3) r();});
+      ctx.drawImage(v,sx,sy,sw,sh,0,0,W,H);
+      rec.start(500);
+      await v.play();
+      desenha();
+      // Trava: se a aba for pro segundo plano o Chrome pausa o vídeo e o
+      // "ended" nunca chega — desiste e sobe o original.
+      const teto=((isFinite(v.duration)&&v.duration>0?v.duration:60)*3+10)*1000;
+      let t; const acabou=await Promise.race([
+        new Promise(r=>{v.onended=()=>r(true);}),
+        new Promise(r=>{t=setTimeout(()=>r(false),teto);}),
+      ]);
+      clearTimeout(t);
+      vivo=false; rec.stop(); await parou;
+      if(!acabou) return null;
+      const out=new Blob(partes,{type:'video/mp4'});
+      return out.size>0&&out.size<file.size?out:null;
+    }finally{ v.pause(); v.removeAttribute('src'); URL.revokeObjectURL(src); }
+  }
+
+  async _uploadImagem(file,pasta='home',onStatus=null){
     if(!file) return null;
     if(!/^(image\/(png|jpe?g|webp|gif)|video\/(mp4|webm))$/i.test(file.type)){this._toast('Formato não suportado (use PNG, JPG, WebP, GIF, MP4 ou WebM)','err');return null;}
     let blob=file, ct=file.type;
     if(/^video\//i.test(file.type)){
-      // Vídeo sobe cru (sem recompressão no navegador).
-      if(file.size>20*1024*1024){this._toast('Vídeo muito grande (máx 20 MB) — exporte mais curto ou com menos qualidade','err');return null;}
+      onStatus?.('preparando vídeo…');
+      let otim=null;
+      try{ otim=await this._otimizarVideo(file,p=>onStatus?.(`otimizando vídeo… ${p}%`)); }catch{ otim=null; }
+      if(otim){ blob=otim; ct='video/mp4'; }
+      if(blob.size>20*1024*1024){this._toast('Vídeo muito grande (máx 20 MB) — abra o admin no Chrome ou Edge, que ele reduz o vídeo sozinho','err');return null;}
+      onStatus?.('enviando…');
     }else if(/gif/i.test(file.type)){
       if(file.size>4*1024*1024){this._toast('GIF muito grande (máx 4 MB)','err');return null;}
     }else{
@@ -2971,8 +3027,8 @@ class DimaiorAdmin extends HTMLElement {
       const r=w/h, ok=Math.abs(r-32/9)/(32/9)<0.04;
       dim.style.color=ok?'var(--verde,#34d399)':'var(--warn,#fbbf24)';
       dim.textContent=ok
-        ?`${w} × ${h} px${extra} — proporção certa, vai caber sem corte.`
-        :`${w} × ${h} px${extra} — não é 32:9, então o site mostra só a parte do meio (a prévia acima é o que vai aparecer). Sem corte: 1920 × 540.`;
+        ?`${w} × ${h} px${extra} — tamanho certo`
+        :`${w} × ${h} px${extra} — vai aparecer só o que está na prévia`;
     };
     if(safe&&video&&vid){
       img.style.display='none'; img.removeAttribute('src');
@@ -6732,7 +6788,7 @@ class DimaiorAdmin extends HTMLElement {
           <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mComTitulo" type="text" placeholder="Ex: Inscrições abertas até 12 de junho!" maxlength="120"/></div>
           <div class="mc"><label>Subtítulo <span style="color:var(--t3);font-size:11px">(aparece em ciano abaixo do título)</span></label><textarea id="mComDescricao" rows="2" placeholder="Ex: BATALHA DE SQUADS"></textarea></div>
           <div class="mc"><label>Descrição / Corpo <span style="color:var(--verm)">*</span></label><textarea id="mComTexto_imp" rows="3" placeholder="Ex: Não perca tempo! Garanta já o seu lugar na Copa Arena."></textarea></div>
-          <div class="mc"><label>Imagem ou vídeo</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem ou vídeo</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole um link (Wix, Drive público, R2...)"/><div style="font-size:11px;color:var(--t2);margin-top:8px;line-height:1.55;background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:var(--rs);padding:9px 11px"><strong style="color:var(--t1)">Formato do banner da Home (carrossel)</strong><br>• Proporção <strong>32:9</strong> (faixa larga) — tamanho ideal <strong>1920 × 540 px</strong> (ou 1440 × 405). Qualquer outra proporção é cortada nas bordas.<br>• <strong>Imagem:</strong> PNG, JPG, WebP ou GIF, até 4 MB (vira WebP otimizado sozinha).<br>• <strong>Vídeo:</strong> MP4 (H.264) ou WebM, até 20 MB, ideal <strong>até 8 segundos</strong>. Toca <strong>sem som</strong>, e o carrossel só passa pro próximo quando o vídeo acaba.<br>• Vídeo em <strong>16:9</strong> (padrão do Flow/IA) também funciona: o site mostra só a <strong>faixa do meio</strong> (corta em cima e embaixo). Na prévia abaixo você vê exatamente o que vai aparecer.<br>• O título aparece numa faixa escura em cima da parte de baixo, então deixe texto e rostos no centro. No celular o banner fica pequeno (~100 px de altura): use letras grandes.<br><span style="color:var(--t3)">Vídeo precisa ser enviado pelo botão (link do Drive não toca). Link do Drive ainda funciona pra imagem, mas é mais lento.</span></div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/><video id="mComVidEl" muted playsinline autoplay loop style="display:none;width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)"></video><div id="mComImgDim" style="font-size:11px;margin-top:4px;line-height:1.45"></div></div></div>
+          <div class="mc"><label>Imagem ou vídeo</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem ou vídeo</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole o link"/><div style="font-size:11px;color:var(--t3);margin-top:5px">Tamanho ideal do banner da Home: <strong style="color:var(--t2)">1920 × 540 px</strong> (proporção 32:9)</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/><video id="mComVidEl" muted playsinline autoplay loop style="display:none;width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)"></video><div id="mComImgDim" style="font-size:11px;margin-top:4px;line-height:1.45"></div></div></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="mc" style="margin:0"><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
             <div class="mc" style="margin:0"><label>Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
