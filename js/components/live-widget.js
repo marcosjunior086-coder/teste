@@ -112,7 +112,11 @@ class KwaiLiveWidget extends HTMLElement {
     this._visHandler = () => {
       this._docHidden = document.hidden;
       if (document.hidden) this._trimMiniPlayers();
-      else this._pumpMiniQueue();
+      // Voltou pra aba: o trim acima parou TODOS os mini-players e o
+      // IntersectionObserver não re-dispara (os cards continuam na mesma
+      // posição) — sem reenfileirar, as bolinhas ficavam só na foto até
+      // atualizar a página.
+      else this._requeueVisible();
     };
     // Recalcula o teto de mini-players quando a janela muda de tamanho
     // (ex: girar o celular, redimensionar a janela).
@@ -558,6 +562,39 @@ class KwaiLiveWidget extends HTMLElement {
     return this._maxMini;
   }
 
+  // play() que registra quando o navegador BLOQUEIA a reprodução automática
+  // (modo economia de bateria do iPhone, autoplay desligado nas configurações).
+  // Nesses casos o vídeo nunca vai começar sozinho — as religações abaixo
+  // param de insistir (senão ficariam repetindo tentativas, passando pela
+  // ponte, sem chance de dar certo). Um toque na página libera de novo.
+  _play(v) {
+    const p = v.play();
+    if (p && typeof p.catch === 'function') {
+      p.catch((e) => {
+        if (!e || e.name !== 'NotAllowedError' || this._autoplayBlocked) return;
+        this._autoplayBlocked = true;
+        const liberar = () => {
+          this._autoplayBlocked = false;
+          this.activePlayers.forEach((en) => { en.retries = 0; });
+          this._requeueVisible();
+        };
+        document.addEventListener('pointerdown', liberar, { once: true, capture: true });
+      });
+    }
+    return p;
+  }
+
+  // Põe na fila os cards visíveis que estão parados (foto). Usado quando os
+  // players foram parados sem o card sair da tela — o IntersectionObserver
+  // só avisa quando a visibilidade MUDA, então ninguém mais os religaria.
+  _requeueVisible() {
+    if (!this.ENABLE_MINI_PREVIEW || this._docHidden || this._autoplayBlocked) return;
+    this.activePlayers.forEach((e, u) => {
+      if (!e.playing && !e.starting && this._isReallyVisible(u)) this._enqueueMini(u);
+    });
+    this._pumpMiniQueue();
+  }
+
   // Corta o excesso de mini-players quando o limite baixa (ex: hero começou a
   // tocar). stopMiniPlayer volta o card pra foto parada — nada some.
   _trimMiniPlayers() {
@@ -693,11 +730,19 @@ class KwaiLiveWidget extends HTMLElement {
       );
     }
 
-    // Atualiza contagem de espectadores de quem já está na tela
+    // Atualiza quem já está na tela: espectadores e o link do vídeo (o radar
+    // manda um link assinado novo a cada ciclo — quem não está tocando agora
+    // usa o mais recente na próxima tentativa). Quem tinha desistido depois
+    // de várias falhas ganha outra chance a cada ciclo, em vez de ficar na
+    // foto até atualizar a página.
     entries.forEach((e) => {
       const entry = this.activePlayers.get(e.url);
-      if (entry && e.viewCount != null) entry.streamer.viewCount = e.viewCount;
+      if (!entry) return;
+      if (e.viewCount != null) entry.streamer.viewCount = e.viewCount;
+      if (e.playUrl) entry.streamer.playUrl = e.playUrl;
+      if (!entry.playing && !entry.starting) entry.retries = 0;
     });
+    if (!this.isFirstLoad) this._requeueVisible();
 
     if (toAdd.length > 0 || this.isFirstLoad) this.saveCache();
     this.isFirstLoad = false;
@@ -852,22 +897,29 @@ class KwaiLiveWidget extends HTMLElement {
       this._heroWarmup = false;
       // reenfileira os cards visíveis (o IntersectionObserver não re-dispara
       // sozinho) — a fila escalonada sobe eles um a um.
-      if (this.ENABLE_MINI_PREVIEW && !this._docHidden) {
-        this.activePlayers.forEach((_e, u) => {
-          if (this._isReallyVisible(u)) this._enqueueMini(u);
-        });
-      }
+      this._requeueVisible();
     }, 3000);
     this._trimMiniPlayers();
 
-    let hls = null, dead = false, watchdog = null, lastT = -1;
+    let hls = null, dead = false, watchdog = null, lastT = -1, frozen = 0, attempt = 0;
+
+    // Voltou pra aba: o navegador costuma pausar o vídeo em segundo plano —
+    // dá play na hora em vez de esperar o watchdog (até 8s).
+    const onVis = () => {
+      if (dead || document.hidden) return;
+      lastT = -1; frozen = 0;
+      if (videoEl.paused) this._play(videoEl);
+    };
+    document.addEventListener('visibilitychange', onVis);
 
     const cleanup = () => {
       dead = true;
+      attempt++;
       this._featuredActive = false;
       this._heroWarmup = false;
       clearTimeout(this._heroWarmupT);
       clearInterval(watchdog);
+      document.removeEventListener('visibilitychange', onVis);
       try { hls && hls.destroy(); } catch (_) {}
       hls = null;
       try { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); } catch (_) {}
@@ -875,7 +927,10 @@ class KwaiLiveWidget extends HTMLElement {
 
     const attach = (useProxy) => {
       if (dead) return;
-      const src = useProxy ? this._proxyBase + encodeURIComponent(playUrl) : playUrl;
+      const tok = ++attempt; // eventos de tentativas anteriores são ignorados
+      // Link mais recente (o radar renova a assinatura a cada ciclo).
+      const cur = (this.activePlayers.get(url)?.streamer?.playUrl) || playUrl;
+      const src = useProxy ? this._proxyBase + encodeURIComponent(cur) : cur;
       try { hls && hls.destroy(); } catch (_) {}
       hls = null;
       videoEl.muted = true;
@@ -884,8 +939,10 @@ class KwaiLiveWidget extends HTMLElement {
 
       if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
         videoEl.src = src;
-        videoEl.addEventListener('error', () => { if (!useProxy && !dead) attach(true); }, { once: true });
-        videoEl.play().catch(() => {});
+        videoEl.addEventListener('error', () => {
+          if (!useProxy && !dead && tok === attempt) attach(true);
+        }, { once: true });
+        this._play(videoEl);
       } else if (window.Hls && window.Hls.isSupported()) {
         // Buffer de view principal (não de "preview") — segura melhor a
         // oscilação da rede sem travar, como o player do modal.
@@ -904,19 +961,31 @@ class KwaiLiveWidget extends HTMLElement {
         });
         hls.loadSource(src);
         hls.attachMedia(videoEl);
-        hls.on(window.Hls.Events.MANIFEST_PARSED, () => videoEl.play().catch(() => {}));
+        hls.on(window.Hls.Events.MANIFEST_PARSED, () => this._play(videoEl));
         let nr = 0;
+        const inst = hls;
         hls.on(window.Hls.Events.ERROR, (_, d) => {
-          if (!d.fatal || dead) return;
-          if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && nr < 4) { nr++; hls.startLoad(); }
-          else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+          if (!d.fatal || dead || tok !== attempt) return;
+          if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && nr < 4) { nr++; inst.startLoad(); }
+          else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR) { inst.recoverMediaError(); }
           else if (!useProxy) { attach(true); }
         });
       }
       clearInterval(watchdog);
+      lastT = -1; frozen = 0;
       watchdog = setInterval(() => {
-        if (dead) return;
-        if (!videoEl.paused && videoEl.currentTime === lastT) videoEl.play().catch(() => {});
+        if (dead || document.hidden) return;
+        if (videoEl.paused) this._play(videoEl);
+        // Imagem parada por 2 checagens seguidas (~16s) — travou, ou nunca
+        // começou, ou a tentativa pelo proxy também falhou: recomeça do zero
+        // com o link mais recente. Antes só chamava play(), que não destrava
+        // uma live, e o quadro ficava congelado até atualizar a página.
+        if (videoEl.currentTime === lastT) {
+          if (++frozen >= 2 && !this._autoplayBlocked) { attach(false); return; }
+          this._play(videoEl);
+        } else {
+          frozen = 0;
+        }
         lastT = videoEl.currentTime;
       }, 8000);
     };
@@ -1020,6 +1089,10 @@ class KwaiLiveWidget extends HTMLElement {
     if (!entry) return;
     clearInterval(entry.watchdog);
     clearTimeout(entry._stopT); entry._stopT = null;
+    clearTimeout(entry._startT);
+    // Invalida a tentativa em andamento: o "error" que o <video> dispara ao
+    // limpar o src logo abaixo não pode religar o player.
+    entry._attempt = (entry._attempt || 0) + 1;
     try { entry.hlsInst?.destroy(); } catch (_) {}
     entry.hlsInst  = null;
     entry.playing  = false;
@@ -1077,7 +1150,7 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   _pumpMiniQueue() {
-    if (this._miniPumpT || this._docHidden || !this.ENABLE_MINI_PREVIEW) return;
+    if (this._miniPumpT || this._docHidden || !this.ENABLE_MINI_PREVIEW || this._autoplayBlocked) return;
     const ativos = (this._miniPlayerOrder || []).length;
     if (ativos >= this.MAX_MINI_PLAYERS) return;
     let url = null;
@@ -1119,30 +1192,85 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   _startHls(vid, playUrl, useProxy, entry, url) {
-    let lastT = -1;
+    // Navegador sem HLS nativo e hls.js ainda não carregado (ele é adiado pra
+    // depois do load): espera a lib em vez de não fazer nada — antes a
+    // bolinha ficava presa em "starting" sem nunca tocar.
+    if (!window.Hls && !vid.canPlayType('application/vnd.apple.mpegurl')) {
+      entry.starting = true;
+      const waitTok = entry._attempt = (entry._attempt || 0) + 1;
+      (this.hlsReadyPromise || this.loadHlsLib()).then(() => {
+        if (entry._attempt !== waitTok || !entry.starting) return;
+        if (window.Hls) { this._startHls(vid, entry.streamer.playUrl || playUrl, useProxy, entry, url); return; }
+        // CDN do hls.js bloqueado: libera a vaga, a bolinha fica na foto.
+        entry.starting = false;
+        this._miniPlayerOrder = (this._miniPlayerOrder || []).filter((u) => u !== url);
+        this._pumpMiniQueue();
+      });
+      return;
+    }
+
+    let lastT = -1, frozen = 0;
     entry.starting = true;
+    // Cada tentativa tem um número. stopMiniPlayer (e a próxima tentativa)
+    // trocam o número, e aí qualquer evento atrasado da tentativa velha é
+    // ignorado. Sem isso, o "error" que o <video> dispara ao limpar o src no
+    // stop religava o player sozinho, e um timeout velho derrubava o novo.
+    const token = entry._attempt = (entry._attempt || 0) + 1;
+    const stale = () => entry._attempt !== token;
 
     const startWatchdog = () => {
       clearInterval(entry.watchdog);
       entry.watchdog = setInterval(() => {
-        if (!vid.paused && vid.currentTime === lastT) vid.play().catch(() => {});
+        if (stale()) return;
+        if (vid.paused) this._play(vid);
+        // Imagem parada por 2 checagens seguidas (~16s): play() sozinho não
+        // destrava uma live que perdeu a posição — reinicia o player do zero
+        // (volta pra fila com o link mais recente).
+        if (vid.currentTime === lastT) {
+          if (++frozen >= 2) { this.stopMiniPlayer(url); this._enqueueMini(url); return; }
+          this._play(vid);
+        } else {
+          frozen = 0;
+        }
         lastT = vid.currentTime;
       }, 8000);
     };
 
     const onPlaying = () => {
-      if (entry.playing) return;
+      if (stale() || entry.playing) return;
+      clearTimeout(entry._startT);
       entry.playing = true;
       entry.starting = false;
       startWatchdog();
     };
 
+    // Não começou a tocar em 15s (nem deu erro — acontece no HLS nativo, que
+    // às vezes só fica esperando): trata como falha. Antes a vaga ficava
+    // presa em "starting" pra sempre e a bolinha nunca saía da foto.
+    clearTimeout(entry._startT);
+    entry._startT = setTimeout(() => {
+      if (!stale() && entry.starting && !entry.playing) onFatal();
+    }, 15000);
+
     const onFatal = () => {
+      if (stale()) return;
+      entry._attempt++; // invalida os eventos que ainda chegarem desta tentativa
+      clearTimeout(entry._startT);
+      clearInterval(entry.watchdog);
       try { entry.hlsInst?.destroy(); } catch (_) {}
       entry.hlsInst = null;
+      entry.playing = false;
+      // Não é falha do vídeo: o navegador bloqueou a reprodução automática.
+      // Libera a vaga e fica na foto, sem ponte e sem novas tentativas.
+      if (this._autoplayBlocked) {
+        entry.starting = false;
+        this._miniPlayerOrder = (this._miniPlayerOrder || []).filter((u) => u !== url);
+        this._pumpMiniQueue();
+        return;
+      }
       if (!useProxy) {
         // Tenta via proxy como fallback antes de desistir (continua "starting")
-        this._startHls(vid, playUrl, true, entry, url);
+        this._startHls(vid, entry.streamer.playUrl || playUrl, true, entry, url);
       } else {
         entry.playing  = false;
         entry.starting = false;
@@ -1168,7 +1296,7 @@ class KwaiLiveWidget extends HTMLElement {
       vid.src = src;
       vid.addEventListener('playing', onPlaying, { once: true });
       vid.addEventListener('error',   onFatal,   { once: true });
-      vid.play().catch(() => {});
+      this._play(vid);
 
     } else if (window.Hls && window.Hls.isSupported()) {
       // Nota: quando useProxy=true, "src" já é a URL do proxy — o próprio
@@ -1202,7 +1330,7 @@ class KwaiLiveWidget extends HTMLElement {
       const hls = new window.Hls(hlsCfg);
       hls.loadSource(src);
       hls.attachMedia(vid);
-      hls.on(window.Hls.Events.MANIFEST_PARSED, () => vid.play().catch(() => {}));
+      hls.on(window.Hls.Events.MANIFEST_PARSED, () => this._play(vid));
       vid.addEventListener('playing', onPlaying, { once: true });
       let networkRetries = 0;
       hls.on(window.Hls.Events.ERROR, (_, d) => {

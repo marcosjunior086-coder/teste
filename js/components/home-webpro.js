@@ -729,6 +729,9 @@ class DmaiorHomeWebpro extends HTMLElement {
       active.onclick = () => {
         const v = active.querySelector('.hf-video');
         if (!v) return;
+        // Toque = gesto do usuário: destrava o vídeo se o navegador tinha
+        // bloqueado a reprodução automática (ex: economia de bateria do iPhone).
+        if (v.paused) v.play().catch(() => {});
         v.muted = !v.muted;
         active.classList.toggle('sound', !v.muted);
       };
