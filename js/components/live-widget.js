@@ -176,6 +176,36 @@ class KwaiLiveWidget extends HTMLElement {
     }));
   }
 
+  // Qual player usar num <video>: 'hlsjs' | 'native' | 'wait' (hls.js ainda
+  // carregando) | null (nenhum disponível).
+  // hls.js PRIMEIRO onde existe MediaSource (Android, Chrome/Edge/Firefox,
+  // Mac) — igual ao site da Fox. Antes era o contrário: o Chrome (Android
+  // sempre; desktop desde as versões recentes) diz que toca HLS sozinho, e o
+  // player nativo dele não deixa controlar buffer nem ponto de início —
+  // demorava mais pra começar e pesava com várias bolinhas. No iPhone não
+  // existe MediaSource (só o ManagedMediaSource) → continua o nativo do
+  // Safari, que lá é o melhor. Se o hls.js não carregar (CDN bloqueado), cai
+  // no nativo.
+  _engine(v) {
+    const hlsOk  = !!(window.Hls && window.Hls.isSupported());
+    const native = !!v.canPlayType('application/vnd.apple.mpegurl');
+    if (window.MediaSource && !this._hlsLibFailed) {
+      if (hlsOk) return 'hlsjs';
+      if (!window.Hls) return 'wait';
+    }
+    if (native) return 'native';
+    if (hlsOk)  return 'hlsjs';
+    return (window.Hls || this._hlsLibFailed) ? null : 'wait';
+  }
+
+  // Espera o hls.js (no ritmo do _scheduleHlsLib, pra não disputar banda com
+  // o carregamento da página) e marca se ele falhou de vez.
+  _whenHlsLib() {
+    return (this.hlsReadyPromise || this.loadHlsLib()).then(() => {
+      if (!window.Hls) this._hlsLibFailed = true;
+    });
+  }
+
   // Adia o hls.js (123 KB) pra depois do 1º paint / load — assim ele não
   // disputa banda com o conteúdo da página. A live ainda entra sozinha, só
   // ~1s mais tarde. Quem pedir a lib antes (raro) cai no loadHlsLib() na hora.
@@ -937,13 +967,14 @@ class KwaiLiveWidget extends HTMLElement {
       videoEl.setAttribute('playsinline', '');
       videoEl.setAttribute('webkit-playsinline', '');
 
-      if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      const engine = this._engine(videoEl);
+      if (engine === 'native') {
         videoEl.src = src;
         videoEl.addEventListener('error', () => {
           if (!useProxy && !dead && tok === attempt) attach(true);
         }, { once: true });
         this._play(videoEl);
-      } else if (window.Hls && window.Hls.isSupported()) {
+      } else if (engine === 'hlsjs') {
         // Buffer de view principal (não de "preview") — segura melhor a
         // oscilação da rede sem travar, como o player do modal.
         hls = new window.Hls({
@@ -991,8 +1022,8 @@ class KwaiLiveWidget extends HTMLElement {
     };
 
     const go = () => attach(false);
-    if (window.Hls || videoEl.canPlayType('application/vnd.apple.mpegurl')) go();
-    else (this.hlsReadyPromise || this.loadHlsLib()).then(() => { if (!dead) go(); });
+    if (this._engine(videoEl) === 'wait') this._whenHlsLib().then(() => { if (!dead) go(); });
+    else go();
 
     return cleanup;
   }
@@ -1192,19 +1223,25 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   _startHls(vid, playUrl, useProxy, entry, url) {
-    // Navegador sem HLS nativo e hls.js ainda não carregado (ele é adiado pra
-    // depois do load): espera a lib em vez de não fazer nada — antes a
-    // bolinha ficava presa em "starting" sem nunca tocar.
-    if (!window.Hls && !vid.canPlayType('application/vnd.apple.mpegurl')) {
+    // hls.js ainda não carregou (ele é adiado pra depois do load): espera a
+    // lib em vez de não fazer nada — antes a bolinha ficava presa em
+    // "starting" sem nunca tocar.
+    const engine = this._engine(vid);
+    if (engine === 'wait' || !engine) {
       entry.starting = true;
       const waitTok = entry._attempt = (entry._attempt || 0) + 1;
-      (this.hlsReadyPromise || this.loadHlsLib()).then(() => {
-        if (entry._attempt !== waitTok || !entry.starting) return;
-        if (window.Hls) { this._startHls(vid, entry.streamer.playUrl || playUrl, useProxy, entry, url); return; }
-        // CDN do hls.js bloqueado: libera a vaga, a bolinha fica na foto.
+      const giveUp = () => {
+        // Nenhum player disponível (CDN do hls.js bloqueado e sem nativo):
+        // libera a vaga, a bolinha fica na foto.
         entry.starting = false;
         this._miniPlayerOrder = (this._miniPlayerOrder || []).filter((u) => u !== url);
         this._pumpMiniQueue();
+      };
+      if (!engine) { giveUp(); return; }
+      this._whenHlsLib().then(() => {
+        if (entry._attempt !== waitTok || !entry.starting) return;
+        if (this._engine(vid) && this._engine(vid) !== 'wait') this._startHls(vid, entry.streamer.playUrl || playUrl, useProxy, entry, url);
+        else giveUp();
       });
       return;
     }
@@ -1292,13 +1329,13 @@ class KwaiLiveWidget extends HTMLElement {
 
     const src = useProxy ? this._proxyBase + encodeURIComponent(playUrl) : playUrl;
 
-    if (vid.canPlayType('application/vnd.apple.mpegurl')) {
+    if (engine === 'native') {
       vid.src = src;
       vid.addEventListener('playing', onPlaying, { once: true });
       vid.addEventListener('error',   onFatal,   { once: true });
       this._play(vid);
 
-    } else if (window.Hls && window.Hls.isSupported()) {
+    } else {
       // Nota: quando useProxy=true, "src" já é a URL do proxy — o próprio
       // Worker devolve o m3u8 com todas as URIs internas (segmentos e
       // sub-playlists) já reescritas para passar por ele. NÃO reescrever
@@ -1318,8 +1355,8 @@ class KwaiLiveWidget extends HTMLElement {
         enableWorker:              true,
         lowLatencyMode:            false,
         autoLevelCapping:          0,      // menor rendição — é uma bolinha de 56px
-        maxBufferLength:           6,      // +2s de folga: um engasgo da rede não congela na hora
-        maxMaxBufferLength:        12,
+        maxBufferLength:           5,      // igual à Fox: começa rápido, pouca memória por bolinha
+        maxMaxBufferLength:        10,
         liveSyncDurationCount:     3,
         startFragPrefetch:         true,
         manifestLoadingMaxRetry:   4,
@@ -1428,10 +1465,9 @@ class KwaiLiveWidget extends HTMLElement {
     this.destroyHLSModal();
     clearInterval(this.modalWatchdog);
     const video = this.shadowRoot.getElementById('modalVideo');
-    if (!window.Hls && !video.canPlayType('application/vnd.apple.mpegurl')) {
+    if (this._engine(video) === 'wait') {
       this.shadowRoot.getElementById('spinnerText').textContent = 'Carregando player...';
-      this.hlsReadyPromise = this.hlsReadyPromise || this.loadHlsLib();
-      this.hlsReadyPromise.then(() => this._playM3U8WithMode(url, false));
+      this._whenHlsLib().then(() => this._playM3U8WithMode(url, false));
       return;
     }
     this._playM3U8WithMode(url, false);
@@ -1466,12 +1502,13 @@ class KwaiLiveWidget extends HTMLElement {
     // (o admin faz assim e abre liso — a espera de buffer aqui era o que
     // deixava "carregando" por muito tempo e às vezes travava/ficava preto
     // num fluxo ao vivo, que não tem buffer acumulado igual um vídeo gravado).
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    const engine = this._engine(video);
+    if (engine === 'native') {
       video.src = src;
       video.addEventListener('canplay', () => onReady(), { once: true });
       video.addEventListener('error',   () => onFatal(), { once: true });
       video.load();
-    } else if (window.Hls && window.Hls.isSupported()) {
+    } else if (engine === 'hlsjs') {
       // Mesma observação do mini player: quando useProxy=true, "src" já é a
       // URL do proxy e o Worker já devolve o m3u8 com as URIs internas
       // reescritas para passar por ele. Nada de xhrSetup aqui — reaplicar
@@ -1491,10 +1528,10 @@ class KwaiLiveWidget extends HTMLElement {
       this.hlsModal = new window.Hls(hlsCfg);
       this.hlsModal.loadSource(src);
       this.hlsModal.attachMedia(video);
-      this.hlsModal.on(window.Hls.Events.MANIFEST_PARSED, () => {
-        video.currentTime = 0;
-        onReady();
-      });
+      // Sem "currentTime = 0": numa live isso pulava pro trecho mais antigo
+      // da playlist (um pedaço a mais pra baixar antes de tocar e ~4s mais
+      // atrasado). O hls.js já começa perto do ao vivo sozinho.
+      this.hlsModal.on(window.Hls.Events.MANIFEST_PARSED, () => onReady());
       let networkRetries = 0;
       this.hlsModal.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
