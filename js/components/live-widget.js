@@ -33,7 +33,7 @@ class KwaiLiveWidget extends HTMLElement {
     this._docHidden = (typeof document !== 'undefined' && document.hidden) || false;
     this._narrow    = this._isNarrow();
     this._maxMini   = this._calcMaxMini();  // teto fixo (recalc no resize)
-    this._pumpGap   = this._narrow ? 950 : 1300; // no mobile a fila anda mais rápido
+    this._pumpGap   = this._narrow ? 400 : 300;  // cascata rápida: parece simultâneo sem largar tudo no mesmo instante (hls.js + buffer 5s deixou cada bolinha leve)
     this._miniQueue = [];                   // urls esperando a vez de começar
     this._miniPumpT = null;
 
@@ -126,7 +126,7 @@ class KwaiLiveWidget extends HTMLElement {
         const eraNarrow = this._narrow;
         this._narrow  = this._isNarrow();
         this._maxMini = this._calcMaxMini();
-        this._pumpGap = this._narrow ? 950 : 1300;
+        this._pumpGap = this._narrow ? 400 : 300;
         // Trocou de faixa (mobile <-> desktop): refaz o observer com a margem certa.
         if (eraNarrow !== this._narrow) this._reobserveCards();
         this._pumpMiniQueue();
@@ -918,7 +918,7 @@ class KwaiLiveWidget extends HTMLElement {
     const playUrl = entry && entry.streamer && entry.streamer.playUrl;
     if (!videoEl || !playUrl) return null;
 
-    // hero = view principal → prioridade: por ~3s a faixa segura os mini-players
+    // hero = view principal → prioridade: por ~1,5s a faixa segura os mini-players
     // (viram foto), a live grande sobe primeiro, e aí os mini-players voltam.
     this._featuredActive = true;
     this._heroWarmup = true;
@@ -928,7 +928,7 @@ class KwaiLiveWidget extends HTMLElement {
       // reenfileira os cards visíveis (o IntersectionObserver não re-dispara
       // sozinho) — a fila escalonada sobe eles um a um.
       this._requeueVisible();
-    }, 3000);
+    }, 1500);
     this._trimMiniPlayers();
 
     let hls = null, dead = false, watchdog = null, lastT = -1, frozen = 0, attempt = 0;
@@ -1195,7 +1195,7 @@ class KwaiLiveWidget extends HTMLElement {
     this._miniPumpT = setTimeout(() => {
       this._miniPumpT = null;
       if (this._miniQueue.length) this._pumpMiniQueue();
-    }, this._pumpGap || 1300);
+    }, this._pumpGap || 300);
   }
 
   startMiniPlayer(url) {

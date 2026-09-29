@@ -255,6 +255,7 @@ class DimaiorAdmin extends HTMLElement {
       metrics:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`,
       clipboard:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`,
       search:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+      eye_off:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`,
       settings:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
       history:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>`,
       play_circle:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>`,
@@ -682,6 +683,9 @@ class DimaiorAdmin extends HTMLElement {
     const estiloEfetivo=(isMobile && cols>1 && estilo===1)?2:estilo;
     try{localStorage.setItem('dm_lives_opts',JSON.stringify(this._livesOpts));}catch{}
 
+    // UIDs com a live oculta no site (tag + botão Mostrar/Ocultar nos cards)
+    this._livesOcultasSet=new Set((d.ocultas_site||[]).map(String));
+
     // ── Ordena as lives ──────────────────────────────────────────────────────
     let lista=[...d.ao_vivo];
     if(ordenar==='espectadores') lista.sort((a,b)=>(Number(b.espectadores||0))-(Number(a.espectadores||0)));
@@ -836,6 +840,19 @@ class DimaiorAdmin extends HTMLElement {
       });
     });
 
+    // ── Ocultar / mostrar a live no site ─────────────────────────────────────
+    el.querySelectorAll('.lc-ocultar').forEach(btn=>{
+      btn.addEventListener('click',async()=>{
+        const {uid,oculta,nome,kid,foto}=btn.dataset;
+        btn.disabled=true;
+        const r=oculta==='1'
+          ?await this._api('DELETE',`/admin/lives/ocultas/${encodeURIComponent(uid)}`)
+          :await this._api('POST','/admin/lives/ocultas',{kwai_uid:uid,kwai_id:kid||null,nome:nome||null,foto_url:foto||null});
+        if(r?.ok){this._toast(oculta==='1'?'Live voltou a aparecer no site':'Live ocultada do site');this._carregarLives();}
+        else{btn.disabled=false;this._toast(r?.erro||'Erro','err');}
+      });
+    });
+
     // ── Bind play-live (data-stream em vez de onclick inline) ───────────────────
     el.querySelectorAll('[data-stream]').forEach(btn=>{btn.addEventListener('click',()=>{window._dmPlayLive&&window._dmPlayLive(btn.dataset.stream,btn.dataset.nomeLive||'',btn.dataset.capaLive||'');});});
 
@@ -875,10 +892,15 @@ class DimaiorAdmin extends HTMLElement {
       : `<div class="lc-capa lc-play-area" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${ca&&/^https?:\/\//i.test(ca)?`<img src="${this._esc(ca)}" class="lc-capa-img" onerror="this.style.display='none'"/>`:''}<div class="lc-capa-overlay">${sv.stream_url?`<div class="lc-play">${this._ico('live',20)}</div>`:''}<div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`;
 
     const cardClass=`live-card-full${estilo===2?' lc-estilo2':' lc-horizontal'}`;
+    // Ocultar a live no site público (só o admin principal; o painel da sub não tem essa rota)
+    const uid=String(sv.userId||'');
+    const oculta=!!(uid&&this._livesOcultasSet?.has(uid));
+    const btnOcultar=(!this._sub&&/^\d+$/.test(uid))
+      ?`<button class="btn btn-o btn-sm lc-ocultar" data-uid="${this._esc(uid)}" data-oculta="${oculta?1:0}" data-nome="${this._esc(sv.nome||'')}" data-kid="${this._esc(sv.kwai_id||'')}" data-foto="${this._esc(fo)}" title="${oculta?'Voltar a mostrar esta live no site':'Esconder esta live da faixa Ao vivo e da live grande do site'}" style="${oculta?'border-color:rgba(74,222,128,.4);color:#4ade80':'border-color:rgba(248,113,113,.4);color:#f87171'}">${this._ico(oculta?'eye':'eye_off',12)} ${oculta?'Mostrar no site':'Ocultar do site'}</button>`:'';
     return`<div class="${cardClass}">${mediaHtml}<div class="lc-info">
-      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'—')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'—')}</div>${sv.org_id&&sv.org_id!=='principal'?`<span class="lc-org" title="Live de sub-agência">${this._esc(sv.org_nome||'Sub')}</span>`:''}</div></div>
+      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'—')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'—')}</div>${sv.org_id&&sv.org_id!=='principal'?`<span class="lc-org" title="Live de sub-agência">${this._esc(sv.org_nome||'Sub')}</span>`:''}${oculta?`<span class="lc-org lc-oculta" title="Esta live não aparece no site público">${this._ico('eye_off',10)} Oculta no site</span>`:''}</div></div>
       <div class="lc-stats"><div class="lc-stat-row">${this._ico('users',12)}<span class="lc-stat-lbl">Seguidores</span><strong>${Number(sv.fans||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('heart',12)}<span class="lc-stat-lbl">Curtidas</span><strong>${Number(sv.likes||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('gift',12)}<span class="lc-stat-lbl">Presentes</span><strong style="color:var(--gold)">${sv.gifts||0}</strong></div></div>
-      <div class="lc-footer"><div class="lc-espects"><div style="font-size:11px;color:var(--t3);font-family:var(--dm-font-body,'Exo 2',sans-serif)">Espectadores</div><div style="font-size:24px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.espectadores||0}</div></div><div class="lc-acoes">${sv.stream_url?`<button class="btn btn-g btn-sm lc-play-btn" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${this._ico('live',12)} Assistir</button>`:''}${sv.jump_url&&/^https?:\/\//i.test(sv.jump_url)?`<a href="${this._esc(sv.jump_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="text-decoration:none">${this._ico('live',11)} Kwai</a>`:''}</div></div>
+      <div class="lc-footer"><div class="lc-espects"><div style="font-size:11px;color:var(--t3);font-family:var(--dm-font-body,'Exo 2',sans-serif)">Espectadores</div><div style="font-size:24px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.espectadores||0}</div></div><div class="lc-acoes">${sv.stream_url?`<button class="btn btn-g btn-sm lc-play-btn" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${this._ico('live',12)} Assistir</button>`:''}${sv.jump_url&&/^https?:\/\//i.test(sv.jump_url)?`<a href="${this._esc(sv.jump_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="text-decoration:none">${this._ico('live',11)} Kwai</a>`:''}${btnOcultar}</div></div>
     </div></div>`;
   }
   _tempoDecorrido(s){const d=Date.now()-s,h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?`${h}h ${m}m`:m>0?`${m}m`:'<1m';}
@@ -1320,6 +1342,87 @@ class DimaiorAdmin extends HTMLElement {
       const uid=btn.dataset.uid;
       const r=await this._api('DELETE',`/admin/ranking/ocultos/${encodeURIComponent(uid)}`);
       if(r?.ok){this._toast('Streamer reexibido no ranking!');this._carregarListaOcultosRanking();this._carregarRanking();}else this._toast(r?.erro||'Erro','err');
+    }));
+  }
+
+  // ── Ocultar a LIVE de um streamer no site público ───────────────────────
+  // Some da faixa "Ao vivo" e da live grande da home. Não mexe em nada além
+  // da exibição: a live continua aqui no Ao Vivo (com a tag "Oculta no site").
+  async _abrirModalOcultarLive(){
+    const s=this.shadowRoot;
+    let over=s.getElementById('mOcultLiveOver');
+    if(!over){
+      over=document.createElement('div');over.id='mOcultLiveOver';
+      over.style.cssText='position:fixed;inset:0;background:rgba(4,4,14,.97);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+      over.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:24px;position:relative">
+        <button id="mOcultLiveFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px" aria-label="Fechar">${this._ico('x',18)}</button>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:17px;font-weight:700;color:var(--t1);margin-bottom:16px">${this._ico('eye_off',16)} Ocultar live do site</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">A live do streamer deixa de aparecer na faixa "Ao vivo" e na live grande do site. Ela continua sendo monitorada e aparece normalmente aqui no admin.</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input id="mOcultLiveInput" type="text" placeholder="UID ou Kwai ID..." style="flex:1;background:rgba(0,0,0,.4);border:1px solid var(--brd);border-radius:8px;color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/>
+          <button id="mOcultLiveBuscar" class="btn btn-o" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('search',13)} Buscar</button>
+        </div>
+        <div id="mOcultLivePreview" style="display:none;border:1px solid var(--brd);border-radius:8px;padding:14px;margin-bottom:12px;background:rgba(0,0,0,.25)"></div>
+        <input id="mOcultLiveMotivo" type="text" placeholder="Motivo (opcional)..." style="display:none;width:100%;background:rgba(0,0,0,.4);border:1px solid var(--brd);border-radius:8px;color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;margin-bottom:12px"/>
+        <div id="mOcultLiveAcoes" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:20px"></div>
+        <div style="border-top:1px solid var(--brddim);padding-top:16px">
+          <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;font-weight:700;color:var(--t2);margin-bottom:10px">Lives ocultas no site</div>
+          <div id="mOcultLiveLista">${this._loading()}</div>
+        </div>
+      </div>`;
+      s.appendChild(over);
+      s.getElementById('mOcultLiveFechar').addEventListener('click',()=>over.remove());
+      over.addEventListener('click',e=>{if(e.target===over)over.remove();});
+      s.getElementById('mOcultLiveBuscar').addEventListener('click',()=>this._buscarStreamerLive());
+      s.getElementById('mOcultLiveInput').addEventListener('keydown',e=>{if(e.key==='Enter')this._buscarStreamerLive();});
+    }
+    s.getElementById('mOcultLiveInput')?.focus();
+    this._carregarListaLivesOcultas();
+  }
+  async _buscarStreamerLive(){
+    const s=this.shadowRoot;
+    const q=(s.getElementById('mOcultLiveInput')?.value||'').trim();
+    if(!q){this._toast('Digite um UID ou Kwai ID','err');return;}
+    const btn=s.getElementById('mOcultLiveBuscar');
+    if(btn){btn.disabled=true;btn.textContent='Buscando...';}
+    const prev=s.getElementById('mOcultLivePreview'),motivo=s.getElementById('mOcultLiveMotivo'),acoes=s.getElementById('mOcultLiveAcoes');
+    prev.style.display='none';motivo.style.display='none';acoes.style.display='none';
+    const d=await this._api('GET',`/admin/lives/ocultas/buscar?q=${encodeURIComponent(q)}`);
+    if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('search',13)} Buscar`;}
+    if(!d?.ok){this._toast(d?.erro||'Erro ao buscar','err');return;}
+    if(!d.encontrado){prev.style.display='block';prev.innerHTML=`<div style="color:var(--t3);font-size:13px;text-align:center">Nenhum streamer encontrado com esse UID / Kwai ID.<br><span style="font-size:11px">Procuramos em quem está ao vivo agora e no histórico de resultados.</span></div>`;return;}
+    const sv=d.streamer;const foto=this._proxyFoto(sv.foto||'');
+    prev.style.display='block';
+    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'—')}${d.ao_vivo?' · <span style="color:#f87171">ao vivo agora</span>':''}</div>${d.ja_oculto?`<div style="font-size:10px;color:var(--warn);margin-top:4px">A live já está oculta no site${d.motivo?' — '+this._esc(d.motivo):''}</div>`:''}</div></div>`;
+    const recarregar=()=>{this._buscarStreamerLive();this._carregarListaLivesOcultas();this._carregarLives();};
+    acoes.style.display='flex';
+    if(d.ja_oculto){
+      acoes.innerHTML=`<button id="mOcultLiveReexibir" class="btn btn-o" style="border-color:rgba(74,222,128,.4);color:#4ade80">${this._ico('eye',13)} Mostrar no site</button>`;
+      s.getElementById('mOcultLiveReexibir').addEventListener('click',async()=>{
+        const r=await this._api('DELETE',`/admin/lives/ocultas/${encodeURIComponent(sv.kwai_uid)}`);
+        if(r?.ok){this._toast('Live voltou a aparecer no site');recarregar();}else this._toast(r?.erro||'Erro','err');
+      });
+      return;
+    }
+    motivo.style.display='block';
+    acoes.innerHTML=`<button id="mOcultLiveSalvar" class="btn btn-o" style="border-color:rgba(248,113,113,.4);color:#f87171">${this._ico('eye_off',13)} Ocultar live do site</button>`;
+    s.getElementById('mOcultLiveSalvar').addEventListener('click',async()=>{
+      const mot=(s.getElementById('mOcultLiveMotivo')?.value||'').trim();
+      const r=await this._api('POST','/admin/lives/ocultas',{kwai_uid:sv.kwai_uid,kwai_id:sv.kwai_id,nome:sv.nome,foto_url:sv.foto,motivo:mot||null});
+      if(r?.ok){this._toast('Live ocultada do site');s.getElementById('mOcultLiveMotivo').value='';recarregar();}else this._toast(r?.erro||'Erro','err');
+    });
+  }
+  async _carregarListaLivesOcultas(){
+    const s=this.shadowRoot;const el=s.getElementById('mOcultLiveLista');if(!el)return;
+    const d=await this._api('GET','/admin/lives/ocultas');
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar');return;}
+    const lista=d.ocultos||[];
+    if(!lista.length){el.innerHTML=`<div style="color:var(--t3);font-size:12px;text-align:center;padding:10px 0">Nenhuma live oculta no momento.</div>`;return;}
+    el.innerHTML=lista.map(o=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brddim)"><div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(o.nome||o.kwai_id||o.kwai_uid)}</div><div style="font-size:10px;color:var(--cyan)">UID: ${this._esc(o.kwai_uid)}</div>${o.motivo?`<div style="font-size:10px;color:var(--t3)">${this._esc(o.motivo)}</div>`:''}</div><button class="btn btn-o btn-sm" data-uid="${this._esc(o.kwai_uid)}" style="border-color:rgba(74,222,128,.4);color:#4ade80;flex-shrink:0">${this._ico('eye',12)} Mostrar</button></div>`).join('');
+    el.querySelectorAll('button[data-uid]').forEach(btn=>btn.addEventListener('click',async()=>{
+      btn.disabled=true;
+      const r=await this._api('DELETE',`/admin/lives/ocultas/${encodeURIComponent(btn.dataset.uid)}`);
+      if(r?.ok){this._toast('Live voltou a aparecer no site');this._carregarListaLivesOcultas();this._carregarLives();}else{btn.disabled=false;this._toast(r?.erro||'Erro','err');}
     }));
   }
 
@@ -2436,7 +2539,7 @@ class DimaiorAdmin extends HTMLElement {
     this._bindAparencia(s);
     this._buildMobileNav(s);
     s.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>this._ir(n.dataset.p)));
-    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('dashFonteToggle')?.addEventListener('change',e=>this._salvarDashFonteToggle(e.target.checked));s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
+    s.getElementById('btnAtuDash').addEventListener('click',()=>this._carregarDash());s.getElementById('dashFonteToggle')?.addEventListener('change',e=>this._salvarDashFonteToggle(e.target.checked));s.getElementById('btnAtuLive').addEventListener('click',()=>this._carregarLives());s.getElementById('btnAtuRank').addEventListener('click',()=>this._carregarRanking());s.getElementById('btnOcultarRanking')?.addEventListener('click',()=>this._abrirModalOcultarRanking());s.getElementById('btnAtuDiar').addEventListener('click',()=>this._carregarDiario());s.getElementById('btnAtuDesemp').addEventListener('click',()=>this._carregarDesempenho());s.getElementById('btnAtuHist').addEventListener('click',()=>this._carregarHistorico(true));s.getElementById('btnAtuRankMeses')?.addEventListener('click',()=>this._carregarMesesRanking());s.getElementById('btnAddRankMes')?.addEventListener('click',()=>this._adicionarMesRanking());s.getElementById('btnReordenarRankMeses')?.addEventListener('click',()=>this._reordenarMesesRanking());s.getElementById('btnSalvarRankMeses')?.addEventListener('click',()=>this._salvarMesesRanking());s.getElementById('btnAtuMet').addEventListener('click',()=>this._carregarMetricas());s.getElementById('btnAtuRec').addEventListener('click',()=>this._carregarRecrutamento());s.getElementById('btnAtuLog').addEventListener('click',()=>this._carregarLogs());s.getElementById('btnAtuCfg').addEventListener('click',()=>this._carregarConfig());s.getElementById('btnLvOcultas')?.addEventListener('click',()=>this._abrirModalOcultarLive());s.getElementById('btnLvCfg')?.addEventListener('click',()=>{const p=s.getElementById('lvCfgPainel');const a=s.getElementById('lvCfgArrow');if(!p)return;const open=p.style.display==='none';p.style.display=open?'':'none';if(a)a.style.transform=open?'rotate(180deg)':'';});
     s.getElementById('btnAddS').addEventListener('click',()=>this._abrirModalS());s.getElementById('btnVerifExterno').addEventListener('click',()=>this._abrirModalVerifExterno());s.getElementById('mSSave').addEventListener('click',()=>this._salvarStreamer());s.getElementById('mSCancel').addEventListener('click',()=>this._fechaModal('mS'));s.getElementById('mCCancel').addEventListener('click',()=>this._fechaModal('mC'));
     s.getElementById('bS').addEventListener('input',dbc(()=>{this._pg.s=1;this._carregarStreamers();},400));s.getElementById('bL').addEventListener('input',dbc(()=>{this._pg.l=1;this._carregarLogs();},400));
     s.getElementById('root').addEventListener('click',e=>{const cb=e.target.closest('.rec-copy-btn');if(cb){navigator.clipboard.writeText(cb.dataset.copy||'').then(()=>this._toast('Copiado!','ok')).catch(()=>{});}});
@@ -5884,6 +5987,8 @@ class DimaiorAdmin extends HTMLElement {
     .lv-org-btn.on{background:var(--cyan-d);border-color:var(--cyan);color:var(--cyan)}.lv-org-btn.on b{color:var(--cyan)}
     .lv-org-aviso{font-size:10.5px;color:var(--gold);display:inline-flex;gap:4px;align-items:center}
     .lc-org{display:inline-block;margin-top:4px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.4);color:var(--gold)}
+    .lc-oculta{display:inline-flex;align-items:center;gap:4px;margin-left:4px;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.45);color:#f87171}
+    .lc-ocultar{white-space:normal;line-height:1.2}
 
     /* ── Navegação inferior flutuante (mobile) — padrão do demo/agente ── */
     .mnav,.msheet,.fab,.pm-voltar{display:none;}
@@ -6043,7 +6148,7 @@ class DimaiorAdmin extends HTMLElement {
           <div class="content">
             <button type="button" class="pm-voltar" id="admVoltar" hidden><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Voltar ao menu</button>
             <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash',`<div style="display:flex;align-items:center;gap:8px;margin-left:6px" title="Quando ativo, os números de diamantes/streamers ao vivo/horas vêm direto da Kwai (mais preciso, já soma sub-agências) em vez do nosso banco"><span style="font-size:11px;color:var(--t3);white-space:nowrap">Dados oficiais Kwai</span><label class="tog-switch"><input type="checkbox" id="dashFonteToggle"><span class="tog-slider"></span></label></div>`)}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
-            <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive',`<button class="btn btn-o" id="btnLvCfg">${this._ico('settings',13)} Configurações<span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span></button>`)}<div id="gLives">${this._loading()}</div></div>
+            <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive',`${!this._sub?`<button class="btn btn-o" id="btnLvOcultas" title="Esconder a live de um streamer do site público">${this._ico('eye_off',13)} Ocultar do site</button>`:''}<button class="btn btn-o" id="btnLvCfg">${this._ico('settings',13)} Configurações<span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span></button>`)}<div id="gLives">${this._loading()}</div></div>
             <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank',`<button class="btn btn-o" id="btnOcultarRanking">${this._ico('settings',13)} Opções</button>`)}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
             <div class="pag" id="pag-desempenho">${ph('Desempenho','trend','Metas do mês','btnAtuDesemp')}<div class="dc2-grid" id="resumoDesemp">${this._loading('grid-column:1/-1')}</div><div class="box" id="tbDesemp"></div></div>
