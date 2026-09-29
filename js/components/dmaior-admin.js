@@ -393,7 +393,7 @@ class DimaiorAdmin extends HTMLElement {
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
     const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
-    if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); }
+    if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
   }
 
@@ -1567,7 +1567,7 @@ class DimaiorAdmin extends HTMLElement {
 
   // ══════════ PAINEL DA SUB ══════════
   // Páginas que o admin da sub enxerga (o resto some do DOM, e _ir() não deixa abrir)
-  static get PAGINAS_SUB(){ return ['dashboard','aoVivo','ranking','diario','dashDesemp','violacoes','buscaUid','subConvites','monitor']; }
+  static get PAGINAS_SUB(){ return ['dashboard','aoVivo','subStreamers','ranking','diario','dashDesemp','violacoes','buscaUid','subConvites','monitor']; }
   _niHtml(ico,pag,lbl){return`<div class="ni" data-p="${pag}"><span class="ico">${this._ico(ico,14)}</span><span class="nlb">${lbl}</span></div>`;}
   _phHtml(titulo,ico,sub,extra=''){return`<div class="ph"><div><div class="titulo">${this._ico(ico,18)} ${titulo}</div><div class="psub">${sub}</div></div><div class="ph-r">${extra}</div></div>`;}
   _aplicarModoSub(){
@@ -1577,6 +1577,9 @@ class DimaiorAdmin extends HTMLElement {
     const nm=s.querySelector('.side .ni[data-p="monitor"]'); if(nm){ nm.querySelector('.nlb').textContent='Baixar dados'; const ic=nm.querySelector('.ico'); if(ic) ic.innerHTML=this._ico('download',14); }
     const grupo=s.getElementById('navSec-recrutamento')||s.querySelector('.side .acc-body');
     if(grupo){ grupo.insertAdjacentHTML('beforeend',this._niHtml('user_plus','subConvites','Convites')); grupo.lastElementChild.addEventListener('click',()=>this._ir('subConvites')); }
+    // "Meus Streamers" logo depois do Ao Vivo (grupo Principal)
+    const niAoVivo=s.querySelector('.side .ni[data-p="aoVivo"]');
+    if(niAoVivo){ niAoVivo.insertAdjacentHTML('afterend',this._niHtml('users','subStreamers','Meus Streamers')); niAoVivo.nextElementSibling.addEventListener('click',()=>this._ir('subStreamers')); }
     s.querySelectorAll('.side .acc-body').forEach(b=>{ if(!b.querySelector('.ni')){ b.previousElementSibling?.classList.contains('ns')&&b.previousElementSibling.remove(); b.remove(); } });
     const nsRec=s.querySelector('.side .ns[data-nav-sec="recrutamento"] span'); if(nsRec) nsRec.textContent='Recrutamento';
     const nsSis=s.querySelector('.side .ns[data-nav-sec="sistema"] span'); if(nsSis) nsSis.textContent='Dados';
@@ -1626,6 +1629,18 @@ class DimaiorAdmin extends HTMLElement {
           </div></div>
         <div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Convites enviados</div></div><div id="scHistorico" style="padding:12px 18px 18px">${this._loading()}</div></div>
       </div>`);
+    // Página nova: Meus Streamers (todos os membros da sub, direto da Kwai)
+    s.querySelector('.content')?.insertAdjacentHTML('beforeend',`
+      <div class="pag" id="pag-subStreamers">${this._phHtml('Meus Streamers','users','Todos os streamers vinculados à sua sub-agência na Kwai',`<button class="btn btn-o" id="btnAtuSubStreamers">${this._ico('refresh',13)} Atualizar</button>`)}
+        <div class="box">
+          <div class="bhead" style="flex-wrap:wrap;gap:10px"><div class="btitulo">${this._ico('users',14)} <span id="ssTotal">Streamers</span></div>
+            <input id="ssBusca" type="search" placeholder="Buscar por nome, @ ou UID..." autocapitalize="off" autocorrect="off" spellcheck="false" style="flex:1;min-width:180px;max-width:320px;padding:8px 12px;background:var(--input-bg);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:13px;outline:none"/></div>
+          <div id="ssInfo" class="viol-ids" style="padding:10px 18px 0"></div>
+          <div id="ssLista" style="padding:12px 18px 18px">${this._loading()}</div>
+        </div>
+      </div>`);
+    s.getElementById('btnAtuSubStreamers')?.addEventListener('click',()=>this._carregarSubStreamers(true));
+    s.getElementById('ssBusca')?.addEventListener('input',()=>this._renderSubStreamers());
     s.getElementById('btnScVerificar')?.addEventListener('click',()=>this._subConvite(false));
     s.getElementById('btnScEnviar')?.addEventListener('click',()=>this._subConvite(true));
     s.getElementById('scUid')?.addEventListener('input',()=>{ const b=s.getElementById('btnScEnviar'); if(b) b.disabled=true; s.getElementById('scResultado').innerHTML=''; });
@@ -1655,8 +1670,38 @@ class DimaiorAdmin extends HTMLElement {
     const lista=d?.convites||[];
     if(!lista.length){el.innerHTML=this._empty('user_plus','Nenhum convite enviado ainda');return;}
     const rot={convite_enviado:['Enviado','var(--verde)'],dry_run:['Simulação','var(--gold)'],erro:['Recusado pela Kwai','var(--verm)']};
-    el.innerHTML=lista.map(c=>{let pl={};try{pl=JSON.parse(c.payload||'{}');}catch{}const [t,cor]=rot[c.status]||[c.status,'var(--t3)'];
-      return`<div class="viol-top" style="border-bottom:1px solid var(--brd);padding:8px 0;margin:0"><div><b class="viol-nome">${this._esc(pl.nome||pl.kwaiId||c.uid)}</b><span class="viol-ids">${this._esc(c.uid)} · ${this._esc(pl.categoria==='games'?'Games':'Entretenimento')} · ${this._fdt(c.criado_em)}</span></div><span class="viol-st" style="color:${cor};border:1px solid currentColor">${this._esc(t)}</span></div>`;}).join('');
+    // Situação real na Kwai (quando deu pra consultar): aceito/recusado/aguardando
+    const corKwai=t=>{const x=String(t||'').toLowerCase();return /aceit|conclu|aprov|sucesso|coopera/.test(x)?'var(--verde)':/recus|rejeit|expir|cancel|falh|inv[aá]lid/.test(x)?'var(--verm)':'var(--gold)';};
+    const aviso=d&&d.kwai_ok===false?`<div class="viol-ids" style="padding:0 0 8px">Não deu pra consultar a situação dos convites na Kwai agora — mostrando só o histórico de envio.</div>`:'';
+    el.innerHTML=aviso+lista.map(c=>{let pl={};try{pl=typeof c.payload==='string'?JSON.parse(c.payload||'{}'):(c.payload||{});}catch{}
+      let [t,cor]=rot[c.status]||[c.status,'var(--t3)'], extra='';
+      if(c.ja_membro){t='Já é seu streamer';cor='var(--verde)';}
+      else if(c.kwai?.situacao){t=c.kwai.situacao;cor=corKwai(t);if(c.kwai.motivo_recusa)extra=` · ${this._esc(c.kwai.motivo_recusa)}`;}
+      else if(c.status==='convite_enviado'&&d?.kwai_ok){t='Aguardando resposta';cor='var(--gold)';}
+      return`<div class="viol-top" style="border-bottom:1px solid var(--brd);padding:8px 0;margin:0"><div><b class="viol-nome">${this._esc(pl.nome||pl.kwaiId||c.uid)}</b><span class="viol-ids">${this._esc(c.uid)} · ${this._esc(pl.categoria==='games'?'Games':'Entretenimento')} · ${this._fdt(c.criado_em)}${extra}</span></div><span class="viol-st" style="color:${cor};border:1px solid currentColor">${this._esc(t)}</span></div>`;}).join('');
+  }
+  // Meus Streamers: todos os membros da sub (Kwai ao vivo; se a Kwai falhar, a foto das 03h)
+  async _carregarSubStreamers(forcar=false){
+    const s=this.shadowRoot, el=s.getElementById('ssLista'); if(!el) return;
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/streamers'+(forcar?'?forcar=1':''));
+    if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar os streamers');this._subStreamers=null;return;}
+    this._subStreamers=d;
+    this._renderSubStreamers();
+  }
+  _renderSubStreamers(){
+    const s=this.shadowRoot, el=s.getElementById('ssLista'), d=this._subStreamers; if(!el||!d) return;
+    const q=(s.getElementById('ssBusca')?.value||'').trim().toLowerCase().replace(/^@/,'');
+    const todos=d.membros||[];
+    const lista=q?todos.filter(m=>[m.nome,m.kwai_id,m.uid].some(v=>String(v||'').toLowerCase().includes(q))):todos;
+    const tot=s.getElementById('ssTotal'); if(tot) tot.textContent=`${todos.length} streamer${todos.length===1?'':'s'}${q?` · ${lista.length} na busca`:''}`;
+    const info=s.getElementById('ssInfo');
+    if(info) info.textContent=d.fonte==='kwai'?`Direto da Kwai · atualizado às ${new Date(d.atualizado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} (quem aceitou o convite aparece aqui em até 3 minutos — ou clique em Atualizar)`:'A Kwai não respondeu agora — mostrando a lista salva às 03h de hoje. Tente Atualizar daqui a pouco.';
+    if(!lista.length){el.innerHTML=this._empty('users',q?'Ninguém encontrado nessa busca':'Nenhum streamer vinculado à sua sub ainda');return;}
+    const data=v=>{if(!v)return'—';try{return new Date(v).toLocaleDateString('pt-BR');}catch{return'—';}};
+    el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px">${lista.map(m=>{
+      const ok=m.status==null||m.status===1;
+      return`<div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--brddim);border-radius:var(--rs);background:var(--sunk);min-width:0">${this._avatar(m.foto||'',m.nome,'av')}<div style="min-width:0;flex:1"><div style="display:flex;gap:6px;align-items:center;min-width:0"><b class="viol-nome" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(m.nome)}</b>${m.ao_vivo?`<span class="viol-st" style="color:var(--verm);border:1px solid currentColor;padding:1px 6px">Ao vivo</span>`:''}</div><div class="viol-ids" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.kwai_id?'@'+this._esc(m.kwai_id)+' · ':''}UID ${this._esc(m.uid)}</div><div class="viol-ids">Entrou em ${data(m.entrou)}${m.status_texto&&!ok?` · <span style="color:var(--verm)">${this._esc(m.status_texto)}</span>`:''}</div></div></div>`;}).join('')}</div>`;
   }
 
   // ══════════ ADMIN PRINCIPAL: acessos do painel da sub ══════════
