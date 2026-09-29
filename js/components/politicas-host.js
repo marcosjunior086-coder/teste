@@ -74,7 +74,7 @@ class PoliticasHost extends HTMLElement {
 
             /* ===== PLAYER DE ÁUDIO DISCRETO ===== */
             .audio-player {
-                background: rgba(0, 0, 0, 0.4);
+                background: var(--dm-bg-panel, rgba(0, 0, 0, 0.4));
                 border: 1px solid rgba(0, 212, 212, 0.2);
                 border-radius: 20px;
                 display: inline-flex;
@@ -93,7 +93,7 @@ class PoliticasHost extends HTMLElement {
             .audio-btn svg { fill: #000; }
             
             .audio-info { display: flex; flex-direction: column; align-items: flex-start; }
-            .audio-label { font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 0.65rem; font-weight: 700; color: #fff; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+            .audio-label { font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 0.65rem; font-weight: 700; color: var(--dm-text, #fff); text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
             .audio-time { font-size: 0.6rem; color: var(--cyan); font-variant-numeric: tabular-nums; }
             .progress-container { width: 80px; height: 2px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin-top: 2px; overflow: hidden; position: relative; }
             .progress-bar { height: 100%; width: 0%; background: var(--cyan); border-radius: 2px; transition: width 0.1s linear; }
@@ -105,14 +105,14 @@ class PoliticasHost extends HTMLElement {
             }
             .tabs-nav::-webkit-scrollbar { display: none; }
             .tab-btn {
-                background: rgba(26, 26, 46, 0.7); border: 1px solid rgba(0, 212, 212, 0.2);
+                background: var(--dm-bg-panel, rgba(26, 26, 46, 0.7)); border: 1px solid rgba(0, 212, 212, 0.2);
                 color: var(--sub); padding: 8px; border-radius: 8px;
                 font-family: var(--dm-font-title,'Rajdhani',sans-serif); font-size: 0.75rem; font-weight: 700;
                 text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
                 white-space: nowrap; transition: all 0.2s ease; flex: 1; text-align: center;
                 user-select: none;
             }
-            .tab-btn:hover { background: rgba(0, 212, 212, 0.1); color: #fff; }
+            .tab-btn:hover { background: rgba(0, 212, 212, 0.1); color: var(--dm-text, #fff); }
             .tab-btn.active { background: var(--cyan); color: #000; border-color: var(--cyan); }
             .tab-btn:active { transform: scale(0.95); }
 

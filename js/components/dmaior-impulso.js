@@ -790,6 +790,14 @@ class DmaiorImpulso extends HTMLElement {
           border-color: transparent;
           color: #fff;
         }
+        /* Texto da duração no cartão selecionado: a regra genérica (.rc-tempo
+           ciano) é mais específica e ganhava do #fff acima — ciano sobre o
+           fundo rosa/laranja ficava ilegível. */
+        :host-context([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo, :host([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo,
+        :host-context([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo, :host([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo,
+        :host-context([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo, :host([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo {
+          color: #fff;
+        }
         :host-context([data-theme="branco"]) #btn-impulso:disabled, :host([data-theme="branco"]) #btn-impulso:disabled,
         :host-context([data-theme="rosa"])   #btn-impulso:disabled, :host([data-theme="rosa"])   #btn-impulso:disabled,
         :host-context([data-theme="laranja"]) #btn-impulso:disabled , :host([data-theme="laranja"]) #btn-impulso:disabled {

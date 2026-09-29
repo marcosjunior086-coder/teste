@@ -313,7 +313,7 @@ class DmaiorServicesMenu extends HTMLElement {
            à esquerda (ex: "Portfólio" sozinho na última linha do Acesso rápido). */
         .dp-grid .dp-item:last-child:nth-child(odd) { grid-column:1 / -1; max-width:calc(50% - 5px); margin:0 auto; }
         .dp-item { display:flex; flex-direction:row; align-items:center; gap:11px; padding:13px 12px; border-radius:24px; background:var(--dm-grad-card-alt); border:1px solid var(--dm-bw06); text-decoration:none; position:relative; overflow:hidden; transition:transform .18s, border-color .18s, box-shadow .18s; min-height:68px; }
-        .dp-item:hover { border-color:var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); box-shadow:0 10px 24px var(--dm-shadow-40),0 0 16px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
+        .dp-item:hover { border-color:var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); box-shadow:0 10px 24px var(--dm-shadow-50),0 0 16px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); }
         .dp-item:active { transform:scale(.97); }
         .dp-item::before { content:''; position:absolute; top:0; left:0; right:0; height:1.5px; }
         .dp-item-icon { width:38px; height:38px; border-radius:16px; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
