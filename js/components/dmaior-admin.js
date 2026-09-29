@@ -2612,6 +2612,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAplicarLiberacao').addEventListener('click',()=>this._liberarImpulso());
     s.getElementById('btnAtuLiberados').addEventListener('click',async()=>{const lib=await this._api('GET','/admin/impulso/liberados');this._renderLiberados(lib?.liberados||[]);});
     s.getElementById('btnSalvarMeta').addEventListener('click',()=>this._salvarMeta());
+    s.getElementById('btnSalvarMetaDias').addEventListener('click',()=>this._salvarMetaDias());
     s.getElementById('btnCancelarEdicaoMeta').addEventListener('click',()=>this._cancelarEdicaoMeta());
     s.getElementById('btnAtuMetas').addEventListener('click',()=>this._carregarMetas());
     s.getElementById('btnAtuMetasAtingidas').addEventListener('click',()=>this._carregarMetasAtingidas());
@@ -4395,7 +4396,7 @@ class DimaiorAdmin extends HTMLElement {
     }
     this._renderBloqueios(blq?.bloqueios||[]);
     this._renderLiberados(lib?.liberados||[]);
-    this._renderMetas(metas?.metas||[]);
+    this._renderMetas(metas?.metas||[],metas?.dias_minimos);
     this._renderMetasAtingidas(metasAt?.streamers||[]);
     this._carregarImpulsoHistorico();
   }
@@ -4460,10 +4461,12 @@ class DimaiorAdmin extends HTMLElement {
   async _carregarMetas(){
     const s=this.shadowRoot;const el=s.getElementById('tbMetas');if(el)el.innerHTML=this._loading();
     const d=await this._api('GET','/admin/impulso/metas');
-    this._renderMetas(d?.metas||[]);
+    this._renderMetas(d?.metas||[],d?.dias_minimos);
   }
-  _renderMetas(lista){
+  _renderMetas(lista,diasMinimos){
     const s=this.shadowRoot;const el=s.getElementById('tbMetas');if(!el)return;
+    const diasEl=s.getElementById('iMetaDiasMin');
+    if(diasEl&&diasMinimos!=null)diasEl.value=diasMinimos;
     if(!lista.length){el.innerHTML=this._empty('award','Nenhuma meta cadastrada ainda');return;}
     el.innerHTML=`<div class="bloq-lista">${lista.map(m=>`
       <div class="bloq-item">
@@ -4503,6 +4506,14 @@ class DimaiorAdmin extends HTMLElement {
       this._carregarMetas();
     } else this._toast(r?.erro||'Erro ao salvar','err');
   }
+  async _salvarMetaDias(){
+    const s=this.shadowRoot;
+    const dias_minimos=parseInt(s.getElementById('iMetaDiasMin').value,10);
+    if(!Number.isFinite(dias_minimos)||dias_minimos<0||dias_minimos>31){this._toast('Informe um número de dias entre 0 e 31','err');return;}
+    const r=await this._api('POST','/admin/impulso/metas-dias',{dias_minimos});
+    if(r?.ok){this._toast('Dias mínimos salvos!');this._carregarMetasAtingidas();}
+    else this._toast(r?.erro||'Erro ao salvar','err');
+  }
   _cancelarEdicaoMeta(){
     const s=this.shadowRoot;
     s.getElementById('iMetaId').value='';
@@ -4527,7 +4538,7 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div class="bloq-lista">${lista.map(p=>`
       <div class="bloq-item">
         <div class="bloq-info">
-          <div class="bloq-uid">${this._ico('award',13)} ${this._esc(p.nome)} <span style="color:var(--t3);font-weight:400">— UID: ${this._esc(p.kwai_uid)} · ${p.quantidade} usos/semana</span></div>
+          <div class="bloq-uid">${this._ico('award',13)} ${this._esc(p.nome)} <span style="color:var(--t3);font-weight:400">— UID: ${this._esc(p.kwai_uid)} · ${p.quantidade} usos/semana${p.dias_mes_anterior!=null?` · ${p.dias_mes_anterior} dias no mês passado`:''}</span></div>
           <div class="bloq-motivo">
             <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="ma-manual" data-uid="${this._esc(p.kwai_uid)}" ${p.ativo_manual?'checked':''}/> Manual</label>
             &nbsp;•&nbsp;
@@ -6552,8 +6563,13 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('award',14)} Metas Automáticas de Impulso</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuMetas">${this._ico('refresh',12)} Atualizar</button></div></div>
-                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Quem bater uma dessas metas de diamantes no mês libera Impulso sozinho, com a cota de usos do degrau atingido — só vale pra quem ainda NÃO foi liberado manualmente acima. Bateu a meta esse mês: libera agora e continua liberado o mês inteiro seguinte, sem precisar bater de novo. Se no mês seguinte não bater pelo menos a mesma meta, no mês depois disso volta a zero.</div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Quem bater uma dessas metas de diamantes no mês libera Impulso sozinho, com a cota de usos do degrau atingido — só vale pra quem ainda NÃO foi liberado manualmente acima. Bateu a meta esse mês: libera agora e continua liberado o mês inteiro seguinte, sem precisar bater de novo. Se no mês seguinte não bater pelo menos a mesma meta, no mês depois disso volta a zero. <b style="color:var(--t2)">Além dos diamantes, o streamer precisa ter cumprido os dias válidos (1h+ de live no dia) no mês anterior</b> — quem só faz diamante e não cumpre os dias fica sem Impulso por meta.</div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding-bottom:12px;border-bottom:1px solid var(--brddim)">
+                    <div class="mc" style="width:220px"><label>Dias válidos mínimos (mês anterior)</label><input id="iMetaDiasMin" type="number" min="0" max="31" placeholder="Ex: 23" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/></div>
+                    <button class="btn btn-g" id="btnSalvarMetaDias">${this._ico('check',13)} Salvar Dias</button>
+                    <span style="color:var(--t3);font-size:11px;align-self:center">0 = não exige dias</span>
+                  </div>
                   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
                     <div class="mc" style="flex:1;min-width:140px"><label>Diamantes no mês</label><input id="iMetaDiamantes" type="number" min="1" placeholder="Ex: 30000" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/></div>
                     <div class="mc" style="width:130px"><label>Usos/semana</label><input id="iMetaQuantidade" type="number" min="1" max="99" placeholder="Ex: 2" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/></div>
@@ -6566,7 +6582,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('award',14)} Streamers com Meta Atingida</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuMetasAtingidas">${this._ico('refresh',12)} Atualizar</button></div></div>
-                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Streamers com algum degrau de meta ativo agora (batido este mês ou no mês passado). Aqui dá pra escolher se deixa ativo o Manual, o Automático, ou os dois — desativar aqui não mexe no cálculo da meta, só impede o uso daquele modo enquanto o degrau estiver ativo.</div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Streamers com algum degrau de meta ativo agora (batido este mês ou no mês passado, e com os dias válidos mínimos cumpridos no mês passado). Aqui dá pra escolher se deixa ativo o Manual, o Automático, ou os dois — desativar aqui não mexe no cálculo da meta, só impede o uso daquele modo enquanto o degrau estiver ativo.</div>
                 <div id="tbMetasAtingidas">${this._loading()}</div>
               </div>
               <div class="box impulso-section">

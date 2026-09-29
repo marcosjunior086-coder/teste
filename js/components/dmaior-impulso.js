@@ -443,12 +443,41 @@ class DmaiorImpulso extends HTMLElement {
   // Barra de progresso da meta automática de diamantes do mês. Usada tanto
   // no cartão de bloqueio (ainda não bateu nenhum degrau) quanto numa faixa
   // acima da cota semanal (já liberado, mostrando o próximo degrau).
+  //
+  // A meta também exige dias válidos (1h+ de live no dia) no MÊS ANTERIOR
+  // (meta.dias_minimos, editável no admin). Quem não cumpriu vê primeiro a
+  // barra de dias deste mês, que é o que libera no mês que vem.
   _metaProgressoHtml(meta) {
     const fmt = n => Number(n || 0).toLocaleString('pt-BR');
     // Diamante em SVG (mesmo desenho do ranking) no lugar do emoji
     const D = '<svg class="ico-dia" viewBox="0 0 24 24" fill="currentColor" aria-label="diamantes" role="img"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>';
+    const diasMin   = Number(meta.dias_minimos) || 0;
+    const diasAtual = Number(meta.dias_mes_atual) || 0;
+    const barraDias = () => `
+      <div class="meta-bar"><div class="meta-bar-fill" style="width:${Math.max(0, Math.min(100, (diasAtual / diasMin) * 100))}%"></div></div>
+      <div class="meta-vals"><span>${diasAtual} dias válidos este mês</span><b>${diasMin} dias</b></div>`;
+
+    if (meta.dias_ok === false && diasMin > 0) {
+      const alvoDia = meta.proxima_meta ? meta.proxima_meta.diamantes : 0;
+      const jaCumpriu = diasAtual >= diasMin && meta.diamantes_mes >= alvoDia;
+      const chamada = jaCumpriu
+        ? 'Você já cumpriu os dias e a meta deste mês — o impulso libera no dia 1º do mês que vem.'
+        : `Cumpra os ${diasMin} dias${alvoDia ? ` e pelo menos <b>${fmt(alvoDia)} ${D}</b>` : ''} este mês pra liberar no mês que vem.`;
+      return `
+        <div class="meta-lbl">O impulso por meta exige <b>${diasMin} dias válidos</b> (1h ou mais de live no dia) no mês anterior — no mês passado você fez <b>${Number(meta.dias_mes_anterior) || 0}</b>. ${chamada}</div>
+        ${barraDias()}
+        ${alvoDia ? `<div class="meta-bar" style="margin-top:10px"><div class="meta-bar-fill" style="width:${Math.max(0, Math.min(100, (meta.diamantes_mes / alvoDia) * 100))}%"></div></div>
+        <div class="meta-vals"><span>${fmt(meta.diamantes_mes)} ${D} este mês</span><b>${fmt(alvoDia)} ${D}</b></div>` : ''}`;
+    }
+
+    // Liberado, mas ainda não fechou os dias deste mês — avisa que é isso
+    // que mantém o impulso no mês que vem.
+    const avisoDias = (meta.quantidade_atual > 0 && diasMin > 0 && diasAtual < diasMin)
+      ? `<div class="meta-lbl" style="margin-top:12px">Pra continuar com impulso no mês que vem, feche <b>${diasMin} dias válidos</b> (1h+ de live no dia) este mês.</div>${barraDias()}`
+      : '';
+
     if (!meta.proxima_meta) {
-      return `<div class="meta-lbl">Meta máxima do mês atingida — <b>${meta.quantidade_atual} usos de impulso por semana</b> liberados.</div>`;
+      return `<div class="meta-lbl">Meta máxima do mês atingida — <b>${meta.quantidade_atual} usos de impulso por semana</b> liberados.</div>${avisoDias}`;
     }
     const alvo   = meta.proxima_meta.diamantes;
     const pct    = Math.max(0, Math.min(100, (meta.diamantes_mes / alvo) * 100));
@@ -459,7 +488,7 @@ class DmaiorImpulso extends HTMLElement {
     return `
       <div class="meta-lbl">${rotulo}</div>
       <div class="meta-bar"><div class="meta-bar-fill" style="width:${pct}%"></div></div>
-      <div class="meta-vals"><span>${fmt(meta.diamantes_mes)} ${D} este mês</span><b>${fmt(alvo)} ${D}</b></div>`;
+      <div class="meta-vals"><span>${fmt(meta.diamantes_mes)} ${D} este mês</span><b>${fmt(alvo)} ${D}</b></div>${avisoDias}`;
   }
 
   _setLockedContent(painel, titulo, texto) {
