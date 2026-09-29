@@ -565,11 +565,12 @@ class DimaiorAdmin extends HTMLElement {
       <div class="box" id="dashSubsBox">
         <div class="bhead">
           <div class="btitulo">${this._ico('users',14)} Sub-agências (Kwai)</div>
-          <button class="btn btn-o btn-sm" id="btnCarregarDashSubs">${this._ico('refresh',12)} Carregar</button>
+          <button class="btn btn-o btn-sm" id="btnCarregarDashSubs">${this._ico('refresh',12)} Atualizar</button>
         </div>
-        <div id="dashSubsArea" style="padding:14px;font-size:12px;color:var(--t3)">Diamantes e streamers ativos do mês, por sub-agência + total geral (principal + subs). Consulta direto na Kwai — pode levar alguns segundos.</div>
+        <div id="dashSubsArea" style="padding:14px;font-size:12px;color:var(--t3)"></div>
       </div>`;
-    s.getElementById('btnCarregarDashSubs')?.addEventListener('click',()=>this._carregarDashSubs());
+    s.getElementById('btnCarregarDashSubs')?.addEventListener('click',()=>this._carregarDashSubs(true));
+    this._carregarDashSubs();
 
     const ql=s.getElementById('qaLista');
     qas.forEach(q=>{
@@ -604,20 +605,38 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // Resultado do mês por sub-agência (Kwai) + total geral (principal + subs).
-  // Consulta sob demanda (botão "Carregar") — não entra no carregamento
-  // automático do Dashboard porque bate direto na Kwai paginando member/list
-  // por org, pode levar alguns segundos.
-  async _carregarDashSubs(){
+  // A consulta na Kwai demora, então o Worker guarda o último resultado no KV:
+  // abre na hora com ele e, se tiver passado de 10 min (`desatualizado`), pede
+  // a atualização em segundo plano e redesenha quando chegar. forcar=botão Atualizar.
+  async _carregarDashSubs(forcar=false){
+    if(this._dashSubsDados)this._renderDashSubs(this._dashSubsDados);
+    else{const a=this.shadowRoot.getElementById('dashSubsArea');if(a)a.innerHTML=this._loading();}
+    if(!forcar){
+      const d=await this._api('GET','/admin/dashboard/subs');
+      if(d?.ok){this._dashSubsDados=d;this._renderDashSubs(d);if(!d.desatualizado)return;}
+      else if(!this._dashSubsDados){this._renderDashSubs(d||{ok:false});return;}
+    }
+    if(this._dashSubsAtualizando)return;
+    this._dashSubsAtualizando=true;
+    this._renderDashSubs(this._dashSubsDados);
+    const d=await this._api('GET','/admin/dashboard/subs?atualizar=1');
+    this._dashSubsAtualizando=false;
+    if(d?.ok)this._dashSubsDados=d;
+    else if(this._dashSubsDados)this._toast(d?.erro||'Não deu pra atualizar as sub-agências','err');
+    this._renderDashSubs(d?.ok||!this._dashSubsDados?(d||{ok:false}):this._dashSubsDados);
+  }
+
+  _renderDashSubs(d){
     const s=this.shadowRoot;
     const area=s.getElementById('dashSubsArea');
     const btn=s.getElementById('btnCarregarDashSubs');
+    if(btn)btn.disabled=!!this._dashSubsAtualizando;
     if(!area)return;
-    if(btn)btn.disabled=true;
-    area.innerHTML=this._loading();
-    const d=await this._api('GET','/admin/dashboard/subs');
-    if(btn)btn.disabled=false;
-    if(!d?.ok){area.innerHTML=this._empty('warning',d?.erro||'Erro ao buscar sub-agências');return;}
+    if(!d){area.innerHTML=this._loading();return;}
+    if(!d.ok){area.innerHTML=this._empty('warning',d.erro||'Erro ao buscar sub-agências');return;}
     const orgs=d.por_org||[];
+    const quando=d.atualizado_em?new Date(d.atualizado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    const status=this._dashSubsAtualizando?' · atualizando…':(quando?` · atualizado em ${quando}`:'');
     if(!orgs.length){area.innerHTML=this._empty('users','Nenhuma sub-agência configurada (Config > IDs das sub-agências)');return;}
     const linhas=orgs.map(o=>`
       <tr>
@@ -626,7 +645,7 @@ class DimaiorAdmin extends HTMLElement {
         <td style="text-align:right;color:var(--cyan);font-weight:700">${this._num(o.diamantes_mes)} ${this._dia()}</td>
       </tr>`).join('');
     area.innerHTML=`
-      <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Período: ${this._esc(d.periodo||'')}</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Período: ${this._esc(d.periodo||'')}${this._esc(status)}</div>
       <table class="tb" style="width:100%">
         <thead><tr><th>Org</th><th style="text-align:right">Streamers ativos</th><th style="text-align:right">Diamantes</th></tr></thead>
         <tbody>${linhas}</tbody>
