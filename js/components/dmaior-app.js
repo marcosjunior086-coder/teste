@@ -547,6 +547,18 @@
             /* ── CARTEIRA — topo azul + card branco sobreposto (demo redesign) ── */
             .cart-view{max-width:660px;margin:0;align-self:flex-start;}
 
+            /* Perfil — mobile: coluna única (igual sempre foi). Desktop: sai dos 420px
+               das telas de login e vira 2 colunas (dados e preferências à esquerda;
+               recebimento e senha à direita), no padrão da Carteira e do Desempenho. */
+            @media(min-width:900px){
+                #vS.auth-view{max-width:980px;margin:0;align-self:flex-start;}
+                #vS .hd{justify-content:flex-start;}
+                #vS .perfil-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 36px;align-items:start;}
+                #vS .perfil-col{min-width:0;}
+                #vS .perfil-col + .perfil-col > h2:first-child{margin-top:0 !important;}
+                #vS #btnSave{max-width:360px;}
+            }
+
             /* Layout da carteira: coluna única no mobile; 2 colunas no desktop
                (dados à esquerda, transações ocupando o espaço vazio à direita) */
             #cMain{display:flex;flex-direction:column;}
@@ -1212,6 +1224,8 @@
                     <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
                     <div class="hd"><h1 class="raaj" style="font-size:1.3rem;color:var(--text);" data-i18n="profileControl">CONTROLE DE PERFIL</h1></div>
                     <div class="card">
+                        <div class="perfil-grid">
+                        <div class="perfil-col">
                         <h2 class="raaj" style="font-size:.9rem;margin-bottom:15px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;" data-i18n="personalData">DADOS PESSOAIS</h2>
                         <div id="alS" class="al"></div>
                         <div class="ig"><label>NOME DE IDENTIFICACAO</label>
@@ -1250,6 +1264,8 @@
                         <p class="pref-note" data-i18n="appearanceHelp">Essas opções ficam salvas neste aparelho e ajudam na leitura sem alterar seus dados.</p>
                         <!-- Notificações push (Fase 1) — preenchido por js/push.js; fica vazio se o navegador não suportar -->
                         <div id="dmPushMount"></div>
+                        </div>
+                        <div class="perfil-col">
                         <h2 class="raaj" style="font-size:.9rem;margin:20px 0 12px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px;">DADOS DE RECEBIMENTO</h2>
                         <div class="ig"><label>TIPO DE CHAVE PIX</label>
                             <div class="iw"><span class="ico">${this.svgPix()}</span>
@@ -1277,6 +1293,8 @@
                                 <span class="prule fail" id="sm1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Letra Maiúscula</span>
                                 <span class="prule fail" id="sn1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>1 Número</span>
                             </div>
+                        </div>
+                        </div>
                         </div>
                         <button class="btn" id="btnSave" style="margin-top:20px;" data-i18n="updateData">ATUALIZAR DADOS</button>
                     </div>
