@@ -2816,6 +2816,7 @@
             }
 
             el.innerHTML = html;
+            window.DmaiorVideoCompat?.apply(el); // Xiaomi: vídeo sequestrado pelo navegador
         } catch {
             el.innerHTML = '<div class="avisos-empty">Não foi possível carregar os avisos.</div>';
         }

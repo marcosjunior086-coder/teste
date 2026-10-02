@@ -143,7 +143,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .banner .bc{position:relative;width:100%;max-width:820px;margin:0 auto;border-radius:16px;overflow:hidden;}
     .banner .bc-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);will-change:transform;}
     .banner .bc-slide{flex:0 0 100%;width:100%;min-width:100%;position:relative;display:block;}
-    .banner .bc-slide img,.banner .bc-slide video{display:block;width:100%;height:auto;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
+    .banner .bc-slide img,.banner .bc-slide video,.banner .bc-slide canvas{display:block;width:100%;height:auto;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
     .banner .bc-cap{position:absolute;bottom:0;left:0;right:0;padding:8px 14px 10px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);border-radius:0 0 16px 16px;pointer-events:none;}
     .banner .bc-cap span{font-family:var(--f-title);font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
     /* dots FORA da imagem (numa faixa embaixo) — assim não se sobrepõem ao
@@ -784,6 +784,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       band?.classList.remove('empty');
       wrap.style.display = '';
       wrap.innerHTML = this._carouselHTML(slides);
+      window.DmaiorVideoCompat?.apply(wrap); // Xiaomi: vídeo sequestrado pelo navegador
       this._bindCarousel(slides.length);
     } catch (_) { /* API indisponível — carrossel fica oculto */
       this.shadowRoot?.querySelector('.banner')?.classList.add('empty');
