@@ -572,14 +572,14 @@ class RankingDmaior extends HTMLElement {
       const data = await window.DmaiorAPI.rank.getMeses(this._getToken());
       const meses = Array.isArray(data) ? data : (data?.meses || data?.items || []);
       const historicos = meses
-        .filter(m => m && m.ativo !== false && m.gid && m.nome)
+        .filter(m => m && m.ativo !== false && m.nome && (m.gid || (m.ano && m.mes)))
         .sort((a, b) => Number(a.ordem ?? 999) - Number(b.ordem ?? 999))
-        .map(m => ({
-          nome: String(m.nome).trim(),
-          tipo: 'sheets',
-          gid: String(m.gid).trim(),
-          compararCom: m.compararCom ?? m.comparar_com ?? null,
-        }));
+        .map(m => (m.ano && m.mes)
+          // Mês fechado vindo do banco (automático, sem planilha)
+          ? { nome: String(m.nome).trim(), tipo: 'db', ano: Number(m.ano), mes: Number(m.mes),
+              compararCom: m.compararCom ?? null }
+          : { nome: String(m.nome).trim(), tipo: 'sheets', gid: String(m.gid).trim(),
+              compararCom: m.compararCom ?? m.comparar_com ?? null });
       // Se o admin cadastrou um mês novo sem preencher "Comparar com", assume
       // o mês seguinte na ordem (o mais antigo) — evita que a % de variação
       // suma sozinha até alguém lembrar de preencher esse campo manualmente.
@@ -745,6 +745,25 @@ class RankingDmaior extends HTMLElement {
   async fetchSheet(nomeAba) {
     if (this.cache[nomeAba]) return this.cache[nomeAba];
     const config = this.ABAS_CONFIG.find(a => a.nome === nomeAba);
+    if (config?.tipo === 'db') {
+      const d = await window.DmaiorAPI.rank.getHistorico(config.ano, config.mes, this._getToken());
+      if (!d || d.erro || !Array.isArray(d.streamers)) throw new Error(d?.erro || 'Erro ao carregar o histórico');
+      const data = {
+        rows: d.streamers.map(s => ({
+          img:      this.proxyImg(s.foto_url),
+          id:       s.kwai_id || s.kwai_uid,
+          nome:     s.nome || s.kwai_id || s.kwai_uid || '',
+          uid:      s.kwai_uid,
+          diamonds: Number(s.diamantes) || 0,
+          hoursStr: s.horas_video || '00:00',
+          hoursMin: this.h2m(s.horas_video),
+        })),
+        time: '23:59',
+        date: d.periodo || '',
+      };
+      this.cache[nomeAba] = data;
+      return data;
+    }
     if (!config || config.tipo !== 'sheets') return { rows: [], time: '', date: '' };
     const cacheKey = 'dmaior_sheet_data_' + config.gid;
     try {

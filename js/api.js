@@ -148,6 +148,20 @@ window.DmaiorAPI = {
     },
 
     /**
+     * Ranking de um mês fechado, somado direto do banco (sem planilha).
+     * @param {number} ano
+     * @param {number} mes - 1 a 12
+     * @param {string} token - Bearer token
+     */
+    async getHistorico(ano, mes, token) {
+      return window.DmaiorAPI._get(
+        window.DmaiorConfig.workers.rank,
+        `/api/ranking/historico?ano=${encodeURIComponent(ano)}&mes=${encodeURIComponent(mes)}`,
+        window.DmaiorAPI.rank._auth(token),
+      );
+    },
+
+    /**
      * Busca a lista dinâmica de meses históricos do ranking.
      * A configuração fica no KV do Worker Rank.
      * @param {string} token - Bearer token
