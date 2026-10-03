@@ -1651,7 +1651,7 @@
                 const icon = id === 'avisos' ? bell : (this.qs('#'+id)?.querySelector('svg')?.outerHTML || '');
                 let extra = '';
                 if(id === 'nC' && this._saldoCarteira != null) extra = `<span class="pm-val">${this.brl(this._saldoCarteira)}</span>`;
-                if(id === 'avisos' && this._avisosNovos) extra = `<span class="pm-dot" title="Aviso novo"></span>`;
+                if(id === 'avisos' && (this._avisosNovos || this._eventosNovos)) extra = `<span class="pm-dot" title="${this._eventosNovos && !this._avisosNovos ? 'Evento novo' : 'Aviso novo'}"></span>`;
                 return `<button type="button" class="pm-row" data-nav="${id}" data-busca="${this.esc(label+' '+chaves)}"><span class="pm-ri">${icon}</span><span class="pm-rt">${this.esc(label)}</span>${extra}${chev}</button>`;
             });
             if(rows.length) html += `<section class="pm-sec"><div class="pm-gt">${titulo}</div><div class="pm-grp">${rows.join('')}</div></section>`;
@@ -2512,6 +2512,7 @@
                     }
                 } catch {}
             }
+            this._checarEventosNovos();
         } catch { /* silencia erro — comunicados são opcionais */ }
     }
 
@@ -2797,7 +2798,36 @@
         try {
             const d = await window.DmaiorAPI.eventos.listar();
             this._renderEventosStreamer(el, d.eventos || [], d.hoje);
+            this._marcarEventosVistos(d.eventos || []);
         } catch { el.innerHTML = ''; }
+    }
+
+    // "Novo" = evento ativo que este streamer ainda não viu OU que mudou (dias/links)
+    // desde a última vez que abriu Avisos e eventos. Guarda no aparelho, igual aos avisos.
+    _eventoAssinatura(e){ return [e.id, (e.dias || []).join(','), e.link_regras || '', e.link_inscricao || ''].join('|'); }
+    _eventosChave(){ return `dm_eventos_vistos_${localStorage.getItem('dm_uid') || 'anon'}`; }
+    _atualizarBolinhaAvisos(){
+        const menu = document.querySelector('menu-mobile-dmaior');
+        const dot = menu?.shadowRoot?.getElementById('bellDot');
+        if(dot) dot.classList.toggle('hidden', !(this._avisosNovos || this._eventosNovos));
+    }
+    async _checarEventosNovos(){
+        try {
+            const d = await window.DmaiorAPI.eventos.listar();
+            const lista = d.eventos || [];
+            let vistos = [];
+            try { vistos = JSON.parse(localStorage.getItem(this._eventosChave()) || '[]'); } catch {}
+            this._eventosNovos = lista.some(e => !vistos.includes(this._eventoAssinatura(e)));
+            if(this._eventosNovos){
+                const dot = document.querySelector('menu-mobile-dmaior')?.shadowRoot?.getElementById('bellDot');
+                if(dot) dot.classList.remove('hidden');
+            }
+        } catch { /* eventos são opcionais */ }
+    }
+    _marcarEventosVistos(lista){
+        try { localStorage.setItem(this._eventosChave(), JSON.stringify(lista.map(e => this._eventoAssinatura(e)))); } catch {}
+        this._eventosNovos = false;
+        this._atualizarBolinhaAvisos();
     }
 
     _evtDiasTxt(dias){
