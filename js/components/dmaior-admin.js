@@ -2650,7 +2650,7 @@ class DimaiorAdmin extends HTMLElement {
     const rota=this._edtId?`/admin/streamers/${this._edtId}`:'/admin/streamers';const method=this._edtId?'PUT':'POST';
     const d=await this._api(method,rota,dados);if(d?.ok){this._fechaModal('mS');this._toast(this._edtId?'Atualizado!':'Adicionado!');this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
   }
-  _confirmarDel(msg,cb){const s=this.shadowRoot;s.getElementById('mCMsg').textContent=msg;s.getElementById('mCOk').onclick=()=>{this._fechaModal('mC');cb();};s.getElementById('mC').classList.add('on');}
+  _confirmarDel(msg,cb){const s=this.shadowRoot;s.getElementById('mCMsg').textContent=msg;{const ok=s.getElementById('mCOk');ok.style.background='linear-gradient(135deg,#c00030,#f87171)';ok.innerHTML=`${this._ico('trash',13)} Confirmar`;}s.getElementById('mCOk').onclick=()=>{this._fechaModal('mC');cb();};s.getElementById('mC').classList.add('on');}
 
   _bindEvents(){
     const s=this.shadowRoot;const dbc=this._dbc.bind(this);
@@ -2713,7 +2713,10 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtuPremios').addEventListener('click',()=>this._carregarPremios());s.getElementById('btnProcessarPremios').addEventListener('click',()=>this._abrirModalProcessar());s.getElementById('btnCancelarProc').addEventListener('click',()=>this._fechaModal('mProc'));s.getElementById('mProcConfirmar').addEventListener('click',()=>this._confirmarProcessarPremios());
     s.querySelectorAll('.premio-tipo-tab').forEach(tab=>{tab.addEventListener('click',()=>{s.querySelectorAll('.premio-tipo-tab').forEach(t=>t.classList.remove('on'));tab.classList.add('on');this._premioTipo=tab.dataset.tipo;this._renderPremiosConfig();});});
     // Comunicados
-    s.getElementById('btnAtuCom').addEventListener('click',()=>this._carregarComunicados());
+    s.getElementById('btnAtuCom').addEventListener('click',()=>this._comAba==='eventos'?this._carregarEventos(this._evMes):this._carregarComunicados());
+    s.querySelectorAll('[data-com-aba]').forEach(b=>b.addEventListener('click',()=>this._abaCom(b.dataset.comAba)));
+    s.getElementById('evImportar')?.addEventListener('click',()=>this._importarEventos());
+    s.getElementById('evMes')?.addEventListener('change',e=>this._carregarEventos(e.target.value));
     s.getElementById('btnDriveFotos')?.addEventListener('click',()=>window.open(this.DRIVE_FOTOS_URL,'_blank','noopener,noreferrer'));
     s.getElementById('btnNovoRapido').addEventListener('click',()=>this._abrirModalCom(null,'rapido'));
     s.getElementById('btnNovoImportante').addEventListener('click',()=>this._abrirModalCom(null,'importante'));
@@ -3030,6 +3033,7 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET','/admin/comunicados');
     if(!d?.ok){if(el)el.innerHTML=this._empty('warning','Erro ao carregar comunicados');return;}
     this._renderComunicados(d.comunicados||[]);
+    this._carregarEventos(this._evMes,true); // só pra acender o selo da aba "Eventos do mês"
   }
 
   _renderComunicados(lista){
@@ -3082,6 +3086,201 @@ class DimaiorAdmin extends HTMLElement {
     el.querySelectorAll('[data-com-del]').forEach(btn=>btn.addEventListener('click',()=>{
       this._confirmarDel('Excluir este comunicado permanentemente?',()=>this._excluirComunicado(btn.dataset.comDel));
     }));
+  }
+
+  // ── EVENTOS DO MÊS (planilha da plataforma → aba Comunicados) ───────────────
+  // Cola o link da planilha, o Worker lê a aba do mês e salva cada linha como
+  // RASCUNHO. Aqui o admin revisa, põe a imagem e ativa; só aí a streamer vê.
+  // A conferência diária reimporta e marca o que mudou ("alterado").
+  _evMesesOpcoes(){
+    const NM=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const h=new Date(),out=[];
+    for(let i=-1;i<=2;i++){const d=new Date(h.getFullYear(),h.getMonth()+i,1);out.push({v:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,t:`${NM[d.getMonth()]}/${d.getFullYear()}`});}
+    return out;
+  }
+  _evMesRotulo(v){const o=this._evMesesOpcoes().find(x=>x.v===v);if(o)return o.t;const m=/^(\d{4})-(\d{2})$/.exec(v||'');return m?`${m[2]}/${m[1]}`:'—';}
+  _evDias(dias){
+    const a=[...(dias||[])].sort((x,y)=>x-y),out=[];let ini=null,ant=null;
+    const fecha=()=>{if(ini===null)return;out.push(ini===ant?String(ini):(ant===ini+1?`${ini} e ${ant}`:`${ini} a ${ant}`));};
+    for(const d of a){if(ini===null){ini=ant=d;continue;}if(d===ant+1){ant=d;continue;}fecha();ini=ant=d;}
+    fecha();return out.join(', ');
+  }
+  _evLink(u){return /^https?:\/\//i.test(String(u||''))?this._esc(u):'';}
+  _evCorOk(c){return /^#[0-9a-f]{6}$/i.test(c||'')?c:'#00d4d4';}
+  _evTextoSobre(c){const n=parseInt(this._evCorOk(c).slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;return(r*299+g*587+b*114)/1000>150?'#111':'#fff';}
+
+  _abaCom(aba){
+    const s=this.shadowRoot,ev=aba==='eventos';
+    s.querySelectorAll('[data-com-aba]').forEach(b=>b.classList.toggle('on',b.dataset.comAba===aba));
+    s.getElementById('comPainelAvisos').hidden=ev;
+    s.getElementById('comPainelEventos').hidden=!ev;
+    const bt=s.getElementById('comBtnsAvisos');if(bt)bt.style.display=ev?'none':'flex';
+    this._comAba=aba;
+    if(ev)this._carregarEventos(this._evMes);
+  }
+
+  async _carregarEventos(mes,silencioso=false){
+    const s=this.shadowRoot,el=s.getElementById('tbEv');
+    if(!silencioso&&el)el.innerHTML=this._loading();
+    const q=mes?`?mes=${encodeURIComponent(mes)}`:'';
+    const d=await this._api('GET','/admin/eventos'+q);
+    if(!d?.ok){if(el&&!silencioso)el.innerHTML=this._empty('warning','Erro ao carregar eventos');return;}
+    this._evMes=d.mes;this._evLista=d.eventos||[];this._evCfg=d.config||{};
+    this._renderEventos();
+  }
+
+  _renderEventos(){
+    const s=this.shadowRoot,lista=this._evLista||[],cfg=this._evCfg||{};
+    // seletor de mês + link salvo
+    const sel=s.getElementById('evMes');
+    if(sel){
+      const ops=this._evMesesOpcoes();
+      if(this._evMes&&!ops.some(o=>o.v===this._evMes))ops.push({v:this._evMes,t:this._evMesRotulo(this._evMes)});
+      sel.innerHTML=ops.map(o=>`<option value="${o.v}" ${o.v===this._evMes?'selected':''}>${this._esc(o.t)}</option>`).join('');
+    }
+    const url=s.getElementById('evUrl');
+    if(url&&!url.value&&cfg.url)url.value=cfg.url;
+    // última conferência
+    const sy=s.getElementById('evSync');
+    if(sy){
+      if(cfg.ultima_sync_em){
+        const dt=new Date(cfg.ultima_sync_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+        sy.innerHTML=`<span class="ev-sync-${cfg.ultima_sync_ok?'ok':'err'}">${this._ii(cfg.ultima_sync_ok?'check':'warning',12)}${this._esc(cfg.ultima_sync_msg||'')}</span> <span class="com-data">· ${dt}${cfg.ultima_sync_auto?' (automática)':''}</span>`;
+      }else sy.innerHTML=`<span class="com-data">Ainda não importado. Cole o link da planilha e clique em “Atualizar eventos do mês”. Depois disso a planilha é conferida sozinha toda madrugada.</span>`;
+    }
+    // faixa de avisos + selo da aba
+    const mudou=lista.filter(e=>e.alteracoes_vistas===false&&e.alteracoes);
+    const rasc=lista.filter(e=>e.status==='rascunho'&&e.na_planilha!==false);
+    const badge=s.getElementById('evAbaN');
+    if(badge){const n=mudou.length||rasc.length;badge.hidden=!n;badge.textContent=n;}
+    const av=s.getElementById('evAviso'),partes=[];
+    if(mudou.length)partes.push(`<div class="ev-faixa ev-faixa-alt">${this._ii('warning',14)}<span><b>${mudou.length}</b> evento(s) mudaram na planilha desde a última vez que você olhou.</span><button class="btn btn-o btn-sm" id="evVistas">${this._ico('check',12)} Marcar como vistos</button></div>`);
+    if(rasc.length)partes.push(`<div class="ev-faixa">${this._ii('eye_off',14)}<span><b>${rasc.length}</b> rascunho(s): ainda <b>não aparecem</b> pras streamers. Revise, ponha a imagem e ative.</span><button class="btn btn-g btn-sm" id="evAtivarTodos">${this._ico('check',12)} Ativar todos</button></div>`);
+    if(av)av.innerHTML=partes.join('');
+    s.getElementById('evVistas')?.addEventListener('click',()=>this._eventosMarcarVistas());
+    s.getElementById('evAtivarTodos')?.addEventListener('click',()=>this._eventosAtivarTodos());
+
+    const el=s.getElementById('tbEv');if(!el)return;
+    if(!lista.length){el.innerHTML=this._empty('calendar',`Nenhum evento em ${this._evMesRotulo(this._evMes)}. Cole o link da planilha e clique em “Atualizar eventos do mês”.`);return;}
+    const PUB={streamer:'Streamer',agencia:'Agência',todos:'Todos'};
+    const [ano,mm]=String(this._evMes).split('-').map(Number),totalDias=new Date(ano,mm,0).getDate();
+    el.innerHTML=`<div class="com-lista">${lista.map(e=>{
+      const cor=this._evCorOk(e.cor),tx=this._evTextoSobre(cor);
+      const dias=new Set(e.dias||[]),pk=new Set(e.dias_pk||[]);
+      let tl='';for(let d=1;d<=totalDias;d++){const on=dias.has(d);tl+=`<i class="${on?'on':''}${pk.has(d)?' pk':''}" style="${on?`background:${cor};color:${tx}`:''}" title="${on?(pk.has(d)?'Dia de PK':'Dia do evento'):''}">${d}</i>`;}
+      const thumb=e.imagem_url
+        ?(this._ehVideo(e.imagem_url)?`<video class="com-thumb" src="${this._safeImgSrc(e.imagem_url)}" muted playsinline preload="metadata"></video>`:`<img class="com-thumb" src="${this._safeImgSrc(e.imagem_url)}" alt="" onerror="this.style.display='none'">`)
+        :`<span class="ev-semimg" style="background:${cor};color:${tx}">${this._ico('image',18)}</span>`;
+      const stBadge=e.status==='ativo'?`<span class="com-status ativo">Ativo</span>`:e.status==='oculto'?`<span class="com-status inativo">Oculto</span>`:`<span class="com-status" style="background:rgba(240,192,64,.1);color:var(--gold);border:1px solid rgba(240,192,64,.3)">Rascunho</span>`;
+      const pubBadge=`<span class="com-local">${PUB[e.publico]||e.publico}</span>`;
+      const pkBadge=(e.dias_pk||[]).length?`<span class="com-local" style="background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.35);color:var(--purple)">PK ${this._esc(this._evDias(e.dias_pk))}</span>`:'';
+      const remBadge=e.na_planilha===false?`<span class="com-status inativo">Saiu da planilha</span>`:'';
+      const notBadge=e.notificado_em?`<span class="com-data">${this._ii('bell',11)} avisou ${this._fdtCurto(e.notificado_em)}</span>`:'';
+      const alt=(e.alteracoes_vistas===false&&e.alteracoes)?`<div class="ev-alt">${this._ii('warning',12)} ${this._esc(this._evDescMudancas(e.alteracoes))}${e.status==='ativo'&&e.publico!=='agencia'?` <a href="#" data-ev-not-alt="${e.id}">Avisar as streamers da mudança</a>`:''}</div>`:'';
+      const rg=this._evLink(e.link_regras),ins=this._evLink(e.link_inscricao);
+      const links=`${rg?`<a class="ev-link" href="${rg}" target="_blank" rel="noopener noreferrer">${this._ii('file_text',12)}Regras</a>`:`<span class="ev-link off">sem regras</span>`}${ins?`<a class="ev-link" href="${ins}" target="_blank" rel="noopener noreferrer">${this._ii('edit',12)}Inscrição</a>`:''}`;
+      const podeAvisar=e.status==='ativo'&&e.publico!=='agencia';
+      return`<div class="com-item ev-item ${e.status==='ativo'?'is-important':'is-fast'}">
+        <div class="com-preview">${thumb}<div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1)">${this._esc(e.nome)}${e.nome_zh?` <span class="com-data" style="margin-left:4px">${this._esc(e.nome_zh)}</span>`:''}</strong><span class="com-texto">Dias ${this._esc(this._evDias(e.dias)||'—')}</span><div class="ev-links">${links}</div></div></div>
+        <div class="com-acoes">
+          <button class="btn btn-o btn-sm" data-ev-img="${e.id}">${this._ico('image',12)} ${e.imagem_url?'Trocar imagem':'Imagem'}</button>
+          ${e.status==='ativo'?`<button class="btn btn-o btn-sm" data-ev-st="${e.id}" data-v="oculto">${this._ico('eye_off',12)} Ocultar</button>`:`<button class="btn btn-g btn-sm" data-ev-st="${e.id}" data-v="ativo">${this._ico('check',12)} Ativar</button>`}
+          ${podeAvisar?`<button class="btn btn-o btn-sm" style="border-color:rgba(240,192,64,.5);color:var(--gold)" data-ev-not="${e.id}">${this._ico('bell',12)} Avisar streamers</button>`:''}
+          <button class="btn btn-sm" style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--verm)" data-ev-del="${e.id}">${this._ico('trash',12)}</button>
+        </div>
+        <div class="com-meta"><div class="com-meta-esq">${stBadge}${pubBadge}${pkBadge}${remBadge}${notBadge}</div></div>
+        <div class="ev-tl">${tl}</div>${alt}
+      </div>`;
+    }).join('')}</div>`;
+    const por=id=>lista.find(x=>x.id===id);
+    el.querySelectorAll('[data-ev-st]').forEach(b=>b.addEventListener('click',()=>this._eventoStatus(b.dataset.evSt,b.dataset.v)));
+    el.querySelectorAll('[data-ev-img]').forEach(b=>b.addEventListener('click',()=>this._eventoImagem(b.dataset.evImg)));
+    el.querySelectorAll('[data-ev-not]').forEach(b=>b.addEventListener('click',()=>this._eventoNotificar(por(b.dataset.evNot),'novo')));
+    el.querySelectorAll('[data-ev-not-alt]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();this._eventoNotificar(por(a.dataset.evNotAlt),'alteracao');}));
+    el.querySelectorAll('[data-ev-del]').forEach(b=>b.addEventListener('click',()=>this._confirmarDel('Excluir este evento? Se ele ainda estiver na planilha, volta como rascunho na próxima atualização.',()=>this._eventoExcluir(b.dataset.evDel))));
+  }
+
+  _evDescMudancas(alts){
+    const ROT={dias:'Dias',dias_pk:'Dias de PK',link_regras:'Link das regras',link_inscricao:'Link de inscrição',publico:'Público',nome:'Nome',nome_zh:'Nome (中文)',cor:'Cor'};
+    return(alts||[]).map(a=>{
+      if(a.campo==='novo')return'Evento novo na planilha';
+      if(a.campo==='removido')return'Saiu da planilha';
+      if(a.campo==='dias'||a.campo==='dias_pk')return`${ROT[a.campo]}: ${this._evDias(a.de)||'—'} → ${this._evDias(a.para)||'—'}`;
+      if(a.campo==='publico')return`Público: ${a.de||'—'} → ${a.para||'—'}`;
+      if(a.campo==='nome')return`Nome: ${a.de||'—'} → ${a.para||'—'}`;
+      return`${ROT[a.campo]||a.campo} mudou`;
+    }).join(' · ');
+  }
+
+  async _importarEventos(){
+    const s=this.shadowRoot,btn=s.getElementById('evImportar');
+    const url=s.getElementById('evUrl').value.trim(),mes=s.getElementById('evMes').value;
+    if(!url&&!(this._evCfg&&this._evCfg.sheet_id)){this._toast('Cole o link da planilha de eventos','err');return;}
+    btn.disabled=true;const orig=btn.innerHTML;btn.textContent='Lendo a planilha…';
+    const r=await this._api('POST','/admin/eventos/importar',{url:url||undefined,mes});
+    btn.disabled=false;btn.innerHTML=orig;
+    if(!r?.ok){this._toast(r?.erro||'Falha ao importar','err');return;}
+    const x=r.resumo||{};
+    if(!x.achouAba){this._toast(`A planilha não tem uma aba para ${this._evMesRotulo(mes)}`,'err');return;}
+    this._toast(`${x.total} evento(s): ${x.novos} novo(s), ${x.alterados} alterado(s)`);
+    this._carregarEventos(mes);
+  }
+
+  async _eventoStatus(id,v){
+    const r=await this._api('PATCH',`/admin/eventos/${id}`,{status:v});
+    if(!r?.ok){this._toast(r?.erro||'Erro ao atualizar','err');return;}
+    this._toast(v==='ativo'?'Evento ativo — as streamers já veem':'Evento oculto');
+    this._carregarEventos(this._evMes,true);
+  }
+
+  async _eventosAtivarTodos(){
+    const rasc=(this._evLista||[]).filter(e=>e.status==='rascunho'&&e.na_planilha!==false);
+    if(!rasc.length)return;
+    this._confirmarAcao(`Ativar ${rasc.length} evento(s)? Eles passam a aparecer no painel das streamers (os de Agência continuam só aqui). Nenhuma notificação é enviada agora.`,async()=>{
+      for(const e of rasc)await this._api('PATCH',`/admin/eventos/${e.id}`,{status:'ativo'});
+      this._toast(`${rasc.length} evento(s) ativados`);this._carregarEventos(this._evMes,true);
+    },'Ativar todos');
+  }
+
+  _eventoImagem(id){
+    const f=document.createElement('input');f.type='file';f.accept='image/png,image/jpeg,image/webp,image/gif';
+    f.addEventListener('change',async()=>{
+      const file=f.files?.[0];if(!file)return;
+      this._toast('Enviando imagem…');
+      const url=await this._uploadImagem(file,'eventos');
+      if(!url)return;
+      const r=await this._api('PATCH',`/admin/eventos/${id}`,{imagem_url:url});
+      if(r?.ok){this._toast('Imagem salva');this._carregarEventos(this._evMes,true);}else this._toast(r?.erro||'Erro ao salvar a imagem','err');
+    });
+    f.click();
+  }
+
+  _eventoNotificar(ev,tipo){
+    if(!ev)return;
+    this._confirmarAcao(`Enviar notificação pra TODAS as streamers: “${ev.nome}”${tipo==='alteracao'?' (evento atualizado)':''}? Elas recebem no celular.`,async()=>{
+      const r=await this._api('POST',`/admin/eventos/${ev.id}/notificar`,{tipo});
+      if(r?.ok){this._toast(`Notificação enviada${r.enqueued!=null?` (${r.enqueued} aparelho(s))`:''}`);this._carregarEventos(this._evMes,true);}
+      else this._toast(r?.erro||'Falha ao notificar','err');
+    },'Enviar notificação');
+  }
+
+  async _eventoExcluir(id){
+    const r=await this._api('DELETE',`/admin/eventos/${id}`);
+    if(r?.ok){this._toast('Evento excluído');this._carregarEventos(this._evMes,true);}else this._toast(r?.erro||'Erro ao excluir','err');
+  }
+
+  async _eventosMarcarVistas(){
+    const r=await this._api('POST','/admin/eventos/marcar-vistas',{mes:this._evMes});
+    if(r?.ok)this._carregarEventos(this._evMes,true);
+  }
+
+  // Confirmação neutra (verde) — o modal mC é vermelho/lixeira por padrão, de exclusão.
+  _confirmarAcao(msg,cb,rotulo='Confirmar'){
+    const s=this.shadowRoot,ok=s.getElementById('mCOk');
+    s.getElementById('mCMsg').textContent=msg;
+    ok.style.background='';ok.innerHTML=`${this._ico('check',13)} ${this._esc(rotulo)}`;
+    ok.onclick=()=>{this._fechaModal('mC');cb();};
+    s.getElementById('mC').classList.add('on');
   }
 
   _esc(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -6055,6 +6254,34 @@ class DimaiorAdmin extends HTMLElement {
     .com-check-label input[type=checkbox]{width:15px;height:15px;accent-color:var(--cyan);cursor:pointer}
     #mComTexto{width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;resize:vertical;transition:border-color .2s}
     #mComTexto:focus{border-color:var(--cyan);box-shadow:0 0 8px var(--cyan-d)}
+    .com-abas{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+    .com-aba{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;border:1px solid var(--brd);background:var(--glass);color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+    .com-aba.on{background:var(--cyan-d);border-color:rgba(0,212,212,.45);color:var(--cyan)}
+    .com-aba-n{min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--verm);color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center}
+    .com-aba-n[hidden]{display:none}
+    .ev-config{padding:14px}
+    .ev-lbl{font-size:11px;color:var(--t3);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+    .ev-linha{display:flex;gap:8px;flex-wrap:wrap}
+    .ev-inp{flex:1 1 280px;min-width:0;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none}
+    .ev-inp:focus{border-color:var(--cyan);box-shadow:0 0 8px var(--cyan-d)}
+    .ev-inp.ev-mes{flex:0 0 auto;cursor:pointer}
+    .ev-sync{margin-top:8px;font-size:12px}
+    .ev-sync-ok{color:var(--verde)} .ev-sync-err{color:var(--verm)}
+    .ev-faixa{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin:0 0 10px;border-radius:12px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);color:var(--t1);font-size:13px}
+    .ev-faixa span{flex:1 1 220px;text-align:left}
+    .ev-faixa.ev-faixa-alt{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35)}
+    .com-item.ev-item{grid-template-areas:"preview actions" "meta meta" "tl tl" "alt alt"}
+    .ev-semimg{width:72px;height:54px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;opacity:.9}
+    .ev-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    .ev-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--cyan);text-decoration:none}
+    .ev-link:hover{text-decoration:underline}
+    .ev-link.off{color:var(--t3)}
+    .ev-tl{grid-area:tl;display:flex;gap:2px;flex-wrap:wrap}
+    .ev-tl i{font-style:normal;width:20px;height:20px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;background:rgba(255,255,255,.05);color:var(--t3)}
+    .ev-tl i.pk{outline:2px solid var(--purple);outline-offset:-2px}
+    .ev-alt{grid-area:alt;font-size:12px;color:var(--verm);background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:8px 10px}
+    .ev-alt a{color:var(--gold);margin-left:6px}
+    @media(max-width:760px){.com-item.ev-item{grid-template-areas:"preview" "meta" "tl" "alt" "actions"}.ev-tl i{width:18px;height:18px}}
     @media(max-width:760px){.com-item{grid-template-columns:1fr;grid-template-areas:"preview" "meta" "actions"}.com-acoes{min-width:0;justify-content:flex-start}.com-thumb{width:60px;height:60px}.com-data{white-space:normal}}
     @media(max-width:600px){.com-preview{align-items:flex-start}.com-acoes{gap:5px}.com-acoes .btn-sm{font-size:10px;padding:4px 7px}}
     /* ── Monitor Kwai ── */
@@ -6810,7 +7037,17 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
               </div>
             </div>
-            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="box"><div id="tbCom">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div id="comBtnsAvisos" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="com-abas"><button class="com-aba on" data-com-aba="avisos">${this._ico('bell',13)} Avisos</button><button class="com-aba" data-com-aba="eventos">${this._ico('calendar',13)} Eventos do mês<span class="com-aba-n" id="evAbaN" hidden></span></button></div>
+            <div id="comPainelAvisos"><div class="box"><div id="tbCom">${this._loading()}</div></div></div>
+            <div id="comPainelEventos" hidden>
+              <div class="box ev-config">
+                <div class="ev-lbl">Planilha de eventos da plataforma (Google Planilhas — liberada por link)</div>
+                <div class="ev-linha"><input id="evUrl" class="ev-inp" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off"><select id="evMes" class="ev-inp ev-mes"></select><button class="btn btn-g" id="evImportar">${this._ico('refresh',13)} Atualizar eventos do mês</button></div>
+                <div class="ev-sync" id="evSync"></div>
+              </div>
+              <div id="evAviso"></div>
+              <div class="box"><div id="tbEv"></div></div>
+            </div></div>
             <div class="pag" id="pag-notificacoes">${this._pagNotificacoesHTML(ph)}</div>
             <div class="pag" id="pag-votacoes">${ph('Votações','vote','Enquetes públicas e privadas','btnAtuVot',`<button class="btn btn-g" id="btnNovaVotacao">${this._ico('plus',13)} Nova Votação</button>`)}<div class="box"><div id="tbVot">${this._loading()}</div></div></div>
             <div class="pag" id="pag-impulsoCtrl">${ph('Controle de Impulsionamento','bolt','Configurações e bloqueios','btnAtuImpulso')}

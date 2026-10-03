@@ -301,6 +301,15 @@ window.DmaiorAPI = {
     },
   },
 
+  // ── Módulo: Eventos da agência ─────────────────────────────────────────────
+  // Leitura pública (só eventos ATIVOS de público streamer/todos, mês atual e
+  // seguinte). Quem importa da planilha e ativa é o admin.
+  eventos: {
+    async listar() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, '/eventos');
+    },
+  },
+
   // ── Módulo: PK Diário ──────────────────────────────────────────────────────
   // Leitura pública pro streamer logado — mesmo Worker/nível de confiança do
   // módulo votacao (não precisa de uid, o ranking/confrontos são iguais pra

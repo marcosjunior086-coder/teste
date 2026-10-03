@@ -97,9 +97,11 @@
 
                 if (loading) loading.style.display = 'none';
                 // Verifica deeplink — sino no site público redireciona com #avisos
-                if (window.location.hash === '#avisos') {
+                if (window.location.hash === '#avisos' || window.location.hash === '#eventos') {
+                    const irEventos = window.location.hash === '#eventos';
                     history.replaceState(null, '', window.location.pathname);
                     this.goAvisos();
+                    if (irEventos) setTimeout(() => this.qs('#avisosEventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 900);
                 } else {
                     this.navigate('vD');
                     this.navActive('nD');
@@ -775,6 +777,28 @@
             .aviso-card-desc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:6px;}
             .aviso-card-data{font-size:.7rem;color:var(--muted);opacity:.7;display:flex;align-items:center;gap:4px;}
             .aviso-card-data svg{width:11px;height:11px;flex-shrink:0;}
+            /* Eventos do mês */
+            .evt-wrap{margin-bottom:22px;}
+            .evt-lista{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
+            .evt-card{border-radius:16px;border:1px solid var(--border);background:var(--glass);overflow:hidden;animation:fi .35s ease both;}
+            .evt-card.is-hoje{border-color:var(--cyan);}
+            .evt-img{width:100%;aspect-ratio:32/9;object-fit:cover;display:block;}
+            .evt-faixa{height:6px;}
+            .evt-body{padding:12px 14px 14px;}
+            .evt-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+            .evt-nome{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.25;}
+            .evt-chip{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:99px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;}
+            .evt-chip.hoje{background:var(--cyan);border-color:var(--cyan);color:#000;}
+            .evt-chip.off{opacity:.65;}
+            .evt-dias{font-size:.8rem;color:var(--muted);}
+            .evt-pk{font-size:.78rem;color:var(--cyan);font-weight:700;margin-top:2px;}
+            .evt-tl{display:flex;flex-wrap:wrap;gap:2px;margin:10px 0 2px;}
+            .evt-tl i{font-style:normal;width:19px;height:19px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;background:rgba(128,128,128,.14);color:var(--muted);}
+            .evt-tl i.pk{outline:2px solid #a855f7;outline-offset:-2px;}
+            .evt-tl i.hoje{box-shadow:0 0 0 2px var(--text);}
+            .evt-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+            .evt-fim summary{cursor:pointer;font-size:.8rem;color:var(--muted);margin:0 0 10px;}
+            .evt-fim .evt-card{opacity:.7;}
             .avisos-empty{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
             .avisos-loading{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
 
@@ -1453,6 +1477,7 @@
                             MARCAR TODOS COMO LIDOS
                         </button>
                     </div>
+                    <div id="avisosEventos"></div>
                     <div id="avisosList"></div>
                 </div>
 
@@ -1610,7 +1635,7 @@
     static get MENU_GRUPOS(){ return [
         ['Meu desempenho', [['nD','Resumo','inicio dashboard diamantes horas'], ['nRank','Ranking','posicao'], ['nPk','PK Diário','batalha']]],
         ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate']]],
-        ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
+        ['Comunidade',     [['avisos','Avisos e eventos','notificacoes comunicados eventos agenda inscricao pk'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
         ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
         ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente'], ['nAtalhoSub','Painel da Sub','sub agencia']]],
     ]; }
@@ -2760,7 +2785,89 @@
             e.classList.remove('on');
             if(e.id!=='nO') e.style.color='var(--muted)';
         });
+        this.loadEventos();
         this.loadAvisos();
+    }
+
+    // ── Eventos do mês (agenda importada da planilha da plataforma) ──────────
+    // O admin importa, revisa e ativa; aqui o streamer vê dias, regras e inscrição.
+    async loadEventos(){
+        const el = this.qs('#avisosEventos');
+        if(!el) return;
+        try {
+            const d = await window.DmaiorAPI.eventos.listar();
+            this._renderEventosStreamer(el, d.eventos || [], d.hoje);
+        } catch { el.innerHTML = ''; }
+    }
+
+    _evtDiasTxt(dias){
+        const a = [...(dias || [])].sort((x, y) => x - y), out = [];
+        let ini = null, ant = null;
+        const fecha = () => { if(ini === null) return; out.push(ini === ant ? String(ini) : (ant === ini + 1 ? `${ini} e ${ant}` : `${ini} a ${ant}`)); };
+        for(const d of a){ if(ini === null){ ini = ant = d; continue; } if(d === ant + 1){ ant = d; continue; } fecha(); ini = ant = d; }
+        fecha();
+        return out.join(', ');
+    }
+
+    _evtCor(c){ return /^#[0-9a-f]{6}$/i.test(c || '') ? c : '#00d4d4'; }
+    _evtTexto(c){ const n = parseInt(this._evtCor(c).slice(1), 16); return (((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000) > 150 ? '#111' : '#fff'; }
+
+    _renderEventosStreamer(el, lista, hoje){
+        if(!lista.length){ el.innerHTML = ''; return; }
+        const [hy, hm, hd] = String(hoje).split('-').map(Number);
+        const mesHoje = `${hy}-${String(hm).padStart(2, '0')}`;
+        const fase = e => {
+            const dias = [...(e.dias || [])].sort((a, b) => a - b);
+            if(!dias.length) return { f: 'depois', ini: null };
+            if(e.mes > mesHoje) return { f: 'depois', ini: dias[0] };
+            if(e.mes < mesHoje) return { f: 'fim' };
+            if(dias.includes(hd)) return { f: 'hoje' };
+            const prox = dias.find(d => d > hd);
+            return prox ? { f: 'prox', ini: prox } : { f: 'fim' };
+        };
+        const grupos = { hoje: [], prox: [], depois: [], fim: [] };
+        lista.forEach(e => { const i = fase(e); grupos[i.f].push({ e, i }); });
+        grupos.prox.sort((a, b) => a.i.ini - b.i.ini);
+
+        const card = ({ e, i }) => {
+            const cor = this._evtCor(e.cor), tx = this._evtTexto(cor);
+            const [ay, am] = e.mes.split('-').map(Number), total = new Date(ay, am, 0).getDate();
+            const dias = new Set(e.dias || []), pk = new Set(e.dias_pk || []);
+            const mesAtual = e.mes === mesHoje;
+            let tl = '';
+            for(let d = 1; d <= total; d++){
+                const on = dias.has(d), isHoje = mesAtual && d === hd;
+                tl += `<i class="${on ? 'on' : ''}${pk.has(d) ? ' pk' : ''}${isHoje ? ' hoje' : ''}" style="${on ? `background:${cor};color:${tx}` : ''}">${d}</i>`;
+            }
+            const mm = String(am).padStart(2, '0');
+            let chip = '';
+            if(i.f === 'hoje') chip = pk.has(hd) ? `<span class="evt-chip hoje">Hoje é dia de PK</span>` : `<span class="evt-chip hoje">Acontecendo hoje</span>`;
+            else if(i.f === 'prox') chip = `<span class="evt-chip">Próximo dia: ${i.ini}/${mm}</span>`;
+            else if(i.f === 'depois' && i.ini) chip = `<span class="evt-chip">Começa dia ${i.ini}/${mm}</span>`;
+            else if(i.f === 'fim') chip = `<span class="evt-chip off">Encerrado neste mês</span>`;
+            const okUrl = u => /^https?:\/\//i.test(u || '') ? this._escHtml(u) : '';
+            const rg = okUrl(e.link_regras), ins = okUrl(e.link_inscricao);
+            const img = e.imagem_url ? this._avisoMidia('evt-img', e.imagem_url, e.nome) : `<div class="evt-faixa" style="background:${cor}"></div>`;
+            const pkTxt = (e.dias_pk || []).length ? `<div class="evt-pk">PK nos dias ${this._escHtml(this._evtDiasTxt(e.dias_pk))}</div>` : '';
+            return `<div class="evt-card ${i.f === 'hoje' ? 'is-hoje' : ''}">
+                ${img}
+                <div class="evt-body">
+                    <div class="evt-top"><div class="evt-nome">${this._escHtml(e.nome)}</div>${chip}</div>
+                    <div class="evt-dias">Dias ${this._escHtml(this._evtDiasTxt(e.dias) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>
+                    ${pkTxt}
+                    <div class="evt-tl">${tl}</div>
+                    ${(rg || ins) ? `<div class="evt-btns">${rg ? `<a class="aviso-btn-sec" href="${rg}" target="_blank" rel="noopener noreferrer">Regras</a>` : ''}${ins ? `<a class="aviso-btn-pri" href="${ins}" target="_blank" rel="noopener noreferrer">Inscrever-se</a>` : ''}</div>` : ''}
+                </div>
+            </div>`;
+        };
+        const secao = (titulo, itens) => itens.length ? `<div class="avisos-sec-titulo">${titulo}</div><div class="evt-lista">${itens.map(card).join('')}</div>` : '';
+        const fim = grupos.fim.length ? `<details class="evt-fim"><summary>Eventos já encerrados (${grupos.fim.length})</summary><div class="evt-lista">${grupos.fim.map(card).join('')}</div></details>` : '';
+        el.innerHTML = `<div class="evt-wrap">
+            ${secao('Acontecendo hoje', grupos.hoje)}
+            ${secao('Próximos eventos', grupos.prox)}
+            ${secao('Mês que vem', grupos.depois)}
+            ${fim}
+        </div>`;
     }
 
     async loadAvisos(){
