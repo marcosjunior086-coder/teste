@@ -1,4 +1,4 @@
-﻿/* eslint-env browser */
+/* eslint-env browser */
 // ════════════════════════════════════════════════════════════
 // DMaior Agency — Admin Panel v2.1
 // CORREÇÕES v2.1:
@@ -492,7 +492,7 @@ class DimaiorAdmin extends HTMLElement {
     }).join('');
   }
 
-  // Painel único "Diamantes por dia" do Dashboard: barras dos últimos 7 dias
+  // Painel único "Diamantes por dia" do Dashboard: linha dos últimos 7 dias
   // (6 fechados + hoje em andamento), com a variação de cada dia contra o anterior.
   _renderDashDiasChart(){
     const el=this.shadowRoot?.getElementById('gDiasChart');
@@ -507,31 +507,64 @@ class DimaiorAdmin extends HTMLElement {
     const fechados=pts.filter(p=>!p.hoje&&typeof p.total==='number');
     const soma=fechados.reduce((a,p)=>a+p.total,0);
     const media=fechados.length?Math.round(soma/fechados.length):null;
-    const cols=pts.map((p,i)=>{
+    const W=Math.max(280,Math.round(el.clientWidth||el.parentElement?.clientWidth||700)-2);
+    const H=220,padL=18,padR=18,padT=34,padB=44;
+    const iw=W-padL-padR,ih=H-padT-padB;
+    const n=pts.length;
+    const xs=pts.map((_,i)=>padL+(n>1?i*iw/(n-1):iw/2));
+    const lo=nums.length?Math.min(...nums):0,hi=nums.length?Math.max(...nums):1;
+    const span=Math.max(hi-lo,hi*0.15,1);
+    const yMin=Math.max(0,lo-span*0.35),yMax=hi+span*0.2;
+    const yOf=v=>padT+(1-(v-yMin)/(yMax-yMin))*ih;
+    const ok=pts.map(p=>typeof p.total==='number');
+    const suave=(a,b)=>{const dx=(b.x-a.x)/2;return ` C${(a.x+dx).toFixed(1)},${a.y.toFixed(1)} ${(b.x-dx).toFixed(1)},${b.y.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}`;};
+    const P=pts.map((p,i)=>ok[i]?{x:xs[i],y:yOf(p.total),i}:null);
+    let linha='',area='',pontilhada='',ini=null,ult=null;
+    const fechadosPts=P.filter((q,i)=>q&&!pts[i].hoje);
+    fechadosPts.forEach((q,k)=>{ if(k===0){linha=`M${q.x.toFixed(1)},${q.y.toFixed(1)}`;ini=q;} else linha+=suave(fechadosPts[k-1],q); ult=q; });
+    if(linha&&ult){
+      area=`${linha} L${ult.x.toFixed(1)},${(padT+ih).toFixed(1)} L${ini.x.toFixed(1)},${(padT+ih).toFixed(1)} Z`;
+      const hj=P[n-1];
+      if(hj) pontilhada=`M${ult.x.toFixed(1)},${ult.y.toFixed(1)}${suave(ult,hj)}`;
+    }
+    const grade=[0,1,2].map(g=>{const y=padT+g*ih/2;return `<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" class="g"/>`;}).join('');
+    const marcas=pts.map((p,i)=>{
       const lbl=`${sem[new Date(`${p.dt}T12:00:00Z`).getUTCDay()]} ${p.dt.slice(8,10)}`;
       const ant=pts[i-1];
       let chg='';
       if(typeof p.total==='number'&&ant&&typeof ant.total==='number'&&ant.total>0&&!p.hoje){
         const v=((p.total-ant.total)/ant.total)*100;
-        chg=`<span class="chg ${v>=0?'up':'down'}">${v>=0?'▲':'▼'}${Math.abs(v).toFixed(0)}%</span>`;
+        chg=`<text x="${xs[i].toFixed(1)}" y="${H-8}" text-anchor="middle" class="chg ${v>=0?'up':'down'}">${v>=0?'▲':'▼'}${Math.abs(v).toFixed(0)}%</text>`;
       }
-      const carregando=p.total===undefined;
-      const falhou=p.total===null;
-      const altura=typeof p.total==='number'?Math.max(4,(p.total/max)*100):4;
-      return `<div class="col">${chg||'<span class="chg"></span>'}
-        <span class="val">${carregando?'<span class="dc2-spin"></span>':falhou?'—':this._numK(p.total)}</span>
-        <div class="stick ${p.hoje?'progress':''} ${carregando||falhou?'vazio':''}" style="height:${altura}%" title="${typeof p.total==='number'?this._num(p.total)+(p.hoje?' — hoje, em andamento':''):''}"></div>
-        <span class="lbl ${p.hoje?'now':''}">${p.hoje?'Hoje •':lbl}</span>
-      </div>`;
+      const q=P[i];
+      const val=q?`<text x="${q.x.toFixed(1)}" y="${(q.y-11).toFixed(1)}" text-anchor="middle" class="v">${this._numK(p.total)}</text>
+        <circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${p.hoje?5.5:4.5}" class="pt ${p.hoje?'hj':''}"><title>${this._num(p.total)}${p.hoje?' — hoje, em andamento':''}</title></circle>`
+        :`<text x="${xs[i].toFixed(1)}" y="${(padT+ih/2).toFixed(1)}" text-anchor="middle" class="v">${p.total===null?'—':'…'}</text>`;
+      return `${val}<text x="${xs[i].toFixed(1)}" y="${H-22}" text-anchor="middle" class="x ${p.hoje?'now':''}">${p.hoje?'Hoje •':lbl}</text>${chg}`;
     }).join('');
+    const grafico=`<svg class="dia-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Diamantes por dia, últimos 7 dias">
+      <defs><linearGradient id="diaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--cyan)" stop-opacity=".38"/><stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/></linearGradient></defs>
+      ${grade}
+      ${area?`<path d="${area}" fill="url(#diaGrad)"/>`:''}
+      ${linha?`<path d="${linha}" class="ln" fill="none"/>`:''}
+      ${pontilhada?`<path d="${pontilhada}" class="ln dash" fill="none"/>`:''}
+      ${marcas}
+    </svg>`;
     el.innerHTML=`<div class="box dia-box">
       <div class="bhead">
         <div class="btitulo">${this._ico('bars_up',14)} Diamantes por dia</div>
         <span class="dia-sub">${media!==null?`Média dos dias fechados: <b>${this._numK(media)}</b>`:'Últimos 7 dias'}</span>
       </div>
-      <div class="dia-bars">${cols}</div>
-      <p class="dia-nota">Últimos 6 dias fechados + hoje (listrado = em andamento). % = variação contra o dia anterior.</p>
+      <div class="dia-line">${grafico}</div>
+      <p class="dia-nota">Últimos 6 dias fechados + hoje (linha pontilhada = em andamento). % = variação contra o dia anterior.</p>
     </div>`;
+    // O gráfico é calculado pela largura disponível: redesenha se a janela mudar.
+    if(window.ResizeObserver&&this._diaROel!==el){
+      if(this._diaRO)this._diaRO.disconnect();
+      this._diaW=el.clientWidth;
+      this._diaRO=new ResizeObserver(()=>{const w=el.clientWidth;if(w>0&&Math.abs(w-(this._diaW||0))>8){this._diaW=w;this._renderDashDiasChart();}});
+      this._diaRO.observe(el);this._diaROel=el;
+    }
   }
 
   // Toggle "fonte dos dados do Dashboard" — kwai (oficial, direto da Kwai,
@@ -5260,19 +5293,21 @@ class DimaiorAdmin extends HTMLElement {
     .dia-box{margin-top:14px;}
     .dia-sub{font-size:11px;color:var(--t3);}
     .dia-sub b{color:var(--t1);}
-    .dia-bars{display:flex;align-items:flex-end;gap:10px;height:190px;padding:10px 16px 6px;}
-    .dia-bars .col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;}
-    .dia-bars .val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;color:var(--t1);white-space:nowrap;min-height:16px;display:flex;align-items:center;}
-    .dia-bars .stick{width:100%;max-width:46px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));box-shadow:0 0 16px rgba(0,212,212,.16);}
-    .dia-bars .stick.progress{background:repeating-linear-gradient(135deg,rgba(0,212,212,.55) 0 6px,rgba(0,212,212,.24) 6px 12px);box-shadow:none;}
-    .dia-bars .stick.vazio{opacity:.25;box-shadow:none;}
-    .dia-bars .lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--t3);white-space:nowrap;}
-    .dia-bars .lbl.now{color:var(--cyan);}
-    .dia-bars .chg{font-size:9.5px;font-weight:700;min-height:12px;color:var(--t3);}
-    .dia-bars .chg.up{color:var(--verde);}
-    .dia-bars .chg.down{color:var(--verm);}
-    .dia-nota{font-size:10.5px;color:var(--t3);padding:0 16px 12px;margin:0;}
-    @media(max-width:560px){.dia-bars{gap:5px;padding:10px 8px 6px;}.dia-bars .val{font-size:10.5px;}.dia-bars .lbl{font-size:9px;letter-spacing:0;}.dia-bars .chg{font-size:8.5px;}}
+    .dia-line{padding:6px 8px 0;overflow:hidden;}
+    .dia-svg{display:block;max-width:100%;}
+    .dia-svg .g{stroke:var(--brddim,rgba(160,184,200,.14));stroke-width:1;stroke-dasharray:3 4;}
+    .dia-svg .ln{stroke:var(--cyan);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(0,212,212,.35));}
+    .dia-svg .ln.dash{stroke-dasharray:6 6;opacity:.75;filter:none;}
+    .dia-svg .pt{fill:var(--sunk,#0b1220);stroke:var(--cyan);stroke-width:2.4;}
+    .dia-svg .pt.hj{fill:rgba(0,212,212,.3);stroke-dasharray:3 2;}
+    .dia-svg text{font-family:var(--dm-font-title,'Rajdhani',sans-serif);}
+    .dia-svg .v{font-size:12px;font-weight:700;fill:var(--t1);}
+    .dia-svg .x{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;fill:var(--t3);}
+    .dia-svg .x.now{fill:var(--cyan);}
+    .dia-svg .chg{font-size:9.5px;font-weight:700;fill:var(--t3);}
+    .dia-svg .chg.up{fill:var(--verde);}
+    .dia-svg .chg.down{fill:var(--verm);}    .dia-nota{font-size:10.5px;color:var(--t3);padding:0 16px 12px;margin:0;}
+    @media(max-width:560px){.dia-svg .v{font-size:10.5px;}.dia-svg .x{font-size:9px;letter-spacing:0;}.dia-svg .chg{font-size:8.5px;}}
     .dd-mini-bars{display:flex;align-items:flex-end;gap:14px;height:140px;padding:4px 2px 0;}
     .dd-mini-bars .col{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;}
     .dd-mini-bars .stick{width:100%;max-width:42px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--azul),rgba(59,130,246,.2));}
