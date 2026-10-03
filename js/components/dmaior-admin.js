@@ -2069,7 +2069,30 @@ class DimaiorAdmin extends HTMLElement {
           <div class="dd-bar-compare"><div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div></div>
         </div>
       </div>
-      ${this._ddRenderHoje(d.hoje_em_andamento)}`;
+      ${this._ddRenderHoje(d.hoje_em_andamento)}
+      ${this._ddRenderUltimosDias(d.ultimos_dias)}`;
+  }
+  // Diamantes dos últimos dias fechados (ontem, anteontem, ...), cada um com a
+  // variação contra o dia anterior. Vem de `ultimos_dias` do Worker admin; se o
+  // Worker ainda for a versão antiga (sem o campo), a seção simplesmente não aparece.
+  _ddRenderUltimosDias(dias){
+    if(!Array.isArray(dias)||!dias.length)return '';
+    const sem=['dom','seg','ter','qua','qui','sex','sáb'];
+    const pad=n=>String(n).padStart(2,'0');
+    const rotulos=['Ontem','Anteontem'];
+    const itens=dias.map((x,i)=>{
+      const sobe=x.delta>=0,cor=sobe?'var(--verde)':'var(--verm)';
+      const pct=x.percentual!==null&&x.percentual!==undefined?`${x.percentual>=0?'+':''}${x.percentual.toFixed(1)}%`:'—';
+      return `<div class="dd-ud-item">
+        <p class="dd-hoje-lbl">${rotulos[i]||'3 dias atrás'} · ${sem[x.dia_semana]} ${pad(x.dia)}/${pad(x.mes)}</p>
+        <div class="dd-hoje-val">${this._num(x.total_diamantes)} ${this._dia()}</div>
+        <p class="dd-compare-sub">${x.streamers_ativos} streamers ativos</p>
+        <div class="dd-ud-delta" style="color:${cor}"><span>${sobe?'▲':'▼'} ${this._num(Math.abs(x.delta))}</span><span class="pct">${pct} vs. dia anterior</span></div>
+      </div>`;}).join('');
+    return `<div class="dd-hoje-row dd-ud">
+      <div class="dd-hoje-head"><span class="dd-hoje-dot"></span><span class="dd-hoje-txt">Últimos 3 dias fechados — diamantes de cada dia e a variação contra o dia anterior.</span></div>
+      <div class="dd-ud-grid">${itens}</div>
+    </div>`;
   }
   _ddRenderHoje(h){
     const eq=h.dia_equivalente_mes_anterior;
@@ -5184,6 +5207,11 @@ class DimaiorAdmin extends HTMLElement {
     .dd-hoje-bar{height:34px;margin-top:8px;display:flex;align-items:flex-end;}
     .dd-hoje-bar .seg{width:100%;border-radius:5px 5px 0 0;}
     .dd-hoje-bar .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}
+    .dd-ud-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+    .dd-ud-item{min-width:0;}
+    .dd-ud-delta{display:flex;flex-direction:column;margin-top:6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;}
+    .dd-ud-delta .pct{font-size:10.5px;font-weight:400;color:var(--t3);}
+    @media(max-width:560px){.dd-ud-grid{grid-template-columns:1fr;}}
     .dd-hoje-bar .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
     .dd-hoje-delta{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;padding-bottom:6px;}
     .dd-hoje-delta .pct{font-size:10px;font-weight:400;opacity:.85;}
