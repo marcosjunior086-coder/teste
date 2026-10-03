@@ -469,11 +469,6 @@ class DimaiorAdmin extends HTMLElement {
       ...(this._sub?[]:[{ico:'bolt',    val:m?.impulsionamentos, lbl:'Boosts',        cor:'verde',  fmt:'num'}]),
       {ico:'diamond', val:m?.total_diamantes,  lbl:'Diamantes Mês', cor:'cyan',   fmt:'num', prev:m?.total_diamantes_mes_anterior},
       {ico:'diamond', val:diaDisponivel?this._dashDiamantesDia:undefined, lbl:'Diamantes do Dia', cor:'cyan', fmt:'num'},
-      ...(this._dashDiasAnt||[null,null,null]).map((x,i)=>{
-        const rot=['Ontem','Anteontem','3 dias atrás'][i];
-        const dm=x?` · ${x.data.slice(8,10)}/${x.data.slice(5,7)}`:'';
-        return {ico:'diamond',val:x?x.total:undefined,lbl:`Diamantes ${rot}${dm}`,cor:'cyan',fmt:typeof x?.total==='number'?'num':'raw'};
-      }),
       {ico:'users',   val:m?.streamers_ao_vivo_mes, lbl:'Streamer(s) ao Vivo', cor:'roxo', fmt:'num', prev:m?.streamers_ao_vivo_mes_anterior},
       {ico:'metrics', val:m?.registros_hoje,   lbl:'Registros Hoje',cor:'gold',   fmt:'num'},
       ...(mostrarHoras?[{ico:'clock_r', val:m?.horas_mes, lbl:'Carga Horária Geral', cor:'azul', fmt:'horas', prev:m?.horas_mes_anterior}]:[]),
@@ -495,6 +490,48 @@ class DimaiorAdmin extends HTMLElement {
         ${c.prev!==undefined?`<div class="dc2-prev">Mês anterior: ${c.fmt==='horas'?this._num(Math.round(Number(c.prev||0)))+'h':this._numK(Number(c.prev||0))}</div>`:''}
       </div>`;
     }).join('');
+  }
+
+  // Painel único "Diamantes por dia" do Dashboard: barras dos últimos 7 dias
+  // (6 fechados + hoje em andamento), com a variação de cada dia contra o anterior.
+  _renderDashDiasChart(){
+    const el=this.shadowRoot?.getElementById('gDiasChart');
+    if(!el)return;
+    const sem=['dom','seg','ter','qua','qui','sex','sáb'];
+    const hoje=this._dataHojeBR();
+    const pts=[];
+    for(let k=6;k>=1;k--){const dt=this._dataDiasAtrasBR(k);pts.push({dt,total:this._dashDias&&dt in this._dashDias?this._dashDias[dt]:undefined,hoje:false});}
+    pts.push({dt:hoje,total:this._dashDiamantesDia===null||this._dashDiamantesDia===undefined?undefined:this._dashDiamantesDia,hoje:true});
+    const nums=pts.map(p=>p.total).filter(v=>typeof v==='number');
+    const max=Math.max(...nums,1);
+    const fechados=pts.filter(p=>!p.hoje&&typeof p.total==='number');
+    const soma=fechados.reduce((a,p)=>a+p.total,0);
+    const media=fechados.length?Math.round(soma/fechados.length):null;
+    const cols=pts.map((p,i)=>{
+      const lbl=`${sem[new Date(`${p.dt}T12:00:00Z`).getUTCDay()]} ${p.dt.slice(8,10)}`;
+      const ant=pts[i-1];
+      let chg='';
+      if(typeof p.total==='number'&&ant&&typeof ant.total==='number'&&ant.total>0&&!p.hoje){
+        const v=((p.total-ant.total)/ant.total)*100;
+        chg=`<span class="chg ${v>=0?'up':'down'}">${v>=0?'▲':'▼'}${Math.abs(v).toFixed(0)}%</span>`;
+      }
+      const carregando=p.total===undefined;
+      const falhou=p.total===null;
+      const altura=typeof p.total==='number'?Math.max(4,(p.total/max)*100):4;
+      return `<div class="col">${chg||'<span class="chg"></span>'}
+        <span class="val">${carregando?'<span class="dc2-spin"></span>':falhou?'—':this._numK(p.total)}</span>
+        <div class="stick ${p.hoje?'progress':''} ${carregando||falhou?'vazio':''}" style="height:${altura}%" title="${typeof p.total==='number'?this._num(p.total)+(p.hoje?' — hoje, em andamento':''):''}"></div>
+        <span class="lbl ${p.hoje?'now':''}">${p.hoje?'Hoje •':lbl}</span>
+      </div>`;
+    }).join('');
+    el.innerHTML=`<div class="box dia-box">
+      <div class="bhead">
+        <div class="btitulo">${this._ico('bars_up',14)} Diamantes por dia</div>
+        <span class="dia-sub">${media!==null?`Média dos dias fechados: <b>${this._numK(media)}</b>`:'Últimos 7 dias'}</span>
+      </div>
+      <div class="dia-bars">${cols}</div>
+      <p class="dia-nota">Últimos 6 dias fechados + hoje (listrado = em andamento). % = variação contra o dia anterior.</p>
+    </div>`;
   }
 
   // Toggle "fonte dos dados do Dashboard" — kwai (oficial, direto da Kwai,
@@ -540,19 +577,21 @@ class DimaiorAdmin extends HTMLElement {
     this._api('GET',`/admin/ranking/diario?data=${dataHoje}`).then(diarioDash=>{
       this._dashDiamantesDia=this._listaDiario(diarioDash).reduce((acc,sv)=>acc+this._diam(sv),0);
       this._renderDashMetricasGrid();
+      this._renderDashDiasChart();
     });
-    // Diamantes dos 3 dias anteriores (ontem, anteontem, 3 dias atrás) — mesma
-    // rota do "Diamantes do Dia", uma chamada por data; cada card aparece quando
-    // o seu dia responde.
-    this._dashDiasAnt=[null,null,null];
-    [1,2,3].forEach((k,i)=>{
+    // Gráfico "Diamantes por dia": hoje (em andamento) + 6 dias fechados — mesma
+    // rota do "Diamantes do Dia", uma chamada por data; cada barra aparece
+    // quando o seu dia responde.
+    this._dashDias={};
+    this._renderDashDiasChart();
+    for(let k=1;k<=6;k++){
       const dt=this._dataDiasAtrasBR(k);
       this._api('GET',`/admin/ranking/diario?data=${dt}`).then(r=>{
         const ok=r&&r.ok!==false&&!r.erro;
-        this._dashDiasAnt[i]={data:dt,total:ok?this._listaDiario(r).reduce((acc,sv)=>acc+this._diam(sv),0):'—'};
-        this._renderDashMetricasGrid();
-      }).catch(()=>{this._dashDiasAnt[i]={data:dt,total:'—'};this._renderDashMetricasGrid();});
-    });
+        this._dashDias[dt]=ok?this._listaDiario(r).reduce((acc,sv)=>acc+this._diam(sv),0):null;
+        this._renderDashDiasChart();
+      }).catch(()=>{this._dashDias[dt]=null;this._renderDashDiasChart();});
+    }
 
     // Ações Rápidas — estilo lista colorida (referência imagem 1)
     const qas=[
@@ -5217,6 +5256,23 @@ class DimaiorAdmin extends HTMLElement {
     .dd-bars .stick.progress{background:repeating-linear-gradient(135deg,rgba(0,212,212,.55) 0 6px,rgba(0,212,212,.24) 6px 12px);box-shadow:none;}
     .dd-bars .lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);}
     .dd-bars .lbl.now{color:var(--cyan);}
+    /* Dashboard — painel "Diamantes por dia" (7 barras: 6 dias fechados + hoje) */
+    .dia-box{margin-top:14px;}
+    .dia-sub{font-size:11px;color:var(--t3);}
+    .dia-sub b{color:var(--t1);}
+    .dia-bars{display:flex;align-items:flex-end;gap:10px;height:190px;padding:10px 16px 6px;}
+    .dia-bars .col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;}
+    .dia-bars .val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;color:var(--t1);white-space:nowrap;min-height:16px;display:flex;align-items:center;}
+    .dia-bars .stick{width:100%;max-width:46px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));box-shadow:0 0 16px rgba(0,212,212,.16);}
+    .dia-bars .stick.progress{background:repeating-linear-gradient(135deg,rgba(0,212,212,.55) 0 6px,rgba(0,212,212,.24) 6px 12px);box-shadow:none;}
+    .dia-bars .stick.vazio{opacity:.25;box-shadow:none;}
+    .dia-bars .lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--t3);white-space:nowrap;}
+    .dia-bars .lbl.now{color:var(--cyan);}
+    .dia-bars .chg{font-size:9.5px;font-weight:700;min-height:12px;color:var(--t3);}
+    .dia-bars .chg.up{color:var(--verde);}
+    .dia-bars .chg.down{color:var(--verm);}
+    .dia-nota{font-size:10.5px;color:var(--t3);padding:0 16px 12px;margin:0;}
+    @media(max-width:560px){.dia-bars{gap:5px;padding:10px 8px 6px;}.dia-bars .val{font-size:10.5px;}.dia-bars .lbl{font-size:9px;letter-spacing:0;}.dia-bars .chg{font-size:8.5px;}}
     .dd-mini-bars{display:flex;align-items:flex-end;gap:14px;height:140px;padding:4px 2px 0;}
     .dd-mini-bars .col{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;}
     .dd-mini-bars .stick{width:100%;max-width:42px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--azul),rgba(59,130,246,.2));}
@@ -6214,7 +6270,7 @@ class DimaiorAdmin extends HTMLElement {
           </div>
           <div class="content">
             <button type="button" class="pm-voltar" id="admVoltar" hidden><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Voltar ao menu</button>
-            <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash',`<div style="display:flex;align-items:center;gap:8px;margin-left:6px" title="Quando ativo, os números de diamantes/streamers ao vivo/horas vêm direto da Kwai (mais preciso, já soma sub-agências) em vez do nosso banco"><span style="font-size:11px;color:var(--t3);white-space:nowrap">Dados oficiais Kwai</span><label class="tog-switch"><input type="checkbox" id="dashFonteToggle"><span class="tog-slider"></span></label></div>`)}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="pDash"></div></div>
+            <div class="pag on" id="pag-dashboard">${ph('Dashboard','dashboard','Visão geral da agência','btnAtuDash',`<div style="display:flex;align-items:center;gap:8px;margin-left:6px" title="Quando ativo, os números de diamantes/streamers ao vivo/horas vêm direto da Kwai (mais preciso, já soma sub-agências) em vez do nosso banco"><span style="font-size:11px;color:var(--t3);white-space:nowrap">Dados oficiais Kwai</span><label class="tog-switch"><input type="checkbox" id="dashFonteToggle"><span class="tog-slider"></span></label></div>`)}<div class="dc2-grid" id="gMetricas">${this._loading('grid-column:1/-1')}</div><div id="gDiasChart"></div><div id="pDash"></div></div>
             <div class="pag" id="pag-aoVivo">${ph('Ao Vivo','live','Streamers ativos agora','btnAtuLive',`${!this._sub?`<button class="btn btn-o" id="btnLvOcultas" title="Esconder a live de um streamer do site público">${this._ico('eye_off',13)} Ocultar do site</button>`:''}<button class="btn btn-o" id="btnLvCfg">${this._ico('settings',13)} Configurações<span class="lv-cfg-arrow" id="lvCfgArrow">${this._ico('down',11)}</span></button>`)}<div id="gLives">${this._loading()}</div></div>
             <div class="pag" id="pag-ranking">${ph('Ranking do Mês','trophy','Diamantes acumulados','btnAtuRank',`<button class="btn btn-o" id="btnOcultarRanking">${this._ico('settings',13)} Opções</button>`)}<div class="box"><div id="tbRank">${this._loading()}</div></div></div>
             <div class="pag" id="pag-diario">${ph('Resultado Diário','chart','Performance de hoje','btnAtuDiar')}<div class="box"><div id="tbDiario">${this._loading()}</div></div></div>
