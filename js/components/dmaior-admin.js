@@ -408,6 +408,12 @@ class DimaiorAdmin extends HTMLElement {
     const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
     return `${p.year}-${p.month}-${p.day}`;
   }
+  // Data (YYYY-MM-DD, horário de Brasília) de k dias atrás.
+  _dataDiasAtrasBR(k){
+    const d=new Date(`${this._dataHojeBR()}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate()-k);
+    return d.toISOString().slice(0,10);
+  }
   _proxyFoto(url){url=this._normalizarImagemUrl(url);if(!url||url==='null'||url==='undefined')return null;if(url.includes('flaticon')||url.includes('149071'))return null;if(url.includes('weserv.nl'))return url;return`https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=100&h=100&fit=cover&output=webp`;}
   // Mesmo proxy/cache do weserv.nl, mas sem recortar em círculo (fit=contain)
   // e num tamanho maior — pra presente de galeria mostrar a arte inteira.
@@ -463,6 +469,11 @@ class DimaiorAdmin extends HTMLElement {
       ...(this._sub?[]:[{ico:'bolt',    val:m?.impulsionamentos, lbl:'Boosts',        cor:'verde',  fmt:'num'}]),
       {ico:'diamond', val:m?.total_diamantes,  lbl:'Diamantes Mês', cor:'cyan',   fmt:'num', prev:m?.total_diamantes_mes_anterior},
       {ico:'diamond', val:diaDisponivel?this._dashDiamantesDia:undefined, lbl:'Diamantes do Dia', cor:'cyan', fmt:'num'},
+      ...(this._dashDiasAnt||[null,null,null]).map((x,i)=>{
+        const rot=['Ontem','Anteontem','3 dias atrás'][i];
+        const dm=x?` · ${x.data.slice(8,10)}/${x.data.slice(5,7)}`:'';
+        return {ico:'diamond',val:x?x.total:undefined,lbl:`Diamantes ${rot}${dm}`,cor:'cyan',fmt:typeof x?.total==='number'?'num':'raw'};
+      }),
       {ico:'users',   val:m?.streamers_ao_vivo_mes, lbl:'Streamer(s) ao Vivo', cor:'roxo', fmt:'num', prev:m?.streamers_ao_vivo_mes_anterior},
       {ico:'metrics', val:m?.registros_hoje,   lbl:'Registros Hoje',cor:'gold',   fmt:'num'},
       ...(mostrarHoras?[{ico:'clock_r', val:m?.horas_mes, lbl:'Carga Horária Geral', cor:'azul', fmt:'horas', prev:m?.horas_mes_anterior}]:[]),
@@ -529,6 +540,18 @@ class DimaiorAdmin extends HTMLElement {
     this._api('GET',`/admin/ranking/diario?data=${dataHoje}`).then(diarioDash=>{
       this._dashDiamantesDia=this._listaDiario(diarioDash).reduce((acc,sv)=>acc+this._diam(sv),0);
       this._renderDashMetricasGrid();
+    });
+    // Diamantes dos 3 dias anteriores (ontem, anteontem, 3 dias atrás) — mesma
+    // rota do "Diamantes do Dia", uma chamada por data; cada card aparece quando
+    // o seu dia responde.
+    this._dashDiasAnt=[null,null,null];
+    [1,2,3].forEach((k,i)=>{
+      const dt=this._dataDiasAtrasBR(k);
+      this._api('GET',`/admin/ranking/diario?data=${dt}`).then(r=>{
+        const ok=r&&r.ok!==false&&!r.erro;
+        this._dashDiasAnt[i]={data:dt,total:ok?this._listaDiario(r).reduce((acc,sv)=>acc+this._diam(sv),0):'—'};
+        this._renderDashMetricasGrid();
+      }).catch(()=>{this._dashDiasAnt[i]={data:dt,total:'—'};this._renderDashMetricasGrid();});
     });
 
     // Ações Rápidas — estilo lista colorida (referência imagem 1)
@@ -2069,30 +2092,7 @@ class DimaiorAdmin extends HTMLElement {
           <div class="dd-bar-compare"><div class="seg cur" style="height:${alturaCur}%" title="${this._esc(d.mes_atual.nome)}: ${this._num(d.mes_atual.total_ate_hoje)}"></div></div>
         </div>
       </div>
-      ${this._ddRenderHoje(d.hoje_em_andamento)}
-      ${this._ddRenderUltimosDias(d.ultimos_dias)}`;
-  }
-  // Diamantes dos últimos dias fechados (ontem, anteontem, ...), cada um com a
-  // variação contra o dia anterior. Vem de `ultimos_dias` do Worker admin; se o
-  // Worker ainda for a versão antiga (sem o campo), a seção simplesmente não aparece.
-  _ddRenderUltimosDias(dias){
-    if(!Array.isArray(dias)||!dias.length)return '';
-    const sem=['dom','seg','ter','qua','qui','sex','sáb'];
-    const pad=n=>String(n).padStart(2,'0');
-    const rotulos=['Ontem','Anteontem'];
-    const itens=dias.map((x,i)=>{
-      const sobe=x.delta>=0,cor=sobe?'var(--verde)':'var(--verm)';
-      const pct=x.percentual!==null&&x.percentual!==undefined?`${x.percentual>=0?'+':''}${x.percentual.toFixed(1)}%`:'—';
-      return `<div class="dd-ud-item">
-        <p class="dd-hoje-lbl">${rotulos[i]||'3 dias atrás'} · ${sem[x.dia_semana]} ${pad(x.dia)}/${pad(x.mes)}</p>
-        <div class="dd-hoje-val">${this._num(x.total_diamantes)} ${this._dia()}</div>
-        <p class="dd-compare-sub">${x.streamers_ativos} streamers ativos</p>
-        <div class="dd-ud-delta" style="color:${cor}"><span>${sobe?'▲':'▼'} ${this._num(Math.abs(x.delta))}</span><span class="pct">${pct} vs. dia anterior</span></div>
-      </div>`;}).join('');
-    return `<div class="dd-hoje-row dd-ud">
-      <div class="dd-hoje-head"><span class="dd-hoje-dot"></span><span class="dd-hoje-txt">Últimos 3 dias fechados — diamantes de cada dia e a variação contra o dia anterior.</span></div>
-      <div class="dd-ud-grid">${itens}</div>
-    </div>`;
+      ${this._ddRenderHoje(d.hoje_em_andamento)}`;
   }
   _ddRenderHoje(h){
     const eq=h.dia_equivalente_mes_anterior;
@@ -5206,13 +5206,7 @@ class DimaiorAdmin extends HTMLElement {
     .dd-hoje-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:17px;color:var(--t1);}
     .dd-hoje-bar{height:34px;margin-top:8px;display:flex;align-items:flex-end;}
     .dd-hoje-bar .seg{width:100%;border-radius:5px 5px 0 0;}
-    .dd-hoje-bar .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}
-    .dd-ud-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
-    .dd-ud-item{min-width:0;}
-    .dd-ud-delta{display:flex;flex-direction:column;margin-top:6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;}
-    .dd-ud-delta .pct{font-size:10.5px;font-weight:400;color:var(--t3);}
-    @media(max-width:560px){.dd-ud-grid{grid-template-columns:1fr;}}
-    .dd-hoje-bar .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
+    .dd-hoje-bar .seg.prev{background:linear-gradient(180deg,rgba(160,184,200,.55),rgba(160,184,200,.15));}    .dd-hoje-bar .seg.cur{background:linear-gradient(180deg,var(--cyan),rgba(0,212,212,.2));}
     .dd-hoje-delta{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:13px;padding-bottom:6px;}
     .dd-hoje-delta .pct{font-size:10px;font-weight:400;opacity:.85;}
     @keyframes ddPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
