@@ -617,8 +617,22 @@ class DmaiorHomeWebpro extends HTMLElement {
       }
     }
 
-    // streamer em destaque = mais espectadores (com stream pronto na frente)
-    this._featured = lives.find(l => l.ready) || lives[0] || null;
+    // Streamer em destaque = mais espectadores (com stream pronto na frente) NA
+    // 1ª ESCOLHA. Depois disso fica TRAVADO nele enquanto continuar ao vivo:
+    // a lista vem ordenada por espectadores e, com audiência parecida, o 1º
+    // lugar trocava a cada atualização — o quadro era reconstruído toda vez
+    // (volta pra capa, vídeo reinicia) e ficava piscando. Só troca se o atual
+    // sair do ar (tolera 1 atualização sem ele pra não piscar por falha do radar).
+    const atual = this._featured && lives.find(l => l.url === this._featured.url);
+    if (atual && (atual.ready || this._featuredCleanup)) {
+      this._featured = atual;
+      this._featMiss = 0;
+    } else if (!atual && this._featured && this._featuredCleanup && (this._featMiss = (this._featMiss || 0) + 1) < 2) {
+      // sumiu só nesta atualização: mantém o quadro como está
+    } else {
+      this._featMiss = 0;
+      this._featured = lives.find(l => l.ready) || lives[0] || null;
+    }
     this._renderFeatured();
 
     // insiste até a live tocar de fato dentro do quadro (cobre: componente
