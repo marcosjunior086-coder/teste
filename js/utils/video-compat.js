@@ -17,13 +17,30 @@
 (function () {
   'use strict';
 
-  var UA_SEQUESTRA = /XiaoMi|MiuiBrowser|MIUI|HyperOS|UCBrowser|UCWEB|MQQBrowser|QQBrowser|Quark|HuaweiBrowser|HeyTapBrowser|VivoBrowser/i;
-
+  // O modo canvas é EXPERIMENTAL e fica DESLIGADO por padrão: no Mi Browser real
+  // (2026-10-02) o canvas ficou vazio e o banner sumiu — o vídeo vem do R2 sem
+  // CORS e não dá pra conferir os pixels. Só liga com ?canvasvideo=1 na URL.
+  // ?vcdebug=1 mostra um painel com o estado do vídeo (pra print de diagnóstico).
   function precisaCanvas() {
-    try {
-      if (/[?&]canvasvideo=1\b/.test(location.search)) return true;
-      return UA_SEQUESTRA.test(navigator.userAgent || '');
-    } catch (_) { return false; }
+    try { return /[?&]canvasvideo=1\b/.test(location.search); } catch (_) { return false; }
+  }
+  function debugLigado() {
+    try { return /[?&]vcdebug=1\b/.test(location.search); } catch (_) { return false; }
+  }
+
+  function painelDebug(v, c) {
+    var d = document.getElementById('vc-debug');
+    if (!d) {
+      d = document.createElement('pre');
+      d.id = 'vc-debug';
+      d.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:2147483647;margin:0;padding:6px;background:#000c;color:#0f0;font:11px/1.3 monospace;max-width:96vw;white-space:pre-wrap;pointer-events:none';
+      document.body.appendChild(d);
+    }
+    setInterval(function () {
+      d.textContent = 'canvas=' + (c ? 'sim' : 'nao') + ' paused=' + v.paused + ' t=' + v.currentTime.toFixed(2) +
+        ' ready=' + v.readyState + ' vw=' + v.videoWidth + ' err=' + (v.error ? v.error.code : '-') +
+        '\nUA=' + navigator.userAgent.slice(-70);
+    }, 500);
   }
 
   // Atributos que reduzem o "sequestro" mesmo sem canvas. Nunca deixa `controls`.
@@ -84,6 +101,8 @@
     s.setProperty('aspect-ratio', 'auto', 'important');
     v.insertAdjacentElement('afterend', c);
     if (!v.paused) iniciar();
+    var p = v.play(); if (p && p.catch) p.catch(function () {});
+    return c;
   }
 
   function apply(raiz) {
@@ -94,7 +113,8 @@
       var v = lista[i];
       v.setAttribute('data-vc-ok', '1');
       endurecer(v);
-      if (canvas) virarCanvas(v);
+      var c = canvas ? virarCanvas(v) : null;
+      if (debugLigado() && i === 0) painelDebug(v, c);
     }
   }
 
