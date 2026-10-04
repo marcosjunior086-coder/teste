@@ -2995,6 +2995,8 @@
         if(m) return `https://docs.google.com/document/d/${m[1]}/preview`;
         m = /^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)/.exec(s);
         if(m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+        // Página de campanha da própria Kwai (ex.: Arena Agência) — não bloqueia ser incorporada
+        if(/^https:\/\/ppg\.kwai-pro\.com\//.test(s)) return s;
         return null;
     }
     // Só incorpora o que o Worker conferiu que dá pra preencher sem login do Google;

@@ -3213,6 +3213,7 @@ class DimaiorAdmin extends HTMLElement {
     if(m)return`https://docs.google.com/document/d/${m[1]}/preview`;
     m=/^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)/.exec(s);
     if(m)return`https://drive.google.com/file/d/${m[1]}/preview`;
+    if(/^https:\/\/ppg\.kwai-pro\.com\//.test(s))return s; // página de campanha da própria Kwai
     return null;
   }
   _evEmbedInsc(e){return(typeof e.inscricao_embed==='string'&&e.inscricao_embed.startsWith('https://docs.google.com/forms/'))?e.inscricao_embed:null;}
