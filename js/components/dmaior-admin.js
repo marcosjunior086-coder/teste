@@ -3174,7 +3174,8 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div class="com-lista">${lista.map(e=>{
       const cor=this._evCorOk(e.cor),tx=this._evTextoSobre(cor);
       const dias=new Set(e.dias||[]),pk=new Set(e.dias_pk||[]);
-      let tl='';for(let d=1;d<=totalDias;d++){const on=dias.has(d);tl+=`<i class="${on?'on':''}${pk.has(d)?' pk':''}" style="${on?`background:${cor};color:${tx}`:''}" title="${on?(pk.has(d)?'Dia de PK':'Dia do evento'):''}">${d}</i>`;}
+      const perTl=this._evPeriodoEf(e);
+      let tl='';for(let d=1;d<=totalDias;d++){const on=dias.has(d),ins=on&&perTl&&d>=perTl.de&&d<=perTl.ate;tl+=`<i class="${on?'on':''}${ins?' ins':''}${pk.has(d)?' pk':''}" style="${on?(ins?`border-color:${cor}`:`background:${cor};color:${tx}`):''}" title="${on?(ins?'Período de inscrição':(pk.has(d)?'Dia de PK':'Dia do evento')):''}">${d}</i>`;}
       const thumb=e.imagem_url
         ?(this._ehVideo(e.imagem_url)?`<video class="com-thumb" src="${this._safeImgSrc(e.imagem_url)}" muted playsinline preload="metadata"></video>`:`<img class="com-thumb" src="${this._safeImgSrc(e.imagem_url)}" alt="" onerror="this.style.display='none'">`)
         :`<span class="ev-semimg" style="background:${cor};color:${tx}">${this._ico('image',18)}</span>`;
@@ -3189,7 +3190,8 @@ class DimaiorAdmin extends HTMLElement {
       const links=`${rg?`<a class="ev-link" href="${rg}" target="_blank" rel="noopener noreferrer"${vRg}>${this._ii('file_text',12)}Regras</a>`:`<span class="ev-link off">sem regras</span>`}${ins?`<a class="ev-link" href="${ins}" target="_blank" rel="noopener noreferrer"${vIns}>${this._ii('edit',12)}Inscrição</a>`:''}`;
       const podeAvisar=e.status==='ativo'&&e.publico!=='agencia';
       const ci=e.inscritos||{total:0,enviados:0,novas:0};
-      const insc=e.link_inscricao?`<div class="ev-insc"><span class="ev-insc-t">Inscrição pelo painel:</span><button type="button" class="btn btn-sm ${e.inscricao_aberta?'btn-g':'btn-o'}" data-ev-insc-toggle="${e.id}" data-v="${e.inscricao_aberta?'0':'1'}" ${e.form_url?'':'disabled'}>${e.inscricao_aberta?'Abertas':'Fechadas'}</button><label class="ev-insc-t">até <input type="date" class="ev-data" data-ev-insc-ate="${e.id}" value="${this._esc(e.inscricao_ate||'')}"></label><span class="com-data ev-insc-q" title="Perguntas lidas do formulário da plataforma">${this._esc(this._evPerguntasTxt(e))}</span><button type="button" class="btn btn-o btn-sm" data-ev-reler="${e.id}">${this._ico('refresh',12)} Reler formulário</button>${ci.total?`<button type="button" class="btn btn-o btn-sm" data-ev-ver-insc="1">${this._ico('users',12)} ${ci.total} inscrito(s)${ci.novas?` · ${ci.novas} nova(s)`:''}</button>`:''}</div>`:'';
+      const per=this._evPeriodoEf(e);
+      const insc=e.link_inscricao?`<div class="ev-insc"><span class="ev-insc-t">Inscrição pelo painel:</span><button type="button" class="btn btn-sm ${e.inscricao_aberta?'btn-g':'btn-o'}" data-ev-insc-toggle="${e.id}" data-v="${e.inscricao_aberta?'0':'1'}" ${e.form_url?'':'disabled'}>${e.inscricao_aberta?'Abertas':'Fechadas'}</button><label class="ev-insc-t">inscrições até o dia <input type="number" min="1" max="31" class="ev-data ev-dia" data-ev-insc-ate="${e.id}" data-mes="${e.mes}" value="${e.inscricao_ate&&String(e.inscricao_ate).slice(0,7)===e.mes?Number(String(e.inscricao_ate).slice(8,10)):''}" placeholder="${e.periodo_insc?e.periodo_insc.ate:''}"></label>${per?`<span class="com-data ev-insc-q">${per.manual?'Definido por você':'Detectado na planilha'}: inscrições dias ${per.de} a ${per.ate} · evento depois disso</span>`:''}<span class="com-data ev-insc-q" title="Perguntas lidas do formulário da plataforma">${this._esc(this._evPerguntasTxt(e))}</span><button type="button" class="btn btn-o btn-sm" data-ev-reler="${e.id}">${this._ico('refresh',12)} Reler formulário</button>${ci.total?`<button type="button" class="btn btn-o btn-sm" data-ev-ver-insc="1">${this._ico('users',12)} ${ci.total} inscrito(s)${ci.novas?` · ${ci.novas} nova(s)`:''}</button>`:''}</div>`:'';
       return`<div class="com-item ev-item ${e.status==='ativo'?'is-important':'is-fast'}">
         <div class="com-preview">${thumb}<div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1)">${this._esc(e.nome)}${e.nome_zh?` <span class="com-data" style="margin-left:4px">${this._esc(e.nome_zh)}</span>`:''}</strong><span class="com-texto">Dias ${this._esc(this._evDias(e.dias)||'—')}</span><div class="ev-links">${links}</div></div></div>
         <div class="com-acoes">
@@ -3204,7 +3206,7 @@ class DimaiorAdmin extends HTMLElement {
     }).join('')}</div>`;
     const por=id=>lista.find(x=>x.id===id);
     el.querySelectorAll('[data-ev-insc-toggle]').forEach(b=>b.addEventListener('click',()=>this._eventoInscToggle(b.dataset.evInscToggle,b.dataset.v==='1')));
-    el.querySelectorAll('[data-ev-insc-ate]').forEach(i=>i.addEventListener('change',()=>this._eventoInscAte(i.dataset.evInscAte,i.value)));
+    el.querySelectorAll('[data-ev-insc-ate]').forEach(i=>i.addEventListener('change',()=>this._eventoInscAte(i.dataset.evInscAte,i.dataset.mes,i.value)));
     el.querySelectorAll('[data-ev-reler]').forEach(b=>b.addEventListener('click',()=>this._eventoRelerForm(b.dataset.evReler)));
     el.querySelectorAll('[data-ev-ver-insc]').forEach(b=>b.addEventListener('click',()=>this._abaCom('inscricoes')));
     el.querySelectorAll('[data-ev-ver]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();this._abrirEvView(a.dataset.evId,a.dataset.evVer);}));
@@ -3247,6 +3249,12 @@ class DimaiorAdmin extends HTMLElement {
   // O streamer se inscreve no painel dele. Aqui o admin vê quem se inscreveu, abre o
   // formulário da plataforma JÁ PREENCHIDO ("Inscrever fulano"), envia e marca como
   // enviado — a linha fica verde e ele segue pro próximo.
+  // Período de inscrição: "inscrições até o dia N" (definido aqui) vale mais que o detectado na planilha
+  _evPeriodoEf(e){
+    const dias=[...(e.dias||[])].sort((a,b)=>a-b);if(!dias.length||!e.link_inscricao)return null;
+    if(e.inscricao_ate&&String(e.inscricao_ate).slice(0,7)===e.mes){const ate=Number(String(e.inscricao_ate).slice(8,10));return ate>=dias[0]?{de:dias[0],ate,manual:true}:null;}
+    return e.periodo_insc?{...e.periodo_insc,manual:false}:null;
+  }
   _evPerguntasTxt(e){
     if(e.form_perguntas==null)return'formulário ainda não lido';
     if(!e.form_url)return'o link de inscrição não é um Google Forms';
@@ -3355,10 +3363,17 @@ class DimaiorAdmin extends HTMLElement {
     this._toast(aberta?'Inscrições abertas — o streamer já vê "Tenho interesse"':'Inscrições fechadas');
     this._carregarEventos(this._evMes,true);
   }
-  async _eventoInscAte(id,data){
-    const r=await this._api('PATCH',`/admin/eventos/${id}`,{inscricao_ate:data||''});
-    if(!r?.ok){this._toast(r?.erro||'Erro ao salvar a data','err');return;}
-    this._toast(data?'Prazo salvo':'Prazo removido');
+  async _eventoInscAte(id,mes,dia){
+    let data='';
+    if(String(dia).trim()!==''){
+      const n=Number(dia),[y,m]=mes.split('-').map(Number),max=new Date(y,m,0).getDate();
+      if(!Number.isInteger(n)||n<1||n>max){this._toast(`Digite um dia entre 1 e ${max}`,'err');this._carregarEventos(this._evMes,true);return;}
+      data=`${mes}-${String(n).padStart(2,'0')}`;
+    }
+    const r=await this._api('PATCH',`/admin/eventos/${id}`,{inscricao_ate:data});
+    if(!r?.ok){this._toast(r?.erro||'Erro ao salvar','err');return;}
+    this._toast(data?`Inscrições até o dia ${Number(dia)} — o resto vira "evento"`:'Voltou ao período detectado na planilha');
+    this._carregarEventos(this._evMes,true);
   }
   async _eventoRelerForm(id){
     this._toast('Lendo o formulário…');
@@ -6454,6 +6469,8 @@ class DimaiorAdmin extends HTMLElement {
     .ev-insc{grid-area:insc;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--brddim);border-radius:10px;background:rgba(0,212,212,.04)}
     .ev-insc-t{font-size:11px;color:var(--t3);display:inline-flex;align-items:center;gap:6px}
     .ev-insc-q{flex:1 1 200px;min-width:0}
+    .ev-tl i.ins{background:transparent;border:2px solid;box-sizing:border-box;color:var(--t1)}
+    .ev-data.ev-dia{width:64px}
     .ev-data{padding:5px 8px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:12px;font-family:inherit;color-scheme:dark}
     .ev-chip{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--brd);background:var(--glass);color:var(--t1);cursor:pointer;font-family:inherit}
     .ev-chip:hover{border-color:var(--cyan)}

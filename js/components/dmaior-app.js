@@ -779,6 +779,14 @@
             .aviso-card-data svg{width:11px;height:11px;flex-shrink:0;}
             /* Dados do streamer pra copiar no formulário */
             /* Calendário de eventos */
+            .cal-pts i.ins,.cal-ev i.ins{background:transparent;border:2px solid #888;box-sizing:border-box;}
+            .cal-pts i.ins{width:7px;height:7px;border-width:1.5px;}
+            .cal-per{font-style:normal;font-size:.62rem;font-weight:700;padding:1px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;background:rgba(240,192,64,.18);color:var(--gold);}
+            .cal-leg{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:.7rem;color:var(--muted);}
+            .cal-leg span{display:inline-flex;align-items:center;gap:6px;}
+            .cal-leg i{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block;box-sizing:border-box;}
+            .cal-leg i.ins{background:transparent;border:2px solid var(--muted);}
+            .evt-tl i.ins{background:transparent;border:2px solid #888;box-sizing:border-box;color:var(--text);}
             .cal-wrap{border:1px solid var(--border);border-radius:16px;background:var(--glass);padding:12px 12px 10px;margin-bottom:20px;}
             .cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
             .cal-mes{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:1.1rem;color:var(--text);text-transform:uppercase;letter-spacing:.04em;}
@@ -2944,6 +2952,10 @@
 
     _evtCor(c){ return /^#[0-9a-f]{6}$/i.test(c || '') ? c : '#00d4d4'; }
     _evtTexto(c){ const n = parseInt(this._evtCor(c).slice(1), 16); return (((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000) > 150 ? '#111' : '#fff'; }
+    // Período de inscrição (vem do servidor): esses dias são "inscrição"; os demais, "evento rolando"
+    _evtDiaInsc(e, d){ const p = e.periodo_insc; return !!(p && d >= p.de && d <= p.ate); }
+    _evtDiasEvt(e){ return (e.dias || []).filter(d => !this._evtDiaInsc(e, d)); }
+    _evtDiasInscLista(e){ return (e.dias || []).filter(d => this._evtDiaInsc(e, d)); }
     _evtRespTxt(e){
         const r = e.minha_inscricao?.respostas || {};
         const t = (e.perguntas || []).map(q => { const v = r[q.id]; return v == null || v === '' ? '' : (Array.isArray(v) ? v.join(', ') : String(v)); }).filter(Boolean).join(' · ');
@@ -2958,13 +2970,13 @@
         const [y, m] = mes.split('-').map(Number);
         const primeiro = new Date(y, m - 1, 1).getDay(), total = new Date(y, m, 0).getDate();
         const doMes = lista.filter(e => e.mes === mes), porDia = {};
-        doMes.forEach(e => (e.dias || []).forEach(d => (porDia[d] = porDia[d] || []).push(e)));
+        doMes.forEach(e => (e.dias || []).forEach(d => (porDia[d] = porDia[d] || []).push({ e, insc: this._evtDiaInsc(e, d) })));
         const dia = this._calDia != null ? (this._calDia > 0 ? this._calDia : null) : (mes === mesHoje ? hd : null);
         let cel = '';
         for(let i = 0; i < primeiro; i++) cel += '<span class="cal-v"></span>';
         for(let d = 1; d <= total; d++){
             const evs = porDia[d] || [];
-            const pts = evs.slice(0, 4).map(e => `<i style="background:${this._evtCor(e.cor)}"></i>`).join('') + (evs.length > 4 ? '<em>+</em>' : '');
+            const pts = evs.slice(0, 4).map(({ e, insc }) => `<i class="${insc ? 'ins' : ''}" style="${insc ? `border-color:${this._evtCor(e.cor)}` : `background:${this._evtCor(e.cor)}`}"></i>`).join('') + (evs.length > 4 ? '<em>+</em>' : '');
             cel += `<button type="button" class="cal-d${evs.length ? ' tem' : ''}${mes === mesHoje && d === hd ? ' hoje' : ''}${dia === d ? ' sel' : ''}" data-cal-dia="${d}" aria-label="Dia ${d}${evs.length ? `, ${evs.length} evento(s)` : ''}"><b>${d}</b><span class="cal-pts">${pts}</span></button>`;
         }
         const i = meses.indexOf(mes);
@@ -2973,13 +2985,13 @@
         if(dia != null){
             const evs = porDia[dia] || [];
             det = `<div class="cal-det"><div class="cal-det-t">Dia ${dia} de ${NM[m - 1]}</div>${evs.length
-                ? evs.map(e => `<div class="cal-ev"><i style="background:${this._evtCor(e.cor)}"></i><span>${this._escHtml(e.nome)}</span>${(e.dias_pk || []).includes(dia) ? '<em class="cal-pk">PK</em>' : ''}${e.minha_inscricao ? '<em class="cal-ins">Inscrito</em>' : ''}</div>`).join('')
+                ? evs.map(({ e, insc }) => `<div class="cal-ev"><i class="${insc ? 'ins' : ''}" style="${insc ? `border-color:${this._evtCor(e.cor)}` : `background:${this._evtCor(e.cor)}`}"></i><span>${this._escHtml(e.nome)}</span>${insc ? '<em class="cal-per">Inscrições</em>' : ((e.dias_pk || []).includes(dia) ? '<em class="cal-pk">PK</em>' : '')}${e.minha_inscricao ? '<em class="cal-ins">Inscrito</em>' : ''}</div>`).join('')
                 : '<div class="cal-vazio">Nenhum evento neste dia.</div>'}</div>`;
         }
         return `<div class="cal-wrap">
             <div class="cal-top">${nav(-1, i > 0)}<div class="cal-mes">${NM[m - 1]} ${y}</div>${nav(1, i < meses.length - 1)}</div>
             <div class="cal-sem"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
-            <div class="cal-grid">${cel}</div>${det}</div>`;
+            <div class="cal-grid">${cel}</div>${doMes.some(e => e.periodo_insc) ? '<div class="cal-leg"><span><i></i>Evento rolando</span><span><i class="ins"></i>Período de inscrição</span></div>' : ''}${det}</div>`;
     }
 
     _renderEventosStreamer(el, lista, hoje){
@@ -2988,15 +3000,19 @@
         const [hy, hm, hd] = String(hoje).split('-').map(Number);
         const mesHoje = `${hy}-${String(hm).padStart(2, '0')}`;
         const fase = e => {
-            const dias = [...(e.dias || [])].sort((a, b) => a - b);
-            if(!dias.length) return { f: 'depois', ini: null };
-            if(e.mes > mesHoje) return { f: 'depois', ini: dias[0] };
+            const todos = [...(e.dias || [])].sort((a, b) => a - b);
+            const evt = this._evtDiasEvt(e).sort((a, b) => a - b);
+            const base = evt.length ? evt : todos;           // "evento rolando" = dias fora do período de inscrição
+            if(!base.length) return { f: 'depois', ini: null };
+            if(e.mes > mesHoje) return { f: 'depois', ini: todos[0] };
             if(e.mes < mesHoje) return { f: 'fim' };
-            if(dias.includes(hd)) return { f: 'hoje' };
-            const prox = dias.find(d => d > hd);
+            if(base.includes(hd)) return { f: 'hoje' };
+            const p = e.periodo_insc;
+            if(p && e.inscricao_aberta && hd >= p.de && hd <= p.ate) return { f: 'insc', ini: base.find(d => d > hd) || null };
+            const prox = base.find(d => d > hd);
             return prox ? { f: 'prox', ini: prox } : { f: 'fim' };
         };
-        const grupos = { hoje: [], prox: [], depois: [], fim: [] };
+        const grupos = { hoje: [], insc: [], prox: [], depois: [], fim: [] };
         lista.forEach(e => { const i = fase(e); grupos[i.f].push({ e, i }); });
         grupos.prox.sort((a, b) => a.i.ini - b.i.ini);
 
@@ -3008,11 +3024,13 @@
             let tl = '';
             for(let d = 1; d <= total; d++){
                 const on = dias.has(d), isHoje = mesAtual && d === hd;
-                tl += `<i class="${on ? 'on' : ''}${pk.has(d) ? ' pk' : ''}${isHoje ? ' hoje' : ''}" style="${on ? `background:${cor};color:${tx}` : ''}">${d}</i>`;
+                const insd = on && this._evtDiaInsc(e, d);
+                tl += `<i class="${on ? 'on' : ''}${insd ? ' ins' : ''}${pk.has(d) ? ' pk' : ''}${isHoje ? ' hoje' : ''}" style="${on ? (insd ? `border-color:${cor}` : `background:${cor};color:${tx}`) : ''}">${d}</i>`;
             }
             const mm = String(am).padStart(2, '0');
             let chip = '';
             if(i.f === 'hoje') chip = pk.has(hd) ? `<span class="evt-chip hoje">Hoje é dia de PK</span>` : `<span class="evt-chip hoje">Acontecendo hoje</span>`;
+            else if(i.f === 'insc') chip = `<span class="evt-chip hoje">Inscrições até ${String(e.periodo_insc.ate).padStart(2, '0')}/${mm}</span>`;
             else if(i.f === 'prox') chip = `<span class="evt-chip">Próximo dia: ${i.ini}/${mm}</span>`;
             else if(i.f === 'depois' && i.ini) chip = `<span class="evt-chip">Começa dia ${i.ini}/${mm}</span>`;
             else if(i.f === 'fim') chip = `<span class="evt-chip off">Encerrado neste mês</span>`;
@@ -3032,7 +3050,9 @@
                 ${img}
                 <div class="evt-body">
                     <div class="evt-top"><div class="evt-nome">${this._escHtml(e.nome)}</div>${chip}</div>
-                    <div class="evt-dias">Dias ${this._escHtml(this._evtDiasTxt(e.dias) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>
+                    ${e.periodo_insc
+                        ? `<div class="evt-dias"><b>Inscrições:</b> dias ${this._escHtml(this._evtDiasTxt(this._evtDiasInscLista(e)) || '—')}</div><div class="evt-dias"><b>Evento:</b> dias ${this._escHtml(this._evtDiasTxt(this._evtDiasEvt(e)) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>`
+                        : `<div class="evt-dias">Dias ${this._escHtml(this._evtDiasTxt(e.dias) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>`}
                     ${pkTxt}
                     <div class="evt-tl">${tl}</div>
                     ${minha}
@@ -3049,6 +3069,7 @@
             ${this._calendarioEventos(lista, mesHoje, hd)}
             ${minhasHtml}
             ${secao('Acontecendo hoje', grupos.hoje)}
+            ${secao('Inscrições abertas', grupos.insc)}
             ${secao('Próximos eventos', grupos.prox)}
             ${secao('Mês que vem', grupos.depois)}
             ${fim}
