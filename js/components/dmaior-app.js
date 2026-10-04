@@ -849,6 +849,22 @@
             .aec-txt b{font-size:.92rem;}
             .aec-txt small{font-size:.75rem;color:var(--muted);}
             .aec-go{font-size:1.4rem;color:var(--muted);}
+            /* Legenda/filtro do calendário e modalzinho do dia */
+            .cal-chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px;}
+            .cal-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:5px 11px;border-radius:99px;border:1px solid var(--border);background:none;color:var(--text);font-family:inherit;font-size:.74rem;font-weight:600;cursor:pointer;}
+            .cal-chip i{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+            .cal-chip.on{background:var(--cyan-d);border-color:var(--cyan);color:var(--cyan);}
+            .cal-ev-t{font-style:normal;font-size:.62rem;font-weight:700;padding:1px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;background:rgba(128,128,128,.18);color:var(--muted);}
+            .evt-modal-box.evt-dia-box{height:auto;max-height:80vh;width:min(520px,100%);}
+            .dia-body{padding:12px 14px 16px;overflow:auto;display:flex;flex-direction:column;gap:10px;}
+            .dia-ev{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--glass);}
+            .dia-ev-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+            .dia-ev-top b{font-size:.92rem;color:var(--text);}
+            .dia-ev-top i{width:11px;height:11px;border-radius:50%;flex-shrink:0;box-sizing:border-box;}
+            .dia-ev-top i.ins{background:transparent;border:2px solid #888;}
+            .dia-ev-btns{display:flex;gap:6px;flex-wrap:wrap;}
+            .dia-ev-btns .aviso-btn-sec,.dia-ev-btns .aviso-btn-pri{padding:7px 12px;font-size:.78rem;}
+            @media(max-width:700px){.evt-modal-box.evt-dia-box{height:auto;border-radius:16px;border:1px solid var(--border);width:calc(100% - 24px);}.evt-modal:has(.evt-dia-box){padding:12px;}}
             /* Janela de leitura (regras / inscrição) dentro do painel */
             .evt-modal{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;}
             .evt-modal.on{display:flex;}
@@ -2962,36 +2978,95 @@
         return t || 'Interesse confirmado';
     }
 
-    // Calendário do mês: cada dia mostra pontinhos coloridos dos eventos; tocar no dia lista o que acontece nele.
+    // Calendário do mês: pontinhos coloridos por evento; a legenda filtra um único evento;
+    // tocar num dia abre um modalzinho com o que acontece nele.
     _calendarioEventos(lista, mesHoje, hd){
         const NM = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
         const meses = [...new Set([...lista.map(e => e.mes), mesHoje])].sort();
         const mes = this._calMes && meses.includes(this._calMes) ? this._calMes : mesHoje;
+        this._calMesAtual = mes;
         const [y, m] = mes.split('-').map(Number);
         const primeiro = new Date(y, m - 1, 1).getDay(), total = new Date(y, m, 0).getDate();
-        const doMes = lista.filter(e => e.mes === mes), porDia = {};
-        doMes.forEach(e => (e.dias || []).forEach(d => (porDia[d] = porDia[d] || []).push({ e, insc: this._evtDiaInsc(e, d) })));
-        const dia = this._calDia != null ? (this._calDia > 0 ? this._calDia : null) : (mes === mesHoje ? hd : null);
+        const doMes = lista.filter(e => e.mes === mes);
+        if(this._calFiltro && !doMes.some(e => String(e.id) === String(this._calFiltro))) this._calFiltro = null;
+        const filtro = this._calFiltro ? String(this._calFiltro) : null;
+        const visiveis = filtro ? doMes.filter(e => String(e.id) === filtro) : doMes, porDia = {};
+        visiveis.forEach(e => (e.dias || []).forEach(d => (porDia[d] = porDia[d] || []).push({ e, insc: this._evtDiaInsc(e, d) })));
         let cel = '';
         for(let i = 0; i < primeiro; i++) cel += '<span class="cal-v"></span>';
         for(let d = 1; d <= total; d++){
             const evs = porDia[d] || [];
             const pts = evs.slice(0, 4).map(({ e, insc }) => `<i class="${insc ? 'ins' : ''}" style="${insc ? `border-color:${this._evtCor(e.cor)}` : `background:${this._evtCor(e.cor)}`}"></i>`).join('') + (evs.length > 4 ? '<em>+</em>' : '');
-            cel += `<button type="button" class="cal-d${evs.length ? ' tem' : ''}${mes === mesHoje && d === hd ? ' hoje' : ''}${dia === d ? ' sel' : ''}" data-cal-dia="${d}" aria-label="Dia ${d}${evs.length ? `, ${evs.length} evento(s)` : ''}"><b>${d}</b><span class="cal-pts">${pts}</span></button>`;
+            cel += `<button type="button" class="cal-d${evs.length ? ' tem' : ''}${mes === mesHoje && d === hd ? ' hoje' : ''}" data-cal-dia="${d}" aria-label="Dia ${d}${evs.length ? `, ${evs.length} evento(s)` : ''}"><b>${d}</b><span class="cal-pts">${pts}</span></button>`;
         }
         const i = meses.indexOf(mes);
         const nav = (dir, ok) => `<button type="button" class="cal-nav" data-cal-mes="${ok ? meses[i + dir] : ''}" ${ok ? '' : 'disabled'} aria-label="${dir < 0 ? 'Mês anterior' : 'Próximo mês'}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${dir < 0 ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6'}"/></svg></button>`;
-        let det = '';
-        if(dia != null){
-            const evs = porDia[dia] || [];
-            det = `<div class="cal-det"><div class="cal-det-t">Dia ${dia} de ${NM[m - 1]}</div>${evs.length
-                ? evs.map(({ e, insc }) => `<div class="cal-ev"><i class="${insc ? 'ins' : ''}" style="${insc ? `border-color:${this._evtCor(e.cor)}` : `background:${this._evtCor(e.cor)}`}"></i><span>${this._escHtml(e.nome)}</span>${insc ? '<em class="cal-per">Inscrições</em>' : ((e.dias_pk || []).includes(dia) ? '<em class="cal-pk">PK</em>' : '')}${e.minha_inscricao ? '<em class="cal-ins">Inscrito</em>' : ''}</div>`).join('')
-                : '<div class="cal-vazio">Nenhum evento neste dia.</div>'}</div>`;
-        }
+        const chips = doMes.length > 1 || filtro
+            ? `<div class="cal-chips" role="group" aria-label="Filtrar por evento"><button type="button" class="cal-chip${filtro ? '' : ' on'}" data-cal-filtro="">Todos</button>${doMes.map(e => `<button type="button" class="cal-chip${filtro === String(e.id) ? ' on' : ''}" data-cal-filtro="${this._escHtml(e.id)}"><i style="background:${this._evtCor(e.cor)}"></i>${this._escHtml(e.nome)}</button>`).join('')}</div>`
+            : '';
         return `<div class="cal-wrap">
             <div class="cal-top">${nav(-1, i > 0)}<div class="cal-mes">${NM[m - 1]} ${y}</div>${nav(1, i < meses.length - 1)}</div>
+            ${chips}
             <div class="cal-sem"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
-            <div class="cal-grid">${cel}</div>${doMes.some(e => e.periodo_insc) ? '<div class="cal-leg"><span><i></i>Evento rolando</span><span><i class="ins"></i>Período de inscrição</span></div>' : ''}${det}</div>`;
+            <div class="cal-grid">${cel}</div>${doMes.some(e => e.periodo_insc) ? '<div class="cal-leg"><span><i></i>Evento rolando</span><span><i class="ins"></i>Período de inscrição</span></div>' : ''}</div>`;
+    }
+
+    // Modalzinho do dia: o que acontece nele, com atalhos pra regras, inscrição e "ver só este evento"
+    _abrirDiaModal(mes, d){
+        const NM = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+        const filtro = this._calFiltro ? String(this._calFiltro) : null;
+        const evs = (this._evtLista || []).filter(e => e.mes === mes && (e.dias || []).includes(d) && (!filtro || String(e.id) === filtro));
+        const shell = this.qs('.shell') || this;
+        let m = this.qs('#evtDia');
+        if(!m){
+            m = document.createElement('div');
+            m.id = 'evtDia'; m.className = 'evt-modal';
+            m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+            shell.appendChild(m);
+            m.addEventListener('click', ev => { if(ev.target === m) this._fecharDiaModal(); });
+        }
+        const [y, mm] = mes.split('-').map(Number), esc = s => this._escHtml(s);
+        const linhas = evs.map(e => {
+            const insc = this._evtDiaInsc(e, d), cor = this._evtCor(e.cor), mi = e.minha_inscricao;
+            const tag = insc ? '<em class="cal-per">Período de inscrição</em>' : ((e.dias_pk || []).includes(d) ? '<em class="cal-pk">Dia de PK</em>' : '<em class="cal-ev-t">Evento rolando</em>');
+            const rg = !!e.link_regras;
+            let bIns = '';
+            if(mi && mi.status === 'enviado') bIns = `<span class="evt-ok">${this._evtOkIco()} Inscrição enviada</span>`;
+            else if(mi) bIns = `<button type="button" class="aviso-btn-sec" data-dia-insc="${esc(e.id)}">Alterar inscrição</button>`;
+            else if(e.inscricao_aberta) bIns = `<button type="button" class="aviso-btn-pri" data-dia-insc="${esc(e.id)}">Tenho interesse</button>`;
+            return `<div class="dia-ev">
+                <div class="dia-ev-top"><i class="${insc ? 'ins' : ''}" style="${insc ? `border-color:${cor}` : `background:${cor}`}"></i><b>${esc(e.nome)}</b>${tag}${mi ? '<em class="cal-ins">Inscrito</em>' : ''}</div>
+                <div class="dia-ev-btns">
+                    <button type="button" class="aviso-btn-sec" data-dia-filtro="${esc(e.id)}">${filtro === String(e.id) ? 'Mostrar todos os eventos' : 'Ver só este evento'}</button>
+                    ${rg ? `<button type="button" class="aviso-btn-sec" data-dia-regras="${esc(e.id)}">${this._evtEmbedRegras(e.link_regras) ? 'Ler regras' : 'Regras'}</button>` : ''}${bIns}
+                </div></div>`;
+        }).join('');
+        m.innerHTML = `<div class="evt-modal-box evt-dia-box">
+            <div class="evt-modal-top"><div class="evt-modal-tit">Dia ${d} de ${NM[mm - 1]}</div>
+                <button type="button" class="evt-modal-x" id="evtDiaX" aria-label="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+            <div class="dia-body">${linhas || '<div class="cal-vazio">Nenhum evento neste dia.</div>'}</div></div>`;
+        m.querySelector('#evtDiaX').addEventListener('click', () => this._fecharDiaModal());
+        const fora = fn => id => { this._fecharDiaModal(); fn(id); };
+        m.querySelectorAll('[data-dia-regras]').forEach(b => b.addEventListener('click', () => fora(i => this._abrirRegrasModal(i))(b.dataset.diaRegras)));
+        m.querySelectorAll('[data-dia-insc]').forEach(b => b.addEventListener('click', () => fora(i => this._abrirInscricaoModal(i))(b.dataset.diaInsc)));
+        m.querySelectorAll('[data-dia-filtro]').forEach(b => b.addEventListener('click', () => {
+            const id = b.dataset.diaFiltro;
+            this._calFiltro = filtro === String(id) ? null : id;
+            this._fecharDiaModal();
+            this._renderEventosStreamer(this.qs('#avisosEventos'), this._evtLista, this._evtHoje);
+        }));
+        m.classList.add('on');
+        document.documentElement.style.overflow = 'hidden';
+        this._evtEsc3 = ev => { if(ev.key === 'Escape') this._fecharDiaModal(); };
+        document.addEventListener('keydown', this._evtEsc3);
+        m.querySelector('#evtDiaX').focus();
+    }
+    _fecharDiaModal(){
+        const m = this.qs('#evtDia');
+        if(!m) return;
+        m.classList.remove('on');
+        document.documentElement.style.overflow = '';
+        if(this._evtEsc3){ document.removeEventListener('keydown', this._evtEsc3); this._evtEsc3 = null; }
     }
 
     _renderEventosStreamer(el, lista, hoje){
@@ -3074,15 +3149,14 @@
             ${secao('Mês que vem', grupos.depois)}
             ${fim}
         </div>`;
-        el.querySelectorAll('[data-cal-dia]').forEach(b => b.addEventListener('click', () => {
-            const d = Number(b.dataset.calDia);
-            const atual = this._calDia != null ? this._calDia : ((this._calMes || mesHoje) === mesHoje ? hd : -1);
-            this._calDia = atual === d ? -1 : d;   // tocar de novo no mesmo dia desmarca
+        el.querySelectorAll('[data-cal-dia]').forEach(b => b.addEventListener('click', () => this._abrirDiaModal(this._calMesAtual || mesHoje, Number(b.dataset.calDia))));
+        el.querySelectorAll('[data-cal-filtro]').forEach(b => b.addEventListener('click', () => {
+            this._calFiltro = b.dataset.calFiltro || null;
             this._renderEventosStreamer(el, this._evtLista, this._evtHoje);
         }));
         el.querySelectorAll('[data-cal-mes]').forEach(b => b.addEventListener('click', () => {
             if(!b.dataset.calMes) return;
-            this._calMes = b.dataset.calMes; this._calDia = null;
+            this._calMes = b.dataset.calMes; this._calFiltro = null;
             this._renderEventosStreamer(el, this._evtLista, this._evtHoje);
         }));
         el.querySelectorAll('[data-evt-regras]').forEach(b => b.addEventListener('click', () => this._abrirRegrasModal(b.dataset.evtRegras)));
