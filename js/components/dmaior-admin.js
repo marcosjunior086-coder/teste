@@ -174,7 +174,7 @@ class DimaiorAdmin extends HTMLElement {
     nav.innerHTML=grupos.filter(g=>g[1]).map(([t,h])=>`<section class="pm-sec"><div class="pm-gt">${t}</div><div class="pm-grp">${h}</div></section>`).join('');
     nav.querySelectorAll('.pm-row').forEach(b=>b.addEventListener('click',()=>b.dataset.p==='__aparencia'?this._msAparencia?.():this._msGo?.(b.dataset.p)));
     // "Precisa de atenção": os mesmos contadores do menu lateral, só os que têm pendência
-    const ATN=[['nbSaques','saques','Saques pendentes'],['nbTicketsResgates','tickets','Resgates de tickets'],['nbMigracoesAgente','agenteMigracoes','Migrações de agente'],['nbSolicForm','solicitacoesFormularios','Solicitações de formulário'],['nbViolacoes','violacoes','Violações novas'],['nbCand','convites','Candidaturas novas'],['nbRec','recrutamento','Recrutamento'],['nbLive','aoVivo','Ao vivo agora']];
+    const ATN=[['nbSaques','saques','Saques pendentes'],['nbTicketsResgates','tickets','Resgates de tickets'],['nbMigracoesAgente','agenteMigracoes','Migrações de agente'],['nbSolicForm','solicitacoesFormularios','Solicitações de formulário'],['nbViolacoes','violacoes','Violações novas'],['nbInscricoes','comunicados','Inscrições em eventos'],['nbCand','convites','Candidaturas novas'],['nbRec','recrutamento','Recrutamento'],['nbLive','aoVivo','Ao vivo agora']];
     const cards=ATN.map(([id,p,lbl])=>{ const b=s.getElementById(id); if(!b||b.style.display==='none') return ''; const v=parseInt(b.textContent,10); if(!(v>0)) return ''; return `<button type="button" class="pm-ac${id==='nbLive'?' live':''}" data-p="${p}"><b>${v}</b><small>${lbl}</small></button>`; }).join('');
     const atn=s.getElementById('admMsAtencao');
     if(atn){ atn.innerHTML=cards?`<div class="pm-gt">Precisa de atenção</div><div class="pm-atn">${cards}</div>`:''; atn.querySelectorAll('.pm-ac').forEach(b=>b.addEventListener('click',()=>this._msGo?.(b.dataset.p))); }
@@ -591,6 +591,7 @@ class DimaiorAdmin extends HTMLElement {
   async _carregarDash(){
     const s=this.shadowRoot;
     this._contarViolacoesNovas(); // badge "Violações" + "Precisa de atenção" (sem await)
+    this._contarInscricoes();     // badge "Comunicados" (inscrições novas nos eventos)
     // Skeleton na hora: a grade de métricas já aparece com "—"/spinner em
     // vez de travar a tela toda esperando a rede — e o Acesso Rápido (que
     // não depende de nenhum dado do banco) nem precisa esperar nada.
@@ -2713,7 +2714,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtuPremios').addEventListener('click',()=>this._carregarPremios());s.getElementById('btnProcessarPremios').addEventListener('click',()=>this._abrirModalProcessar());s.getElementById('btnCancelarProc').addEventListener('click',()=>this._fechaModal('mProc'));s.getElementById('mProcConfirmar').addEventListener('click',()=>this._confirmarProcessarPremios());
     s.querySelectorAll('.premio-tipo-tab').forEach(tab=>{tab.addEventListener('click',()=>{s.querySelectorAll('.premio-tipo-tab').forEach(t=>t.classList.remove('on'));tab.classList.add('on');this._premioTipo=tab.dataset.tipo;this._renderPremiosConfig();});});
     // Comunicados
-    s.getElementById('btnAtuCom').addEventListener('click',()=>this._comAba==='eventos'?this._carregarEventos(this._evMes):this._carregarComunicados());
+    s.getElementById('btnAtuCom').addEventListener('click',()=>this._comAba==='eventos'?this._carregarEventos(this._evMes):this._comAba==='inscricoes'?this._carregarInscricoes(this._evMes):this._carregarComunicados());
+    s.getElementById('insMes')?.addEventListener('change',e=>this._carregarInscricoes(e.target.value));
     s.querySelectorAll('[data-com-aba]').forEach(b=>b.addEventListener('click',()=>this._abaCom(b.dataset.comAba)));
     s.getElementById('evViewX')?.addEventListener('click',()=>this._fecharEvView());
     s.getElementById('mEvView')?.addEventListener('click',e=>{if(e.target.id==='mEvView')this._fecharEvView();});
@@ -3036,6 +3038,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){if(el)el.innerHTML=this._empty('warning','Erro ao carregar comunicados');return;}
     this._renderComunicados(d.comunicados||[]);
     this._carregarEventos(this._evMes,true); // só pra acender o selo da aba "Eventos do mês"
+    this._contarInscricoes();
   }
 
   _renderComunicados(lista){
@@ -3112,13 +3115,15 @@ class DimaiorAdmin extends HTMLElement {
   _evTextoSobre(c){const n=parseInt(this._evCorOk(c).slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;return(r*299+g*587+b*114)/1000>150?'#111':'#fff';}
 
   _abaCom(aba){
-    const s=this.shadowRoot,ev=aba==='eventos';
+    const s=this.shadowRoot,ev=aba==='eventos',insc=aba==='inscricoes';
     s.querySelectorAll('[data-com-aba]').forEach(b=>b.classList.toggle('on',b.dataset.comAba===aba));
-    s.getElementById('comPainelAvisos').hidden=ev;
+    s.getElementById('comPainelAvisos').hidden=ev||insc;
     s.getElementById('comPainelEventos').hidden=!ev;
-    const bt=s.getElementById('comBtnsAvisos');if(bt)bt.style.display=ev?'none':'flex';
+    const pi=s.getElementById('comPainelInscricoes');if(pi)pi.hidden=!insc;
+    const bt=s.getElementById('comBtnsAvisos');if(bt)bt.style.display=(ev||insc)?'none':'flex';
     this._comAba=aba;
     if(ev)this._carregarEventos(this._evMes);
+    if(insc)this._carregarInscricoes(this._evMes);
   }
 
   async _carregarEventos(mes,silencioso=false){
@@ -3183,6 +3188,8 @@ class DimaiorAdmin extends HTMLElement {
       const vRg=this._evEmbedRegras(e.link_regras)?` data-ev-ver="regras" data-ev-id="${e.id}"`:'',vIns=this._evEmbedInsc(e)?` data-ev-ver="insc" data-ev-id="${e.id}"`:'';
       const links=`${rg?`<a class="ev-link" href="${rg}" target="_blank" rel="noopener noreferrer"${vRg}>${this._ii('file_text',12)}Regras</a>`:`<span class="ev-link off">sem regras</span>`}${ins?`<a class="ev-link" href="${ins}" target="_blank" rel="noopener noreferrer"${vIns}>${this._ii('edit',12)}Inscrição</a>`:''}`;
       const podeAvisar=e.status==='ativo'&&e.publico!=='agencia';
+      const ci=e.inscritos||{total:0,enviados:0,novas:0};
+      const insc=e.link_inscricao?`<div class="ev-insc"><span class="ev-insc-t">Inscrição pelo painel:</span><button type="button" class="btn btn-sm ${e.inscricao_aberta?'btn-g':'btn-o'}" data-ev-insc-toggle="${e.id}" data-v="${e.inscricao_aberta?'0':'1'}" ${e.form_url?'':'disabled'}>${e.inscricao_aberta?'Abertas':'Fechadas'}</button><label class="ev-insc-t">até <input type="date" class="ev-data" data-ev-insc-ate="${e.id}" value="${this._esc(e.inscricao_ate||'')}"></label><span class="com-data ev-insc-q" title="Perguntas lidas do formulário da plataforma">${this._esc(this._evPerguntasTxt(e))}</span><button type="button" class="btn btn-o btn-sm" data-ev-reler="${e.id}">${this._ico('refresh',12)} Reler formulário</button>${ci.total?`<button type="button" class="btn btn-o btn-sm" data-ev-ver-insc="1">${this._ico('users',12)} ${ci.total} inscrito(s)${ci.novas?` · ${ci.novas} nova(s)`:''}</button>`:''}</div>`:'';
       return`<div class="com-item ev-item ${e.status==='ativo'?'is-important':'is-fast'}">
         <div class="com-preview">${thumb}<div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1)">${this._esc(e.nome)}${e.nome_zh?` <span class="com-data" style="margin-left:4px">${this._esc(e.nome_zh)}</span>`:''}</strong><span class="com-texto">Dias ${this._esc(this._evDias(e.dias)||'—')}</span><div class="ev-links">${links}</div></div></div>
         <div class="com-acoes">
@@ -3192,10 +3199,14 @@ class DimaiorAdmin extends HTMLElement {
           <button class="btn btn-sm" style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--verm)" data-ev-del="${e.id}">${this._ico('trash',12)}</button>
         </div>
         <div class="com-meta"><div class="com-meta-esq">${stBadge}${pubBadge}${pkBadge}${remBadge}${notBadge}</div></div>
-        <div class="ev-tl">${tl}</div>${alt}
+        <div class="ev-tl">${tl}</div>${insc}${alt}
       </div>`;
     }).join('')}</div>`;
     const por=id=>lista.find(x=>x.id===id);
+    el.querySelectorAll('[data-ev-insc-toggle]').forEach(b=>b.addEventListener('click',()=>this._eventoInscToggle(b.dataset.evInscToggle,b.dataset.v==='1')));
+    el.querySelectorAll('[data-ev-insc-ate]').forEach(i=>i.addEventListener('change',()=>this._eventoInscAte(i.dataset.evInscAte,i.value)));
+    el.querySelectorAll('[data-ev-reler]').forEach(b=>b.addEventListener('click',()=>this._eventoRelerForm(b.dataset.evReler)));
+    el.querySelectorAll('[data-ev-ver-insc]').forEach(b=>b.addEventListener('click',()=>this._abaCom('inscricoes')));
     el.querySelectorAll('[data-ev-ver]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();this._abrirEvView(a.dataset.evId,a.dataset.evVer);}));
     el.querySelectorAll('[data-ev-st]').forEach(b=>b.addEventListener('click',()=>this._eventoStatus(b.dataset.evSt,b.dataset.v)));
     el.querySelectorAll('[data-ev-img]').forEach(b=>b.addEventListener('click',()=>this._eventoImagem(b.dataset.evImg)));
@@ -3230,6 +3241,130 @@ class DimaiorAdmin extends HTMLElement {
   _fecharEvView(){
     this.shadowRoot.getElementById('evViewFrame').src='about:blank'; // para o PDF/formulário
     this._fechaModal('mEvView');
+  }
+
+  // ── INSCRIÇÕES NOS EVENTOS ──────────────────────────────────────────────────
+  // O streamer se inscreve no painel dele. Aqui o admin vê quem se inscreveu, abre o
+  // formulário da plataforma JÁ PREENCHIDO ("Inscrever fulano"), envia e marca como
+  // enviado — a linha fica verde e ele segue pro próximo.
+  _evPerguntasTxt(e){
+    if(e.form_perguntas==null)return'formulário ainda não lido';
+    if(!e.form_url)return'o link de inscrição não é um Google Forms';
+    const ps=e.form_perguntas.filter(q=>!q.auto);
+    if(!ps.length)return'só interesse (o formulário não pede horário)';
+    return ps.map(q=>`${String(q.rotulo||'').slice(0,40)} — ${q.tipo==='multipla'?'várias opções':q.tipo==='unica'?'escolha única':'texto'}${q.opcoes?.length?` (${q.opcoes.length})`:''}`).join(' · ');
+  }
+  _evInscResposta(e,i){
+    const t=(e.form_perguntas||[]).filter(q=>!q.auto).map(q=>{const v=i.respostas?.[q.id];return v==null||v===''?'':(Array.isArray(v)?v.join(', '):String(v));}).filter(Boolean).join(' · ');
+    return t||'Interesse confirmado';
+  }
+  // Link do formulário da plataforma com os campos já preenchidos (entry.N = código de cada pergunta)
+  _evFormLink(e,i){
+    if(!e.form_url)return'';
+    const p=new URLSearchParams({usp:'pp_url'});
+    for(const q of e.form_perguntas||[]){
+      const v=q.auto==='agencia'?'DMaior Agency':q.auto==='uid'?i.kwai_uid:q.auto==='kwai_id'?i.kwai_id:i.respostas?.[q.id];
+      if(v==null||v==='')continue;
+      (Array.isArray(v)?v:[v]).forEach(x=>p.append('entry.'+q.id,String(x)));
+    }
+    return e.form_url+'?'+p.toString();
+  }
+  async _copiarTxt(t,msg='Copiado'){
+    try{await navigator.clipboard.writeText(t);this._toast(msg);}
+    catch{try{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();this._toast(msg);}catch{this._toast('Não consegui copiar','err');}}
+  }
+  async _contarInscricoes(){
+    if(this._sub)return;
+    const d=await this._api('GET','/admin/eventos/inscricoes/contagem');
+    const n=d?.ok?Number(d.novas)||0:0;this._insNovas=n;
+    const b=this.shadowRoot.getElementById('nbInscricoes');if(b){b.textContent=n;b.style.display=n>0?'':'none';}
+    const t=this.shadowRoot.getElementById('evInscN');if(t){t.textContent=n;t.hidden=!n;}
+  }
+  async _carregarInscricoes(mes){
+    const s=this.shadowRoot,el=s.getElementById('tbInsc');if(!el)return;
+    el.innerHTML=this._loading();
+    const m=mes||this._evMes;
+    const d=await this._api('GET','/admin/eventos/inscricoes'+(m?`?mes=${encodeURIComponent(m)}`:''));
+    if(!d?.ok){el.innerHTML=this._empty('warning','Erro ao carregar as inscrições');return;}
+    this._evMes=d.mes;this._insLista=d.eventos||[];
+    const sel=s.getElementById('insMes');
+    if(sel){const ops=this._evMesesOpcoes();if(!ops.some(o=>o.v===d.mes))ops.push({v:d.mes,t:this._evMesRotulo(d.mes)});sel.innerHTML=ops.map(o=>`<option value="${o.v}" ${o.v===d.mes?'selected':''}>${this._esc(o.t)}</option>`).join('');}
+    this._renderInscricoes();
+    this._contarInscricoes();
+  }
+  _renderInscricoes(){
+    const s=this.shadowRoot,el=s.getElementById('tbInsc');if(!el)return;
+    const lista=this._insLista||[];
+    if(!lista.length){el.innerHTML=this._empty('users',`Ninguém se inscreveu em ${this._evMesRotulo(this._evMes)} ainda. As inscrições aparecem aqui quando os streamers se inscreverem pelo painel.`);return;}
+    el.innerHTML=lista.map(e=>{
+      const cor=this._evCorOk(e.cor),tx=this._evTextoSobre(cor);
+      const tot=e.inscricoes.length,env=e.inscricoes.filter(i=>i.status==='enviado').length,nov=e.inscricoes.filter(i=>!i.visto).length;
+      const rows=e.inscricoes.map(i=>{
+        const ok=i.status==='enviado',link=this._evFormLink(e,i),primeiro=String(i.nome||'streamer').trim().split(/\s+/)[0];
+        const dt=i.enviado_em?new Date(i.enviado_em).toLocaleDateString('pt-BR'):'';
+        return`<div class="insc-row${ok?' ok':''}${!i.visto?' nova':''}" data-insc="${i.id}">
+          <div class="insc-nome"><b>${this._esc(i.nome||'—')}</b>${!i.visto?`<span class="insc-nova">NOVA</span>`:''}</div>
+          <div class="insc-ids"><button type="button" class="ev-chip" data-ins-copy="${this._esc(i.kwai_uid)}" title="Copiar UID">UID ${this._esc(i.kwai_uid)}</button><button type="button" class="ev-chip" data-ins-copy="${this._esc(i.kwai_id||'')}" title="Copiar ID Kwai">ID ${this._esc(i.kwai_id||'—')}</button></div>
+          <div class="insc-resp">${this._esc(this._evInscResposta(e,i))}</div>
+          <div class="insc-acoes">${ok
+            ?`<span class="com-status ativo">${this._ii('check',11)}Enviado ${dt}</span><button type="button" class="btn btn-o btn-sm" data-ins-st="${i.id}" data-v="inscrito">Desfazer</button>`
+            :`${link?`<a class="btn btn-g btn-sm" href="${this._esc(link)}" target="_blank" rel="noopener noreferrer" data-ins-abrir="${i.id}">${this._ico('arrow_right',12)} Inscrever ${this._esc(primeiro)}</a>`:`<span class="com-data">sem link do formulário</span>`}<button type="button" class="btn btn-o btn-sm" data-ins-st="${i.id}" data-v="enviado">${this._ico('check',12)} Marcar enviado</button>`}</div>
+        </div>`;
+      }).join('');
+      return`<div class="insc-evento">
+        <div class="insc-topo"><span class="ev-semimg" style="background:${cor};color:${tx};width:34px;height:34px">${this._ico('calendar',16)}</span>
+          <div class="insc-tit"><b>${this._esc(e.nome)}</b><span class="com-data">${tot} inscrito(s) · ${env} enviado(s)${nov?` · <span style="color:var(--gold)">${nov} nova(s)</span>`:''}</span></div>
+          <div class="insc-btns"><button type="button" class="btn btn-o btn-sm" data-ins-copiar-tudo="${e.id}">${this._ico('file_text',12)} Copiar lista</button><button type="button" class="btn btn-o btn-sm" data-ins-csv="${e.id}">${this._ico('download',12)} Baixar CSV</button>${nov?`<button type="button" class="btn btn-o btn-sm" data-ins-vistas="${e.id}">${this._ico('eye',12)} Marcar vistas</button>`:''}</div></div>
+        <div class="insc-lista">${rows}</div></div>`;
+    }).join('');
+    el.querySelectorAll('[data-ins-copy]').forEach(b=>b.addEventListener('click',()=>this._copiarTxt(b.dataset.insCopy)));
+    el.querySelectorAll('[data-ins-st]').forEach(b=>b.addEventListener('click',()=>this._inscricaoStatus(b.dataset.insSt,b.dataset.v)));
+    el.querySelectorAll('[data-ins-abrir]').forEach(a=>a.addEventListener('click',()=>{
+      // abriu o formulário: marca como vista e destaca "Marcar enviado" pra quando ele terminar
+      const row=a.closest('.insc-row');row?.classList.add('aguardando');
+      this._api('PATCH',`/admin/eventos/inscricoes/${a.dataset.insAbrir}`,{visto:true}).then(()=>this._contarInscricoes());
+    }));
+    el.querySelectorAll('[data-ins-vistas]').forEach(b=>b.addEventListener('click',async()=>{await this._api('POST',`/admin/eventos/${b.dataset.insVistas}/inscricoes/vistas`);this._carregarInscricoes();}));
+    el.querySelectorAll('[data-ins-copiar-tudo]').forEach(b=>b.addEventListener('click',()=>this._copiarTxt(this._insTabela(b.dataset.insCopiarTudo,'\t'),'Lista copiada')));
+    el.querySelectorAll('[data-ins-csv]').forEach(b=>b.addEventListener('click',()=>this._insCsv(b.dataset.insCsv)));
+  }
+  _insTabela(id,sep){
+    const e=(this._insLista||[]).find(x=>x.id===id);if(!e)return'';
+    const ps=(e.form_perguntas||[]).filter(q=>!q.auto);
+    const cab=['Evento','Nome','UID','ID Kwai',...ps.map(q=>q.rotulo),'Status','Inscrito em'];
+    const lin=e.inscricoes.map(i=>[e.nome,i.nome||'',i.kwai_uid,i.kwai_id||'',...ps.map(q=>{const v=i.respostas?.[q.id];return Array.isArray(v)?v.join(' | '):(v??'');}),i.status==='enviado'?'Enviado':'Pendente',new Date(i.criado_em).toLocaleString('pt-BR')]);
+    const cel=c=>sep===';'?`"${String(c??'').replace(/"/g,'""')}"`:String(c??'').replace(/[\t\r\n]+/g,' ');
+    return[cab,...lin].map(r=>r.map(cel).join(sep)).join('\r\n');
+  }
+  _insCsv(id){
+    const e=(this._insLista||[]).find(x=>x.id===id);if(!e)return;
+    const blob=new Blob(['﻿'+this._insTabela(id,';')],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download=`inscricoes-${String(e.nome).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-${this._evMes}.csv`;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  }
+  async _inscricaoStatus(id,v){
+    const r=await this._api('PATCH',`/admin/eventos/inscricoes/${id}`,{status:v});
+    if(!r?.ok){this._toast(r?.erro||'Erro ao atualizar','err');return;}
+    this._toast(v==='enviado'?'Marcado como enviado':'Voltou para pendente');
+    this._carregarInscricoes();
+  }
+  async _eventoInscToggle(id,aberta){
+    const r=await this._api('PATCH',`/admin/eventos/${id}`,{inscricao_aberta:aberta});
+    if(!r?.ok){this._toast(r?.erro||'Erro ao atualizar','err');return;}
+    this._toast(aberta?'Inscrições abertas — o streamer já vê "Tenho interesse"':'Inscrições fechadas');
+    this._carregarEventos(this._evMes,true);
+  }
+  async _eventoInscAte(id,data){
+    const r=await this._api('PATCH',`/admin/eventos/${id}`,{inscricao_ate:data||''});
+    if(!r?.ok){this._toast(r?.erro||'Erro ao salvar a data','err');return;}
+    this._toast(data?'Prazo salvo':'Prazo removido');
+  }
+  async _eventoRelerForm(id){
+    this._toast('Lendo o formulário…');
+    const r=await this._api('POST',`/admin/eventos/${id}/reler-form`);
+    if(!r?.ok){this._toast(r?.erro||'Não consegui ler o formulário','err');return;}
+    this._toast('Formulário atualizado');this._carregarEventos(this._evMes,true);
   }
 
   _evDescMudancas(alts){
@@ -6302,7 +6437,7 @@ class DimaiorAdmin extends HTMLElement {
     .ev-faixa{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin:0 0 10px;border-radius:12px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);color:var(--t1);font-size:13px}
     .ev-faixa span{flex:1 1 220px;text-align:left}
     .ev-faixa.ev-faixa-alt{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35)}
-    .com-item.ev-item{grid-template-areas:"preview actions" "meta meta" "tl tl" "alt alt"}
+    .com-item.ev-item{grid-template-areas:"preview actions" "meta meta" "tl tl" "insc insc" "alt alt"}
     .ev-semimg{width:72px;height:54px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;opacity:.9}
     .ev-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
     .ev-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--cyan);text-decoration:none}
@@ -6316,9 +6451,32 @@ class DimaiorAdmin extends HTMLElement {
     .ev-view-top b{flex:1;min-width:0;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .ev-view-body{flex:1;min-height:0;background:#fff}
     .ev-view-body iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+    .ev-insc{grid-area:insc;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--brddim);border-radius:10px;background:rgba(0,212,212,.04)}
+    .ev-insc-t{font-size:11px;color:var(--t3);display:inline-flex;align-items:center;gap:6px}
+    .ev-insc-q{flex:1 1 200px;min-width:0}
+    .ev-data{padding:5px 8px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:12px;font-family:inherit;color-scheme:dark}
+    .ev-chip{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--brd);background:var(--glass);color:var(--t1);cursor:pointer;font-family:inherit}
+    .ev-chip:hover{border-color:var(--cyan)}
+    .insc-evento{border:1px solid var(--brd);border-radius:14px;margin-bottom:14px;overflow:hidden}
+    .insc-topo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--brddim)}
+    .insc-tit{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--t1)}
+    .insc-btns{display:flex;gap:6px;flex-wrap:wrap}
+    .insc-lista{display:flex;flex-direction:column}
+    .insc-row{display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(150px,1.3fr) minmax(120px,1.4fr) auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--brddim);font-size:12px;color:var(--t2)}
+    .insc-row:last-child{border-bottom:0}
+    .insc-row.ok{background:rgba(74,222,128,.10);box-shadow:inset 3px 0 0 var(--verde)}
+    .insc-row.nova{box-shadow:inset 3px 0 0 var(--gold)}
+    .insc-row.aguardando [data-ins-st][data-v="enviado"]{background:linear-gradient(135deg,#16a34a,#4ade80);color:#04210f;border-color:transparent;animation:insPulse 1.2s ease-in-out infinite}
+    @keyframes insPulse{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.5)}50%{box-shadow:0 0 0 6px rgba(74,222,128,0)}}
+    .insc-nome{display:flex;align-items:center;gap:6px;color:var(--t1);min-width:0}
+    .insc-nova{font-size:9px;font-weight:700;letter-spacing:.8px;padding:1px 6px;border-radius:99px;background:rgba(240,192,64,.15);color:var(--gold)}
+    .insc-ids{display:flex;gap:6px;flex-wrap:wrap}
+    .insc-resp{color:var(--t1)}
+    .insc-acoes{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+    @media(max-width:760px){.insc-row{grid-template-columns:1fr}.insc-acoes{justify-content:flex-start}}
     .ev-alt{grid-area:alt;font-size:12px;color:var(--verm);background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:8px 10px}
     .ev-alt a{color:var(--gold);margin-left:6px}
-    @media(max-width:760px){.com-item.ev-item{grid-template-areas:"preview" "meta" "tl" "alt" "actions"}.ev-tl i{width:18px;height:18px}}
+    @media(max-width:760px){.com-item.ev-item{grid-template-areas:"preview" "meta" "tl" "insc" "alt" "actions"}.ev-tl i{width:18px;height:18px}}
     @media(max-width:760px){.com-item{grid-template-columns:1fr;grid-template-areas:"preview" "meta" "actions"}.com-acoes{min-width:0;justify-content:flex-start}.com-thumb{width:60px;height:60px}.com-data{white-space:normal}}
     @media(max-width:600px){.com-preview{align-items:flex-start}.com-acoes{gap:5px}.com-acoes .btn-sm{font-size:10px;padding:4px 7px}}
     /* ── Monitor Kwai ── */
@@ -6554,7 +6712,7 @@ class DimaiorAdmin extends HTMLElement {
             )}
             ${navSec('engajamento','Engajamento',
               ni('bolt','impulsoCtrl','Controle do Impulso')+
-              ni('bell','comunicados','Comunicados')+
+              ni('bell','comunicados','Comunicados',`<span class="nb live" id="nbInscricoes" style="display:none">0</span>`)+
               ni('megaphone','notificacoes','Notificações')+
               ni('vote','votacoes','Votações')+
               ni('zap','pkDiario','PK Diário')+
@@ -7074,7 +7232,7 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
               </div>
             </div>
-            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div id="comBtnsAvisos" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="com-abas"><button class="com-aba on" data-com-aba="avisos">${this._ico('bell',13)} Avisos</button><button class="com-aba" data-com-aba="eventos">${this._ico('calendar',13)} Eventos do mês<span class="com-aba-n" id="evAbaN" hidden></span></button></div>
+            <div class="pag" id="pag-comunicados">${ph('Comunicados / Avisos','bell','Avisos para streamers e ranking','btnAtuCom',`<div id="comBtnsAvisos" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-o" id="btnDriveFotos" title="Abrir pasta de fotos no Google Drive">${this._ico('image',13)} Drive de Fotos</button><button class="btn btn-o" id="btnNovoRapido" style="border-color:rgba(240,192,64,.5);color:var(--gold)">${this._ico('zap',13)} Aviso Rápido</button><button class="btn btn-g" id="btnNovoImportante">${this._ico('bell',13)} Aviso Importante</button></div>`)}<div class="com-abas"><button class="com-aba on" data-com-aba="avisos">${this._ico('bell',13)} Avisos</button><button class="com-aba" data-com-aba="eventos">${this._ico('calendar',13)} Eventos do mês<span class="com-aba-n" id="evAbaN" hidden></span></button>${this._sub?'':`<button class="com-aba" data-com-aba="inscricoes">${this._ico('users',13)} Inscrições<span class="com-aba-n" id="evInscN" hidden></span></button>`}</div>
             <div id="comPainelAvisos"><div class="box"><div id="tbCom">${this._loading()}</div></div></div>
             <div id="comPainelEventos" hidden>
               <div class="box ev-config">
@@ -7084,6 +7242,14 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div id="evAviso"></div>
               <div class="box"><div id="tbEv"></div></div>
+            </div>
+            <div id="comPainelInscricoes" hidden>
+              <div class="box ev-config">
+                <div class="ev-lbl">Inscrições dos streamers nos eventos</div>
+                <div class="ev-linha"><select id="insMes" class="ev-inp ev-mes"></select></div>
+                <div class="ev-sync"><span class="com-data">Toque em <b>Inscrever [nome]</b>: o formulário da plataforma abre já preenchido. Confira os campos, envie e volte aqui em <b>Marcar enviado</b> — a linha fica verde e você segue para o próximo.</span></div>
+              </div>
+              <div class="box"><div id="tbInsc"></div></div>
             </div></div>
             <div class="pag" id="pag-notificacoes">${this._pagNotificacoesHTML(ph)}</div>
             <div class="pag" id="pag-votacoes">${ph('Votações','vote','Enquetes públicas e privadas','btnAtuVot',`<button class="btn btn-g" id="btnNovaVotacao">${this._ico('plus',13)} Nova Votação</button>`)}<div class="box"><div id="tbVot">${this._loading()}</div></div></div>

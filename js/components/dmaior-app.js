@@ -100,8 +100,7 @@
                 if (window.location.hash === '#avisos' || window.location.hash === '#eventos') {
                     const irEventos = window.location.hash === '#eventos';
                     history.replaceState(null, '', window.location.pathname);
-                    this.goAvisos();
-                    if (irEventos) setTimeout(() => this.qs('#avisosEventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 900);
+                    if (irEventos) this.goEventos(); else this.goAvisos();
                 } else {
                     this.navigate('vD');
                     this.navActive('nD');
@@ -217,6 +216,7 @@
     svgInfo()    { return `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`; }
     svgRank()    { return `<svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>`; }
     svgPk()      { return `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`; }
+    svgCalendar(){ return `<svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>`; }
     svgRules()   { return `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
     svgTicket()  { return `<svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/></svg>`; }
@@ -778,13 +778,69 @@
             .aviso-card-data{font-size:.7rem;color:var(--muted);opacity:.7;display:flex;align-items:center;gap:4px;}
             .aviso-card-data svg{width:11px;height:11px;flex-shrink:0;}
             /* Dados do streamer pra copiar no formulário */
-            .evt-dados{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding:9px 11px;border:1px dashed var(--border);border-radius:10px;}
-            .evt-dados-t{flex-basis:100%;font-size:.7rem;color:var(--muted);}
-            .evt-dados-chips,#evtModalDadosChips{display:inline-flex;flex-wrap:wrap;gap:8px;}
-            .evt-copy{display:inline-flex;align-items:center;gap:6px;background:var(--cyan-d);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:.8rem;font-family:inherit;cursor:pointer;}
-            .evt-copy b{color:var(--cyan);font-weight:700;}
-            .evt-copy.ok{background:var(--cyan);border-color:var(--cyan);color:#000;}
-            .evt-modal-dados{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:.72rem;color:var(--muted);}
+            /* Calendário de eventos */
+            .cal-wrap{border:1px solid var(--border);border-radius:16px;background:var(--glass);padding:12px 12px 10px;margin-bottom:20px;}
+            .cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+            .cal-mes{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:1.1rem;color:var(--text);text-transform:uppercase;letter-spacing:.04em;}
+            .cal-nav{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+            .cal-nav:disabled{opacity:.25;cursor:default;}
+            .cal-sem,.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;}
+            .cal-sem span{text-align:center;font-size:.68rem;font-weight:700;color:var(--muted);padding:2px 0 4px;}
+            .cal-v{min-height:46px;}
+            .cal-d{min-height:46px;border-radius:10px;border:1px solid transparent;background:rgba(128,128,128,.08);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-family:inherit;padding:2px 0;}
+            .cal-d b{font-size:.82rem;font-weight:600;}
+            .cal-d:not(.tem){color:var(--muted);}
+            .cal-d.hoje{border-color:var(--cyan);}
+            .cal-d.sel{background:var(--cyan-d);border-color:var(--cyan);}
+            .cal-pts{display:flex;gap:2px;align-items:center;height:7px;}
+            .cal-pts i{width:6px;height:6px;border-radius:50%;display:block;}
+            .cal-pts em{font-style:normal;font-size:.55rem;color:var(--muted);line-height:1;}
+            .cal-det{margin-top:10px;border-top:1px solid var(--border);padding-top:10px;}
+            .cal-det-t{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+            .cal-ev{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text);padding:3px 0;}
+            .cal-ev i{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+            .cal-ev span{flex:1;min-width:0;}
+            .cal-pk,.cal-ins{font-style:normal;font-size:.62rem;font-weight:700;padding:1px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;}
+            .cal-pk{background:rgba(168,85,247,.18);color:#a855f7;}
+            .cal-ins{background:var(--cyan-d);color:var(--cyan);}
+            .cal-vazio{font-size:.82rem;color:var(--muted);}
+            .evt-minhas{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
+            .evt-minhas-i{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:12px;background:var(--glass);}
+            .evt-minhas-i i{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+            .evt-minhas-i div{display:flex;flex-direction:column;min-width:0;}
+            .evt-minhas-i b{font-size:.88rem;color:var(--text);}
+            .evt-minhas-i span{font-size:.75rem;color:var(--muted);}
+            .evt-minha{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:.8rem;color:var(--green);}
+            .evt-minha span{color:var(--text);}
+            .evt-ok{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--green);padding:9px 4px;}
+            /* Janela de inscrição */
+            .evt-insc-box{height:auto;max-height:92vh;}
+            .evt-insc-body{padding:14px 16px 18px;overflow:auto;display:flex;flex-direction:column;gap:14px;}
+            .evt-insc-intro{margin:0;font-size:.82rem;color:var(--muted);line-height:1.5;}
+            .evt-q{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;min-width:0;}
+            .evt-q legend,.evt-q-l{font-size:.85rem;font-weight:700;color:var(--text);padding:0;margin-bottom:6px;}
+            .evt-q legend small{font-weight:400;color:var(--muted);}
+            .evt-req{color:var(--red);}
+            .evt-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:.88rem;color:var(--text);background:var(--glass);}
+            /* o painel estiliza todo <input> como campo de texto; aqui precisa voltar a ser marcador nativo */
+            .evt-opt input[type=radio],.evt-opt input[type=checkbox]{appearance:auto;-webkit-appearance:auto;width:18px;height:18px;min-width:18px;padding:0;margin:0;border:0;background:none;accent-color:var(--cyan);flex-shrink:0;box-shadow:none;}
+            .evt-opt:has(input:checked){border-color:var(--cyan);background:var(--cyan-d);}
+            .evt-in{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--glass);color:var(--text);font-family:inherit;font-size:.9rem;}
+            .evt-insc-err{min-height:1em;font-size:.8rem;color:var(--red);}
+            .evt-insc-btns{display:flex;gap:8px;flex-wrap:wrap;}
+            .evt-insc-btns button:disabled{opacity:.5;cursor:default;}
+            .evt-insc-ok{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:18px 6px;color:var(--green);}
+            .evt-insc-ok svg{width:42px;height:42px;}
+            .evt-insc-ok p{margin:0;color:var(--text);font-size:.9rem;}
+            /* Aviso "Eventos do mês" dentro de Avisos */
+            .avisos-evt-card{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--glass);color:var(--text);font-family:inherit;text-align:left;cursor:pointer;margin-bottom:16px;}
+            .avisos-evt-card.novo{border-color:var(--cyan);}
+            .aec-ico{width:38px;height:38px;border-radius:10px;background:var(--cyan-d);color:var(--cyan);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+            .aec-ico svg{width:20px;height:20px;fill:currentColor;}
+            .aec-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+            .aec-txt b{font-size:.92rem;}
+            .aec-txt small{font-size:.75rem;color:var(--muted);}
+            .aec-go{font-size:1.4rem;color:var(--muted);}
             /* Janela de leitura (regras / inscrição) dentro do painel */
             .evt-modal{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;}
             .evt-modal.on{display:flex;}
@@ -976,6 +1032,7 @@
                     <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
                     <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
+                    <button class="nit" id="nEventos">${this.svgCalendar()} <span>EVENTOS</span></button>
                     <button class="nit" id="nRegras">${this.svgRules()} <span data-i18n="rules">REGRAS</span></button>
                     <button class="nit" id="nViolacoes">${this.svgAlerta()} <span>SITUAÇÃO DA CONTA</span></button>
                     <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
@@ -1499,8 +1556,16 @@
                             MARCAR TODOS COMO LIDOS
                         </button>
                     </div>
-                    <div id="avisosEventos"></div>
+                    <div id="avisosEventosCard"></div>
                     <div id="avisosList"></div>
+                </div>
+
+                <!-- ══════ EVENTOS (calendário + inscrição) ══════ -->
+                <div id="vEventos" class="view" style="width:100%;">
+                    <div class="avisos-topbar">
+                        <button class="iframe-back pm-voltar" id="btnBackEventos">${this.svgBack()} VOLTAR</button>
+                    </div>
+                    <div id="avisosEventos"></div>
                 </div>
 
             </div><!-- /content -->
@@ -1657,7 +1722,7 @@
     static get MENU_GRUPOS(){ return [
         ['Meu desempenho', [['nD','Resumo','inicio dashboard diamantes horas'], ['nRank','Ranking','posicao'], ['nPk','PK Diário','batalha']]],
         ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate']]],
-        ['Comunidade',     [['avisos','Avisos e eventos','notificacoes comunicados eventos agenda inscricao pk'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
+        ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nEventos','Eventos','calendario agenda inscricao interesse pk'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
         ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
         ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente'], ['nAtalhoSub','Painel da Sub','sub agencia']]],
     ]; }
@@ -1673,7 +1738,8 @@
                 const icon = id === 'avisos' ? bell : (this.qs('#'+id)?.querySelector('svg')?.outerHTML || '');
                 let extra = '';
                 if(id === 'nC' && this._saldoCarteira != null) extra = `<span class="pm-val">${this.brl(this._saldoCarteira)}</span>`;
-                if(id === 'avisos' && (this._avisosNovos || this._eventosNovos)) extra = `<span class="pm-dot" title="${this._eventosNovos && !this._avisosNovos ? 'Evento novo' : 'Aviso novo'}"></span>`;
+                if(id === 'avisos' && (this._avisosNovos || this._eventosNovos)) extra = `<span class="pm-dot" title="Aviso novo"></span>`;
+                if(id === 'nEventos' && this._eventosNovos) extra = `<span class="pm-dot" title="Novidade nos eventos"></span>`;
                 return `<button type="button" class="pm-row" data-nav="${id}" data-busca="${this.esc(label+' '+chaves)}"><span class="pm-ri">${icon}</span><span class="pm-rt">${this.esc(label)}</span>${extra}${chev}</button>`;
             });
             if(rows.length) html += `<section class="pm-sec"><div class="pm-gt">${titulo}</div><div class="pm-grp">${rows.join('')}</div></section>`;
@@ -1836,6 +1902,7 @@
         this.qs('#nVotacao').addEventListener('click',()=>this.goVotacao());
         this.qs('#nPk').addEventListener('click',()=>this.goPk());
         this.qs('#nRegras').addEventListener('click',()=>this.goRegras());
+        this.qs('#nEventos').addEventListener('click',()=>this.goEventos());
         this.qs('#nViolacoes').addEventListener('click',()=>this.goViolacoes());
         this.qs('#violaAviso').addEventListener('click',e=>{ if(e.target.closest('[data-viola-abrir]')) this.goViolacoes(); });
         this.qs('#regrasEl')?.addEventListener('regras-aceitar', e=>this._aceitarTermo(e.detail || {}));
@@ -2033,7 +2100,6 @@
             try {
                 if(nomeExibir) localStorage.setItem('dm_nome', nomeExibir);
                 if(fotoExibir) localStorage.setItem('dm_foto', fotoExibir);
-                this._guardarKwaiId(p.kwai_id);
                 localStorage.setItem('dm_atalho_admin',  p.atalho_admin  ? 'true' : 'false');
                 localStorage.setItem('dm_atalho_agente', p.atalho_agente ? 'true' : 'false');
                 localStorage.setItem('dm_atalho_sub', p.atalho_sub ? 'true' : 'false');
@@ -2809,38 +2875,52 @@
             e.classList.remove('on');
             if(e.id!=='nO') e.style.color='var(--muted)';
         });
-        this.loadEventos();
+        this._cardEventosAviso();
         this.loadAvisos();
     }
 
-    // ── Eventos do mês (agenda importada da planilha da plataforma) ──────────
-    // O admin importa, revisa e ativa; aqui o streamer vê dias, regras e inscrição.
+    // ── Eventos do mês: calendário + inscrição pelo painel ───────────────────
+    // O admin importa a agenda da planilha da plataforma, revisa e ativa. Aqui o streamer vê o
+    // calendário, lê as regras (janela) e se inscreve ("Tenho interesse" → horário → Confirmar).
+    // Quem envia a inscrição pra plataforma é o admin; o streamer só enxerga banner, regras,
+    // dias, nome e a própria inscrição.
+    async _buscarEventos(){
+        // Rota autenticada (traz a minha inscrição). Se o Worker ainda não foi atualizado, cai na lista pública.
+        try {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/eventos?uid=${encodeURIComponent(this.sessionUid)}`);
+            if(res.ok) return await res.json();
+        } catch {}
+        return window.DmaiorAPI.eventos.listar();
+    }
+
     async loadEventos(){
         const el = this.qs('#avisosEventos');
         if(!el) return;
         try {
-            const d = await window.DmaiorAPI.eventos.listar();
+            const d = await this._buscarEventos();
             this._renderEventosStreamer(el, d.eventos || [], d.hoje);
             this._marcarEventosVistos(d.eventos || []);
         } catch { el.innerHTML = ''; }
     }
 
-    // "Novo" = evento ativo que este streamer ainda não viu OU que mudou (dias/links)
+    // "Novo" = evento ativo que este streamer ainda não viu OU que mudou (dias/regras/inscrição)
     // desde a última vez que abriu Avisos e eventos. Guarda no aparelho, igual aos avisos.
-    _eventoAssinatura(e){ return [e.id, (e.dias || []).join(','), e.link_regras || '', e.link_inscricao || ''].join('|'); }
+    _eventoAssinatura(e){ return [e.id, (e.dias || []).join(','), e.link_regras || '', e.inscricao_aberta ? 1 : 0].join('|'); }
     _eventosChave(){ return `dm_eventos_vistos_${localStorage.getItem('dm_uid') || 'anon'}`; }
     _atualizarBolinhaAvisos(){
         const menu = document.querySelector('menu-mobile-dmaior');
         const dot = menu?.shadowRoot?.getElementById('bellDot');
         if(dot) dot.classList.toggle('hidden', !(this._avisosNovos || this._eventosNovos));
     }
+    _eventosNovosEm(lista){
+        let vistos = [];
+        try { vistos = JSON.parse(localStorage.getItem(this._eventosChave()) || '[]'); } catch {}
+        return lista.some(e => !vistos.includes(this._eventoAssinatura(e)));
+    }
     async _checarEventosNovos(){
         try {
-            const d = await window.DmaiorAPI.eventos.listar();
-            const lista = d.eventos || [];
-            let vistos = [];
-            try { vistos = JSON.parse(localStorage.getItem(this._eventosChave()) || '[]'); } catch {}
-            this._eventosNovos = lista.some(e => !vistos.includes(this._eventoAssinatura(e)));
+            const d = await this._buscarEventos();
+            this._eventosNovos = this._eventosNovosEm(d.eventos || []);
             if(this._eventosNovos){
                 const dot = document.querySelector('menu-mobile-dmaior')?.shadowRoot?.getElementById('bellDot');
                 if(dot) dot.classList.remove('hidden');
@@ -2864,9 +2944,47 @@
 
     _evtCor(c){ return /^#[0-9a-f]{6}$/i.test(c || '') ? c : '#00d4d4'; }
     _evtTexto(c){ const n = parseInt(this._evtCor(c).slice(1), 16); return (((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000) > 150 ? '#111' : '#fff'; }
+    _evtRespTxt(e){
+        const r = e.minha_inscricao?.respostas || {};
+        const t = (e.perguntas || []).map(q => { const v = r[q.id]; return v == null || v === '' ? '' : (Array.isArray(v) ? v.join(', ') : String(v)); }).filter(Boolean).join(' · ');
+        return t || 'Interesse confirmado';
+    }
+
+    // Calendário do mês: cada dia mostra pontinhos coloridos dos eventos; tocar no dia lista o que acontece nele.
+    _calendarioEventos(lista, mesHoje, hd){
+        const NM = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        const meses = [...new Set([...lista.map(e => e.mes), mesHoje])].sort();
+        const mes = this._calMes && meses.includes(this._calMes) ? this._calMes : mesHoje;
+        const [y, m] = mes.split('-').map(Number);
+        const primeiro = new Date(y, m - 1, 1).getDay(), total = new Date(y, m, 0).getDate();
+        const doMes = lista.filter(e => e.mes === mes), porDia = {};
+        doMes.forEach(e => (e.dias || []).forEach(d => (porDia[d] = porDia[d] || []).push(e)));
+        const dia = this._calDia != null ? (this._calDia > 0 ? this._calDia : null) : (mes === mesHoje ? hd : null);
+        let cel = '';
+        for(let i = 0; i < primeiro; i++) cel += '<span class="cal-v"></span>';
+        for(let d = 1; d <= total; d++){
+            const evs = porDia[d] || [];
+            const pts = evs.slice(0, 4).map(e => `<i style="background:${this._evtCor(e.cor)}"></i>`).join('') + (evs.length > 4 ? '<em>+</em>' : '');
+            cel += `<button type="button" class="cal-d${evs.length ? ' tem' : ''}${mes === mesHoje && d === hd ? ' hoje' : ''}${dia === d ? ' sel' : ''}" data-cal-dia="${d}" aria-label="Dia ${d}${evs.length ? `, ${evs.length} evento(s)` : ''}"><b>${d}</b><span class="cal-pts">${pts}</span></button>`;
+        }
+        const i = meses.indexOf(mes);
+        const nav = (dir, ok) => `<button type="button" class="cal-nav" data-cal-mes="${ok ? meses[i + dir] : ''}" ${ok ? '' : 'disabled'} aria-label="${dir < 0 ? 'Mês anterior' : 'Próximo mês'}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${dir < 0 ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6'}"/></svg></button>`;
+        let det = '';
+        if(dia != null){
+            const evs = porDia[dia] || [];
+            det = `<div class="cal-det"><div class="cal-det-t">Dia ${dia} de ${NM[m - 1]}</div>${evs.length
+                ? evs.map(e => `<div class="cal-ev"><i style="background:${this._evtCor(e.cor)}"></i><span>${this._escHtml(e.nome)}</span>${(e.dias_pk || []).includes(dia) ? '<em class="cal-pk">PK</em>' : ''}${e.minha_inscricao ? '<em class="cal-ins">Inscrito</em>' : ''}</div>`).join('')
+                : '<div class="cal-vazio">Nenhum evento neste dia.</div>'}</div>`;
+        }
+        return `<div class="cal-wrap">
+            <div class="cal-top">${nav(-1, i > 0)}<div class="cal-mes">${NM[m - 1]} ${y}</div>${nav(1, i < meses.length - 1)}</div>
+            <div class="cal-sem"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+            <div class="cal-grid">${cel}</div>${det}</div>`;
+    }
 
     _renderEventosStreamer(el, lista, hoje){
         if(!lista.length){ el.innerHTML = ''; return; }
+        this._evtLista = lista; this._evtHoje = hoje;
         const [hy, hm, hd] = String(hoje).split('-').map(Number);
         const mesHoje = `${hy}-${String(hm).padStart(2, '0')}`;
         const fase = e => {
@@ -2898,10 +3016,18 @@
             else if(i.f === 'prox') chip = `<span class="evt-chip">Próximo dia: ${i.ini}/${mm}</span>`;
             else if(i.f === 'depois' && i.ini) chip = `<span class="evt-chip">Começa dia ${i.ini}/${mm}</span>`;
             else if(i.f === 'fim') chip = `<span class="evt-chip off">Encerrado neste mês</span>`;
-            const okUrl = u => /^https?:\/\//i.test(u || '') ? this._escHtml(u) : '';
-            const rg = okUrl(e.link_regras), ins = okUrl(e.link_inscricao);
+            const rg = /^https?:\/\//i.test(e.link_regras || '') ? this._escHtml(e.link_regras) : '';
             const img = e.imagem_url ? this._avisoMidia('evt-img', e.imagem_url, e.nome) : `<div class="evt-faixa" style="background:${cor}"></div>`;
             const pkTxt = (e.dias_pk || []).length ? `<div class="evt-pk">PK nos dias ${this._escHtml(this._evtDiasTxt(e.dias_pk))}</div>` : '';
+            const mi = e.minha_inscricao;
+            const btnRegras = rg ? (this._evtEmbedRegras(e.link_regras)
+                ? `<button type="button" class="aviso-btn-sec" data-evt-regras="${this._escHtml(e.id)}">Ler regras</button>`
+                : `<a class="aviso-btn-sec" href="${rg}" target="_blank" rel="noopener noreferrer">Regras</a>`) : '';
+            let btnInsc = '';
+            if(mi && mi.status === 'enviado') btnInsc = `<span class="evt-ok">${this._evtOkIco()} Inscrição enviada</span>`;
+            else if(mi) btnInsc = `<button type="button" class="aviso-btn-sec" data-evt-insc="${this._escHtml(e.id)}">Alterar inscrição</button>`;
+            else if(e.inscricao_aberta) btnInsc = `<button type="button" class="aviso-btn-pri" data-evt-insc="${this._escHtml(e.id)}">Tenho interesse</button>`;
+            const minha = mi ? `<div class="evt-minha">${this._evtOkIco()} <span><b>Você está inscrito</b> · ${this._escHtml(this._evtRespTxt(e))}${mi.status === 'enviado' ? ' · enviada à plataforma' : ''}</span></div>` : '';
             return `<div class="evt-card ${i.f === 'hoje' ? 'is-hoje' : ''}">
                 ${img}
                 <div class="evt-body">
@@ -2909,86 +3035,42 @@
                     <div class="evt-dias">Dias ${this._escHtml(this._evtDiasTxt(e.dias) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>
                     ${pkTxt}
                     <div class="evt-tl">${tl}</div>
-                    ${(rg || ins) ? `<div class="evt-btns">${
-                        rg ? (this._evtEmbedRegras(e.link_regras)
-                            ? `<button type="button" class="aviso-btn-sec" data-evt-ver="regras" data-evt-id="${this._escHtml(e.id)}">Ler regras</button>`
-                            : `<a class="aviso-btn-sec" href="${rg}" target="_blank" rel="noopener noreferrer">Regras</a>`) : ''}${
-                        ins ? (this._evtEmbedInsc(e)
-                            ? `<button type="button" class="aviso-btn-pri" data-evt-ver="insc" data-evt-id="${this._escHtml(e.id)}">Inscrever-se</button>`
-                            : `<a class="aviso-btn-pri" href="${ins}" target="_blank" rel="noopener noreferrer">Inscrever-se</a>`) : ''}</div>` : ''}
-                    ${ins ? `<div class="evt-dados"><span class="evt-dados-t">Seus dados para preencher o formulário (toque para copiar)</span><span class="evt-dados-chips">${this._chipsDados()}</span></div>` : ''}
+                    ${minha}
+                    ${(btnRegras || btnInsc) ? `<div class="evt-btns">${btnRegras}${btnInsc}</div>` : ''}
                 </div>
             </div>`;
         };
         const secao = (titulo, itens) => itens.length ? `<div class="avisos-sec-titulo">${titulo}</div><div class="evt-lista">${itens.map(card).join('')}</div>` : '';
         const fim = grupos.fim.length ? `<details class="evt-fim"><summary>Eventos já encerrados (${grupos.fim.length})</summary><div class="evt-lista">${grupos.fim.map(card).join('')}</div></details>` : '';
+        const minhas = lista.filter(e => e.minha_inscricao && fase(e).f !== 'fim');
+        const minhasHtml = minhas.length ? `<div class="avisos-sec-titulo">Minhas inscrições</div><div class="evt-minhas">${minhas.map(e => `<div class="evt-minhas-i"><i style="background:${this._evtCor(e.cor)}"></i><div><b>${this._escHtml(e.nome)}</b><span>${this._escHtml(this._evtRespTxt(e))}${e.minha_inscricao.status === 'enviado' ? ' · enviada' : ''}</span></div></div>`).join('')}</div>` : '';
         el.innerHTML = `<div class="evt-wrap">
+            <div class="avisos-sec-titulo">Calendário de eventos</div>
+            ${this._calendarioEventos(lista, mesHoje, hd)}
+            ${minhasHtml}
             ${secao('Acontecendo hoje', grupos.hoje)}
             ${secao('Próximos eventos', grupos.prox)}
             ${secao('Mês que vem', grupos.depois)}
             ${fim}
         </div>`;
-        this._evtLista = lista;
-        el.querySelectorAll('[data-evt-ver]').forEach(b => b.addEventListener('click', () => this._abrirEventoModal(b.dataset.evtId, b.dataset.evtVer)));
-        this._ligarCopiar(el);
-        this._garantirKwaiId();
+        el.querySelectorAll('[data-cal-dia]').forEach(b => b.addEventListener('click', () => {
+            const d = Number(b.dataset.calDia);
+            const atual = this._calDia != null ? this._calDia : ((this._calMes || mesHoje) === mesHoje ? hd : -1);
+            this._calDia = atual === d ? -1 : d;   // tocar de novo no mesmo dia desmarca
+            this._renderEventosStreamer(el, this._evtLista, this._evtHoje);
+        }));
+        el.querySelectorAll('[data-cal-mes]').forEach(b => b.addEventListener('click', () => {
+            if(!b.dataset.calMes) return;
+            this._calMes = b.dataset.calMes; this._calDia = null;
+            this._renderEventosStreamer(el, this._evtLista, this._evtHoje);
+        }));
+        el.querySelectorAll('[data-evt-regras]').forEach(b => b.addEventListener('click', () => this._abrirRegrasModal(b.dataset.evtRegras)));
+        el.querySelectorAll('[data-evt-insc]').forEach(b => b.addEventListener('click', () => this._abrirInscricaoModal(b.dataset.evtInsc)));
     }
 
-    // ── Dados do streamer pra colar nos formulários de inscrição ─────────────
-    // O formulário da plataforma pede UID e ID Kwai; aqui o streamer copia com um toque
-    // (sem precisar do F12). O UID é o da sessão; o ID Kwai vem do /api/dashboard.
-    _kwaiIdAtual(){
-        if(this._kwaiId) return this._kwaiId;
-        try { return localStorage.getItem('dm_kwai_id') || ''; } catch { return ''; }
-    }
-    async _garantirKwaiId(){
-        if(this._kwaiIdAtual() || this._kwaiIdBuscado || !this.sessionUid) return;
-        this._kwaiIdBuscado = true;   // 1 tentativa por sessão
-        try {
-            const res = await this._fetchAutenticado(`${this.apiUrl}/api/dashboard`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: this.sessionUid }),
-            });
-            if(!res.ok) return;
-            this._guardarKwaiId(((await res.json()).perfil || {}).kwai_id);
-            this._atualizarChipsDados();
-        } catch {}
-    }
-    _guardarKwaiId(id){
-        if(!id) return;
-        this._kwaiId = String(id);
-        try { localStorage.setItem('dm_kwai_id', this._kwaiId); } catch {}
-    }
-    _chipsDados(){
-        const uid = this.sessionUid || localStorage.getItem('dm_uid') || '', kid = this._kwaiIdAtual();
-        const ico = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`;
-        const chip = (rot, v) => v ? `<button type="button" class="evt-copy" data-copiar="${this._escHtml(v)}" title="Copiar ${rot}"><b>${rot}</b> ${this._escHtml(v)} ${ico}</button>` : '';
-        return chip('UID', uid) + chip('ID Kwai', kid);
-    }
-    _ligarCopiar(root){
-        root.querySelectorAll('[data-copiar]').forEach(b => b.addEventListener('click', () => this._copiarDado(b)));
-    }
-    _atualizarChipsDados(){
-        this.querySelectorAll('.evt-dados-chips, #evtModalDadosChips').forEach(c => { c.innerHTML = this._chipsDados(); this._ligarCopiar(c); });
-    }
-    async _copiarDado(btn){
-        const v = btn.dataset.copiar || '';
-        let ok = false;
-        try { await navigator.clipboard.writeText(v); ok = true; } catch {}
-        if(!ok){
-            try {   // navegadores antigos / WebView: copia via campo temporário
-                const t = document.createElement('textarea');
-                t.value = v; t.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-                document.body.appendChild(t); t.select(); ok = document.execCommand('copy'); t.remove();
-            } catch {}
-        }
-        const orig = btn.innerHTML;
-        btn.classList.toggle('ok', ok);
-        btn.innerHTML = ok ? 'Copiado!' : 'Não consegui copiar — selecione e copie';
-        setTimeout(() => { btn.classList.remove('ok'); btn.innerHTML = orig; }, 1400);
-    }
+    _evtOkIco(){ return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`; }
 
-    // Regras/inscrição abrem numa janela DENTRO do painel (Doc, PDF do Drive e Google Forms
-    // deixam ser incorporados). Sempre fica o link "Abrir em nova aba" como plano B.
+    // Regras (Google Doc / PDF do Drive / página de campanha da Kwai) abrem numa janela DENTRO do painel.
     _evtEmbedRegras(u){
         const s = String(u || '');
         let m = /^https:\/\/docs\.google\.com\/document\/d\/([\w-]+)/.exec(s);
@@ -2999,17 +3081,11 @@
         if(/^https:\/\/ppg\.kwai-pro\.com\//.test(s)) return s;
         return null;
     }
-    // Só incorpora o que o Worker conferiu que dá pra preencher sem login do Google;
-    // formulário que exige login (ou ainda não conferido) abre em nova aba.
-    _evtEmbedInsc(e){
-        return (typeof e.inscricao_embed === 'string' && e.inscricao_embed.startsWith('https://docs.google.com/forms/')) ? e.inscricao_embed : null;
-    }
-    _abrirEventoModal(id, tipo){
+    _abrirRegrasModal(id){
         const e = (this._evtLista || []).find(x => String(x.id) === String(id));
         if(!e) return;
-        const src = tipo === 'regras' ? this._evtEmbedRegras(e.link_regras) : this._evtEmbedInsc(e);
-        const externo = tipo === 'regras' ? e.link_regras : e.link_inscricao;
-        if(!src) { if(externo) window.open(externo, '_blank', 'noopener,noreferrer'); return; }
+        const src = this._evtEmbedRegras(e.link_regras);
+        if(!src) { if(e.link_regras) window.open(e.link_regras, '_blank', 'noopener,noreferrer'); return; }
         const shell = this.qs('.shell') || this;
         let m = this.qs('#evtModal');
         if(!m){
@@ -3022,39 +3098,162 @@
                     <a id="evtModalExt" class="evt-modal-ext" target="_blank" rel="noopener noreferrer">Abrir em nova aba</a>
                     <button type="button" class="evt-modal-x" id="evtModalX" aria-label="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
                 </div>
-                <div class="evt-modal-dados" id="evtModalDados"><span>Seus dados:</span><span id="evtModalDadosChips"></span></div>
                 <div class="evt-modal-body">
                     <div class="evt-modal-load" id="evtModalLoad">Carregando…</div>
-                    <iframe id="evtModalFrame" title="Conteúdo do evento" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
+                    <iframe id="evtModalFrame" title="Regras do evento" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
                 </div>
                 <div class="evt-modal-dica">Se o conteúdo não aparecer, toque em “Abrir em nova aba”.</div>
             </div>`;
             shell.appendChild(m);
-            m.addEventListener('click', ev => { if(ev.target === m) this._fecharEventoModal(); });
-            m.querySelector('#evtModalX').addEventListener('click', () => this._fecharEventoModal());
+            m.addEventListener('click', ev => { if(ev.target === m) this._fecharRegrasModal(); });
+            m.querySelector('#evtModalX').addEventListener('click', () => this._fecharRegrasModal());
             m.querySelector('#evtModalFrame').addEventListener('load', () => { m.querySelector('#evtModalLoad').style.display = 'none'; });
         }
-        m.querySelector('#evtModalTit').textContent = `${tipo === 'regras' ? 'Regras' : 'Inscrição'} · ${e.nome}`;
+        m.querySelector('#evtModalTit').textContent = `Regras · ${e.nome}`;
         const ext = m.querySelector('#evtModalExt');
-        if(/^https?:\/\//i.test(externo || '')) { ext.href = externo; ext.style.display = ''; } else ext.style.display = 'none';
+        if(/^https?:\/\//i.test(e.link_regras || '')) { ext.href = e.link_regras; ext.style.display = ''; } else ext.style.display = 'none';
         m.querySelector('#evtModalLoad').style.display = '';
-        const dd = m.querySelector('#evtModalDados');
-        dd.style.display = tipo === 'insc' ? '' : 'none';
-        this._atualizarChipsDados();
         m.querySelector('#evtModalFrame').src = src;
         m.classList.add('on');
         document.documentElement.style.overflow = 'hidden';
-        this._evtEsc = ev => { if(ev.key === 'Escape') this._fecharEventoModal(); };
+        this._evtEsc = ev => { if(ev.key === 'Escape') this._fecharRegrasModal(); };
         document.addEventListener('keydown', this._evtEsc);
         m.querySelector('#evtModalX').focus();
     }
-    _fecharEventoModal(){
+    _fecharRegrasModal(){
         const m = this.qs('#evtModal');
         if(!m) return;
         m.classList.remove('on');
-        m.querySelector('#evtModalFrame').src = 'about:blank';   // para o formulário/PDF
+        m.querySelector('#evtModalFrame').src = 'about:blank';
         document.documentElement.style.overflow = '';
         if(this._evtEsc){ document.removeEventListener('keydown', this._evtEsc); this._evtEsc = null; }
+    }
+
+    // ── Inscrição: "Tenho interesse" → (horário) → Confirmar ───────────────────
+    _abrirInscricaoModal(id){
+        const e = (this._evtLista || []).find(x => String(x.id) === String(id));
+        if(!e) return;
+        const shell = this.qs('.shell') || this;
+        let m = this.qs('#evtInsc');
+        if(!m){
+            m = document.createElement('div');
+            m.id = 'evtInsc'; m.className = 'evt-modal';
+            m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+            shell.appendChild(m);
+            m.addEventListener('click', ev => { if(ev.target === m) this._fecharInscricaoModal(); });
+        }
+        const mi = e.minha_inscricao, esc = s => this._escHtml(s);
+        const campos = (e.perguntas || []).map(q => {
+            const val = mi?.respostas?.[q.id], nome = `q_${esc(q.id)}`;
+            const rot = `${esc(q.rotulo)}${q.obrigatoria ? ' <span class="evt-req">*</span>' : ''}`;
+            if(q.tipo === 'unica') return `<fieldset class="evt-q" data-q="${esc(q.id)}"><legend>${rot}</legend>${(q.opcoes || []).map(o => `<label class="evt-opt"><input type="radio" name="${nome}" value="${esc(o)}" ${val === o ? 'checked' : ''}><span>${esc(o)}</span></label>`).join('')}</fieldset>`;
+            if(q.tipo === 'multipla') return `<fieldset class="evt-q" data-q="${esc(q.id)}"><legend>${rot} <small>(pode marcar mais de um)</small></legend>${(q.opcoes || []).map(o => `<label class="evt-opt"><input type="checkbox" name="${nome}" value="${esc(o)}" ${(Array.isArray(val) ? val : []).includes(o) ? 'checked' : ''}><span>${esc(o)}</span></label>`).join('')}</fieldset>`;
+            return `<label class="evt-q" data-q="${esc(q.id)}"><span class="evt-q-l">${rot}</span><input type="text" class="evt-in" name="${nome}" maxlength="300" value="${esc(val || '')}"></label>`;
+        }).join('');
+        const bloqueada = mi && mi.status === 'enviado';
+        m.innerHTML = `<div class="evt-modal-box evt-insc-box">
+            <div class="evt-modal-top">
+                <div class="evt-modal-tit">${mi ? 'Sua inscrição' : 'Inscrição'} · ${esc(e.nome)}</div>
+                <button type="button" class="evt-modal-x" id="evtInscX" aria-label="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+            <form class="evt-insc-body" id="evtInscForm" novalidate>
+                <p class="evt-insc-intro">Seu nome, UID e ID Kwai vão automaticamente. A agência faz o envio da sua inscrição à plataforma.</p>
+                ${campos || `<p class="evt-insc-intro"><b>Confirme seu interesse</b> em participar de <b>${esc(e.nome)}</b>.</p>`}
+                <div class="evt-insc-err" id="evtInscErr" role="alert"></div>
+                <div class="evt-insc-btns">
+                    <button type="submit" class="aviso-btn-pri" id="evtInscOk" ${bloqueada ? 'disabled' : ''}>${mi ? 'Salvar alteração' : 'Confirmar inscrição'}</button>
+                    ${mi && !bloqueada ? `<button type="button" class="aviso-btn-sec" id="evtInscCancel">Cancelar inscrição</button>` : ''}
+                </div>
+                ${bloqueada ? '<p class="evt-insc-intro">Sua inscrição já foi enviada à plataforma. Para alterar, fale com a agência.</p>' : ''}
+            </form></div>`;
+        m.querySelector('#evtInscX').addEventListener('click', () => this._fecharInscricaoModal());
+        m.querySelector('#evtInscForm').addEventListener('submit', ev => { ev.preventDefault(); this._enviarInscricao(e); });
+        m.querySelector('#evtInscCancel')?.addEventListener('click', ev => {
+            const b = ev.currentTarget;
+            if(!b.dataset.sim){ b.dataset.sim = '1'; b.textContent = 'Tem certeza? Toque de novo para cancelar'; return; }
+            this._cancelarInscricao(e);
+        });
+        m.classList.add('on');
+        document.documentElement.style.overflow = 'hidden';
+        this._evtEsc2 = ev => { if(ev.key === 'Escape') this._fecharInscricaoModal(); };
+        document.addEventListener('keydown', this._evtEsc2);
+    }
+    _fecharInscricaoModal(){
+        const m = this.qs('#evtInsc');
+        if(!m) return;
+        m.classList.remove('on');
+        document.documentElement.style.overflow = '';
+        if(this._evtEsc2){ document.removeEventListener('keydown', this._evtEsc2); this._evtEsc2 = null; }
+    }
+    _inscErro(msg){ const el = this.qs('#evtInscErr'); if(el) el.textContent = msg || ''; }
+    _inscSucesso(msg){
+        const body = this.qs('#evtInscForm');
+        if(body) body.innerHTML = `<div class="evt-insc-ok">${this._evtOkIco()}<p>${this._escHtml(msg)}</p><button type="button" class="aviso-btn-pri" id="evtInscFim">Fechar</button></div>`;
+        this.qs('#evtInscFim')?.addEventListener('click', () => this._fecharInscricaoModal());
+    }
+    async _enviarInscricao(e){
+        const form = this.qs('#evtInscForm'), btn = this.qs('#evtInscOk');
+        if(!form || !btn) return;
+        const respostas = {};
+        for(const q of (e.perguntas || [])){
+            const nome = `q_${q.id}`;
+            let v;
+            if(q.tipo === 'multipla') v = [...form.querySelectorAll(`input[name="${nome}"]:checked`)].map(i => i.value);
+            else if(q.tipo === 'unica') v = form.querySelector(`input[name="${nome}"]:checked`)?.value || '';
+            else v = (form.querySelector(`input[name="${nome}"]`)?.value || '').trim();
+            if(q.obrigatoria && (Array.isArray(v) ? !v.length : !v)){ this._inscErro(`Preencha: ${q.rotulo}`); return; }
+            respostas[q.id] = v;
+        }
+        this._inscErro(''); btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Enviando…';
+        try {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/eventos/inscrever`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: this.sessionUid, evento_id: e.id, respostas }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if(!res.ok){ this._inscErro(d.erro || 'Não foi possível salvar sua inscrição.'); btn.disabled = false; btn.textContent = orig; return; }
+            this._inscSucesso('Inscrição confirmada! A agência vai enviá-la à plataforma.');
+            this.loadEventos();
+        } catch { this._inscErro('Sem conexão. Tente de novo.'); btn.disabled = false; btn.textContent = orig; }
+    }
+    async _cancelarInscricao(e){
+        try {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/eventos/cancelar`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: this.sessionUid, evento_id: e.id }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if(!res.ok){ this._inscErro(d.erro || 'Não foi possível cancelar.'); return; }
+            this._inscSucesso('Inscrição cancelada.');
+            this.loadEventos();
+        } catch { this._inscErro('Sem conexão. Tente de novo.'); }
+    }
+
+
+    // ── Aba "Eventos" (calendário + inscrição). As notificações continuam em "Avisos". ──
+    goEventos(){
+        this.navigate('vEventos');
+        this.navActive('nEventos');
+        window.scrollTo({ top: 0 });
+        this.loadEventos();
+    }
+    // Aviso dentro de "Avisos": leva pra aba Eventos e destaca quando há novidade no calendário
+    async _cardEventosAviso(){
+        const el = this.qs('#avisosEventosCard');
+        if(!el) return;
+        try {
+            const d = await this._buscarEventos();
+            const lista = d.eventos || [];
+            if(!lista.length){ el.innerHTML = ''; return; }
+            const novo = this._eventosNovosEm(lista);
+            const mesHoje = String(d.hoje).slice(0, 7), hd = Number(String(d.hoje).slice(8, 10));
+            const hoje = lista.filter(e => e.mes === mesHoje && (e.dias || []).includes(hd)).length;
+            const abertas = lista.filter(e => e.inscricao_aberta && !e.minha_inscricao).length;
+            const minhas = lista.filter(e => e.minha_inscricao).length;
+            const partes = [hoje ? `${hoje} acontecendo hoje` : '', abertas ? `${abertas} com inscrição aberta` : '', minhas ? `${minhas} inscrição(ões) sua(s)` : ''].filter(Boolean).join(' · ') || 'Veja o calendário do mês';
+            el.innerHTML = `<button type="button" class="avisos-evt-card${novo ? ' novo' : ''}" id="btnVerEventos"><span class="aec-ico">${this.svgCalendar()}</span><span class="aec-txt"><b>Eventos do mês${novo ? ' · novidade no calendário' : ''}</b><small>${this._escHtml(partes)}</small></span><span class="aec-go" aria-hidden="true">›</span></button>`;
+            el.querySelector('#btnVerEventos').addEventListener('click', () => this.goEventos());
+        } catch { el.innerHTML = ''; }
     }
 
     async loadAvisos(){
