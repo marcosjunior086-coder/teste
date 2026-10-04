@@ -777,6 +777,20 @@
             .aviso-card-desc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:6px;}
             .aviso-card-data{font-size:.7rem;color:var(--muted);opacity:.7;display:flex;align-items:center;gap:4px;}
             .aviso-card-data svg{width:11px;height:11px;flex-shrink:0;}
+            /* Janela de leitura (regras / inscrição) dentro do painel */
+            .evt-modal{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;}
+            .evt-modal.on{display:flex;}
+            .evt-modal-box{width:min(980px,100%);height:min(92vh,100%);background:var(--card-solid,#1a1a2e);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+            .evt-modal-top{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-bottom:1px solid var(--border);}
+            .evt-modal-tit{flex:1;min-width:0;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:1rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+            .evt-modal-ext{font-size:.75rem;font-weight:700;color:var(--cyan);text-decoration:none;white-space:nowrap;}
+            .evt-modal-ext:hover{text-decoration:underline;}
+            .evt-modal-x{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+            .evt-modal-body{position:relative;flex:1;min-height:0;background:#fff;}
+            .evt-modal-body iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;}
+            .evt-modal-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#555;font-size:.85rem;}
+            .evt-modal-dica{padding:7px 14px;font-size:.7rem;color:var(--muted);border-top:1px solid var(--border);text-align:center;}
+            @media(max-width:700px){.evt-modal{padding:0;}.evt-modal-box{height:100%;border-radius:0;border:0;}}
             /* Eventos do mês */
             .evt-wrap{margin-bottom:22px;}
             .evt-lista{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
@@ -2886,7 +2900,13 @@
                     <div class="evt-dias">Dias ${this._escHtml(this._evtDiasTxt(e.dias) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>
                     ${pkTxt}
                     <div class="evt-tl">${tl}</div>
-                    ${(rg || ins) ? `<div class="evt-btns">${rg ? `<a class="aviso-btn-sec" href="${rg}" target="_blank" rel="noopener noreferrer">Regras</a>` : ''}${ins ? `<a class="aviso-btn-pri" href="${ins}" target="_blank" rel="noopener noreferrer">Inscrever-se</a>` : ''}</div>` : ''}
+                    ${(rg || ins) ? `<div class="evt-btns">${
+                        rg ? (this._evtEmbedRegras(e.link_regras)
+                            ? `<button type="button" class="aviso-btn-sec" data-evt-ver="regras" data-evt-id="${this._escHtml(e.id)}">Ler regras</button>`
+                            : `<a class="aviso-btn-sec" href="${rg}" target="_blank" rel="noopener noreferrer">Regras</a>`) : ''}${
+                        ins ? (this._evtEmbedInsc(e)
+                            ? `<button type="button" class="aviso-btn-pri" data-evt-ver="insc" data-evt-id="${this._escHtml(e.id)}">Inscrever-se</button>`
+                            : `<a class="aviso-btn-pri" href="${ins}" target="_blank" rel="noopener noreferrer">Inscrever-se</a>`) : ''}</div>` : ''}
                 </div>
             </div>`;
         };
@@ -2898,6 +2918,72 @@
             ${secao('Mês que vem', grupos.depois)}
             ${fim}
         </div>`;
+        this._evtLista = lista;
+        el.querySelectorAll('[data-evt-ver]').forEach(b => b.addEventListener('click', () => this._abrirEventoModal(b.dataset.evtId, b.dataset.evtVer)));
+    }
+
+    // Regras/inscrição abrem numa janela DENTRO do painel (Doc, PDF do Drive e Google Forms
+    // deixam ser incorporados). Sempre fica o link "Abrir em nova aba" como plano B.
+    _evtEmbedRegras(u){
+        const s = String(u || '');
+        let m = /^https:\/\/docs\.google\.com\/document\/d\/([\w-]+)/.exec(s);
+        if(m) return `https://docs.google.com/document/d/${m[1]}/preview`;
+        m = /^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)/.exec(s);
+        if(m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+        return null;
+    }
+    // Só incorpora o que o Worker conferiu que dá pra preencher sem login do Google;
+    // formulário que exige login (ou ainda não conferido) abre em nova aba.
+    _evtEmbedInsc(e){
+        return (typeof e.inscricao_embed === 'string' && e.inscricao_embed.startsWith('https://docs.google.com/forms/')) ? e.inscricao_embed : null;
+    }
+    _abrirEventoModal(id, tipo){
+        const e = (this._evtLista || []).find(x => String(x.id) === String(id));
+        if(!e) return;
+        const src = tipo === 'regras' ? this._evtEmbedRegras(e.link_regras) : this._evtEmbedInsc(e);
+        const externo = tipo === 'regras' ? e.link_regras : e.link_inscricao;
+        if(!src) { if(externo) window.open(externo, '_blank', 'noopener,noreferrer'); return; }
+        const shell = this.qs('.shell') || this;
+        let m = this.qs('#evtModal');
+        if(!m){
+            m = document.createElement('div');
+            m.id = 'evtModal'; m.className = 'evt-modal';
+            m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+            m.innerHTML = `<div class="evt-modal-box">
+                <div class="evt-modal-top">
+                    <div class="evt-modal-tit" id="evtModalTit"></div>
+                    <a id="evtModalExt" class="evt-modal-ext" target="_blank" rel="noopener noreferrer">Abrir em nova aba</a>
+                    <button type="button" class="evt-modal-x" id="evtModalX" aria-label="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                </div>
+                <div class="evt-modal-body">
+                    <div class="evt-modal-load" id="evtModalLoad">Carregando…</div>
+                    <iframe id="evtModalFrame" title="Conteúdo do evento" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
+                </div>
+                <div class="evt-modal-dica">Se o conteúdo não aparecer, toque em “Abrir em nova aba”.</div>
+            </div>`;
+            shell.appendChild(m);
+            m.addEventListener('click', ev => { if(ev.target === m) this._fecharEventoModal(); });
+            m.querySelector('#evtModalX').addEventListener('click', () => this._fecharEventoModal());
+            m.querySelector('#evtModalFrame').addEventListener('load', () => { m.querySelector('#evtModalLoad').style.display = 'none'; });
+        }
+        m.querySelector('#evtModalTit').textContent = `${tipo === 'regras' ? 'Regras' : 'Inscrição'} · ${e.nome}`;
+        const ext = m.querySelector('#evtModalExt');
+        if(/^https?:\/\//i.test(externo || '')) { ext.href = externo; ext.style.display = ''; } else ext.style.display = 'none';
+        m.querySelector('#evtModalLoad').style.display = '';
+        m.querySelector('#evtModalFrame').src = src;
+        m.classList.add('on');
+        document.documentElement.style.overflow = 'hidden';
+        this._evtEsc = ev => { if(ev.key === 'Escape') this._fecharEventoModal(); };
+        document.addEventListener('keydown', this._evtEsc);
+        m.querySelector('#evtModalX').focus();
+    }
+    _fecharEventoModal(){
+        const m = this.qs('#evtModal');
+        if(!m) return;
+        m.classList.remove('on');
+        m.querySelector('#evtModalFrame').src = 'about:blank';   // para o formulário/PDF
+        document.documentElement.style.overflow = '';
+        if(this._evtEsc){ document.removeEventListener('keydown', this._evtEsc); this._evtEsc = null; }
     }
 
     async loadAvisos(){
