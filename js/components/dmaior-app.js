@@ -777,6 +777,14 @@
             .aviso-card-desc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:6px;}
             .aviso-card-data{font-size:.7rem;color:var(--muted);opacity:.7;display:flex;align-items:center;gap:4px;}
             .aviso-card-data svg{width:11px;height:11px;flex-shrink:0;}
+            /* Dados do streamer pra copiar no formulário */
+            .evt-dados{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding:9px 11px;border:1px dashed var(--border);border-radius:10px;}
+            .evt-dados-t{flex-basis:100%;font-size:.7rem;color:var(--muted);}
+            .evt-dados-chips,#evtModalDadosChips{display:inline-flex;flex-wrap:wrap;gap:8px;}
+            .evt-copy{display:inline-flex;align-items:center;gap:6px;background:var(--cyan-d);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:.8rem;font-family:inherit;cursor:pointer;}
+            .evt-copy b{color:var(--cyan);font-weight:700;}
+            .evt-copy.ok{background:var(--cyan);border-color:var(--cyan);color:#000;}
+            .evt-modal-dados{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:.72rem;color:var(--muted);}
             /* Janela de leitura (regras / inscrição) dentro do painel */
             .evt-modal{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;}
             .evt-modal.on{display:flex;}
@@ -2025,6 +2033,7 @@
             try {
                 if(nomeExibir) localStorage.setItem('dm_nome', nomeExibir);
                 if(fotoExibir) localStorage.setItem('dm_foto', fotoExibir);
+                this._guardarKwaiId(p.kwai_id);
                 localStorage.setItem('dm_atalho_admin',  p.atalho_admin  ? 'true' : 'false');
                 localStorage.setItem('dm_atalho_agente', p.atalho_agente ? 'true' : 'false');
                 localStorage.setItem('dm_atalho_sub', p.atalho_sub ? 'true' : 'false');
@@ -2907,6 +2916,7 @@
                         ins ? (this._evtEmbedInsc(e)
                             ? `<button type="button" class="aviso-btn-pri" data-evt-ver="insc" data-evt-id="${this._escHtml(e.id)}">Inscrever-se</button>`
                             : `<a class="aviso-btn-pri" href="${ins}" target="_blank" rel="noopener noreferrer">Inscrever-se</a>`) : ''}</div>` : ''}
+                    ${ins ? `<div class="evt-dados"><span class="evt-dados-t">Seus dados para preencher o formulário (toque para copiar)</span><span class="evt-dados-chips">${this._chipsDados()}</span></div>` : ''}
                 </div>
             </div>`;
         };
@@ -2920,6 +2930,61 @@
         </div>`;
         this._evtLista = lista;
         el.querySelectorAll('[data-evt-ver]').forEach(b => b.addEventListener('click', () => this._abrirEventoModal(b.dataset.evtId, b.dataset.evtVer)));
+        this._ligarCopiar(el);
+        this._garantirKwaiId();
+    }
+
+    // ── Dados do streamer pra colar nos formulários de inscrição ─────────────
+    // O formulário da plataforma pede UID e ID Kwai; aqui o streamer copia com um toque
+    // (sem precisar do F12). O UID é o da sessão; o ID Kwai vem do /api/dashboard.
+    _kwaiIdAtual(){
+        if(this._kwaiId) return this._kwaiId;
+        try { return localStorage.getItem('dm_kwai_id') || ''; } catch { return ''; }
+    }
+    async _garantirKwaiId(){
+        if(this._kwaiIdAtual() || this._kwaiIdBuscado || !this.sessionUid) return;
+        this._kwaiIdBuscado = true;   // 1 tentativa por sessão
+        try {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/dashboard`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: this.sessionUid }),
+            });
+            if(!res.ok) return;
+            this._guardarKwaiId(((await res.json()).perfil || {}).kwai_id);
+            this._atualizarChipsDados();
+        } catch {}
+    }
+    _guardarKwaiId(id){
+        if(!id) return;
+        this._kwaiId = String(id);
+        try { localStorage.setItem('dm_kwai_id', this._kwaiId); } catch {}
+    }
+    _chipsDados(){
+        const uid = this.sessionUid || localStorage.getItem('dm_uid') || '', kid = this._kwaiIdAtual();
+        const ico = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`;
+        const chip = (rot, v) => v ? `<button type="button" class="evt-copy" data-copiar="${this._escHtml(v)}" title="Copiar ${rot}"><b>${rot}</b> ${this._escHtml(v)} ${ico}</button>` : '';
+        return chip('UID', uid) + chip('ID Kwai', kid);
+    }
+    _ligarCopiar(root){
+        root.querySelectorAll('[data-copiar]').forEach(b => b.addEventListener('click', () => this._copiarDado(b)));
+    }
+    _atualizarChipsDados(){
+        this.querySelectorAll('.evt-dados-chips, #evtModalDadosChips').forEach(c => { c.innerHTML = this._chipsDados(); this._ligarCopiar(c); });
+    }
+    async _copiarDado(btn){
+        const v = btn.dataset.copiar || '';
+        let ok = false;
+        try { await navigator.clipboard.writeText(v); ok = true; } catch {}
+        if(!ok){
+            try {   // navegadores antigos / WebView: copia via campo temporário
+                const t = document.createElement('textarea');
+                t.value = v; t.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+                document.body.appendChild(t); t.select(); ok = document.execCommand('copy'); t.remove();
+            } catch {}
+        }
+        const orig = btn.innerHTML;
+        btn.classList.toggle('ok', ok);
+        btn.innerHTML = ok ? 'Copiado!' : 'Não consegui copiar — selecione e copie';
+        setTimeout(() => { btn.classList.remove('ok'); btn.innerHTML = orig; }, 1400);
     }
 
     // Regras/inscrição abrem numa janela DENTRO do painel (Doc, PDF do Drive e Google Forms
@@ -2955,6 +3020,7 @@
                     <a id="evtModalExt" class="evt-modal-ext" target="_blank" rel="noopener noreferrer">Abrir em nova aba</a>
                     <button type="button" class="evt-modal-x" id="evtModalX" aria-label="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
                 </div>
+                <div class="evt-modal-dados" id="evtModalDados"><span>Seus dados:</span><span id="evtModalDadosChips"></span></div>
                 <div class="evt-modal-body">
                     <div class="evt-modal-load" id="evtModalLoad">Carregando…</div>
                     <iframe id="evtModalFrame" title="Conteúdo do evento" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
@@ -2970,6 +3036,9 @@
         const ext = m.querySelector('#evtModalExt');
         if(/^https?:\/\//i.test(externo || '')) { ext.href = externo; ext.style.display = ''; } else ext.style.display = 'none';
         m.querySelector('#evtModalLoad').style.display = '';
+        const dd = m.querySelector('#evtModalDados');
+        dd.style.display = tipo === 'insc' ? '' : 'none';
+        this._atualizarChipsDados();
         m.querySelector('#evtModalFrame').src = src;
         m.classList.add('on');
         document.documentElement.style.overflow = 'hidden';
