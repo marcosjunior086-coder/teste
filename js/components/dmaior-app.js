@@ -778,6 +778,12 @@
             .aviso-card-data{font-size:.7rem;color:var(--muted);opacity:.7;display:flex;align-items:center;gap:4px;}
             .aviso-card-data svg{width:11px;height:11px;flex-shrink:0;}
             /* Dados do streamer pra copiar no formulário */
+            /* Sininho (lembretes do evento) e aviso rápido */
+            .evt-sino{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--text);font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;}
+            .evt-sino.on{border-color:var(--cyan);background:var(--cyan-d);color:var(--cyan);}
+            .evt-sino:disabled{opacity:.6;cursor:default;}
+            .evt-aviso{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(16px);max-width:min(440px,calc(100% - 24px));background:var(--card-solid,#1a1a2e);color:var(--text);border:1px solid var(--cyan);border-radius:12px;padding:10px 14px;font-size:.82rem;line-height:1.4;z-index:3500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+            .evt-aviso.on{opacity:1;transform:translateX(-50%) translateY(0);}
             /* Calendário de eventos */
             .cal-pts i.ins,.cal-ev i.ins{background:transparent;border:2px solid #888;box-sizing:border-box;}
             .cal-pts i.ins{width:7px;height:7px;border-width:1.5px;}
@@ -3120,6 +3126,7 @@
             if(mi && mi.status === 'enviado') btnInsc = `<span class="evt-ok">${this._evtOkIco()} Inscrição enviada</span>`;
             else if(mi) btnInsc = `<button type="button" class="aviso-btn-sec" data-evt-insc="${this._escHtml(e.id)}">Alterar inscrição</button>`;
             else if(e.inscricao_aberta) btnInsc = `<button type="button" class="aviso-btn-pri" data-evt-insc="${this._escHtml(e.id)}">Tenho interesse</button>`;
+            const btnSino = (mi && i.f !== 'fim') ? `<button type="button" class="evt-sino${mi.lembrete ? ' on' : ''}" data-evt-sino="${this._escHtml(e.id)}" aria-pressed="${mi.lembrete ? 'true' : 'false'}" title="${mi.lembrete ? 'Desligar os lembretes deste evento' : 'Receber lembretes deste evento'}">${this._evtSinoIco()}<span>${mi.lembrete ? 'Lembretes ligados' : 'Avisar-me'}</span></button>` : '';
             const minha = mi ? `<div class="evt-minha">${this._evtOkIco()} <span><b>Você está inscrito</b> · ${this._escHtml(this._evtRespTxt(e))}${mi.status === 'enviado' ? ' · enviada à plataforma' : ''}</span></div>` : '';
             return `<div class="evt-card ${i.f === 'hoje' ? 'is-hoje' : ''}">
                 ${img}
@@ -3131,7 +3138,7 @@
                     ${pkTxt}
                     <div class="evt-tl">${tl}</div>
                     ${minha}
-                    ${(btnRegras || btnInsc) ? `<div class="evt-btns">${btnRegras}${btnInsc}</div>` : ''}
+                    ${(btnRegras || btnInsc || btnSino) ? `<div class="evt-btns">${btnRegras}${btnInsc}${btnSino}</div>` : ''}
                 </div>
             </div>`;
         };
@@ -3161,6 +3168,49 @@
         }));
         el.querySelectorAll('[data-evt-regras]').forEach(b => b.addEventListener('click', () => this._abrirRegrasModal(b.dataset.evtRegras)));
         el.querySelectorAll('[data-evt-insc]').forEach(b => b.addEventListener('click', () => this._abrirInscricaoModal(b.dataset.evtInsc)));
+        el.querySelectorAll('[data-evt-sino]').forEach(b => b.addEventListener('click', () => this._alternarLembrete(b.dataset.evtSino)));
+    }
+
+    _evtSinoIco(){ return `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`; }
+    // Aviso rápido (fica fora da lista de eventos, que é redesenhada a cada mudança)
+    _evtAviso(msg){
+        const shell = this.qs('.shell') || this;
+        let t = this.qs('#evtAviso');
+        if(!t){ t = document.createElement('div'); t.id = 'evtAviso'; t.className = 'evt-aviso'; t.setAttribute('role', 'status'); shell.appendChild(t); }
+        t.textContent = msg; t.classList.add('on');
+        clearTimeout(this._evtAvisoT); this._evtAvisoT = setTimeout(() => t.classList.remove('on'), 5500);
+    }
+    // Sininho: liga/desliga os lembretes push do evento. Ligar precisa de notificação ativa NESTE aparelho.
+    async _alternarLembrete(id, forcarLigar){
+        const e = (this._evtLista || []).find(x => String(x.id) === String(id));
+        const mi = e?.minha_inscricao;
+        if(!e || !mi) return false;
+        const novo = forcarLigar ? true : !mi.lembrete;
+        let dica = '';
+        if(novo){
+            const P = window.DmaiorPush;
+            let st = 'nao-suportado';
+            try { st = P ? await P.estado() : 'nao-suportado'; } catch {}
+            if(P && st === 'desativado'){ try { await P.ativar(); st = await P.estado(); } catch {} }
+            if(st !== 'ativado'){
+                dica = st === 'ios-instalar' ? ' No iPhone, instale o painel na tela inicial para receber notificações.'
+                    : st === 'bloqueado' ? ' As notificações estão bloqueadas neste aparelho: libere nas configurações do navegador.'
+                    : ' Ative as notificações deste aparelho para receber.';
+            }
+        }
+        try {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/eventos/lembrete`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: this.sessionUid, evento_id: e.id, ativo: novo }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if(!res.ok){ this._evtAviso(d.erro || 'Não foi possível salvar. Tente de novo.'); return !!mi.lembrete; }
+            mi.lembrete = novo;
+            const el = this.qs('#avisosEventos');
+            if(el) this._renderEventosStreamer(el, this._evtLista, this._evtHoje);
+            this._evtAviso(novo ? `Lembretes ligados para ${e.nome}.${dica}` : `Lembretes desligados para ${e.nome}.`);
+            return novo;
+        } catch { this._evtAviso('Sem conexão. Tente de novo.'); return !!mi.lembrete; }
     }
 
     _evtOkIco(){ return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`; }
@@ -3281,10 +3331,17 @@
         if(this._evtEsc2){ document.removeEventListener('keydown', this._evtEsc2); this._evtEsc2 = null; }
     }
     _inscErro(msg){ const el = this.qs('#evtInscErr'); if(el) el.textContent = msg || ''; }
-    _inscSucesso(msg){
+    _inscSucesso(msg, eventoId){
         const body = this.qs('#evtInscForm');
-        if(body) body.innerHTML = `<div class="evt-insc-ok">${this._evtOkIco()}<p>${this._escHtml(msg)}</p><button type="button" class="aviso-btn-pri" id="evtInscFim">Fechar</button></div>`;
+        if(body) body.innerHTML = `<div class="evt-insc-ok">${this._evtOkIco()}<p>${this._escHtml(msg)}</p>${eventoId ? `<p class="evt-insc-intro">Quer receber um lembrete no dia do evento e perto do seu horário?</p><button type="button" class="evt-sino" id="evtInscSino">${this._evtSinoIco()}<span>Ativar lembretes deste evento</span></button>` : ''}<button type="button" class="aviso-btn-pri" id="evtInscFim">Fechar</button></div>`;
         this.qs('#evtInscFim')?.addEventListener('click', () => this._fecharInscricaoModal());
+        const s = this.qs('#evtInscSino');
+        s?.addEventListener('click', async () => {
+            s.disabled = true;
+            const ligou = await this._alternarLembrete(eventoId, true);
+            s.disabled = false; s.classList.toggle('on', !!ligou);
+            s.querySelector('span').textContent = ligou ? 'Lembretes ligados' : 'Ativar lembretes deste evento';
+        });
     }
     async _enviarInscricao(e){
         const form = this.qs('#evtInscForm'), btn = this.qs('#evtInscOk');
@@ -3307,8 +3364,8 @@
             });
             const d = await res.json().catch(() => ({}));
             if(!res.ok){ this._inscErro(d.erro || 'Não foi possível salvar sua inscrição.'); btn.disabled = false; btn.textContent = orig; return; }
-            this._inscSucesso('Inscrição confirmada! A agência vai enviá-la à plataforma.');
-            this.loadEventos();
+            await this.loadEventos();
+            this._inscSucesso('Inscrição confirmada! A agência vai enviá-la à plataforma.', e.id);
         } catch { this._inscErro('Sem conexão. Tente de novo.'); btn.disabled = false; btn.textContent = orig; }
     }
     async _cancelarInscricao(e){
