@@ -2715,6 +2715,8 @@ class DimaiorAdmin extends HTMLElement {
     // Comunicados
     s.getElementById('btnAtuCom').addEventListener('click',()=>this._comAba==='eventos'?this._carregarEventos(this._evMes):this._carregarComunicados());
     s.querySelectorAll('[data-com-aba]').forEach(b=>b.addEventListener('click',()=>this._abaCom(b.dataset.comAba)));
+    s.getElementById('evViewX')?.addEventListener('click',()=>this._fecharEvView());
+    s.getElementById('mEvView')?.addEventListener('click',e=>{if(e.target.id==='mEvView')this._fecharEvView();});
     s.getElementById('evImportar')?.addEventListener('click',()=>this._importarEventos());
     s.getElementById('evMes')?.addEventListener('change',e=>this._carregarEventos(e.target.value));
     s.getElementById('btnDriveFotos')?.addEventListener('click',()=>window.open(this.DRIVE_FOTOS_URL,'_blank','noopener,noreferrer'));
@@ -3178,7 +3180,8 @@ class DimaiorAdmin extends HTMLElement {
       const notBadge=e.notificado_em?`<span class="com-data">${this._ii('bell',11)} avisou ${this._fdtCurto(e.notificado_em)}</span>`:'';
       const alt=(e.alteracoes_vistas===false&&e.alteracoes)?`<div class="ev-alt">${this._ii('warning',12)} ${this._esc(this._evDescMudancas(e.alteracoes))}${e.status==='ativo'&&e.publico!=='agencia'?` <a href="#" data-ev-not-alt="${e.id}">Avisar as streamers da mudança</a>`:''}</div>`:'';
       const rg=this._evLink(e.link_regras),ins=this._evLink(e.link_inscricao);
-      const links=`${rg?`<a class="ev-link" href="${rg}" target="_blank" rel="noopener noreferrer">${this._ii('file_text',12)}Regras</a>`:`<span class="ev-link off">sem regras</span>`}${ins?`<a class="ev-link" href="${ins}" target="_blank" rel="noopener noreferrer">${this._ii('edit',12)}Inscrição</a>`:''}`;
+      const vRg=this._evEmbedRegras(e.link_regras)?` data-ev-ver="regras" data-ev-id="${e.id}"`:'',vIns=this._evEmbedInsc(e)?` data-ev-ver="insc" data-ev-id="${e.id}"`:'';
+      const links=`${rg?`<a class="ev-link" href="${rg}" target="_blank" rel="noopener noreferrer"${vRg}>${this._ii('file_text',12)}Regras</a>`:`<span class="ev-link off">sem regras</span>`}${ins?`<a class="ev-link" href="${ins}" target="_blank" rel="noopener noreferrer"${vIns}>${this._ii('edit',12)}Inscrição</a>`:''}`;
       const podeAvisar=e.status==='ativo'&&e.publico!=='agencia';
       return`<div class="com-item ev-item ${e.status==='ativo'?'is-important':'is-fast'}">
         <div class="com-preview">${thumb}<div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1)">${this._esc(e.nome)}${e.nome_zh?` <span class="com-data" style="margin-left:4px">${this._esc(e.nome_zh)}</span>`:''}</strong><span class="com-texto">Dias ${this._esc(this._evDias(e.dias)||'—')}</span><div class="ev-links">${links}</div></div></div>
@@ -3193,11 +3196,39 @@ class DimaiorAdmin extends HTMLElement {
       </div>`;
     }).join('')}</div>`;
     const por=id=>lista.find(x=>x.id===id);
+    el.querySelectorAll('[data-ev-ver]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();this._abrirEvView(a.dataset.evId,a.dataset.evVer);}));
     el.querySelectorAll('[data-ev-st]').forEach(b=>b.addEventListener('click',()=>this._eventoStatus(b.dataset.evSt,b.dataset.v)));
     el.querySelectorAll('[data-ev-img]').forEach(b=>b.addEventListener('click',()=>this._eventoImagem(b.dataset.evImg)));
     el.querySelectorAll('[data-ev-not]').forEach(b=>b.addEventListener('click',()=>this._eventoNotificar(por(b.dataset.evNot),'novo')));
     el.querySelectorAll('[data-ev-not-alt]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();this._eventoNotificar(por(a.dataset.evNotAlt),'alteracao');}));
     el.querySelectorAll('[data-ev-del]').forEach(b=>b.addEventListener('click',()=>this._confirmarDel('Excluir este evento? Se ele ainda estiver na planilha, volta como rascunho na próxima atualização.',()=>this._eventoExcluir(b.dataset.evDel))));
+  }
+
+  // Regras (Google Doc / PDF do Drive) e inscrição (Google Forms aberto, sem login) abrem
+  // numa janela aqui dentro — igual o streamer vê no painel dele. O link continua sendo um
+  // link normal (nova aba) pra o que não dá pra incorporar.
+  _evEmbedRegras(u){
+    const s=String(u||'');
+    let m=/^https:\/\/docs\.google\.com\/document\/d\/([\w-]+)/.exec(s);
+    if(m)return`https://docs.google.com/document/d/${m[1]}/preview`;
+    m=/^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)/.exec(s);
+    if(m)return`https://drive.google.com/file/d/${m[1]}/preview`;
+    return null;
+  }
+  _evEmbedInsc(e){return(typeof e.inscricao_embed==='string'&&e.inscricao_embed.startsWith('https://docs.google.com/forms/'))?e.inscricao_embed:null;}
+  _abrirEvView(id,tipo){
+    const s=this.shadowRoot,e=(this._evLista||[]).find(x=>x.id===id);if(!e)return;
+    const src=tipo==='regras'?this._evEmbedRegras(e.link_regras):this._evEmbedInsc(e);
+    const ext=tipo==='regras'?e.link_regras:e.link_inscricao;
+    if(!src){if(/^https?:\/\//i.test(ext||''))window.open(ext,'_blank','noopener,noreferrer');return;}
+    s.getElementById('evViewTit').textContent=`${tipo==='regras'?'Regras':'Inscrição'} · ${e.nome}`;
+    const a=s.getElementById('evViewExt');a.href=/^https?:\/\//i.test(ext||'')?ext:'#';
+    s.getElementById('evViewFrame').src=src;
+    this._abrirModal('mEvView');
+  }
+  _fecharEvView(){
+    this.shadowRoot.getElementById('evViewFrame').src='about:blank'; // para o PDF/formulário
+    this._fechaModal('mEvView');
   }
 
   _evDescMudancas(alts){
@@ -6279,6 +6310,11 @@ class DimaiorAdmin extends HTMLElement {
     .ev-tl{grid-area:tl;display:flex;gap:2px;flex-wrap:wrap}
     .ev-tl i{font-style:normal;width:20px;height:20px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;background:rgba(255,255,255,.05);color:var(--t3)}
     .ev-tl i.pk{outline:2px solid var(--purple);outline-offset:-2px}
+    .modal.ev-view{max-width:980px;width:96%;height:90vh;padding:0;display:flex;flex-direction:column;overflow:hidden}
+    .ev-view-top{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--brd)}
+    .ev-view-top b{flex:1;min-width:0;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ev-view-body{flex:1;min-height:0;background:#fff}
+    .ev-view-body iframe{width:100%;height:100%;border:0;display:block;background:#fff}
     .ev-alt{grid-area:alt;font-size:12px;color:var(--verm);background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:8px 10px}
     .ev-alt a{color:var(--gold);margin-left:6px}
     @media(max-width:760px){.com-item.ev-item{grid-template-areas:"preview" "meta" "tl" "alt" "actions"}.ev-tl i{width:18px;height:18px}}
@@ -7351,6 +7387,7 @@ class DimaiorAdmin extends HTMLElement {
       <!-- MODAIS -->
       <div class="ov" id="mS"><div class="modal"><div class="m-titulo" id="mSTit">Adicionar</div><div class="mc"><label>Nome</label><input id="mNome" type="text"/></div><div class="mc"><label>Kwai ID</label><input id="mKwai" type="text"/></div><div class="mc"><label>URL da Foto</label><input id="mFoto" type="text"/></div><div class="mc"><label>Status</label><select id="mAtivo"><option value="true">Ativo</option><option value="false">Inativo</option></select></div><div class="mf"><button class="btn btn-o" id="mSCancel">Cancelar</button><button class="btn btn-g" id="mSSave">${this._ico('check',13)} Salvar</button></div></div></div>
       <div class="ov" id="mC"><div class="modal"><div class="m-titulo">${this._ico('warning',16)} Confirmar</div><p id="mCMsg" style="color:var(--t2);font-size:13px;margin-bottom:16px;line-height:1.6"></p><div class="mf"><button class="btn btn-o" id="mCCancel">Cancelar</button><button class="btn btn-g" id="mCOk" style="background:linear-gradient(135deg,#c00030,#f87171)">${this._ico('trash',13)} Confirmar</button></div></div></div>
+      <div class="ov" id="mEvView"><div class="modal ev-view"><div class="ev-view-top"><b id="evViewTit"></b><a id="evViewExt" class="ev-link" target="_blank" rel="noopener noreferrer">Abrir em nova aba</a><button class="btn btn-o btn-sm" id="evViewX" type="button" aria-label="Fechar">${this._ico('x',13)}</button></div><div class="ev-view-body"><iframe id="evViewFrame" title="Conteúdo do evento" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe></div></div></div>
       <div class="ov" id="mUID"><div class="modal"><div class="m-titulo">${this._ico('key_uid',16)} Autorizar UID</div><div class="mc"><label>UID Kwai</label><div class="uid-input-row"><input id="uidInputVal" type="number" placeholder="Ex: 11614413" autocomplete="off"/><button class="btn btn-g" id="btnBuscarUID">${this._ico('search',13)} Buscar</button></div></div><div id="uidLookupResult" style="display:none"></div><div class="mc" style="margin-top:12px"><label>Anotação (opcional)</label><input id="uidNomeRef" type="text" placeholder="Ex: João da turma de maio"/></div><div class="mf"><button class="btn btn-o" id="btnCancelarUID">Cancelar</button><button class="btn btn-g" id="btnConfirmarUID" style="display:none">${this._ico('unlock',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mCart"><div class="modal modal-lg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="m-titulo" id="mCartTitulo" style="margin-bottom:0">${this._ico('wallet',16)} Carteira</div><button class="btn btn-o btn-sm" id="btnFecharCart">${this._ico('x_circle',12)} Fechar</button></div><div id="mCartBody">${this._loading()}</div></div></div>
       <div class="ov" id="mOp"><div class="modal"><div class="m-titulo" id="mOpTitulo">${this._ico('wallet',16)} Operação</div><div class="mc"><label>Valor (R$)</label><input id="mOpValor" type="number" min="0.01" step="0.01" placeholder="0.00"/></div><div class="mc"><label>Descrição / Motivo <span style="color:var(--verm)">*</span></label><textarea id="mOpDesc" rows="3" placeholder="Ex: Fechamento maio..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarOp">Cancelar</button><button class="btn btn-g" id="mOpConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
