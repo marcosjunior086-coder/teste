@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <script>
@@ -27,13 +27,20 @@
   <link rel="stylesheet" href="css/global.css?v=20260908-tap">
   <link rel="stylesheet" href="css/components.css">
   <style>
-    .rc-page { max-width: 560px; margin: 32px auto 60px; padding: 0 16px; }
+    .rc-page { max-width: 560px; margin: 20px auto 60px; padding: 0 16px; }
+    /* Botões no padrão da home: pílula azul→ciano / contorno */
+    .rc-page .dm-btn-primary { background: var(--dm-grad-effect, linear-gradient(135deg,#3b82f6,#00d4d4)); color: #fff; border: 1px solid var(--dm-effect-35, rgba(0,212,212,.35)); border-radius: 999px; box-shadow: 0 12px 30px var(--dm-effect-glow, rgba(59,130,246,.28)); font-weight: 700; }
+    .rc-page .dm-btn-primary:hover { color: #fff; transform: translateY(-1px); }
+    .rc-page .rc-btn-row .dm-btn-secondary { border-radius: 999px; }
+    .rc-info-compacta { margin: 22px 0 10px !important; padding-top: 16px; border-top: 1px solid var(--dm-border); gap: 8px !important; }
+    .rc-info-compacta .rc-info-item { font-size: .82rem !important; }
+    .rc-link-tut { display: block; width: 100%; background: none; border: 0; color: var(--dm-cyan); font-family: var(--dm-font-body); font-size: .88rem; font-weight: 600; padding: 8px 0 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
     .rc-prefbar { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
     .rc-prefbar select { width: auto; min-width: 132px; padding: 9px 30px 9px 11px; background: rgba(0,0,0,.45); border: 1px solid var(--dm-border); border-radius: 8px; color: var(--dm-text); font-family: var(--dm-font-body); font-size: .82rem; outline: none; }
 
     /* -- Cabeçalho -- */
-    .rc-hero { text-align: center; margin-bottom: 28px; }
-    .rc-hero h1 { font-family: var(--dm-font-title); font-size: clamp(1.6rem,5vw,2.2rem); color: var(--dm-cyan); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .rc-hero { text-align: center; margin-bottom: 18px; }
+    .rc-hero h1 { font-family: var(--dm-font-body); font-weight: 700; font-size: clamp(1.6rem,5vw,2.1rem); color: var(--dm-text); text-transform: uppercase; letter-spacing: -.01em; line-height: 1.15; margin-bottom: 8px; }
     .rc-hero p  { color: var(--dm-text-muted); font-size: .92rem; line-height: 1.6; }
 
     /* -- Steps -- */
@@ -212,22 +219,9 @@
 
   <main class="dm-main">
     <div class="rc-page">
-      <div class="rc-prefbar" aria-label="Preferências">
-        <select id="pref-lang" data-pref-lang-select aria-label="Idioma">
-          <option value="pt-BR">Português BR</option>
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="zh">??</option>
-        </select>
-        <select id="pref-font" data-pref-font-select aria-label="Tamanho do texto">
-          <option value="normal" data-i18n="fontNormal">Normal</option>
-          <option value="grande" data-i18n="fontLarge">Grande</option>
-          <option value="extra" data-i18n="fontExtra">Muito grande</option>
-        </select>
-      </div>
       <div class="rc-hero">
-        <h1 data-i18n="enterAgency">Entrar para a Agência</h1>
-        <p data-i18n="recruitmentSubtitle">Processo gratuito. Consulte seu perfil, confirme e envie sua candidatura.</p>
+        <h1 id="rc-titulo">Faça parte da DMaior</h1>
+        <p id="rc-subtitulo">Grátis e sem compromisso. Informe seu Kwai ID para consultar seu perfil e enviar sua candidatura.</p>
       </div>
 
       <!-- indicador de etapa -->
@@ -242,26 +236,6 @@
 
         <!-- -- ETAPA 1: buscar perfil -- -->
         <div id="etapa-1">
-          <div class="rc-info-list">
-            <div class="rc-info-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span data-i18n="infoKwaiId">Informe seu Kwai ID (nome de usuário ou número de ID) para consultarmos sua situação.</span>
-            </div>
-            <div class="rc-info-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span data-i18n="infoFree">O processo é totalmente gratuito e sem compromisso.</span>
-            </div>
-            <div class="rc-info-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span data-i18n="infoData">Seus dados são usados apenas para o processo de agenciamento.</span>
-            </div>
-            <div class="rc-info-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-              <span id="rc-info-idade">A DMaior Agency agencia apenas pessoas com 18 anos ou mais.</span>
-            </div>
-          </div>
-
-          <button type="button" class="dm-btn-secondary" id="btn-como-aceitar-topo" data-i18n="howAcceptInvite" style="width:100%;padding:12px;margin-bottom:18px;font-family:var(--dm-font-title);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;background:none;border:1.5px solid var(--dm-border);color:var(--dm-text-muted);border-radius:8px;cursor:pointer;">Como aceitar o convite</button>
 
           <div class="rc-group">
             <label for="f-uid" data-i18n="kwaiIdLabel">Kwai ID ou número de membro</label>
@@ -277,6 +251,23 @@
               <span data-i18n="searchProfile">Buscar perfil</span>
             </button>
           </div>
+
+          <div class="rc-info-list rc-info-compacta">
+            <div class="rc-info-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span data-i18n="infoFree">O processo é totalmente gratuito e sem compromisso.</span>
+            </div>
+            <div class="rc-info-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span data-i18n="infoData">Seus dados são usados apenas para o processo de agenciamento.</span>
+            </div>
+            <div class="rc-info-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span id="rc-info-idade">A DMaior Agency agencia apenas pessoas com 18 anos ou mais.</span>
+            </div>
+          </div>
+
+          <button type="button" class="rc-link-tut" id="btn-como-aceitar-topo" data-i18n="howAcceptInvite">Como aceitar o convite</button>
 
           <div id="loading-1" class="rc-loading rc-hidden">
             <div class="rc-spinner"></div>
@@ -492,7 +483,16 @@
       zh:      { info: 'DMaior Agency 仅代理年满 18 周岁的用户。', check: '我确认我已年满 18 周岁。', erro: '你必须确认已年满 18 周岁。' },
     };
     const ttIdade = key => (IDADE_I18N[window.DMaiorPrefs?.getLang?.() || 'pt-BR'] || IDADE_I18N['pt-BR'])[key];
+    const HERO_I18N = {
+      'pt-BR': ['Faça parte da DMaior', 'Grátis e sem compromisso. Informe seu Kwai ID para consultar seu perfil e enviar sua candidatura.'],
+      en:      ['Join DMaior', 'Free, no commitment. Enter your Kwai ID to check your profile and send your application.'],
+      es:      ['Forma parte de DMaior', 'Gratis y sin compromiso. Ingresa tu Kwai ID para consultar tu perfil y enviar tu candidatura.'],
+      zh:      ['加入 DMaior', '免费，无任何承诺。输入你的 Kwai ID，查询资料并提交申请。'],
+    };
     function localizarIdade() {
+      const h = HERO_I18N[window.DMaiorPrefs?.getLang?.() || 'pt-BR'] || HERO_I18N['pt-BR'];
+      if ($('rc-titulo')) $('rc-titulo').textContent = h[0];
+      if ($('rc-subtitulo')) $('rc-subtitulo').textContent = h[1];
       const info = $('rc-info-idade'), lbl = $('lbl-idade');
       if (info) info.textContent = ttIdade('info');
       if (lbl)  lbl.textContent  = ttIdade('check');
