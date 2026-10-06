@@ -59,6 +59,15 @@
   <dmaior-cookie-consent></dmaior-cookie-consent>
   <script charset=utf-8 src="js/components/cookie-consent.js"></script>
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
+  <!-- Diagnóstico no celular: só carrega com ?debug=1 na URL (mostra console/erros num painel) -->
+  <script>
+    if (/[?&]debug=1/.test(location.search)) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/eruda@3.4.1';
+      s.onload = function () { try { eruda.init(); } catch (e) {} };
+      document.head.appendChild(s);
+    }
+  </script>
 </body>
 </html>
 
