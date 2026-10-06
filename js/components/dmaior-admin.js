@@ -3578,7 +3578,39 @@ class DimaiorAdmin extends HTMLElement {
     let d=null; try{ d=await r.json(); }catch{}
     if(r.status===501){this._toast('Upload ainda não ligado no servidor — cole um link por enquanto','err');return null;}
     if(!r.ok||!d?.ok||!d.url){this._toast(d?.erro||'Falha ao enviar a imagem','err');return null;}
+    // Vídeo: sobe também uma CAPA (quadro do vídeo) e grava junto como #poster=.
+    // No navegador da Xiaomi o vídeo vira essa imagem (ver js/utils/video-compat.js).
+    if(/^video\//i.test(ct)){
+      onStatus?.('gerando capa…');
+      try{
+        const capa=await this._capaDoVideo(blob);
+        const rc=await fetch(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,{method:'POST',headers:{'Content-Type':'image/webp',Authorization:`Bearer ${this._token}`},body:capa});
+        const dc=await rc.json().catch(()=>null);
+        if(rc.ok&&dc?.ok&&dc.url) return `${d.url}#poster=${encodeURIComponent(dc.url)}`;
+      }catch{ /* sem capa: o site mostra um cartão com o título no Xiaomi */ }
+    }
     return d.url;
+  }
+
+  // Quadro do vídeo (≈1s) recortado em 1280×360 (32:9, igual ao banner) → WebP
+  _capaDoVideo(blob){
+    return new Promise((ok,falha)=>{
+      const v=document.createElement('video'),src=URL.createObjectURL(blob);
+      const fim=(e,b)=>{clearTimeout(t);URL.revokeObjectURL(src);e?falha(e):ok(b);};
+      const t=setTimeout(()=>fim(new Error('tempo')),15000);
+      v.muted=true;v.playsInline=true;v.preload='auto';
+      v.onloadedmetadata=()=>{v.currentTime=Math.min(1,(v.duration||2)/2);};
+      v.onseeked=()=>{
+        try{
+          const W=1280,H=360,cv=document.createElement('canvas');cv.width=W;cv.height=H;
+          const k=Math.max(W/v.videoWidth,H/v.videoHeight),w=v.videoWidth*k,h=v.videoHeight*k;
+          cv.getContext('2d').drawImage(v,(W-w)/2,(H-h)/2,w,h);
+          cv.toBlob(b=>b?fim(null,b):fim(new Error('capa')),'image/webp',.82);
+        }catch(e){fim(e);}
+      };
+      v.onerror=()=>fim(new Error('vídeo'));
+      v.src=src;
+    });
   }
 
   // Valida que a URL é http/https antes de colocar em src (previne javascript: e data: URIs)
