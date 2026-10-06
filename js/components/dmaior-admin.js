@@ -112,13 +112,12 @@ class DimaiorAdmin extends HTMLElement {
     const btn=it=>`<button data-p="${it[0]}" aria-label="${it[2]}">${this._ico(it[1],22)}</button>`;
     mnav.querySelector('[data-g="a"]').innerHTML=PRIM.slice(0,2).map(btn).join('');
     mnav.querySelector('[data-g="b"]').innerHTML=PRIM.slice(2).map(btn).join('');
-    // Menu do "+" em tela cheia. NÃO trava o <html> com overflow:hidden: em Android/Xiaomi isso
-    // congelava a rolagem do próprio menu (e da página, se ele fechasse sem passar por aqui).
-    // O .msheet rola sozinho e tem overscroll-behavior:contain, então a página de trás não anda.
+    // Menu do "+" em tela cheia, dentro do fluxo da página (ver CSS .msheet). Sem travar o <html>.
     const html=document.documentElement;
     html.style.overflow=''; // limpa trava de versão antiga que tenha ficado no <html>
-    const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); };
-    const openSheet=()=>{ const q=s.getElementById('admMsBusca'); if(q) q.value=''; this._montarMenuMobile(); sheet.scrollTop=0; sheet.classList.add('on'); fab.classList.add('on'); };
+    const app=s.getElementById('app'), foot=()=>document.querySelector('dmaior-footer');
+    const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); app?.classList.remove('menu-on'); const f=foot(); if(f) f.style.display=''; if(this._msY!=null){ try{window.scrollTo(0,this._msY);}catch(_){} this._msY=null; } };
+    const openSheet=()=>{ const q=s.getElementById('admMsBusca'); if(q) q.value=''; this._montarMenuMobile(); this._msY=window.scrollY||0; sheet.classList.add('on'); fab.classList.add('on'); app?.classList.add('menu-on'); const f=foot(); if(f) f.style.display='none'; try{window.scrollTo(0,0);}catch(_){} };
     this._msAbrir=openSheet;
     s.getElementById('admVoltar')?.addEventListener('click',openSheet);
     this._msGo=p=>{ this._ir(p); closeSheet(); this._syncMobileNav(p); try{window.scrollTo({top:0,behavior:'smooth'});}catch(_){}};
@@ -6664,9 +6663,14 @@ class DimaiorAdmin extends HTMLElement {
       .fab svg{width:22px;height:22px;}
       .fab.on{transform:translateX(-50%) rotate(45deg);}
       /* Menu do "+" em tela cheia, por categorias + busca. Mesmo padrão (.pm-*) do painel do streamer e do agente */
-      .msheet{display:block;position:fixed;inset:0;height:100vh;height:100dvh;touch-action:pan-y;z-index:300;background:var(--bg0);color:var(--t1);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:var(--dm-font-body,'Exo 2',sans-serif);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(22px);transition:opacity .2s ease,transform .26s cubic-bezier(.4,0,.2,1),visibility 0s linear .26s;}
-      .msheet.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .26s cubic-bezier(.4,0,.2,1);}
-      .pm-in{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom));}
+      /* Menu do "+" como parte da PÁGINA (não camada fixa com rolagem própria): o Safari do iPhone
+         travava o arrasto do dedo dentro de position:fixed+overflow. Aberto, esconde topo e conteúdo
+         e a rolagem é a da própria página. */
+      .msheet{display:none;position:relative;min-height:100vh;min-height:100dvh;z-index:300;background:var(--bg0);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);}
+      .msheet.on{display:block;animation:msIn .2s ease;}
+      @keyframes msIn{from{opacity:0}to{opacity:1}}
+      #app.menu-on .top,#app.menu-on .shell{display:none;}
+      .pm-in{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 16px calc(120px + env(safe-area-inset-bottom));}
       .pm-top{height:44px;display:flex;align-items:center;justify-content:space-between;}
       .pm-back{width:42px;height:42px;margin-left:-9px;display:grid;place-items:center;background:none;border:none;border-radius:50%;color:var(--t1);cursor:pointer;}
       .pm-back svg{width:26px;height:26px;fill:currentColor;}
