@@ -112,10 +112,13 @@ class DimaiorAdmin extends HTMLElement {
     const btn=it=>`<button data-p="${it[0]}" aria-label="${it[2]}">${this._ico(it[1],22)}</button>`;
     mnav.querySelector('[data-g="a"]').innerHTML=PRIM.slice(0,2).map(btn).join('');
     mnav.querySelector('[data-g="b"]').innerHTML=PRIM.slice(2).map(btn).join('');
-    // Menu do "+" em tela cheia: trava a rolagem da página por trás enquanto aberto
+    // Menu do "+" em tela cheia. NÃO trava o <html> com overflow:hidden: em Android/Xiaomi isso
+    // congelava a rolagem do próprio menu (e da página, se ele fechasse sem passar por aqui).
+    // O .msheet rola sozinho e tem overscroll-behavior:contain, então a página de trás não anda.
     const html=document.documentElement;
-    const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); html.style.overflow=''; };
-    const openSheet=()=>{ const q=s.getElementById('admMsBusca'); if(q) q.value=''; this._montarMenuMobile(); sheet.scrollTop=0; sheet.classList.add('on'); fab.classList.add('on'); html.style.overflow='hidden'; };
+    html.style.overflow=''; // limpa trava de versão antiga que tenha ficado no <html>
+    const closeSheet=()=>{ sheet.classList.remove('on'); fab.classList.remove('on'); };
+    const openSheet=()=>{ const q=s.getElementById('admMsBusca'); if(q) q.value=''; this._montarMenuMobile(); sheet.scrollTop=0; sheet.classList.add('on'); fab.classList.add('on'); };
     this._msAbrir=openSheet;
     s.getElementById('admVoltar')?.addEventListener('click',openSheet);
     this._msGo=p=>{ this._ir(p); closeSheet(); this._syncMobileNav(p); try{window.scrollTo({top:0,behavior:'smooth'});}catch(_){}};
@@ -130,6 +133,7 @@ class DimaiorAdmin extends HTMLElement {
     // Enter com um único resultado já abre ele
     busca?.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const vis=[...s.querySelectorAll('#admMsheetNav .pm-row')].filter(r=>!r.hidden&&!r.closest('.pm-sec')?.hidden); if(vis.length===1){e.preventDefault();vis[0].click();} });
     document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheet.classList.contains('on')) closeSheet(); });
+    window.addEventListener('resize',()=>{ if(window.innerWidth>700&&sheet.classList.contains('on')) closeSheet(); });
     this._montarMenuMobile();
     const path=(w,h)=>{ const r=Math.min(30,h/2),c=r*.448,nw=116,nd=38,cx=w/2,nl=cx-nw/2,nr=cx+nw/2;
       return 'M'+r+' 0H'+nl.toFixed(1)+'C'+(nl+nw*.1).toFixed(1)+' 0 '+(nl+nw*.25).toFixed(1)+' '+nd+' '+cx.toFixed(1)+' '+nd+'C'+(nr-nw*.25).toFixed(1)+' '+nd+' '+(nr-nw*.1).toFixed(1)+' 0 '+nr.toFixed(1)+' 0H'+(w-r).toFixed(1)+'C'+(w-c).toFixed(1)+' 0 '+w.toFixed(1)+' '+c.toFixed(1)+' '+w.toFixed(1)+' '+r+'V'+(h-r).toFixed(1)+'C'+w.toFixed(1)+' '+(h-c).toFixed(1)+' '+(w-c).toFixed(1)+' '+h+' '+(w-r).toFixed(1)+' '+h+'H'+r+'C'+c.toFixed(1)+' '+h+' 0 '+(h-c).toFixed(1)+' 0 '+(h-r).toFixed(1)+'V'+r+'C0 '+c.toFixed(1)+' '+c.toFixed(1)+' 0 '+r+' 0Z'; };
@@ -6640,7 +6644,7 @@ class DimaiorAdmin extends HTMLElement {
       .fab svg{width:22px;height:22px;}
       .fab.on{transform:translateX(-50%) rotate(45deg);}
       /* Menu do "+" em tela cheia, por categorias + busca. Mesmo padrão (.pm-*) do painel do streamer e do agente */
-      .msheet{display:block;position:fixed;inset:0;z-index:300;background:var(--bg0);color:var(--t1);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:var(--dm-font-body,'Exo 2',sans-serif);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(22px);transition:opacity .2s ease,transform .26s cubic-bezier(.4,0,.2,1),visibility 0s linear .26s;}
+      .msheet{display:block;position:fixed;inset:0;height:100vh;height:100dvh;touch-action:pan-y;z-index:300;background:var(--bg0);color:var(--t1);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:var(--dm-font-body,'Exo 2',sans-serif);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(22px);transition:opacity .2s ease,transform .26s cubic-bezier(.4,0,.2,1),visibility 0s linear .26s;}
       .msheet.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .26s cubic-bezier(.4,0,.2,1);}
       .pm-in{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom));}
       .pm-top{height:44px;display:flex;align-items:center;justify-content:space-between;}
