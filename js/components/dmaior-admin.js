@@ -203,6 +203,7 @@ class DimaiorAdmin extends HTMLElement {
     window.removeEventListener('storage', this._storageHandler);
     clearTimeout(this._debounceTimer);
     clearInterval(this._initInterval);
+    this._pararVideosInline();
   }
   _startHeightObserver(){
     let lastH=0;
@@ -392,6 +393,7 @@ class DimaiorAdmin extends HTMLElement {
     const secao=DimaiorAdmin._NAV_SECAO_POR_PAGINA[pag];
     if(secao)this._abrirNavSec(secao);
     this._fecharMenuMobile();
+    if(pag!=='aoVivo') this._pararVideosInline();
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
@@ -757,7 +759,15 @@ class DimaiorAdmin extends HTMLElement {
       </div>`;
   }
 
+  // Players HLS do modo "vídeo" da aba Ao Vivo. Cada render criava um Hls novo sem destruir o
+  // anterior (vazava decoder/buffer a cada clique) — no iPhone/Android fraco isso derruba a aba.
+  _pararVideosInline(){
+    try{ (this._hlsInline||[]).forEach(h=>{try{h.destroy();}catch{}}); }catch{}
+    this._hlsInline=[];
+    try{ this.shadowRoot?.querySelectorAll('video.lvc-video').forEach(v=>{try{v.pause();v.removeAttribute('src');v.load();}catch{}}); }catch{}
+  }
   async _carregarLives(){
+    this._pararVideosInline();
     const s=this.shadowRoot;const el=s.getElementById('gLives');if(el)el.innerHTML=this._loading();
     const d=await this._api('GET','/admin/lives');const badge=s.getElementById('nbLive');
     if(!d?.ok){if(el)el.innerHTML=this._empty('warning','Erro ao buscar lives');return;}
@@ -769,6 +779,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   _renderLives(d,el){
+    this._pararVideosInline();
     const s=this.shadowRoot;
     const root=this.shadowRoot.getElementById('root');
     const isMobile=root?root.classList.contains('narrow'):(window.innerWidth<=700);
@@ -781,6 +792,9 @@ class DimaiorAdmin extends HTMLElement {
     // Estilo efetivo: no mobile com >1 col, horizontal não é viável → usa vertical
     // Mas com 1 col o horizontal funciona normalmente
     const estiloEfetivo=(isMobile && cols>1 && estilo===1)?2:estilo;
+    // Limite de vídeos tocando ao mesmo tempo (celular não aguenta N decoders): o resto vira capa
+    let touch=false; try{touch=window.matchMedia('(pointer:coarse)').matches;}catch{}
+    const maxVid=(touch||isMobile)?2:6;
     try{localStorage.setItem('dm_lives_opts',JSON.stringify(this._livesOpts));}catch{}
 
     // UIDs com a live oculta no site (tag + botão Mostrar/Ocultar nos cards)
@@ -886,7 +900,7 @@ class DimaiorAdmin extends HTMLElement {
       ${orgsHtml}
       <!-- Grid das lives -->
       ${lista.length
-        ? `<div class="lives-lista" id="livesLista" style="grid-template-columns:repeat(${cols},1fr);gap:14px">${lista.map((sv,i)=>this._livesCard(sv,i,modo,estiloEfetivo)).join('')}</div>`
+        ? `<div class="lives-lista" id="livesLista" style="grid-template-columns:repeat(${cols},1fr);gap:14px">${lista.map((sv,i)=>this._livesCard(sv,i,i<maxVid?modo:'capa',estiloEfetivo)).join('')}</div>`
         : this._empty('live','Nenhum streamer ao vivo agora')}`;
 
     // ── Bind colunas ─────────────────────────────────────────────────────────
@@ -960,7 +974,7 @@ class DimaiorAdmin extends HTMLElement {
 
     // ── Modo vídeo: inicia HLS inline ────────────────────────────────────────
     if(modo==='video'){
-      lista.forEach((sv,i)=>{
+      lista.slice(0,maxVid).forEach((sv,i)=>{
         if(sv.stream_url) this._iniciarVideoInline(`lv-vid-${i}`,sv.stream_url);
       });
     }
@@ -968,19 +982,25 @@ class DimaiorAdmin extends HTMLElement {
   _iniciarVideoInline(videoId,url){
     const vid=this.shadowRoot.getElementById(videoId);if(!vid||!url)return;
     const start=()=>{
+      if(!vid.isConnected) return; // re-render já trocou o card
       const HlsLib=window['Hls'];
-      if(HlsLib&&HlsLib.isSupported()){
-        const hls=new HlsLib({maxBufferLength:8,autoStartLoad:true});
+      // Safari/iPhone toca HLS nativo (bem mais leve que hls.js via MSE)
+      if(vid.canPlayType('application/vnd.apple.mpegurl')){
+        vid.src=url;vid.play().catch(()=>{});
+      } else if(HlsLib&&HlsLib.isSupported()){
+        const hls=new HlsLib({maxBufferLength:8,maxMaxBufferLength:12,autoStartLoad:true});
         hls.loadSource(url);hls.attachMedia(vid);
         hls.on(HlsLib.Events.MANIFEST_PARSED,()=>vid.play().catch(()=>{}));
-        vid._hls=hls;
-      } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
-        vid.src=url;vid.play().catch(()=>{});
+        vid._hls=hls;(this._hlsInline=this._hlsInline||[]).push(hls);
       }
     };
-    if(!document.getElementById('hls-js-cdn')){
-      const sc=document.createElement('script');sc.id='hls-js-cdn';sc.src='https://cdn.jsdelivr.net/npm/hls.js@latest';sc.onload=start;document.head.appendChild(sc);
-    } else { start(); }
+    if(window['Hls']||vid.canPlayType('application/vnd.apple.mpegurl')){ start(); return; }
+    let sc=document.getElementById('hls-js-cdn');
+    if(!sc){
+      sc=document.createElement('script');sc.id='hls-js-cdn';sc.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.20'; // versão fixada
+      document.head.appendChild(sc);
+    }
+    sc.addEventListener('load',start,{once:true});
   }
   _livesCard(sv,i,modo='capa',estilo=1){
     const tc=sv.inicio?this._tempoDecorrido(sv.inicio):'';

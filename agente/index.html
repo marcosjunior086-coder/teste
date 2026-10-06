@@ -1959,7 +1959,7 @@ function abrirPlayerLive(url, nome, capa) {
   if (!document.getElementById('hls-js-cdn')) {
     const sc = document.createElement('script');
     sc.id = 'hls-js-cdn';
-    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20';
     sc.onload = iniciar;
     document.head.appendChild(sc);
   } else {
@@ -2010,7 +2010,7 @@ function iniciarVideosInline(container) {
   if (!document.getElementById('hls-js-cdn')) {
     const sc = document.createElement('script');
     sc.id = 'hls-js-cdn';
-    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20';
     sc.onload = iniciar;
     document.head.appendChild(sc);
   } else {
