@@ -289,11 +289,15 @@ class RankingDmaior extends HTMLElement {
       /* Template escolhido pelo streamer (aba Personalização): arte atrás do conteúdo, sem mexer no layout */
       .list-item.has-tpl,.podium-item.has-tpl{isolation:isolate}
       .list-item.has-tpl{position:relative;border-color:transparent;aspect-ratio:6/1}
-      .list-item.has-tpl::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--tpl) center/cover no-repeat;pointer-events:none}
+      .list-item.has-tpl::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--tpl) center/100% 100% no-repeat;pointer-events:none}
+      /* escurece de leve as pontas (onde ficam posição/nome e diamantes) pra o texto ler em qualquer arte; não mexe no centro */
+      .list-item.has-tpl:not(.forma)::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background:linear-gradient(90deg,rgba(6,8,20,.5) 0%,rgba(6,8,20,0) 36%,rgba(6,8,20,0) 76%,rgba(6,8,20,.55) 100%)}
+      /* o número usa texto em degradê (fill transparente): sobre arte vira branco sólido, senão a sombra de texto aparece por baixo e apaga */
+      .list-item.has-tpl .list-score{color:#fff;-webkit-text-fill-color:#fff;background:none;-webkit-background-clip:border-box;background-clip:border-box;text-shadow:0 1px 4px rgba(0,0,0,.9)}
       /* Arte com borda e cantos próprios: o sistema não desenha card/borda em volta */
       .list-item.has-tpl.forma,.list-item.has-tpl.forma:hover{background:transparent;border:0;box-shadow:none}
       /* arte com cantos próprios: encaixa inteira (sem cortar as pontas arredondadas em tela estreita) */
-      .list-item.has-tpl.forma::before{border-radius:0;background-size:100% 100%}
+      .list-item.has-tpl.forma::before{border-radius:0}
       .list-item.has-tpl .list-name,.list-item.has-tpl .list-score,.list-item.has-tpl .list-rank,.list-item.has-tpl .list-id{text-shadow:0 1px 3px rgba(0,0,0,.85)}
       .podium-item.has-tpl .name,.podium-item.has-tpl .podium-val,.podium-item.has-tpl .podium-id,.podium-item.has-tpl .prize-tag{text-shadow:0 1px 4px rgba(0,0,0,.9)}
       /* Card com arte de fundo ganha mais altura: o desenho fica embaixo e não pode ficar por baixo da etiqueta do prêmio */
