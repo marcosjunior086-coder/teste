@@ -301,10 +301,12 @@ class RankingDmaior extends HTMLElement {
       .list-item.has-tpl .list-name,.list-item.has-tpl .list-score,.list-item.has-tpl .list-rank,.list-item.has-tpl .list-id{text-shadow:0 1px 3px rgba(0,0,0,.85)}
       .podium-item.has-tpl .name,.podium-item.has-tpl .podium-val,.podium-item.has-tpl .podium-id,.podium-item.has-tpl .prize-tag{text-shadow:0 1px 4px rgba(0,0,0,.9)}
       /* Card com arte de fundo ganha mais altura: o desenho fica embaixo e não pode ficar por baixo da etiqueta do prêmio */
-      .podium-item.has-tpl.first{height:336px}.podium-item.has-tpl.second{height:276px}.podium-item.has-tpl.third{height:246px}
-      :host(.dinamico) .podium-item.has-tpl.first{min-height:320px}:host(.dinamico) .podium-item.has-tpl.second{min-height:270px}:host(.dinamico) .podium-item.has-tpl.third{min-height:246px}
-      @media(max-width:480px){.podium-item.has-tpl.first{height:296px}.podium-item.has-tpl.second{height:236px}.podium-item.has-tpl.third{height:206px}
-        :host(.dinamico) .podium-item.has-tpl.first{min-height:276px}:host(.dinamico) .podium-item.has-tpl.second{min-height:240px}:host(.dinamico) .podium-item.has-tpl.third{min-height:218px}}
+      /* Só no computador (cards mais baixos): se QUALQUER card do pódio tem arte, os TRÊS ganham +24px — assim a etiqueta do prêmio
+         não cobre o desenho de baixo e a ordem 1º>2º>3º se mantém. No celular o tamanho é o padrão. (.pod-tpl é posto na montagem do pódio) */
+      @media(min-width:481px){
+        .podium.pod-tpl .podium-item.first{height:314px}.podium.pod-tpl .podium-item.second{height:254px}.podium.pod-tpl .podium-item.third{height:224px}
+        :host(.dinamico) .podium.pod-tpl .podium-item.first{min-height:296px}:host(.dinamico) .podium.pod-tpl .podium-item.second{min-height:244px}:host(.dinamico) .podium.pod-tpl .podium-item.third{min-height:220px}
+      }
       .podium-item.has-tpl::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--tpl-podio) center bottom/cover no-repeat;pointer-events:none}
       .moldura{position:absolute;left:50%;top:50%;width:145%;height:145%;transform:translate(-50%,-50%);object-fit:contain;pointer-events:none;z-index:4}
       .list-rank{width:35px;font-size:var(--t-title-md);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--text-muted);text-align:center}
@@ -1009,7 +1011,8 @@ class RankingDmaior extends HTMLElement {
     let html = '';
 
     if (this.currentPage === 1 && filtered.length >= 1) {
-      html += `<div class="podium">`;
+      const podComArte = [0, 1, 2].some(i => filtered[i]?.template?.podio);
+      html += `<div class="podium${podComArte ? ' pod-tpl' : ''}">`;
       [1, 0, 2].forEach(idx => {
         const s = filtered[idx];
         if (!s) { html += `<div class="podium-item" style="border:none;background:transparent;backdrop-filter:none"></div>`; return; }
