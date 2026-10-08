@@ -761,7 +761,9 @@ class DimaiorAdmin extends HTMLElement {
   // Players HLS do modo "vídeo" da aba Ao Vivo. Cada render criava um Hls novo sem destruir o
   // anterior (vazava decoder/buffer a cada clique) — no iPhone/Android fraco isso derruba a aba.
   _pararVideosInline(){
-    try{ (this._hlsInline||[]).forEach(h=>{try{h.destroy();}catch{}}); }catch{}
+    try{ (this._vidTimers||[]).forEach(t=>clearTimeout(t)); }catch{}
+    this._vidTimers=[];
+    try{ (this._hlsInline||[]).forEach(stop=>{try{stop();}catch{}}); }catch{}
     this._hlsInline=[];
     try{ this.shadowRoot?.querySelectorAll('video.lvc-video').forEach(v=>{try{v.pause();v.removeAttribute('src');v.load();}catch{}}); }catch{}
   }
@@ -972,34 +974,107 @@ class DimaiorAdmin extends HTMLElement {
     this._injetarPlayerHLS();
 
     // ── Modo vídeo: inicia HLS inline ────────────────────────────────────────
+    // Largada escalonada (todos no mesmo instante disputam rede/decoder e travam — mesma lição do widget da home)
     if(modo==='video'){
       lista.slice(0,maxVid).forEach((sv,i)=>{
-        if(sv.stream_url) this._iniciarVideoInline(`lv-vid-${i}`,sv.stream_url);
+        if(!sv.stream_url) return;
+        (this._vidTimers=this._vidTimers||[]).push(setTimeout(()=>this._iniciarVideoInline(`lv-vid-${i}`,sv.stream_url,sv),i*700));
       });
     }
   }
-  _iniciarVideoInline(videoId,url){
-    const vid=this.shadowRoot.getElementById(videoId);if(!vid||!url)return;
-    const start=()=>{
-      if(!vid.isConnected) return; // re-render já trocou o card
-      const HlsLib=window['Hls'];
-      // Safari/iPhone toca HLS nativo (bem mais leve que hls.js via MSE)
-      if(vid.canPlayType('application/vnd.apple.mpegurl')){
-        vid.src=url;vid.play().catch(()=>{});
-      } else if(HlsLib&&HlsLib.isSupported()){
-        const hls=new HlsLib({maxBufferLength:8,maxMaxBufferLength:12,autoStartLoad:true});
-        hls.loadSource(url);hls.attachMedia(vid);
-        hls.on(HlsLib.Events.MANIFEST_PARSED,()=>vid.play().catch(()=>{}));
-        vid._hls=hls;(this._hlsInline=this._hlsInline||[]).push(hls);
-      }
+  // Carrega o hls.js uma vez só (Promise compartilhada). Antes: modal usava @latest e o inline @1.5.20 com o MESMO
+  // id de <script>; clicar em Assistir com a lib ainda baixando caía em "HLS não suportado".
+  _hlsLib(){
+    if(window['Hls']) return Promise.resolve(window['Hls']);
+    if(this._hlsLibP) return this._hlsLibP;
+    const esperar=(sc)=>new Promise(r=>{
+      const fim=()=>r(!!window['Hls']);
+      sc.addEventListener('load',fim,{once:true});sc.addEventListener('error',fim,{once:true});
+      setTimeout(fim,12000);
+    });
+    const injetar=(id,src)=>{
+      const velho=document.getElementById(id);if(velho)velho.remove();
+      const sc=document.createElement('script');sc.id=id;sc.src=src;document.head.appendChild(sc);
+      return esperar(sc);
     };
-    if(window['Hls']||vid.canPlayType('application/vnd.apple.mpegurl')){ start(); return; }
-    let sc=document.getElementById('hls-js-cdn');
-    if(!sc){
-      sc=document.createElement('script');sc.id='hls-js-cdn';sc.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.20'; // versão fixada
-      document.head.appendChild(sc);
-    }
-    sc.addEventListener('load',start,{once:true});
+    this._hlsLibP=(async()=>{
+      const existente=document.getElementById('hls-js-cdn');
+      let ok=existente?await esperar(existente):false;
+      if(!ok) ok=await injetar('hls-js-cdn','https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js'); // versão fixada
+      if(!ok) ok=await injetar('hls-js-cdn-2','https://cdn.jsdelivr.net/npm/hls.js@1.5.20');
+      if(!ok) this._hlsLibP=null; // próxima tentativa recarrega
+      return window['Hls']||null;
+    })();
+    return this._hlsLibP;
+  }
+  // Toca um HLS num <video> com recuperação de erro. hls.js (MSE) vem ANTES do player nativo — Chrome
+  // desktop/Android respondem canPlayType('mpegurl') e caíam no nativo, sem controle de buffer/retry
+  // (travava ou ficava preto). Nativo só no iPhone (sem MediaSource) ou se a lib não carregar.
+  // Retorna uma função que para tudo. opt: {mini, onPlaying(), onFail(msg), onStatus(msg)}
+  _tocarHls(vid,url,opt={}){
+    let morto=false,hls=null,wd=null,tStart=null,reinicios=0,errRede=0,errMidia=0,ultT=-1,parado=0;
+    const limpar=()=>{clearTimeout(tStart);clearInterval(wd);tStart=null;wd=null;if(hls){try{hls.destroy();}catch{}hls=null;}};
+    const parar=()=>{morto=true;limpar();vid.removeEventListener('playing',onPlay);};
+    const falhou=(msg)=>{if(morto)return;limpar();opt.onFail&&opt.onFail(msg);};
+    const onPlay=()=>{clearTimeout(tStart);tStart=null;opt.onPlaying&&opt.onPlaying();};
+    const reiniciar=(motivo)=>{
+      if(morto)return;
+      if(++reinicios>3){falhou(motivo||'Sem sinal');return;}
+      opt.onStatus&&opt.onStatus('Reconectando…');
+      limpar();setTimeout(()=>{if(!morto)iniciar();},1200*reinicios);
+    };
+    const vigiar=()=>{
+      // congelou (sem avançar) por ~15s com o player "tocando" → recria
+      wd=setInterval(()=>{
+        if(morto||vid.paused||vid.readyState<2){parado=0;return;}
+        if(Math.abs(vid.currentTime-ultT)<0.05){if(++parado>=3){parado=0;reiniciar('Transmissão travou');}}
+        else{parado=0;ultT=vid.currentTime;}
+      },5000);
+    };
+    const iniciar=async()=>{
+      const H=await this._hlsLib();
+      if(morto||!vid.isConnected)return;
+      if(H&&window.MediaSource&&H.isSupported()){
+        hls=new H(opt.mini
+          ?{maxBufferLength:5,maxMaxBufferLength:10,lowLatencyMode:true,capLevelToPlayerSize:true,manifestLoadingMaxRetry:2,levelLoadingMaxRetry:2,fragLoadingMaxRetry:3}
+          :{maxBufferLength:10,maxMaxBufferLength:20,lowLatencyMode:true,manifestLoadingMaxRetry:2,levelLoadingMaxRetry:2,fragLoadingMaxRetry:3});
+        const h=hls;
+        h.on(H.Events.MANIFEST_PARSED,()=>{vid.play().catch(()=>{});});
+        h.on(H.Events.ERROR,(_,d)=>{
+          if(morto||h!==hls||!d.fatal)return;
+          if(d.type===H.ErrorTypes.NETWORK_ERROR){ if(++errRede<=3)setTimeout(()=>{try{h.startLoad();}catch{}},1500*errRede); else reiniciar('Sem sinal da transmissão'); }
+          else if(d.type===H.ErrorTypes.MEDIA_ERROR){ if(++errMidia<=2)h.recoverMediaError(); else reiniciar('Erro de vídeo'); }
+          else reiniciar('Erro no stream');
+        });
+        h.loadSource(url);h.attachMedia(vid);
+      }else if(vid.canPlayType('application/vnd.apple.mpegurl')){
+        vid.src=url;vid.play().catch(()=>{});
+      }else{falhou('HLS não suportado neste navegador');return;}
+      // nunca começou a tocar em 15s → tenta de novo
+      // (se já tem quadro carregado, o navegador só segurou o play — não é falha de rede, não reinicia)
+      tStart=setTimeout(()=>{if(vid.readyState>=2){vid.play().catch(()=>{});return;}reiniciar('Demorou demais para carregar');},15000);
+      vigiar();
+    };
+    vid.addEventListener('playing',onPlay);
+    iniciar();
+    return parar;
+  }
+  _iniciarVideoInline(videoId,url,sv){
+    const vid=this.shadowRoot.getElementById(videoId);if(!vid||!url)return;
+    const box=vid.parentElement;
+    const stop=this._tocarHls(vid,url,{
+      mini:true,
+      onPlaying:()=>{vid.removeAttribute('poster');box&&box.classList.remove('lc-falhou');},
+      // Sem sinal: vira a capa clicável (abre o modal), em vez de um quadro preto parado
+      onFail:()=>{
+        if(!box||!vid.isConnected)return;
+        box.classList.add('lc-falhou','lc-play-area');
+        box.dataset.stream=url;box.dataset.nomeLive=sv?.nome||'';box.dataset.capaLive=sv?.capa||'';
+        box.addEventListener('click',()=>{window._dmPlayLive&&window._dmPlayLive(url,sv?.nome||'',sv?.capa||'');},{once:true});
+        if(!box.querySelector('.lc-semsinal'))box.insertAdjacentHTML('beforeend','<div class="lc-semsinal" style="position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:3px 8px;border-radius:6px">Sem sinal · clique para abrir</div>');
+      }
+    });
+    (this._hlsInline=this._hlsInline||[]).push(stop);
   }
   _livesCard(sv,i,modo='capa',estilo=1){
     const tc=sv.inicio?this._tempoDecorrido(sv.inicio):'';
@@ -1007,7 +1082,7 @@ class DimaiorAdmin extends HTMLElement {
 
     // Área de mídia: vídeo inline (modo vídeo) ou capa clicável (modo capa)
     const mediaHtml = modo==='video' && sv.stream_url
-      ? `<div class="lc-capa lc-capa-video"><video id="lv-vid-${i}" class="lvc-video" autoplay muted playsinline></video><div class="lc-capa-overlay"><div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`
+      ? `<div class="lc-capa lc-capa-video"><video id="lv-vid-${i}" class="lvc-video" autoplay muted playsinline${ca&&/^https?:\/\//i.test(ca)?` poster="${this._esc(ca)}"`:''}></video><div class="lc-capa-overlay"><div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`
       : `<div class="lc-capa lc-play-area" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${ca&&/^https?:\/\//i.test(ca)?`<img src="${this._esc(ca)}" class="lc-capa-img" onerror="this.style.display='none'"/>`:''}<div class="lc-capa-overlay">${sv.stream_url?`<div class="lc-play">${this._ico('live',20)}</div>`:''}<div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`;
 
     const cardClass=`live-card-full${estilo===2?' lc-estilo2':' lc-horizontal'}`;
@@ -1028,8 +1103,29 @@ class DimaiorAdmin extends HTMLElement {
     const modal=document.createElement('div');modal.id='lv-player-modal';modal.style.cssText='position:fixed;inset:0;background:rgba(4,4,4,.95);z-index:9001;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px';
     modal.innerHTML=`<div style="width:100%;max-width:800px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div id="lv-player-nome" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;font-weight:700;color:#fff"></div><button id="lv-player-close" style="background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.4);border-radius:6px;color:var(--verm);padding:6px 14px;cursor:pointer;font-size:12px">Fechar</button></div><div style="position:relative;padding-bottom:56.25%;background:#000;border-radius:10px;overflow:hidden"><video id="lv-player-video" style="position:absolute;inset:0;width:100%;height:100%" controls autoplay muted playsinline></video><img id="lv-player-capa" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/></div><div id="lv-player-status" style="text-align:center;color:#a0b8c8;font-size:11px;margin-top:8px">Carregando stream...</div></div>`;
     s.getElementById('root').appendChild(modal);
-    s.getElementById('lv-player-close').addEventListener('click',()=>{modal.style.display='none';const vid=s.getElementById('lv-player-video');vid.pause();vid.src='';if(window._hlsInstance){window._hlsInstance.destroy();window._hlsInstance=null;}});
-    window._dmPlayLive=(url,nome,capa)=>{modal.style.display='flex';try{this.scrollIntoView({behavior:'instant',block:'start'});}catch{}s.getElementById('lv-player-nome').textContent=nome||'Live';const vid=s.getElementById('lv-player-video');const capaEl=s.getElementById('lv-player-capa');const status=s.getElementById('lv-player-status');if(capa){capaEl.src=capa;capaEl.style.display='block';}if(window._hlsInstance){window._hlsInstance.destroy();window._hlsInstance=null;}const iniciarHLS=()=>{const HlsLib=window['Hls'];if(HlsLib&&HlsLib.isSupported()){window._hlsInstance=new HlsLib({maxBufferLength:10});window._hlsInstance.loadSource(url);window._hlsInstance.attachMedia(vid);window._hlsInstance.on(HlsLib.Events.MANIFEST_PARSED,()=>{capaEl.style.display='none';vid.play().catch(()=>{});status.textContent='Reproduzindo ao vivo';});window._hlsInstance.on(HlsLib.Events.ERROR,(_,d)=>{if(d.fatal)status.textContent='Erro no stream.';});}else if(vid.canPlayType('application/vnd.apple.mpegurl')){vid.src=url;vid.play().catch(()=>{});capaEl.style.display='none';status.textContent='Reproduzindo';}else{status.textContent='HLS não suportado.'}};const hlsScript=document.getElementById('hls-js-cdn');if(!hlsScript){const s2=document.createElement('script');s2.id='hls-js-cdn';s2.src='https://cdn.jsdelivr.net/npm/hls.js@latest';s2.onload=iniciarHLS;document.head.appendChild(s2);}else{iniciarHLS();}};
+    // Para o stream do modal e devolve os vídeos das miniaturas (pausados enquanto o modal ficou aberto)
+    const pararModal=()=>{
+      if(this._modalStop){try{this._modalStop();}catch{}this._modalStop=null;}
+      const vid=s.getElementById('lv-player-video');try{vid.pause();vid.removeAttribute('src');vid.load();}catch{}
+      s.querySelectorAll('video.lvc-video').forEach(v=>{try{v.play().catch(()=>{});}catch{}});
+    };
+    s.getElementById('lv-player-close').addEventListener('click',()=>{modal.style.display='none';pararModal();});
+    window._dmPlayLive=(url,nome,capa)=>{
+      modal.style.display='flex';
+      try{this.scrollIntoView({behavior:'instant',block:'start'});}catch{}
+      s.getElementById('lv-player-nome').textContent=nome||'Live';
+      const vid=s.getElementById('lv-player-video'),capaEl=s.getElementById('lv-player-capa'),status=s.getElementById('lv-player-status');
+      if(this._modalStop){try{this._modalStop();}catch{}this._modalStop=null;}
+      // Libera decoder/rede das miniaturas enquanto assiste no modal (celular não aguenta tudo junto)
+      s.querySelectorAll('video.lvc-video').forEach(v=>{try{v.pause();}catch{}});
+      if(capa&&/^https?:\/\//i.test(capa)){capaEl.src=capa;capaEl.style.display='block';}else capaEl.style.display='none';
+      status.textContent='Carregando stream...';
+      this._modalStop=this._tocarHls(vid,url,{
+        onPlaying:()=>{capaEl.style.display='none';status.textContent='Reproduzindo ao vivo';},
+        onStatus:(m)=>{status.textContent=m;},
+        onFail:(m)=>{status.textContent=(m||'Sem sinal')+' — a live pode ter acabado. Feche e atualize a lista.';}
+      });
+    };
   }
 
   async _carregarRanking(){
