@@ -217,6 +217,7 @@
     svgRank()    { return `<svg viewBox="0 0 24 24"><path d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"/></svg>`; }
     svgPk()      { return `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`; }
     svgCalendar(){ return `<svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>`; }
+    svgPaint(){ return `<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.3A4.9 4.9 0 0 0 22 11.6C22 6.9 17.5 3 12 3zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>`; }
     svgRules()   { return `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
     svgTicket()  { return `<svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/></svg>`; }
@@ -716,6 +717,12 @@
             .viola-txt{display:flex;flex-direction:column;gap:2px;font-size:.82rem;line-height:1.35;}
             .viola-txt b{font-size:.9rem;}
             .viola-txt small{opacity:.85;font-size:.74rem;}
+            .viola-verif{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 14px;}
+            .viola-verif-btn{cursor:pointer;}
+            .viola-verif-btn:disabled{opacity:.55;cursor:default;}
+            .viola-verif-st{font-size:.78rem;color:var(--muted);}
+            .viola-verif-st.ok{color:var(--green);}
+            .viola-verif-st.nok{color:var(--red);}
             .viola-item{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
             .viola-item.nova{border-color:rgba(248,113,113,.55);}
             .viola-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
@@ -885,6 +892,38 @@
             .evt-modal-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#555;font-size:.85rem;}
             .evt-modal-dica{padding:7px 14px;font-size:.7rem;color:var(--muted);border-top:1px solid var(--border);text-align:center;}
             @media(max-width:700px){.evt-modal{padding:0;}.evt-modal-box{height:100%;border-radius:0;border:0;}}
+            /* Personalização (templates e molduras do ranking) */
+            .pers-intro{font-size:.85rem;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+            .pers-sec{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.15rem;font-weight:700;color:var(--text);margin:18px 0 4px;}
+            .pers-sec-sub{font-size:.78rem;color:var(--muted);margin:0 0 12px;}
+            .pers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+            .pers-card{border-radius:16px;border:1px solid var(--border);background:var(--glass);padding:12px;display:flex;flex-direction:column;gap:10px;animation:fi .35s ease both;}
+            .pers-card.usando{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan) inset;}
+            .pers-card.trava{opacity:.82;}
+            .pers-prev{border-radius:12px;background:var(--bg,#0b0f16);padding:10px;display:flex;align-items:center;justify-content:center;min-height:74px;}
+            .pers-linha{position:relative;isolation:isolate;display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+            .pers-linha::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--pimg) center/cover no-repeat;}
+            .pers-linha .n{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--muted);width:20px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.85);}
+            .pers-linha .nm{font-weight:700;font-size:.85rem;color:var(--text);flex:1;text-shadow:0 1px 3px rgba(0,0,0,.85);}
+            .pers-linha .sc{font-weight:700;font-size:.85rem;color:var(--cyan);text-shadow:0 1px 3px rgba(0,0,0,.85);}
+            .pers-av{position:relative;width:46px;height:46px;border-radius:50%;background:var(--cyan-d);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--cyan);flex:0 0 46px;}
+            .pers-av img.f{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+            .pers-av img.m{position:absolute;left:50%;top:50%;width:145%;height:145%;transform:translate(-50%,-50%);object-fit:contain;pointer-events:none;}
+            .pers-prev.mold{padding:18px;}
+            .pers-prev.mold .pers-av{width:64px;height:64px;flex-basis:64px;}
+            .pers-nome{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.02rem;font-weight:700;color:var(--text);line-height:1.2;}
+            .pers-desc{font-size:.76rem;color:var(--muted);margin-top:2px;}
+            .pers-chip{display:inline-block;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:99px;border:1px solid var(--border);color:var(--muted);margin-right:6px;}
+            .pers-chip.ok{background:var(--cyan-d);border-color:var(--cyan);color:var(--cyan);}
+            .pers-chip.emp{background:rgba(251,191,36,.14);border-color:rgba(251,191,36,.6);color:#fbbf24;}
+            .pers-req{font-size:.78rem;color:var(--muted);line-height:1.4;}
+            .pers-barra{height:7px;border-radius:99px;background:rgba(128,128,128,.2);overflow:hidden;margin-top:6px;}
+            .pers-barra i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),#60a5fa);border-radius:99px;}
+            .pers-barra-txt{font-size:.72rem;color:var(--muted);margin-top:3px;}
+            .pers-btn{border:none;border-radius:999px;padding:9px 16px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-weight:700;font-size:.85rem;cursor:pointer;background:var(--cyan);color:#001a1a;}
+            .pers-btn.sec{background:none;border:1px solid var(--border);color:var(--text);}
+            .pers-btn:disabled{opacity:.5;cursor:default;}
+            .pers-vazio{padding:26px 12px;text-align:center;color:var(--muted);font-size:.85rem;}
             /* Eventos do mês */
             .evt-wrap{margin-bottom:22px;}
             .evt-lista{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
@@ -1063,6 +1102,7 @@
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
                     <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
                     <button class="nit" id="nEventos">${this.svgCalendar()} <span>EVENTOS</span></button>
+                    <button class="nit" id="nPers">${this.svgPaint()} <span>PERSONALIZAÇÃO</span></button>
                     <button class="nit" id="nRegras">${this.svgRules()} <span data-i18n="rules">REGRAS</span></button>
                     <button class="nit" id="nViolacoes">${this.svgAlerta()} <span>SITUAÇÃO DA CONTA</span></button>
                     <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
@@ -1566,6 +1606,7 @@
                     <div class="card">
                         <h3 class="dcard-h">Situação da conta</h3>
                         <p class="req-sub" id="violaSub">Violações registradas pela Kwai nos últimos 30 dias.</p>
+                        <div class="viola-verif"><button type="button" class="btn-sm viola-verif-btn" id="btnVerificarViola">Verificar agora</button><span class="viola-verif-st" id="violaVerifSt"></span></div>
                         <div id="violaLista"><p class="txn-empty">Carregando...</p></div>
                         <p class="viola-nota">Não concorda com alguma violação? Fale com o seu agente ou com a agência, informando a data dela.</p>
                     </div>
@@ -1596,6 +1637,14 @@
                         <button class="iframe-back pm-voltar" id="btnBackEventos">${this.svgBack()} VOLTAR</button>
                     </div>
                     <div id="avisosEventos"></div>
+                </div>
+
+                <!-- ══════ PERSONALIZAÇÃO (templates e molduras do ranking) ══════ -->
+                <div id="vPers" class="view" style="width:100%;">
+                    <div class="avisos-topbar">
+                        <button class="iframe-back pm-voltar" id="btnBackPers">${this.svgBack()} VOLTAR</button>
+                    </div>
+                    <div id="persEl"></div>
                 </div>
 
             </div><!-- /content -->
@@ -1752,7 +1801,7 @@
     static get MENU_GRUPOS(){ return [
         ['Meu desempenho', [['nD','Resumo','inicio dashboard diamantes horas'], ['nRank','Ranking','posicao'], ['nPk','PK Diário','batalha']]],
         ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate']]],
-        ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nEventos','Eventos','calendario agenda inscricao interesse pk'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
+        ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nEventos','Eventos','calendario agenda inscricao interesse pk'], ['nPers','Personalização','template moldura fundo ranking visual estilo cor'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
         ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
         ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente'], ['nAtalhoSub','Painel da Sub','sub agencia']]],
     ]; }
@@ -1933,7 +1982,9 @@
         this.qs('#nPk').addEventListener('click',()=>this.goPk());
         this.qs('#nRegras').addEventListener('click',()=>this.goRegras());
         this.qs('#nEventos').addEventListener('click',()=>this.goEventos());
+        this.qs('#nPers').addEventListener('click',()=>this.goPers());
         this.qs('#nViolacoes').addEventListener('click',()=>this.goViolacoes());
+        this.qs('#btnVerificarViola')?.addEventListener('click',()=>this.verificarViolacoes());
         this.qs('#violaAviso').addEventListener('click',e=>{ if(e.target.closest('[data-viola-abrir]')) this.goViolacoes(); });
         this.qs('#regrasEl')?.addEventListener('regras-aceitar', e=>this._aceitarTermo(e.detail || {}));
         this.qs('#nTickets').addEventListener('click',()=>this.goTickets());
@@ -2757,6 +2808,31 @@
                 <span class="viola-txt"><b>Você recebeu ${d.novas === 1 ? 'uma violação nova' : d.novas+' violações novas'}</b><small>Toque para ver o motivo</small></span></button>`;
         } else el.innerHTML = '';
     }
+    // "Verificar agora": consulta na Kwai só a SUA conta (leva alguns segundos). O servidor limita a 1 pedido a cada 90 s.
+    async verificarViolacoes(){
+        const btn = this.qs('#btnVerificarViola'), st = this.qs('#violaVerifSt');
+        if(!btn || btn.disabled) return;
+        const msg = (t, cls='') => { if(st){ st.textContent = t; st.className = 'viola-verif-st ' + cls; } };
+        const liberar = (seg) => setTimeout(()=>{ btn.disabled = false; }, Math.max(5, seg) * 1000);
+        btn.disabled = true; msg('Verificando a sua conta na Kwai…');
+        try{
+            const r = await this._fetchAutenticado(`${this.apiUrl}/api/violacoes/verificar`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ uid: this.sessionUid }),
+            });
+            const d = await r.json().catch(()=>({}));
+            if(!r.ok || !d.ok){ msg(d.erro || 'Não foi possível verificar agora. Tente de novo em instantes.', 'nok'); liberar(20); return; }
+            await this.goViolacoes();
+            if(d.verificado === false){
+                msg(`Você verificou há pouco. Dá pra verificar de novo em ${Math.max(1, d.proxima_em || 60)} s.`, 'ok');
+                liberar(d.proxima_em || 60);
+            }else{
+                msg(d.novas > 0 ? (d.novas === 1 ? 'Encontramos 1 violação nova.' : `Encontramos ${d.novas} violações novas.`) : 'Verificado agora: nenhuma violação nova.', d.novas > 0 ? 'nok' : 'ok');
+                liberar(90);
+            }
+        }catch(e){
+            msg('Sem conexão. Tente de novo.', 'nok'); liberar(10);
+        }
+    }
     async goViolacoes(){
         this.navigate('vViolacoes');
         this.navActive('nViolacoes');
@@ -3381,6 +3457,104 @@
         } catch { this._inscErro('Sem conexão. Tente de novo.'); }
     }
 
+
+    // ── Aba "Personalização": templates (fundo da linha) e molduras (aro da foto) no ranking ──
+    goPers(){
+        this.navigate('vPers');
+        this.navActive('nPers');
+        window.scrollTo({ top: 0 });
+        this.loadPers();
+    }
+    async loadPers(){
+        const el = this.qs('#persEl');
+        if(!el) return;
+        if(!this._persItens) el.innerHTML = '<div class="pers-vazio">Carregando…</div>';
+        try {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/personalizacao?uid=${encodeURIComponent(this.sessionUid)}`);
+            const d = await res.json().catch(() => ({}));
+            if(!res.ok || !d.ok) throw new Error(d.erro || 'erro');
+            this._persItens = d.itens || [];
+            this._renderPers();
+        } catch {
+            el.innerHTML = '<div class="pers-vazio">Não foi possível carregar agora. Tente de novo em instantes.</div>';
+        }
+    }
+    _persUrl(u){
+        return (typeof u === 'string' && /^https:\/\/[a-z0-9.-]+\.agencydmaior\.com\.br\/[A-Za-z0-9._\-\/%]+$/.test(u)) ? u : '';
+    }
+    _persNum(n){ return Math.round(Number(n) || 0).toLocaleString('pt-BR'); }
+    _persQuando(iso){ try { return new Date(String(iso).slice(0,10) + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }); } catch { return ''; } }
+    _renderPers(){
+        const el = this.qs('#persEl');
+        if(!el) return;
+        const esc = s => this.esc(s);
+        const foto = localStorage.getItem('dm_foto') || '';
+        const nome = (this.qs('#dName')?.textContent || '').trim() || localStorage.getItem('dm_nome') || 'Você';
+        const ini  = nome.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase() || 'DM';
+        const avatar = (moldura) => `<span class="pers-av">${foto ? `<img class="f" src="${esc(foto)}" alt="" onerror="this.remove()">` : esc(ini)}${moldura ? `<img class="m" src="${esc(moldura)}" alt="">` : ''}</span>`;
+
+        const card = (i) => {
+            const img = this._persUrl(i.imagem_url);
+            const liberado = i.estado === 'conquistado' || i.estado === 'emprestado';
+            const prev = i.tipo === 'template'
+                ? `<div class="pers-prev"><div class="pers-linha" style="--pimg:url('${img}')"><span class="n">4</span>${avatar('')}<span class="nm">${esc(nome)}</span><span class="sc">21,4K</span></div></div>`
+                : `<div class="pers-prev mold">${avatar(img)}</div>`;
+            let chip = '', info = '';
+            if(i.estado === 'conquistado'){
+                chip = `<span class="pers-chip ok">Conquistado</span>`;
+                if(i.expira_em) info = `<div class="pers-req">Vale até ${esc(this._persQuando(i.expira_em))}.</div>`;
+            } else if(i.estado === 'emprestado'){
+                chip = `<span class="pers-chip emp">Liberado até ${esc(this._persQuando(i.ate))}</span>`;
+            } else if(i.estado === 'encerrado'){
+                chip = `<span class="pers-chip">Encerrado</span>`;
+                info = `<div class="pers-req">O evento acabou e a meta não foi batida.</div>`;
+            } else if(i.estado === 'em_breve'){
+                chip = `<span class="pers-chip">Começa em ${esc(this._persQuando(i.ate))}</span>`;
+            } else {
+                chip = `<span class="pers-chip">Bloqueado</span>`;
+            }
+            const barra = (i.meta && i.atual != null && !liberado || (i.estado === 'emprestado' && i.meta))
+                ? (() => {
+                    const pct = Math.max(0, Math.min(100, (Number(i.atual) / Number(i.meta)) * 100));
+                    const tempo = i.regra === 'tempo';
+                    const txt = tempo ? `${Math.round(Number(i.atual))} de ${Math.round(Number(i.meta))} dias` : `${this._persNum(i.atual)} de ${this._persNum(i.meta)} diamantes`;
+                    return `<div><div class="pers-barra"><i style="width:${pct.toFixed(1)}%"></i></div><div class="pers-barra-txt">${txt}</div></div>`;
+                })() : '';
+            const req = i.requisito && i.estado !== 'conquistado' ? `<div class="pers-req">${esc(i.requisito)}</div>` : '';
+            const botao = liberado
+                ? (i.usando
+                    ? `<button class="pers-btn sec" data-pers-tirar="${esc(i.tipo)}">Tirar</button>`
+                    : `<button class="pers-btn" data-pers-usar="${esc(i.id)}" data-tipo="${esc(i.tipo)}">Usar</button>`)
+                : '';
+            return `<div class="pers-card${i.usando ? ' usando' : ''}${liberado ? '' : ' trava'}">${prev}
+                <div><div class="pers-nome">${esc(i.nome)}</div>${i.descricao ? `<div class="pers-desc">${esc(i.descricao)}</div>` : ''}</div>
+                <div>${chip}${i.usando ? '<span class="pers-chip ok">Em uso</span>' : ''}</div>
+                ${req}${info}${barra}${botao}</div>`;
+        };
+        const ord = { conquistado: 0, emprestado: 1, bloqueado: 2, em_breve: 3, encerrado: 4 };
+        const secao = (tipo, titulo, sub) => {
+            const lista = (this._persItens || []).filter(i => i.tipo === tipo).sort((a, b) => (ord[a.estado] ?? 9) - (ord[b.estado] ?? 9));
+            return `<div class="pers-sec">${titulo}</div><div class="pers-sec-sub">${sub}</div>
+                ${lista.length ? `<div class="pers-grid">${lista.map(card).join('')}</div>` : '<div class="pers-vazio">Nada por aqui ainda. Novidades chegam em breve.</div>'}`;
+        };
+        el.innerHTML = `<p class="pers-intro">Escolha como você aparece no ranking. Os itens são liberados por tempo de agência, metas de diamantes ou eventos — e cada um que você conquista fica salvo aqui.</p>
+            ${secao('template', 'Templates', 'O fundo da sua linha no ranking.')}
+            ${secao('moldura', 'Molduras', 'O aro em volta da sua foto no ranking.')}`;
+        el.querySelectorAll('[data-pers-usar]').forEach(b => b.addEventListener('click', () => this._persUsar(b, b.dataset.persUsar, b.dataset.tipo)));
+        el.querySelectorAll('[data-pers-tirar]').forEach(b => b.addEventListener('click', () => this._persUsar(b, null, b.dataset.persTirar)));
+    }
+    async _persUsar(btn, itemId, tipo){
+        btn.disabled = true;
+        try {
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/personalizacao/usar`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: this.sessionUid, item_id: itemId, tipo }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if(!res.ok || !d.ok){ alert(d.erro || 'Não foi possível salvar. Tente de novo.'); }
+        } catch { alert('Sem conexão. Tente de novo.'); }
+        await this.loadPers();
+    }
 
     // ── Aba "Eventos" (calendário + inscrição). As notificações continuam em "Avisos". ──
     goEventos(){

@@ -157,7 +157,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
     ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
-    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive']]],
+    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer']]],
     ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
   ]; }
   _montarMenuMobile(){
@@ -384,7 +384,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -396,7 +396,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -1127,9 +1127,410 @@ class DimaiorAdmin extends HTMLElement {
     };
   }
 
+  // ── PERSONALIZAÇÃO (templates e molduras do ranking) ─────────────────────
+  _persData(iso){ if(!iso)return '—'; const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/); return m?`${m[3]}/${m[2]}/${m[1]}`:String(iso); }
+  _persN(n){ return Number(n||0).toLocaleString('pt-BR'); }
+  async _carregarPers(){
+    const s=this.shadowRoot,el=s.getElementById('persLista');
+    if(!el)return;
+    if(!this._persBound){
+      this._persBound=true;
+      s.getElementById('btnAtuPers')?.addEventListener('click',()=>this._carregarPers());
+      s.getElementById('btnPersNovoT')?.addEventListener('click',()=>this._persForm(null,'template'));
+      s.getElementById('btnPersNovoM')?.addEventListener('click',()=>this._persForm(null,'moldura'));
+      s.getElementById('btnPersEntradas')?.addEventListener('click',()=>this._persEntradas());
+    }
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/personalizacao');
+    if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar');return;}
+    this._persDados=d;
+    this._renderPers();
+  }
+  _persResumo(it){
+    if(it.regra==='manual') return 'Manual — só quem você liberar por UID';
+    if(it.regra==='tempo') return `${String(it.anos_agencia).replace('.',',')} ${Number(it.anos_agencia)===1?'ano':'anos'} de agência`;
+    if(it.regra==='diamantes') return `${this._persN(it.meta_diamantes)} diamantes em um mês · ${it.validade_meses?`vale ${it.validade_meses} meses`:'vale pra sempre'}${it.contar_desde?` · contando desde ${this._persData(it.contar_desde)}`:''}`;
+    return `Evento ${this._persData(it.evento_inicio)} a ${this._persData(it.evento_fim)} · ${it.evento_publico==='todos'?'todos podem usar':'só inscritos'} · ${it.evento_meta_diamantes?`meta ${this._persN(it.evento_meta_diamantes)} diamantes pra ficar`:'só empréstimo, sem meta'}`;
+  }
+  _renderPers(){
+    const s=this.shadowRoot,el=s.getElementById('persLista'),d=this._persDados;
+    if(!el||!d)return;
+    const card=it=>`<div class="adp-card ${it.ativo?'':'off'}">
+      <div class="adp-thumb ${it.tipo==='template'?'tpl':'mol'}"><img src="${this._safeImgSrc(it.imagem_url)}" alt="" loading="lazy"></div>
+      <div><div class="adp-nome" title="${this._esc(it.nome)}">${this._esc(it.nome)}</div>
+        <div><span class="adp-chip ${it.ativo?'on':''}">${it.ativo?'Ativo':'Desligado'}</span><span class="adp-chip">${this._esc({manual:'Manual',tempo:'Tempo de agência',diamantes:'Meta de diamantes',evento:'Evento'}[it.regra])}</span>${it.tema?`<span class="adp-chip">${this._esc(it.tema)}</span>`:''}${it.imagem_podio_url?'<span class="adp-chip">Com pódio</span>':''}</div></div>
+      <div class="adp-regra">${this._esc(this._persResumo(it))}</div>
+      <div class="adp-meta">${it.liberados} streamer(s) com o item${it.liberados_manual?` · ${it.liberados_manual} liberado(s) por você`:''}</div>
+      <div class="adp-acoes">
+        <button class="btn btn-o" data-pers-edit="${it.id}">${this._ico('edit',11)} Editar</button>
+        <button class="btn btn-o" data-pers-lib="${it.id}">${this._ico('users',11)} Liberar / ver</button>
+        <button class="btn btn-o" data-pers-ativo="${it.id}" data-v="${it.ativo?0:1}">${this._ico(it.ativo?'eye_off':'eye',11)} ${it.ativo?'Desligar':'Ligar'}</button>
+        <button class="btn btn-o" data-pers-del="${it.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4)">${this._ico('trash',11)}</button>
+      </div></div>`;
+    const sec=(tipo,tit)=>{const l=d.itens.filter(i=>i.tipo===tipo);return `<div class="adp-sec">${tit} (${l.length})</div>${l.length?`<div class="adp-grid">${l.map(card).join('')}</div>`:this._empty('image','Nenhum ainda — use o botão de cima pra criar')}`;};
+    el.innerHTML=sec('template','Templates — fundo da linha no ranking')+sec('moldura','Molduras — aro da foto no ranking');
+    const acha=id=>d.itens.find(i=>i.id===id);
+    el.querySelectorAll('[data-pers-edit]').forEach(b=>b.addEventListener('click',()=>{const it=acha(b.dataset.persEdit);this._persForm(it,it.tipo);}));
+    el.querySelectorAll('[data-pers-lib]').forEach(b=>b.addEventListener('click',()=>this._persLiberar(acha(b.dataset.persLib))));
+    el.querySelectorAll('[data-pers-ativo]').forEach(b=>b.addEventListener('click',async()=>{
+      const r=await this._api('PATCH',`/admin/personalizacao/itens/${b.dataset.persAtivo}`,{ativo:b.dataset.v==='1'});
+      if(r?.ok){this._toast(b.dataset.v==='1'?'Item ligado':'Item desligado — some do painel dos streamers e do ranking');this._carregarPers();}else this._toast(r?.erro||'Erro','err');
+    }));
+    el.querySelectorAll('[data-pers-del]').forEach(b=>b.addEventListener('click',()=>{
+      const it=acha(b.dataset.persDel);
+      this._confirmarDel(`Excluir "${it.nome}"? ${it.liberados?`${it.liberados} streamer(s) perdem o item. `:''}As imagens continuam na aba Arquivos. Não dá pra desfazer.`,async()=>{
+        const r=await this._api('DELETE',`/admin/personalizacao/itens/${it.id}`);
+        if(r?.ok){this._toast('Item excluído');this._carregarPers();}else this._toast(r?.erro||'Erro ao excluir','err');
+      });
+    }));
+  }
+  _persModal(larg=560){
+    const s=this.shadowRoot;let m=s.getElementById('mPers');
+    if(!m){m=document.createElement('div');m.className='ov';m.id='mPers';s.getElementById('root').appendChild(m);m.addEventListener('click',e=>{if(e.target===m)this._fechaModal('mPers');});}
+    m.dataset.larg=larg;
+    return m;
+  }
+  _persDims(file){
+    return new Promise(ok=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);ok({w:i.naturalWidth,h:i.naturalHeight});};i.onerror=()=>{URL.revokeObjectURL(u);ok(null);};i.src=u;});
+  }
+  // Ajusta a arte vinda de fora (ex.: ChatGPT gera só 1536×1024 / 1024×1024 / 1024×1536, quase sempre com margem em volta):
+  // recorta a margem, encaixa no formato do item (corta ou estica de leve), reduz (nunca amplia) e, se pedir, tira o fundo
+  // de cor sólida. Devolve um File WebP com transparência, ou null se cancelar.
+  async _persAjustar(file,alvo,{miolo=false}={}){
+    const s=this.shadowRoot;
+    const lido=await new Promise(ok=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>ok({i,u});i.onerror=()=>{URL.revokeObjectURL(u);ok(null);};i.src=u;});
+    if(!lido){this._toast('Não consegui abrir essa imagem','err');return null;}
+    const im=lido.i,iw=im.naturalWidth,ih=im.naturalHeight,tr=alvo.w/alvo.h;
+    const an=this._persAnalisa(im,iw,ih);
+    const retaTot={x:0,y:0,w:iw,h:ih};
+    // Posição inicial do corte: centraliza no desenho do tema (parte mais clara), não no meio geométrico
+    const base0=an.margem?an.rect:retaTot;
+    let pos0=0.5;
+    if(base0.w/base0.h>tr){const cw=base0.h*tr,cx=an.cx*iw-base0.x;pos0=base0.w>cw?Math.max(0,Math.min(1,(cx-cw/2)/(base0.w-cw))):0.5;}
+    else{const ch=base0.w/tr,cy=an.cy*ih-base0.y;pos0=base0.h>ch?Math.max(0,Math.min(1,(cy-ch/2)/(base0.h-ch))):0.5;}
+    let posCaber=0.5;
+    {const k=Math.min(alvo.w/base0.w,alvo.h/base0.h),dw=base0.w*k,cxr=(an.cx*iw-base0.x)/base0.w;if(alvo.w-dw>2)posCaber=Math.max(0,Math.min(1,(0.65*alvo.w-dw*cxr)/(alvo.w-dw)));}
+    const razao=r=>(r.w/r.h);
+    const dist=r=>Math.abs(razao(r)-tr)/tr;
+    return new Promise(resolve=>{
+      let m=s.getElementById('mPersAj');if(m)m.remove();
+      m=document.createElement('div');m.className='ov on';m.id='mPersAj';m.style.zIndex='9100';s.getElementById('root').appendChild(m);
+      const dBase=an.margem?dist(an.rect):dist(retaTot);
+      const fitPadrao=dBase<=0.15?'esticar':(dBase>0.3?'caber':'cortar');
+      const fitIni=fitPadrao;
+      const keyPadrao=!an.jaTransp&&(an.chave||an.margem);
+      m.innerHTML=`<div class="modal adp-aj" style="max-width:640px;max-height:94vh;overflow:auto"><div class="m-titulo">Ajustar imagem</div>
+        <div class="adp-meta">Sua imagem tem ${iw}×${ih} px. O item pede <b>${alvo.w}×${alvo.h}</b>. Confira a prévia (o xadrez é transparente); o resultado nunca é ampliado.</div>
+        <canvas id="pjCv"></canvas>
+        ${an.margem?`<label><input type="checkbox" id="pjTrim" checked style="width:auto"> Recortar a margem em volta da arte</label>`:''}
+        <label><span style="min-width:90px">Aparar bordas</span><input type="range" id="pjInset" min="0" max="20" value="0"><span class="adp-meta" id="pjInsetV" style="min-width:34px">0%</span></label>
+        <div class="adp-meta" style="margin-top:-6px">Corta uma faixa igual nos 4 lados. Use se sobrar borda branca ou contorno na imagem.</div>
+        <label><span style="min-width:90px">Encaixar</span><select id="pjFit" style="flex:1"><option value="esticar" ${fitPadrao==='esticar'?'selected':''}>Esticar de leve (não corta nada)</option><option value="cortar" ${fitPadrao==='cortar'?'selected':''}>Cortar o que passar</option><option value="caber" ${fitPadrao==='caber'?'selected':''}>Caber inteira (completa as laterais com o fundo)</option></select></label>
+        <label id="pjPosL"><span style="min-width:90px">Posição do corte</span><input type="range" id="pjPos" min="0" max="100" value="${Math.round((fitIni==='caber'?posCaber:pos0)*100)}"></label>
+        ${alvo.w===1800?`<div id="pjShiftL"><label><span style="min-width:90px">Desenho pra direita</span><input type="range" id="pjShift" min="0" max="20" value="15"></label><div class="adp-meta" style="margin-top:-6px">Empurra o desenho do meio (coroa, número) pra direita, deixando a esquerda livre pro nome (no celular o nome ocupa até perto do meio). Se a arte já veio com o desenho à direita, deixe em 0.</div></div>`:''}
+        <div id="pjFundo">${an.jaTransp?'<div class="adp-meta adp-ok">Essa imagem já tem fundo transparente ✓</div>':''}
+          <label><input type="checkbox" id="pjKey" ${keyPadrao?'checked':''} style="width:auto"> Tornar a cor de fundo transparente</label>
+          <label><span style="min-width:90px">Cor do fundo</span><input type="color" id="pjCor" value="${an.canto}" style="width:48px;height:30px;padding:0;flex:0 0 48px"><span class="adp-meta">(pega do canto da imagem)</span></label>
+          <label><span style="min-width:90px">Tolerância</span><input type="range" id="pjTol" min="5" max="100" value="${an.margem&&!an.chave?25:40}"></label>
+          <label><input type="checkbox" id="pjGlobal" ${miolo?'checked':''} style="width:auto"> Apagar também dentro da arte (miolo de moldura)</label>
+          <div class="adp-meta">Sem essa última opção, só o fundo ligado às bordas some — brilhos e estrelas brancos dentro da arte ficam intactos.</div></div>
+        <div class="mf"><button class="btn btn-o" id="pjCancel">Cancelar</button><button class="btn btn-g" id="pjOk">${this._ico('check',13)} Usar esta imagem</button></div></div>`;
+      const $=id=>s.getElementById(id);
+      let timer=null,seq=0;
+      const rectBase=()=>{
+        const r=($('pjTrim')?.checked&&an.rect)?an.rect:retaTot;
+        const ins=Number($('pjInset').value)/100*Math.min(r.w,r.h);
+        return {x:r.x+ins,y:r.y+ins,w:Math.max(8,r.w-2*ins),h:Math.max(8,r.h-2*ins)};
+      };
+      const opts=()=>({
+        rect:rectBase(),
+        fit:$('pjFit').value,pos:Number($('pjPos').value)/100,shift:Number($('pjShift')?.value||0)/100,
+        key:$('pjKey').checked?{cor:$('pjCor').value,tol:Number($('pjTol').value),global:$('pjGlobal').checked}:null,
+      });
+      const desenha=async()=>{
+        $('pjInsetV').textContent=$('pjInset').value+'%';
+        const o=opts();
+        if($('pjShiftL'))$('pjShiftL').style.display=o.fit==='caber'?'none':'';
+        $('pjPosL').style.display=(o.fit==='caber'||(o.fit==='cortar'&&dist(o.rect)>0.005))?'':'none';
+        const meu=++seq;const r=await this._persRender(im,o,alvo,$('pjCv'));
+        if(meu===seq)$('pjOk')._r=r;
+      };
+      const agenda=()=>{clearTimeout(timer);timer=setTimeout(desenha,60);};
+      $('pjFit').addEventListener('change',()=>{$('pjPos').value=Math.round(($('pjFit').value==='caber'?posCaber:pos0)*100);});
+      ['pjTrim','pjInset','pjFit','pjPos','pjShift','pjKey','pjCor','pjTol','pjGlobal'].forEach(id=>{$(id)?.addEventListener('input',agenda);$(id)?.addEventListener('change',agenda);});
+      const fim=r=>{clearTimeout(timer);m.remove();URL.revokeObjectURL(lido.u);resolve(r);};
+      $('pjCancel').addEventListener('click',()=>fim(null));
+      $('pjOk').addEventListener('click',async()=>{await desenha();fim($('pjOk')._r?.file||null);});
+      desenha();
+    });
+  }
+  // Olha a imagem em tamanho pequeno: cor do canto, se já é transparente e onde está a arte (sem a margem em volta)
+  _persAnalisa(im,iw,ih){
+    const esc=Math.min(1,900/Math.max(iw,ih)),w=Math.max(1,Math.round(iw*esc)),h=Math.max(1,Math.round(ih*esc));
+    const out={canto:'#ffffff',jaTransp:false,chave:false,margem:false,rect:null,cx:0.5,cy:0.5};
+    try{
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,w,h);
+      const px=x.getImageData(0,0,w,h).data;
+      const at=(a,b)=>{const k=(b*w+a)*4;return [px[k],px[k+1],px[k+2],px[k+3]];};
+      const cs=[at(0,0),at(w-1,0),at(0,h-1),at(w-1,h-1)];
+      const bg=cs[0];
+      out.jaTransp=cs.every(v=>v[3]<250);
+      out.canto='#'+bg.slice(0,3).map(v=>v.toString(16).padStart(2,'0')).join('');
+      // os 4 cantos têm que ser da mesma cor pra ser "fundo uniforme"
+      const igual=cs.every(v=>Math.hypot(v[0]-bg[0],v[1]-bg[1],v[2]-bg[2])<40&&Math.abs(v[3]-bg[3])<40);
+      // centro de massa do que é claro/brilhante = onde está o desenho do tema (usado pra escolher o corte)
+      {let sw=0,sx=0,sy=0;for(let b=0;b<h;b+=2)for(let a=0;a<w;a+=2){const k=(b*w+a)*4;if(px[k+3]<16)continue;const l=(0.299*px[k]+0.587*px[k+1]+0.114*px[k+2])/255,q=l*l*l;sw+=q;sx+=q*a;sy+=q*b;}
+       if(sw>0){out.cx=sx/sw/w;out.cy=sy/sw/h;}}
+      const [r0,g0,b0]=bg;
+      out.chave=!out.jaTransp&&igual&&((g0>200&&r0<80&&b0<80)||(r0>200&&b0>200&&g0<80));
+      if(!igual&&!out.jaTransp)return out;
+      const claro=r0>225&&g0>225&&b0>225;
+      const ehFundo=k=>px[k+3]<16||(!out.jaTransp&&(Math.hypot(px[k]-r0,px[k+1]-g0,px[k+2]-b0)<45||(claro&&px[k]>228&&px[k+1]>228&&px[k+2]>228)));
+      let x0=w,y0=h,x1=-1,y1=-1;
+      for(let b=0;b<h;b++)for(let a=0;a<w;a++){if(!ehFundo((b*w+a)*4)){if(a<x0)x0=a;if(a>x1)x1=a;if(b<y0)y0=b;if(b>y1)y1=b;}}
+      if(x1<0)return out;
+      const bw=x1-x0+1,bh=y1-y0+1;
+      // só vale se tirou margem de verdade (>3% de algum lado) e sobrou pelo menos 20% da imagem
+      if((bw<w*0.97||bh<h*0.97)&&bw*bh>w*h*0.2){
+        out.margem=true;
+        out.rect={x:Math.max(0,Math.floor(x0/esc)),y:Math.max(0,Math.floor(y0/esc)),w:Math.min(iw,Math.ceil(bw/esc)),h:Math.min(ih,Math.ceil(bh/esc))};
+      }
+    }catch{}
+    return out;
+  }
+  // Desenha o recorte no tamanho final e devolve {file,w,h}. Se vier canvas, mostra nele (prévia).
+  // o = {rect, fit:'cortar'|'esticar', pos:0..1, key:{cor,tol,global}|null}
+  async _persRender(im,o,alvo,cvPrev){
+    const tr=alvo.w/alvo.h,r=o.rect;
+    let sx=r.x,sy=r.y,sw=r.w,sh=r.h;
+    if(o.fit==='cortar'){
+      if(r.w/r.h>tr){sw=r.h*tr;sx=r.x+(r.w-sw)*o.pos;}else{sh=r.w/tr;sy=r.y+(r.h-sh)*o.pos;}
+    }
+    if(o.fit==='caber'){
+      // A imagem INTEIRA cabe no formato (sem cortar nem esticar); o que sobra é preenchido com o próprio fundo da arte,
+      // desfocado, e as bordas da imagem somem suavemente nele.
+      const cv2=cvPrev||document.createElement('canvas');cv2.width=alvo.w;cv2.height=alvo.h;
+      const x2=cv2.getContext('2d',{willReadFrequently:true});x2.clearRect(0,0,alvo.w,alvo.h);x2.imageSmoothingQuality='high';
+      x2.save();try{x2.filter='blur(26px) brightness(.85)';}catch{}
+      x2.drawImage(im,r.x,r.y,r.w,r.h,-40,-40,alvo.w+80,alvo.h+80);x2.restore();x2.filter='none';
+      const k=Math.min(alvo.w/r.w,alvo.h/r.h),dw=Math.round(r.w*k),dh=Math.round(r.h*k);
+      const dx=Math.round((alvo.w-dw)*o.pos),dy=Math.round((alvo.h-dh)*o.pos);
+      const t=document.createElement('canvas');t.width=dw;t.height=dh;const tx=t.getContext('2d');tx.imageSmoothingQuality='high';
+      tx.drawImage(im,r.x,r.y,r.w,r.h,0,0,dw,dh);
+      tx.globalCompositeOperation='destination-in';
+      const suave=(ex,w,h,h1)=>{const g=h1?tx.createLinearGradient(0,0,w,0):tx.createLinearGradient(0,0,0,h);const f=Math.min(0.14,(h1?alvo.w-dw:alvo.h-dh)>1?0.14:0);g.addColorStop(0,f?'rgba(0,0,0,0)':'#000');g.addColorStop(f||0.001,'#000');g.addColorStop(1-(f||0.001),'#000');g.addColorStop(1,f?'rgba(0,0,0,0)':'#000');tx.fillStyle=g;tx.fillRect(0,0,w,h);};
+      suave(0,dw,dh,true);suave(0,dw,dh,false);
+      x2.drawImage(t,dx,dy);
+      const blob2=await new Promise(ok=>cv2.toBlob(ok,'image/webp',0.92));
+      const file2=blob2?new File([blob2],'arte.webp',{type:'image/webp'}):null;
+      if(file2)file2.formaPropria=false;
+      return {file:file2,w:alvo.w,h:alvo.h};
+    }
+    // tamanho de saída: o alvo, mas nunca maior que o recorte original
+    const esc=Math.min(1,sw/alvo.w,sh/alvo.h);
+    const ow=Math.max(1,Math.round(alvo.w*Math.max(esc,0.0001))),oh=Math.max(1,Math.round(alvo.h*Math.max(esc,0.0001)));
+    const cv=cvPrev||document.createElement('canvas');cv.width=ow;cv.height=oh;
+    const x=cv.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,ow,oh);x.imageSmoothingQuality='high';
+    if(o.shift>0){
+      // esquerda cresce, direita encolhe, o meio (o desenho) mantém o tamanho e anda pra direita
+      const dL=Math.round((0.4+o.shift)*ow),dM=Math.round(0.2*ow);
+      x.drawImage(im,sx,sy,sw*0.4,sh,0,0,dL,oh);
+      x.drawImage(im,sx+sw*0.6,sy,sw*0.4,sh,dL+dM,0,ow-dL-dM,oh);
+      x.drawImage(im,sx+sw*0.4-1,sy,sw*0.2+2,sh,dL-1,0,dM+2,oh);
+    }else x.drawImage(im,sx,sy,sw,sh,0,0,ow,oh);
+    if(o.key){
+      const d=x.getImageData(0,0,ow,oh),px=d.data,k=o.key;
+      const kr=parseInt(k.cor.slice(1,3),16),kg=parseInt(k.cor.slice(3,5),16),kb=parseInt(k.cor.slice(5,7),16);
+      const lim=k.tol*2.5,suave=30;
+      const dist=i=>Math.hypot(px[i]-kr,px[i+1]-kg,px[i+2]-kb);
+      const apaga=i=>{const dd=dist(i);if(dd<=lim)px[i+3]=0;else if(dd<lim+suave)px[i+3]=Math.min(px[i+3],Math.round(255*(dd-lim)/suave));};
+      if(k.global){for(let i=0;i<px.length;i+=4)apaga(i);}
+      else{
+        // só o fundo ligado às bordas (flood fill) — preserva brilhos/estrelas da mesma cor dentro da arte
+        const seen=new Uint8Array(ow*oh),fila=new Int32Array(ow*oh);let ini=0,fimF=0;
+        const poe=(a,b)=>{const p=b*ow+a;if(seen[p])return;seen[p]=1;if(px[p*4+3]<16||dist(p*4)<=lim+suave){fila[fimF++]=p;}};
+        for(let a=0;a<ow;a++){poe(a,0);poe(a,oh-1);}for(let b=0;b<oh;b++){poe(0,b);poe(ow-1,b);}
+        while(ini<fimF){
+          const p=fila[ini++],a=p%ow,b=(p-a)/ow;
+          apaga(p*4);
+          if(a>0)poe(a-1,b);if(a<ow-1)poe(a+1,b);if(b>0)poe(a,b-1);if(b<oh-1)poe(a,b+1);
+        }
+      }
+      x.putImageData(d,0,0);
+    }
+    const cantos=[[0,0],[ow-1,0],[0,oh-1],[ow-1,oh-1]].every(([a,b])=>x.getImageData(a,b,1,1).data[3]<16);
+    const blob=await new Promise(ok=>cv.toBlob(ok,'image/webp',0.92));
+    const file=blob?new File([blob],'arte.webp',{type:'image/webp'}):null;
+    if(file)file.formaPropria=cantos;
+    return {file,w:ow,h:oh};
+  }
+  // Prévia de como o item vai ficar no ranking (linha, avatar com moldura e card do pódio)
+  _persMockHtml(tipo,img1,img2){
+    const u=x=>this._safeImgSrc(x);
+    if(!img1&&!img2)return '';
+    if(tipo==='moldura')return `<div class="adp-mock"><div class="av" style="width:56px;height:56px;flex-basis:56px">${img1?`<img src="${u(img1)}" alt="">`:''}</div></div>`;
+    return `<div class="adp-mock">${img1?`<div class="linha" style="--pimg:url('${u(img1)}')"><span class="n">4</span><div class="av"></div><b>Seu nome</b><span class="d">21,4K</span></div>`:''}${img2?`<div class="pod" style="--pimg:url('${u(img2)}')"><div class="av"></div><i></i><i style="width:30px"></i></div>`:''}</div>`;
+  }
+  _persForm(it,tipo){
+    const s=this.shadowRoot,m=this._persModal(), novo=!it;
+    const v=(k,d='')=>it&&it[k]!=null?it[k]:d;
+    const mesIni=new Date().toISOString().slice(0,8)+'01';
+    const evs=(this._persDados?.eventos||[]).map(e=>`<option value="${e.id}" ${v('evento_id')===e.id?'selected':''}>${this._esc(e.nome||'(sem nome)')} — ${this._esc(e.mes||'')}</option>`).join('');
+    const dica=tipo==='template'
+      ?'Faixa <b>1800 × 300 px</b> (6:1), WebP ou PNG. Desenho do tema à <b>direita do centro</b> (50% a 85% da largura); os 45% da esquerda e os 15% da direita ficam calmos (ali ficam posição, foto, nome e diamantes). O admin recorta a margem e ajusta sozinho.'
+      :'Quadrado <b>512 × 512 px</b>, PNG ou WebP com fundo transparente. A foto fica no círculo central de ~70% (358 px); os enfeites passam pra fora.';
+    m.innerHTML=`<div class="modal adp-form" style="max-width:${m.dataset.larg}px;max-height:92vh;overflow:auto">
+      <div class="m-titulo">${novo?'Novo':'Editar'} ${tipo==='template'?'template':'moldura'}</div>
+      <div class="mc"><label>Nome <span style="color:var(--verm)">*</span></label><input id="pfNome" maxlength="60" value="${this._esc(v('nome'))}" placeholder="${tipo==='template'?'Ex: 1 Ano de DMaior':'Ex: Moldura Ouro'}"></div>
+      <div class="mc"><label>Descrição <span style="color:var(--t3);font-size:11px">(opcional — aparece pro streamer)</span></label><input id="pfDesc" maxlength="200" value="${this._esc(v('descricao'))}"></div>
+      <div class="mc"><label>Tema / campanha <span style="color:var(--t3);font-size:11px">(identifica o conjunto — ex.: aniversario-2-anos, natal, halloween)</span></label><input id="pfTema" maxlength="40" list="pfTemas" value="${this._esc(v('tema'))}" placeholder="aniversario-2-anos"><datalist id="pfTemas">${[...new Set((this._persDados?.itens||[]).map(i=>i.tema).filter(Boolean))].map(t=>`<option value="${this._esc(t)}">`).join('')}</datalist></div>
+      <div class="mc"><label>${tipo==='template'?'Imagem da linha':'Imagem da moldura'} <span style="color:var(--verm)">*</span></label>
+        <div class="adp-up"><button type="button" class="btn btn-o" id="pfUp1">${this._ico('upload',13)} Enviar imagem</button><input type="file" id="pfFile1" accept="image/png,image/webp,image/gif" style="display:none"><img id="pfPrev1" src="${this._safeImgSrc(v('imagem_url'))}" style="${v('imagem_url')?'':'display:none'}" alt=""><span id="pfInfo1" class="adp-meta"></span></div>
+        <input type="hidden" id="pfImg1" value="${this._esc(v('imagem_url'))}"><div class="dica">${dica}</div></div>
+      ${tipo==='template'?`<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--t2);text-transform:none;letter-spacing:0;margin:-4px 0 12px"><input type="checkbox" id="pfForma" ${v('forma_propria',false)?'checked':''} style="width:auto;margin-top:2px"><span>A arte já traz borda e cantos arredondados próprios <span style="color:var(--t3)">(o sistema não desenha a borda dele em volta. Marcado sozinho quando os cantos da imagem são transparentes)</span></span></label>`:''}
+      <div id="pfMock"></div>
+      ${tipo==='template'?`<div class="mc"><label>Imagem do pódio <span style="color:var(--t3);font-size:11px">(opcional — fundo do card de quem ficar no top 3)</span></label>
+        <div class="adp-up"><button type="button" class="btn btn-o" id="pfUp2">${this._ico('upload',13)} Enviar imagem</button><button type="button" class="btn btn-o" id="pfRm2" style="${v('imagem_podio_url')?'':'display:none'}">Remover</button><input type="file" id="pfFile2" accept="image/png,image/webp,image/gif" style="display:none"><img id="pfPrev2" src="${this._safeImgSrc(v('imagem_podio_url'))}" style="${v('imagem_podio_url')?'':'display:none'}" alt=""><span id="pfInfo2" class="adp-meta"></span></div>
+        <input type="hidden" id="pfImg2" value="${this._esc(v('imagem_podio_url'))}"><div class="dica"><b>600 × 900 px</b> (2:3). Pode ser uma <b>arte de fundo completa</b> (fica atrás do card do pódio) ou só enfeites com fundo transparente (aí o degradê dourado/azul/roxo aparece). Desenho do tema <b>embaixo à esquerda</b> (62% a 94% da altura); topo e meio calmos (foto, nome, diamantes e prêmio) e canto direito livre pro número da posição.</div></div>`:''}
+      <div class="mc"><label>Como libera</label><select id="pfRegra">
+        <option value="manual" ${v('regra','manual')==='manual'?'selected':''}>Manual — só quem eu liberar por UID (exclusivo)</option>
+        <option value="tempo" ${v('regra')==='tempo'?'selected':''}>Tempo de agência (anos)</option>
+        <option value="diamantes" ${v('regra')==='diamantes'?'selected':''}>Meta de diamantes dentro de um mês</option>
+        <option value="evento" ${v('regra')==='evento'?'selected':''}>Evento (período + meta pra ficar)</option></select></div>
+      <div id="pfSecTempo" class="mc"><label>Anos de agência</label><input type="number" id="pfAnos" min="0.5" max="30" step="0.5" value="${v('anos_agencia',1)}"><div class="dica">Conta a partir da <b>data de entrada</b> de cada streamer (botão "Datas de entrada" lá em cima). Vale pra sempre depois de liberado.</div></div>
+      <div id="pfSecDia">
+        <div class="grid2"><div class="mc"><label>Meta (diamantes no mês)</label><input type="number" id="pfMeta" min="1" step="1" value="${v('meta_diamantes','')}" placeholder="100000"></div>
+          <div class="mc"><label>Fica com o item por</label><select id="pfVal"><option value="">Pra sempre</option>${[3,6,12,24].map(n=>`<option value="${n}" ${Number(v('validade_meses'))===n?'selected':''}>${n} meses</option>`).join('')}</select></div></div>
+        <div class="mc"><label>Contar a partir de</label><input type="date" id="pfDesde" value="${v('contar_desde',mesIni)}"><div class="dica">Só meses a partir dessa data contam. Por padrão, o mês de hoje (ninguém ganha por mês antigo sem você querer). Apague a data pra valer todo o histórico (desde abril/2026).</div></div></div>
+      <div id="pfSecEv">
+        <div class="grid2"><div class="mc"><label>Início do evento</label><input type="date" id="pfEvIni" value="${v('evento_inicio')}"></div><div class="mc"><label>Fim do evento</label><input type="date" id="pfEvFim" value="${v('evento_fim')}"></div></div>
+        <div class="mc"><label>Quem pode usar durante o evento</label><select id="pfEvPub"><option value="todos" ${v('evento_publico','todos')==='todos'?'selected':''}>Todos os streamers</option><option value="inscritos" ${v('evento_publico')==='inscritos'?'selected':''}>Só quem se inscreveu no evento…</option></select></div>
+        <div class="mc" id="pfEvSel"><label>Evento (inscrições do painel)</label><select id="pfEvId"><option value="">— escolha —</option>${evs}</select></div>
+        <div class="mc"><label>Meta pra ficar com o item <span style="color:var(--t3);font-size:11px">(diamantes dentro do período — vazio = só empréstimo)</span></label><input type="number" id="pfEvMeta" min="1" step="1" value="${v('evento_meta_diamantes','')}" placeholder="50000"><div class="dica">Durante o evento ele usa de graça. Se bater a meta dentro do período, <b>conquista pra sempre</b>; se não, o item some no fim.</div></div></div>
+      <div class="mc"><label>Ordem na lista <span style="color:var(--t3);font-size:11px">(menor aparece primeiro)</span></label><input type="number" id="pfOrdem" min="0" max="999" value="${v('ordem',0)}"></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="pfAtivo" ${v('ativo',true)?'checked':''}> Ativo (aparece pros streamers)</label>
+      <div class="mf"><button class="btn btn-o" id="pfCancel">Cancelar</button><button class="btn btn-g" id="pfSalvar">${this._ico('check',13)} Salvar</button></div></div>`;
+    const $=id=>s.getElementById(id);
+    const alterna=()=>{const r=$('pfRegra').value;$('pfSecTempo').style.display=r==='tempo'?'':'none';$('pfSecDia').style.display=r==='diamantes'?'':'none';$('pfSecEv').style.display=r==='evento'?'':'none';$('pfEvSel').style.display=$('pfEvPub').value==='inscritos'?'':'none';};
+    $('pfRegra').addEventListener('change',alterna);$('pfEvPub').addEventListener('change',alterna);alterna();
+    const mock=()=>{$('pfMock').innerHTML=this._persMockHtml(tipo,$('pfImg1').value,$('pfImg2')?.value);};
+    const sobe=(n,pasta,alvo,miolo)=>{
+      $('pfUp'+n).addEventListener('click',()=>$('pfFile'+n).click());
+      $('pfFile'+n).addEventListener('change',async e=>{
+        const f0=e.target.files[0];e.target.value='';if(!f0)return;
+        const info=$('pfInfo'+n);info.className='adp-meta';
+        let f=f0;
+        if(f0.type!=='image/gif'){f=await this._persAjustar(f0,alvo,{miolo});if(!f)return;}
+        info.textContent='enviando…';
+        const url=await this._uploadImagem(f,pasta);
+        if(!url){info.textContent='';return;}
+        $('pfImg'+n).value=url;$('pfPrev'+n).src=url;$('pfPrev'+n).style.display='';if($('pfRm2')&&n===2)$('pfRm2').style.display='';
+        info.className='adp-meta adp-ok';info.textContent='enviado ✓';
+        if(n===1&&$('pfForma'))$('pfForma').checked=!!f.formaPropria;
+        mock();
+      });
+    };
+    const pasta=tipo==='template'?'templates':'molduras';
+    sobe(1,pasta,tipo==='template'?{w:1800,h:300}:{w:512,h:512},tipo==='moldura');
+    if(tipo==='template'){sobe(2,pasta,{w:600,h:900},false);$('pfRm2').addEventListener('click',()=>{$('pfImg2').value='';$('pfPrev2').style.display='none';$('pfRm2').style.display='none';$('pfInfo2').textContent='';mock();});}
+    mock();
+    $('pfCancel').addEventListener('click',()=>this._fechaModal('mPers'));
+    $('pfSalvar').addEventListener('click',async()=>{
+      const regra=$('pfRegra').value;
+      const body={tipo,nome:$('pfNome').value.trim(),descricao:$('pfDesc').value.trim(),tema:$('pfTema').value.trim()||null,imagem_url:$('pfImg1').value,regra,
+        ordem:Number($('pfOrdem').value)||0,ativo:$('pfAtivo').checked};
+      if(tipo==='template'){body.imagem_podio_url=$('pfImg2').value||null;body.cor_brilho=null;body.forma_propria=$('pfForma').checked;}
+      if(regra==='tempo')body.anos_agencia=Number($('pfAnos').value);
+      if(regra==='diamantes'){body.meta_diamantes=Number($('pfMeta').value);body.validade_meses=$('pfVal').value||null;body.contar_desde=$('pfDesde').value||null;}
+      if(regra==='evento'){body.evento_inicio=$('pfEvIni').value;body.evento_fim=$('pfEvFim').value;body.evento_publico=$('pfEvPub').value;body.evento_id=$('pfEvId').value||null;body.evento_meta_diamantes=$('pfEvMeta').value||null;}
+      if(!body.nome){this._toast('Dê um nome ao item','err');return;}
+      if(!body.imagem_url){this._toast('Envie a imagem do item','err');return;}
+      const b=$('pfSalvar');b.disabled=true;
+      const r=await this._api(novo?'POST':'PATCH',novo?'/admin/personalizacao/itens':`/admin/personalizacao/itens/${it.id}`,body);
+      b.disabled=false;
+      if(r?.ok){this._fechaModal('mPers');this._toast(novo?'Item criado':'Item salvo');this._carregarPers();}else this._toast(r?.erro||'Erro ao salvar','err');
+    });
+    this._abrirModal('mPers');
+  }
+  async _persLiberar(it){
+    const s=this.shadowRoot,m=this._persModal(620);
+    m.innerHTML=`<div class="modal adp-form" style="max-width:620px;max-height:92vh;overflow:auto">
+      <div class="m-titulo">Liberar "${this._esc(it.nome)}"</div>
+      <div class="dica" style="margin-bottom:10px;font-size:12px;color:var(--t3)">Libera na mão pra streamers específicos (vale além da regra do item) — bom pra algo especial ou fora do público. Cole um UID por linha (só números).</div>
+      <div class="mc"><label>UIDs</label><textarea id="plUids" rows="4" placeholder="150001398819765&#10;150001756165363"></textarea></div>
+      <div class="mc"><label>Vale até <span style="color:var(--t3);font-size:11px">(opcional — vazio = pra sempre)</span></label><input type="date" id="plAte"></div>
+      <div class="mf" style="margin-top:0;margin-bottom:14px"><button class="btn btn-g" id="plBtn">${this._ico('check',13)} Liberar</button></div>
+      <div class="adp-sec" style="font-size:14px">Quem tem o item</div><div id="plLista">${this._loading()}</div>
+      <div class="mf"><button class="btn btn-o" id="plFechar">Fechar</button></div></div>`;
+    const $=id=>s.getElementById(id);
+    $('plFechar').addEventListener('click',()=>{this._fechaModal('mPers');this._carregarPers();});
+    const lista=async()=>{
+      const d=await this._api('GET',`/admin/personalizacao/liberacoes?item_id=${it.id}`);
+      const el=$('plLista');if(!el)return;
+      if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||'Erro');return;}
+      if(!d.liberacoes.length){el.innerHTML='<div class="adp-meta">Ninguém ainda.</div>';return;}
+      const origem={manual:'você',tempo:'tempo de agência',diamantes:'meta de diamantes',evento:'evento'};
+      el.innerHTML=`<table class="adp-tab"><tr><th>Streamer</th><th>Como</th><th>Vale até</th><th></th></tr>${d.liberacoes.map(l=>`<tr><td>${this._esc(l.nome||'—')}<br><span class="adp-meta">${this._esc(l.kwai_uid)}</span></td><td>${origem[l.origem]||l.origem}</td><td>${l.expira_em?this._persData(l.expira_em):'sempre'}</td><td><button class="btn btn-o" data-rev="${l.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4);padding:4px 8px;font-size:11px">Revogar</button></td></tr>`).join('')}</table>`;
+      el.querySelectorAll('[data-rev]').forEach(b=>b.addEventListener('click',async()=>{const r=await this._api('DELETE',`/admin/personalizacao/liberacoes/${b.dataset.rev}`);if(r?.ok){this._toast('Revogado');lista();}else this._toast(r?.erro||'Erro','err');}));
+    };
+    $('plBtn').addEventListener('click',async()=>{
+      const uids=$('plUids').value.split(/[\s,;]+/).map(x=>x.trim()).filter(Boolean);
+      if(!uids.length){this._toast('Cole ao menos um UID','err');return;}
+      const b=$('plBtn');b.disabled=true;
+      const r=await this._api('POST','/admin/personalizacao/liberar',{item_id:it.id,uids,expira_em:$('plAte').value||null});
+      b.disabled=false;
+      if(r?.ok){this._toast(`Liberado para ${r.liberados} streamer(s)`);$('plUids').value='';lista();}else this._toast(r?.erro||'Erro ao liberar','err');
+    });
+    this._abrirModal('mPers');lista();
+  }
+  async _persEntradas(){
+    const s=this.shadowRoot,m=this._persModal(720);
+    m.innerHTML=`<div class="modal adp-form" style="max-width:720px;max-height:92vh;overflow:auto">
+      <div class="m-titulo">Datas de entrada na agência</div>
+      <div class="dica" style="margin-bottom:10px;font-size:12px;color:var(--t3);line-height:1.5">É daqui que sai o "tempo de agência". O sistema só conhece desde <b>01/04/2026</b>, então preenche com o primeiro dia que o streamer aparece nos dados — <b>corrija a data dos veteranos</b>. Quem for "admin" (você corrigiu) nunca é sobrescrito.</div>
+      <div class="mf" style="justify-content:flex-start;margin:0 0 12px"><button class="btn btn-o" id="peSync">${this._ico('refresh',12)} Carregar todos os streamers</button></div>
+      <div class="mc"><label>Colar várias de uma vez <span style="color:var(--t3);font-size:11px">(UID e data, uma por linha — ex.: 150001398819765 15/03/2024)</span></label><textarea id="peBulk" rows="3" placeholder="150001398819765 15/03/2024&#10;150001756165363;2023-11-02"></textarea>
+        <div class="mf" style="margin-top:6px"><button class="btn btn-g" id="peBulkBtn">${this._ico('check',13)} Salvar datas coladas</button></div></div>
+      <div class="mc"><input id="peBusca" placeholder="Buscar por nome ou UID…"></div>
+      <div id="peLista">${this._loading()}</div>
+      <div class="mf"><button class="btn btn-o" id="peFechar">Fechar</button></div></div>`;
+    const $=id=>s.getElementById(id);
+    $('peFechar').addEventListener('click',()=>this._fechaModal('mPers'));
+    const desenha=()=>{
+      const el=$('peLista');if(!el)return;
+      const q=($('peBusca').value||'').trim().toLowerCase();
+      const l=(this._persEnt||[]).filter(e=>!q||e.kwai_uid.includes(q)||(e.nome||'').toLowerCase().includes(q));
+      if(!l.length){el.innerHTML='<div class="adp-meta">Nada aqui. Use "Carregar todos os streamers".</div>';return;}
+      el.innerHTML=`<div class="adp-meta" style="margin-bottom:6px">${l.length} streamer(s)${l.length>200?' — mostrando 200, use a busca':''}</div><table class="adp-tab"><tr><th>Streamer</th><th>Data de entrada</th><th>Origem</th><th></th></tr>${l.slice(0,200).map(e=>`<tr><td>${this._esc(e.nome||'—')}<br><span class="adp-meta">${this._esc(e.kwai_uid)}</span></td><td><input type="date" value="${this._esc(e.data_entrada)}" data-d="${this._esc(e.kwai_uid)}" style="padding:4px 6px"></td><td>${e.origem==='admin'?'<span class="adp-chip on">você</span>':'<span class="adp-chip">automática</span>'}</td><td><button class="btn btn-o" data-sv="${this._esc(e.kwai_uid)}" style="padding:4px 8px;font-size:11px">Salvar</button></td></tr>`).join('')}</table>`;
+      el.querySelectorAll('[data-sv]').forEach(b=>b.addEventListener('click',async()=>{
+        const uid=b.dataset.sv,data=el.querySelector(`[data-d="${uid}"]`).value;
+        const r=await this._api('POST','/admin/personalizacao/entradas',{linhas:[{uid,data}]});
+        if(r?.ok){this._toast('Data salva');carrega();}else this._toast(r?.erro||'Erro','err');
+      }));
+    };
+    const carrega=async()=>{const d=await this._api('GET','/admin/personalizacao/entradas');this._persEnt=d?.ok?d.entradas:[];if(!d?.ok)this._toast(d?.erro||'Erro ao carregar','err');desenha();};
+    $('peBusca').addEventListener('input',desenha);
+    $('peSync').addEventListener('click',async()=>{const b=$('peSync');b.disabled=true;const r=await this._api('POST','/admin/personalizacao/entradas/sincronizar',{});b.disabled=false;if(r?.ok){this._toast(`${r.novos} streamer(s) adicionados`);carrega();}else this._toast(r?.erro||'Erro','err');});
+    $('peBulkBtn').addEventListener('click',async()=>{
+      const linhas=[];
+      for(const ln of $('peBulk').value.split('\n')){
+        const t=ln.trim();if(!t)continue;
+        const m=t.match(/^(\d{5,20})[\s;,\t]+(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})$/);
+        if(!m){this._toast(`Linha inválida: ${t.slice(0,40)}`,'err');return;}
+        let d=m[2];if(d.includes('/')){const [dd,mm,aa]=d.split('/');d=`${aa}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;}
+        linhas.push({uid:m[1],data:d});
+      }
+      if(!linhas.length){this._toast('Cole ao menos uma linha','err');return;}
+      const r=await this._api('POST','/admin/personalizacao/entradas',{linhas});
+      if(r?.ok){this._toast(`${r.salvas} data(s) salva(s)`);$('peBulk').value='';carrega();}else this._toast(r?.erro||'Erro ao salvar','err');
+    });
+    this._abrirModal('mPers');carrega();
+  }
+
   // ── ARQUIVOS (R2) ────────────────────────────────────────────────────────
   static get ARQ_LIMITE_GB(){ return 10; } // plano gratuito do R2 — só referência da barra
-  _arqPasta(p){return ({home:'Home (banners)',eventos:'Eventos',pk:'PK Diário',votacao:'Votações',geral:'Geral','(raiz)':'Sem pasta'})[p]||p;}
+  _arqPasta(p){return ({home:'Home (banners)',eventos:'Eventos',pk:'PK Diário',votacao:'Votações',geral:'Geral',templates:'Templates (ranking)',molduras:'Molduras (ranking)','(raiz)':'Sem pasta'})[p]||p;}
   _arqBytes(n){n=Number(n)||0;if(n>=1073741824)return (n/1073741824).toFixed(2).replace('.',',')+' GB';if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB';if(n>=1024)return Math.round(n/1024)+' KB';return n+' B';}
   async _carregarArquivos(){
     const s=this.shadowRoot;const lista=s.getElementById('arqLista');
@@ -3755,6 +4156,9 @@ class DimaiorAdmin extends HTMLElement {
       onStatus?.('enviando…');
     }else if(/gif/i.test(file.type)){
       if(file.size>4*1024*1024){this._toast('GIF muito grande (máx 4 MB)','err');return null;}
+    }else if(pasta==='templates'||pasta==='molduras'){
+      // Arte já pronta (1800×300 / 600×900 / 512×512, com transparência): sobe do jeito que veio
+      blob=file; ct=file.type;
     }else{
       try{
         blob=await this._resizeImageToBlob(file);
@@ -6809,6 +7213,47 @@ class DimaiorAdmin extends HTMLElement {
     .cfg-chave,.lv-cfg-label,.mc label,.mc-field label{color:var(--t2);}
     /* Ao Vivo: filtro Todas/Principal/<sub> + selo da sub no card */
     .lv-orgs{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+    .adp-sec{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:16px;font-weight:700;color:var(--t1);margin:6px 0 10px;letter-spacing:.5px}
+    .adp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-bottom:22px}
+    .adp-card{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:9px;min-width:0}
+    .adp-card.off{opacity:.55}
+    .adp-thumb{border-radius:10px;background:#05070c;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:60px}
+    .adp-thumb.tpl{aspect-ratio:6/1;min-height:0}.adp-thumb.tpl img{width:100%;height:100%;object-fit:cover;display:block}
+    .adp-thumb.mol{height:96px}.adp-thumb.mol img{height:88px;width:88px;object-fit:contain}
+    .adp-nome{font-size:14px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .adp-regra{font-size:12px;color:var(--t2);line-height:1.45}
+    .adp-meta{font-size:11px;color:var(--t3)}
+    .adp-acoes{display:flex;flex-wrap:wrap;gap:6px}
+    .adp-acoes .btn{padding:6px 10px;font-size:11px}
+    .adp-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--brd);color:var(--t3);margin-right:5px}
+    .adp-chip.on{border-color:var(--cyan);color:var(--cyan)}
+    .adp-chip.warn{border-color:rgba(251,191,36,.6);color:#fbbf24}
+    .adp-form .mc{margin-bottom:12px}
+    .adp-form .dica{font-size:11px;color:var(--t3);margin-top:4px;line-height:1.4}
+    .adp-form .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .adp-form select,.adp-form input[type=date],.adp-form input[type=number]{width:100%}
+    .adp-up{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .adp-up img{max-height:64px;max-width:200px;border-radius:8px;background:#05070c;object-fit:contain}
+    .adp-ok{color:var(--verde,#4ade80)}.adp-aviso{color:#fbbf24}
+    .adp-aj{display:flex;flex-direction:column;gap:12px}
+    .adp-aj canvas{max-width:100%;max-height:46vh;border-radius:10px;background:repeating-conic-gradient(#2a3140 0 25%,#1b2029 0 50%) 0 0/16px 16px;align-self:center;border:1px solid var(--brd)}
+    .adp-aj label{font-size:12px;color:var(--t2);display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;margin:0}
+    .adp-aj input[type=range]{flex:1;padding:0}
+    .adp-aj select{background:#0d121b;border:1px solid var(--brd);border-radius:8px;color:var(--t1);padding:7px 8px;font-size:12px}
+    .adp-mock{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-top:8px}
+    .adp-mock .linha{position:relative;isolation:isolate;display:flex;align-items:center;gap:10px;flex:1;min-width:220px;padding:12px 14px;border-radius:14px;border:1px solid var(--brd);overflow:hidden;background:#0d121b}
+    .adp-mock .linha::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--pimg) center/cover no-repeat}
+    .adp-mock .linha b{color:var(--t1);font-size:12px;text-shadow:0 1px 3px rgba(0,0,0,.85)}.adp-mock .linha span.n{color:var(--t3);font-weight:700;width:16px;text-align:center}.adp-mock .linha span.d{margin-left:auto;color:var(--cyan);font-size:12px;font-weight:700}
+    .adp-mock .av{position:relative;width:40px;height:40px;border-radius:50%;background:#33415a;flex:0 0 40px}
+    .adp-mock .av img{position:absolute;left:50%;top:50%;width:145%;height:145%;transform:translate(-50%,-50%);object-fit:contain}
+    .adp-mock .pod{position:relative;isolation:isolate;width:86px;height:150px;border-radius:14px;border:1px solid var(--brd);background:linear-gradient(to bottom,rgba(240,185,20,.9),rgba(6,8,20,.97));display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:5px;overflow:hidden}
+    .adp-mock .pod::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--pimg) center/cover no-repeat}
+    .adp-mock .pod .av{width:34px;height:34px;flex-basis:34px}
+    .adp-mock .pod i{display:block;width:44px;height:6px;border-radius:3px;background:rgba(255,255,255,.7)}
+    .adp-tab{width:100%;border-collapse:collapse;font-size:12px}
+    .adp-tab th,.adp-tab td{padding:7px 8px;border-bottom:1px solid var(--brddim);text-align:left;color:var(--t2)}
+    .adp-tab th{color:var(--t3);font-size:11px;font-weight:700}
+    @media(max-width:700px){.adp-form .grid2{grid-template-columns:1fr}.adp-grid{grid-template-columns:1fr}}
     .arq-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
     .arq-card{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;min-width:0}
     .arq-card.larga{grid-column:span 2}
@@ -6993,7 +7438,8 @@ class DimaiorAdmin extends HTMLElement {
               ni('megaphone','notificacoes','Notificações')+
               ni('vote','votacoes','Votações')+
               ni('zap','pkDiario','PK Diário')+
-              ni('play_circle','historicoLive','Histórico de Live')
+              ni('play_circle','historicoLive','Histórico de Live')+
+              ni('medal','personalizacao','Personalização')
             )}
             ${navSec('sistema','Sistema',
               ni('server','monitor','Monitor Kwai')+
@@ -7605,6 +8051,9 @@ class DimaiorAdmin extends HTMLElement {
                 <div id="tbImpulsoHist">${this._loading()}</div>
                 <div class="pag-bar" id="pgImpulsoHist"></div>
               </div>
+            </div>
+            <div class="pag" id="pag-personalizacao">${ph('Personalização','medal','Templates (fundo da linha) e molduras (aro da foto) que os streamers usam no ranking','btnAtuPers',`<button class="btn btn-o" id="btnPersEntradas">${this._ico('calendar',13)} Datas de entrada</button><button class="btn btn-o" id="btnPersNovoM">${this._ico('plus',13)} Nova moldura</button><button class="btn btn-g" id="btnPersNovoT">${this._ico('plus',13)} Novo template</button>`)}
+              <div id="persLista">${this._loading()}</div>
             </div>
             <div class="pag" id="pag-arquivos">${ph('Arquivos','image','Fotos e vídeos salvos no Cloudflare (banners, eventos, PK, votações) — veja o espaço usado e apague o que não usa mais','btnAtuArquivos')}
               <div id="arqResumo"></div>

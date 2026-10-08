@@ -286,6 +286,23 @@ class RankingDmaior extends HTMLElement {
       .ranking-list{display:flex;flex-direction:column;gap:10px;width:100%;animation:fadeUp 0.8s ease both}
       .list-item{display:flex;align-items:center;padding:12px 18px;background:var(--bg-card);border-radius:16px;border:1px solid var(--border-dim);transition:transform 0.2s}
       .list-item:hover{transform:translateX(5px);background:var(--podium-2);border-color:var(--border)}
+      /* Template escolhido pelo streamer (aba Personalização): arte atrás do conteúdo, sem mexer no layout */
+      .list-item.has-tpl,.podium-item.has-tpl{isolation:isolate}
+      .list-item.has-tpl{position:relative;border-color:transparent;aspect-ratio:6/1}
+      .list-item.has-tpl::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--tpl) center/cover no-repeat;pointer-events:none}
+      /* Arte com borda e cantos próprios: o sistema não desenha card/borda em volta */
+      .list-item.has-tpl.forma,.list-item.has-tpl.forma:hover{background:transparent;border:0;box-shadow:none}
+      /* arte com cantos próprios: encaixa inteira (sem cortar as pontas arredondadas em tela estreita) */
+      .list-item.has-tpl.forma::before{border-radius:0;background-size:100% 100%}
+      .list-item.has-tpl .list-name,.list-item.has-tpl .list-score,.list-item.has-tpl .list-rank,.list-item.has-tpl .list-id{text-shadow:0 1px 3px rgba(0,0,0,.85)}
+      .podium-item.has-tpl .name,.podium-item.has-tpl .podium-val,.podium-item.has-tpl .podium-id,.podium-item.has-tpl .prize-tag{text-shadow:0 1px 4px rgba(0,0,0,.9)}
+      /* Card com arte de fundo ganha mais altura: o desenho fica embaixo e não pode ficar por baixo da etiqueta do prêmio */
+      .podium-item.has-tpl.first{height:336px}.podium-item.has-tpl.second{height:276px}.podium-item.has-tpl.third{height:246px}
+      :host(.dinamico) .podium-item.has-tpl.first{min-height:320px}:host(.dinamico) .podium-item.has-tpl.second{min-height:270px}:host(.dinamico) .podium-item.has-tpl.third{min-height:246px}
+      @media(max-width:480px){.podium-item.has-tpl.first{height:296px}.podium-item.has-tpl.second{height:236px}.podium-item.has-tpl.third{height:206px}
+        :host(.dinamico) .podium-item.has-tpl.first{min-height:276px}:host(.dinamico) .podium-item.has-tpl.second{min-height:240px}:host(.dinamico) .podium-item.has-tpl.third{min-height:218px}}
+      .podium-item.has-tpl::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--tpl-podio) center bottom/cover no-repeat;pointer-events:none}
+      .moldura{position:absolute;left:50%;top:50%;width:145%;height:145%;transform:translate(-50%,-50%);object-fit:contain;pointer-events:none;z-index:4}
       .list-rank{width:35px;font-size:var(--t-title-md);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--text-muted);text-align:center}
       .list-avatar-wrap{position:relative;width:45px;height:45px;margin-right:15px;flex-shrink:0}
       .list-avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid var(--border-dim);display:block}
@@ -395,9 +412,9 @@ class RankingDmaior extends HTMLElement {
       :host(.dinamico) .podium{height:auto;margin-top:80px;margin-bottom:20px;gap:8px}
       :host(.dinamico) .podium-item{height:auto!important;min-height:195px;border-radius:22px!important;padding:0 10px 18px!important;overflow:visible;gap:4px;border-bottom:none!important}
       :host(.dinamico) .list-id{display:none}
-      :host(.dinamico) .podium-item.second{min-height:220px;background:linear-gradient(to bottom,rgba(15,115,255,.92) 0%,rgba(0,70,190,.60) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(30,170,255,.72)!important;border-bottom:none!important;box-shadow:0 0 40px rgba(15,115,255,.30),0 8px 28px rgba(0,0,0,.55)!important}
+      :host(.dinamico) .podium-item.second{min-height:220px;background:linear-gradient(to bottom,rgba(15,115,255,.92) 0%,rgba(0,70,190,.60) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(30,170,255,.72)!important;border-bottom:none!important;box-shadow:0 0 20px rgba(15,115,255,.34),0 6px 14px rgba(0,0,0,.5)!important}
       :host(.dinamico) .podium-item.first{min-height:272px;background:linear-gradient(to bottom,rgba(240,185,20,.96) 0%,rgba(200,130,0,.62) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(240,192,64,.85)!important;border-bottom:none!important;box-shadow:0 0 60px rgba(240,185,20,.40),0 10px 36px rgba(0,0,0,.55)!important}
-      :host(.dinamico) .podium-item.third{min-height:196px;background:linear-gradient(to bottom,rgba(210,40,210,.92) 0%,rgba(140,20,180,.58) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(215,60,215,.72)!important;border-bottom:none!important;box-shadow:0 0 38px rgba(210,40,210,.28),0 8px 24px rgba(0,0,0,.5)!important}
+      :host(.dinamico) .podium-item.third{min-height:196px;background:linear-gradient(to bottom,rgba(210,40,210,.92) 0%,rgba(140,20,180,.58) 40%,rgba(6,8,20,.97) 100%)!important;border-color:rgba(215,60,215,.72)!important;border-bottom:none!important;box-shadow:0 0 20px rgba(210,40,210,.32),0 6px 14px rgba(0,0,0,.5)!important}
       :host(.dinamico) .badge{display:none!important}
       :host(.dinamico) .avatar{border-width:3.5px!important}
       :host(.dinamico) .second .avatar{border-color:#1eb8ff!important;box-shadow:0 0 12px rgba(30,184,255,.5)!important}
@@ -690,6 +707,8 @@ class RankingDmaior extends HTMLElement {
           verificado:         s.verificado         || false,
           verificado_premium: s.verificado_premium || false,
           selo_premium_url:   this.normalizeImageUrl(s.selo_premium_url || ''),
+          template:           this._tplSafe(s.template),
+          moldura:            this._moldSafe(s.moldura),
         }));
         const _safeBadge = u => this.normalizeImageUrl(u);
         const _safeV = _safeBadge(data.badge_verificado_url || '');
@@ -831,6 +850,22 @@ class RankingDmaior extends HTMLElement {
     } catch { return ''; }
   }
 
+  // Personalização (template/moldura): só aceita imagem hospedada no nosso domínio e com caracteres
+  // seguros — o valor entra num style="url(...)", então nada de aspas/parênteses vindo de fora.
+  _imgPers(u) {
+    return (typeof u === 'string' && /^https:\/\/[a-z0-9.-]+\.agencydmaior\.com\.br\/[A-Za-z0-9._\-\/%]+$/.test(u)) ? u : '';
+  }
+  _tplSafe(t) {
+    if (!t) return null;
+    const img = this._imgPers(t.img);
+    if (!img) return null;
+    return { img, podio: this._imgPers(t.podio || ''), cor: /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(t.cor || '') ? t.cor : '', forma: !!t.forma };
+  }
+  _moldSafe(m) {
+    const img = m && this._imgPers(m.img);
+    return img ? { img } : null;
+  }
+  _moldHtml(s) { return s.moldura ? `<img class="moldura" src="${s.moldura.img}" alt="" loading="lazy" decoding="async">` : ''; }
   normalizeImageUrl(url) {
     const safe = this.safeUrl(url);
     if (!safe) return '';
@@ -979,13 +1014,15 @@ class RankingDmaior extends HTMLElement {
         const prizeHtml  = prizeValue ? `<div class="prize-tag"><span class="currency-symbol">R$</span> ${prizeValue}</div>` : '';
         const isLive     = isMes && this.liveSet.has(s.uid);
         const liveDot    = isLive ? `<div class="live-dot"><span></span><span></span><span></span></div>` : '';
+        const podTpl     = s.template?.podio || '';
         if (dyn) {
           html += `
-          <div class="podium-item ${type}">
+          <div class="podium-item ${type}${podTpl ? ' has-tpl' : ''}"${podTpl ? ` style="--tpl-podio:url('${podTpl}')"` : ''}>
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
               <div class="av-inner">
                 <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                ${this._moldHtml(s)}
                 ${liveDot}
               </div>
             </div>
@@ -997,10 +1034,11 @@ class RankingDmaior extends HTMLElement {
           </div>`;
         } else {
           html += `
-          <div class="podium-item ${type}">
+          <div class="podium-item ${type}${podTpl ? ' has-tpl' : ''}"${podTpl ? ` style="--tpl-podio:url('${podTpl}')"` : ''}>
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
               <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+              ${this._moldHtml(s)}
               <div class="badge">${idx + 1}</div>
               ${liveDot}
             </div>
@@ -1025,10 +1063,11 @@ class RankingDmaior extends HTMLElement {
       const isLiveItem    = isMes && this.liveSet.has(s.uid);
       const liveDotItem   = isLiveItem ? `<div class="live-dot"><span></span><span></span><span></span></div>` : '';
       html += `
-        <div class="list-item">
+        <div class="list-item${s.template ? ' has-tpl' : ''}${s.template?.forma ? ' forma' : ''}"${s.template ? ` style="--tpl:url('${s.template.img}')"` : ''}>
           <div class="list-rank">${globalIndex + 1}</div>
           <div class="list-avatar-wrap${isLiveItem ? ' is-live' : ''}">
             <img src="${s.img}" class="list-avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+            ${this._moldHtml(s)}
             ${liveDotItem}
           </div>
           <div class="list-name-col">
