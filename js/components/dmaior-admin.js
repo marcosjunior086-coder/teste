@@ -793,9 +793,6 @@ class DimaiorAdmin extends HTMLElement {
     // Estilo efetivo: no mobile com >1 col, horizontal não é viável → usa vertical
     // Mas com 1 col o horizontal funciona normalmente
     const estiloEfetivo=(isMobile && cols>1 && estilo===1)?2:estilo;
-    // Limite de vídeos tocando ao mesmo tempo (celular não aguenta N decoders): o resto vira capa
-    let touch=false; try{touch=window.matchMedia('(pointer:coarse)').matches;}catch{}
-    const maxVid=(touch||isMobile)?2:6;
     try{localStorage.setItem('dm_lives_opts',JSON.stringify(this._livesOpts));}catch{}
 
     // UIDs com a live oculta no site (tag + botão Mostrar/Ocultar nos cards)
@@ -901,7 +898,7 @@ class DimaiorAdmin extends HTMLElement {
       ${orgsHtml}
       <!-- Grid das lives -->
       ${lista.length
-        ? `<div class="lives-lista" id="livesLista" style="grid-template-columns:repeat(${cols},1fr);gap:14px">${lista.map((sv,i)=>this._livesCard(sv,i,i<maxVid?modo:'capa',estiloEfetivo)).join('')}</div>`
+        ? `<div class="lives-lista" id="livesLista" style="grid-template-columns:repeat(${cols},1fr);gap:14px">${lista.map((sv,i)=>this._livesCard(sv,i,modo,estiloEfetivo)).join('')}</div>`
         : this._empty('live','Nenhum streamer ao vivo agora')}`;
 
     // ── Bind colunas ─────────────────────────────────────────────────────────
@@ -973,12 +970,15 @@ class DimaiorAdmin extends HTMLElement {
 
     this._injetarPlayerHLS();
 
-    // ── Modo vídeo: inicia HLS inline ────────────────────────────────────────
-    // Largada escalonada (todos no mesmo instante disputam rede/decoder e travam — mesma lição do widget da home)
+    // ── Modo vídeo: abre todos, um por um ────────────────────────────────────
+    // Sem limite (admin usa aparelho potente). Largada escalonada: todos no mesmo instante disputam rede e travam.
     if(modo==='video'){
-      lista.slice(0,maxVid).forEach((sv,i)=>{
-        if(!sv.stream_url) return;
-        (this._vidTimers=this._vidTimers||[]).push(setTimeout(()=>this._iniciarVideoInline(`lv-vid-${i}`,sv.stream_url,sv),i*700));
+      lista.forEach((sv,i)=>{
+        if(!sv.stream_url)return;
+        const vid=s.getElementById(`lv-vid-${i}`);if(!vid)return;
+        const it={vid,sv,url:sv.stream_url,stop:null};
+        (this._vidTimers=this._vidTimers||[]).push(setTimeout(()=>{if(vid.isConnected)this._iniciarVideoInline(it);},i*400));
+        (this._hlsInline=this._hlsInline||[]).push(()=>{if(it.stop){try{it.stop();}catch{}it.stop=null;}});
       });
     }
   }
@@ -1059,22 +1059,21 @@ class DimaiorAdmin extends HTMLElement {
     iniciar();
     return parar;
   }
-  _iniciarVideoInline(videoId,url,sv){
-    const vid=this.shadowRoot.getElementById(videoId);if(!vid||!url)return;
+  _iniciarVideoInline(it){
+    const {vid,url,sv}=it;
     const box=vid.parentElement;
-    const stop=this._tocarHls(vid,url,{
+    if(box){box.classList.remove('lc-falhou');box.querySelector('.lc-semsinal')?.remove();}
+    it.stop=this._tocarHls(vid,url,{
       mini:true,
-      onPlaying:()=>{vid.removeAttribute('poster');box&&box.classList.remove('lc-falhou');},
+      onPlaying:()=>{vid.removeAttribute('poster');},
       // Sem sinal: vira a capa clicável (abre o modal), em vez de um quadro preto parado
       onFail:()=>{
         if(!box||!vid.isConnected)return;
         box.classList.add('lc-falhou','lc-play-area');
-        box.dataset.stream=url;box.dataset.nomeLive=sv?.nome||'';box.dataset.capaLive=sv?.capa||'';
         box.addEventListener('click',()=>{window._dmPlayLive&&window._dmPlayLive(url,sv?.nome||'',sv?.capa||'');},{once:true});
         if(!box.querySelector('.lc-semsinal'))box.insertAdjacentHTML('beforeend','<div class="lc-semsinal" style="position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:3px 8px;border-radius:6px">Sem sinal · clique para abrir</div>');
       }
     });
-    (this._hlsInline=this._hlsInline||[]).push(stop);
   }
   _livesCard(sv,i,modo='capa',estilo=1){
     const tc=sv.inicio?this._tempoDecorrido(sv.inicio):'';
