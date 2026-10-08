@@ -158,7 +158,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
     ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
     ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive']]],
-    ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
+    ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
   ]; }
   _montarMenuMobile(){
     const s=this.shadowRoot; const nav=s?.getElementById('admMsheetNav'); if(!nav) return;
@@ -384,7 +384,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -396,7 +396,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -1125,6 +1125,86 @@ class DimaiorAdmin extends HTMLElement {
         onFail:(m)=>{status.textContent=(m||'Sem sinal')+' — a live pode ter acabado. Feche e atualize a lista.';}
       });
     };
+  }
+
+  // ── ARQUIVOS (R2) ────────────────────────────────────────────────────────
+  static get ARQ_LIMITE_GB(){ return 10; } // plano gratuito do R2 — só referência da barra
+  _arqPasta(p){return ({home:'Home (banners)',eventos:'Eventos',pk:'PK Diário',votacao:'Votações',geral:'Geral','(raiz)':'Sem pasta'})[p]||p;}
+  _arqBytes(n){n=Number(n)||0;if(n>=1073741824)return (n/1073741824).toFixed(2).replace('.',',')+' GB';if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB';if(n>=1024)return Math.round(n/1024)+' KB';return n+' B';}
+  async _carregarArquivos(){
+    const s=this.shadowRoot;const lista=s.getElementById('arqLista');
+    if(lista)lista.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/arquivos');
+    if(!d?.ok){
+      if(lista)lista.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar os arquivos');
+      s.getElementById('arqResumo').innerHTML='';s.getElementById('arqFiltros').innerHTML='';return;
+    }
+    this._arqDados=d;
+    this._arqF=this._arqF||{pasta:'todas',tipo:'todos',uso:'todos',ordem:'recentes',mostrar:48};
+    this._arqF.mostrar=48;
+    this._renderArquivos();
+    const b=s.getElementById('btnAtuArquivos');if(b&&!b._ok){b._ok=1;b.addEventListener('click',()=>this._carregarArquivos());}
+  }
+  _renderArquivos(){
+    const s=this.shadowRoot,d=this._arqDados;if(!d)return;
+    const F=this._arqF,todos=d.arquivos||[];
+    // Resumo / acompanhamento do espaço
+    const soma=a=>a.reduce((t,x)=>t+x.size,0);
+    const imgs=todos.filter(x=>x.tipo==='imagem'),vids=todos.filter(x=>x.tipo==='video'),livres=todos.filter(x=>!x.em_uso);
+    const limite=DimaiorAdmin.ARQ_LIMITE_GB*1073741824,pct=Math.min(100,d.total_bytes/limite*100);
+    s.getElementById('arqResumo').innerHTML=`<div class="arq-resumo">
+      <div class="arq-card larga"><div class="l">Espaço usado</div><div class="v">${this._arqBytes(d.total_bytes)}</div>
+        <div class="arq-barra"><i class="${pct>=80?'alta':''}" style="width:${Math.max(pct,d.total_bytes?1:0).toFixed(1)}%"></i></div>
+        <div class="s">${pct.toFixed(pct<1?2:1).replace('.',',')}% de ${DimaiorAdmin.ARQ_LIMITE_GB} GB (limite grátis do R2)</div></div>
+      <div class="arq-card"><div class="l">Arquivos</div><div class="v">${d.total}</div><div class="s">${d.truncado?'mostrando os primeiros '+todos.length:'no total'}</div></div>
+      <div class="arq-card"><div class="l">Fotos</div><div class="v">${imgs.length}</div><div class="s">${this._arqBytes(soma(imgs))}</div></div>
+      <div class="arq-card"><div class="l">Vídeos</div><div class="v">${vids.length}</div><div class="s">${this._arqBytes(soma(vids))}</div></div>
+      <div class="arq-card ${livres.length?'warn':''}"><div class="l">Sem uso</div><div class="v">${livres.length}</div><div class="s">${livres.length?this._arqBytes(soma(livres))+' que dá pra liberar':'tudo em uso'}</div></div>
+    </div>`;
+    // Filtros
+    const pastas=[...new Set(todos.map(x=>x.pasta||'(raiz)'))].sort();
+    const chip=(grp,val,lbl,n)=>`<button type="button" class="lv-org-btn ${F[grp]===val?'on':''}" data-arq="${grp}" data-v="${this._esc(val)}">${this._esc(lbl)}${n!=null?`<b>${n}</b>`:''}</button>`;
+    s.getElementById('arqFiltros').innerHTML=`<div class="arq-filtros">
+      ${chip('pasta','todas','Todas as pastas')}${pastas.map(p=>chip('pasta',p,this._arqPasta(p),todos.filter(x=>(x.pasta||'(raiz)')===p).length)).join('')}
+      <span class="sep"></span>${chip('tipo','todos','Fotos e vídeos')}${chip('tipo','imagem','Fotos')}${chip('tipo','video','Vídeos')}
+      <span class="sep"></span>${chip('uso','todos','Todos')}${chip('uso','livre','Só sem uso',livres.length)}${chip('uso','usado','Em uso')}
+      <span class="sep"></span>${chip('ordem','recentes','Mais recentes')}${chip('ordem','antigos','Mais antigos')}${chip('ordem','maiores','Maiores')}
+    </div>`;
+    s.querySelectorAll('#arqFiltros [data-arq]').forEach(b=>b.addEventListener('click',()=>{this._arqF[b.dataset.arq]=b.dataset.v;this._arqF.mostrar=48;this._renderArquivos();}));
+    // Lista
+    const l=todos.filter(x=>(F.pasta==='todas'||(x.pasta||'(raiz)')===F.pasta)&&(F.tipo==='todos'||x.tipo===F.tipo)&&(F.uso==='todos'||(F.uso==='livre'?!x.em_uso:x.em_uso)));
+    l.sort((a,b)=>F.ordem==='maiores'?b.size-a.size:F.ordem==='antigos'?String(a.uploaded).localeCompare(String(b.uploaded)):String(b.uploaded).localeCompare(String(a.uploaded)));
+    const el=s.getElementById('arqLista');
+    if(!l.length){el.innerHTML=this._empty('image',todos.length?'Nenhum arquivo com esses filtros':'Nenhum arquivo salvo ainda');return;}
+    const fatia=l.slice(0,F.mostrar);
+    const card=x=>{
+      const u=this._safeImgSrc(x.url),nome=x.key.split('/').pop();
+      const midia=x.tipo==='video'
+        ?`<video src="${u}#t=0.1" muted playsinline preload="metadata"></video>`
+        :`<img src="${u}" alt="" loading="lazy" onerror="this.style.opacity='.2'">`;
+      const dt=x.uploaded?new Date(x.uploaded).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—';
+      return`<div class="arq-item"><a class="arq-thumb" href="${u}" target="_blank" rel="noopener noreferrer" title="Abrir em tamanho real">${midia}<span class="tag">${this._esc(this._arqPasta(x.pasta||'(raiz)'))}${x.tipo==='video'?' · vídeo':''}</span><span class="uso ${x.em_uso?'':'livre'}">${x.em_uso?'Em uso':'Sem uso'}</span></a>
+        <div class="arq-info"><div class="arq-nome" title="${this._esc(x.key)}">${this._esc(nome)}</div><div class="arq-meta">${this._arqBytes(x.size)} · ${dt}</div></div>
+        <div class="arq-acoes"><button class="btn btn-o btn-sm" data-arq-copiar="${this._esc(x.url)}">${this._ico('file_text',12)} Link</button><button class="btn btn-o btn-sm" data-arq-del="${this._esc(x.key)}" style="color:var(--verm);border-color:rgba(248,113,113,.4)">${this._ico('trash',12)} Apagar</button></div></div>`;
+    };
+    el.innerHTML=`<div class="arq-grid">${fatia.map(card).join('')}</div>${l.length>fatia.length?`<div style="text-align:center;margin-top:14px"><button class="btn btn-o" id="arqMais">Mostrar mais (${l.length-fatia.length})</button></div>`:''}`;
+    el.querySelector('#arqMais')?.addEventListener('click',()=>{this._arqF.mostrar+=48;this._renderArquivos();});
+    el.querySelectorAll('[data-arq-copiar]').forEach(b=>b.addEventListener('click',()=>this._copiarTxt(b.dataset.arqCopiar,'Link copiado')));
+    el.querySelectorAll('[data-arq-del]').forEach(b=>b.addEventListener('click',()=>this._apagarArquivo(b.dataset.arqDel)));
+  }
+  _apagarArquivo(key){
+    const x=(this._arqDados?.arquivos||[]).find(a=>a.key===key);
+    const aviso=x?.em_uso
+      ?'ATENÇÃO: este arquivo ainda está sendo usado por um banner, evento ou votação. Se apagar, ele some do site. Apagar mesmo assim?'
+      :`Apagar "${key.split('/').pop()}" (${this._arqBytes(x?.size)})? Isso não dá pra desfazer.`;
+    this._confirmarDel(aviso,async()=>{
+      const r=await this._api('DELETE',`/admin/arquivos?key=${encodeURIComponent(key)}`);
+      if(r?.ok){
+        this._toast(`Apagado — ${this._arqBytes(r.liberado)} liberados`);
+        const d=this._arqDados;if(d){d.arquivos=d.arquivos.filter(a=>a.key!==key);d.total=Math.max(0,d.total-1);d.total_bytes=Math.max(0,d.total_bytes-(r.liberado||0));}
+        this._renderArquivos();
+      }else this._toast(r?.erro||'Erro ao apagar','err');
+    });
   }
 
   async _carregarRanking(){
@@ -6729,6 +6809,31 @@ class DimaiorAdmin extends HTMLElement {
     .cfg-chave,.lv-cfg-label,.mc label,.mc-field label{color:var(--t2);}
     /* Ao Vivo: filtro Todas/Principal/<sub> + selo da sub no card */
     .lv-orgs{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+    .arq-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+    .arq-card{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;min-width:0}
+    .arq-card.larga{grid-column:span 2}
+    .arq-card .l{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+    .arq-card .v{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:24px;font-weight:700;color:var(--t1);margin-top:2px}
+    .arq-card .s{font-size:11px;color:var(--t3);margin-top:2px}
+    .arq-card.warn .v{color:var(--amber,#fbbf24)}
+    .arq-barra{height:8px;border-radius:99px;background:var(--brddim,rgba(255,255,255,.08));overflow:hidden;margin-top:8px}
+    .arq-barra i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--azul,#60a5fa));border-radius:99px}
+    .arq-barra i.alta{background:linear-gradient(90deg,var(--amber,#fbbf24),var(--verm,#f87171))}
+    .arq-filtros{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+    .arq-filtros .sep{width:1px;height:20px;background:var(--brd);margin:0 4px}
+    .arq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+    .arq-item{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+    .arq-thumb{position:relative;aspect-ratio:16/10;background:#000;display:block}
+    .arq-thumb img,.arq-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+    .arq-thumb .tag{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(0,0,0,.7);color:#fff}
+    .arq-thumb .uso{position:absolute;top:6px;right:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(74,222,128,.9);color:#04210f}
+    .arq-thumb .uso.livre{background:rgba(251,191,36,.95);color:#2b1d00}
+    .arq-info{padding:10px 12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+    .arq-nome{font-size:12px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .arq-meta{font-size:11px;color:var(--t3)}
+    .arq-acoes{display:flex;gap:6px;padding:0 12px 12px}
+    .arq-acoes .btn{flex:1;justify-content:center}
+    @media(max-width:700px){.arq-card.larga{grid-column:span 1}.arq-grid{grid-template-columns:repeat(2,1fr);gap:10px}.arq-acoes{flex-direction:column}}
     .lv-org-btn{padding:6px 12px;border-radius:99px;border:1px solid var(--brd);background:transparent;color:var(--t2);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;cursor:pointer}
     .lv-org-btn b{margin-left:4px;color:var(--t1)}
     .lv-org-btn.on{background:var(--cyan-d);border-color:var(--cyan);color:var(--cyan)}.lv-org-btn.on b{color:var(--cyan)}
@@ -6893,6 +6998,7 @@ class DimaiorAdmin extends HTMLElement {
             ${navSec('sistema','Sistema',
               ni('server','monitor','Monitor Kwai')+
               ni('search','logs','Auditoria')+
+              ni('image','arquivos','Arquivos')+
               ni('settings','config','Configurações')+
               ni('clipboard','configFormularios','Configurar Formulários')
             )}
@@ -7499,6 +7605,11 @@ class DimaiorAdmin extends HTMLElement {
                 <div id="tbImpulsoHist">${this._loading()}</div>
                 <div class="pag-bar" id="pgImpulsoHist"></div>
               </div>
+            </div>
+            <div class="pag" id="pag-arquivos">${ph('Arquivos','image','Fotos e vídeos salvos no Cloudflare (banners, eventos, PK, votações) — veja o espaço usado e apague o que não usa mais','btnAtuArquivos')}
+              <div id="arqResumo"></div>
+              <div id="arqFiltros"></div>
+              <div id="arqLista">${this._loading()}</div>
             </div>
             <div class="pag" id="pag-historicoLive">${ph('Histórico de Live','play_circle','Tela de teste — mostra o que já foi capturado do review/list da Kwai pra 1 streamer','btnAtuHistoricoLive')}
               <div class="box mon-section">
