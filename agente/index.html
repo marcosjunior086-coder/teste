@@ -180,7 +180,9 @@
     .btn-logout:hover { background: rgba(248,113,113,.2); }
 
     /* Conteúdo principal */
-    .main { flex: 1; margin-left: 220px; padding: 28px; max-width: 1200px; }
+    /* min-width:0 — sem isso o item flex cresce até o conteúdo mais largo (ex.: tabela
+       de comissão) e a página fica maior que a tela no celular, cortando os cards */
+    .main { flex: 1; min-width: 0; margin-left: 220px; padding: 28px; max-width: 1200px; }
 
     /* Topbar */
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
