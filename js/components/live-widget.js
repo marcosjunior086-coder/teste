@@ -747,9 +747,15 @@ class KwaiLiveWidget extends HTMLElement {
 
     const liveUrls = new Set(entries.map((e) => e.url));
 
-    // Remove quem saiu da live
-    [...this.activePlayers.keys()].forEach((url) => {
-      if (!liveUrls.has(url)) this.removeCard(url);
+    // Remove quem saiu da live — mas só depois de faltar em 2 ciclos seguidos.
+    // A lista principal do radar às vezes some por alguns segundos (a chave no
+    // KV expira antes da próxima gravação) e a API devolve só as sub-agências;
+    // tirar na hora fazia todo mundo sumir e sobrar 1 live até o ciclo seguinte.
+    // Na 1ª carga remove direto (são cards do cache local, podem estar velhos).
+    [...this.activePlayers.entries()].forEach(([url, entry]) => {
+      if (liveUrls.has(url)) { entry.missing = 0; return; }
+      entry.missing = (entry.missing || 0) + 1;
+      if (this.isFirstLoad || entry.missing >= 2) this.removeCard(url);
     });
 
     // Adiciona novos streamers em lotes
