@@ -97,10 +97,11 @@
 
                 if (loading) loading.style.display = 'none';
                 // Verifica deeplink — sino no site público redireciona com #avisos
-                if (window.location.hash === '#avisos' || window.location.hash === '#eventos') {
-                    const irEventos = window.location.hash === '#eventos';
+                if (window.location.hash === '#avisos' || window.location.hash === '#eventos' || window.location.hash === '#personalizacao') {
+                    const destino = window.location.hash;
                     history.replaceState(null, '', window.location.pathname);
-                    if (irEventos) this.goEventos(); else this.goAvisos();
+                    if (destino === '#personalizacao') this.goPers();
+                    else if (destino === '#eventos') this.goEventos(); else this.goAvisos();
                 } else {
                     this.navigate('vD');
                     this.navActive('nD');
@@ -893,6 +894,7 @@
             .evt-modal-dica{padding:7px 14px;font-size:.7rem;color:var(--muted);border-top:1px solid var(--border);text-align:center;}
             @media(max-width:700px){.evt-modal{padding:0;}.evt-modal-box{height:100%;border-radius:0;border:0;}}
             /* Personalização (templates e molduras do ranking) */
+            .nit .nav-dot{width:9px;height:9px;border-radius:50%;background:#ff3b5c;margin-left:auto;flex:none;}
             .pers-intro{font-size:.85rem;color:var(--muted);margin:0 0 16px;line-height:1.5;}
             .pers-sec{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:1.15rem;font-weight:700;color:var(--text);margin:18px 0 4px;}
             .pers-sec-sub{font-size:.78rem;color:var(--muted);margin:0 0 12px;}
@@ -1103,7 +1105,7 @@
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
                     <button class="nit" id="nPk">${this.svgPk()} <span data-i18n="pk">PK DIÁRIO</span></button>
                     <button class="nit" id="nEventos">${this.svgCalendar()} <span>EVENTOS</span></button>
-                    <button class="nit" id="nPers">${this.svgPaint()} <span>PERSONALIZAÇÃO</span></button>
+                    <button class="nit" id="nPers">${this.svgPaint()} <span>PERSONALIZAÇÃO</span><i class="nav-dot hidden" id="persDot" title="Novidade"></i></button>
                     <button class="nit" id="nRegras">${this.svgRules()} <span data-i18n="rules">REGRAS</span></button>
                     <button class="nit" id="nViolacoes">${this.svgAlerta()} <span>SITUAÇÃO DA CONTA</span></button>
                     <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
@@ -1820,6 +1822,7 @@
                 if(id === 'nC' && this._saldoCarteira != null) extra = `<span class="pm-val">${this.brl(this._saldoCarteira)}</span>`;
                 if(id === 'avisos' && (this._avisosNovos || this._eventosNovos)) extra = `<span class="pm-dot" title="Aviso novo"></span>`;
                 if(id === 'nEventos' && this._eventosNovos) extra = `<span class="pm-dot" title="Novidade nos eventos"></span>`;
+                if(id === 'nPers' && this._persNovos) extra = `<span class="pm-dot" title="Novidade na personalização"></span>`;
                 return `<button type="button" class="pm-row" data-nav="${id}" data-busca="${this.esc(label+' '+chaves)}"><span class="pm-ri">${icon}</span><span class="pm-rt">${this.esc(label)}</span>${extra}${chev}</button>`;
             });
             if(rows.length) html += `<section class="pm-sec"><div class="pm-gt">${titulo}</div><div class="pm-grp">${rows.join('')}</div></section>`;
@@ -2684,6 +2687,7 @@
                 } catch {}
             }
             this._checarEventosNovos();
+            this._checarPersNovos();
         } catch { /* silencia erro — comunicados são opcionais */ }
     }
 
@@ -3017,7 +3021,7 @@
     _atualizarBolinhaAvisos(){
         const menu = document.querySelector('menu-mobile-dmaior');
         const dot = menu?.shadowRoot?.getElementById('bellDot');
-        if(dot) dot.classList.toggle('hidden', !(this._avisosNovos || this._eventosNovos));
+        if(dot) dot.classList.toggle('hidden', !(this._avisosNovos || this._eventosNovos || this._persNovos));
     }
     _eventosNovosEm(lista){
         let vistos = [];
@@ -3466,6 +3470,30 @@
         window.scrollTo({ top: 0 });
         this.loadPers();
     }
+    // "Novo" na Personalização: algum item que o streamer PODE usar (conquistado/emprestado) e que ele ainda não viu aqui.
+    // Guarda no aparelho (igual aos eventos). Item que passa a valer depois (ex.: completou 2 anos) também acende.
+    _persChave(){ return `dm_pers_vistos_${localStorage.getItem('dm_uid') || 'anon'}`; }
+    _persDisponiveis(lista){ return (lista || []).filter(i => i.estado === 'conquistado' || i.estado === 'emprestado').map(i => `${i.id}:${i.estado}`); }
+    _persAtualizarBolinhas(){
+        this.qs('#persDot')?.classList.toggle('hidden', !this._persNovos);
+        this._atualizarBolinhaAvisos();
+    }
+    async _checarPersNovos(){
+        try{
+            const res = await this._fetchAutenticado(`${this.apiUrl}/api/personalizacao?uid=${encodeURIComponent(this.sessionUid)}`);
+            const d = await res.json().catch(() => ({}));
+            if(!res.ok || !d.ok) return;
+            let vistos = [];
+            try { vistos = JSON.parse(localStorage.getItem(this._persChave()) || '[]'); } catch {}
+            this._persNovos = this._persDisponiveis(d.itens).some(x => !vistos.includes(x));
+            this._persAtualizarBolinhas();
+        }catch{ /* personalização é opcional */ }
+    }
+    _persMarcarVistos(lista){
+        try { localStorage.setItem(this._persChave(), JSON.stringify(this._persDisponiveis(lista))); } catch {}
+        this._persNovos = false;
+        this._persAtualizarBolinhas();
+    }
     async loadPers(){
         const el = this.qs('#persEl');
         if(!el) return;
@@ -3476,6 +3504,7 @@
             if(!res.ok || !d.ok) throw new Error(d.erro || 'erro');
             this._persItens = d.itens || [];
             this._renderPers();
+            this._persMarcarVistos(this._persItens);
         } catch {
             el.innerHTML = '<div class="pers-vazio">Não foi possível carregar agora. Tente de novo em instantes.</div>';
         }

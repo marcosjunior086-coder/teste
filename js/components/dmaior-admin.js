@@ -1164,6 +1164,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="adp-acoes">
         <button class="btn btn-o" data-pers-edit="${it.id}">${this._ico('edit',11)} Editar</button>
         <button class="btn btn-o" data-pers-lib="${it.id}">${this._ico('users',11)} Liberar / ver</button>
+        ${it.regra!=='manual'&&it.ativo?`<button class="btn btn-o" data-pers-avisar="${it.id}" title="Manda uma notificação pros streamers">${this._ico('bell',11)} Avisar</button>`:''}
         <button class="btn btn-o" data-pers-ativo="${it.id}" data-v="${it.ativo?0:1}">${this._ico(it.ativo?'eye_off':'eye',11)} ${it.ativo?'Desligar':'Ligar'}</button>
         <button class="btn btn-o" data-pers-del="${it.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4)">${this._ico('trash',11)}</button>
       </div></div>`;
@@ -1172,6 +1173,7 @@ class DimaiorAdmin extends HTMLElement {
     const acha=id=>d.itens.find(i=>i.id===id);
     el.querySelectorAll('[data-pers-edit]').forEach(b=>b.addEventListener('click',()=>{const it=acha(b.dataset.persEdit);this._persForm(it,it.tipo);}));
     el.querySelectorAll('[data-pers-lib]').forEach(b=>b.addEventListener('click',()=>this._persLiberar(acha(b.dataset.persLib))));
+    el.querySelectorAll('[data-pers-avisar]').forEach(b=>b.addEventListener('click',()=>this._persAvisar(acha(b.dataset.persAvisar))));
     el.querySelectorAll('[data-pers-ativo]').forEach(b=>b.addEventListener('click',async()=>{
       const r=await this._api('PATCH',`/admin/personalizacao/itens/${b.dataset.persAtivo}`,{ativo:b.dataset.v==='1'});
       if(r?.ok){this._toast(b.dataset.v==='1'?'Item ligado':'Item desligado — some do painel dos streamers e do ranking');this._carregarPers();}else this._toast(r?.erro||'Erro','err');
@@ -1183,6 +1185,27 @@ class DimaiorAdmin extends HTMLElement {
         if(r?.ok){this._toast('Item excluído');this._carregarPers();}else this._toast(r?.erro||'Erro ao excluir','err');
       });
     }));
+  }
+  // Confirma e manda "Novo template de X disponível" por notificação push (texto montado no servidor)
+  _persAvisar(it,{recemCriado=false}={}){
+    if(!it)return;
+    const s=this.shadowRoot,m=this._persModal(460);
+    const tipoTxt=it.tipo==='template'?'template':'moldura';
+    m.innerHTML=`<div class="modal" style="max-width:460px"><div class="m-titulo">${this._ico('bell',16)} ${recemCriado?'Item criado — avisar os streamers?':'Avisar os streamers'}</div>
+      <p style="color:var(--t2);font-size:13px;line-height:1.6;margin:0 0 6px">Vai chegar uma notificação no celular de quem ativou os avisos:</p>
+      <p style="background:var(--glass);border:1px solid var(--brd);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--t1);margin:0 0 14px"><b>Novo ${tipoTxt} de ${this._esc(it.nome)} disponível</b><br><span style="color:var(--t3)">${this._esc(this._persResumo(it))}</span></p>
+      <p style="color:var(--t3);font-size:11px;margin:0 0 4px">Ao tocar, abre direto a aba Personalização. O texto da mensagem é montado pelo sistema.</p>
+      <div class="mf"><button class="btn btn-o" id="pvNao">${recemCriado?'Agora não':'Cancelar'}</button><button class="btn btn-g" id="pvSim">${this._ico('send',13)} Enviar notificação</button></div></div>`;
+    const $=id=>s.getElementById(id);
+    $('pvNao').addEventListener('click',()=>this._fechaModal('mPers'));
+    $('pvSim').addEventListener('click',async()=>{
+      const b=$('pvSim');b.disabled=true;
+      const r=await this._api('POST',`/admin/personalizacao/itens/${it.id}/avisar`,{});
+      b.disabled=false;
+      if(r?.ok){this._fechaModal('mPers');this._toast(r.enqueued!=null?`Notificação enviada (${r.enqueued} aparelho(s))`:'Notificação enviada');}
+      else this._toast(r?.erro||'Erro ao enviar a notificação','err');
+    });
+    this._abrirModal('mPers');
   }
   _persModal(larg=560){
     const s=this.shadowRoot;let m=s.getElementById('mPers');
@@ -1449,7 +1472,7 @@ class DimaiorAdmin extends HTMLElement {
       const b=$('pfSalvar');b.disabled=true;
       const r=await this._api(novo?'POST':'PATCH',novo?'/admin/personalizacao/itens':`/admin/personalizacao/itens/${it.id}`,body);
       b.disabled=false;
-      if(r?.ok){this._fechaModal('mPers');this._toast(novo?'Item criado':'Item salvo');this._carregarPers();}else this._toast(r?.erro||'Erro ao salvar','err');
+      if(r?.ok){this._fechaModal('mPers');this._toast(novo?'Item criado':'Item salvo');await this._carregarPers();if(novo&&r.item&&regra!=='manual'&&body.ativo)this._persAvisar({...body,id:r.item.id},{recemCriado:true});}else this._toast(r?.erro||'Erro ao salvar','err');
     });
     this._abrirModal('mPers');
   }
