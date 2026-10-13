@@ -44,6 +44,8 @@ class RankingDmaior extends HTMLElement {
     this.cache         = {};
     this.timerInterval = null;
     this.liveSet       = new Set();
+    this.liveStreams   = new Map();   // uid → link da transmissão (live na bolinha)
+    this._lp           = new Map();   // uid → player da bolinha
     this._menuObserver     = null;
     this._menuPollInterval = null;
     this._dashboardIniciado = false;
@@ -92,9 +94,15 @@ class RankingDmaior extends HTMLElement {
     window.addEventListener('dmaior:tema',   this._temaHandler);
     window.addEventListener('dmaior:layout', this._layoutHandler);
     window.addEventListener('storage', this._storageThemeHandler);
+    this._visHandler = () => this._lpBombear();
+    document.addEventListener('visibilitychange', this._visHandler);
   }
 
   disconnectedCallback() {
+    document.removeEventListener('visibilitychange', this._visHandler);
+    this._lpPararTudo();
+    this._lpObserver?.disconnect(); this._lpObserver = null;
+    clearInterval(this._lpVigia); this._lpVigia = null;
     if (this._menuObserver)     { this._menuObserver.disconnect(); this._menuObserver = null; }
     window.removeEventListener('dmaior:tema',   this._temaHandler);
     window.removeEventListener('dmaior:layout', this._layoutHandler);
@@ -304,6 +312,10 @@ class RankingDmaior extends HTMLElement {
       /* Só no computador (cards mais baixos): se QUALQUER card do pódio tem arte, os TRÊS ganham +24px — assim a etiqueta do prêmio
          não cobre o desenho de baixo e a ordem 1º>2º>3º se mantém. No celular o tamanho é o padrão. (.pod-tpl é posto na montagem do pódio) */
       @media(min-width:481px){
+        /* Lista no computador: card com template fica da MESMA altura dos outros (o 6:1 deixava ~130px num card de ~800px).
+           A arte preenche cortando um pouco em cima/embaixo, sem achatar; arte com borda própria (.forma) estica pra não perder as bordas. */
+        .list-item.has-tpl{aspect-ratio:auto}
+        .list-item.has-tpl:not(.forma)::before{background-size:cover}
         .podium.pod-tpl .podium-item.first{height:314px}.podium.pod-tpl .podium-item.second{height:254px}.podium.pod-tpl .podium-item.third{height:224px}
         :host(.dinamico) .podium.pod-tpl .podium-item.first{min-height:296px}:host(.dinamico) .podium.pod-tpl .podium-item.second{min-height:244px}:host(.dinamico) .podium.pod-tpl .podium-item.third{min-height:220px}
       }
@@ -314,6 +326,7 @@ class RankingDmaior extends HTMLElement {
       .list-avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid var(--border-dim);display:block}
       /* ── Live: sem borda azul, sem texto LIVE — só bolinha com barrinhas animadas ── */
       .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:2px solid var(--border-dim)}
+      video.av-live{background-color:var(--bg-card2);pointer-events:none}
       .live-badge,.list-live-badge{display:none}
       /* Bolinha animada estilo Kwai — tema escuro: sólida na cor azul do tema */
       .live-dot{position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:1.5px;z-index:4;box-shadow:0 0 6px var(--border);border:2px solid var(--azul);outline:2px solid rgba(0,0,0,0.5);}
@@ -623,12 +636,16 @@ class RankingDmaior extends HTMLElement {
 
   // Busca streamers ao vivo via DmaiorAPI
   async fetchLives() {
-    if (!this._isMesAtual()) { this.liveSet = new Set(); return; }
+    if (!this._isMesAtual()) { this.liveSet = new Set(); this.liveStreams = new Map(); return; }
     try {
       const data = await window.DmaiorAPI.rank.getLives(this._getToken());
       this.liveSet = new Set(data.ao_vivo || []);
       if (this.allRows.length) this.renderScreen();
     } catch {}
+    // Link das transmissões (live na bolinha) chega depois e NÃO segura o ranking
+    this._buscarStreams().then(ok => {
+      if (ok && this.liveSet.size && this.allRows.length && this._isMesAtual()) this.renderScreen();
+    });
   }
 
   updateRuleText() {
@@ -694,6 +711,8 @@ class RankingDmaior extends HTMLElement {
     clearInterval(this.timerInterval);
     this.shadowRoot.getElementById('time-counter').innerHTML = '';
     this.liveSet = new Set();
+    this.liveStreams = new Map();
+    this._lpPararTudo();
     el.innerHTML = `<div class="state-msg"><div class="spinner"></div>Carregando ${nomeAba}...</div>`;
     btnRefresh.disabled = true;
 
@@ -1028,7 +1047,7 @@ class RankingDmaior extends HTMLElement {
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
               <div class="av-inner">
-                <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                ${this._avHtml(s, 'avatar', isLive)}
                 ${this._moldHtml(s)}
                 ${liveDot}
               </div>
@@ -1044,7 +1063,7 @@ class RankingDmaior extends HTMLElement {
           <div class="podium-item ${type}${podTpl ? ' has-tpl' : ''}"${podTpl ? ` style="--tpl-podio:url('${podTpl}')"` : ''}>
             <div class="avatar-wrapper${isLive ? ' is-live' : ''}">
               ${idx === 0 ? `<div class="crown-emoji">👑</div>` : ''}
-              <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+              ${this._avHtml(s, 'avatar', isLive)}
               ${this._moldHtml(s)}
               <div class="badge">${idx + 1}</div>
               ${liveDot}
@@ -1073,7 +1092,7 @@ class RankingDmaior extends HTMLElement {
         <div class="list-item${s.template ? ' has-tpl' : ''}${s.template?.forma ? ' forma' : ''}"${s.template ? ` style="--tpl:url('${s.template.img}')"` : ''}>
           <div class="list-rank">${globalIndex + 1}</div>
           <div class="list-avatar-wrap${isLiveItem ? ' is-live' : ''}">
-            <img src="${s.img}" class="list-avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+            ${this._avHtml(s, 'list-avatar', isLiveItem)}
             ${this._moldHtml(s)}
             ${liveDotItem}
           </div>
@@ -1105,8 +1124,176 @@ class RankingDmaior extends HTMLElement {
     }
 
     el.innerHTML = html;
+    this._ligarLives(el);
     window.DMaiorPrefs?.bind(this.shadowRoot);
   }
+
+  // ── Live rodando dentro da bolinha (só Mês Atual) ─────────────────────────
+  // Quem está ao vivo e tem o link da transmissão na lista pública de lives
+  // ganha um <video> no lugar da foto, com a MESMA classe (tamanho, borda,
+  // recorte redondo) e a foto como capa: até a live carregar — ou se ela
+  // falhar — continua aparecendo a foto. Mudo, sem controles, não abre nada
+  // ao clicar. Só toca o que está visível na tela (no máx. LIVE_MAX ao mesmo
+  // tempo) e para quando a aba Ranking some ou o celular apaga a tela.
+  // Navegador da Xiaomi troca <video> por player nativo: lá fica só a foto.
+  _avHtml(s, cls, isLive) {
+    const sequestra = window.DmaiorVideoCompat?.sequestraVideo?.();
+    if (isLive && !sequestra && this.liveStreams.has(String(s.uid))) {
+      return `<video class="${cls} av-live" data-live-uid="${this.esc(s.uid)}" poster="${s.img}" muted playsinline webkit-playsinline x5-playsinline disablepictureinpicture disableremoteplayback aria-label="${this.esc(s.nome)} ao vivo"></video>`;
+    }
+    return `<img src="${s.img}" class="${cls}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">`;
+  }
+
+  // Link da transmissão por UID (Worker live — o mesmo do widget da home)
+  // Devolve true se atualizou. Teto de 8s: servidor lento = fica só a foto.
+  async _buscarStreams() {
+    const seq = this._streamsSeq = (this._streamsSeq || 0) + 1;
+    try {
+      const lista = await Promise.race([
+        window.DmaiorAPI.live?.getLives?.(),
+        new Promise(r => setTimeout(() => r(null), 8000)),
+      ]);
+      // resposta atrasada de uma busca antiga não sobrescreve a mais nova
+      if (seq !== this._streamsSeq || !Array.isArray(lista)) return false;
+      const m = new Map();
+      lista.forEach(l => {
+        const uid = String(l?.userId || ''), url = String(l?.stream_url || '');
+        if (uid && url.startsWith('https://')) m.set(uid, url);
+      });
+      this.liveStreams = m;
+      return true;
+    } catch { return false; }
+  }
+
+  // Depois de cada renderScreen: reaproveita o <video> que já estava tocando
+  // (trocar a página do ranking ou o tema não reinicia a live) e larga quem saiu.
+  _ligarLives(root) {
+    const presentes = new Set();
+    root.querySelectorAll('video[data-live-uid]').forEach(novo => {
+      const uid = novo.dataset.liveUid, url = this.liveStreams.get(uid);
+      presentes.add(uid);
+      const p = this._lp.get(uid);
+      if (p && p.url === url) {
+        p.video.className = novo.className;
+        novo.replaceWith(p.video);           // mesmo "turno": o vídeo não pausa
+      } else {
+        if (p) this._lpParar(p);
+        this._lp.set(uid, { uid, url, video: novo, hls: null, on: false, falhou: false, visivel: false, tok: 0, lastT: -1, parado: 0 });
+      }
+      this._lpObs().observe(this._lp.get(uid).video);
+    });
+    for (const p of [...this._lp.values()]) if (!presentes.has(p.uid)) this._lpParar(p);
+    this._lpBombear();
+  }
+
+  _lpObs() {
+    if (!this._lpObserver) {
+      this._lpObserver = new IntersectionObserver(ents => {
+        ents.forEach(e => {
+          const p = this._lp.get(e.target.dataset.liveUid);
+          if (p && p.video === e.target) p.visivel = e.isIntersecting;
+        });
+        this._lpBombear();
+      }, { rootMargin: '120px 0px' });
+    }
+    return this._lpObserver;
+  }
+
+  // Liga quem está visível (até LIVE_MAX), desliga quem saiu da tela
+  _lpBombear() {
+    const LIVE_MAX = 6;
+    let ativos = 0;
+    for (const p of this._lp.values()) {
+      if (p.on && (!p.visivel || document.hidden || !p.video.isConnected)) this._lpDesligar(p);
+      if (p.on) ativos++;
+    }
+    if (!document.hidden) {
+      for (const p of this._lp.values()) {
+        if (ativos >= LIVE_MAX) break;
+        if (!p.on && !p.falhou && p.visivel && p.video.isConnected) { this._lpLigar(p, false); ativos++; }
+      }
+    }
+    // Vigia: imagem parada por ~20s = travou → recomeça
+    const algum = [...this._lp.values()].some(p => p.on);
+    if (algum && !this._lpVigia) {
+      this._lpVigia = setInterval(() => {
+        for (const p of this._lp.values()) {
+          if (!p.on || document.hidden) continue;
+          const t = p.video.currentTime;
+          if (t === p.lastT) { if (++p.parado >= 2) { p.parado = 0; this._lpSoltar(p); this._lpLigar(p, false); } }
+          else p.parado = 0;
+          p.lastT = t;
+        }
+      }, 10000);
+    } else if (!algum && this._lpVigia) { clearInterval(this._lpVigia); this._lpVigia = null; }
+  }
+
+  // hls.js só é baixado se alguém estiver ao vivo (mesma versão fixa do widget da home)
+  _lpHlsLib() {
+    if (window.Hls) return Promise.resolve();
+    return window.__dmHlsLib || (window.__dmHlsLib = new Promise(ok => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20';
+      s.onload = ok; s.onerror = ok;
+      document.head.appendChild(s);
+    }));
+  }
+
+  async _lpLigar(p, proxy) {
+    p.on = true; p.lastT = -1; p.parado = 0;
+    const tok = ++p.tok, v = p.video;
+    const vivo = () => p.on && p.tok === tok;
+    v.muted = true;
+    const base = (window.DmaiorConfig?.workers?.live || '').replace(/\/$/, '');
+    const url = proxy && base ? `${base}/?${encodeURIComponent(p.url)}` : p.url;
+    // 1ª tentativa direto na Kwai; se falhar, pelo proxy; se falhar de novo, fica a foto
+    const falhou = () => {
+      if (!vivo()) return;
+      this._lpSoltar(p);
+      if (!proxy && base) this._lpLigar(p, true);
+      else { p.on = false; p.falhou = true; setTimeout(() => this._lpBombear(), 0); } // libera a vaga pra próxima bolinha
+    };
+    if (window.MediaSource) await this._lpHlsLib();
+    if (!vivo()) return;
+    if (window.MediaSource && window.Hls?.isSupported()) {
+      const Hls = window.Hls;
+      const hls = p.hls = new Hls({
+        capLevelToPlayerSize: true,   // bolinha pequena: pega a menor qualidade
+        maxBufferLength: 10, maxMaxBufferLength: 20, backBufferLength: 0,
+        liveSyncDurationCount: 3, manifestLoadingMaxRetry: 3, fragLoadingMaxRetry: 4,
+      });
+      hls.on(Hls.Events.MANIFEST_PARSED, () => { if (vivo()) v.play().catch(() => {}); });
+      hls.on(Hls.Events.ERROR, (_, d) => {
+        if (!d.fatal || !vivo()) return;
+        if (d.type === Hls.ErrorTypes.MEDIA_ERROR) { try { hls.recoverMediaError(); } catch { falhou(); } }
+        else falhou();
+      });
+      hls.loadSource(url);
+      hls.attachMedia(v);
+    } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
+      p.onErr = falhou;
+      v.addEventListener('error', falhou, { once: true });
+      v.src = url;
+      v.play().catch(() => {});
+    } else {
+      p.on = false; p.falhou = true;
+      setTimeout(() => this._lpBombear(), 0);
+    }
+  }
+
+  _lpSoltar(p) {
+    try { p.hls?.destroy(); } catch {}
+    p.hls = null;
+    if (p.onErr) { p.video.removeEventListener('error', p.onErr); p.onErr = null; }
+    try { p.video.pause(); p.video.removeAttribute('src'); p.video.load(); } catch {}  // volta a mostrar a foto
+  }
+  _lpDesligar(p) { p.on = false; p.tok++; this._lpSoltar(p); }
+  _lpParar(p) {
+    this._lpDesligar(p);
+    try { this._lpObserver?.unobserve(p.video); } catch {}
+    this._lp.delete(p.uid);
+  }
+  _lpPararTudo() { for (const p of [...this._lp.values()]) this._lpParar(p); }
 
   goPage(p) { this.currentPage = p; this.renderScreen(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 

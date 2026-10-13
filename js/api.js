@@ -193,6 +193,14 @@ window.DmaiorAPI = {
     },
 
     /**
+     * Vídeos de abertura da home (sem auth — público).
+     * Retorna { ativo, frequencia_horas, videos: [...] }; desligado = videos vazio.
+     */
+    async getVideosAbertura() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.rank, '/videos-abertura');
+    },
+
+    /**
      * Retorna configuração pública do impulsionamento (quota, opções ativas).
      */
     async getImpulsoConfig() {

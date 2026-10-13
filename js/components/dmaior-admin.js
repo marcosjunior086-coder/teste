@@ -157,7 +157,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
     ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
-    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer']]],
+    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live']]],
     ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
   ]; }
   _montarMenuMobile(){
@@ -384,7 +384,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -396,7 +396,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -1555,6 +1555,260 @@ class DimaiorAdmin extends HTMLElement {
   static get ARQ_LIMITE_GB(){ return 10; } // plano gratuito do R2 — só referência da barra
   _arqPasta(p){return ({home:'Home (banners)',eventos:'Eventos',pk:'PK Diário',votacao:'Votações',geral:'Geral',templates:'Templates (ranking)',molduras:'Molduras (ranking)','(raiz)':'Sem pasta'})[p]||p;}
   _arqBytes(n){n=Number(n)||0;if(n>=1073741824)return (n/1073741824).toFixed(2).replace('.',',')+' GB';if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB';if(n>=1024)return Math.round(n/1024)+' KB';return n+' B';}
+  // ── VÍDEOS DE ABERTURA (janela da home) ─────────────────────────────────────
+  // Worker admin: /admin/videos-abertura/* · site: js/components/video-abertura.js
+  async _carregarVideosAbertura(){
+    const s=this.shadowRoot,el=s.getElementById('vaLista');
+    if(!el)return;
+    if(!this._vaBound){
+      this._vaBound=true;
+      s.getElementById('btnAtuVa')?.addEventListener('click',()=>this._carregarVideosAbertura());
+      s.getElementById('btnVaNovo')?.addEventListener('click',()=>this._vaForm(null));
+    }
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/videos-abertura');
+    if(!d?.ok){s.getElementById('vaConfig').innerHTML='';el.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar');return;}
+    this._vaDados=d;
+    this._renderVa();
+  }
+  _vaDur(x){const n=Number(x);return n>0?`${String(Math.round(n*10)/10).replace('.',',')}s`:'';}
+  _renderVa(){
+    const s=this.shadowRoot,d=this._vaDados,cfg=s.getElementById('vaConfig'),el=s.getElementById('vaLista');
+    if(!d||!el)return;
+    const FREQ=[[6,'6 horas'],[12,'12 horas'],[24,'1 dia'],[48,'2 dias'],[72,'3 dias'],[168,'1 semana']];
+    const ativos=d.videos.filter(v=>v.ativo).length;
+    cfg.innerHTML=`<div class="va-cfg">
+      <div class="va-cfg-txt"><b>${d.config.ativo?'Aparecendo na home':'Desligado — ninguém vê'}</b><br>${d.config.ativo?(ativos?`${ativos} vídeo(s) ativo(s). Cada visitante vê no máximo 1 vídeo no período escolhido, sorteado entre os que ele ainda não viu.`:'Ligado, mas sem vídeo ativo: nada aparece até você ativar um.'):'Ligue para a janela aparecer pros visitantes da home.'}</div>
+      <label><span class="tog-switch"><input type="checkbox" id="vaAtivo" ${d.config.ativo?'checked':''}><span class="tog-slider"></span></span> Mostrar na home</label>
+      <label>No máximo 1 vez a cada <select id="vaFreq">${FREQ.map(([h,t])=>`<option value="${h}" ${d.config.frequencia_horas===h?'selected':''}>${t}</option>`).join('')}</select></label>
+      <a class="btn btn-o btn-sm" href="/?videoabertura=1" target="_blank" rel="noopener" title="Abre a home mostrando um vídeo agora, sem esperar a frequência (precisa estar ligado)">${this._ico('play_circle',12)} Testar na home</a>
+    </div>`;
+    s.getElementById('vaAtivo').addEventListener('change',async e=>{
+      const on=e.target.checked;
+      if(!on&&!confirm('Desligar os vídeos de abertura? A janela para de aparecer pra todo mundo na home.')){e.target.checked=true;return;}
+      const r=await this._api('POST','/admin/videos-abertura/config',{ativo:on});
+      if(r?.ok){this._toast(on?'Vídeos ligados na home':'Vídeos desligados');d.config.ativo=on;this._renderVa();}
+      else{this._toast(r?.erro||'Erro','err');e.target.checked=!on;}
+    });
+    s.getElementById('vaFreq').addEventListener('change',async e=>{
+      const h=Number(e.target.value),antes=d.config.frequencia_horas;
+      const r=await this._api('POST','/admin/videos-abertura/config',{frequencia_horas:h});
+      if(r?.ok){this._toast('Frequência salva');d.config.frequencia_horas=h;}
+      else{this._toast(r?.erro||'Erro','err');e.target.value=antes;}
+    });
+
+    if(!d.videos.length){el.innerHTML=this._empty('play_circle','Nenhum vídeo ainda — use "Novo vídeo" lá em cima');return;}
+    const src=u=>/^https:\/\//.test(u||'')?this._esc(u):'';
+    el.innerHTML=`<div class="adp-grid va-grid">${d.videos.map(v=>`<div class="adp-card ${v.ativo?'':'off'}">
+      <div class="va-thumb"><video src="${src(v.video_url)}" ${src(v.poster_url)?`poster="${src(v.poster_url)}"`:''} controls playsinline preload="none"></video></div>
+      <div class="va-quem">${v.foto_url?`<img src="${this._safeImgSrc(v.foto_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}<div style="min-width:0"><div class="adp-nome" title="${this._esc(v.nome)}">${this._esc(v.nome)}</div><div class="adp-meta">UID ${this._esc(v.kwai_uid)}</div></div></div>
+      <div><span class="adp-chip ${v.ativo?'on':''}">${v.ativo?'Ativo':'Pausado'}</span>${v.mostrar_live?'<span class="adp-chip">Live no canto</span>':''}${this._vaDur(v.duracao_seg)?`<span class="adp-chip">${this._vaDur(v.duracao_seg)}</span>`:''}${v.perfil_url?'':'<span class="adp-chip warn">Sem link do perfil</span>'}</div>
+      <div class="adp-acoes">
+        <button class="btn btn-o" data-va-edit="${v.id}">${this._ico('edit',11)} Editar</button>
+        <button class="btn btn-o" data-va-ativo="${v.id}" data-v="${v.ativo?0:1}">${this._ico(v.ativo?'eye_off':'eye',11)} ${v.ativo?'Pausar':'Ativar'}</button>
+        <button class="btn btn-o" data-va-del="${v.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4)" aria-label="Excluir">${this._ico('trash',11)}</button>
+      </div></div>`).join('')}</div>`;
+    const acha=id=>d.videos.find(v=>v.id===id);
+    el.querySelectorAll('[data-va-edit]').forEach(b=>b.addEventListener('click',()=>this._vaForm(acha(b.dataset.vaEdit))));
+    el.querySelectorAll('[data-va-ativo]').forEach(b=>b.addEventListener('click',async()=>{
+      const r=await this._api('PATCH',`/admin/videos-abertura/${b.dataset.vaAtivo}`,{ativo:b.dataset.v==='1'});
+      if(r?.ok){this._toast(b.dataset.v==='1'?'Vídeo ativado':'Vídeo pausado — não aparece mais na home');this._carregarVideosAbertura();}else this._toast(r?.erro||'Erro','err');
+    }));
+    el.querySelectorAll('[data-va-del]').forEach(b=>b.addEventListener('click',()=>{
+      const v=acha(b.dataset.vaDel);
+      this._confirmarDel(`Excluir o vídeo de "${v.nome}"? O arquivo continua na aba Arquivos. Não dá pra desfazer.`,async()=>{
+        const r=await this._api('DELETE',`/admin/videos-abertura/${v.id}`);
+        if(r?.ok){this._toast('Vídeo excluído');this._carregarVideosAbertura();}else this._toast(r?.erro||'Erro ao excluir','err');
+      });
+    }));
+  }
+  _vaForm(it){
+    const s=this.shadowRoot,m=this._persModal(520),novo=!it;
+    const v=(k,d='')=>it&&it[k]!=null?it[k]:d;
+    m.innerHTML=`<div class="modal adp-form" style="max-width:520px;max-height:92vh;overflow:auto">
+      <div class="m-titulo">${this._ico('play_circle',16)} ${novo?'Novo vídeo de abertura':'Editar vídeo'}</div>
+      <div class="mc"><label>UID da streamer <span style="color:var(--verm)">*</span> <span style="color:var(--t3);font-size:11px">(o número que começa com 150…)</span></label>
+        <div style="display:flex;gap:8px"><input id="vfUid" inputmode="numeric" maxlength="20" value="${this._esc(v('kwai_uid'))}" placeholder="150001234567890" style="flex:1"><button type="button" class="btn btn-o" id="vfBuscar">${this._ico('search',13)} Buscar</button></div>
+        <div id="vfAchou"></div>
+        <div class="dica">Com o UID, o site sabe quando ela está ao vivo e mostra a live no canto do vídeo. "Buscar" preenche nome, foto e link do perfil sozinho.</div></div>
+      <div class="mc"><label>Nome que aparece <span style="color:var(--verm)">*</span></label><input id="vfNome" maxlength="60" value="${this._esc(v('nome'))}" placeholder="Ex: Val · Universo das Cartas"></div>
+      <div class="mc"><label>Link do perfil</label><input id="vfPerfil" maxlength="500" value="${this._esc(v('perfil_url'))}" placeholder="https://www.kwai.com/@usuario"><div class="dica">Botão "Ver perfil" em cima do vídeo. No celular, link da Kwai abre direto no aplicativo.</div></div>
+      <input type="hidden" id="vfFoto" value="${this._esc(v('foto_url'))}">
+      <div class="mc"><label>Vídeo <span style="color:var(--verm)">*</span></label>
+        <div class="adp-up"><button type="button" class="btn btn-o" id="vfUp">${this._ico('upload',13)} ${novo?'Enviar vídeo':'Trocar vídeo'}</button><input type="file" id="vfFile" accept="video/mp4,video/webm" style="display:none"><span id="vfInfo" class="adp-meta">${this._vaDur(v('duracao_seg'))}</span></div>
+        <div class="va-prev" id="vfPrev" style="margin-top:10px;${v('video_url')?'':'display:none'}"><video id="vfVid" controls playsinline preload="metadata" ${/^https:\/\//.test(v('poster_url'))?`poster="${this._esc(v('poster_url'))}"`:''} src="${/^https:\/\//.test(v('video_url'))?this._esc(v('video_url')):''}"></video></div>
+        <input type="hidden" id="vfVideo" value="${this._esc(v('video_url'))}"><input type="hidden" id="vfPoster" value="${this._esc(v('poster_url'))}"><input type="hidden" id="vfDur" value="${this._esc(v('duracao_seg'))}">
+        <div class="dica">Em pé (<b>9:16</b>, formato de live), até <b>12 segundos</b>, MP4 com som. O admin prepara o vídeo sozinho (720p, ~2,5 MB, leva o tempo do vídeo) — use o Chrome ou o Edge no computador.</div></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="vfLive" ${v('mostrar_live',true)?'checked':''} style="width:auto"> Mostrar a live dela no canto quando estiver ao vivo</label>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="vfAtivo" ${v('ativo',true)?'checked':''} style="width:auto"> Ativo (entra no sorteio da home)</label>
+      <div class="mf"><button class="btn btn-o" id="vfCancel">Cancelar</button><button class="btn btn-g" id="vfSalvar">${this._ico('check',13)} Salvar</button></div></div>`;
+    // Busca SEMPRE dentro deste formulário: se ele for fechado/trocado no meio de um
+    // envio, o resultado cai no formulário antigo (já fora da tela), nunca no de outra streamer.
+    const raiz=m.firstElementChild,$=id=>raiz.querySelector('#'+id);
+    let enviando=false;
+
+    const mostraAchou=st=>{
+      const foto=st?.foto||'';
+      $('vfAchou').innerHTML=st?`<div class="va-achou">${foto?`<img src="${this._safeImgSrc(foto)}" alt="" onerror="this.style.display='none'">`:''}<div><b style="color:var(--t1)">${this._esc(st.nome||'—')}</b>${st.kwai_id?`<br><span style="color:var(--t3)">@${this._esc(st.kwai_id)}</span>`:''}</div></div>`:'';
+    };
+    $('vfBuscar').addEventListener('click',async()=>{
+      const uid=$('vfUid').value.replace(/\D/g,'');$('vfUid').value=uid;
+      if(!/^\d{5,20}$/.test(uid)){this._toast('Digite o UID (só números)','err');return;}
+      const b=$('vfBuscar');b.disabled=true;
+      const r=await this._api('GET',`/admin/videos-abertura/streamer/${uid}`);
+      b.disabled=false;
+      if(!r?.ok){mostraAchou(null);this._toast(r?.erro||'UID não encontrado','err');return;}
+      const st=r.streamer;mostraAchou(st);
+      if(st.nome&&!$('vfNome').value.trim())$('vfNome').value=st.nome;
+      if(st.perfil_url&&!$('vfPerfil').value.trim())$('vfPerfil').value=st.perfil_url;
+      if(st.foto_url)$('vfFoto').value=st.foto_url;
+    });
+
+    $('vfUp').addEventListener('click',()=>{if(!enviando)$('vfFile').click();});
+    $('vfFile').addEventListener('change',async e=>{
+      const f=e.target.files[0];e.target.value='';if(!f)return;
+      const info=$('vfInfo');info.className='adp-meta';
+      const meta=await this._vaMeta(f);
+      if(!meta){this._toast('Não consegui abrir esse vídeo (use MP4)','err');return;}
+      if(meta.dur>12.5){this._toast(`O vídeo tem ${this._vaDur(meta.dur)} — o limite é 12 segundos`,'err');return;}
+      const r916=meta.w&&meta.h?Math.abs(meta.w/meta.h-9/16)/(9/16):0;
+      if(r916>0.06&&!confirm(`Esse vídeo não está em pé (9:16) — está ${meta.w}×${meta.h}. Ele vai ser cortado no meio. Continuar?`))return;
+      enviando=true;$('vfUp').disabled=true;$('vfSalvar').disabled=true;
+      try{
+        // Sempre regrava: garante H.264 + AAC (o que todo celular toca). Arquivo original nunca
+        // sobe direto — um MP4 em HEVC, por ex., tocaria no iPhone do admin e não no Android de quem visita.
+        let blob=null;
+        try{blob=await this._vaRegravar(f,p=>{info.textContent=`preparando vídeo… ${p}%`;});}catch{blob=null;}
+        if(!blob){info.textContent='';this._toast('Não consegui preparar esse vídeo neste navegador. Use o Chrome ou o Edge no computador e deixe esta aba aberta enquanto prepara.','err');return;}
+        if(blob.size>20*1024*1024){this._toast('Vídeo muito grande mesmo depois de reduzir (máx 20 MB)','err');info.textContent='';return;}
+        info.textContent='enviando…';
+        const url=await this._vaEnviar(blob,'video/mp4');
+        if(!url){info.textContent='';return;}
+        info.textContent='gerando capa…';
+        let poster='';
+        try{const capa=await this._capaDoVideo(blob,540,960);poster=await this._vaEnviar(capa,'image/webp',true)||'';}catch{poster='';}
+        $('vfVideo').value=url;$('vfPoster').value=poster;$('vfDur').value=String(Math.round(meta.dur*100)/100);
+        const vid=$('vfVid');vid.src=url;if(poster)vid.poster=poster;else vid.removeAttribute('poster');$('vfPrev').style.display='';
+        info.className='adp-meta adp-ok';info.textContent=`enviado ✓ · ${this._vaDur(meta.dur)} · ${(blob.size/1048576).toFixed(1).replace('.',',')} MB`;
+      }finally{enviando=false;$('vfUp').disabled=false;$('vfSalvar').disabled=false;}
+    });
+
+    $('vfCancel').addEventListener('click',()=>this._fechaModal('mPers'));
+    $('vfSalvar').addEventListener('click',async()=>{
+      if(enviando)return;
+      const body={kwai_uid:$('vfUid').value.replace(/\D/g,''),nome:$('vfNome').value.trim(),perfil_url:$('vfPerfil').value.trim()||null,
+        foto_url:$('vfFoto').value||null,video_url:$('vfVideo').value,poster_url:$('vfPoster').value||null,
+        duracao_seg:$('vfDur').value?Number($('vfDur').value):null,mostrar_live:$('vfLive').checked,ativo:$('vfAtivo').checked};
+      if(!/^\d{5,20}$/.test(body.kwai_uid)){this._toast('Informe o UID da streamer','err');return;}
+      if(!body.nome){this._toast('Informe o nome que aparece','err');return;}
+      if(body.perfil_url&&!/^https:\/\//.test(body.perfil_url)){this._toast('O link do perfil precisa começar com https://','err');return;}
+      if(!body.video_url){this._toast('Envie o vídeo','err');return;}
+      const b=$('vfSalvar');b.disabled=true;
+      const r=await this._api(novo?'POST':'PATCH',novo?'/admin/videos-abertura':`/admin/videos-abertura/${it.id}`,body);
+      b.disabled=false;
+      // Só fecha se a janela ainda mostra ESTE formulário (pode ter aberto outro enquanto salvava)
+      if(r?.ok){if(m.firstElementChild===raiz)this._fechaModal('mPers');this._toast(novo?'Vídeo criado':'Vídeo salvo');this._carregarVideosAbertura();}
+      else this._toast(r?.erro||'Erro ao salvar','err');
+    });
+    if(it?.kwai_uid&&it?.foto_url)mostraAchou({nome:it.nome,foto:it.foto_url});
+    this._abrirModal('mPers');
+  }
+  _vaMeta(file){
+    return new Promise(ok=>{
+      const v=document.createElement('video'),u=URL.createObjectURL(file);
+      const fim=r=>{clearTimeout(t);URL.revokeObjectURL(u);ok(r);};
+      const t=setTimeout(()=>fim(null),15000);
+      v.preload='metadata';v.muted=true;
+      v.onloadedmetadata=()=>fim(isFinite(v.duration)&&v.duration>0?{dur:v.duration,w:v.videoWidth,h:v.videoHeight}:null);
+      v.onerror=()=>fim(null);
+      v.src=u;
+    });
+  }
+  // Sobe pro R2 (pasta abertura/) sem passar pelo _otimizarVideo do banner (que corta em 32:9 e tira o som)
+  async _vaEnviar(blob,ct,silencioso=false){
+    let r;
+    try{r=await fetch(`${this.WORKER}/admin/upload?pasta=abertura`,{method:'POST',headers:{'Content-Type':ct,Authorization:`Bearer ${this._token}`},body:blob});}
+    catch{if(!silencioso)this._toast('Sem conexão com o servidor','err');return null;}
+    if(r.status===401||r.status===403){this._doLogout();return null;}
+    const d=await r.json().catch(()=>null);
+    if(r.status===501){if(!silencioso)this._toast('Upload ainda não ligado no servidor','err');return null;}
+    if(!r.ok||!d?.ok||!d.url){if(!silencioso)this._toast(d?.erro||'Falha ao enviar o vídeo','err');return null;}
+    return d.url;
+  }
+  // Regrava no navegador em 720×1280 (9:16, corte central), H.264 ~2,2 Mbps + som AAC.
+  // O som passa por um AudioContext ligado só no gravador (não sai na caixa de som).
+  // Reproduz em tempo real (10s de vídeo = ~10s). Devolve null se o navegador não
+  // grava MP4 com som (Firefox/Safari) ou se o vídeo não tocar até o fim — aí o
+  // formulário avisa e NÃO sobe nada. Toda etapa tem tempo máximo e, em qualquer
+  // saída, gravador, faixas e desenho são desligados.
+  async _vaRegravar(file,onProg){
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(typeof MediaRecorder==='undefined'||!AC) return null;
+    const mime=['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1.4d002a,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2'].find(m=>{try{return MediaRecorder.isTypeSupported(m);}catch{return false;}});
+    if(!mime) return null;
+    const src=URL.createObjectURL(file);
+    const v=document.createElement('video');
+    v.playsInline=true;v.preload='auto';v.muted=false;v.volume=1;v.src=src;
+    const ac=new AC();
+    let rec=null,stream=null,vivo=true,escondeu=false,sumiu=null;
+    // Espera um evento do vídeo com teto; erro do vídeo = falha na hora
+    const espera=(ev,ms,pronto)=>new Promise((ok,err)=>{
+      const t=setTimeout(()=>{limpa();err(new Error('tempo'));},ms);
+      const bom=()=>{limpa();ok();},ruim=()=>{limpa();err(new Error('video'));};
+      const limpa=()=>{clearTimeout(t);v.removeEventListener(ev,bom);v.removeEventListener('error',ruim);};
+      v.addEventListener(ev,bom);v.addEventListener('error',ruim);
+      if(pronto&&pronto())bom();
+    });
+    try{
+      await espera('loadedmetadata',15000,()=>v.readyState>=1);
+      const W=720,H=1280,R=W/H,vw=v.videoWidth,vh=v.videoHeight;
+      if(!vw||!vh) return null;
+      let sw=vw,sh=vw/R;if(sh>vh){sh=vh;sw=vh*R;}
+      const sx=(vw-sw)/2,sy=(vh-sh)/2;
+      const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+      const ctx=cv.getContext('2d');
+      const dest=ac.createMediaStreamDestination();
+      ac.createMediaElementSource(v).connect(dest);
+      if(ac.state==='suspended') await ac.resume().catch(()=>{});
+      stream=new MediaStream([...cv.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]);
+      rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:2200000,audioBitsPerSecond:96000});
+      const partes=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)partes.push(e.data);};
+      const parou=new Promise(r=>{rec.onstop=r;});
+      const desenha=()=>{
+        if(!vivo)return;
+        ctx.drawImage(v,sx,sy,sw,sh,0,0,W,H);
+        if(onProg&&v.duration>0)onProg(Math.min(99,Math.round(v.currentTime/v.duration*100)));
+        v.requestVideoFrameCallback?v.requestVideoFrameCallback(desenha):requestAnimationFrame(desenha);
+      };
+      await espera('canplay',15000,()=>v.readyState>=3);
+      // Aba fora de vista: o navegador para de desenhar os quadros mas o som segue —
+      // sairia um vídeo congelado. Se acontecer, descarta.
+      if(document.hidden) return null;
+      let largaAba;const aba=new Promise((_,rej)=>{largaAba=rej;});aba.catch(()=>{});
+      sumiu=()=>{if(document.hidden){escondeu=true;largaAba(new Error('aba'));}};
+      document.addEventListener('visibilitychange',sumiu);
+      ctx.drawImage(v,sx,sy,sw,sh,0,0,W,H);
+      rec.start(500);
+      // play() pode ficar pendente (aba escondida, política do navegador): teto de 10s
+      await Promise.race([v.play(),aba,new Promise((_,rej)=>setTimeout(()=>rej(new Error('tempo')),10000))]);
+      desenha();
+      // Aba em segundo plano pausa o vídeo e o "ended" não chega; vídeo com quadros
+      // corrompidos dispara "error" — nos dois casos desiste
+      const teto=((isFinite(v.duration)&&v.duration>0?v.duration:15)*3+10)*1000;
+      const acabou=await Promise.race([espera('ended',teto).then(()=>true,()=>false),aba.then(()=>false,()=>false)]);
+      vivo=false;rec.stop();await parou;
+      if(!acabou||escondeu) return null;
+      const out=new Blob(partes,{type:'video/mp4'});
+      return out.size>0?out:null;
+    }finally{
+      vivo=false;
+      if(sumiu)document.removeEventListener('visibilitychange',sumiu);
+      try{if(rec&&rec.state!=='inactive')rec.stop();}catch{}
+      try{stream?.getTracks().forEach(t=>t.stop());}catch{}
+      v.pause();v.removeAttribute('src');v.load();URL.revokeObjectURL(src);ac.close().catch(()=>{});
+    }
+  }
+
   async _carregarArquivos(){
     const s=this.shadowRoot;const lista=s.getElementById('arqLista');
     if(lista)lista.innerHTML=this._loading();
@@ -2635,7 +2889,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.getElementById('tbC').innerHTML=this._loading();const d=await this._api('GET','/admin/config');const el=s.getElementById('tbC');
     // revisao_* tem tela própria com botões em Monitor Kwai, dashboard_limite_* tem
     // tela própria em Evolução Mensal — não repete aqui como texto livre
-    const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas','dashboard_limite_atencao','dashboard_limite_critico']);
+    const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas','dashboard_limite_atencao','dashboard_limite_critico','home_videos_ativo','home_videos_frequencia_horas']);
     if(d?.config)d.config=d.config.filter(c=>!NAO_LISTAR.has(c.chave));
     if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configurações');return;}
     const labels={
@@ -4217,8 +4471,9 @@ class DimaiorAdmin extends HTMLElement {
     return d.url;
   }
 
-  // Quadro do vídeo (≈1s) recortado em 1280×360 (32:9, igual ao banner) → WebP
-  _capaDoVideo(blob){
+  // Quadro do vídeo (≈1s) recortado em 1280×360 (32:9, igual ao banner) → WebP.
+  // Vídeo de abertura usa 540×960 (9:16).
+  _capaDoVideo(blob,W=1280,H=360){
     return new Promise((ok,falha)=>{
       const v=document.createElement('video'),src=URL.createObjectURL(blob);
       const fim=(e,b)=>{clearTimeout(t);URL.revokeObjectURL(src);e?falha(e):ok(b);};
@@ -4227,7 +4482,7 @@ class DimaiorAdmin extends HTMLElement {
       v.onloadedmetadata=()=>{v.currentTime=Math.min(1,(v.duration||2)/2);};
       v.onseeked=()=>{
         try{
-          const W=1280,H=360,cv=document.createElement('canvas');cv.width=W;cv.height=H;
+          const cv=document.createElement('canvas');cv.width=W;cv.height=H;
           const k=Math.max(W/v.videoWidth,H/v.videoHeight),w=v.videoWidth*k,h=v.videoHeight*k;
           cv.getContext('2d').drawImage(v,(W-w)/2,(H-h)/2,w,h);
           cv.toBlob(b=>b?fim(null,b):fim(new Error('capa')),'image/webp',.82);
@@ -7257,6 +7512,19 @@ class DimaiorAdmin extends HTMLElement {
     .adp-form select,.adp-form input[type=date],.adp-form input[type=number]{width:100%}
     .adp-up{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .adp-up img{max-height:64px;max-width:200px;border-radius:8px;background:#05070c;object-fit:contain}
+    .va-cfg{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+    .va-cfg .va-cfg-txt{flex:1;min-width:220px;font-size:12px;color:var(--t3);line-height:1.5}
+    .va-cfg .va-cfg-txt b{color:var(--t1);font-size:13px}
+    .va-cfg label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
+    .va-grid{grid-template-columns:repeat(auto-fill,minmax(180px,220px))}
+    .va-thumb{position:relative;aspect-ratio:9/16;border-radius:10px;background:#05070c;overflow:hidden}
+    .va-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+    .va-quem{display:flex;align-items:center;gap:8px;min-width:0}
+    .va-quem img{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:none;background:#05070c}
+    .va-prev{width:120px;aspect-ratio:9/16;border-radius:10px;background:#05070c;overflow:hidden}
+    .va-prev video{width:100%;height:100%;object-fit:cover;display:block}
+    .va-achou{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--brd);border-radius:10px;background:var(--glass);margin-top:8px;font-size:12px;color:var(--t2)}
+    .va-achou img{width:34px;height:34px;border-radius:50%;object-fit:cover}
     .adp-ok{color:var(--verde,#4ade80)}.adp-aviso{color:#fbbf24}
     .adp-aj{display:flex;flex-direction:column;gap:12px}
     .adp-aj canvas{max-width:100%;max-height:46vh;border-radius:10px;background:repeating-conic-gradient(#2a3140 0 25%,#1b2029 0 50%) 0 0/16px 16px;align-self:center;border:1px solid var(--brd)}
@@ -7462,7 +7730,8 @@ class DimaiorAdmin extends HTMLElement {
               ni('vote','votacoes','Votações')+
               ni('zap','pkDiario','PK Diário')+
               ni('play_circle','historicoLive','Histórico de Live')+
-              ni('medal','personalizacao','Personalização')
+              ni('medal','personalizacao','Personalização')+
+              ni('play_circle','videosAbertura','Vídeos de Abertura')
             )}
             ${navSec('sistema','Sistema',
               ni('server','monitor','Monitor Kwai')+
@@ -8077,6 +8346,10 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <div class="pag" id="pag-personalizacao">${ph('Personalização','medal','Templates (fundo da linha) e molduras (aro da foto) que os streamers usam no ranking','btnAtuPers',`<button class="btn btn-o" id="btnPersEntradas">${this._ico('calendar',13)} Datas de entrada</button><button class="btn btn-o" id="btnPersNovoM">${this._ico('plus',13)} Nova moldura</button><button class="btn btn-g" id="btnPersNovoT">${this._ico('plus',13)} Novo template</button>`)}
               <div id="persLista">${this._loading()}</div>
+            </div>
+            <div class="pag" id="pag-videosAbertura">${ph('Vídeos de Abertura','play_circle','Vídeo curto de uma streamer que aparece ao abrir a home (com Pular aos 3s e a live dela no canto se estiver ao vivo)','btnAtuVa',`<button class="btn btn-g" id="btnVaNovo">${this._ico('plus',13)} Novo vídeo</button>`)}
+              <div id="vaConfig"></div>
+              <div id="vaLista">${this._loading()}</div>
             </div>
             <div class="pag" id="pag-arquivos">${ph('Arquivos','image','Fotos e vídeos salvos no Cloudflare (banners, eventos, PK, votações) — veja o espaço usado e apague o que não usa mais','btnAtuArquivos')}
               <div id="arqResumo"></div>
