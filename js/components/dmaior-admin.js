@@ -152,7 +152,7 @@ class DimaiorAdmin extends HTMLElement {
   // do item real do .side; item novo que não estiver aqui cai em "Outros"
   // sozinho (não some). 2º campo = nome no menu (vazio = o do .side), 3º = palavras extras pra busca.
   static get MENU_GRUPOS(){ return [
-    ['Principal',[['dashboard'],['aoVivo','','lives transmissao']]],
+    ['Principal',[['dashboard'],['aoVivo','','lives transmissao'],['mapaAcessos','','visitas visitantes acessos cidade estado pais de onde acessam site mapa']]],
     ['Ranking e resultados',[['ranking','Ranking do Mês'],['diario'],['desempenho'],['historico'],['mesesRanking'],['dashDesemp','','comparativo grafico']]],
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
@@ -384,7 +384,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -396,7 +396,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),mapaAcessos:()=>this._carregarMapaAcessos()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -1555,6 +1555,100 @@ class DimaiorAdmin extends HTMLElement {
   static get ARQ_LIMITE_GB(){ return 10; } // plano gratuito do R2 — só referência da barra
   _arqPasta(p){return ({home:'Home (banners)',eventos:'Eventos',pk:'PK Diário',votacao:'Votações',geral:'Geral',templates:'Templates (ranking)',molduras:'Molduras (ranking)','(raiz)':'Sem pasta'})[p]||p;}
   _arqBytes(n){n=Number(n)||0;if(n>=1073741824)return (n/1073741824).toFixed(2).replace('.',',')+' GB';if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB';if(n>=1024)return Math.round(n/1024)+' KB';return n+' B';}
+  // ── MAPA DE ACESSOS ─────────────────────────────────────────────────────────
+  // De onde acessam o site. Worker admin: GET /admin/visitas?dias=N · coleta anônima:
+  // js/utils/visita.js → Worker rank POST /visita (só +1 por dia/país/estado/cidade/página,
+  // sem IP nem cookie) · tabela: SQL/visitas-mapa.sql · contornos: js/utils/mapa-geo.js
+  _mpGeo(){
+    if(window.DMaiorGeo) return Promise.resolve();
+    return this._mpGeoP||(this._mpGeoP=new Promise(ok=>{
+      const sc=document.createElement('script');
+      sc.src='js/utils/mapa-geo.js?v=20261013-mapa';sc.charset='utf-8';
+      sc.onload=sc.onerror=()=>{ if(!window.DMaiorGeo) this._mpGeoP=null; ok(); };
+      document.head.appendChild(sc);
+    }));
+  }
+  _mpChips(){
+    const m=this._mp, chip=(g,v,l)=>`<button type="button" class="lv-org-btn ${(g==='dias'?m.dias:m.vista)===v?'on':''}" data-mp="${g}" data-v="${v}">${l}</button>`;
+    this.shadowRoot.getElementById('mpFiltros').innerHTML=chip('dias',1,'Hoje')+chip('dias',7,'7 dias')+chip('dias',30,'30 dias')+chip('dias',90,'90 dias')+'<span class="sep"></span>'+chip('vista','brasil','Brasil')+chip('vista','mundo','Mundo');
+  }
+  async _carregarMapaAcessos(){
+    const s=this.shadowRoot,el=s.getElementById('mpCorpo'); if(!el) return;
+    this._mp=this._mp||{dias:7,vista:'brasil'};
+    if(!this._mpBound){
+      this._mpBound=true;
+      s.getElementById('btnAtuMp')?.addEventListener('click',()=>this._carregarMapaAcessos());
+      s.getElementById('mpFiltros')?.addEventListener('click',e=>{
+        const b=e.target.closest('[data-mp]'); if(!b) return;
+        if(b.dataset.mp==='dias'){ this._mp.dias=+b.dataset.v; this._carregarMapaAcessos(); }
+        else { this._mp.vista=b.dataset.v; this._mpChips(); this._renderMapaAcessos(); }
+      });
+      el.addEventListener('click',e=>{
+        const a=e.target.closest('[data-mpinfo]'); if(!a) return;
+        const info=s.getElementById('mpInfo'); if(info) info.innerHTML=a.dataset.mpinfo;
+      });
+    }
+    this._mpChips();
+    el.innerHTML=this._loading();
+    const [d]=await Promise.all([this._api('GET','/admin/visitas?dias='+this._mp.dias),this._mpGeo()]);
+    if(!d?.ok){ el.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar os acessos'); return; }
+    this._mpDados=d; this._renderMapaAcessos();
+  }
+  _renderMapaAcessos(){
+    const s=this.shadowRoot,el=s.getElementById('mpCorpo'),d=this._mpDados; if(!el||!d) return;
+    const n=v=>this._num(v), esc=v=>this._esc(v), G=window.DMaiorGeo, brasil=this._mp.vista==='brasil';
+    const locais=d.locais||[], tot=d.totais||{sessoes:0,paginas:0};
+    if(!tot.paginas){ el.innerHTML=this._empty('globe','Ainda não há acessos registrados neste período. Os números aparecem conforme as pessoas abrem o site.'); return; }
+    let nomePais; try{ const dn=new Intl.DisplayNames(['pt-BR'],{type:'region'}); nomePais=c=>{try{return dn.of(c)||c;}catch{return c;}}; }catch{ nomePais=c=>c; }
+    const uf={}; (G?.brasil.estados||[]).forEach(e=>{uf[e.s]=e.n;});
+    // Agrupamentos
+    const soma=(chave,f)=>{ const m=new Map(); locais.forEach(l=>{ if(f&&!f(l)) return; const k=chave(l); if(!k) return; const o=m.get(k)||{k,sessoes:0,paginas:0}; o.sessoes+=l.sessoes; o.paginas+=l.paginas; m.set(k,o); }); return [...m.values()].sort((a,b)=>b.sessoes-a.sessoes||b.paginas-a.paginas); };
+    const paises=soma(l=>l.pais), estados=soma(l=>l.regiao,l=>l.pais==='BR'&&l.regiao);
+    const cidades=locais.filter(l=>l.cidade).map(l=>({k:l.cidade+(l.pais==='BR'?(l.regiao?' — '+l.regiao:''):' — '+nomePais(l.pais)),sessoes:l.sessoes,paginas:l.paginas}));
+    // Mapa
+    let mapa='';
+    if(G){
+      const g=brasil?G.brasil:G.mundo, k=g.k, X=lo=>(lo-g.x0)*k, Y=la=>(g.y0-la)*k;
+      const porUf=Object.fromEntries(estados.map(e=>[e.k,e])), maxUf=Math.max(1,...estados.map(e=>e.sessoes));
+      const pts=locais.filter(l=>l.lat!=null&&l.lon!=null&&(!brasil||l.pais==='BR'));
+      const maxP=Math.max(1,...pts.map(l=>l.sessoes||l.paginas));
+      const info=(t,sub)=>esc(`<b>${t}</b> — ${sub}`);
+      const base=brasil
+        ?G.brasil.estados.map(e=>{ const v=porUf[e.s]; return`<path d="${e.d}" class="mp-uf${v?' on':''}" ${v?`style="fill-opacity:${(.18+.62*Math.sqrt(v.sessoes/maxUf)).toFixed(2)}" data-mpinfo="${info(esc(e.n),`${n(v.sessoes)} visitas · ${n(v.paginas)} páginas`)}"`:''}><title>${esc(e.n)}${v?`: ${n(v.sessoes)} visitas`:''}</title></path>`; }).join('')
+        :`<path d="${G.mundo.d}" class="mp-terra"/>`;
+      const rMax=brasil?34:70, rMin=brasil?5:12;
+      const bolas=[...pts].sort((a,b)=>b.sessoes-a.sessoes).map(l=>{
+        const r=(rMin+(rMax-rMin)*Math.sqrt((l.sessoes||l.paginas)/maxP)).toFixed(1), nome=(l.cidade||'Local não identificado')+(l.regiao&&l.pais==='BR'?' — '+l.regiao:' — '+nomePais(l.pais));
+        return`<circle cx="${X(l.lon).toFixed(0)}" cy="${Y(l.lat).toFixed(0)}" r="${r}" class="mp-pt" data-mpinfo="${info(esc(nome),`${n(l.sessoes)} visitas · ${n(l.paginas)} páginas`)}"><title>${esc(nome)}: ${n(l.sessoes)} visitas</title></circle>`;
+      }).join('');
+      mapa=`<div class="mp-mapa"><div class="mp-info" id="mpInfo">Toque numa bolinha${brasil?' ou estado':''} pra ver os números</div><svg viewBox="0 0 ${g.w} ${g.h}" role="img" aria-label="Mapa de acessos ao site">${base}${bolas}</svg></div>`;
+    } else mapa=`<div class="mp-mapa">${this._empty('warning','Não deu pra carregar o desenho do mapa. Os números abaixo continuam valendo.')}</div>`;
+    // Listas com barra
+    const lista=(titulo,arr,fmt,max=10)=>{
+      const top=arr.slice(0,max), m=Math.max(1,...top.map(x=>x.sessoes||x.paginas));
+      return`<div class="box mp-box"><div class="bhead"><div class="btitulo">${titulo}</div></div><div class="mp-lista">${top.length?top.map(x=>`<div class="mp-lin"><div class="mp-lt"><span class="mp-nm">${esc(fmt(x))}</span><b>${n(x.sessoes)}</b></div><div class="mp-bar"><i style="width:${Math.max(3,(x.sessoes||x.paginas)/m*100).toFixed(0)}%"></i></div></div>`).join(''):'<div class="mp-vz">Sem dados</div>'}</div></div>`;
+    };
+    const dias=d.dias||[], maxD=Math.max(1,...dias.map(x=>x.paginas));
+    const serie=dias.length>1?`<div class="box mp-box mp-larga"><div class="bhead"><div class="btitulo">${this._ico('chart',14)} Páginas vistas por dia</div></div><div class="mp-serie">${dias.map(x=>`<div class="mp-col" title="${this._fdtData(x.dia)}: ${n(x.paginas)} páginas · ${n(x.sessoes)} visitas"><i style="height:${Math.max(2,x.paginas/maxD*100).toFixed(0)}%"></i></div>`).join('')}</div><div class="mp-eixo"><span>${this._fdtData(dias[0].dia).slice(0,5)}</span><span>${this._fdtData(dias[dias.length-1].dia).slice(0,5)}</span></div></div>`:'';
+    const nomeP=p=>p==='/'?'Página inicial':p;
+    el.innerHTML=`
+      <div class="arq-resumo">
+        <div class="arq-card"><div class="l">Visitas</div><div class="v">${n(tot.sessoes)}</div><div class="s">pessoas que chegaram ao site</div></div>
+        <div class="arq-card"><div class="l">Páginas vistas</div><div class="v">${n(tot.paginas)}</div><div class="s">no período</div></div>
+        <div class="arq-card"><div class="l">Cidades</div><div class="v">${n(cidades.length)}</div><div class="s">${n(paises.length)} ${paises.length===1?'país':'países'}</div></div>
+        <div class="arq-card"><div class="l">Estados</div><div class="v">${n(estados.length)}</div><div class="s">${estados[0]?esc(uf[estados[0].k]||estados[0].k)+' lidera':'—'}</div></div>
+      </div>
+      <div class="box">${mapa}</div>
+      <div class="mp-grade">
+        ${lista(this._ico('globe',14)+' Estados',estados,x=>uf[x.k]||x.k)}
+        ${lista(this._ico('globe',14)+' Cidades',cidades,x=>x.k)}
+        ${lista(this._ico('globe',14)+' Países',paises,x=>nomePais(x.k),8)}
+        ${lista(this._ico('clipboard',14)+' Páginas mais vistas',(d.paginas||[]).map(p=>({k:p.pagina,sessoes:p.paginas,paginas:p.paginas})),x=>nomeP(x.k))}
+        ${serie}
+      </div>
+      <p class="mp-nota">Contagem anônima: o site registra só a cidade (vinda da conexão) e a página. Não guarda IP, cookie nem identifica ninguém. Quem usa "Não rastrear" não entra na conta.</p>`;
+  }
+
   // ── VÍDEOS DE ABERTURA (janela da home) ─────────────────────────────────────
   // Worker admin: /admin/videos-abertura/* · site: js/components/video-abertura.js
   async _carregarVideosAbertura(){
@@ -7512,6 +7606,32 @@ class DimaiorAdmin extends HTMLElement {
     .adp-form select,.adp-form input[type=date],.adp-form input[type=number]{width:100%}
     .adp-up{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .adp-up img{max-height:64px;max-width:200px;border-radius:8px;background:#05070c;object-fit:contain}
+    .mp-mapa{padding:14px 14px 10px}
+    .mp-info{min-height:34px;display:flex;align-items:center;padding:6px 12px;margin-bottom:10px;border:1px solid var(--brddim);border-radius:var(--rs);background:var(--sunk);font-size:13px;color:var(--t2)}
+    .mp-info b{color:var(--t1);margin-right:4px}
+    .mp-mapa svg{display:block;width:100%;max-height:600px;margin:0 auto}
+    .mp-terra{fill:var(--brd);stroke:var(--t3);stroke-opacity:.45;stroke-width:1.2}
+    .mp-uf{fill:var(--brd);stroke:var(--t3);stroke-opacity:.5;stroke-width:1;cursor:default}
+    .mp-uf.on{fill:var(--cyan);cursor:pointer}
+    .mp-uf.on:hover{stroke:var(--t1);stroke-width:2}
+    .mp-pt{fill:var(--amber,#fbbf24);fill-opacity:.72;stroke:var(--amber,#fbbf24);stroke-width:2;cursor:pointer}
+    .mp-pt:hover{fill-opacity:.95;stroke:var(--t1)}
+    .mp-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px}
+    .mp-grade .box{margin:0}
+    .mp-larga{grid-column:1/-1}
+    .mp-lista{padding:6px 18px 16px}
+    .mp-lin{padding:6px 0}
+    .mp-lt{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--t2)}
+    .mp-lt .mp-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mp-lt b{color:var(--t1);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700}
+    .mp-bar{height:5px;border-radius:99px;background:var(--sunk);margin-top:4px;overflow:hidden}
+    .mp-bar i{display:block;height:100%;background:var(--grad);border-radius:99px}
+    .mp-vz{padding:14px 0;color:var(--t3);font-size:13px}
+    .mp-serie{display:flex;align-items:flex-end;gap:2px;height:120px;padding:14px 18px 0}
+    .mp-col{flex:1;min-width:2px;height:100%;display:flex;align-items:flex-end}
+    .mp-col i{display:block;width:100%;background:var(--grad);border-radius:3px 3px 0 0;min-height:2px}
+    .mp-eixo{display:flex;justify-content:space-between;padding:4px 18px 14px;font-size:11px;color:var(--t3)}
+    .mp-nota{margin-top:14px;font-size:11.5px;color:var(--t3);line-height:1.5}
     .va-cfg{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
     .va-cfg .va-cfg-txt{flex:1;min-width:220px;font-size:12px;color:var(--t3);line-height:1.5}
     .va-cfg .va-cfg-txt b{color:var(--t1);font-size:13px}
@@ -7691,7 +7811,8 @@ class DimaiorAdmin extends HTMLElement {
             ${/* Mesmas 7 categorias e nomes do menu do "+" no celular (MENU_GRUPOS) */''}
             ${navSec('principal','Principal',
               ni('dashboard','dashboard','Dashboard')+
-              ni('live','aoVivo','Ao Vivo',`<span class="nb live" id="nbLive">0</span>`)
+              ni('live','aoVivo','Ao Vivo',`<span class="nb live" id="nbLive">0</span>`)+
+              ni('globe','mapaAcessos','Mapa de Acessos')
             ,true)}
             ${navSec('ranking','Ranking e resultados',
               ni('trophy','ranking','Ranking do Mês')+
@@ -8346,6 +8467,10 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <div class="pag" id="pag-personalizacao">${ph('Personalização','medal','Templates (fundo da linha) e molduras (aro da foto) que os streamers usam no ranking','btnAtuPers',`<button class="btn btn-o" id="btnPersEntradas">${this._ico('calendar',13)} Datas de entrada</button><button class="btn btn-o" id="btnPersNovoM">${this._ico('plus',13)} Nova moldura</button><button class="btn btn-g" id="btnPersNovoT">${this._ico('plus',13)} Novo template</button>`)}
               <div id="persLista">${this._loading()}</div>
+            </div>
+            <div class="pag" id="pag-mapaAcessos">${ph('Mapa de Acessos','globe','De onde as pessoas acessam o site (contagem anônima, sem IP nem cookie)','btnAtuMp')}
+              <div class="arq-filtros" id="mpFiltros" style="margin-bottom:14px"></div>
+              <div id="mpCorpo"></div>
             </div>
             <div class="pag" id="pag-videosAbertura">${ph('Vídeos de Abertura','play_circle','Vídeo curto de uma streamer que aparece ao abrir a home (com Pular aos 3s e a live dela no canto se estiver ao vivo)','btnAtuVa',`<button class="btn btn-g" id="btnVaNovo">${this._ico('plus',13)} Novo vídeo</button>`)}
               <div id="vaConfig"></div>
