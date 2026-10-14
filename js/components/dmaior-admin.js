@@ -268,6 +268,8 @@ class DimaiorAdmin extends HTMLElement {
       home:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
       menu:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
       refresh:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
+      minus:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>`,
+      maximize:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>`,
       plus:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
       edit:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
       trash:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
@@ -1584,6 +1586,8 @@ class DimaiorAdmin extends HTMLElement {
         else { this._mp.vista=b.dataset.v; this._mpChips(); this._renderMapaAcessos(); }
       });
       el.addEventListener('click',e=>{
+        const z=e.target.closest('[data-mpz]'); if(z){ this._mpZoomBotao(z.dataset.mpz); return; }
+        if(this._mpArrastou){ this._mpArrastou=false; return; } // soltar depois de arrastar o mapa não conta como toque
         const a=e.target.closest('[data-mpinfo]'); if(!a) return;
         const info=s.getElementById('mpInfo'); if(info) info.innerHTML=a.dataset.mpinfo;
       });
@@ -1604,7 +1608,7 @@ class DimaiorAdmin extends HTMLElement {
     // Agrupamentos
     const soma=(chave,f)=>{ const m=new Map(); locais.forEach(l=>{ if(f&&!f(l)) return; const k=chave(l); if(!k) return; const o=m.get(k)||{k,sessoes:0,paginas:0}; o.sessoes+=l.sessoes; o.paginas+=l.paginas; m.set(k,o); }); return [...m.values()].sort((a,b)=>b.sessoes-a.sessoes||b.paginas-a.paginas); };
     const paises=soma(l=>l.pais), estados=soma(l=>l.regiao,l=>l.pais==='BR'&&l.regiao);
-    const cidades=locais.filter(l=>l.cidade).map(l=>({k:l.cidade+(l.pais==='BR'?(l.regiao?' — '+l.regiao:''):' — '+nomePais(l.pais)),sessoes:l.sessoes,paginas:l.paginas}));
+    const cidades=locais.filter(l=>l.cidade).map(l=>({k:l.cidade+(l.pais==='BR'?(l.regiao?' — '+l.regiao:''):' — '+nomePais(l.pais)),sessoes:l.sessoes,paginas:l.paginas})).sort((a,b)=>b.sessoes-a.sessoes||b.paginas-a.paginas);
     // Mapa
     let mapa='';
     if(G){
@@ -1613,23 +1617,46 @@ class DimaiorAdmin extends HTMLElement {
       const pts=locais.filter(l=>l.lat!=null&&l.lon!=null&&(!brasil||l.pais==='BR'));
       const maxP=Math.max(1,...pts.map(l=>l.sessoes||l.paginas));
       const info=(t,sub)=>esc(`<b>${t}</b> — ${sub}`);
-      const base=brasil
-        ?G.brasil.estados.map(e=>{ const v=porUf[e.s]; return`<path d="${e.d}" class="mp-uf${v?' on':''}" ${v?`style="fill-opacity:${(.18+.62*Math.sqrt(v.sessoes/maxUf)).toFixed(2)}" data-mpinfo="${info(esc(e.n),`${n(v.sessoes)} visitas · ${n(v.paginas)} páginas`)}"`:''}><title>${esc(e.n)}${v?`: ${n(v.sessoes)} visitas`:''}</title></path>`; }).join('')
-        :`<path d="${G.mundo.d}" class="mp-terra"/>`;
-      const rMax=brasil?34:70, rMin=brasil?5:12;
+      // Estados em 3D: quem tem acesso "sobe" do mapa — quanto mais visitas, mais alto e
+      // mais claro. A altura é em pixels de tela (camadas empilhadas, refeitas a cada zoom
+      // em _mpEscalarMarcas), então não vira um paredão quando aproxima.
+      const altUf={};
+      let base='';
+      if(brasil){
+        const planos=[], altos=[];
+        G.brasil.estados.forEach(e=>{
+          const v=porUf[e.s];
+          if(!v){ planos.push(`<path d="${e.d}" class="mp-uf"><title>${esc(e.n)}</title></path>`); return; }
+          const f=v.sessoes/maxUf, hpx=6+26*Math.sqrt(f), cam=Math.ceil(hpx/1.5), id='mpUf'+e.s;
+          const ys=(e.d.match(/-?\d+/g)||[]).filter((_,i)=>i%2).map(Number); // pontos são "x y": pega os y
+          altUf[e.s]=hpx;
+          altos.push({fundo:ys.length?Math.max(...ys):0,html:`<g class="mp-ext" data-h="${hpx.toFixed(1)}" data-mpinfo="${info(esc(e.n),`${n(v.sessoes)} visitas · ${n(v.paginas)} páginas`)}"><title>${esc(e.n)}: ${n(v.sessoes)} visitas</title>`
+            +`<defs><path id="${id}" d="${e.d}"/></defs><use href="#${id}" class="mp-chao"/>`
+            +Array.from({length:cam},(_,i)=>`<use href="#${id}" class="mp-lado" data-k="${((i+1)/cam).toFixed(3)}"/>`).join('')
+            +`<use href="#${id}" class="mp-topo" data-k="1"/><use href="#${id}" class="mp-cor" data-k="1" style="fill-opacity:${(.45+.5*Math.sqrt(f)).toFixed(2)}"/></g>`});
+        });
+        // de trás (norte) pra frente (sul): o estado da frente cobre a parede do de trás
+        base=planos.join('')+altos.sort((a,b)=>a.fundo-b.fundo).map(a=>a.html).join('');
+      } else base=`<path d="${G.mundo.d}" class="mp-terra"/>`;
+      // Bolinhas com tamanho fixo na tela (escala 1/zoom): ao aproximar, as cidades vizinhas
+      // se separam e o nome delas aparece. Ficam em cima do estado já "levantado".
       const bolas=[...pts].sort((a,b)=>b.sessoes-a.sessoes).map(l=>{
-        const r=(rMin+(rMax-rMin)*Math.sqrt((l.sessoes||l.paginas)/maxP)).toFixed(1), nome=(l.cidade||'Local não identificado')+(l.regiao&&l.pais==='BR'?' — '+l.regiao:' — '+nomePais(l.pais));
-        return`<circle cx="${X(l.lon).toFixed(0)}" cy="${Y(l.lat).toFixed(0)}" r="${r}" class="mp-pt" data-mpinfo="${info(esc(nome),`${n(l.sessoes)} visitas · ${n(l.paginas)} páginas`)}"><title>${esc(nome)}: ${n(l.sessoes)} visitas</title></circle>`;
+        const r=(4+13*Math.sqrt((l.sessoes||l.paginas)/maxP)).toFixed(1), x=X(l.lon).toFixed(1), y=Y(l.lat).toFixed(1);
+        const ergue=brasil&&l.pais==='BR'?(altUf[l.regiao]||0):0;
+        const nome=(l.cidade||'Local não identificado')+(l.regiao&&l.pais==='BR'?' — '+l.regiao:' — '+nomePais(l.pais));
+        return`<g class="mp-mk" data-x="${x}" data-y="${y}" data-e="${ergue.toFixed(1)}" transform="translate(${x} ${y})" data-mpinfo="${info(esc(nome),`${n(l.sessoes)} visitas · ${n(l.paginas)} páginas`)}"><title>${esc(nome)}: ${n(l.sessoes)} visitas</title><circle r="${r}" class="mp-pt"/><text class="mp-lb" y="${(-r-5).toFixed(1)}">${esc(l.cidade||'')}</text></g>`;
       }).join('');
-      mapa=`<div class="mp-mapa"><div class="mp-info" id="mpInfo">Toque numa bolinha${brasil?' ou estado':''} pra ver os números</div><svg viewBox="0 0 ${g.w} ${g.h}" role="img" aria-label="Mapa de acessos ao site">${base}${bolas}</svg></div>`;
+      mapa=`<div class="mp-mapa"><div class="mp-info" id="mpInfo">Toque numa bolinha${brasil?' ou estado':''} pra ver os números</div>
+        <div class="mp-palco"><svg id="mpSvg" class="mp-svg" viewBox="0 0 ${g.w} ${g.h}" role="img" aria-label="Mapa de acessos ao site"><g>${base}</g><g>${bolas}</g></svg>
+          <div class="mp-zoom"><button type="button" data-mpz="mais" aria-label="Aproximar" title="Aproximar">${this._ico('plus',16)}</button><button type="button" data-mpz="menos" aria-label="Afastar" title="Afastar">${this._ico('minus',16)}</button><button type="button" data-mpz="tudo" aria-label="Ver o mapa inteiro" title="Ver o mapa inteiro">${this._ico('maximize',15)}</button><span id="mpZoomPct"></span></div>
+        </div>
+        <div class="mp-dica">Zoom: botões + e −, dois cliques, Ctrl + roda do mouse ou dois dedos no celular. Com zoom, arraste pra mover e o nome das cidades aparece.</div></div>`;
     } else mapa=`<div class="mp-mapa">${this._empty('warning','Não deu pra carregar o desenho do mapa. Os números abaixo continuam valendo.')}</div>`;
     // Listas com barra
     const lista=(titulo,arr,fmt,max=10)=>{
       const top=arr.slice(0,max), m=Math.max(1,...top.map(x=>x.sessoes||x.paginas));
       return`<div class="box mp-box"><div class="bhead"><div class="btitulo">${titulo}</div></div><div class="mp-lista">${top.length?top.map(x=>`<div class="mp-lin"><div class="mp-lt"><span class="mp-nm">${esc(fmt(x))}</span><b>${n(x.sessoes)}</b></div><div class="mp-bar"><i style="width:${Math.max(3,(x.sessoes||x.paginas)/m*100).toFixed(0)}%"></i></div></div>`).join(''):'<div class="mp-vz">Sem dados</div>'}</div></div>`;
     };
-    const dias=d.dias||[], maxD=Math.max(1,...dias.map(x=>x.paginas));
-    const serie=dias.length>1?`<div class="box mp-box mp-larga"><div class="bhead"><div class="btitulo">${this._ico('chart',14)} Páginas vistas por dia</div></div><div class="mp-serie">${dias.map(x=>`<div class="mp-col" title="${this._fdtData(x.dia)}: ${n(x.paginas)} páginas · ${n(x.sessoes)} visitas"><i style="height:${Math.max(2,x.paginas/maxD*100).toFixed(0)}%"></i></div>`).join('')}</div><div class="mp-eixo"><span>${this._fdtData(dias[0].dia).slice(0,5)}</span><span>${this._fdtData(dias[dias.length-1].dia).slice(0,5)}</span></div></div>`:'';
     const nomeP=p=>p==='/'?'Página inicial':p;
     el.innerHTML=`
       <div class="arq-resumo">
@@ -1639,14 +1666,131 @@ class DimaiorAdmin extends HTMLElement {
         <div class="arq-card"><div class="l">Estados</div><div class="v">${n(estados.length)}</div><div class="s">${estados[0]?esc(uf[estados[0].k]||estados[0].k)+' lidera':'—'}</div></div>
       </div>
       <div class="box">${mapa}</div>
+      <div id="mpSerie"></div>
       <div class="mp-grade">
         ${lista(this._ico('globe',14)+' Estados',estados,x=>uf[x.k]||x.k)}
         ${lista(this._ico('globe',14)+' Cidades',cidades,x=>x.k)}
         ${lista(this._ico('globe',14)+' Países',paises,x=>nomePais(x.k),8)}
         ${lista(this._ico('clipboard',14)+' Páginas mais vistas',(d.paginas||[]).map(p=>({k:p.pagina,sessoes:p.paginas,paginas:p.paginas})),x=>nomeP(x.k))}
-        ${serie}
       </div>
       <p class="mp-nota">Contagem anônima: o site registra só a cidade (vinda da conexão) e a página. Não guarda IP, cookie nem identifica ninguém. Quem usa "Não rastrear" não entra na conta.</p>`;
+    if(G) this._mpZoomIniciar(brasil?G.brasil:G.mundo);
+    this._mpRenderSerie();
+  }
+  // Zoom e arrasto mexem só no viewBox do SVG (sem biblioteca: a CSP do site bloqueia CDN).
+  _mpZoomIniciar(g){
+    const svg=this.shadowRoot.getElementById('mpSvg'); if(!svg) return;
+    this._mpZ={W:g.w,H:g.h,k:1,x:0,y:0};
+    this._mpAplicarZoom();
+    const dedos=new Map(); let ini=null, pinca=null;
+    const noMapa=(cx,cy)=>{ const m=svg.getScreenCTM(); return m?new DOMPoint(cx,cy).matrixTransform(m.inverse()):null; };
+    const dist=()=>{ const [a,b]=[...dedos.values()]; return Math.hypot(a.x-b.x,a.y-b.y)||1; };
+    svg.addEventListener('pointerdown',e=>{
+      dedos.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(dedos.size===1){ ini={x:e.clientX,y:e.clientY}; this._mpArrastou=false; }
+      if(dedos.size===2){ const [a,b]=[...dedos.values()]; pinca={d:dist(),k:this._mpZ.k,c:noMapa((a.x+b.x)/2,(a.y+b.y)/2)}; this._mpArrastou=true; }
+    });
+    svg.addEventListener('pointermove',e=>{
+      const p=dedos.get(e.pointerId); if(!p) return;
+      const dx=e.clientX-p.x, dy=e.clientY-p.y; p.x=e.clientX; p.y=e.clientY;
+      if(dedos.size>=2&&pinca){ this._mpZoomEm(pinca.k*dist()/pinca.d,pinca.c); return; }
+      if(this._mpZ.k<=1||!ini) return;
+      if(!this._mpArrastou){ if(Math.hypot(e.clientX-ini.x,e.clientY-ini.y)<5) return; this._mpArrastou=true; try{svg.setPointerCapture(e.pointerId);}catch{} }
+      const m=svg.getScreenCTM(); if(!m||!m.a) return;
+      this._mpZ.x-=dx/m.a; this._mpZ.y-=dy/m.d; this._mpAplicarZoom();
+    });
+    const solta=e=>{ dedos.delete(e.pointerId); if(dedos.size<2) pinca=null; if(!dedos.size) ini=null; };
+    svg.addEventListener('pointerup',solta); svg.addEventListener('pointercancel',solta);
+    svg.addEventListener('pointerleave',e=>{ if(e.pointerType==='mouse') solta(e); });
+    // Roda do mouse só com Ctrl (ou pinça do touchpad), pra não prender a rolagem da página
+    svg.addEventListener('wheel',e=>{ if(!e.ctrlKey&&!e.metaKey) return; e.preventDefault(); this._mpZoomEm(this._mpZ.k*Math.exp(-e.deltaY*.0025),noMapa(e.clientX,e.clientY)); },{passive:false});
+    svg.addEventListener('dblclick',e=>{ e.preventDefault(); this._mpZoomEm(this._mpZ.k*2,noMapa(e.clientX,e.clientY)); });
+    if(window.ResizeObserver){ this._mpRO?.disconnect(); this._mpRO=new ResizeObserver(()=>this._mpEscalarMarcas()); this._mpRO.observe(svg); }
+  }
+  // Muda o zoom pra k mantendo o ponto c (coordenadas do mapa) parado na tela.
+  _mpZoomEm(k,c){
+    const Z=this._mpZ; if(!Z) return;
+    k=Math.min(40,Math.max(1,k));
+    const wa=Z.W/Z.k, ha=Z.H/Z.k, w=Z.W/k, h=Z.H/k;
+    if(!c) c={x:Z.x+wa/2,y:Z.y+ha/2};
+    Z.x=c.x-(c.x-Z.x)*(w/wa); Z.y=c.y-(c.y-Z.y)*(h/ha); Z.k=k;
+    this._mpAplicarZoom();
+  }
+  _mpZoomBotao(a){
+    const Z=this._mpZ; if(!Z) return;
+    if(a==='tudo'){ Z.k=1; Z.x=0; Z.y=0; this._mpAplicarZoom(); return; }
+    this._mpZoomEm(Z.k*(a==='mais'?1.8:1/1.8));
+  }
+  _mpAplicarZoom(){
+    const Z=this._mpZ, svg=this.shadowRoot.getElementById('mpSvg'); if(!Z||!svg) return;
+    const w=Z.W/Z.k, h=Z.H/Z.k;
+    Z.x=Math.min(Math.max(0,Z.x),Z.W-w); Z.y=Math.min(Math.max(0,Z.y),Z.H-h);
+    svg.setAttribute('viewBox',`${Z.x.toFixed(2)} ${Z.y.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
+    svg.style.touchAction=Z.k>1?'none':'pan-y'; // sem zoom, o dedo ainda rola a página
+    svg.classList.toggle('mp-movel',Z.k>1);
+    svg.classList.toggle('mp-lbon',Z.k>=1.8);
+    const pct=this.shadowRoot.getElementById('mpZoomPct'); if(pct) pct.textContent=Z.k>1.01?Z.k.toFixed(1).replace('.',',')+'x':'';
+    this._mpEscalarMarcas();
+  }
+  // Altura dos estados e tamanho das bolinhas fixos na tela: escala = unidades do mapa por pixel.
+  _mpEscalarMarcas(){
+    const svg=this.shadowRoot.getElementById('mpSvg'), Z=this._mpZ; if(!svg||!Z) return;
+    // mapa estreito (celular) = bolinhas e altura menores, senão cobrem o mapa
+    const m=svg.getScreenCTM(), esc=(m&&m.a>0?1/m.a:(Z.W/Z.k)/(svg.clientWidth||800))*Math.min(1,Math.max(.55,(svg.clientWidth||800)/800));
+    svg.querySelectorAll('.mp-ext').forEach(g=>{ const h=g.dataset.h*esc; g.querySelectorAll('[data-k]').forEach(u=>u.setAttribute('transform',`translate(0 ${(-u.dataset.k*h).toFixed(2)})`)); });
+    svg.querySelectorAll('.mp-mk').forEach(g=>g.setAttribute('transform',`translate(${g.dataset.x} ${(g.dataset.y-g.dataset.e*esc).toFixed(2)}) scale(${esc.toFixed(4)})`));
+  }
+  // "Páginas vistas por dia": mesmo desenho do "Diamantes por dia" do Dashboard (linha suave
+  // com área, hoje pontilhado = dia em andamento) + as visitas numa 2ª linha.
+  _mpRenderSerie(){
+    const el=this.shadowRoot?.getElementById('mpSerie'), d=this._mpDados; if(!el||!d) return;
+    const nd=this._mp.dias, titulo=`<div class="btitulo">${this._ico('bars_up',14)} Páginas vistas por dia</div>`;
+    if(nd<2){ el.innerHTML=''; return; }
+    const porDia=Object.fromEntries((d.dias||[]).map(x=>[x.dia,x])), hoje=this._dataHojeBR(), sem=['dom','seg','ter','qua','qui','sex','sáb'];
+    const todos=[]; for(let k=nd-1;k>=0;k--){ const dt=k?this._dataDiasAtrasBR(k):hoje, x=porDia[dt]; todos.push({dt,pg:x?.paginas||0,vs:x?.sessoes||0,hoje:!k}); }
+    // Começa no 1º dia com acesso: antes disso a contagem ainda não existia (começou em 13/10/2026)
+    const prim=todos.findIndex(p=>p.pg>0), serie=prim>0?todos.slice(prim):todos;
+    if(serie.length<2){ el.innerHTML=`<div class="box dia-box"><div class="bhead">${titulo}</div><p class="dia-nota" style="padding:14px 16px">O gráfico aparece a partir do 2º dia com acessos.</p></div>`; return; }
+    const N=serie.length, poucos=N<=10;
+    const W=Math.max(280,Math.round(el.clientWidth||el.parentElement?.clientWidth||700)-2);
+    const H=230,padL=24,padR=24,padT=34,padB=poucos?46:30, iw=W-padL-padR, ih=H-padT-padB;
+    const xs=serie.map((_,i)=>padL+i*iw/(N-1)), yMax=Math.max(1,...serie.map(p=>p.pg))*1.18, yOf=v=>padT+(1-v/yMax)*ih;
+    const suave=(a,b)=>{const dx=(b.x-a.x)/2;return ` C${(a.x+dx).toFixed(1)},${a.y.toFixed(1)} ${(b.x-dx).toFixed(1)},${b.y.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}`;};
+    const tracar=campo=>{
+      const Q=serie.map((p,i)=>({x:xs[i],y:yOf(p[campo])})), F=Q.slice(0,-1), ult=F[F.length-1];
+      let ln=`M${F[0].x.toFixed(1)},${F[0].y.toFixed(1)}`; for(let i=1;i<F.length;i++) ln+=suave(F[i-1],F[i]);
+      return {Q, ln:F.length>1?ln:'', area:F.length>1?`${ln} L${ult.x.toFixed(1)},${(padT+ih).toFixed(1)} L${F[0].x.toFixed(1)},${(padT+ih).toFixed(1)} Z`:'', hj:`M${ult.x.toFixed(1)},${ult.y.toFixed(1)}${suave(ult,Q[N-1])}`};
+    };
+    const pg=tracar('pg'), vs=tracar('vs');
+    const passo=poucos?1:Math.ceil(N/8), iMax=serie.reduce((m,p,i)=>p.pg>serie[m].pg?i:m,0);
+    const grade=[0,1,2].map(g=>{const y=padT+g*ih/2;return`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" class="g"/>`;}).join('');
+    const marcas=serie.map((p,i)=>{
+      const q=pg.Q[i], ant=serie[i-1];
+      const lbl=p.hoje?'Hoje •':poucos?`${sem[new Date(`${p.dt}T12:00:00Z`).getUTCDay()]} ${p.dt.slice(8,10)}`:`${p.dt.slice(8,10)}/${p.dt.slice(5,7)}`;
+      let chg='';
+      if(poucos&&!p.hoje&&ant&&ant.pg>0){ const v=(p.pg-ant.pg)/ant.pg*100; chg=`<text x="${q.x.toFixed(1)}" y="${H-8}" text-anchor="middle" class="chg ${v>=0?'up':'down'}">${v>=0?'▲':'▼'}${Math.abs(v).toFixed(0)}%</text>`; }
+      const val=(poucos||i===iMax||p.hoje)?`<text x="${q.x.toFixed(1)}" y="${(q.y-11).toFixed(1)}" text-anchor="middle" class="v">${this._numK(p.pg)}</text>`:'';
+      const rot=(poucos||i%passo===0||p.hoje)?`<text x="${q.x.toFixed(1)}" y="${H-(poucos?24:10)}" text-anchor="middle" class="x ${p.hoje?'now':''}">${lbl}</text>`:'';
+      return`<circle cx="${vs.Q[i].x.toFixed(1)}" cy="${vs.Q[i].y.toFixed(1)}" r="${poucos?3:2}" class="pt2"/>${val}<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${p.hoje?5.5:poucos?4.5:3}" class="pt ${p.hoje?'hj':''}"><title>${this._fdtData(p.dt)}${p.hoje?' (hoje, em andamento)':''}: ${this._num(p.pg)} páginas · ${this._num(p.vs)} visitas</title></circle>${rot}${chg}`;
+    }).join('');
+    const fech=serie.filter(p=>!p.hoje), media=fech.length?Math.round(fech.reduce((a,p)=>a+p.pg,0)/fech.length):null;
+    el.innerHTML=`<div class="box dia-box">
+      <div class="bhead">${titulo}<span class="dia-sub"><span class="mp-leg"><i class="c1"></i>Páginas <i class="c2"></i>Visitas</span>${media!==null?`<span class="mp-media">Média dos dias fechados: <b>${this._numK(media)}</b></span>`:''}</span></div>
+      <div class="dia-line"><svg class="dia-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Páginas vistas por dia">
+        <defs><linearGradient id="mpSerieGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--cyan)" stop-opacity=".38"/><stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/></linearGradient></defs>
+        ${grade}${pg.area?`<path d="${pg.area}" fill="url(#mpSerieGrad)"/>`:''}
+        ${vs.ln?`<path d="${vs.ln}" class="ln2"/>`:''}<path d="${vs.hj}" class="ln2 dash"/>
+        ${pg.ln?`<path d="${pg.ln}" class="ln" fill="none"/>`:''}<path d="${pg.hj}" class="ln dash" fill="none"/>
+        ${marcas}
+      </svg></div>
+      <p class="dia-nota">${poucos?'% = variação de páginas vistas contra o dia anterior. ':''}Linha pontilhada = hoje, ainda em andamento.</p>
+    </div>`;
+    // Redesenha se a largura mudar (o gráfico é calculado em pixels)
+    if(window.ResizeObserver&&this._mpSerieROel!==el){
+      this._mpSerieRO?.disconnect(); this._mpSerieW=el.clientWidth;
+      this._mpSerieRO=new ResizeObserver(()=>{const w=el.clientWidth;if(w>0&&Math.abs(w-(this._mpSerieW||0))>8){this._mpSerieW=w;this._mpRenderSerie();}});
+      this._mpSerieRO.observe(el); this._mpSerieROel=el;
+    }
   }
 
   // ── VÍDEOS DE ABERTURA (janela da home) ─────────────────────────────────────
@@ -7610,12 +7754,37 @@ class DimaiorAdmin extends HTMLElement {
     .mp-info{min-height:34px;display:flex;align-items:center;padding:6px 12px;margin-bottom:10px;border:1px solid var(--brddim);border-radius:var(--rs);background:var(--sunk);font-size:13px;color:var(--t2)}
     .mp-info b{color:var(--t1);margin-right:4px}
     .mp-mapa svg{display:block;width:100%;max-height:600px;margin:0 auto}
-    .mp-terra{fill:var(--brd);stroke:var(--t3);stroke-opacity:.45;stroke-width:1.2}
-    .mp-uf{fill:var(--brd);stroke:var(--t3);stroke-opacity:.5;stroke-width:1;cursor:default}
-    .mp-uf.on{fill:var(--cyan);cursor:pointer}
-    .mp-uf.on:hover{stroke:var(--t1);stroke-width:2}
-    .mp-pt{fill:var(--amber,#fbbf24);fill-opacity:.72;stroke:var(--amber,#fbbf24);stroke-width:2;cursor:pointer}
-    .mp-pt:hover{fill-opacity:.95;stroke:var(--t1)}
+    .mp-terra{fill:var(--brd);stroke:var(--t3);stroke-opacity:.45;stroke-width:1;vector-effect:non-scaling-stroke}
+    .mp-uf{fill:var(--brd);stroke:var(--t3);stroke-opacity:.5;stroke-width:1;cursor:default;vector-effect:non-scaling-stroke}
+    .mp-ext{cursor:pointer}
+    .mp-chao{fill:#000;fill-opacity:.45}
+    .mp-lado{fill:#063f44;fill:color-mix(in srgb,var(--cyan) 28%,#000);stroke:#000;stroke-opacity:.18;stroke-width:.6;vector-effect:non-scaling-stroke}
+    .mp-topo{fill:var(--panel-solid)}
+    .mp-cor{fill:var(--cyan);stroke:#fff;stroke-opacity:.55;stroke-width:1.2;vector-effect:non-scaling-stroke}
+    .mp-ext:hover .mp-cor{fill-opacity:1 !important}
+    .mp-pt{fill:var(--amber,#fbbf24);fill-opacity:.78;stroke:#b45309;stroke-width:1.5}
+    .mp-mk:hover .mp-pt{fill-opacity:1;stroke:var(--t1)}
+    .mp-palco{position:relative}
+    .mp-svg{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+    .mp-svg.mp-movel{cursor:grab}.mp-svg.mp-movel:active{cursor:grabbing}
+    .mp-zoom{position:absolute;bottom:6px;right:6px;display:flex;flex-direction:column;gap:6px;align-items:center}
+    @media(max-width:700px){.mp-zoom{flex-direction:row;gap:5px}.mp-zoom button{width:32px;height:32px}}
+    .mp-zoom button{width:36px;height:36px;display:grid;place-items:center;border-radius:var(--rs);border:1px solid var(--brd);background:var(--panel-solid);color:var(--t1);cursor:pointer;padding:0}
+    .mp-zoom button:hover{border-color:var(--cyan);color:var(--cyan)}
+    .mp-zoom span{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:12px;color:var(--t2)}
+    .mp-dica{font-size:11px;color:var(--t3);margin-top:8px;line-height:1.45}
+    .mp-mk{cursor:pointer}
+    .mp-lb{display:none;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:11px;font-weight:600;text-anchor:middle;fill:var(--t1);paint-order:stroke;stroke:var(--bg0,#000);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+    .mp-svg.mp-lbon .mp-lb{display:block}
+    #mpSerie .dia-box{margin-top:14px}
+    .dia-svg .ln2{fill:none;stroke:var(--amber,#fbbf24);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+    .dia-svg .ln2.dash{stroke-dasharray:5 5;opacity:.6}
+    .dia-svg .pt2{fill:var(--amber,#fbbf24)}
+    .mp-leg{display:inline-flex;gap:4px;align-items:center}
+    .mp-media{margin-left:14px;white-space:nowrap}
+    #mpSerie .bhead{flex-wrap:wrap;gap:6px}
+    .mp-leg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin:0 4px 0 6px}
+    .mp-leg .c1{background:var(--cyan)}.mp-leg .c2{background:var(--amber,#fbbf24)}
     .mp-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px}
     .mp-grade .box{margin:0}
     .mp-larga{grid-column:1/-1}
@@ -7627,10 +7796,6 @@ class DimaiorAdmin extends HTMLElement {
     .mp-bar{height:5px;border-radius:99px;background:var(--sunk);margin-top:4px;overflow:hidden}
     .mp-bar i{display:block;height:100%;background:var(--grad);border-radius:99px}
     .mp-vz{padding:14px 0;color:var(--t3);font-size:13px}
-    .mp-serie{display:flex;align-items:flex-end;gap:2px;height:120px;padding:14px 18px 0}
-    .mp-col{flex:1;min-width:2px;height:100%;display:flex;align-items:flex-end}
-    .mp-col i{display:block;width:100%;background:var(--grad);border-radius:3px 3px 0 0;min-height:2px}
-    .mp-eixo{display:flex;justify-content:space-between;padding:4px 18px 14px;font-size:11px;color:var(--t3)}
     .mp-nota{margin-top:14px;font-size:11.5px;color:var(--t3);line-height:1.5}
     .va-cfg{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
     .va-cfg .va-cfg-txt{flex:1;min-width:220px;font-size:12px;color:var(--t3);line-height:1.5}
