@@ -9110,7 +9110,7 @@ class DimaiorAdmin extends HTMLElement {
           ${wppNum}</a>`:'';
         const cat=c.categoria==='games'?`${this._ii('gamepad',12)}Games`:`${this._ii('drama',12)}Entretenimento`;
         const recrutador=this._esc(c.recrutador_nome||'Padrão da agência');
-        const viaAgente=c.agente_nome?`<br><span style="font-size:10px;color:var(--cyan)">via agente: ${this._esc(c.agente_nome)}</span>`:'';
+        const viaAgente=c.agente_nome?`<br><span style="font-size:10px;color:var(--cyan)">via agente: ${this._esc(c.agente_nome)}</span>`:(c.afiliado_nome?`<br><span style="font-size:10px;color:var(--cyan)">via afiliado: ${this._esc(c.afiliado_nome)}</span>`:'');
         const stBadge=`<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:${COR[c.status]||'var(--t2)'}">${BADGE[c.status]||c.status}</span>`;
         let motivoErro=String(c.motivo_bloqueio||'').trim();
         if(!motivoErro&&c.status==='erro'&&c.resposta_voyager){
