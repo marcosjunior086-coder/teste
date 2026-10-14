@@ -221,6 +221,7 @@
     svgPaint(){ return `<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.3A4.9 4.9 0 0 0 22 11.6C22 6.9 17.5 3 12 3zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>`; }
     svgRules()   { return `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
+    svgAfiliado(){ return `<svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6Zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z"/></svg>`; }
     svgTicket()  { return `<svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/></svg>`; }
     svgFrame()   { return `<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v2.17A3 3 0 0 0 16.17 5H19zM5 5h2.83A3 3 0 0 0 5 7.83V5zm0 14v-2.83A3 3 0 0 0 7.83 19H5zm14 0h-2.83A3 3 0 0 0 19 16.17V19zM9 19a5 5 0 0 1 10-5V10a5 5 0 0 1-5-5h-4a5 5 0 0 1-5 5v4a5 5 0 0 1 4 5z"/></svg>`; }
     svgKey()     { return `<svg viewBox="0 0 24 24"><path d="M12.65 10A6 6 0 1 0 14 14.65L14 14h2v2h2v2h2v-2.18A6.002 6.002 0 0 0 12.65 10zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>`; }
@@ -1109,6 +1110,7 @@
                     <button class="nit" id="nRegras">${this.svgRules()} <span data-i18n="rules">REGRAS</span></button>
                     <button class="nit" id="nViolacoes">${this.svgAlerta()} <span>SITUAÇÃO DA CONTA</span></button>
                     <button class="nit hidden" id="nTickets">${this.svgTicket()} <span data-i18n="tickets">TICKETS</span></button>
+                    <button class="nit" id="nAfiliado">${this.svgAfiliado()} <span>INDICAÇÕES</span></button>
                     <a class="nit hidden" id="nAtalhoAdmin" href="admin/index.html">${this.svgShield()} <span>ADMIN</span></a>
                     <a class="nit hidden" id="nAtalhoAgente" href="agente/index.html">${this.svgAgente()} <span>AGENTE</span></a>
                     <a class="nit hidden" id="nAtalhoSub" href="adminsub/index.html">${this.svgShield()} <span>SUB</span></a>
@@ -1597,6 +1599,14 @@
                     <dmaior-tickets id="ticketsEl" worker-url="https://dashboard.agencydmaior.com.br"></dmaior-tickets>
                 </div>
 
+                <!-- ══════ INDICAÇÕES / AFILIADOS (componente nativo) ══════
+                     Todo streamer vê a aba; quem ainda não é afiliado ativa a própria participação ali.
+                     dmaior-afiliado lê dm_uid/dm_token sozinho; fala com o Worker admin. -->
+                <div id="vAfiliado" class="view" style="width:100%;">
+                    <button class="iframe-back pm-voltar" id="btnBackAfiliado">${this.svgBack()} VOLTAR</button>
+                    <dmaior-afiliado id="afiliadoEl" worker-url="https://admin.agencydmaior.com.br"></dmaior-afiliado>
+                </div>
+
                 <!-- ══════ REGRAS E DIRETRIZES (componente nativo, conteúdo estático) ══════ -->
                 <div id="vRegras" class="view" style="width:100%;">
                     <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
@@ -1803,7 +1813,7 @@
     // sem nenhum item some inteira. 3º campo = palavras extras pra busca.
     static get MENU_GRUPOS(){ return [
         ['Meu desempenho', [['nD','Resumo','inicio dashboard diamantes horas'], ['nRank','Ranking','posicao'], ['nPk','PK Diário','batalha']]],
-        ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate']]],
+        ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate'], ['nAfiliado','Indicações','afiliado indicar convidar link bonus recrutar']]],
         ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nEventos','Eventos','calendario agenda inscricao interesse pk'], ['nPers','Personalização','template moldura fundo ranking visual estilo cor'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
         ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
         ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente'], ['nAtalhoSub','Painel da Sub','sub agencia']]],
@@ -1992,6 +2002,7 @@
         this.qs('#violaAviso').addEventListener('click',e=>{ if(e.target.closest('[data-viola-abrir]')) this.goViolacoes(); });
         this.qs('#regrasEl')?.addEventListener('regras-aceitar', e=>this._aceitarTermo(e.detail || {}));
         this.qs('#nTickets').addEventListener('click',()=>this.goTickets());
+        this.qs('#nAfiliado').addEventListener('click',()=>this.goAfiliado());
         this.qs('#nMore').addEventListener('click',()=>{
             this.qs('#bNav').classList.toggle('expanded');
         });
@@ -2966,6 +2977,12 @@
         });
     }
 
+    // Aba Indicações: aparece para todo streamer. Quem ainda não é afiliado vê a tela "Seja um afiliado" e ativa ali mesmo.
+    goAfiliado(){
+        this.qs('#afiliadoEl')?.verificarSessao?.();
+        this.navigate('vAfiliado');
+        this.navActive('nAfiliado');
+    }
     goTickets(){
         // dmaior-tickets já existe no DOM desde antes do login terminar — reconfirma
         // a sessão toda vez que a aba abre, igual dmaior-impulso.

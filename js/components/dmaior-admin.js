@@ -155,7 +155,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Principal',[['dashboard'],['aoVivo','','lives transmissao'],['mapaAcessos','','visitas visitantes acessos cidade estado pais de onde acessam site mapa']]],
     ['Ranking e resultados',[['ranking','Ranking do Mês'],['diario'],['desempenho'],['historico'],['mesesRanking'],['dashDesemp','','comparativo grafico']]],
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
-    ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
+    ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['afiliados','','indicacao indicar streamer link bonus programa'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
     ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
     ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live']]],
     ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
@@ -386,7 +386,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -398,7 +398,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),mapaAcessos:()=>this._carregarMapaAcessos()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),mapaAcessos:()=>this._carregarMapaAcessos()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -2875,6 +2875,10 @@ class DimaiorAdmin extends HTMLElement {
     const msg=enviar?(d.ok?'Convite enviado! O streamer recebe o convite no app da Kwai.':(d.mensagem||d.erro||'Não foi possível enviar')):(d.mensagem||d.erro||'—');
     out.innerHTML=`<div style="border:1px solid ${okCor?'rgba(74,222,128,.4)':'rgba(248,113,113,.4)'};border-radius:10px;padding:12px 14px">${perfil}<div style="font-size:13px;color:${okCor?'var(--verde)':'var(--verm)'}">${this._ii(okCor?'check_c':'warning',13)}${this._esc(msg)}</div></div>`;
     if(bEnv) bEnv.disabled=!(!enviar&&d.pode_enviar);
+    if(!enviar&&d.pode_reenviar&&d.invite_id){
+      out.insertAdjacentHTML('beforeend',`<div style="margin-top:10px"><button class="btn btn-o" id="btnScReenviar">${this._ico('refresh',13)} Reenviar convite</button></div>`);
+      s.getElementById('btnScReenviar')?.addEventListener('click',e=>this._reenviarConvite(d.invite_id,p.memberId,e.currentTarget,()=>{ this._toast('Convite reenviado!','ok'); s.getElementById('scResultado').innerHTML=''; this._carregarSubConvites(); }));
+    }
     if(enviar&&d.ok){ s.getElementById('scUid').value=''; this._carregarSubConvites(); }
   }
   async _carregarSubConvites(){
@@ -4035,6 +4039,7 @@ class DimaiorAdmin extends HTMLElement {
     // Streamers Premium
     _bind('btnNovoStreamerPremium','click',()=>this._abrirFormStreamerPremium(null));
     _bind('btnAtuStreamersPremium','click',()=>this._carregarStreamersPremium());
+    _bind('btnAtuAfiliados','click',()=>this._carregarAfiliados());
     _bind('btnSalvarStreamerPremium','click',()=>this._salvarStreamerPremium());
     _bind('btnCancelarStreamerPremium','click',()=>{const fb=s.getElementById('formStreamerPremiumBox');if(fb)fb.style.display='none';});
     _bind('btnBuscarPrefillStreamerPremium','click',()=>this._buscarPrefillStreamerPremium());
@@ -8006,6 +8011,7 @@ class DimaiorAdmin extends HTMLElement {
               ni('clipboard','recrutamento','Recrutamento',`<span class="nb" id="nbRec" style="display:none">0</span>`)+
               ni('user_plus','convites','Convites',`<span class="nb" id="nbCand" style="display:none">0</span>`)+
               ni('users','agentes','Agentes')+
+              ni('user_plus','afiliados','Afiliados')+
               ni('refresh','agenteMigracoes','Migrações de Agente',`<span class="nb gold" id="nbMigracoesAgente" style="display:none">0</span>`)+
               ni('clipboard','solicitacoesFormularios','Solicitações de Formulários',`<span class="nb gold" id="nbSolicForm" style="display:none">0</span>`)
             )}
@@ -8223,6 +8229,10 @@ class DimaiorAdmin extends HTMLElement {
               </div>
             </div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
+            <div class="pag" id="pag-afiliados">
+              <div class="ph"><div><div class="titulo">${this._ico('user_plus',18)} Afiliados</div><div class="psub">Streamers que indicam novos streamers — eles mesmos ativam a participação no painel deles; aqui você controla o programa, as metas e o fechamento</div></div><div class="ph-r"><button class="btn btn-o" id="btnAtuAfiliados">${this._ico('refresh',13)} Atualizar</button></div></div>
+              <div id="afRaiz">${this._loading()}</div>
+            </div>
             <div class="pag" id="pag-streamersPremium">
               <div class="ph"><div><div class="titulo">${this._ico('star',18)} Streamers Premium</div><div class="psub">Onboarding premium — lives-teste, início de contrato e selo Premium (Drive)</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnAtuStreamersPremium">${this._ico('refresh',13)} Atualizar</button><button class="btn btn-g" id="btnNovoStreamerPremium">${this._ico('plus',13)} Novo</button></div></div>
               <div class="box"><div id="tbStreamersPremium">${this._loading()}</div></div>
@@ -9197,7 +9207,7 @@ class DimaiorAdmin extends HTMLElement {
         </td>
         <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||'—')}</td>
         <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'—')}</td>
-        <td style="padding:8px">${c.reenviavel?`<button class="btn btn-sm btn-o" data-conv-reenv="${c.id}">${this._ico('refresh',11)} Reenviar</button>`:''}</td>
+        <td style="padding:8px">${c.reenviavel?`<button class="btn btn-sm btn-o" data-conv-reenv="${c.id}" data-conv-mid="${this._esc(String(c.memberId||''))}">${this._ico('refresh',11)} Reenviar</button>`:''}</td>
       </tr>`).join('')}</tbody>
     </table>
     <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
@@ -9208,17 +9218,28 @@ class DimaiorAdmin extends HTMLElement {
         ${_pgBtn('→',pg+1,pg>=totalPg)}
       </div>
     </div>`;
-    el.querySelectorAll('[data-conv-reenv]').forEach(b=>b.addEventListener('click',()=>this._reenviarConvite(b.dataset.convReenv)));
+    el.querySelectorAll('[data-conv-reenv]').forEach(b=>b.addEventListener('click',()=>this._reenviarConvite(b.dataset.convReenv,b.dataset.convMid,b)));
     el.querySelectorAll('[data-conv-pg]').forEach(b=>b.addEventListener('click',()=>!b.disabled&&this._carregarConvitesVoyager(+b.dataset.convPg)));
     el.querySelectorAll('[data-conv-cnt]').forEach(b=>b.addEventListener('click',()=>!b.disabled&&this._carregarConvitesVoyager(1,+b.dataset.convCnt)));
   }
 
-  async _reenviarConvite(inviteId){
-    const modo=this.shadowRoot.getElementById('convModo')?.value||'simular';
-    const dry=modo==='simular';
-    const r=await this._api('POST',`/admin/convites/${inviteId}/reenviar`,{dry_run:dry});
-    if(r?.ok)this._toast(dry?'Simulado OK':'Reenviado!','ok');
-    else this._toast(r?.erro||'Erro ao reenviar','err');
+  // Reenvia um convite expirado. A resposta do servidor é a verdade: só mostra
+  // "Reenviado" quando a Kwai aceitou; recusa aparece com o motivo dela.
+  // btn: botão que disparou (trava contra clique duplo); aoConcluir: callback após sucesso.
+  async _reenviarConvite(inviteId,memberId,btn,aoConcluir){
+    const modoEl=this.shadowRoot.getElementById('convModo');
+    // Só a lista da aba Convites tem o seletor Simular/Real; os botões do modal e da sub são reenvio real.
+    const dry=(!aoConcluir&&modoEl)?modoEl.value==='simular':false;
+    if(btn)btn.disabled=true;
+    // Sub: rota própria /sub/convites/reenviar (id no corpo); admin: /admin/convites/:id/reenviar.
+    const r=this._sub
+      ?await this._api('POST','/admin/convites/reenviar',{invite_id:inviteId,member_id:memberId})
+      :await this._api('POST',`/admin/convites/${encodeURIComponent(inviteId)}/reenviar`,{dry_run:dry,member_id:memberId||undefined});
+    if(btn)btn.disabled=false;
+    if(r?.ok){
+      this._toast(dry?'Simulação OK — nada foi enviado à Kwai':'Convite reenviado!','ok');
+      if(!dry){ if(aoConcluir)aoConcluir(); else if(this.shadowRoot.getElementById('tbConvitesVoyager'))this._carregarConvitesVoyager(); }
+    }else this._toast(r?.mensagem||r?.erro||'A Kwai não aceitou o reenvio','err');
   }
 
   async _bulkReenviar(dry){
@@ -9561,6 +9582,7 @@ class DimaiorAdmin extends HTMLElement {
     const agBadge=p.agencia?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);color:var(--gold)">${this._esc(p.agencia)}</span>`:'';
     const stBadge=r.status==='LIVRE'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--verde)">Livre</span>`:
       r.status==='VINCULADO_OUTRA_AGENCIA'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)">Outra Agência</span>`:
+      r.status==='CONVITE_REENVIAVEL'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);color:var(--gold)">Convite expirado</span>`:
       `<span style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--brddim);color:var(--t3)">${this._esc(r.status)}</span>`;
     s.getElementById('mConvPerfilResult').innerHTML=`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--brddim);margin-top:8px">
       ${foto}
@@ -9571,6 +9593,15 @@ class DimaiorAdmin extends HTMLElement {
       </div></div>`;
     if(r.status==='LIVRE'||r.acao==='ENVIAR')s.getElementById('mConvEnvioArea').style.display='';
     this._convPerfilAtual=r.perfil;
+    // Convite expirado: a verificação já sabe que dá pra reenviar — oferece a ação aqui
+    // (antes só aparecia o texto "pode ser reenviado" e nenhum botão).
+    if(r.status==='CONVITE_REENVIAVEL'&&r.invite_id){
+      const box=s.getElementById('mConvPerfilResult');
+      box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:4px 0 8px">${this._esc(r.mensagem||'')}</div><button class="btn btn-o" id="mConvBtnReenviar">${this._ico('refresh',13)} Reenviar convite</button>`);
+      s.getElementById('mConvBtnReenviar')?.addEventListener('click',e=>this._reenviarConvite(r.invite_id,r.perfil?.memberId,e.currentTarget,()=>this._buscarPerfilConvite()));
+    }else if(r.mensagem&&r.status!=='LIVRE'){
+      s.getElementById('mConvPerfilResult').insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:2px 0 6px">${this._esc(r.mensagem)}</div>`);
+    }
   }
 
   async _enviarConviteManual(dry){
@@ -9595,6 +9626,207 @@ class DimaiorAdmin extends HTMLElement {
       if(res)res.innerHTML=`<div style="color:var(--verm);font-size:12px;padding:6px 0">${this._esc(motivo)}</div>`;
       this._toast(motivo,'err');
     }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // AFILIADOS — streamers que indicam streamers (SQL/afiliados.sql; Worker admin /admin/afiliados/*)
+  // Tudo separado dos agentes: regras, percentuais e vínculos próprios. Desligar o programa
+  // bloqueia só indicações NOVAS; nada do histórico é apagado.
+  // ════════════════════════════════════════════════════════════
+  _afMes='';
+
+  _afMeses(){ // últimos 12 meses (Fortaleza); '' = mês atual
+    const out=[]; const d=new Date(Date.now()-3*3600000); d.setUTCDate(1);
+    for(let i=0;i<12;i++){ out.push(d.toISOString().slice(0,7)); d.setUTCMonth(d.getUTCMonth()-1); }
+    return out;
+  }
+  _afNum(n){return Number(n||0).toLocaleString('pt-BR');}
+  _afDec(n){return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  _afBrl(n){return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+  _afStBonus(st){return ({calculado:['Calculado','var(--gold)'],aprovado:['Aprovado','var(--cyan)'],pago:['Pago','var(--verde)'],cancelado:['Cancelado','var(--verm)']}[st])||[st,'var(--t3)'];}
+
+  // Modal simples (dentro do shadow DOM, para pegar os tokens de tema)
+  _afModal(titulo,corpo,salvar,onSave){
+    const s=this.shadowRoot; s.getElementById('mAf')?.remove();
+    const w=document.createElement('div');
+    w.innerHTML=`<div id="mAf" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px">
+      <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:22px;min-width:300px;max-width:${salvar?'440px':'760px'};width:100%;max-height:90vh;overflow:auto">
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:19px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;color:var(--t1)">${this._esc(titulo)}</div>
+        ${corpo}
+        <div id="mAfErro" style="color:var(--verm);font-size:12px;margin-top:8px;min-height:16px"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+          <button class="btn btn-o" id="mAfFechar">${salvar?'Cancelar':'Fechar'}</button>
+          ${salvar?`<button class="btn btn-g" id="mAfSalvar">${this._ico('check',13)} ${this._esc(salvar)}</button>`:''}
+        </div></div></div>`;
+    s.appendChild(w.firstChild);
+    const m=s.getElementById('mAf');
+    m.querySelector('#mAfFechar').addEventListener('click',()=>m.remove());
+    if(salvar) m.querySelector('#mAfSalvar').addEventListener('click',async e=>{
+      e.currentTarget.disabled=true;
+      const erro=await onSave(m);
+      if(erro){ m.querySelector('#mAfErro').textContent=erro; e.currentTarget.disabled=false; } else m.remove();
+    });
+    return m;
+  }
+  _afCampo(id,rot,val='',extra='',dica=''){
+    return `<div style="margin-bottom:12px"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px">${rot}</label><input id="${id}" ${extra} value="${this._esc(val)}" style="width:100%;padding:9px 12px;background:var(--input-bg);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:14px;outline:none"/>${dica?`<div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.4">${dica}</div>`:''}</div>`;
+  }
+
+  async _carregarAfiliados(){
+    const s=this.shadowRoot; const el=s.getElementById('afRaiz'); if(!el) return;
+    el.innerHTML=this._loading();
+    const q=this._afMes?`?mes=${this._afMes}`:'';
+    const [cfg,lst,ind,bon]=await Promise.all([
+      this._api('GET','/admin/afiliados/config'),
+      this._api('GET',`/admin/afiliados${q}`),
+      this._api('GET','/admin/afiliados/indicacoes'),
+      this._api('GET',`/admin/afiliados/bonus${q}`),
+    ]);
+    if(!cfg?.ok||!lst?.ok){ el.innerHTML=this._empty('warning',cfg?.erro||lst?.erro||'Erro ao carregar os afiliados. Confira se o SQL e o Worker foram publicados.'); return; }
+    const th='padding:10px 8px;text-align:left;color:var(--t3);font-weight:600';
+    const c=cfg.config||{};
+    const mesesOpt=['',...this._afMeses().slice(1)].map(m=>`<option value="${m}" ${m===this._afMes?'selected':''}>${m||'Mês atual'}</option>`).join('');
+    const regras=(cfg.regras||[]).map(r=>`<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t1)">${this._esc(r.nome)}${r.ativo?'':' <span style="color:var(--t3);font-size:11px">(inativa)</span>'}</td><td style="padding:9px 8px;color:var(--t2)">${this._afNum(r.dias_minimos)}</td><td style="padding:9px 8px;color:var(--t2)">${this._afDec(r.horas_minimas)} h</td><td style="padding:9px 8px;color:var(--t1)"><b>${this._afDec(r.percentual)}%</b></td><td style="padding:9px 8px;text-align:right"><button class="btn btn-sm btn-o" data-af-regra-edit="${this._esc(JSON.stringify(r))}">${this._ico('edit',11)} Editar</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-regra-del="${r.id}">${this._ico('trash',11)}</button></td></tr>`).join('');
+    const afs=lst.afiliados||[];
+    const linhas=afs.map(a=>`<tr style="border-bottom:1px solid var(--brddim);${a.ativo?'':'opacity:.6'}">
+      <td style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(a.foto_url||''),a.nome||a.kwai_uid,'av')}<div><strong style="color:var(--t1)">${this._esc(a.nome||'—')}</strong><div style="font-size:10px;color:var(--cyan)">/${this._esc(a.codigo)} · UID ${this._esc(a.kwai_uid)}</div></div></div></td>
+      <td style="padding:10px 8px;color:var(--t2)">${a.indicacoes.concluidas} concl. · ${a.indicacoes.pendentes} pend. · ${a.indicacoes.total} total</td>
+      <td style="padding:10px 8px;color:var(--t1)">${this._afNum(a.diamantes)}</td>
+      <td style="padding:10px 8px;color:var(--t2)">${this._afDec(a.horas)} h</td>
+      <td style="padding:10px 8px;color:var(--gold)"><b>${this._afBrl(a.bonus_brl)}</b><div style="font-size:10px;color:var(--t3)">${this._afDec(a.bonus_koin)} Koin${a.comissao_percentual_override!=null?` · ${this._afDec(a.comissao_percentual_override)}% manual`:''}</div></td>
+      <td style="padding:10px 8px"><span style="font-size:11px;font-weight:700;color:${a.ativo?'var(--verde)':'var(--verm)'}">${a.ativo?'Ativo':(a.desativado_por==='streamer'?'Pausado pelo streamer':'Desativado')}</span><div style="font-size:10px;color:var(--t3)">${a.ativado_por==='streamer'?'ativou sozinho':'liberado pelo admin'}</div></td>
+      <td style="padding:10px 8px;text-align:right;white-space:nowrap">
+        <button class="btn btn-sm btn-o" data-af-det="${a.id}">${this._ico('eye',11)} Detalhes</button>
+        <button class="btn btn-sm btn-o" data-af-edit="${this._esc(JSON.stringify({id:a.id,codigo:a.codigo,nome:a.nome,ov:a.comissao_percentual_override,obs:a.observacao||''}))}">${this._ico('edit',11)}</button>
+        <button class="btn btn-sm btn-o" data-af-copiar="${this._esc(a.links?.curto||'')}" title="Copiar link curto">${this._ico('link',11)}</button>
+        <button class="btn btn-sm" style="background:${a.ativo?'rgba(248,113,113,.1)':'rgba(74,222,128,.1)'};border:1px solid ${a.ativo?'rgba(248,113,113,.35)':'rgba(74,222,128,.4)'};color:${a.ativo?'var(--verm)':'var(--verde)'}" data-af-ativo="${a.id}" data-af-novo="${a.ativo?0:1}">${a.ativo?'Desativar':'Ativar'}</button>
+      </td></tr>`).join('');
+    const bonus=(bon?.bonus||[]).map(b=>{const [rot,cor]=this._afStBonus(b.status);return `<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t2)">${this._esc(b.mes)}</td><td style="padding:9px 8px;color:var(--t1)">${this._esc(b.afiliados?.nome||'—')}</td><td style="padding:9px 8px;color:var(--t2)">${this._esc(b.indicado_nome||b.indicado_uid)}</td><td style="padding:9px 8px">${this._afNum(b.diamantes)}</td><td style="padding:9px 8px">${this._afDec(b.percentual)}%</td><td style="padding:9px 8px;color:var(--gold)"><b>${this._afBrl(b.brl)}</b></td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:700;color:${cor}">${rot}</span></td><td style="padding:9px 8px;text-align:right;white-space:nowrap">${b.status==='calculado'?`<button class="btn btn-sm btn-o" data-af-bonus="${b.id}" data-af-st="aprovado">Aprovar</button> `:''}${b.status==='aprovado'?`<button class="btn btn-sm btn-g" data-af-bonus="${b.id}" data-af-st="pago">Marcar pago</button> `:''}${(b.status==='calculado'||b.status==='aprovado')?`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-bonus="${b.id}" data-af-st="cancelado">Cancelar</button>`:''}</td></tr>`;}).join('');
+    const inds=(ind?.indicacoes||[]).slice(0,60).map(i=>{const cor=i.status==='confirmado'?'var(--verde)':i.status==='convidado'?'var(--gold)':'var(--t3)';return `<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t1)">${this._esc(i.indicado_nome||i.indicado_kwai_id||i.indicado_uid)}<div style="font-size:10px;color:var(--t3)">UID ${this._esc(i.indicado_uid)}</div></td><td style="padding:9px 8px;color:var(--t2)">${this._esc(i.afiliados?.nome||'—')}</td><td style="padding:9px 8px;color:var(--t2)">${this._esc(i.origem)}</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:700;color:${cor}">${this._esc(i.status)}</span>${i.cancelado_motivo?`<div style="font-size:10px;color:var(--t3)">${this._esc(i.cancelado_motivo)}</div>`:''}</td><td style="padding:9px 8px;color:var(--t2)">${this._fdt(i.convidado_em)}</td><td style="padding:9px 8px;text-align:right">${i.status!=='cancelado'?`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-ind-cancel="${i.id}">Cancelar</button>`:''}</td></tr>`;}).join('');
+    el.innerHTML=`
+      <div class="box"><div class="bhead"><div class="btitulo">${this._ico('user_plus',14)} Programa de indicações dos afiliados</div></div>
+        <div style="padding:14px 18px 18px">
+          <label style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="tog-switch"><input type="checkbox" id="afPrograma" ${cfg.programa_ativo?'checked':''}><span class="tog-slider"></span></span>
+            <span style="color:var(--t1);font-weight:700">${cfg.programa_ativo?'Ativado':'Desativado'}</span>
+            <span style="font-size:12px;color:var(--t3);flex:1;min-width:220px;line-height:1.45">Desligado: ninguém envia novos convites e os links não geram novas indicações. O histórico, os resultados, o ranking e os bônus continuam visíveis e <b>nada é apagado</b>.</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:16px">
+            <div>${this._afCampo('afKoin','Koin por dólar',c.koin_por_dolar,'type="number" min="1" step="any"')}</div>
+            <div>${this._afCampo('afCot','Cotação do dólar (R$)',c.cotacao_dolar,'type="number" min="0.01" step="any"')}</div>
+            <div style="margin-bottom:12px"><button class="btn btn-o" id="afSalvarConv">${this._ico('check',13)} Salvar conversão</button></div>
+          </div>
+          <div style="font-size:11px;color:var(--t3)">Configuração própria dos afiliados — alterar aqui não muda nada dos agentes.</div>
+        </div></div>
+      <div class="box"><div class="bhead"><div class="btitulo">${this._ico('trophy',14)} Metas e percentuais de bonificação</div><button class="btn btn-sm btn-g" id="afNovaRegra">${this._ico('plus',12)} Nova meta</button></div>
+        <div style="padding:6px 10px 14px;overflow-x:auto">${regras?`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:1px solid var(--brddim)"><th style="${th}">Meta</th><th style="${th}">Dias mín.</th><th style="${th}">Horas mín.</th><th style="${th}">Percentual</th><th></th></tr></thead><tbody>${regras}</tbody></table>`:this._empty('trophy','Nenhuma meta cadastrada: sem meta e sem % manual, o bônus fica em 0%.')}
+          <div style="font-size:11px;color:var(--t3);padding:8px 8px 0;line-height:1.5">Cada indicado é avaliado pelos próprios dias e horas no mês; vale a meta mais alta que ele atingiu. Cálculo igual ao dos agentes (percentual → Koin → dólar → real), feito no servidor.</div></div></div>
+      <div class="box"><div class="bhead"><div class="btitulo">${this._ico('users',14)} Afiliados <span style="font-size:12px;color:var(--t3);font-weight:400">(${afs.length})</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><select id="afMes" class="viol-sel">${mesesOpt}</select><button class="btn btn-sm btn-g" id="afNovo">${this._ico('plus',12)} Liberar streamer</button></div></div>
+        <div style="padding:6px 10px 14px;overflow-x:auto">${afs.length?`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:1px solid var(--brddim)"><th style="${th}">Afiliado</th><th style="${th}">Indicações</th><th style="${th}">Diamantes</th><th style="${th}">Horas</th><th style="${th}">Bônus</th><th style="${th}">Situação</th><th></th></tr></thead><tbody>${linhas}</tbody></table>`:this._empty('user_plus','Nenhum afiliado ainda. Clique em "Liberar streamer".')}</div></div>
+      <div class="box"><div class="bhead"><div class="btitulo">${this._ico('award',14)||''} Fechamento e bônus</div>
+          <div style="display:flex;gap:8px;align-items:center"><select id="afMesFechar" class="viol-sel">${this._afMeses().slice(1).map(m=>`<option value="${m}">${m}</option>`).join('')}</select><button class="btn btn-sm btn-g" id="afFechar">Fechar mês</button></div></div>
+        <div style="padding:6px 10px 14px;overflow-x:auto">${bonus?`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:1px solid var(--brddim)"><th style="${th}">Mês</th><th style="${th}">Afiliado</th><th style="${th}">Indicado</th><th style="${th}">Diamantes</th><th style="${th}">%</th><th style="${th}">Valor</th><th style="${th}">Situação</th><th></th></tr></thead><tbody>${bonus}</tbody></table>`:this._empty('award','Nenhum bônus fechado neste filtro. "Fechar mês" grava a foto do bônus de um mês já encerrado (não duplica nem mexe no que já foi aprovado/pago).')}</div></div>
+      <div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Indicações (últimas 60)</div></div>
+        <div style="padding:6px 10px 14px;overflow-x:auto">${inds?`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:1px solid var(--brddim)"><th style="${th}">Indicado</th><th style="${th}">Afiliado</th><th style="${th}">Origem</th><th style="${th}">Situação</th><th style="${th}">Convite</th><th></th></tr></thead><tbody>${inds}</tbody></table>`:this._empty('users','Nenhuma indicação registrada ainda.')}</div></div>`;
+    this._afLigar(el,cfg,afs);
+  }
+
+  _afLigar(el,cfg,afs){
+    const s=this.shadowRoot;
+    const recarregar=()=>this._carregarAfiliados();
+    el.querySelector('#afPrograma')?.addEventListener('change',e=>{
+      const ligar=e.target.checked;
+      e.target.checked=!ligar; // só muda depois da confirmação/resposta
+      const msg=ligar?'Ativar o programa de indicações dos afiliados? Os links voltam a registrar indicações e os afiliados podem enviar convites.':'Desativar o programa? Novos convites e novas indicações por link ficam bloqueados. O histórico NÃO é apagado.';
+      this._confirmarDel(msg,async()=>{
+        const r=await this._api('POST','/admin/afiliados/config',{programa_ativo:ligar});
+        if(r?.ok){this._toast(ligar?'Programa ativado':'Programa desativado','ok');recarregar();} else this._toast(r?.erro||'Erro ao salvar','err');
+      });
+    });
+    el.querySelector('#afSalvarConv')?.addEventListener('click',async()=>{
+      const r=await this._api('POST','/admin/afiliados/config',{koin_por_dolar:s.getElementById('afKoin').value,cotacao_dolar:s.getElementById('afCot').value});
+      if(r?.ok)this._toast('Conversão salva','ok'); else this._toast(r?.erro||'Erro ao salvar','err');
+    });
+    el.querySelector('#afMes')?.addEventListener('change',e=>{this._afMes=e.target.value;recarregar();});
+    const regraModal=(r)=>{
+      const t=r||{};
+      this._afModal(r?'Editar meta':'Nova meta',
+        this._afCampo('afrNome','Nome',t.nome||'','type="text"')+`<div style="display:flex;gap:10px">${this._afCampo('afrDias','Dias mín.',t.dias_minimos??0,'type="number" min="0"')}${this._afCampo('afrHoras','Horas mín.',t.horas_minimas??0,'type="number" min="0" step="0.5"')}${this._afCampo('afrPct','%',t.percentual??0,'type="number" min="0" max="100" step="0.1"')}</div>`,
+        'Salvar',async m=>{
+          const p={nome:m.querySelector('#afrNome').value.trim(),dias_minimos:m.querySelector('#afrDias').value||0,horas_minimas:m.querySelector('#afrHoras').value||0,percentual:m.querySelector('#afrPct').value||0};
+          if(!p.nome) return 'Nome obrigatório';
+          const x=r?await this._api('PATCH',`/admin/afiliados/regras/${r.id}`,p):await this._api('POST','/admin/afiliados/regras',p);
+          if(!x?.ok) return x?.erro||'Erro ao salvar';
+          this._toast('Meta salva','ok'); recarregar(); return null;
+        });
+    };
+    el.querySelector('#afNovaRegra')?.addEventListener('click',()=>regraModal(null));
+    el.querySelectorAll('[data-af-regra-edit]').forEach(b=>b.addEventListener('click',()=>{try{regraModal(JSON.parse(b.dataset.afRegraEdit));}catch{}}));
+    el.querySelectorAll('[data-af-regra-del]').forEach(b=>b.addEventListener('click',()=>this._confirmarDel('Excluir esta meta? Bônus já fechados não mudam.',async()=>{
+      const r=await this._api('DELETE',`/admin/afiliados/regras/${b.dataset.afRegraDel}`); if(r?.ok){this._toast('Meta excluída','ok');recarregar();} else this._toast(r?.erro||'Erro','err');
+    })));
+    el.querySelector('#afNovo')?.addEventListener('click',()=>this._afModal('Liberar streamer como afiliado',
+      this._afCampo('afnBusca','ID do Kwai ou UID','','type="text" autocomplete="off"','O streamer precisa ter login no painel. O link usa o ID textual (o @), nunca o número.')+this._afCampo('afnCodigo','Código do link (opcional)','','type="text"','Deixe vazio para usar o @ do streamer.'),
+      'Liberar',async m=>{
+        const busca=m.querySelector('#afnBusca').value.trim(); if(!busca) return 'Informe o ID ou UID';
+        const r=await this._api('POST','/admin/afiliados',{busca,codigo:m.querySelector('#afnCodigo').value.trim()||undefined});
+        if(!r?.ok) return r?.erro||'Erro ao liberar';
+        this._toast('Afiliado liberado','ok'); recarregar(); return null;
+      }));
+    el.querySelectorAll('[data-af-edit]').forEach(b=>b.addEventListener('click',()=>{
+      let a; try{a=JSON.parse(b.dataset.afEdit);}catch{return;}
+      this._afModal(`Editar ${a.nome||'afiliado'}`,
+        this._afCampo('afeCodigo','Código do link',a.codigo,'type="text"','Ao trocar, o código antigo continua funcionando (links já divulgados não quebram).')+
+        this._afCampo('afeOv','Percentual manual (%)',a.ov??'','type="number" min="0" max="100" step="0.1"','Vazio = usar as metas. Preenchido = vale para todos os indicados deste afiliado.')+
+        this._afCampo('afeObs','Observação',a.obs,'type="text"'),
+        'Salvar',async m=>{
+          const ov=m.querySelector('#afeOv').value.trim();
+          const r=await this._api('PATCH',`/admin/afiliados/${a.id}`,{codigo:m.querySelector('#afeCodigo').value.trim(),comissao_percentual_override:ov===''?null:Number(ov),observacao:m.querySelector('#afeObs').value.trim()});
+          if(!r?.ok) return r?.erro||'Erro ao salvar'; this._toast('Salvo','ok'); recarregar(); return null;
+        });
+    }));
+    el.querySelectorAll('[data-af-ativo]').forEach(b=>b.addEventListener('click',()=>this._confirmarDel(b.dataset.afNovo==='1'?'Reativar este afiliado?':'Desativar este afiliado? Os indicados e o histórico continuam; ele deixa de enviar convites e o link para de registrar novas indicações.',async()=>{
+      const r=await this._api('PATCH',`/admin/afiliados/${b.dataset.afAtivo}`,{ativo:b.dataset.afNovo==='1'}); if(r?.ok){this._toast('Atualizado','ok');recarregar();} else this._toast(r?.erro||'Erro','err');
+    })));
+    el.querySelectorAll('[data-af-copiar]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.afCopiar);this._toast('Link copiado','ok');}catch{this._toast('Não consegui copiar','err');}}));
+    el.querySelectorAll('[data-af-det]').forEach(b=>b.addEventListener('click',()=>this._afDetalhe(b.dataset.afDet)));
+    el.querySelector('#afFechar')?.addEventListener('click',()=>{
+      const mes=s.getElementById('afMesFechar').value;
+      this._confirmarDel(`Fechar ${mes}? Grava o bônus de cada indicado (não duplica; o que já foi aprovado/pago não muda).`,async()=>{
+        // O servidor fecha em lotes de afiliados; repete até acabar e soma o resultado.
+        let offset=0, tot={criados:0,atualizados:0,mantidos:0}, falhas=[], erroRede=false, acabou=false;
+        for(let volta=0; volta<200; volta++){
+          const r=await this._api('POST','/admin/afiliados/fechar-mes',{mes,offset});
+          if(!r||r.erro){ this._toast(r?.erro||'Erro ao fechar','err'); erroRede=true; break; }
+          tot.criados+=r.criados||0; tot.atualizados+=r.atualizados||0; tot.mantidos+=r.mantidos||0; falhas.push(...(r.falhas||[]));
+          if(r.proximo_offset==null){ acabou=true; break; }
+          offset=r.proximo_offset;
+        }
+        if(erroRede){ this._afMes=mes; recarregar(); return; }
+        if(!acabou){ this._toast('Fechamento INTERROMPIDO antes de acabar — rode de novo para continuar (nada é duplicado).','err'); this._afMes=mes; recarregar(); return; }
+        if(falhas.length) this._toast(`Fechamento PARCIAL — falhou para: ${falhas.join(', ')}. Rode de novo para completar (nada é duplicado).`,'err');
+        else this._toast(`Fechado: ${tot.criados} novos, ${tot.atualizados} recalculados, ${tot.mantidos} mantidos`,'ok');
+        this._afMes=mes; recarregar();
+      });
+    });
+    el.querySelectorAll('[data-af-bonus]').forEach(b=>b.addEventListener('click',async()=>{
+      const r=await this._api('PATCH',`/admin/afiliados/bonus/${b.dataset.afBonus}`,{status:b.dataset.afSt});
+      if(r?.ok){this._toast('Bônus atualizado','ok');recarregar();} else this._toast(r?.erro||'Erro','err');
+    }));
+    el.querySelectorAll('[data-af-ind-cancel]').forEach(b=>b.addEventListener('click',()=>this._confirmarDel('Cancelar esta indicação? Ela deixa de contar bônus (o histórico fica registrado).',async()=>{
+      const r=await this._api('POST',`/admin/afiliados/indicacoes/${b.dataset.afIndCancel}/cancelar`,{}); if(r?.ok){this._toast('Indicação cancelada','ok');recarregar();} else this._toast(r?.erro||'Erro','err');
+    })));
+  }
+
+  async _afDetalhe(id){
+    const r=await this._api('GET',`/admin/afiliados/${id}${this._afMes?`?mes=${this._afMes}`:''}`);
+    if(!r?.ok){this._toast(r?.erro||'Erro ao abrir','err');return;}
+    const th='padding:8px 6px;text-align:left;color:var(--t3);font-weight:600;font-size:11px';
+    const linhas=(r.indicados||[]).map(i=>`<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:8px 6px;color:var(--t1)">${this._esc(i.nome||i.kwai_id||i.uid)}<div style="font-size:10px;color:var(--t3)">@${this._esc(i.kwai_id||'—')} · ${this._esc(i.uid)}</div></td><td style="padding:8px 6px;color:var(--t2)">${this._esc(i.status)}${i.vinculo==='desligado'?' (desligado)':''}</td><td style="padding:8px 6px">${this._afNum(i.diamantes)}</td><td style="padding:8px 6px;color:var(--t2)">${this._esc(i.hhmm_total)} <span style="font-size:10px;color:var(--t3)">vídeo ${this._esc(i.hhmm_video)} · áudio ${this._esc(i.hhmm_audio)}</span></td><td style="padding:8px 6px">${this._afNum(i.dias)}</td><td style="padding:8px 6px;color:var(--gold)">${this._afBrl(i.brl)}<div style="font-size:10px;color:var(--t3)">${this._afDec(i.percentual)}%</div></td></tr>`).join('');
+    const t=r.totais||{};
+    this._afModal(`${r.afiliado.nome||'Afiliado'} — /${r.afiliado.codigo}`,
+      `<div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6">Período: <b>${this._esc(r.periodo.mes)}</b> · ${t.total_indicados} indicados (${t.concluidas} concluídos, ${t.convidados_pendentes} aguardando) · ${this._afNum(t.diamantes)} diamantes · ${this._afDec(t.horas_total)} h (vídeo ${this._afDec(t.horas_video)} · áudio ${this._afDec(t.horas_audio)}) · bônus <b style="color:var(--gold)">${this._afBrl(t.bonus_brl)}</b><br>Links: ${this._esc(r.afiliado.links?.completo)} · ${this._esc(r.afiliado.links?.curto)}<br>Códigos que levam a este afiliado: ${(r.codigos||[]).map(c=>this._esc(c.codigo)+(c.principal?' (atual)':'')).join(', ')}</div>
+       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:1px solid var(--brddim)"><th style="${th}">Indicado</th><th style="${th}">Situação</th><th style="${th}">Diamantes</th><th style="${th}">Horas</th><th style="${th}">Dias</th><th style="${th}">Bônus</th></tr></thead><tbody>${linhas||`<tr><td colspan="6" style="padding:16px;text-align:center;color:var(--t3)">Sem indicados.</td></tr>`}</tbody></table></div>`,
+      null,null);
   }
 
   // ════════════════════════════════════════════════════════════

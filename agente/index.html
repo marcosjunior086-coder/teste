@@ -3063,11 +3063,17 @@ async function buscarPerfilConvite() {
           <div class="perfil-acoes">
             <select class="sel-categoria" id="sel-cat"><option value="entretenimento">Entretenimento</option><option value="games">Games</option></select>
             <button class="btn btn-green" id="btn-enviar-convite">Enviar Convite</button>
-          </div>` : ''}
+          </div>` : (d.pode_reenviar && d.invite_id ? `
+          <div class="perfil-acoes">
+            <button class="btn btn-green" id="btn-reenviar-convite">Reenviar Convite</button>
+          </div>` : '')}
       </div>`;
     if (statusTexto) mostrarMsg(msg, statusTexto, d.pode_enviar ? 'ok' : 'warn');
     if (d.pode_enviar) {
       document.getElementById('btn-enviar-convite').addEventListener('click', enviarConvite);
+    } else if (d.pode_reenviar && d.invite_id) {
+      _perfilAtual.invite_id = String(d.invite_id);
+      document.getElementById('btn-reenviar-convite').addEventListener('click', reenviarConvite);
     }
   } catch(e) {
     mostrarMsg(msg, `Erro: ${e.message}`, 'err');
@@ -3107,6 +3113,33 @@ async function enviarConvite() {
     mostrarMsg(msg, `Erro: ${e.message}`, 'err');
   } finally {
     btn.disabled = false; btn.textContent = 'Enviar Convite';
+  }
+}
+
+// Reenvio de um convite expirado (só dos convites que o próprio agente enviou).
+async function reenviarConvite() {
+  if (!_perfilAtual?.invite_id) return;
+  const btn = document.getElementById('btn-reenviar-convite');
+  const msg = document.getElementById('msg-convite');
+  btn.disabled = true; btn.textContent = 'Reenviando…';
+  try {
+    const d = await api('/agente/convites/reenviar', {
+      method: 'POST',
+      body: { invite_id: _perfilAtual.invite_id, member_id: _perfilAtual.memberId, kwai_id: _perfilAtual.kwaiId },
+    });
+    if (d.ok) {
+      mostrarMsg(msg, 'Convite reenviado com sucesso!', 'ok');
+      _perfilAtual = null;
+      document.getElementById('perfil-resultado').innerHTML = '';
+      document.getElementById('inp-uid').value = '';
+      _desemp = false;
+    } else {
+      mostrarMsg(msg, d.mensagem || 'A Kwai não aceitou o reenvio.', 'err');
+      btn.disabled = false; btn.textContent = 'Reenviar Convite';
+    }
+  } catch(e) {
+    mostrarMsg(msg, `Erro: ${e.message}`, 'err');
+    btn.disabled = false; btn.textContent = 'Reenviar Convite';
   }
 }
 

@@ -454,7 +454,7 @@
 
   <script defer charset=utf-8 src="js/preferences.js?v=20260801-pk-diario"></script>
   <script defer charset=utf-8 src="js/utils/helpers.js"></script>
-  <script defer charset=utf-8 src="js/api.js?v=20260922-termos-b"></script>
+  <script defer charset=utf-8 src="js/api.js?v=20261014-afiliado"></script>
   <script defer charset=utf-8 src="js/components/regras-diretrizes.js?v=20260924-icones-svg2"></script>
   <script defer charset=utf-8 src="js/auth.js"></script>
   <script defer charset=utf-8 src="js/router.js"></script>
@@ -469,6 +469,7 @@
     let _candidaturaId = null;
     let _recrutadoresCarregados = false;
     let _agenteVinculo = null;
+    let _afiliadoRef = null;   // { codigo, nome } do link de indicação de um streamer afiliado
 
     const $ = id => document.getElementById(id);
     const tt = (key, params) => window.DMaiorPrefs?.t ? window.DMaiorPrefs.t(key, params) : key;
@@ -818,7 +819,8 @@
           whatsapp,
           categoria,
           recrutador_id: $('f-recrutador').value || null,
-          agente_id: _agenteVinculo?.id || null,
+          agente_id: _agenteVinculo?.login || _agenteVinculo?.id || null,
+          afiliado_codigo: _afiliadoRef?.codigo || null,
           aceite: true,
           maior_idade: true,
           aceite_diretrizes_kwai: true,
@@ -836,6 +838,7 @@
         }
 
         _candidaturaId = r.candidatura_id || null;
+        if (_afiliadoRef) { try { localStorage.removeItem('dm_ref'); } catch (e) {} }
 
         $('resultado-protocolo').textContent = r.protocolo ? `Protocolo: ${r.protocolo}` : '';
         if (r.status === 'convite_enviado') {
@@ -1025,12 +1028,41 @@
        Resolvido uma vez no carregamento da página, sem bloquear nada:
        se o agente não existir/estiver inativo, a candidatura segue normal,
        sem atribuição de agente (mesmo comportamento de sempre). */
+    /* -- Afiliado (streamer que indica): /recrutamento/<código>, /r/<código> ou ?ref=<código> --
+       O código fica no navegador (localStorage 'dm_ref') por 30 dias, para a indicação não se
+       perder se a pessoa voltar depois por outro caminho. Vale o primeiro link: um código ainda
+       válido não é trocado por outro. Só o código e a data são guardados — nenhum dado pessoal.
+       Se o programa estiver desligado (ou o código não existir) nada é enviado nem mostrado. */
+    (async function resolverAfiliadoDaUrl() {
+      const REF_KEY = 'dm_ref', VALIDADE_MS = 30 * 24 * 3600 * 1000;
+      const lerRef = () => { try { const o = JSON.parse(localStorage.getItem(REF_KEY) || 'null'); return (o && o.c && Date.now() - o.t < VALIDADE_MS) ? o : null; } catch (e) { return null; } };
+      const gravarRef = (c) => { try { localStorage.setItem(REF_KEY, JSON.stringify({ c, t: Date.now() })); } catch (e) {} };
+      const limparRef = () => { try { localStorage.removeItem(REF_KEY); } catch (e) {} };
+      const m = location.pathname.match(/^\/(?:teste\/)?(?:recrutamento|r)\/([^\/?#]+)\/?$/i);
+      let doLink = null;
+      try { doLink = m ? decodeURIComponent(m[1]) : new URLSearchParams(location.search).get('ref'); } catch (e) {}
+      doLink = (doLink || '').trim().replace(/^@/, '').toLowerCase();
+      if (!/^[a-z0-9][a-z0-9._-]{1,39}$/.test(doLink)) doLink = '';
+      const guardado = lerRef();
+      const codigo = guardado ? guardado.c : doLink;
+      if (!codigo) return;
+      try {
+        const r = await window.DmaiorAPI.candidatura.buscarAfiliado(codigo);
+        if (!r?.ok) { if (guardado && guardado.c === codigo) limparRef(); return; }
+        if (!r.programa_ativo) return;                 // programa desligado: nada de nova indicação
+        if (!guardado) gravarRef(codigo);
+        _afiliadoRef = { codigo, nome: r.afiliado?.nome || null };
+        const quem = _afiliadoRef.nome ? String(_afiliadoRef.nome).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])) : null;
+        alerta('alerta-1', 'info', quem ? `Você foi indicado por <strong>${quem}</strong>.` : 'Você chegou por um link de indicação.');
+      } catch (e) { console.warn('[afiliado]', e); }
+    })();
+
     (async function resolverAgenteDaUrl() {
       const agenteId = new URLSearchParams(location.search).get('agente');
       if (!agenteId) return;
       try {
         const r = await window.DmaiorAPI.candidatura.buscarAgente(agenteId);
-        if (r?.ok && r.agente?.id) _agenteVinculo = r.agente;
+        if (r?.ok && r.agente?.id) _agenteVinculo = { ...r.agente, login: agenteId.trim().toLowerCase() };
       } catch (e) { console.warn('[agente]', e); }
     })();
   })();

@@ -267,6 +267,10 @@ window.DmaiorAPI = {
       return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, '/candidatura/recrutadores');
     },
     /** Resolve o agente por trás de um link exclusivo (?agente=<id>). */
+    /** Resolve o afiliado por trás de um link de indicação (/recrutamento/<código> ou /r/<código>). */
+    async buscarAfiliado(codigo) {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/candidatura/afiliado/${encodeURIComponent(codigo)}`);
+    },
     async buscarAgente(id) {
       return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/candidatura/agente/${encodeURIComponent(id)}`);
     },
@@ -275,8 +279,8 @@ window.DmaiorAPI = {
       return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/buscar-perfil', { uid });
     },
     /** Envia candidatura completa com perfil confirmado. */
-    async enviar({ uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite, maior_idade, aceite_diretrizes_kwai, aceite_termo_agencia, termo_agencia_versao }) {
-      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, recrutador_id, agente_id, aceite, maior_idade, aceite_diretrizes_kwai, aceite_termo_agencia, termo_agencia_versao });
+    async enviar({ uid, nome, whatsapp, categoria, recrutador_id, agente_id, afiliado_codigo, aceite, maior_idade, aceite_diretrizes_kwai, aceite_termo_agencia, termo_agencia_versao }) {
+      return window.DmaiorAPI._post(window.DmaiorConfig.workers.admin, '/candidatura/enviar', { uid, nome, whatsapp, categoria, recrutador_id, agente_id, afiliado_codigo, aceite, maior_idade, aceite_diretrizes_kwai, aceite_termo_agencia, termo_agencia_versao });
     },
     /** Consulta status pelo protocolo gerado no envio. */
     async status(protocolo) {

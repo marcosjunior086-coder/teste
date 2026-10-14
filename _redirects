@@ -10,6 +10,11 @@
 /recarga/       https://rocketbunny.club/@DMAIOR_AGENCY  301
 /recarga.html   https://rocketbunny.club/@DMAIOR_AGENCY  301
 /formulario     /recrutamento.html  301
+# Links de indicação dos afiliados: /recrutamento/<id> e o curto /r/<id>. Reescrita (200),
+# a URL do navegador não muda; recrutamento.html lê o código em location.pathname.
+# Destino SEM .html de propósito: o Pages já serve /recrutamento limpo (ver nota abaixo).
+/recrutamento/*  /recrutamento  200
+/r/*             /recrutamento  200
 /formulario/    /recrutamento.html  301
 
 # NÃO redirecionar /politicas -> /politicas.html nem /tutoriais -> /tutoriais.html:
