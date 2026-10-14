@@ -3773,7 +3773,12 @@ class DimaiorAdmin extends HTMLElement {
     const rota=this._edtId?`/admin/streamers/${this._edtId}`:'/admin/streamers';const method=this._edtId?'PUT':'POST';
     const d=await this._api(method,rota,dados);if(d?.ok){this._fechaModal('mS');this._toast(this._edtId?'Atualizado!':'Adicionado!');this._carregarStreamers();}else this._toast(d?.erro||'Erro','err');
   }
-  _confirmarDel(msg,cb){const s=this.shadowRoot;s.getElementById('mCMsg').textContent=msg;{const ok=s.getElementById('mCOk');ok.style.background='linear-gradient(135deg,#c00030,#f87171)';ok.innerHTML=`${this._ico('trash',13)} Confirmar`;}s.getElementById('mCOk').onclick=()=>{this._fechaModal('mC');cb();};s.getElementById('mC').classList.add('on');}
+  // opts.tom: 'ok' = ação normal (botão no gradiente do painel + check); 'alerta' = vermelho sem lixeira
+  // (ex.: desativar algo reversível); sem opts = exclusão (vermelho + lixeira). opts.rotulo troca o texto "Confirmar".
+  _confirmarDel(msg,cb,opts={}){const s=this.shadowRoot;s.getElementById('mCMsg').textContent=msg;{const ok=s.getElementById('mCOk');const tom=opts.tom||'perigo';const rot=this._esc(opts.rotulo||'Confirmar');
+    if(tom==='ok'){ok.style.background='var(--grad)';ok.innerHTML=`${this._ico('check',13)} ${rot}`;}
+    else if(tom==='alerta'){ok.style.background='linear-gradient(135deg,#c00030,#f87171)';ok.innerHTML=`${this._ico('warning',13)} ${rot}`;}
+    else{ok.style.background='linear-gradient(135deg,#c00030,#f87171)';ok.innerHTML=`${this._ico('trash',13)} ${rot}`;}}s.getElementById('mCOk').onclick=()=>{this._fechaModal('mC');cb();};s.getElementById('mC').classList.add('on');}
 
   _bindEvents(){
     const s=this.shadowRoot;const dbc=this._dbc.bind(this);
@@ -9740,7 +9745,7 @@ class DimaiorAdmin extends HTMLElement {
       this._confirmarDel(msg,async()=>{
         const r=await this._api('POST','/admin/afiliados/config',{programa_ativo:ligar});
         if(r?.ok){this._toast(ligar?'Programa ativado':'Programa desativado','ok');recarregar();} else this._toast(r?.erro||'Erro ao salvar','err');
-      });
+      },ligar?{tom:'ok',rotulo:'Ativar'}:{tom:'alerta',rotulo:'Desativar'});
     });
     el.querySelector('#afSalvarConv')?.addEventListener('click',async()=>{
       const r=await this._api('POST','/admin/afiliados/config',{koin_por_dolar:s.getElementById('afKoin').value,cotacao_dolar:s.getElementById('afCot').value});
@@ -9786,7 +9791,7 @@ class DimaiorAdmin extends HTMLElement {
     }));
     el.querySelectorAll('[data-af-ativo]').forEach(b=>b.addEventListener('click',()=>this._confirmarDel(b.dataset.afNovo==='1'?'Reativar este afiliado?':'Desativar este afiliado? Os indicados e o histórico continuam; ele deixa de enviar convites e o link para de registrar novas indicações.',async()=>{
       const r=await this._api('PATCH',`/admin/afiliados/${b.dataset.afAtivo}`,{ativo:b.dataset.afNovo==='1'}); if(r?.ok){this._toast('Atualizado','ok');recarregar();} else this._toast(r?.erro||'Erro','err');
-    })));
+    },b.dataset.afNovo==='1'?{tom:'ok',rotulo:'Reativar'}:{tom:'alerta',rotulo:'Desativar'})));
     el.querySelectorAll('[data-af-copiar]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.afCopiar);this._toast('Link copiado','ok');}catch{this._toast('Não consegui copiar','err');}}));
     el.querySelectorAll('[data-af-det]').forEach(b=>b.addEventListener('click',()=>this._afDetalhe(b.dataset.afDet)));
     el.querySelector('#afFechar')?.addEventListener('click',()=>{
@@ -9806,7 +9811,7 @@ class DimaiorAdmin extends HTMLElement {
         if(falhas.length) this._toast(`Fechamento PARCIAL — falhou para: ${falhas.join(', ')}. Rode de novo para completar (nada é duplicado).`,'err');
         else this._toast(`Fechado: ${tot.criados} novos, ${tot.atualizados} recalculados, ${tot.mantidos} mantidos`,'ok');
         this._afMes=mes; recarregar();
-      });
+      },{tom:'ok',rotulo:'Fechar mês'});
     });
     el.querySelectorAll('[data-af-bonus]').forEach(b=>b.addEventListener('click',async()=>{
       const r=await this._api('PATCH',`/admin/afiliados/bonus/${b.dataset.afBonus}`,{status:b.dataset.afSt});
@@ -9814,7 +9819,7 @@ class DimaiorAdmin extends HTMLElement {
     }));
     el.querySelectorAll('[data-af-ind-cancel]').forEach(b=>b.addEventListener('click',()=>this._confirmarDel('Cancelar esta indicação? Ela deixa de contar bônus (o histórico fica registrado).',async()=>{
       const r=await this._api('POST',`/admin/afiliados/indicacoes/${b.dataset.afIndCancel}/cancelar`,{}); if(r?.ok){this._toast('Indicação cancelada','ok');recarregar();} else this._toast(r?.erro||'Erro','err');
-    })));
+    },{tom:'alerta',rotulo:'Cancelar indicação'})));
   }
 
   async _afDetalhe(id){
