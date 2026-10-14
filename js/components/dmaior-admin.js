@@ -1571,18 +1571,20 @@ class DimaiorAdmin extends HTMLElement {
     }));
   }
   _mpChips(){
-    const m=this._mp, chip=(g,v,l)=>`<button type="button" class="lv-org-btn ${(g==='dias'?m.dias:m.vista)===v?'on':''}" data-mp="${g}" data-v="${v}">${l}</button>`;
-    this.shadowRoot.getElementById('mpFiltros').innerHTML=chip('dias',1,'Hoje')+chip('dias',7,'7 dias')+chip('dias',30,'30 dias')+chip('dias',90,'90 dias')+'<span class="sep"></span>'+chip('vista','brasil','Brasil')+chip('vista','mundo','Mundo');
+    const m=this._mp, chip=(g,v,l)=>`<button type="button" class="lv-org-btn ${(g==='dias'?m.dias:g==='estilo'?(m.estilo==='3d'?'3d':'plano'):m.vista)===v?'on':''}" data-mp="${g}" data-v="${v}">${l}</button>`;
+    this.shadowRoot.getElementById('mpFiltros').innerHTML=chip('dias',1,'Hoje')+chip('dias',7,'7 dias')+chip('dias',30,'30 dias')+chip('dias',90,'90 dias')+'<span class="sep"></span>'+chip('vista','brasil','Brasil')+chip('vista','mundo','Mundo')
+      +(m.vista==='brasil'?'<span class="sep"></span>'+chip('estilo','plano','Plano')+chip('estilo','3d','3D'):'');
   }
   async _carregarMapaAcessos(){
     const s=this.shadowRoot,el=s.getElementById('mpCorpo'); if(!el) return;
-    this._mp=this._mp||{dias:7,vista:'brasil'};
+    if(!this._mp){ let est='plano'; try{ if(localStorage.getItem('dm_mp_estilo')==='3d') est='3d'; }catch{} this._mp={dias:7,vista:'brasil',estilo:est}; }
     if(!this._mpBound){
       this._mpBound=true;
       s.getElementById('btnAtuMp')?.addEventListener('click',()=>this._carregarMapaAcessos());
       s.getElementById('mpFiltros')?.addEventListener('click',e=>{
         const b=e.target.closest('[data-mp]'); if(!b) return;
         if(b.dataset.mp==='dias'){ this._mp.dias=+b.dataset.v; this._carregarMapaAcessos(); }
+        else if(b.dataset.mp==='estilo'){ this._mp.estilo=b.dataset.v; try{ localStorage.setItem('dm_mp_estilo',b.dataset.v); }catch{} this._mpChips(); this._renderMapaAcessos(); }
         else { this._mp.vista=b.dataset.v; this._mpChips(); this._renderMapaAcessos(); }
       });
       el.addEventListener('click',e=>{
@@ -1622,18 +1624,20 @@ class DimaiorAdmin extends HTMLElement {
       // em _mpEscalarMarcas), então não vira um paredão quando aproxima.
       const altUf={};
       let base='';
-      if(brasil){
+      if(brasil&&this._mp.estilo!=='3d'){
+        base=G.brasil.estados.map(e=>{ const v=porUf[e.s]; return`<path d="${e.d}" class="mp-uf${v?' on':''}" ${v?`style="fill-opacity:${(.18+.62*Math.sqrt(v.sessoes/maxUf)).toFixed(2)}" data-mpinfo="${info(esc(e.n),`${n(v.sessoes)} visitas · ${n(v.paginas)} páginas`)}"`:''}><title>${esc(e.n)}${v?`: ${n(v.sessoes)} visitas`:''}</title></path>`; }).join('');
+      } else if(brasil){
         const planos=[], altos=[];
         G.brasil.estados.forEach(e=>{
           const v=porUf[e.s];
           if(!v){ planos.push(`<path d="${e.d}" class="mp-uf"><title>${esc(e.n)}</title></path>`); return; }
-          const f=v.sessoes/maxUf, hpx=6+26*Math.sqrt(f), cam=Math.ceil(hpx/1.5), id='mpUf'+e.s;
+          const f=v.sessoes/maxUf, hpx=3+7*Math.sqrt(f), cam=Math.ceil(hpx/1.5), id='mpUf'+e.s;
           const ys=(e.d.match(/-?\d+/g)||[]).filter((_,i)=>i%2).map(Number); // pontos são "x y": pega os y
           altUf[e.s]=hpx;
-          altos.push({fundo:ys.length?Math.max(...ys):0,html:`<g class="mp-ext" data-h="${hpx.toFixed(1)}" data-mpinfo="${info(esc(e.n),`${n(v.sessoes)} visitas · ${n(v.paginas)} páginas`)}"><title>${esc(e.n)}: ${n(v.sessoes)} visitas</title>`
+          altos.push({fundo:ys.length?Math.max(...ys):0,html:`<g class="mp-ext" style="--mpf:${f.toFixed(2)}" data-h="${hpx.toFixed(1)}" data-mpinfo="${info(esc(e.n),`${n(v.sessoes)} visitas · ${n(v.paginas)} páginas`)}"><title>${esc(e.n)}: ${n(v.sessoes)} visitas</title>`
             +`<defs><path id="${id}" d="${e.d}"/></defs><use href="#${id}" class="mp-chao"/>`
             +Array.from({length:cam},(_,i)=>`<use href="#${id}" class="mp-lado" data-k="${((i+1)/cam).toFixed(3)}"/>`).join('')
-            +`<use href="#${id}" class="mp-topo" data-k="1"/><use href="#${id}" class="mp-cor" data-k="1" style="fill-opacity:${(.45+.5*Math.sqrt(f)).toFixed(2)}"/></g>`});
+            +`<use href="#${id}" class="mp-topo" data-k="1"/><use href="#${id}" class="mp-cor" data-k="1" style="fill-opacity:${(.3+.65*Math.sqrt(f)).toFixed(2)}"/></g>`});
         });
         // de trás (norte) pra frente (sul): o estado da frente cobre a parede do de trás
         base=planos.join('')+altos.sort((a,b)=>a.fundo-b.fundo).map(a=>a.html).join('');
@@ -7756,9 +7760,11 @@ class DimaiorAdmin extends HTMLElement {
     .mp-mapa svg{display:block;width:100%;max-height:600px;margin:0 auto}
     .mp-terra{fill:var(--brd);stroke:var(--t3);stroke-opacity:.45;stroke-width:1;vector-effect:non-scaling-stroke}
     .mp-uf{fill:var(--brd);stroke:var(--t3);stroke-opacity:.5;stroke-width:1;cursor:default;vector-effect:non-scaling-stroke}
+    .mp-uf.on{fill:var(--cyan);cursor:pointer}
+    .mp-uf.on:hover{stroke:var(--t1);stroke-width:2}
     .mp-ext{cursor:pointer}
     .mp-chao{fill:#000;fill-opacity:.45}
-    .mp-lado{fill:#063f44;fill:color-mix(in srgb,var(--cyan) 28%,#000);stroke:#000;stroke-opacity:.18;stroke-width:.6;vector-effect:non-scaling-stroke}
+    .mp-lado{fill:#063f44;fill:color-mix(in srgb,var(--cyan) calc(14% + 26% * var(--mpf,0)),#000);stroke:#000;stroke-opacity:.18;stroke-width:.6;vector-effect:non-scaling-stroke}
     .mp-topo{fill:var(--panel-solid)}
     .mp-cor{fill:var(--cyan);stroke:#fff;stroke-opacity:.55;stroke-width:1.2;vector-effect:non-scaling-stroke}
     .mp-ext:hover .mp-cor{fill-opacity:1 !important}
