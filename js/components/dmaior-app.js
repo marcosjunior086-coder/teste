@@ -573,6 +573,20 @@
                 #cMain{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:26px;align-items:start;}
                 .txn-col{padding-top:4px;}
             }
+            .lvp-txt{font-size:.82rem;color:var(--muted);line-height:1.5;margin:0 0 12px;}
+            .lvp-link{background:none;border:0;padding:0;color:var(--cyan);font:inherit;text-decoration:underline;cursor:pointer;}
+            .lvp-aviso{border:1px solid var(--gold);color:var(--gold);border-radius:10px;padding:9px 12px;font-size:.8rem;margin-bottom:12px;}
+            .lvp-seg{display:inline-flex;gap:4px;padding:4px;border-radius:999px;border:1px solid var(--border);background:var(--dm-bg-card,rgba(255,255,255,.06));margin-bottom:12px;max-width:100%;}
+            .lvp-seg button{border:0;background:none;color:var(--muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.92rem;padding:8px 18px;border-radius:999px;cursor:pointer;}
+            .lvp-seg button.on{background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));color:#000;}
+            .lvp-busca{display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--dm-bg-card,rgba(255,255,255,.06));color:var(--muted);margin-bottom:10px;max-width:420px;}
+            .lvp-busca input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:16px;padding:0;height:auto;box-shadow:none;}
+            .lvp-ops{display:flex;flex-wrap:wrap;gap:8px;}
+            .lvp-op{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:10px;border:1px solid var(--border);background:var(--dm-bg-card,rgba(255,255,255,.06));color:var(--text);font:inherit;font-size:.86rem;cursor:pointer;}
+            .lvp-op img,.lvp-op .lvp-sc{width:30px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+            .lvp-op .lvp-sc{background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));opacity:.35;}
+            .lvp-op.on{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan) inset;}
+            .lvp-op.on .lvp-sc{opacity:1;}
 
             .wallet-head{
                 background:linear-gradient(155deg,#3b82f6 0%,#1e40af 100%);
@@ -1476,6 +1490,13 @@
                         </div>
                         <button class="btn" id="btnSave" style="margin-top:20px;" data-i18n="updateData">ATUALIZAR DADOS</button>
                     </div>
+                    <!-- Categoria da transmissão (aba LIVES do site) — preenchido por _lvpCarregar() -->
+                    <div class="card" id="cLivePerfil">
+                        <h2 class="raaj" style="font-size:.9rem;margin-bottom:6px;color:var(--cyan);border-bottom:1px solid var(--border);padding-bottom:8px;">CATEGORIA DA TRANSMISSÃO</h2>
+                        <p class="lvp-txt">Quando você estiver ao vivo, aparece nessa categoria na aba LIVES do site, pra quem procura esse tipo de live.</p>
+                        <div id="alLvp" class="al"></div>
+                        <div id="lvpCorpo"><p class="lvp-txt">Carregando…</p></div>
+                    </div>
                 </div>
 
                 <!-- ══════ CARTEIRA ══════ -->
@@ -1986,7 +2007,7 @@
         this.qs('#goForgot').addEventListener('click',e=>{e.preventDefault();this.navigate('vF');});
         this.qs('#backForgot').addEventListener('click',()=>this.navigate('vL'));
         this.qs('#nD').addEventListener('click',()=>{this.navigate('vD');this.navActive('nD');});
-        this.qs('#nS').addEventListener('click',()=>{this.navigate('vS');this.navActive('nS');});
+        this.qs('#nS').addEventListener('click',()=>{this.navigate('vS');this.navActive('nS');this._lvpCarregar();});
         this.qs('#nC').addEventListener('click',()=>{this.navigate('vC');this.navActive('nC');this.loadCarteira();});
         this.qs('#nO').addEventListener('click',()=>this.logout());
         this.qs('#nRank').addEventListener('click',()=>this.goRanking());
@@ -2591,6 +2612,81 @@
             this.qs('#lUid').value=uid; this.qs('#lPass').value=p1;
             this.doLogin();
         } catch(e){ this.showAlert('#alR',e.message); btn.disabled=false; }
+    }
+
+    // ── Categoria da transmissão (aba LIVES do site) ──────────────────
+    // Worker dashboard POST /api/perfil/categoria-live ({acao:'ler'|'salvar'}).
+    // Só opções ativas que o admin cadastrou; o streamer não cria categoria.
+    async _lvpCarregar(forcar){
+        const uid=this.sessionUid;
+        // Escolha fica presa à conta: trocou de conta na mesma página, recarrega
+        if(this._lvp && this._lvp.uid===uid && !forcar) return;
+        const corpo=this.qs('#lvpCorpo'); if(!corpo || !uid) return;
+        const L0={uid,carregando:true}; this._lvp=L0;
+        corpo.innerHTML='<p class="lvp-txt">Carregando…</p>';
+        try{
+            const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/categoria-live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,acao:'ler'})});
+            if(this._lvp!==L0 || this.sessionUid!==uid) return; // resposta de outra sessão/carregamento
+            if(res.status===401) { this._lvp=null; return; }
+            const d=await res.json().catch(()=>null);
+            if(this._lvp!==L0 || this.sessionUid!==uid) return;
+            if(!res.ok||!d||!d.sucesso) throw new Error((d&&d.erro)||'');
+            const a=d.atual||{};
+            this._lvp={uid, dados:d, grupo:a.grupo_desativado?null:a.grupo, cat:a.desativada?null:a.categoria_id, q:'', salvando:false};
+            this._lvpRender();
+        }catch(_){
+            if(this._lvp!==L0) return;
+            this._lvp=null;
+            corpo.innerHTML=`<p class="lvp-txt">Não deu pra carregar as categorias agora. <button type="button" class="lvp-link" id="lvpTentar">Tentar de novo</button></p>`;
+            this.qs('#lvpTentar')?.addEventListener('click',()=>this._lvpCarregar(true));
+        }
+    }
+    _lvpRender(){
+        const corpo=this.qs('#lvpCorpo'), L=this._lvp; if(!corpo||!L||!L.dados) return;
+        const dis=L.salvando?'disabled':'';
+        const d=L.dados, a=d.atual||{}, e=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const tira=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+        if(!d.grupos.length){ corpo.innerHTML='<p class="lvp-txt">As categorias ainda não foram liberadas pela agência.</p>'; return; }
+        const nomeG=id=>(d.grupos.find(g=>g.id===id)||{}).nome||'';
+        const aviso=(a.desativada||a.grupo_desativado)?'<div class="lvp-aviso">A categoria que você tinha escolhido foi desativada pela agência. Escolha outra.</div>':'';
+        const ops=d.categorias.filter(c=>c.grupo===L.grupo && (!L.q || tira(c.nome).includes(tira(L.q))));
+        const temSub=d.categorias.some(c=>c.grupo===L.grupo);
+        corpo.innerHTML=`${aviso}
+            <div class="lvp-seg" role="radiogroup" aria-label="Categoria principal">${d.grupos.map(g=>`<button type="button" role="radio" aria-checked="${L.grupo===g.id}" class="${L.grupo===g.id?'on':''}" data-lvp-g="${e(g.id)}" ${dis}>${e(g.nome)}</button>`).join('')}</div>
+            ${L.grupo?`
+            ${temSub?`<label class="lvp-busca"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m20.5 20.5-4.2-4.2"/></svg><input type="search" id="lvpQ" placeholder="Buscar em ${e(nomeG(L.grupo))}…" value="${e(L.q)}" autocomplete="off" aria-label="Buscar"></label>`:''}
+            <div class="lvp-ops" role="radiogroup" aria-label="Subcategoria">
+                ${ops.map(c=>`<button type="button" role="radio" aria-checked="${L.cat===c.id}" class="lvp-op ${L.cat===c.id?'on':''}" data-lvp-c="${e(c.id)}" ${dis}>${/^https:\/\//.test(c.capa_url||'')?`<img src="${e(c.capa_url)}" alt="" loading="lazy" width="30" height="40">`:'<span class="lvp-sc"></span>'}<span>${e(c.nome)}</span></button>`).join('')}
+                ${!L.q?`<button type="button" role="radio" aria-checked="${!L.cat}" class="lvp-op ${!L.cat?'on':''}" data-lvp-c="" ${dis}><span class="lvp-sc"></span><span>Outra (só ${e(nomeG(L.grupo))})</span></button>`:''}
+            </div>
+            ${L.q&&!ops.length?`<p class="lvp-txt" style="margin-top:8px">Nenhuma opção com "${e(L.q)}". Se o seu jogo ou tipo de live não está na lista, apague a busca, escolha "Outra" e avise a agência.</p>`:''}`:'<p class="lvp-txt">Escolha primeiro se a sua live é de entretenimento ou de jogos.</p>'}
+            <button class="btn" id="btnLvpSalvar" style="margin-top:14px;max-width:360px" ${L.grupo&&!L.salvando?'':'disabled'}>${L.salvando?'SALVANDO...':'SALVAR CATEGORIA'}</button>`;
+        corpo.querySelectorAll('[data-lvp-g]').forEach(b=>b.addEventListener('click',()=>{ if(L.grupo!==b.dataset.lvpG){L.grupo=b.dataset.lvpG;L.cat=null;L.q='';} this._lvpRender(); }));
+        corpo.querySelectorAll('[data-lvp-c]').forEach(b=>b.addEventListener('click',()=>{ L.cat=b.dataset.lvpC||null; this._lvpRender(); }));
+        const q=this.qs('#lvpQ');
+        if(q){ q.addEventListener('input',()=>{ L.q=q.value; const pos=q.selectionStart; this._lvpRender(); const n=this.qs('#lvpQ'); if(n){n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}} }); }
+        this.qs('#btnLvpSalvar')?.addEventListener('click',()=>this._lvpSalvar());
+    }
+    async _lvpSalvar(){
+        const L=this._lvp; if(!L||!L.grupo||L.salvando||L.uid!==this.sessionUid) return;
+        // O que vai pro servidor fica congelado aqui (as opções ficam travadas enquanto salva)
+        const env={uid:L.uid,grupo:L.grupo,cat:L.cat};
+        L.salvando=true; this._lvpRender();
+        let recarregar=false;
+        try{
+            const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/categoria-live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:env.uid,acao:'salvar',grupo:env.grupo,categoria_id:env.cat})});
+            if(res.status===401||this._lvp!==L) return;
+            const d=await res.json().catch(()=>null);
+            if(!res.ok||!d||!d.sucesso){ recarregar=res.status===400; throw new Error((d&&d.erro)||'Não foi possível salvar agora.'); }
+            const a=L.dados.atual; a.grupo=d.grupo||env.grupo; a.categoria_id=d.categoria_id===undefined?env.cat:d.categoria_id; a.desativada=false; a.grupo_desativado=false;
+            this.showAlert('#alLvp','Categoria salva. O site atualiza em até 1 minuto.',false);
+        }catch(err){
+            if(this._lvp===L) this.showAlert('#alLvp',err.message||'Não foi possível salvar agora.');
+        }finally{
+            L.salvando=false;
+            // Opção sumiu (admin desativou enquanto a tela estava aberta): recarrega a lista
+            if(this._lvp===L){ if(recarregar) this._lvpCarregar(true); else this._lvpRender(); }
+        }
     }
 
     // ── Salvar perfil ─────────────────────────────────────────────────

@@ -201,6 +201,15 @@ window.DmaiorAPI = {
     },
 
     /**
+     * Área Lives da home (sem auth — público): categorias + canais ao vivo agora.
+     * Retorna { ativo:false } quando desligada no admin; senão { status, grupos,
+     * categorias, canais, totais, atualizado_em, ... }. Ver Worker rank /lives/descoberta.
+     */
+    async getLivesDescoberta() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.rank, '/lives/descoberta');
+    },
+
+    /**
      * Retorna configuração pública do impulsionamento (quota, opções ativas).
      */
     async getImpulsoConfig() {

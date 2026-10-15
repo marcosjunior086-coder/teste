@@ -157,7 +157,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['afiliados','','indicacao indicar streamer link bonus programa'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
     ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
-    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live']]],
+    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live'],['livesCategorias','','lives categoria jogos entretenimento free fire capa aba home descoberta']]],
     ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
   ]; }
   _montarMenuMobile(){
@@ -386,7 +386,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',livesCategorias:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -398,7 +398,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),mapaAcessos:()=>this._carregarMapaAcessos()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),livesCategorias:()=>this._carregarLivesCat(),mapaAcessos:()=>this._carregarMapaAcessos()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -1795,6 +1795,224 @@ class DimaiorAdmin extends HTMLElement {
       this._mpSerieRO=new ResizeObserver(()=>{const w=el.clientWidth;if(w>0&&Math.abs(w-(this._mpSerieW||0))>8){this._mpSerieW=w;this._mpRenderSerie();}});
       this._mpSerieRO.observe(el); this._mpSerieROel=el;
     }
+  }
+
+  // ── LIVES — CATEGORIAS (aba LIVES da home) ──────────────────────────────────
+  // Worker admin: /admin/lives-categorias/* · site: js/components/lives-descoberta.js
+  // Principais fixas (Entretenimento, Jogos) + subcategorias com capa 3:4.
+  async _carregarLivesCat(){
+    const s=this.shadowRoot,el=s.getElementById('lcLista');
+    if(!el)return;
+    if(!this._lcBound){
+      this._lcBound=true;
+      s.getElementById('btnAtuLc')?.addEventListener('click',()=>this._carregarLivesCat());
+      s.getElementById('btnLcNova')?.addEventListener('click',()=>this._lcForm(null));
+    }
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/lives-categorias');
+    if(!d?.ok){s.getElementById('lcConfig').innerHTML='';el.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar');return;}
+    this._lcDados=d;
+    this._renderLivesCat();
+  }
+  _renderLivesCat(){
+    const s=this.shadowRoot,d=this._lcDados,cfg=s.getElementById('lcConfig'),el=s.getElementById('lcLista');
+    if(!d||!el)return;
+    const semCapa=d.categorias.filter(c=>c.ativo&&!c.capa_url).length;
+    cfg.innerHTML=`<div class="va-cfg">
+      <div class="va-cfg-txt"><b>${d.config.ativo?'Aparecendo na home':'Desligado — ninguém vê'}</b><br>${d.config.ativo?'A aba LIVES aparece na lateral da home para todos os visitantes.':'Cadastre as categorias e as capas, peça aos streamers para escolherem a deles no painel e depois ligue.'}${semCapa?`<br><span style="color:var(--amber)">${semCapa} subcategoria(s) ativa(s) sem capa — no site aparece só o nome sobre um fundo azul.</span>`:''}</div>
+      <label><span class="tog-switch"><input type="checkbox" id="lcAtivo" ${d.config.ativo?'checked':''}><span class="tog-slider"></span></span> Mostrar a aba LIVES na home</label>
+      <label><span class="tog-switch"><input type="checkbox" id="lcVazias" ${d.config.mostrar_vazias?'checked':''}><span class="tog-slider"></span></span> Mostrar categorias sem ninguém ao vivo (apagadinhas)</label>
+      <a class="btn btn-o btn-sm" href="/#lives" target="_blank" rel="noopener" title="Abre a home já com a área Lives aberta (precisa estar ligado)">${this._ico('live',12)} Ver na home</a>
+    </div>`;
+    const salvaCfg=async(chave,on,inp)=>{
+      const r=await this._api('POST','/admin/lives-categorias/config',{[chave]:on});
+      if(r?.ok){d.config[chave]=on;this._toast('Salvo — o site atualiza em até 1 minuto');this._renderLivesCat();}
+      else{this._toast(r?.erro||'Erro','err');inp.checked=!on;}
+    };
+    s.getElementById('lcAtivo').addEventListener('change',e=>{
+      const on=e.target.checked;
+      if(!on&&!confirm('Desligar a área Lives? A aba some da home para todo mundo.')){e.target.checked=true;return;}
+      salvaCfg('ativo',on,e.target);
+    });
+    s.getElementById('lcVazias').addEventListener('change',e=>salvaCfg('mostrar_vazias',e.target.checked,e.target));
+
+    const capa=u=>/^https:\/\//.test(u||'')?`<img src="${this._esc(u)}" alt="" loading="lazy">`:'<span class="lvc-semcapa">sem capa</span>';
+    el.innerHTML=d.grupos.map(g=>{
+      const cats=d.categorias.filter(c=>c.grupo===g.id);
+      return `<div class="lvc-grupo ${g.ativo?'':'off'}">
+        <div class="lvc-ghead">
+          <div style="min-width:0"><div class="lvc-gnome">${this._ico(g.id==='jogos'?'gamepad':'drama',16)} ${this._esc(g.nome)}</div>
+            <div><span class="adp-chip ${g.ativo?'on':''}">${g.ativo?'Ativa':'Desativada'}</span>${g.ativo&&!g.publico?'<span class="adp-chip warn">Escondida do site</span>':''}<span class="adp-chip">${cats.length} subcategoria(s)</span><span class="adp-chip">${g.streamers} streamer(s) escolheram</span></div></div>
+          <button class="btn btn-o btn-sm" data-lc-gedit="${g.id}">${this._ico('edit',11)} Editar</button>
+        </div>
+        ${cats.length?`<div class="lvc-grid">${cats.map((c,i)=>`<div class="lvc-card ${c.ativo?'':'off'}">
+          <div class="lvc-capa">${capa(c.capa_url)}</div>
+          <div class="lvc-info">
+            <div class="adp-nome" title="${this._esc(c.nome)}">${this._esc(c.nome)}</div>
+            <div><span class="adp-chip ${c.ativo?'on':''}">${c.ativo?'Ativa':'Desativada'}</span></div>
+            <div class="adp-meta">${c.streamers} streamer(s) escolheram</div>
+            <div class="lvc-acoes">
+              <button class="btn btn-o" data-lc-mover="${c.id}" data-dir="-1" ${i===0?'disabled':''} aria-label="Subir">${this._ico('up',11)}</button>
+              <button class="btn btn-o" data-lc-mover="${c.id}" data-dir="1" ${i===cats.length-1?'disabled':''} aria-label="Descer">${this._ico('down',11)}</button>
+              <button class="btn btn-o" data-lc-edit="${c.id}">${this._ico('edit',11)} Editar</button>
+              <button class="btn btn-o" data-lc-ativo="${c.id}" data-v="${c.ativo?0:1}">${this._ico(c.ativo?'eye_off':'eye',11)} ${c.ativo?'Desativar':'Ativar'}</button>
+              <button class="btn btn-o" data-lc-del="${c.id}" ${c.streamers?`disabled title="Tem streamer usando — desative em vez de excluir"`:''} style="color:var(--verm);border-color:rgba(248,113,113,.4)" aria-label="Excluir">${this._ico('trash',11)}</button>
+            </div>
+          </div></div>`).join('')}</div>`:`<div class="adp-meta" style="padding:6px 2px 4px">Nenhuma subcategoria ainda — use "Nova subcategoria" lá em cima.</div>`}
+      </div>`;
+    }).join('')+`<div class="adp-meta" style="margin-top:4px">Capas em pé, <b>3:4</b> (recomendado 600×800). Subcategoria desativada some do site e do painel, mas quem já tinha escolhido continua com ela salva (o painel pede pra trocar).</div>`;
+
+    const acha=id=>d.categorias.find(c=>c.id===id);
+    el.querySelectorAll('[data-lc-gedit]').forEach(b=>b.addEventListener('click',()=>this._lcGrupoForm(d.grupos.find(g=>g.id===b.dataset.lcGedit))));
+    el.querySelectorAll('[data-lc-edit]').forEach(b=>b.addEventListener('click',()=>this._lcForm(acha(b.dataset.lcEdit))));
+    el.querySelectorAll('[data-lc-ativo]').forEach(b=>b.addEventListener('click',async()=>{
+      const c=acha(b.dataset.lcAtivo),on=b.dataset.v==='1';
+      if(!on&&c.streamers&&!confirm(`${c.streamers} streamer(s) escolheram "${c.nome}". Desativando, ela some do site e do painel; no site eles aparecem só como "${(d.grupos.find(g=>g.id===c.grupo)||{}).nome||''}" até escolherem outra. Continuar?`))return;
+      b.disabled=true;
+      const r=await this._api('PATCH',`/admin/lives-categorias/${c.id}`,{ativo:on});
+      if(r?.ok){this._toast(on?'Subcategoria ativada':'Subcategoria desativada');this._carregarLivesCat();}else{b.disabled=false;this._toast(r?.erro||'Erro','err');}
+    }));
+    el.querySelectorAll('[data-lc-mover]').forEach(b=>b.addEventListener('click',async()=>{
+      const c=acha(b.dataset.lcMover),lista=d.categorias.filter(x=>x.grupo===c.grupo),i=lista.indexOf(c),j=i+Number(b.dataset.dir);
+      if(j<0||j>=lista.length)return;
+      [lista[i],lista[j]]=[lista[j],lista[i]];
+      el.querySelectorAll('[data-lc-mover]').forEach(x=>x.disabled=true);
+      const r=await this._api('POST','/admin/lives-categorias/ordem',{ids:lista.map(x=>x.id)});
+      if(!r?.ok)this._toast(r?.erro||'Erro ao mudar a ordem','err');
+      this._carregarLivesCat();
+    }));
+    el.querySelectorAll('[data-lc-del]').forEach(b=>b.addEventListener('click',()=>{
+      const c=acha(b.dataset.lcDel);
+      this._confirmarDel(`Excluir a subcategoria "${c.nome}"? A capa continua na aba Arquivos. Não dá pra desfazer.`,async()=>{
+        const r=await this._api('DELETE',`/admin/lives-categorias/${c.id}`);
+        if(r?.ok){this._toast('Subcategoria excluída');this._carregarLivesCat();}else this._toast(r?.erro||'Erro ao excluir','err');
+      });
+    }));
+  }
+  // Recorta a imagem no formato pedido (com prévia e posição do corte) e devolve um WebP.
+  // Nunca amplia: imagem menor que o alvo sai no tamanho dela (com aviso).
+  async _lcRecortar(file,alvo){
+    const s=this.shadowRoot;
+    const lido=await new Promise(ok=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>ok({i,u});i.onerror=()=>{URL.revokeObjectURL(u);ok(null);};i.src=u;});
+    if(!lido){this._toast('Não consegui abrir essa imagem','err');return null;}
+    const im=lido.i,iw=im.naturalWidth,ih=im.naturalHeight,tr=alvo.w/alvo.h;
+    return new Promise(resolve=>{
+      let m=s.getElementById('mLcCorte');if(m)m.remove();
+      m=document.createElement('div');m.className='ov on';m.id='mLcCorte';m.style.zIndex='9100';s.getElementById('root').appendChild(m);
+      m.innerHTML=`<div class="modal" style="max-width:520px;max-height:94vh;overflow:auto"><div class="m-titulo">${this._ico('image',16)} Ajustar capa</div>
+        <div class="adp-meta">Sua imagem tem ${iw}×${ih} px. A capa é <b>${alvo.w}×${alvo.h}</b> (${alvo.w>alvo.h?'deitada':'em pé'}). Arraste os controles até o principal ficar dentro do quadro.</div>
+        <div class="lvc-corte"><canvas id="lcCv" style="aspect-ratio:${alvo.w}/${alvo.h}"></canvas></div>
+        <div class="mc"><label>Zoom</label><input type="range" id="lcZoom" min="100" max="250" value="100"></div>
+        <div class="mc"><label>Posição na horizontal</label><input type="range" id="lcX" min="0" max="100" value="50"></div>
+        <div class="mc"><label>Posição na vertical</label><input type="range" id="lcY" min="0" max="100" value="50"></div>
+        <div class="adp-meta" id="lcAviso"></div>
+        <div class="mf"><button class="btn btn-o" id="lcNao">Cancelar</button><button class="btn btn-g" id="lcSim">${this._ico('check',13)} Usar esta capa</button></div></div>`;
+      const $=id=>s.getElementById(id),cv=$('lcCv');
+      const recorte=()=>{
+        const z=Number($('lcZoom').value)/100;
+        let sw=iw,sh=iw/tr; if(sh>ih){sh=ih;sw=ih*tr;}
+        sw/=z;sh/=z;
+        return {sx:(iw-sw)*Number($('lcX').value)/100,sy:(ih-sh)*Number($('lcY').value)/100,sw,sh};
+      };
+      const desenha=(c,w,h)=>{const r=recorte(),x=c.getContext('2d');c.width=w;c.height=h;x.imageSmoothingQuality='high';x.drawImage(im,r.sx,r.sy,r.sw,r.sh,0,0,w,h);return r;};
+      const prev=()=>{
+        const r=desenha(cv,alvo.w/2,alvo.h/2);
+        $('lcAviso').innerHTML=r.sw<alvo.w*0.75?`<span style="color:var(--amber)">Imagem pequena para esse corte — pode ficar borrada no site. O ideal é ter pelo menos ${alvo.w}×${alvo.h}.</span>`:'';
+      };
+      ['lcZoom','lcX','lcY'].forEach(id=>$(id).addEventListener('input',prev));
+      prev();
+      const fim=v=>{URL.revokeObjectURL(lido.u);m.remove();resolve(v);};
+      $('lcNao').addEventListener('click',()=>fim(null));
+      $('lcSim').addEventListener('click',async()=>{
+        const r=recorte(),k=Math.min(1,r.sw/alvo.w);
+        const out=document.createElement('canvas');desenha(out,Math.max(1,Math.round(alvo.w*k)),Math.max(1,Math.round(alvo.h*k)));
+        const blob=await new Promise(ok=>out.toBlob(ok,'image/webp',0.86));
+        if(!blob){this._toast('Não consegui gerar a capa neste navegador','err');return fim(null);}
+        // iPhone antigo devolve PNG mesmo pedindo WebP — usa o tipo real
+        fim(new File([blob],'capa.'+(blob.type==='image/webp'?'webp':'png'),{type:blob.type||'image/png'}));
+      });
+    });
+  }
+  // Campo de upload com recorte, usado nos dois formulários
+  _lcUpload(raiz,pref,alvo){
+    const $=id=>raiz.querySelector('#'+id);
+    $(pref+'Up').addEventListener('click',()=>$(pref+'File').click());
+    $(pref+'File').addEventListener('change',async e=>{
+      const f0=e.target.files[0];e.target.value='';if(!f0)return;
+      if(!/^image\/(png|jpe?g|webp)$/i.test(f0.type)){this._toast('Use PNG, JPG ou WebP','err');return;}
+      const f=await this._lcRecortar(f0,alvo);if(!f)return;
+      const info=$(pref+'Info');info.className='adp-meta';info.textContent='enviando…';
+      $(pref+'Up').disabled=true;
+      const url=await this._uploadImagem(f,'lives');
+      $(pref+'Up').disabled=false;
+      if(!url){info.textContent='';return;}
+      $(pref+'Url').value=url;$(pref+'Prev').src=url;$(pref+'Prev').style.display='';$(pref+'Rm').style.display='';
+      info.className='adp-meta adp-ok';info.textContent='enviada ✓';
+    });
+    $(pref+'Rm').addEventListener('click',()=>{$(pref+'Url').value='';$(pref+'Prev').style.display='none';$(pref+'Rm').style.display='none';$(pref+'Info').textContent='';});
+  }
+  _lcCampoImg(pref,url,dica,proporcao){
+    const ok=/^https:\/\//.test(url||'');
+    return `<div class="adp-up"><button type="button" class="btn btn-o" id="${pref}Up">${this._ico('upload',13)} ${ok?'Trocar imagem':'Enviar imagem'}</button><button type="button" class="btn btn-o" id="${pref}Rm" style="${ok?'':'display:none'}">Remover</button><input type="file" id="${pref}File" accept="image/png,image/jpeg,image/webp" style="display:none"><span id="${pref}Info" class="adp-meta"></span></div>
+      <img id="${pref}Prev" class="lvc-prev" style="aspect-ratio:${proporcao};${ok?'':'display:none'}" src="${ok?this._esc(url):''}" alt="">
+      <input type="hidden" id="${pref}Url" value="${ok?this._esc(url):''}">
+      <div class="dica">${dica}</div>`;
+  }
+  _lcForm(it){
+    const d=this._lcDados;if(!d)return;
+    const m=this._persModal(480),novo=!it;
+    const v=(k,p='')=>it&&it[k]!=null?it[k]:p;
+    m.innerHTML=`<div class="modal adp-form" style="max-width:480px;max-height:92vh;overflow:auto">
+      <div class="m-titulo">${this._ico('live',16)} ${novo?'Nova subcategoria':'Editar subcategoria'}</div>
+      <div class="mc"><label>Categoria principal <span style="color:var(--verm)">*</span></label>
+        <select id="lfGrupo">${d.grupos.map(g=>`<option value="${g.id}" ${v('grupo','jogos')===g.id?'selected':''}>${this._esc(g.nome)}</option>`).join('')}</select></div>
+      <div class="mc"><label>Nome <span style="color:var(--verm)">*</span></label><input id="lfNome" maxlength="40" value="${this._esc(v('nome'))}" placeholder="Ex: Free Fire"></div>
+      <div class="mc"><label>Capa</label>${this._lcCampoImg('lfCapa',v('capa_url'),'Em pé, <b>3:4</b> — recomendado <b>600×800</b>. Você ajusta o corte antes de enviar.','3/4')}</div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="lfAtivo" ${v('ativo',true)?'checked':''} style="width:auto"> Ativa (aparece no site e o streamer pode escolher)</label>
+      <div class="mf"><button class="btn btn-o" id="lfNao">Cancelar</button><button class="btn btn-g" id="lfSim">${this._ico('check',13)} Salvar</button></div></div>`;
+    const raiz=m.firstElementChild,$=id=>raiz.querySelector('#'+id);
+    this._lcUpload(raiz,'lfCapa',{w:600,h:800});
+    $('lfNao').addEventListener('click',()=>this._fechaModal('mPers'));
+    $('lfSim').addEventListener('click',async()=>{
+      const body={grupo:$('lfGrupo').value,nome:$('lfNome').value.trim(),capa_url:$('lfCapaUrl').value||null,ativo:$('lfAtivo').checked};
+      if(!body.nome){this._toast('Informe o nome','err');return;}
+      if($('lfCapaUp').disabled){this._toast('Espere a capa terminar de enviar','err');return;}
+      if(!novo&&it.streamers&&body.grupo!==it.grupo&&!confirm(`${it.streamers} streamer(s) escolheram "${it.nome}". Mudando a categoria principal, eles passam a aparecer na nova. Continuar?`))return;
+      if(novo)body.ordem=d.categorias.filter(c=>c.grupo===body.grupo).length+1;
+      const b=$('lfSim');b.disabled=true;
+      const r=await this._api(novo?'POST':'PATCH',novo?'/admin/lives-categorias':`/admin/lives-categorias/${it.id}`,body);
+      b.disabled=false;
+      if(r?.ok){if(m.firstElementChild===raiz)this._fechaModal('mPers');this._toast(novo?'Subcategoria criada':'Subcategoria salva');this._carregarLivesCat();}
+      else this._toast(r?.erro||'Erro ao salvar','err');
+    });
+    this._abrirModal('mPers');
+    setTimeout(()=>$('lfNome')?.focus(),50);
+  }
+  _lcGrupoForm(g){
+    if(!g)return;
+    const m=this._persModal(480);
+    m.innerHTML=`<div class="modal adp-form" style="max-width:480px;max-height:92vh;overflow:auto">
+      <div class="m-titulo">${this._ico(g.id==='jogos'?'gamepad':'drama',16)} Categoria principal</div>
+      <div class="mc"><label>Nome <span style="color:var(--verm)">*</span></label><input id="lgNome" maxlength="40" value="${this._esc(g.nome)}"></div>
+      <div class="mc"><label>Banner (opcional)</label>${this._lcCampoImg('lgBan',g.banner_url,'Deitado, <b>1200×450</b>. Reservado para um cabeçalho da categoria — hoje o site mostra só o nome no filtro.','1200/450')}</div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="lgAtivo" ${g.ativo?'checked':''} style="width:auto"> Ativa (o streamer pode escolher)</label>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="lgPub" ${g.publico?'checked':''} style="width:auto"> Aparece no site</label>
+      <div class="mf"><button class="btn btn-o" id="lgNao">Cancelar</button><button class="btn btn-g" id="lgSim">${this._ico('check',13)} Salvar</button></div></div>`;
+    const raiz=m.firstElementChild,$=id=>raiz.querySelector('#'+id);
+    this._lcUpload(raiz,'lgBan',{w:1200,h:450});
+    $('lgNao').addEventListener('click',()=>this._fechaModal('mPers'));
+    $('lgSim').addEventListener('click',async()=>{
+      const body={nome:$('lgNome').value.trim(),banner_url:$('lgBanUrl').value||null,ativo:$('lgAtivo').checked,publico:$('lgPub').checked};
+      if(!body.nome){this._toast('Informe o nome','err');return;}
+      if($('lgBanUp').disabled){this._toast('Espere o banner terminar de enviar','err');return;}
+      if(!body.ativo&&g.ativo&&!confirm(`Desativar "${g.nome}"? Ela e todas as subcategorias dela somem do site e do painel do streamer.`))return;
+      const b=$('lgSim');b.disabled=true;
+      const r=await this._api('PATCH',`/admin/lives-categorias/grupo/${g.id}`,body);
+      b.disabled=false;
+      if(r?.ok){if(m.firstElementChild===raiz)this._fechaModal('mPers');this._toast('Categoria salva');this._carregarLivesCat();}
+      else this._toast(r?.erro||'Erro ao salvar','err');
+    });
+    this._abrirModal('mPers');
   }
 
   // ── VÍDEOS DE ABERTURA (janela da home) ─────────────────────────────────────
@@ -4685,8 +4903,8 @@ class DimaiorAdmin extends HTMLElement {
       onStatus?.('enviando…');
     }else if(/gif/i.test(file.type)){
       if(file.size>4*1024*1024){this._toast('GIF muito grande (máx 4 MB)','err');return null;}
-    }else if(pasta==='templates'||pasta==='molduras'){
-      // Arte já pronta (1800×300 / 600×900 / 512×512, com transparência): sobe do jeito que veio
+    }else if(pasta==='templates'||pasta==='molduras'||pasta==='lives'){
+      // Arte já pronta (1800×300 / 600×900 / 512×512, com transparência; capa de live já recortada em 600×800): sobe do jeito que veio
       blob=file; ct=file.type;
     }else{
       try{
@@ -7813,6 +8031,23 @@ class DimaiorAdmin extends HTMLElement {
     .mp-bar i{display:block;height:100%;background:var(--grad);border-radius:99px}
     .mp-vz{padding:14px 0;color:var(--t3);font-size:13px}
     .mp-nota{margin-top:14px;font-size:11.5px;color:var(--t3);line-height:1.5}
+    .lvc-grupo{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px;margin-bottom:16px}
+    .lvc-grupo.off{opacity:.6}
+    .lvc-ghead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+    .lvc-gnome{display:flex;align-items:center;gap:8px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t1);font-size:15px;margin-bottom:6px}
+    .lvc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+    .lvc-card{display:flex;gap:12px;background:var(--sunk,rgba(0,0,0,.15));border:1px solid var(--brddim);border-radius:12px;padding:10px;min-width:0}
+    .lvc-card.off{opacity:.55}
+    .lvc-capa{flex:0 0 72px;width:72px;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:var(--grad);display:grid;place-items:center}
+    .lvc-capa img{width:100%;height:100%;object-fit:cover;display:block}
+    .lvc-semcapa{font-size:10px;font-weight:700;color:#fff;text-align:center;padding:4px}
+    .lvc-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+    .lvc-acoes{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+    .lvc-acoes .btn{padding:5px 8px;font-size:11px}
+    .lvc-acoes .btn[disabled]{opacity:.4;cursor:not-allowed}
+    .lvc-prev{display:block;max-width:180px;max-height:200px;margin-top:10px;border-radius:10px;object-fit:cover;border:1px solid var(--brd);background:#05070c}
+    .lvc-corte{display:flex;justify-content:center;background:#05070c;border-radius:12px;padding:10px;margin:10px 0}
+    .lvc-corte canvas{max-width:100%;max-height:46vh;border-radius:8px}
     .va-cfg{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
     .va-cfg .va-cfg-txt{flex:1;min-width:220px;font-size:12px;color:var(--t3);line-height:1.5}
     .va-cfg .va-cfg-txt b{color:var(--t1);font-size:13px}
@@ -8034,7 +8269,8 @@ class DimaiorAdmin extends HTMLElement {
               ni('zap','pkDiario','PK Diário')+
               ni('play_circle','historicoLive','Histórico de Live')+
               ni('medal','personalizacao','Personalização')+
-              ni('play_circle','videosAbertura','Vídeos de Abertura')
+              ni('play_circle','videosAbertura','Vídeos de Abertura')+
+              ni('live','livesCategorias','Lives — Categorias')
             )}
             ${navSec('sistema','Sistema',
               ni('server','monitor','Monitor Kwai')+
@@ -8661,6 +8897,10 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-videosAbertura">${ph('Vídeos de Abertura','play_circle','Vídeo curto de uma streamer que aparece ao abrir a home (com Pular aos 3s e a live dela no canto se estiver ao vivo)','btnAtuVa',`<button class="btn btn-g" id="btnVaNovo">${this._ico('plus',13)} Novo vídeo</button>`)}
               <div id="vaConfig"></div>
               <div id="vaLista">${this._loading()}</div>
+            </div>
+            <div class="pag" id="pag-livesCategorias">${ph('Lives — Categorias','live','Categorias da aba LIVES da home. O streamer escolhe a dele no painel (Perfil) e o site agrupa quem está ao vivo','btnAtuLc',`<button class="btn btn-g" id="btnLcNova">${this._ico('plus',13)} Nova subcategoria</button>`)}
+              <div id="lcConfig"></div>
+              <div id="lcLista">${this._loading()}</div>
             </div>
             <div class="pag" id="pag-arquivos">${ph('Arquivos','image','Fotos e vídeos salvos no Cloudflare (banners, eventos, PK, votações) — veja o espaço usado e apague o que não usa mais','btnAtuArquivos')}
               <div id="arqResumo"></div>
