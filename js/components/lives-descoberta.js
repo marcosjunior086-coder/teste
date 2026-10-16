@@ -321,7 +321,7 @@
       const semV = canais.some((c) => c.espectadores == null);
       r.getElementById('stats').innerHTML = indisponivel ? '' : `
         <span><i class="vivo"></i><b>${fmt(tot)}</b> ${tot === 1 ? 'canal' : 'canais'} ao vivo</span>
-        ${tot ? `<span><b>${fmt(soma)}</b> espectadores somados <button type="button" class="dica" aria-label="O que é isso?">${ICO.info}<span class="tip" role="tooltip">Soma do público de cada live. A mesma pessoa pode estar em mais de uma, então não é o número de pessoas diferentes.${semV ? ' Algumas lives não informaram espectadores.' : ''}</span></button></span>` : ''}
+        ${tot ? `<span><b>${fmt(soma)}</b> espectadores somados <button type="button" class="dica" aria-label="O que é isso?">${ICO.info}<span class="tip" role="tooltip">Total de pessoas assistindo agora, somando o público de todas as lives.${semV ? ' Algumas lives não informaram espectadores.' : ''}</span></button></span>` : ''}
         <span class="atu" id="atu"></span>
         ${this._parcial() ? '<span class="parcial">Algumas lives podem não aparecer agora.</span>' : ''}`;
       this._atualizadoHa();
