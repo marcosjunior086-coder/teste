@@ -1807,6 +1807,10 @@ class DimaiorAdmin extends HTMLElement {
       this._lcBound=true;
       s.getElementById('btnAtuLc')?.addEventListener('click',()=>this._carregarLivesCat());
       s.getElementById('btnLcNova')?.addEventListener('click',()=>this._lcForm(null));
+      const uidIn=s.getElementById('lcsUid');
+      s.getElementById('lcsBuscar')?.addEventListener('click',()=>this._lcsBuscar());
+      uidIn?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();this._lcsBuscar();}});
+      uidIn?.addEventListener('input',()=>{s.getElementById('lcsRes').innerHTML='';});
     }
     el.innerHTML=this._loading();
     const d=await this._api('GET','/admin/lives-categorias');
@@ -1888,6 +1892,48 @@ class DimaiorAdmin extends HTMLElement {
         if(r?.ok){this._toast('Subcategoria excluída');this._carregarLivesCat();}else this._toast(r?.erro||'Erro ao excluir','err');
       });
     }));
+  }
+  // Define a categoria de um streamer pelo UID (Worker admin: /admin/lives-categorias/streamer/:uid)
+  async _lcsBuscar(){
+    const s=this.shadowRoot,res=s.getElementById('lcsRes'),d=this._lcDados;
+    const uid=(s.getElementById('lcsUid').value||'').replace(/\D/g,'');
+    if(!d){res.innerHTML=this._empty('warning','Espere as categorias carregarem');return;}
+    if(uid.length<5){res.innerHTML=`<div class="adp-meta" style="color:var(--amber)">Digite o UID do streamer (só números).</div>`;return;}
+    res.innerHTML=this._loading();
+    const r=await this._api('GET',`/admin/lives-categorias/streamer/${uid}`);
+    if(!r?.ok){res.innerHTML=`<div class="adp-meta" style="color:var(--verm)">${this._esc(r?.erro||'Erro ao buscar')}</div>`;return;}
+    const st=r.streamer,at=r.atual||{};
+    const grupos=d.grupos.filter(g=>g.ativo);
+    const foto=/^https?:\/\//.test(st.foto||'')?`<img src="${this._esc(st.foto)}" alt="" referrerpolicy="no-referrer">`:this._ico('user',18);
+    const atualTxt=at.grupo?`${this._esc((d.grupos.find(g=>g.id===at.grupo)||{}).nome||at.grupo)}${at.categoria_id?' › '+this._esc((d.categorias.find(c=>c.id===at.categoria_id)||{}).nome||'—'):''}`:'nenhuma';
+    res.innerHTML=`<div class="lvc-sres">
+      <div class="lvc-sfoto">${foto}</div>
+      <div class="lvc-sinfo"><div class="adp-nome">${this._esc(st.nome||'Sem nome')}</div><div class="adp-meta">UID ${this._esc(st.kwai_uid)} · categoria atual: <b>${atualTxt}</b></div></div>
+      ${r.tem_perfil?'':`<div class="adp-meta" style="color:var(--amber);flex-basis:100%">Esse streamer ainda não criou o perfil no painel — não dá pra salvar a categoria até ele entrar uma vez.</div>`}
+      <div class="lvc-sform" style="flex-basis:100%">
+        <select id="lcsGrupo">${grupos.map(g=>`<option value="${this._esc(g.id)}" ${at.grupo===g.id?'selected':''}>${this._esc(g.nome)}</option>`).join('')}</select>
+        <select id="lcsCat"></select>
+        <button class="btn btn-g" id="lcsSalvar" ${r.tem_perfil?'':'disabled'}>${this._ico('check',13)} Salvar</button>
+        <button class="btn btn-o" id="lcsLimpar" ${r.tem_perfil&&at.grupo?'':'disabled'}>Remover categoria</button>
+      </div></div>`;
+    const gSel=s.getElementById('lcsGrupo'),cSel=s.getElementById('lcsCat');
+    const preencheCat=()=>{
+      const cats=d.categorias.filter(c=>c.grupo===gSel.value&&c.ativo);
+      cSel.innerHTML=`<option value="">(só a principal)</option>`+cats.map(c=>`<option value="${this._esc(c.id)}" ${at.categoria_id===c.id?'selected':''}>${this._esc(c.nome)}</option>`).join('');
+    };
+    preencheCat();
+    gSel.addEventListener('change',()=>{at.categoria_id=null;preencheCat();});
+    const salvar=async(body,msg,btn)=>{
+      btn.disabled=true;
+      const x=await this._api('PUT',`/admin/lives-categorias/streamer/${uid}`,body);
+      if(x?.ok){this._toast(msg);this._carregarLivesCat();this._lcsBuscar();}
+      else{btn.disabled=false;this._toast(x?.erro||'Erro ao salvar','err');}
+    };
+    s.getElementById('lcsSalvar').addEventListener('click',e=>{
+      if(!gSel.value){this._toast('Escolha a categoria principal','err');return;}
+      salvar({grupo:gSel.value,categoria_id:cSel.value||null},'Categoria do streamer salva — o site atualiza em até 1 minuto',e.currentTarget);
+    });
+    s.getElementById('lcsLimpar').addEventListener('click',e=>salvar({grupo:null,categoria_id:null},'Categoria removida',e.currentTarget));
   }
   // Recorta a imagem no formato pedido (com prévia e posição do corte) e devolve um WebP.
   // Nunca amplia: imagem menor que o alvo sai no tamanho dela (com aviso).
@@ -8033,6 +8079,12 @@ class DimaiorAdmin extends HTMLElement {
     .mp-nota{margin-top:14px;font-size:11.5px;color:var(--t3);line-height:1.5}
     .lvc-grupo{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px;margin-bottom:16px}
     .lvc-grupo.off{opacity:.6}
+    .lvc-sform{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .lvc-sform input,.lvc-sform select{flex:1 1 160px;min-width:0}
+    .lvc-sres{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin-top:12px}
+    .lvc-sfoto{flex:0 0 44px;width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--grad);display:grid;place-items:center;color:#fff}
+    .lvc-sfoto img{width:100%;height:100%;object-fit:cover;display:block}
+    .lvc-sinfo{min-width:0;flex:1}
     .lvc-ghead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
     .lvc-gnome{display:flex;align-items:center;gap:8px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t1);font-size:15px;margin-bottom:6px}
     .lvc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
@@ -8900,6 +8952,15 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <div class="pag" id="pag-livesCategorias">${ph('Lives — Categorias','live','Categorias da aba LIVES da home. O streamer escolhe a dele no painel (Perfil) e o site agrupa quem está ao vivo','btnAtuLc',`<button class="btn btn-g" id="btnLcNova">${this._ico('plus',13)} Nova subcategoria</button>`)}
               <div id="lcConfig"></div>
+              <div class="lvc-grupo" id="lcStreamer">
+                <div class="lvc-gnome">${this._ico('user',16)} Definir categoria de um streamer</div>
+                <div class="adp-meta" style="margin-bottom:10px">Digite o UID do streamer, confira o nome e escolha a categoria. Vale no lugar do que ele escolheu no painel.</div>
+                <div class="lvc-sform">
+                  <input id="lcsUid" inputmode="numeric" autocomplete="off" placeholder="UID do streamer" maxlength="20">
+                  <button class="btn btn-o" id="lcsBuscar">${this._ico('search',13)} Buscar</button>
+                </div>
+                <div id="lcsRes"></div>
+              </div>
               <div id="lcLista">${this._loading()}</div>
             </div>
             <div class="pag" id="pag-arquivos">${ph('Arquivos','image','Fotos e vídeos salvos no Cloudflare (banners, eventos, PK, votações) — veja o espaço usado e apague o que não usa mais','btnAtuArquivos')}
