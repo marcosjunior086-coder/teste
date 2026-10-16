@@ -271,7 +271,7 @@
   // Live da streamer agora (lista pública do Worker live, casada pelo UID)
   async function acharLive(uid) {
     try {
-      var lista = await window.DmaiorAPI.live.getLives();
+      var lista = await window.DmaiorAPI.live.getLivesHome();
       if (!Array.isArray(lista)) return null;
       for (var i = 0; i < lista.length; i++) {
         if (String(lista[i].userId) === String(uid) && urlOk(lista[i].link)) return lista[i];

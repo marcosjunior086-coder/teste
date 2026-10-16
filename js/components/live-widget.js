@@ -688,15 +688,17 @@ class KwaiLiveWidget extends HTMLElement {
 
   /**
    * Busca lista de streamers ao vivo do KV do Worker.
-   * Delega para window.DmaiorAPI.live.getLives() — nenhum fetch direto aqui.
+   * Delega para window.DmaiorAPI.live.getLivesHome() (sem quem ocultou a própria live) — nenhum fetch direto aqui.
    * @returns {Promise<Array>} Array de streamers
    */
   async fetchEntries() {
     try {
-      const data = await window.DmaiorAPI.live.getLives();
+      const data = await window.DmaiorAPI.live.getLivesHome();
       if (!Array.isArray(data)) return [];
+      this._uidsOcultos = new Set((data.ocultos || []).map(String));
       return data
         .map((r) => ({
+          uid:       String(r.userId || ''),
           name:      (r.nome       || '').trim().slice(0, 100),
           url:       (r.link       || '').trim(),
           category:  'Geral',
@@ -728,6 +730,15 @@ class KwaiLiveWidget extends HTMLElement {
     }
 
     const entries  = await this.fetchEntries();
+
+    // Quem o streamer escondeu da página inicial sai na hora: não é falha de rede, então não
+    // passa pela regra de "esperar 2 ciclos" nem pela guarda de lista vazia logo abaixo.
+    if (this._uidsOcultos && this._uidsOcultos.size) {
+      [...this.activePlayers.entries()].forEach(([url, entry]) => {
+        const u = entry.streamer && entry.streamer.uid;
+        if (u && this._uidsOcultos.has(u)) this.removeCard(url);
+      });
+    }
 
     // Vazio pode ser erro de rede pontual — não remove ninguém na primeira vez.
     // Mas se vier vazio DE NOVO no ciclo seguinte (~60s depois), já não é rede:
@@ -793,6 +804,7 @@ class KwaiLiveWidget extends HTMLElement {
 
     if (entry.playUrl) {
       result = {
+        uid:       entry.uid,
         url:       entry.url,
         name:      entry.name,
         category:  entry.category,
@@ -858,6 +870,7 @@ class KwaiLiveWidget extends HTMLElement {
       if (m) playUrl = m[1].replace(/\\u002F/g, '/').replace(/\\\//g, '/');
     }
     return {
+      uid:      entry.uid,
       url:      entry.url,
       name:     entry.name,
       category: entry.category,

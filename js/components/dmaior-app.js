@@ -587,6 +587,18 @@
             .lvp-op .lvp-sc{background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));opacity:.35;}
             .lvp-op.on{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan) inset;}
             .lvp-op.on .lvp-sc{opacity:1;}
+            .lvp-sep{height:1px;background:var(--border);margin:20px 0 14px;}
+            .lvp-sub{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.82rem;color:var(--cyan);margin:0 0 10px;letter-spacing:.5px;}
+            .lvp-sw{display:flex;align-items:flex-start;gap:12px;cursor:pointer;position:relative;}
+            .lvp-sw input{position:absolute;opacity:0;width:1px;height:1px;margin:0;}
+            .lvp-trilho{flex:0 0 44px;height:26px;border-radius:999px;background:var(--dm-bg-card,rgba(255,255,255,.12));border:1px solid var(--border);position:relative;transition:.2s;margin-top:2px;}
+            .lvp-trilho::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:.2s;}
+            .lvp-sw input:checked + .lvp-trilho{background:var(--rank-grad,linear-gradient(135deg,#3b82f6,#00d4d4));border-color:transparent;}
+            .lvp-sw input:checked + .lvp-trilho::after{left:20px;background:#fff;}
+            .lvp-sw input:focus-visible + .lvp-trilho{outline:2px solid var(--cyan);outline-offset:2px;}
+            .lvp-sw input:disabled + .lvp-trilho{opacity:.5;}
+            .lvp-sw-txt b{display:block;font-size:.9rem;color:var(--text);font-weight:600;}
+            .lvp-sw-txt small{display:block;font-size:.78rem;color:var(--muted);line-height:1.45;margin-top:2px;}
 
             .wallet-head{
                 background:linear-gradient(155deg,#3b82f6 0%,#1e40af 100%);
@@ -1496,6 +1508,7 @@
                         <p class="lvp-txt">Quando você estiver ao vivo, aparece nessa categoria na aba LIVES do site, pra quem procura esse tipo de live.</p>
                         <div id="alLvp" class="al"></div>
                         <div id="lvpCorpo"><p class="lvp-txt">Carregando…</p></div>
+                        <div id="lvpOcultaBox"></div>
                     </div>
                 </div>
 
@@ -2624,6 +2637,7 @@
         const corpo=this.qs('#lvpCorpo'); if(!corpo || !uid) return;
         const L0={uid,carregando:true}; this._lvp=L0;
         corpo.innerHTML='<p class="lvp-txt">Carregando…</p>';
+        const caixaOc=this.qs('#lvpOcultaBox'); if(caixaOc) caixaOc.innerHTML='';
         try{
             const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/categoria-live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,acao:'ler'})});
             if(this._lvp!==L0 || this.sessionUid!==uid) return; // resposta de outra sessão/carregamento
@@ -2632,8 +2646,9 @@
             if(this._lvp!==L0 || this.sessionUid!==uid) return;
             if(!res.ok||!d||!d.sucesso) throw new Error((d&&d.erro)||'');
             const a=d.atual||{};
-            this._lvp={uid, dados:d, grupo:a.grupo_desativado?null:a.grupo, cat:a.desativada?null:a.categoria_id, q:'', salvando:false};
+            this._lvp={uid, dados:d, grupo:a.grupo_desativado?null:a.grupo, cat:a.desativada?null:a.categoria_id, q:'', salvando:false, oculta:a.oculta_live_site===true, salvandoOculta:false};
             this._lvpRender();
+            this._lvpRenderOculta();
         }catch(_){
             if(this._lvp!==L0) return;
             this._lvp=null;
@@ -2667,6 +2682,40 @@
         if(q){ q.addEventListener('input',()=>{ L.q=q.value; const pos=q.selectionStart; this._lvpRender(); const n=this.qs('#lvpQ'); if(n){n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}} }); }
         this.qs('#btnLvpSalvar')?.addEventListener('click',()=>this._lvpSalvar());
     }
+    // Interruptor: o streamer esconde a PRÓPRIA live da página inicial (faixa de lives, live grande,
+    // aba LIVES e vídeo de abertura). Continua ao vivo no Kwai e no ranking. Salva na hora.
+    _lvpRenderOculta(){
+        const box=this.qs('#lvpOcultaBox'), L=this._lvp; if(!box||!L||!L.dados) return;
+        box.innerHTML=`<div class="lvp-sep"></div>
+            <h3 class="lvp-sub">VISIBILIDADE NA PÁGINA INICIAL</h3>
+            <div id="alLvpOculta" class="al"></div>
+            <label class="lvp-sw"><input type="checkbox" id="lvpOculta" ${L.oculta?'checked':''} ${L.salvandoOculta?'disabled':''}><span class="lvp-trilho" aria-hidden="true"></span>
+                <span class="lvp-sw-txt"><b>Ocultar minha live da página inicial</b><small>Sua live deixa de aparecer na faixa de lives, na live grande e na aba LIVES do site. Você continua ao vivo no Kwai e no ranking.</small></span></label>`;
+        this.qs('#lvpOculta').addEventListener('change',e=>this._lvpOcultar(e.target.checked));
+    }
+    async _lvpOcultar(valor){
+        const L=this._lvp; if(!L||!L.dados||L.salvandoOculta||L.uid!==this.sessionUid) return;
+        L.salvandoOculta=true; this._lvpRenderOculta();
+        try{
+            const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/categoria-live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:L.uid,acao:'ocultar',oculta:valor===true})});
+            if(res.status===401||this._lvp!==L) return;
+            const d=await res.json().catch(()=>null);
+            if(!res.ok||!d||!d.sucesso) throw new Error((d&&d.erro)||'Não foi possível salvar agora.');
+            L.oculta=d.oculta===true;
+            this.showAlert('#alLvpOculta',L.oculta?'Pronto: sua live não aparece mais na página inicial (pode levar até 2 minutos).':'Pronto: sua live volta a aparecer na página inicial (pode levar até 2 minutos).',false);
+        }catch(err){
+            if(this._lvp===L) this.showAlert('#alLvpOculta',err.message||'Não foi possível salvar agora.');
+        }finally{
+            L.salvandoOculta=false;
+            if(this._lvp===L){
+                // reconstrói o interruptor mantendo a mensagem que acabou de aparecer
+                const msg=this.qs('#alLvpOculta'), txt=msg?msg.textContent:'', cls=msg?msg.className:'', st=msg?msg.getAttribute('style'):'';
+                this._lvpRenderOculta();
+                const n=this.qs('#alLvpOculta'); if(n&&txt){ n.textContent=txt; n.className=cls; if(st) n.setAttribute('style',st); }
+            }
+        }
+    }
+
     async _lvpSalvar(){
         const L=this._lvp; if(!L||!L.grupo||L.salvando||L.uid!==this.sessionUid) return;
         // O que vai pro servidor fica congelado aqui (as opções ficam travadas enquanto salva)

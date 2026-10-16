@@ -209,6 +209,11 @@ window.DmaiorAPI = {
       return window.DmaiorAPI._get(window.DmaiorConfig.workers.rank, '/lives/descoberta');
     },
 
+    /** UIDs de quem ocultou a própria live da página inicial. Retorna { uids: [...] }. */
+    async getLivesOcultas() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.rank, '/lives/ocultas');
+    },
+
     /**
      * Retorna configuração pública do impulsionamento (quota, opções ativas).
      */
@@ -365,6 +370,28 @@ window.DmaiorAPI = {
         window.DmaiorConfig.workers.live,
         '/api/lives',
       );
+    },
+
+    /**
+     * Lista de lives da PÁGINA INICIAL: a mesma de getLives(), sem quem escolheu
+     * ocultar a própria live (painel do streamer → Perfil). A lista de ocultos vem do
+     * Worker rank; se ela falhar ou demorar (>4s), mostra a lista inteira.
+     * O ranking do painel continua usando getLives() (lá a live não some).
+     */
+    async getLivesHome() {
+      const api = window.DmaiorAPI;
+      const [lista, ocultas] = await Promise.all([
+        api.live.getLives(),
+        Promise.race([
+          api.rank.getLivesOcultas().catch(() => null),
+          new Promise((r) => setTimeout(() => r(null), 4000)),
+        ]),
+      ]);
+      if (!Array.isArray(lista)) return lista;
+      const uids = new Set((ocultas && Array.isArray(ocultas.uids) ? ocultas.uids : []).map(String));
+      const out = uids.size ? lista.filter((l) => !uids.has(String(l && l.userId))) : lista;
+      out.ocultos = [...uids]; // quem o streamer escondeu (o widget tira o card na hora, sem esperar 2 ciclos)
+      return out;
     },
 
     /**

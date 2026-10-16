@@ -59,8 +59,14 @@
       this.st = { aba: 'cats', grupo: 'todas', cat: null, q: '', ordem: 'esp' };
       this.encerradas = new Map(); // id → canal que saiu do ar enquanto o painel estava aberto
       this._t = null; this._tRel = null;
+      // Live tocando no card (uma por vez): hover no computador, a mais centralizada no celular
+      this._pv = null; this._pvT = null; this._pvTE = null; this._pvVig = null;
+      this._pvFalhou = new Map(); this._pvBloq = false; this._pvOk = undefined;
       this._onPop = () => this._sync();
-      this._onVis = () => { if (!document.hidden) this._agendar(true); };
+      this._onVis = () => {
+        if (document.hidden) { clearTimeout(this._pvT); this._pvParar(); }
+        else { this._agendar(true); this._pvAgendarEscolha(); }
+      };
       this._onKey = (e) => { if (e.key === 'Escape' && this.aberto) this.fechar(); };
     }
 
@@ -103,7 +109,8 @@
       window.removeEventListener('popstate', this._onPop);
       document.removeEventListener('visibilitychange', this._onVis);
       document.removeEventListener('keydown', this._onKey);
-      clearTimeout(this._t); clearInterval(this._tRel);
+      clearTimeout(this._t); clearInterval(this._tRel); clearTimeout(this._pvT); clearTimeout(this._pvTE);
+      this._pvParar();
       this._travarRolagem(false);
     }
 
@@ -121,11 +128,13 @@
         // Quem estava na tela e saiu da lista: marca "encerrada" em vez de sumir do nada.
         // Só com todas as fontes confirmadas (status ok) — em 'parcial' a live pode só ter ficado de fora.
         const novos = new Set(d.canais.map((c) => c.id));
+        const ocultos = new Set((d.ocultos || []).map(String)); // o streamer escondeu a própria live: some, não "encerrou"
         if (this.aberto && this.d && Array.isArray(this.d.canais) && d.status === 'ok') {
-          for (const c of this.d.canais) if (!novos.has(c.id)) this.encerradas.set(c.id, c);
+          for (const c of this.d.canais) if (!novos.has(c.id) && !ocultos.has(String(c.id))) this.encerradas.set(c.id, c);
         }
-        // Voltou a aparecer (em qualquer resposta): deixa de ser "encerrada"
+        // Voltou a aparecer (em qualquer resposta) ou foi ocultada: deixa de ser "encerrada"
         for (const id of novos) this.encerradas.delete(id);
+        for (const id of ocultos) this.encerradas.delete(id);
         this.d = d; this.erro = false; this.recebidoEm = Date.now();
       }
       this._mostrarAba(true);
@@ -198,6 +207,7 @@
         this._agendar(Date.now() - this.recebidoEm > 15000);
       } else {
         this.removeAttribute('data-aberto');
+        clearTimeout(this._pvT); clearTimeout(this._pvTE); this._pvParar();
         this._travarRolagem(false);
         r.getElementById('tabTxt').textContent = 'LIVES';
         tab.setAttribute('aria-expanded', 'false');
@@ -232,7 +242,10 @@
       const p = this.shadowRoot.getElementById('painel');
       if (!p.firstElementChild) {
         p.innerHTML = `<div class="in">
-          <header class="cab"><h1>LIVES</h1><p>Quem da DMaior está ao vivo no Kwai agora.</p></header>
+          <header class="topo">
+            <button type="button" class="voltar" id="voltar" aria-label="Voltar">${ICO.seta}<span>Voltar</span></button>
+            <div class="cab"><h1>LIVES</h1><p>Quem da DMaior está ao vivo no Kwai agora.</p></div>
+          </header>
           <label class="busca">${ICO.busca}<input id="q" type="search" placeholder="Buscar streamer, jogo ou categoria" autocomplete="off" enterkeyhint="search" aria-label="Buscar"></label>
           <nav class="abas" role="tablist">
             <button type="button" role="tab" data-aba="cats">Categorias</button>
@@ -248,6 +261,12 @@
           <div id="corpo"></div>
         </div>`;
         p.addEventListener('click', (e) => this._clique(e));
+        p.querySelector('#voltar').addEventListener('click', () => this.fechar());
+        // Live tocando no card: passar o mouse (computador) / rolar até ficar no centro (celular)
+        p.addEventListener('mouseover', (e) => this._pvMouse(e, true));
+        p.addEventListener('mouseout', (e) => this._pvMouse(e, false));
+        p.addEventListener('scroll', () => this._pvAgendarEscolha(), { passive: true });
+        p.addEventListener('pointerdown', () => { this._pvBloq = false; }, { passive: true }); // um toque libera o autoplay bloqueado
         p.querySelector('#q').addEventListener('input', (e) => { this.st.q = e.target.value.trim(); this._renderCorpo(); });
         p.querySelector('#ordem').addEventListener('change', (e) => { this.st.ordem = e.target.value; this._renderCorpo(); });
       }
@@ -287,7 +306,9 @@
       return l.sort(ord);
     }
 
-    _renderCorpo() {
+    _renderCorpo() { this._renderCorpoBase(); this._pvDepoisDoRender(); }
+
+    _renderCorpoBase() {
       const r = this.shadowRoot, d = this.d || {}, st = this.st;
       if (!r.getElementById('corpo')) return;
       r.querySelectorAll('[data-aba]').forEach((b) => { const on = b.dataset.aba === st.aba; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
@@ -317,6 +338,184 @@
       }
       if (st.aba === 'cats') corpo.innerHTML = this._htmlCategorias(canais);
       else corpo.innerHTML = this._htmlCanais(canais);
+    }
+
+    // ── Live tocando no card ─────────────────────────────────────────────────
+    // Uma transmissão por vez, sem som, só dentro do quadro. Direto na Kwai; se falhar,
+    // pelo proxy do Worker live; se falhar de novo, fica a capa (e não tenta de novo por 2 min).
+    // Xiaomi (que troca <video> por player nativo) e "economia de dados" ficam só com a capa.
+    _pvPermitido() {
+      if (this._pvOk === undefined) {
+        let sequestra = false, poupa = false;
+        try { sequestra = !!(window.DmaiorVideoCompat && window.DmaiorVideoCompat.sequestraVideo && window.DmaiorVideoCompat.sequestraVideo()); } catch (_) {}
+        try { poupa = !!(navigator.connection && navigator.connection.saveData); } catch (_) {}
+        this._pvOk = !sequestra && !poupa;
+      }
+      return this._pvOk;
+    }
+    _pvHover() { try { return matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (_) { return false; } }
+
+    _hlsLib() {
+      if (window.Hls) return Promise.resolve();
+      return window.__dmHlsLib || (window.__dmHlsLib = new Promise((ok) => {
+        const ja = document.querySelector('script[src*="hls.js"]'); // o widget da home pode já estar baixando
+        const s = ja || Object.assign(document.createElement('script'), { src: 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20' });
+        s.addEventListener('load', ok); s.addEventListener('error', ok);
+        setTimeout(ok, 10000);
+        if (!ja) document.head.appendChild(s);
+      }));
+    }
+
+    _pvMouse(e, entrou) {
+      if (!this._pvHover() || !this.aberto) return;
+      const t = e.target && e.target.closest ? e.target.closest('.thumb[data-stream]') : null;
+      if (!t) return;
+      if (entrou) {
+        clearTimeout(this._pvT);
+        if (this._pv && this._pv.thumb === t) return;
+        this._pvT = setTimeout(() => this._pvIniciar(t), 250); // passou o mouse por cima sem querer: não liga
+      } else {
+        if (t.contains(e.relatedTarget)) return;
+        clearTimeout(this._pvT);
+        if (this._pv && this._pv.thumb === t) this._pvParar();
+      }
+    }
+
+    // Celular: toca a transmissão cujo quadro está mais perto do meio da tela (mín. 55% visível)
+    _pvAgendarEscolha() {
+      if (!this.aberto || this._pvHover() || !this._pvPermitido()) return;
+      clearTimeout(this._pvTE);
+      this._pvTE = setTimeout(() => this._pvEscolher(), 280);
+    }
+    _pvEscolher() {
+      if (!this.aberto || document.hidden) return;
+      const painel = this.shadowRoot.getElementById('painel'); if (!painel) return;
+      const pr = painel.getBoundingClientRect(), cy = pr.top + pr.height / 2;
+      let melhor = null, dist = Infinity;
+      for (const t of painel.querySelectorAll('.thumb[data-stream]')) {
+        const b = t.getBoundingClientRect(); if (!b.height) continue;
+        const vis = Math.min(b.bottom, pr.bottom) - Math.max(b.top, pr.top);
+        if (vis < b.height * 0.55) continue;
+        const d = Math.abs(b.top + b.height / 2 - cy);
+        if (d < dist) { dist = d; melhor = t; }
+      }
+      if (!melhor) { this._pvParar(); return; }
+      if (!this._pv || this._pv.thumb !== melhor) this._pvIniciar(melhor);
+    }
+
+    // A tela é redesenhada a cada atualização (30 s) e a cada filtro: a live que já toca
+    // muda de lugar no mesmo instante em vez de recomeçar; se o card sumiu, para.
+    _pvDepoisDoRender() {
+      if (this._pv) {
+        const pv = this._pv;
+        const t = this._semConfirmacao() ? null
+          : [...this.shadowRoot.querySelectorAll('.thumb[data-stream]')].find((x) => x.dataset.id === pv.id);
+        if (t) {
+          pv.url = t.dataset.stream; // link assinado mais novo: vale pra próxima conexão, sem derrubar a que toca
+          t.appendChild(pv.video); pv.thumb = t; t.classList.toggle('tocando', pv.rodando);
+          // Computador: o card pode ter mudado de lugar e o mouse já não estar em cima dele
+          if (this._pvHover()) {
+            setTimeout(() => { if (this._pv === pv && pv.thumb.isConnected && !pv.thumb.matches(':hover')) this._pvParar(); }, 200);
+          }
+        } else this._pvParar();
+      }
+      this._pvAgendarEscolha();
+    }
+
+    _pvIniciar(thumb) {
+      if (!thumb || !thumb.isConnected || !this.aberto || document.hidden || this._pvBloq) return;
+      if (this._pv && this._pv.thumb === thumb) return;
+      const id = thumb.dataset.id, url = thumb.dataset.stream;
+      this._pvParar();
+      const falha = this._pvFalhou.get(id);
+      if (!url || (falha && Date.now() - falha < 120000)) return;
+      const v = document.createElement('video');
+      v.muted = true; v.defaultMuted = true; v.playsInline = true;
+      ['muted', 'playsinline', 'webkit-playsinline', 'x5-playsinline', 'disablepictureinpicture', 'disableremoteplayback'].forEach((a) => v.setAttribute(a, ''));
+      v.setAttribute('controlslist', 'nodownload nofullscreen noremoteplayback noplaybackrate');
+      v.setAttribute('aria-hidden', 'true'); v.tabIndex = -1;
+      thumb.appendChild(v);
+      const pv = this._pv = { id, url, thumb, video: v, hls: null, tok: 0, rodando: false, lastT: -1, parado: 0, timeout: null, onErr: null };
+      v.addEventListener('playing', () => {
+        if (this._pv !== pv) return;
+        pv.rodando = true; clearTimeout(pv.timeout);
+        // Live em pé aparece inteira sobre o fundo desfocado; deitada preenche o quadro
+        v.classList.toggle('vert', v.videoHeight > v.videoWidth * 1.05);
+        pv.thumb.classList.add('tocando');
+      });
+      this._pvLigar(pv, false);
+      // Vigia: imagem parada por ~16 s = travou → recomeça
+      this._pvVig = setInterval(() => {
+        const cur = this._pv; if (!cur || document.hidden || !cur.rodando) return;
+        const t = cur.video.currentTime;
+        if (t === cur.lastT) {
+          if (++cur.parado >= 2) { cur.parado = 0; cur.rodando = false; cur.thumb.classList.remove('tocando'); this._pvSoltar(cur); this._pvLigar(cur, false); }
+        } else cur.parado = 0;
+        cur.lastT = t;
+      }, 8000);
+    }
+
+    async _pvLigar(pv, proxy) {
+      const tok = ++pv.tok, v = pv.video;
+      const vivo = () => this._pv === pv && pv.tok === tok;
+      clearTimeout(pv.timeout);
+      const base = ((window.DmaiorConfig && window.DmaiorConfig.workers && window.DmaiorConfig.workers.live) || '').replace(/\/$/, '');
+      const url = proxy && base ? `${base}/?${encodeURIComponent(pv.url)}` : pv.url;
+      const falhou = () => {
+        if (!vivo()) return;
+        this._pvSoltar(pv);
+        if (!proxy && base) this._pvLigar(pv, true);
+        else { this._pvFalhou.set(pv.id, Date.now()); this._pvParar(); }
+      };
+      if (window.MediaSource) await this._hlsLib();
+      if (!vivo()) return;
+      pv.timeout = setTimeout(falhou, proxy ? 14000 : 9000); // não começou a tocar a tempo → próxima tentativa
+      v.muted = true;
+      const tocar = () => {
+        const pr = v.play();
+        if (pr && pr.catch) pr.catch((e) => { if (vivo() && e && e.name === 'NotAllowedError') { this._pvBloq = true; this._pvParar(); } });
+      };
+      if (window.MediaSource && window.Hls && window.Hls.isSupported()) {
+        const Hls = window.Hls;
+        const hls = pv.hls = new Hls({
+          capLevelToPlayerSize: true,   // quadro pequeno: não puxa qualidade além do necessário
+          maxBufferLength: 6, maxMaxBufferLength: 12, backBufferLength: 0,
+          liveSyncDurationCount: 3, manifestLoadingMaxRetry: 2, fragLoadingMaxRetry: 3,
+        });
+        hls.on(Hls.Events.MANIFEST_PARSED, () => { if (vivo()) tocar(); });
+        hls.on(Hls.Events.ERROR, (_, d) => {
+          if (!d.fatal || !vivo()) return;
+          if (d.type === Hls.ErrorTypes.MEDIA_ERROR) { try { hls.recoverMediaError(); } catch (_) { falhou(); } }
+          else falhou();
+        });
+        hls.loadSource(url);
+        hls.attachMedia(v);
+      } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
+        // iPhone: o Safari toca HLS sozinho
+        pv.onErr = falhou;
+        v.addEventListener('error', falhou, { once: true });
+        v.src = url;
+        tocar();
+      } else {
+        this._pvFalhou.set(pv.id, Date.now()); this._pvParar();
+      }
+    }
+
+    _pvSoltar(pv) {
+      try { if (pv.hls) pv.hls.destroy(); } catch (_) {}
+      pv.hls = null;
+      if (pv.onErr) { pv.video.removeEventListener('error', pv.onErr); pv.onErr = null; }
+      try { pv.video.pause(); pv.video.removeAttribute('src'); pv.video.load(); } catch (_) {}
+    }
+    _pvParar() {
+      const pv = this._pv;
+      clearInterval(this._pvVig); this._pvVig = null;
+      if (!pv) return;
+      this._pv = null; pv.tok++;
+      clearTimeout(pv.timeout);
+      this._pvSoltar(pv);
+      try { pv.video.remove(); } catch (_) {}
+      if (pv.thumb) pv.thumb.classList.remove('tocando');
     }
 
     _parcial() { return !!this.d && (this.d.status === 'parcial' || this.erro); }
@@ -396,6 +595,7 @@
       const capa = urlOk(c.capa) || urlOk(c.foto), capaRaw = urlOk(c.capa_raw) || urlOk(c.foto_raw);
       const foto = urlOk(c.foto), fotoRaw = urlOk(c.foto_raw);
       const link = urlOk(c.link);
+      const stream = !encerrada && this._pvPermitido() ? urlOk(c.stream) : '';
       let dur = '';
       if (c.inicio && !encerrada) {
         const min = Math.max(0, Math.floor((Date.now() - c.inicio) / 60000));
@@ -403,7 +603,7 @@
       }
       const rotulo = cat ? `${esc(g ? g.nome : '')}${g ? ' · ' : ''}${esc(cat.nome)}` : (g ? esc(g.nome) : '');
       return `<article class="canal ${encerrada ? 'fim' : ''}">
-        <div class="thumb">
+        <div class="thumb"${stream ? ` data-id="${esc(c.id)}" data-stream="${esc(stream)}"` : ''}>
           ${capa ? `<img class="fundo" src="${esc(capa)}" alt="" aria-hidden="true" loading="lazy" decoding="async"><img class="capa" src="${esc(capa)}" data-raw="${esc(capaRaw)}" alt="" loading="lazy" decoding="async">` : ''}
           ${encerrada ? '<span class="selo-live fim">ENCERRADA</span>' : '<span class="selo-live">AO VIVO</span>'}
           ${dur ? `<span class="dur">${dur}</span>` : ''}
@@ -457,10 +657,19 @@
         transition:transform .38s cubic-bezier(.4,0,.2,1);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
       :host([data-aberto]) .painel{transform:none}
       .in{padding:22px 26px 90px}
-      @media(max-width:1040px){.in{padding:16px 16px 80px 44px}}
+      @media(max-width:1040px){
+        .in{padding:14px 16px 80px}
+        .voltar{display:inline-flex}
+        :host([data-aberto]) .tab{display:none} /* o Voltar fica no topo do painel (a aba lateral sobrava e deixava a tela vazia) */
+      }
 
+      .topo{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+      .cab{min-width:0}
+      .voltar{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;min-height:44px;padding:0 16px 0 10px;border-radius:999px;border:1px solid var(--dm-border);
+        background:var(--dm-bg-card);color:var(--dm-cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.95rem;-webkit-tap-highlight-color:transparent}
+      @media(min-width:1041px){.voltar{display:none}} /* no computador o VOLTAR é a aba ao lado do painel */
       .cab h1{margin:0;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:1.9rem;letter-spacing:1px;line-height:1;color:var(--dm-text)}
-      .cab p{margin:5px 0 14px;color:var(--dm-text-sub);font-size:.86rem}
+      .cab p{margin:4px 0 0;color:var(--dm-text-sub);font-size:.86rem;line-height:1.35}
 
       .busca{display:flex;align-items:center;gap:10px;height:46px;padding:0 16px;border-radius:999px;background:var(--dm-bg-card);border:1px solid var(--dm-border);color:var(--dm-text-muted);margin-bottom:12px}
       .busca:focus-within{border-color:var(--dm-cyan)}
@@ -529,6 +738,10 @@
       .thumb img.fundo{filter:blur(18px) brightness(.6);transform:scale(1.15)}
       .thumb img.capa.vert{object-fit:contain}
       .thumb img.falhou{display:none}
+      .thumb video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s;z-index:1;pointer-events:none}
+      .thumb video.vert{object-fit:contain}
+      .thumb.tocando video{opacity:1}
+      .selo-live,.dur,.esp-n{z-index:2}
       .selo-live{position:absolute;top:8px;left:8px;background:var(--lv-live);color:#fff;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.74rem;letter-spacing:1px;padding:2px 7px;border-radius:5px}
       .selo-live.fim{background:rgba(0,0,0,.7)}
       .dur{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.62);color:#fff;font-size:.7rem;padding:2px 6px;border-radius:5px}
