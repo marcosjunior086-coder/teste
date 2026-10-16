@@ -1896,19 +1896,19 @@ class DimaiorAdmin extends HTMLElement {
   // Define a categoria de um streamer pelo UID (Worker admin: /admin/lives-categorias/streamer/:uid)
   async _lcsBuscar(){
     const s=this.shadowRoot,res=s.getElementById('lcsRes'),d=this._lcDados;
-    const uid=(s.getElementById('lcsUid').value||'').replace(/\D/g,'');
+    const busca=(s.getElementById('lcsUid').value||'').trim().replace(/^@/,'');
     if(!d){res.innerHTML=this._empty('warning','Espere as categorias carregarem');return;}
-    if(uid.length<5){res.innerHTML=`<div class="adp-meta" style="color:var(--amber)">Digite o UID do streamer (só números).</div>`;return;}
+    if(!/^[A-Za-z0-9_.-]{3,40}$/.test(busca)){res.innerHTML=`<div class="adp-meta" style="color:var(--amber)">Digite o UID ou o ID do Kwai do streamer.</div>`;return;}
     res.innerHTML=this._loading();
-    const r=await this._api('GET',`/admin/lives-categorias/streamer/${uid}`);
+    const r=await this._api('GET',`/admin/lives-categorias/streamer/${encodeURIComponent(busca)}`);
     if(!r?.ok){res.innerHTML=`<div class="adp-meta" style="color:var(--verm)">${this._esc(r?.erro||'Erro ao buscar')}</div>`;return;}
-    const st=r.streamer,at=r.atual||{};
+    const st=r.streamer,at=r.atual||{},uid=st.kwai_uid;
     const grupos=d.grupos.filter(g=>g.ativo);
     const foto=/^https?:\/\//.test(st.foto||'')?`<img src="${this._esc(st.foto)}" alt="" referrerpolicy="no-referrer">`:this._ico('user',18);
     const atualTxt=at.grupo?`${this._esc((d.grupos.find(g=>g.id===at.grupo)||{}).nome||at.grupo)}${at.categoria_id?' › '+this._esc((d.categorias.find(c=>c.id===at.categoria_id)||{}).nome||'—'):''}`:'nenhuma';
     res.innerHTML=`<div class="lvc-sres">
       <div class="lvc-sfoto">${foto}</div>
-      <div class="lvc-sinfo"><div class="adp-nome">${this._esc(st.nome||'Sem nome')}</div><div class="adp-meta">UID ${this._esc(st.kwai_uid)} · categoria atual: <b>${atualTxt}</b></div></div>
+      <div class="lvc-sinfo"><div class="adp-nome">${this._esc(st.nome||'Sem nome')}</div><div class="adp-meta">UID ${this._esc(st.kwai_uid)}${st.kwai_id?` · ID ${this._esc(st.kwai_id)}`:''} · categoria atual: <b>${atualTxt}</b></div></div>
       ${r.tem_perfil?'':`<div class="adp-meta" style="color:var(--amber);flex-basis:100%">Esse streamer ainda não criou o perfil no painel — não dá pra salvar a categoria até ele entrar uma vez.</div>`}
       <div class="lvc-sform" style="flex-basis:100%">
         <select id="lcsGrupo">${grupos.map(g=>`<option value="${this._esc(g.id)}" ${at.grupo===g.id?'selected':''}>${this._esc(g.nome)}</option>`).join('')}</select>
@@ -8954,9 +8954,9 @@ class DimaiorAdmin extends HTMLElement {
               <div id="lcConfig"></div>
               <div class="lvc-grupo" id="lcStreamer">
                 <div class="lvc-gnome">${this._ico('user',16)} Definir categoria de um streamer</div>
-                <div class="adp-meta" style="margin-bottom:10px">Digite o UID do streamer, confira o nome e escolha a categoria. Vale no lugar do que ele escolheu no painel.</div>
+                <div class="adp-meta" style="margin-bottom:10px">Digite o UID ou o ID do Kwai do streamer, confira o nome e escolha a categoria. Vale no lugar do que ele escolheu no painel.</div>
                 <div class="lvc-sform">
-                  <input id="lcsUid" inputmode="numeric" autocomplete="off" placeholder="UID do streamer" maxlength="20">
+                  <input id="lcsUid" autocomplete="off" autocapitalize="off" placeholder="UID ou ID do streamer" maxlength="40">
                   <button class="btn btn-o" id="lcsBuscar">${this._ico('search',13)} Buscar</button>
                 </div>
                 <div id="lcsRes"></div>
