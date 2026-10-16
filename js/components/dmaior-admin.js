@@ -1909,12 +1909,12 @@ class DimaiorAdmin extends HTMLElement {
     res.innerHTML=`<div class="lvc-sres">
       <div class="lvc-sfoto">${foto}</div>
       <div class="lvc-sinfo"><div class="adp-nome">${this._esc(st.nome||'Sem nome')}</div><div class="adp-meta">UID ${this._esc(st.kwai_uid)}${st.kwai_id?` · ID ${this._esc(st.kwai_id)}`:''} · categoria atual: <b>${atualTxt}</b></div></div>
-      ${r.tem_perfil?'':`<div class="adp-meta" style="color:var(--amber);flex-basis:100%">Esse streamer ainda não criou o perfil no painel — não dá pra salvar a categoria até ele entrar uma vez.</div>`}
+      ${r.tem_perfil?'':`<div class="adp-meta" style="flex-basis:100%">Esse streamer ainda não criou o perfil no painel. Pode salvar mesmo assim: a categoria fica guardada e vale até ele escolher a dele.</div>`}
       <div class="lvc-sform" style="flex-basis:100%">
         <select id="lcsGrupo">${grupos.map(g=>`<option value="${this._esc(g.id)}" ${at.grupo===g.id?'selected':''}>${this._esc(g.nome)}</option>`).join('')}</select>
         <select id="lcsCat"></select>
-        <button class="btn btn-g" id="lcsSalvar" ${r.tem_perfil?'':'disabled'}>${this._ico('check',13)} Salvar</button>
-        <button class="btn btn-o" id="lcsLimpar" ${r.tem_perfil&&at.grupo?'':'disabled'}>Remover categoria</button>
+        <button class="btn btn-g" id="lcsSalvar">${this._ico('check',13)} Salvar</button>
+        <button class="btn btn-o" id="lcsLimpar" ${at.grupo?'':'disabled'}>Remover categoria</button>
       </div></div>`;
     const gSel=s.getElementById('lcsGrupo'),cSel=s.getElementById('lcsCat');
     const preencheCat=()=>{
