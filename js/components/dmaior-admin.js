@@ -2077,7 +2077,29 @@ class DimaiorAdmin extends HTMLElement {
     this._vaDados=d;
     this._renderVa();
   }
-  _vaDur(x){const n=Number(x);return n>0?`${String(Math.round(n*10)/10).replace('.',',')}s`:'';}
+  get _VA_MAX_MB(){return 80;} // tem que bater com o teto da pasta abertura/ no Worker admin
+  _vaDur(x){
+    const n=Number(x);if(!(n>0))return '';
+    if(n<60)return `${String(Math.round(n*10)/10).replace('.',',')}s`;
+    const m=Math.floor(n/60),s=Math.round(n-m*60);
+    return s===60?`${m+1}min`:`${m}min${s?` ${s}s`:''}`;
+  }
+  // MP4 com vídeo H.264 (avc1) e áudio AAC (mp4a), sem HEVC/AV1: toca em qualquer celular e sobe sem regravar.
+  // Procura as marcas nos primeiros e últimos 4 MB (o "moov" fica numa das pontas).
+  async _vaCompativel(file){
+    try{
+      if(file.type!=='video/mp4')return false;
+      const T=4*1048576,partes=file.size<=2*T?[file]:[file.slice(0,T),file.slice(file.size-T)];
+      const txt=(await Promise.all(partes.map(async p=>{
+        const b=new Uint8Array(await p.arrayBuffer());let s='';
+        for(let i=0;i<b.length;i+=32768)s+=String.fromCharCode.apply(null,b.subarray(i,i+32768));
+        return s;
+      }))).join('');
+      if(!/ftyp/.test(txt))return false;
+      if(/hvc1|hev1|av01|dvh1|dvhe|vp09/.test(txt))return false;
+      return txt.includes('avc1')&&txt.includes('mp4a');
+    }catch{return false;}
+  }
   _renderVa(){
     const s=this.shadowRoot,d=this._vaDados,cfg=s.getElementById('vaConfig'),el=s.getElementById('vaLista');
     if(!d||!el)return;
@@ -2144,7 +2166,10 @@ class DimaiorAdmin extends HTMLElement {
         <div class="adp-up"><button type="button" class="btn btn-o" id="vfUp">${this._ico('upload',13)} ${novo?'Enviar vídeo':'Trocar vídeo'}</button><input type="file" id="vfFile" accept="video/mp4,video/webm" style="display:none"><span id="vfInfo" class="adp-meta">${this._vaDur(v('duracao_seg'))}</span></div>
         <div class="va-prev" id="vfPrev" style="margin-top:10px;${v('video_url')?'':'display:none'}"><video id="vfVid" controls playsinline preload="metadata" ${/^https:\/\//.test(v('poster_url'))?`poster="${this._esc(v('poster_url'))}"`:''} src="${/^https:\/\//.test(v('video_url'))?this._esc(v('video_url')):''}"></video></div>
         <input type="hidden" id="vfVideo" value="${this._esc(v('video_url'))}"><input type="hidden" id="vfPoster" value="${this._esc(v('poster_url'))}"><input type="hidden" id="vfDur" value="${this._esc(v('duracao_seg'))}">
-        <div class="dica">Em pé (<b>9:16</b>, formato de live), até <b>12 segundos</b>, MP4 com som. O admin prepara o vídeo sozinho (720p, ~2,5 MB, leva o tempo do vídeo) — use o Chrome ou o Edge no computador.</div></div>
+        <div class="dica">Em pé (<b>9:16</b>, formato de live), até <b>1 min 30 s</b>, MP4 com som, até <b>80 MB</b>. MP4 comum (H.264, o padrão de celular e editores) sobe do jeito que está, <b>na qualidade original</b>. Outros formatos (ex.: HEVC/iPhone, WebM) são convertidos no navegador em 1080p — leva o tempo do vídeo; use o Chrome ou o Edge no computador e deixe a aba aberta.</div></div>
+      <div class="mc"><label>Botão "Pular" aparece</label>
+        <select id="vfPular">${[[0,'Na hora (assim que o vídeo abre)'],[3,'Depois de 3 segundos'],[5,'Depois de 5 segundos'],[10,'Depois de 10 segundos']].map(([s,t])=>`<option value="${s}" ${Number(v('pular_apos_seg',3))===s?'selected':''}>${t}</option>`).join('')}</select>
+        <div class="dica">Pra anúncio e promoção, 5 s costuma garantir que a pessoa veja o começo.</div></div>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="vfLive" ${v('mostrar_live',true)?'checked':''} style="width:auto"> Mostrar a live dela no canto quando estiver ao vivo</label>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="vfAtivo" ${v('ativo',true)?'checked':''} style="width:auto"> Ativo (entra no sorteio da home)</label>
       <div class="mf"><button class="btn btn-o" id="vfCancel">Cancelar</button><button class="btn btn-g" id="vfSalvar">${this._ico('check',13)} Salvar</button></div></div>`;
@@ -2176,17 +2201,20 @@ class DimaiorAdmin extends HTMLElement {
       const info=$('vfInfo');info.className='adp-meta';
       const meta=await this._vaMeta(f);
       if(!meta){this._toast('Não consegui abrir esse vídeo (use MP4)','err');return;}
-      if(meta.dur>12.5){this._toast(`O vídeo tem ${this._vaDur(meta.dur)} — o limite é 12 segundos`,'err');return;}
+      if(meta.dur>90.5){this._toast(`O vídeo tem ${this._vaDur(meta.dur)} — o limite é 1 min 30 s`,'err');return;}
       const r916=meta.w&&meta.h?Math.abs(meta.w/meta.h-9/16)/(9/16):0;
       if(r916>0.06&&!confirm(`Esse vídeo não está em pé (9:16) — está ${meta.w}×${meta.h}. Ele vai ser cortado no meio. Continuar?`))return;
       enviando=true;$('vfUp').disabled=true;$('vfSalvar').disabled=true;
       try{
-        // Sempre regrava: garante H.264 + AAC (o que todo celular toca). Arquivo original nunca
-        // sobe direto — um MP4 em HEVC, por ex., tocaria no iPhone do admin e não no Android de quem visita.
+        // MP4 H.264 + AAC (o que todo celular toca) sobe como está, sem perder qualidade. Qualquer outra
+        // coisa (HEVC, WebM...) é regravada: um MP4 em HEVC tocaria no iPhone do admin e não no Android de quem visita.
         let blob=null;
-        try{blob=await this._vaRegravar(f,p=>{info.textContent=`preparando vídeo… ${p}%`;});}catch{blob=null;}
-        if(!blob){info.textContent='';this._toast('Não consegui preparar esse vídeo neste navegador. Use o Chrome ou o Edge no computador e deixe esta aba aberta enquanto prepara.','err');return;}
-        if(blob.size>20*1024*1024){this._toast('Vídeo muito grande mesmo depois de reduzir (máx 20 MB)','err');info.textContent='';return;}
+        if(await this._vaCompativel(f))blob=f;
+        else{
+          try{blob=await this._vaRegravar(f,p=>{info.textContent=`convertendo vídeo… ${p}%`;});}catch{blob=null;}
+          if(!blob){info.textContent='';this._toast('Não consegui preparar esse vídeo neste navegador. Use o Chrome ou o Edge no computador e deixe esta aba aberta enquanto converte — ou exporte o vídeo em MP4 (H.264).','err');return;}
+        }
+        if(blob.size>this._VA_MAX_MB*1048576){this._toast(`Vídeo grande demais (${(blob.size/1048576).toFixed(0)} MB, máx ${this._VA_MAX_MB} MB). Exporte com bitrate menor.`,'err');info.textContent='';return;}
         info.textContent='enviando…';
         const url=await this._vaEnviar(blob,'video/mp4');
         if(!url){info.textContent='';return;}
@@ -2204,7 +2232,7 @@ class DimaiorAdmin extends HTMLElement {
       if(enviando)return;
       const body={kwai_uid:$('vfUid').value.replace(/\D/g,''),nome:$('vfNome').value.trim(),perfil_url:$('vfPerfil').value.trim()||null,
         foto_url:$('vfFoto').value||null,video_url:$('vfVideo').value,poster_url:$('vfPoster').value||null,
-        duracao_seg:$('vfDur').value?Number($('vfDur').value):null,mostrar_live:$('vfLive').checked,ativo:$('vfAtivo').checked};
+        duracao_seg:$('vfDur').value?Number($('vfDur').value):null,pular_apos_seg:Number($('vfPular').value),mostrar_live:$('vfLive').checked,ativo:$('vfAtivo').checked};
       if(!/^\d{5,20}$/.test(body.kwai_uid)){this._toast('Informe o UID da streamer','err');return;}
       if(!body.nome){this._toast('Informe o nome que aparece','err');return;}
       if(body.perfil_url&&!/^https:\/\//.test(body.perfil_url)){this._toast('O link do perfil precisa começar com https://','err');return;}
@@ -2241,9 +2269,9 @@ class DimaiorAdmin extends HTMLElement {
     if(!r.ok||!d?.ok||!d.url){if(!silencioso)this._toast(d?.erro||'Falha ao enviar o vídeo','err');return null;}
     return d.url;
   }
-  // Regrava no navegador em 720×1280 (9:16, corte central), H.264 ~2,2 Mbps + som AAC.
+  // Regrava no navegador em 1080×1920 (9:16, corte central), H.264 ~5 Mbps + som AAC (só quando o MP4 original não é H.264).
   // O som passa por um AudioContext ligado só no gravador (não sai na caixa de som).
-  // Reproduz em tempo real (10s de vídeo = ~10s). Devolve null se o navegador não
+  // Reproduz em tempo real (90s de vídeo = ~90s). Devolve null se o navegador não
   // grava MP4 com som (Firefox/Safari) ou se o vídeo não tocar até o fim — aí o
   // formulário avisa e NÃO sobe nada. Toda etapa tem tempo máximo e, em qualquer
   // saída, gravador, faixas e desenho são desligados.
@@ -2267,7 +2295,7 @@ class DimaiorAdmin extends HTMLElement {
     });
     try{
       await espera('loadedmetadata',15000,()=>v.readyState>=1);
-      const W=720,H=1280,R=W/H,vw=v.videoWidth,vh=v.videoHeight;
+      const W=1080,H=1920,R=W/H,vw=v.videoWidth,vh=v.videoHeight;
       if(!vw||!vh) return null;
       let sw=vw,sh=vw/R;if(sh>vh){sh=vh;sw=vh*R;}
       const sx=(vw-sw)/2,sy=(vh-sh)/2;
@@ -2277,7 +2305,7 @@ class DimaiorAdmin extends HTMLElement {
       ac.createMediaElementSource(v).connect(dest);
       if(ac.state==='suspended') await ac.resume().catch(()=>{});
       stream=new MediaStream([...cv.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]);
-      rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:2200000,audioBitsPerSecond:96000});
+      rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:5000000,audioBitsPerSecond:128000});
       const partes=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)partes.push(e.data);};
       const parou=new Promise(r=>{rec.onstop=r;});
       const desenha=()=>{

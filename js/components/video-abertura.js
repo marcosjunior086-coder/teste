@@ -1,9 +1,10 @@
 /**
- * video-abertura.js — janela com um vídeo curto (9:16, ~10s) de uma streamer
- * ao abrir a home. Cadastro e liga/desliga no admin (aba "Vídeos de abertura").
+ * video-abertura.js — janela com um vídeo (9:16, até 1min30) de uma streamer,
+ * promoção ou anúncio ao abrir a home. Cadastro e liga/desliga no admin (aba "Vídeos de abertura").
  *
  * - Aparece depois que a página termina de carregar (não pesa no carregamento).
- * - "Pular" libera aos 3s; fecha sozinha quando o vídeo acaba.
+ * - "Pular" libera depois de `pular_apos_seg` (por vídeo: 0, 3, 5 ou 10; padrão 3);
+ *   fecha sozinha quando o vídeo acaba.
  * - Tenta começar COM som; se o navegador barrar (regra do Chrome/Safari antes
  *   do primeiro toque), começa mudo e o botão de som pisca.
  * - Frequência por visitante no localStorage: no máximo 1 vídeo a cada
@@ -20,7 +21,7 @@
   'use strict';
 
   var LS = 'dm_video_abertura';
-  var PULAR_EM = 3;          // segundos até liberar o "Pular"
+  var PULAR_PADRAO = 3;      // segundos até liberar o "Pular" quando o vídeo não define
   var FREQ_MIN_H = 6;        // menor frequência que o admin oferece — antes disso nem consulta a API
   var forcar = /[?&]videoabertura=1\b/.test(location.search);
 
@@ -114,7 +115,7 @@
 .bot{display:flex;align-items:center;gap:10px}\
 .prog{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}\
 .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#00d4d4)}\
-.tempo{font-weight:600;font-size:12px;color:#7a9ab4;min-width:30px;text-align:right;font-variant-numeric:tabular-nums}\
+.tempo{font-weight:600;font-size:12px;color:#7a9ab4;min-width:34px;text-align:right;font-variant-numeric:tabular-nums}\
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;border-radius:999px;border:1px solid rgba(0,212,212,.18);background:rgba(255,255,255,.06);color:#e2e8f0;font:600 13px "Exo 2",system-ui,sans-serif;padding:0 14px;cursor:pointer;transition:transform .15s ease;-webkit-tap-highlight-color:transparent}\
 .btn:active{transform:scale(.96)}\
 .btn svg{width:17px;height:17px}\
@@ -129,6 +130,8 @@
 @media (prefers-reduced-motion:reduce){.bg,.vi,.mini,.mini video{transition:none}.som.chama,.dot,.tag i{animation:none}}';
 
   function abrir(v) {
+    var pularEm = v.pular_apos_seg == null ? NaN : Number(v.pular_apos_seg);
+    pularEm = (pularEm >= 0 && pularEm <= 30) ? pularEm : PULAR_PADRAO;
     var xiaomi = !!(window.DmaiorVideoCompat && window.DmaiorVideoCompat.sequestraVideo && window.DmaiorVideoCompat.sequestraVideo());
     var host = document.createElement('dmaior-video-abertura');
     var root = host.attachShadow ? host.attachShadow({ mode: 'open' }) : host;
@@ -170,7 +173,7 @@
       pular.innerHTML = 'Pular ' + ICO.prox;
     }
     function relogio() {
-      var falta = Math.ceil(PULAR_EM - (Date.now() - t0) / 1000);
+      var falta = Math.ceil(pularEm - (Date.now() - t0) / 1000);
       if (falta > 0) pular.textContent = 'Pular em ' + falta; else liberar();
     }
     function fechar() {
@@ -210,12 +213,12 @@
       if (!(dur > 0) || !isFinite(dur)) return;
       barra.style.width = Math.min(100, t / dur * 100) + '%';
       var r = Math.max(0, Math.ceil(dur - t));
-      tempo.textContent = '0:' + String(r).padStart(2, '0');
+      tempo.textContent = Math.floor(r / 60) + ':' + String(r % 60).padStart(2, '0');
     });
     document.addEventListener('keydown', tecla);
     document.addEventListener('visibilitychange', visivel);
 
-    pular.textContent = 'Pular em ' + PULAR_EM;
+    if (pularEm > 0) pular.textContent = 'Pular em ' + pularEm; else liberar();
     timer = setInterval(relogio, 250);
 
     // Começa COM som; se o navegador barrar, começa mudo e o botão de som pisca
