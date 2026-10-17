@@ -3,6 +3,7 @@
  * promoção ou anúncio ao abrir a home. Cadastro e liga/desliga no admin (aba "Vídeos de abertura").
  *
  * - Aparece depois que a página termina de carregar (não pesa no carregamento).
+ * - Link do anúncio (opcional, por vídeo): cartão flutuante tipo Instagram no pé do vídeo.
  * - "Pular" libera depois de `pular_apos_seg` (por vídeo: 0, 3, 5 ou 10; padrão 3);
  *   fecha sozinha quando o vídeo acaba.
  * - Tenta começar COM som; se o navegador barrar (regra do Chrome/Safari antes
@@ -22,7 +23,7 @@
 
   var LS = 'dm_video_abertura';
   var PULAR_PADRAO = 3;      // segundos até liberar o "Pular" quando o vídeo não define
-  var FREQ_MIN_H = 6;        // menor frequência que o admin oferece — antes disso nem consulta a API
+  var FREQ_MIN_MIN = 1;      // menor frequência que o admin aceita (1 minuto) — antes disso nem consulta a API
   var forcar = /[?&]videoabertura=1\b/.test(location.search);
 
   function ler() {
@@ -55,14 +56,15 @@
     var st = ler();
     if (!st) return; // armazenamento bloqueado: não mostra (senão apareceria em toda visita)
     var agora = Date.now();
-    if (!forcar && st.t && agora - st.t < FREQ_MIN_H * 3600e3) return;
+    if (!forcar && st.t && agora - st.t < FREQ_MIN_MIN * 60e3) return;
     if (!window.DmaiorAPI || !window.DmaiorAPI.rank || !window.DmaiorAPI.rank.getVideosAbertura) return;
 
     var d;
     try { d = await window.DmaiorAPI.rank.getVideosAbertura(); } catch (_) { return; }
     var lista = (d && d.ativo && Array.isArray(d.videos)) ? d.videos.filter(function (v) { return urlOk(v.video_url); }) : [];
     if (!lista.length) return;
-    var freq = Math.max(1, Number(d.frequencia_horas) || 24) * 3600e3;
+    var freqMin = Number(d.frequencia_min) || (Number(d.frequencia_horas) || 24) * 60;
+    var freq = Math.max(1, freqMin) * 60e3;
     if (!forcar && st.t && agora - st.t < freq) return;
 
     // Relê antes de abrir: outra aba do site pode ter mostrado um vídeo enquanto esta consultava a API
@@ -78,6 +80,24 @@
     mudo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>',
     perfil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
     prox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 8 6-8 6z"/><path d="M18 6v12"/></svg>',
+    sacola: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+    tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>',
+    agenda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>',
+    voto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5z"/><path d="M22 19H2"/></svg>',
+    trofeu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
+  };
+
+  // Link sobre o vídeo (cartão flutuante, igual aos anúncios do Instagram). O admin escolhe o tipo;
+  // o tipo define o texto do botão, o ícone e a linha de baixo padrão.
+  var CTA = {
+    oferta:    { botao: 'Ver oferta',    sub: 'Toque para ver',     ico: 'sacola' },
+    promocao:  { botao: 'Ver promoção',  sub: 'Toque para ver',     ico: 'tag' },
+    inscricao: { botao: 'Inscrever-se',  sub: 'Inscrições abertas', ico: 'agenda' },
+    votacao:   { botao: 'Votar',         sub: 'Vote agora',         ico: 'voto' },
+    premio:    { botao: 'Ver prêmio',    sub: 'Toque para ver',     ico: 'trofeu' },
+    kwai:      { botao: 'Abrir no Kwai', sub: 'Abre no Kwai',       ico: 'link' },
+    link:      { botao: 'Acessar link',  sub: 'Toque para abrir',   ico: 'link' }
   };
 
   // Paleta fixa (escura) de propósito: a janela fica sobre um fundo escurecido
@@ -112,6 +132,18 @@
 .pe{position:absolute;left:0;right:0;bottom:0;padding:16px 6px 6px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-weight:700;font-size:10.5px;text-align:center}\
 .pe span{display:block;font-weight:600;font-size:9.5px;color:#cfe;opacity:.85}\
 @keyframes pisca{50%{opacity:.3}}\
+.cta{position:absolute;left:10px;right:10px;bottom:10px;display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.97);color:#0b1220;border-radius:14px;padding:8px 8px 8px 10px;text-decoration:none;opacity:0;transform:translateY(26px);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1);-webkit-tap-highlight-color:transparent}\
+.cta.on{opacity:1;transform:none}\
+.cta.fora{position:static;box-shadow:0 0 0 1px rgba(0,212,212,.25)}\
+.cta:active{transform:scale(.98)}\
+.cta .ci{width:36px;height:36px;border-radius:10px;background:#00d4d4;color:#06121a;display:flex;align-items:center;justify-content:center;flex:none}\
+.cta .ci svg{width:19px;height:19px}\
+.cta .ct{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}\
+.cta .ct b{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\
+.cta .ct span{font-weight:600;font-size:11.5px;color:#4a5a73;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\
+.cta .go{background:#1f6feb;color:#fff;border-radius:999px;padding:9px 13px;font:700 12.5px "Exo 2",system-ui,sans-serif;white-space:nowrap}\
+.cta:focus-visible{outline:2px solid #00d4d4;outline-offset:2px}\
+.vi.tem-cta .video{max-height:calc(100vh - 220px);max-height:calc(100dvh - 220px)}\
 .bot{display:flex;align-items:center;gap:10px}\
 .prog{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}\
 .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#00d4d4)}\
@@ -127,7 +159,7 @@
 .pular[disabled]{color:#7a9ab4;cursor:default}\
 .pular:not([disabled]){border-color:rgba(255,255,255,.35)}\
 @media (max-width:480px){.bg{padding:12px}.video{max-height:calc(100dvh - 130px)}}\
-@media (prefers-reduced-motion:reduce){.bg,.vi,.mini,.mini video{transition:none}.som.chama,.dot,.tag i{animation:none}}';
+@media (prefers-reduced-motion:reduce){.bg,.vi,.mini,.mini video,.cta{transition:none}.som.chama,.dot,.tag i{animation:none}}';
 
   function abrir(v) {
     var pularEm = v.pular_apos_seg == null ? NaN : Number(v.pular_apos_seg);
@@ -235,12 +267,50 @@
 
     requestAnimationFrame(function () { bg.classList.add('on'); try { caixa.focus({ preventScroll: true }); } catch (_) {} });
 
+    montarCta(root, v, xiaomi, vid, fechar);
+
     if (v.mostrar_live !== false && v.kwai_uid) {
       acharLive(v.kwai_uid).then(function (live) {
         if (!live || fechado) return;
         limpaLive = montarLive(root, v, live, xiaomi, fechar);
       });
     }
+  }
+
+  // Cartão com o link do anúncio: flutua no pé do vídeo e aparece depois de `aparece_seg` de reprodução.
+  // Xiaomi: o player nativo cobre tudo que está sobre o vídeo, então o cartão fica logo abaixo dele.
+  function montarCta(root, v, xiaomi, vid, fechar) {
+    var c = v.cta;
+    if (!c || !CTA[c.tipo] || !urlOk(c.url) || !c.titulo) return;
+    var t = CTA[c.tipo];
+    var a = document.createElement('a');
+    a.className = 'cta' + (xiaomi ? ' fora' : '');
+    a.href = c.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.setAttribute('aria-label', t.botao + ': ' + c.titulo);
+    a.innerHTML = '<span class="ci">' + ICO[t.ico] + '</span>' +
+      '<span class="ct"><b>' + esc(c.titulo) + '</b><span>' + esc(c.subtitulo || t.sub) + '</span></span>' +
+      '<span class="go">' + esc(t.botao) + '</span>';
+    a.addEventListener('click', function () { setTimeout(fechar, 300); });
+    if (xiaomi) {
+      var bot = root.querySelector('.bot');
+      root.querySelector('.vi').classList.add('tem-cta');
+      bot.parentNode.insertBefore(a, bot);
+    } else {
+      root.querySelector('.video').appendChild(a);
+    }
+    var quando = Number(c.aparece_seg);
+    if (!(quando >= 0)) quando = 3;
+    var mostrou = false;
+    function checa() {
+      if (mostrou) return;
+      if (quando > 0 && !(vid.currentTime >= quando)) return;
+      mostrou = true;
+      requestAnimationFrame(function () { a.classList.add('on'); });
+    }
+    vid.addEventListener('timeupdate', checa);
+    checa();
   }
 
   // Xiaomi: os outros vídeos da home (live em destaque, bolinhas do "ao vivo") viram

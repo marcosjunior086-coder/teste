@@ -10,6 +10,11 @@ class DimaiorAdmin extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.shadowRoot.addEventListener('click',e=>{
+      const b=e.target?.closest?.('.btn,.btn-login');if(!b)return;
+      this._ultBtn={el:b,t:Date.now()};
+      if(b.closest('.adp-up'))this._upBtn={el:b,t:Date.now()};
+    },true);
     this.WORKER  = 'https://admin.agencydmaior.com.br';
     this.TK_KEY  = 'dm_admin_token';
     this._token  = '';
@@ -325,6 +330,9 @@ class DimaiorAdmin extends HTMLElement {
   async _api(method,rota,body=null){
     rota=this._rota(rota);
     const opts={method,headers:{'Content-Type':'application/json',...(this._token&&{Authorization:`Bearer ${this._token}`})},...(body&&{body:JSON.stringify(body)})};
+    // O botão que acabou de ser clicado enche enquanto a ação (salvar, ativar, excluir...) roda
+    let fimBtn=null;
+    if(method!=='GET'&&this._ultBtn&&Date.now()-this._ultBtn.t<1500){fimBtn=this._btnEspera(this._ultBtn.el);this._ultBtn=null;}
     try{
       const r=await fetch(this.WORKER+rota,opts);
       const d=await r.json();
@@ -333,6 +341,7 @@ class DimaiorAdmin extends HTMLElement {
       return d;
     }
     catch{if(rota!=='/admin/me')this._toast('Sem conexão com o servidor','err');return null;}
+    finally{if(fimBtn)fimBtn();}
   }
   _validarSessao(){
     // Valida o JWT localmente (sem chamada ao servidor)
@@ -360,9 +369,10 @@ class DimaiorAdmin extends HTMLElement {
   async _doLogin(){
     const s=this.shadowRoot;const u=s.getElementById('iU').value.trim(),p=s.getElementById('iP').value;
     const err=s.getElementById('lErr');if(!u||!p){err.textContent='Preencha todos os campos';err.style.display='block';return;}
-    err.style.display='none';s.getElementById('btnL').style.display='none';s.getElementById('lLoad').classList.add('on');
+    err.style.display='none';
+    const bL=s.getElementById('btnL');this._ultBtn=null;const fimL=this._btnEspera(bL);
     const d=await this._api('POST','/admin/login',{usuario:u,senha:p});
-    s.getElementById('btnL').style.display='';s.getElementById('lLoad').classList.remove('on');
+    fimL();
     if(d?.ok&&d.token){this._token=d.token;localStorage.setItem(this.TK_KEY,d.token);this._abrirApp();}
     else{err.textContent=d?.erro||'Credenciais inválidas';err.style.display='block';}
   }
@@ -448,6 +458,72 @@ class DimaiorAdmin extends HTMLElement {
   _dbc(fn,t){let id;return(...a)=>{clearTimeout(id);id=setTimeout(()=>fn(...a),t);};}
   _varBadge(v){if(v===null||v===undefined)return'<span class="vbadge neutro">—</span>';const cls=v>0?'up':v<0?'down':'neutro';const ico=v>0?this._ico('up',10):v<0?this._ico('down',10):'';return`<span class="vbadge ${cls}">${ico} ${v>0?'+':''}${v}%</span>`;}
   _renderPg(elId,n,qtd,lim,fn){const el=this.shadowRoot.getElementById(elId);if(!el)return;el.innerHTML=`<button ${n<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${n}</span><button ${qtd<lim?'disabled':''}>Próxima</button>`;el.children[0].addEventListener('click',()=>fn(n-1));el.children[2].addEventListener('click',()=>fn(n+1));}
+  // Cartão de progresso (canto da tela): arquivo, "34 de 56 MB", porcentagem, barra e cancelar.
+  // Também mostra a conversão de vídeo. Some sozinho se ninguém atualizar por 20 s.
+  _upProg(titulo,pct,sub='',cancelar=null){
+    const s=this.shadowRoot,el=s?.getElementById('upProg');if(!el)return;
+    const n=Math.max(0,Math.min(100,Math.round(Number(pct)||0)));
+    const ic=s.getElementById('upI');if(!ic.firstChild)ic.innerHTML=this._ico('upload',18);
+    s.getElementById('upL').textContent=titulo;s.getElementById('upS').textContent=sub;
+    s.getElementById('upP').textContent=n+'%';s.getElementById('upB').style.width=n+'%';
+    el.setAttribute('aria-valuenow',n);el.setAttribute('aria-label',titulo);
+    const x=s.getElementById('upX');x.style.display=cancelar?'':'none';x.onclick=cancelar||null;
+    el.classList.add('on');clearTimeout(this._upProgT);this._upProgT=setTimeout(()=>this._upProgFim(0),20000);
+  }
+  _upProgFim(atraso=700){
+    clearTimeout(this._upProgT);
+    this._upProgT=setTimeout(()=>this.shadowRoot?.getElementById('upProg')?.classList.remove('on'),atraso);
+  }
+  // Botão que enche da esquerda pra direita. Com porcentagem (envio de arquivo) ou sem número (espera de uma ação).
+  _btnFill(b,pct,fim=false,semNumero=false){
+    if(!b||!b.isConnected)return;clearTimeout(b._fpT);
+    if(!b.classList.contains('btn-fill')&&getComputedStyle(b).position==='static'){b.style.position='relative';b._fpPos=1;}
+    b.classList.add('btn-fill');b.style.setProperty('--fp',Math.round(pct)+'%');
+    if(semNumero)delete b.dataset.fp;else b.dataset.fp=fim?'✓':Math.round(pct)+'%';
+  }
+  _btnFillFim(b,atraso=400){
+    if(!b)return;clearTimeout(b._fpT);
+    b._fpT=setTimeout(()=>{b.classList.remove('btn-fill');b.style.removeProperty('--fp');delete b.dataset.fp;if(b._fpPos){b.style.position='';b._fpPos=0;}},atraso);
+  }
+  // Espera de uma ação sem porcentagem conhecida (entrar, salvar...): enche devagar até ~90% e completa quando termina
+  _btnEspera(b){
+    if(!b||!b.isConnected||b.classList.contains('btn-fill'))return()=>{};
+    let p=8;this._btnFill(b,p,false,true);
+    const t=setInterval(()=>{p+=(92-p)*.08;this._btnFill(b,p,false,true);},120);
+    return()=>{clearInterval(t);this._btnFill(b,100,false,true);this._btnFillFim(b,350);};
+  }
+  // POST do arquivo pro Worker com progresso (fetch não informa o quanto já subiu). Devolve algo
+  // parecido com a Response ({ok,status,json()}); rejeita se a conexão cair ou se a pessoa cancelar (erro.cancelado).
+  _postComProgresso(url,ct,blob,rotulo){
+    return new Promise((resolve,reject)=>{
+      const x=new XMLHttpRequest();let cancelou=false;
+      x.open('POST',url);
+      x.setRequestHeader('Content-Type',ct);
+      x.setRequestHeader('Authorization',`Bearer ${this._token}`);
+      const btn=(this._upBtn&&this._upBtn.el.isConnected&&Date.now()-this._upBtn.t<9e5)?this._upBtn.el:null;
+      const titulo=blob.name||rotulo,pre=blob.name?rotulo+' · ':'';
+      const cancela=()=>{cancelou=true;x.abort();};
+      x.upload.onprogress=e=>{
+        if(!e.lengthComputable)return;
+        const pct=Math.min(99,e.loaded/e.total*100),acabou=e.loaded>=e.total;
+        // 100% só quando o servidor responde: o envio termina antes de o Worker gravar no R2
+        this._upProg(titulo,pct,pre+(acabou?'finalizando…':`${this._arqBytes(e.loaded)} de ${this._arqBytes(e.total)}`),acabou?null:cancela);
+        this._btnFill(btn,pct);
+      };
+      x.onload=()=>{
+        this._upProg(titulo,100,pre+this._arqBytes(blob.size)+' · enviado');this._upProgFim(900);
+        this._btnFill(btn,100,true);this._btnFillFim(btn,1200);
+        resolve({status:x.status,ok:x.status>=200&&x.status<300,json:async()=>JSON.parse(x.responseText)});
+      };
+      x.onerror=x.ontimeout=x.onabort=()=>{
+        this._upProgFim(cancelou?0:200);this._btnFillFim(btn,0);
+        if(cancelou)this._toast('Envio cancelado');
+        const er=new Error(cancelou?'cancelado':'rede');er.cancelado=cancelou;reject(er);
+      };
+      this._upProg(titulo,0,pre+'preparando…',cancela);this._btnFill(btn,0);
+      x.send(blob);
+    });
+  }
   _toast(msg,tipo='ok'){const el=this.shadowRoot.getElementById('toast');this.shadowRoot.getElementById('tIco').innerHTML=tipo==='ok'?this._ico('check',14):this._ico('warning',14);this.shadowRoot.getElementById('tMsg').textContent=msg;el.className='toast on '+tipo;setTimeout(()=>el.className='toast',3500);}
   _fechaModal(id){this.shadowRoot.getElementById(id)?.classList.remove('on');}
   _abrirModal(id){
@@ -2103,12 +2179,15 @@ class DimaiorAdmin extends HTMLElement {
   _renderVa(){
     const s=this.shadowRoot,d=this._vaDados,cfg=s.getElementById('vaConfig'),el=s.getElementById('vaLista');
     if(!d||!el)return;
-    const FREQ=[[6,'6 horas'],[12,'12 horas'],[24,'1 dia'],[48,'2 dias'],[72,'3 dias'],[168,'1 semana']];
+    const FREQ=[[15,'15 minutos'],[30,'30 minutos'],[60,'1 hora'],[120,'2 horas'],[180,'3 horas'],[360,'6 horas'],[720,'12 horas'],[1440,'1 dia'],[2880,'2 dias'],[4320,'3 dias'],[10080,'1 semana']];
+    const fMin=Number(d.config.frequencia_min)||1440,manual=!FREQ.some(([m])=>m===fMin);
+    const [mN,mU]=fMin%1440===0?[fMin/1440,1440]:fMin%60===0?[fMin/60,60]:[fMin,1];
     const ativos=d.videos.filter(v=>v.ativo).length;
     cfg.innerHTML=`<div class="va-cfg">
       <div class="va-cfg-txt"><b>${d.config.ativo?'Aparecendo na home':'Desligado — ninguém vê'}</b><br>${d.config.ativo?(ativos?`${ativos} vídeo(s) ativo(s). Cada visitante vê no máximo 1 vídeo no período escolhido, sorteado entre os que ele ainda não viu.`:'Ligado, mas sem vídeo ativo: nada aparece até você ativar um.'):'Ligue para a janela aparecer pros visitantes da home.'}</div>
       <label><span class="tog-switch"><input type="checkbox" id="vaAtivo" ${d.config.ativo?'checked':''}><span class="tog-slider"></span></span> Mostrar na home</label>
-      <label>No máximo 1 vez a cada <select id="vaFreq">${FREQ.map(([h,t])=>`<option value="${h}" ${d.config.frequencia_horas===h?'selected':''}>${t}</option>`).join('')}</select></label>
+      <label>No máximo 1 vez a cada <select id="vaFreq">${FREQ.map(([m,t])=>`<option value="${m}" ${!manual&&fMin===m?'selected':''}>${t}</option>`).join('')}<option value="manual" ${manual?'selected':''}>Manual…</option></select></label>
+      <span id="vaFreqMan" style="display:${manual?'inline-flex':'none'};align-items:center;gap:6px"><input id="vaFreqN" type="number" min="1" max="43200" step="1" value="${mN}" style="width:76px" aria-label="Tempo entre um vídeo e outro"><select id="vaFreqU" aria-label="Unidade"><option value="1" ${mU===1?'selected':''}>minutos</option><option value="60" ${mU===60?'selected':''}>horas</option><option value="1440" ${mU===1440?'selected':''}>dias</option></select><button type="button" class="btn btn-o btn-sm" id="vaFreqOk">${this._ico('check',12)} Salvar</button></span>
       <a class="btn btn-o btn-sm" href="/?videoabertura=1" target="_blank" rel="noopener" title="Abre a home mostrando um vídeo agora, sem esperar a frequência (precisa estar ligado)">${this._ico('play_circle',12)} Testar na home</a>
     </div>`;
     s.getElementById('vaAtivo').addEventListener('change',async e=>{
@@ -2118,11 +2197,22 @@ class DimaiorAdmin extends HTMLElement {
       if(r?.ok){this._toast(on?'Vídeos ligados na home':'Vídeos desligados');d.config.ativo=on;this._renderVa();}
       else{this._toast(r?.erro||'Erro','err');e.target.checked=!on;}
     });
+    const salvaFreq=async(min,sel)=>{
+      const antes=d.config.frequencia_min;
+      const r=await this._api('POST','/admin/videos-abertura/config',{frequencia_min:min});
+      if(r?.ok){this._toast('Frequência salva');d.config.frequencia_min=min;return true;}
+      this._toast(r?.erro||'Erro','err');if(sel&&FREQ.some(([m])=>m===antes))sel.value=String(antes);return false;
+    };
     s.getElementById('vaFreq').addEventListener('change',async e=>{
-      const h=Number(e.target.value),antes=d.config.frequencia_horas;
-      const r=await this._api('POST','/admin/videos-abertura/config',{frequencia_horas:h});
-      if(r?.ok){this._toast('Frequência salva');d.config.frequencia_horas=h;}
-      else{this._toast(r?.erro||'Erro','err');e.target.value=antes;}
+      const man=s.getElementById('vaFreqMan');
+      if(e.target.value==='manual'){man.style.display='inline-flex';s.getElementById('vaFreqN').focus();return;}
+      man.style.display='none';
+      await salvaFreq(Number(e.target.value),e.target);
+    });
+    s.getElementById('vaFreqOk').addEventListener('click',async()=>{
+      const n=Number(s.getElementById('vaFreqN').value),min=Math.round(n*Number(s.getElementById('vaFreqU').value));
+      if(!(n>0)||min<1||min>43200){this._toast('Digite um tempo entre 1 minuto e 30 dias','err');return;}
+      await salvaFreq(min,null);
     });
 
     if(!d.videos.length){el.innerHTML=this._empty('play_circle','Nenhum vídeo ainda — use "Novo vídeo" lá em cima');return;}
@@ -2130,7 +2220,7 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div class="adp-grid va-grid">${d.videos.map(v=>`<div class="adp-card ${v.ativo?'':'off'}">
       <div class="va-thumb"><video src="${src(v.video_url)}" ${src(v.poster_url)?`poster="${src(v.poster_url)}"`:''} controls playsinline preload="none"></video></div>
       <div class="va-quem">${v.foto_url?`<img src="${this._safeImgSrc(v.foto_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}<div style="min-width:0"><div class="adp-nome" title="${this._esc(v.nome)}">${this._esc(v.nome)}</div><div class="adp-meta">UID ${this._esc(v.kwai_uid)}</div></div></div>
-      <div><span class="adp-chip ${v.ativo?'on':''}">${v.ativo?'Ativo':'Pausado'}</span>${v.mostrar_live?'<span class="adp-chip">Live no canto</span>':''}${this._vaDur(v.duracao_seg)?`<span class="adp-chip">${this._vaDur(v.duracao_seg)}</span>`:''}${v.perfil_url?'':'<span class="adp-chip warn">Sem link do perfil</span>'}</div>
+      <div><span class="adp-chip ${v.ativo?'on':''}">${v.ativo?'Ativo':'Pausado'}</span>${v.mostrar_live?'<span class="adp-chip">Live no canto</span>':''}${v.cta_tipo?'<span class="adp-chip">Com link</span>':''}${this._vaDur(v.duracao_seg)?`<span class="adp-chip">${this._vaDur(v.duracao_seg)}</span>`:''}${v.perfil_url?'':'<span class="adp-chip warn">Sem link do perfil</span>'}</div>
       <div class="adp-acoes">
         <button class="btn btn-o" data-va-edit="${v.id}">${this._ico('edit',11)} Editar</button>
         <button class="btn btn-o" data-va-ativo="${v.id}" data-v="${v.ativo?0:1}">${this._ico(v.ativo?'eye_off':'eye',11)} ${v.ativo?'Pausar':'Ativar'}</button>
@@ -2170,6 +2260,14 @@ class DimaiorAdmin extends HTMLElement {
       <div class="mc"><label>Botão "Pular" aparece</label>
         <select id="vfPular">${[[0,'Na hora (assim que o vídeo abre)'],[3,'Depois de 3 segundos'],[5,'Depois de 5 segundos'],[10,'Depois de 10 segundos']].map(([s,t])=>`<option value="${s}" ${Number(v('pular_apos_seg',3))===s?'selected':''}>${t}</option>`).join('')}</select>
         <div class="dica">Pra anúncio e promoção, 5 s costuma garantir que a pessoa veja o começo.</div></div>
+      <div class="mc"><label>Link sobre o vídeo <span style="color:var(--t3);font-size:11px">(opcional, igual aos anúncios do Instagram)</span></label>
+        <select id="vfCtaTipo"><option value="">Sem link</option>${[['oferta','Ver oferta (produto)'],['promocao','Ver promoção'],['inscricao','Inscrições abertas (evento)'],['votacao','Ir para votação'],['premio','Prêmio Kwai'],['kwai','Abrir no Kwai'],['link','Acessar link']].map(([k,t])=>`<option value="${k}" ${v('cta_tipo')===k?'selected':''}>${t}</option>`).join('')}</select>
+        <div id="vfCtaBox" style="display:${v('cta_tipo')?'block':'none'};margin-top:10px">
+          <input id="vfCtaTitulo" maxlength="60" value="${this._esc(v('cta_titulo'))}" placeholder="Título. Ex: Promoção de fim de semana" style="margin-bottom:8px">
+          <input id="vfCtaSub" maxlength="60" value="${this._esc(v('cta_subtitulo'))}" placeholder="Linha de baixo (opcional). Ex: Até 30% de desconto" style="margin-bottom:8px">
+          <input id="vfCtaUrl" maxlength="500" value="${this._esc(v('cta_url'))}" placeholder="https://..." style="margin-bottom:8px">
+          <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)">Aparece depois de <select id="vfCtaQuando" style="width:auto">${[[0,'0 s (na hora)'],[3,'3 s'],[5,'5 s'],[10,'10 s'],[15,'15 s'],[30,'30 s']].map(([n,t])=>`<option value="${n}" ${Number(v('cta_aparece_seg',3))===n?'selected':''}>${t}</option>`).join('')}</select></label>
+          <div class="dica">Aparece um cartão flutuante no pé do vídeo; quem tocar vai direto pro link (abre em outra aba e a janela fecha). O texto do botão muda conforme o tipo escolhido.</div></div></div>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="vfLive" ${v('mostrar_live',true)?'checked':''} style="width:auto"> Mostrar a live dela no canto quando estiver ao vivo</label>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="vfAtivo" ${v('ativo',true)?'checked':''} style="width:auto"> Ativo (entra no sorteio da home)</label>
       <div class="mf"><button class="btn btn-o" id="vfCancel">Cancelar</button><button class="btn btn-g" id="vfSalvar">${this._ico('check',13)} Salvar</button></div></div>`;
@@ -2211,7 +2309,7 @@ class DimaiorAdmin extends HTMLElement {
         let blob=null;
         if(await this._vaCompativel(f))blob=f;
         else{
-          try{blob=await this._vaRegravar(f,p=>{info.textContent=`convertendo vídeo… ${p}%`;});}catch{blob=null;}
+          try{blob=await this._vaRegravar(f,p=>{info.textContent=`convertendo vídeo… ${p}%`;this._upProg('Convertendo vídeo',p);});}catch{blob=null;}
           if(!blob){info.textContent='';this._toast('Não consegui preparar esse vídeo neste navegador. Use o Chrome ou o Edge no computador e deixe esta aba aberta enquanto converte — ou exporte o vídeo em MP4 (H.264).','err');return;}
         }
         if(blob.size>this._VA_MAX_MB*1048576){this._toast(`Vídeo grande demais (${(blob.size/1048576).toFixed(0)} MB, máx ${this._VA_MAX_MB} MB). Exporte com bitrate menor.`,'err');info.textContent='';return;}
@@ -2227,16 +2325,22 @@ class DimaiorAdmin extends HTMLElement {
       }finally{enviando=false;$('vfUp').disabled=false;$('vfSalvar').disabled=false;}
     });
 
+    $('vfCtaTipo').addEventListener('change',e=>{$('vfCtaBox').style.display=e.target.value?'block':'none';});
     $('vfCancel').addEventListener('click',()=>this._fechaModal('mPers'));
     $('vfSalvar').addEventListener('click',async()=>{
       if(enviando)return;
       const body={kwai_uid:$('vfUid').value.replace(/\D/g,''),nome:$('vfNome').value.trim(),perfil_url:$('vfPerfil').value.trim()||null,
         foto_url:$('vfFoto').value||null,video_url:$('vfVideo').value,poster_url:$('vfPoster').value||null,
-        duracao_seg:$('vfDur').value?Number($('vfDur').value):null,pular_apos_seg:Number($('vfPular').value),mostrar_live:$('vfLive').checked,ativo:$('vfAtivo').checked};
+        duracao_seg:$('vfDur').value?Number($('vfDur').value):null,pular_apos_seg:Number($('vfPular').value),
+        cta_tipo:$('vfCtaTipo').value||null,cta_url:$('vfCtaUrl').value.trim()||null,cta_titulo:$('vfCtaTitulo').value.trim()||null,cta_subtitulo:$('vfCtaSub').value.trim()||null,cta_aparece_seg:Number($('vfCtaQuando').value),mostrar_live:$('vfLive').checked,ativo:$('vfAtivo').checked};
       if(!/^\d{5,20}$/.test(body.kwai_uid)){this._toast('Informe o UID da streamer','err');return;}
       if(!body.nome){this._toast('Informe o nome que aparece','err');return;}
       if(body.perfil_url&&!/^https:\/\//.test(body.perfil_url)){this._toast('O link do perfil precisa começar com https://','err');return;}
       if(!body.video_url){this._toast('Envie o vídeo','err');return;}
+      if(body.cta_tipo){
+        if(!body.cta_titulo){this._toast('Informe o título do link sobre o vídeo','err');return;}
+        if(!/^https:\/\//.test(body.cta_url||'')){this._toast('O link sobre o vídeo precisa começar com https://','err');return;}
+      }
       const b=$('vfSalvar');b.disabled=true;
       const r=await this._api(novo?'POST':'PATCH',novo?'/admin/videos-abertura':`/admin/videos-abertura/${it.id}`,body);
       b.disabled=false;
@@ -2261,8 +2365,8 @@ class DimaiorAdmin extends HTMLElement {
   // Sobe pro R2 (pasta abertura/) sem passar pelo _otimizarVideo do banner (que corta em 32:9 e tira o som)
   async _vaEnviar(blob,ct,silencioso=false){
     let r;
-    try{r=await fetch(`${this.WORKER}/admin/upload?pasta=abertura`,{method:'POST',headers:{'Content-Type':ct,Authorization:`Bearer ${this._token}`},body:blob});}
-    catch{if(!silencioso)this._toast('Sem conexão com o servidor','err');return null;}
+    try{r=await this._postComProgresso(`${this.WORKER}/admin/upload?pasta=abertura`,ct,blob,/^video\//i.test(ct)?'Enviando vídeo':'Enviando capa do vídeo');}
+    catch(er){if(!silencioso&&!er?.cancelado)this._toast('Sem conexão com o servidor','err');return null;}
     if(r.status===401||r.status===403){this._doLogout();return null;}
     const d=await r.json().catch(()=>null);
     if(r.status===501){if(!silencioso)this._toast('Upload ainda não ligado no servidor','err');return null;}
@@ -3427,7 +3531,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;s.getElementById('tbC').innerHTML=this._loading();const d=await this._api('GET','/admin/config');const el=s.getElementById('tbC');
     // revisao_* tem tela própria com botões em Monitor Kwai, dashboard_limite_* tem
     // tela própria em Evolução Mensal — não repete aqui como texto livre
-    const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas','dashboard_limite_atencao','dashboard_limite_critico','home_videos_ativo','home_videos_frequencia_horas']);
+    const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas','dashboard_limite_atencao','dashboard_limite_critico','home_videos_ativo','home_videos_frequencia_horas','home_videos_frequencia_min']);
     if(d?.config)d.config=d.config.filter(c=>!NAO_LISTAR.has(c.chave));
     if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configurações');return;}
     const labels={
@@ -4971,7 +5075,7 @@ class DimaiorAdmin extends HTMLElement {
     if(/^video\//i.test(file.type)){
       onStatus?.('preparando vídeo…');
       let otim=null;
-      try{ otim=await this._otimizarVideo(file,p=>onStatus?.(`otimizando vídeo… ${p}%`)); }catch{ otim=null; }
+      try{ otim=await this._otimizarVideo(file,p=>{onStatus?.(`otimizando vídeo… ${p}%`);this._upProg('Otimizando vídeo',p);}); }catch{ otim=null; }
       if(otim){ blob=otim; ct='video/mp4'; }
       if(blob.size>20*1024*1024){this._toast('Vídeo muito grande (máx 20 MB) — abra o admin no Chrome ou Edge, que ele reduz o vídeo sozinho','err');return null;}
       onStatus?.('enviando…');
@@ -4991,12 +5095,8 @@ class DimaiorAdmin extends HTMLElement {
     if(!/^video\//i.test(ct)&&blob.size>4*1024*1024){this._toast('Imagem muito grande (máx 4 MB) — tente uma menor','err');return null;}
     let r;
     try{
-      r=await fetch(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,{
-        method:'POST',
-        headers:{'Content-Type':ct,Authorization:`Bearer ${this._token}`},
-        body:blob,
-      });
-    }catch{ this._toast('Sem conexão com o servidor','err'); return null; }
+      r=await this._postComProgresso(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,ct,blob,/^video\//i.test(ct)?'Enviando vídeo':'Enviando imagem');
+    }catch(er){ if(!er?.cancelado)this._toast('Sem conexão com o servidor','err'); return null; }
     if(r.status===401||r.status===403){this._doLogout();return null;}
     let d=null; try{ d=await r.json(); }catch{}
     if(r.status===501){this._toast('Upload ainda não ligado no servidor — cole um link por enquanto','err');return null;}
@@ -5007,7 +5107,7 @@ class DimaiorAdmin extends HTMLElement {
       onStatus?.('gerando capa…');
       try{
         const capa=await this._capaDoVideo(blob);
-        const rc=await fetch(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,{method:'POST',headers:{'Content-Type':'image/webp',Authorization:`Bearer ${this._token}`},body:capa});
+        const rc=await this._postComProgresso(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,'image/webp',capa,'Enviando capa do vídeo');
         const dc=await rc.json().catch(()=>null);
         if(rc.ok&&dc?.ok&&dc.url) return `${d.url}#poster=${encodeURIComponent(dc.url)}`;
       }catch{ /* sem capa: o site mostra um cartão com o título no Xiaomi */ }
@@ -7371,7 +7471,23 @@ class DimaiorAdmin extends HTMLElement {
     .dm-cal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--brddim)}
     .dm-cal-resumo{font-size:11px;color:var(--t3)}
     @media(max-width:520px){.dm-cal-meses{flex-direction:column;gap:10px}.dm-cal-popup{width:94vw}}
-    .toast{position:absolute;bottom:18px;right:18px;background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--t1);box-shadow:0 0 20px var(--cyan-d);display:flex;align-items:center;gap:8px;transform:translateY(70px);opacity:0;transition:all .3s;z-index:999;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.toast.on{transform:translateY(0);opacity:1}.toast.ok{border-color:rgba(74,222,128,.5)}.toast.err{border-color:rgba(248,113,113,.5)}
+    .toast{position:absolute;bottom:18px;right:18px;background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--t1);box-shadow:0 0 20px var(--cyan-d);display:flex;align-items:center;gap:8px;transform:translateY(70px);opacity:0;transition:all .3s;z-index:999;font-family:var(--dm-font-body,'Exo 2',sans-serif)}.toast.on{transform:translateY(0);opacity:1}
+    .upprog{position:absolute;bottom:72px;right:18px;width:min(340px,calc(100% - 36px));background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:12px 14px;font-size:12px;color:var(--t1);box-shadow:0 0 20px var(--cyan-d);transform:translateY(20px);opacity:0;pointer-events:none;transition:all .25s;z-index:998;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
+    .upprog.on{transform:none;opacity:1;pointer-events:auto}
+    .upp-r{display:flex;align-items:center;gap:10px}
+    .upp-i{display:flex;flex:none;color:var(--cyan)}
+    .upp-m{flex:1;min-width:0}
+    .upp-n{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .upp-s{font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .upp-r b{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+    .upp-x{background:none;border:none;color:var(--t3);cursor:pointer;font-size:20px;line-height:1;padding:0 2px}
+    .upp-x:hover{color:var(--verm)}
+    .upp-b{height:5px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:10px}
+    .upp-b i{display:block;height:100%;width:0;border-radius:5px;background:var(--cyan);transition:width .15s linear}
+    .btn-fill{overflow:hidden;pointer-events:none}
+    .btn-fill::before{content:'';position:absolute;left:0;top:0;bottom:0;width:var(--fp,0%);background:rgba(255,255,255,.3);transition:width .15s linear;pointer-events:none}
+    .btn-o.btn-fill::before{background:rgba(0,212,212,.3)}
+    .btn-fill[data-fp]::after{content:attr(data-fp);margin-left:6px;font-variant-numeric:tabular-nums}.toast.ok{border-color:rgba(74,222,128,.5)}.toast.err{border-color:rgba(248,113,113,.5)}
     .empty{text-align:center;padding:40px;color:var(--t3);display:flex;flex-direction:column;align-items:center;gap:10px}.empty p{font-size:12px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:1px}
     .loading{display:flex;flex-direction:column;align-items:center;gap:9px;padding:36px;color:var(--t3)}.sp{width:40px;height:40px;border-radius:50%;border:3px solid var(--cyan-d);border-top-color:var(--cyan);animation:spin .8s linear infinite;margin:0 auto 5px}
     .uid-row{display:flex;flex-direction:column;gap:6px;padding:13px 16px;border-bottom:1px solid var(--brddim);transition:background .15s}@media(hover:hover){.uid-row:hover{background:var(--cyan-d)}}.uid-row:last-child{border-bottom:none}
@@ -9332,7 +9448,7 @@ class DimaiorAdmin extends HTMLElement {
         <div class="mf"><button class="btn btn-o" id="mPtCancel">Cancelar</button><button class="btn btn-g" id="mPtSave">${this._ico('check',13)} Salvar</button></div>
       </div></div>
 
-      <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div>
+      <div class="toast" id="toast"><span id="tIco"></span><span id="tMsg"></span></div><div class="upprog" id="upProg" role="progressbar" aria-live="polite" aria-valuemin="0" aria-valuemax="100"><div class="upp-r"><span class="upp-i" id="upI"></span><div class="upp-m"><div class="upp-n" id="upL"></div><div class="upp-s" id="upS"></div></div><b id="upP"></b><button type="button" class="upp-x" id="upX" aria-label="Cancelar envio" style="display:none">×</button></div><div class="upp-b"><i id="upB"></i></div></div>
     </div>`;
   }
 
