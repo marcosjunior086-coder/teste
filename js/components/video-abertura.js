@@ -99,6 +99,14 @@
     kwai:      { botao: 'Abrir no Kwai', sub: 'Abre no Kwai',       ico: 'link' },
     link:      { botao: 'Acessar link',  sub: 'Toque para abrir',   ico: 'link' }
   };
+  // Cor do botão e do ícone: [sólida, degradê]. Igual ao _VA_CORES do admin (prévia).
+  var CORES = {
+    azul:     ['#1f6feb','linear-gradient(135deg,#3b82f6 0%,#00e5e5 100%)'],
+    verde:    ['#16a34a','linear-gradient(135deg,#059669 0%,#4ade80 100%)'],
+    vermelho: ['#dc2626','linear-gradient(135deg,#dc2626 0%,#fb7185 100%)'],
+    rosa:     ['#db2777','linear-gradient(135deg,#db2777 0%,#f472b6 100%)'],
+    laranja:  ['#ea580c','linear-gradient(135deg,#ea580c 0%,#fbbf24 100%)']
+  };
 
   // Paleta fixa (escura) de propósito: a janela fica sobre um fundo escurecido
   // em qualquer tema do site; só o destaque segue o ciano da marca.
@@ -292,6 +300,11 @@
     a.innerHTML = '<span class="ci">' + ICO[t.ico] + '</span>' +
       '<span class="ct"><b>' + esc(c.titulo) + '</b><span>' + esc(c.subtitulo || t.sub) + '</span></span>' +
       '<span class="go">' + esc(t.botao) + '</span>';
+    var cor = CORES[c.cor] || CORES.azul, fundo = cor[c.estilo === 'gradiente' ? 1 : 0];
+    a.querySelector('.go').style.background = fundo;
+    var ci = a.querySelector('.ci');
+    ci.style.background = fundo;
+    ci.style.color = '#fff';
     a.addEventListener('click', function () { setTimeout(fechar, 300); });
     if (xiaomi) {
       var bot = root.querySelector('.bot');

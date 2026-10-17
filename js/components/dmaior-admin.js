@@ -2153,7 +2153,17 @@ class DimaiorAdmin extends HTMLElement {
     this._vaDados=d;
     this._renderVa();
   }
-  get _VA_MAX_MB(){return 80;} // tem que bater com o teto da pasta abertura/ no Worker admin
+  get _VA_MAX_MB(){return 80;}
+  // Cores do botão do link sobre o vídeo: [sólida, degradê, nome]. Igual ao CORES do js/components/video-abertura.js
+  get _VA_CORES(){return {
+    azul:     ['#1f6feb','linear-gradient(135deg,#3b82f6 0%,#00e5e5 100%)','Azul'],
+    verde:    ['#16a34a','linear-gradient(135deg,#059669 0%,#4ade80 100%)','Verde'],
+    vermelho: ['#dc2626','linear-gradient(135deg,#dc2626 0%,#fb7185 100%)','Vermelho'],
+    rosa:     ['#db2777','linear-gradient(135deg,#db2777 0%,#f472b6 100%)','Rosa'],
+    laranja:  ['#ea580c','linear-gradient(135deg,#ea580c 0%,#fbbf24 100%)','Laranja']
+  };}
+  // Texto do botão e ícone (só pra prévia; o site tem os ícones próprios) por tipo de link
+  get _VA_CTA(){return {oferta:['Ver oferta','Toque para ver','gift'],promocao:['Ver promoção','Toque para ver','megaphone'],inscricao:['Inscrever-se','Inscrições abertas','calendar'],votacao:['Votar','Vote agora','vote'],premio:['Ver prêmio','Toque para ver','trophy'],kwai:['Abrir no Kwai','Abre no Kwai','play'],link:['Acessar link','Toque para abrir','globe']};} // tem que bater com o teto da pasta abertura/ no Worker admin
   _vaDur(x){
     const n=Number(x);if(!(n>0))return '';
     if(n<60)return `${String(Math.round(n*10)/10).replace('.',',')}s`;
@@ -2267,6 +2277,11 @@ class DimaiorAdmin extends HTMLElement {
           <input id="vfCtaSub" maxlength="60" value="${this._esc(v('cta_subtitulo'))}" placeholder="Linha de baixo (opcional). Ex: Até 30% de desconto" style="margin-bottom:8px">
           <input id="vfCtaUrl" maxlength="500" value="${this._esc(v('cta_url'))}" placeholder="https://..." style="margin-bottom:8px">
           <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)">Aparece depois de <select id="vfCtaQuando" style="width:auto">${[[0,'0 s (na hora)'],[3,'3 s'],[5,'5 s'],[10,'10 s'],[15,'15 s'],[30,'30 s']].map(([n,t])=>`<option value="${n}" ${Number(v('cta_aparece_seg',3))===n?'selected':''}>${t}</option>`).join('')}</select></label>
+          <div style="margin-top:12px"><div style="font-size:12px;color:var(--t2);margin-bottom:8px">Cor do botão</div>
+            <div id="vfCtaCores" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">${Object.entries(this._VA_CORES).map(([k,c])=>`<button type="button" data-cor="${k}" aria-label="${c[2]}" title="${c[2]}" style="width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;padding:0"></button>`).join('')}</div>
+            <div style="display:flex;gap:16px;margin-top:10px;font-size:13px;color:var(--t2)"><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="vfCtaEst" value="solido" ${v('cta_estilo','solido')!=='gradiente'?'checked':''} style="width:auto"> Cor sólida</label><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="vfCtaEst" value="gradiente" ${v('cta_estilo','solido')==='gradiente'?'checked':''} style="width:auto"> Degradê</label></div>
+            <div style="font-size:12px;color:var(--t2);margin:12px 0 6px">Prévia</div>
+            <div id="vfCtaPrev" style="background:#141c2e;border-radius:12px;padding:12px"></div></div>
           <div class="dica">Aparece um cartão flutuante no pé do vídeo; quem tocar vai direto pro link (abre em outra aba e a janela fecha). O texto do botão muda conforme o tipo escolhido.</div></div></div>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="vfLive" ${v('mostrar_live',true)?'checked':''} style="width:auto"> Mostrar a live dela no canto quando estiver ao vivo</label>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="vfAtivo" ${v('ativo',true)?'checked':''} style="width:auto"> Ativo (entra no sorteio da home)</label>
@@ -2325,14 +2340,30 @@ class DimaiorAdmin extends HTMLElement {
       }finally{enviando=false;$('vfUp').disabled=false;$('vfSalvar').disabled=false;}
     });
 
-    $('vfCtaTipo').addEventListener('change',e=>{$('vfCtaBox').style.display=e.target.value?'block':'none';});
+    // Cor do botão do link + prévia do cartão como vai aparecer no site
+    let ctaCor=this._VA_CORES[v('cta_cor','azul')]?v('cta_cor','azul'):'azul';
+    const ctaEstilo=()=>raiz.querySelector('input[name="vfCtaEst"]:checked')?.value==='gradiente'?'gradiente':'solido';
+    const pintaCta=()=>{
+      const est=ctaEstilo(),fundo=k=>this._VA_CORES[k][est==='gradiente'?1:0];
+      $('vfCtaCores').querySelectorAll('[data-cor]').forEach(b=>{b.style.background=fundo(b.dataset.cor);b.style.outline=b.dataset.cor===ctaCor?'2px solid var(--cyan)':'none';b.style.outlineOffset='3px';b.setAttribute('aria-pressed',b.dataset.cor===ctaCor?'true':'false');});
+      const t=this._VA_CTA[$('vfCtaTipo').value]||this._VA_CTA.link;
+      $('vfCtaPrev').innerHTML=`<div style="display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.97);color:#0b1220;border-radius:14px;padding:8px 8px 8px 10px;font-family:'Exo 2',system-ui,sans-serif">
+        <span style="width:36px;height:36px;border-radius:10px;background:${fundo(ctaCor)};color:#fff;display:flex;align-items:center;justify-content:center;flex:none">${this._ico(t[2],18)}</span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25"><b style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${this._esc($('vfCtaTitulo').value.trim()||'Título do link')}</b><span style="font-size:11.5px;font-weight:600;color:#4a5a73;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${this._esc($('vfCtaSub').value.trim()||t[1])}</span></span>
+        <span style="background:${fundo(ctaCor)};color:#fff;border-radius:999px;padding:9px 13px;font-weight:700;font-size:12.5px;white-space:nowrap">${t[0]}</span></div>`;
+    };
+    $('vfCtaCores').addEventListener('click',e=>{const b=e.target.closest('[data-cor]');if(!b)return;ctaCor=b.dataset.cor;pintaCta();});
+    raiz.querySelectorAll('input[name="vfCtaEst"]').forEach(r=>r.addEventListener('change',pintaCta));
+    ['vfCtaTitulo','vfCtaSub'].forEach(id=>$(id).addEventListener('input',pintaCta));
+    $('vfCtaTipo').addEventListener('change',e=>{$('vfCtaBox').style.display=e.target.value?'block':'none';pintaCta();});
+    pintaCta();
     $('vfCancel').addEventListener('click',()=>this._fechaModal('mPers'));
     $('vfSalvar').addEventListener('click',async()=>{
       if(enviando)return;
       const body={kwai_uid:$('vfUid').value.replace(/\D/g,''),nome:$('vfNome').value.trim(),perfil_url:$('vfPerfil').value.trim()||null,
         foto_url:$('vfFoto').value||null,video_url:$('vfVideo').value,poster_url:$('vfPoster').value||null,
         duracao_seg:$('vfDur').value?Number($('vfDur').value):null,pular_apos_seg:Number($('vfPular').value),
-        cta_tipo:$('vfCtaTipo').value||null,cta_url:$('vfCtaUrl').value.trim()||null,cta_titulo:$('vfCtaTitulo').value.trim()||null,cta_subtitulo:$('vfCtaSub').value.trim()||null,cta_aparece_seg:Number($('vfCtaQuando').value),mostrar_live:$('vfLive').checked,ativo:$('vfAtivo').checked};
+        cta_tipo:$('vfCtaTipo').value||null,cta_url:$('vfCtaUrl').value.trim()||null,cta_titulo:$('vfCtaTitulo').value.trim()||null,cta_subtitulo:$('vfCtaSub').value.trim()||null,cta_aparece_seg:Number($('vfCtaQuando').value),cta_cor:ctaCor,cta_estilo:ctaEstilo(),mostrar_live:$('vfLive').checked,ativo:$('vfAtivo').checked};
       if(!/^\d{5,20}$/.test(body.kwai_uid)){this._toast('Informe o UID da streamer','err');return;}
       if(!body.nome){this._toast('Informe o nome que aparece','err');return;}
       if(body.perfil_url&&!/^https:\/\//.test(body.perfil_url)){this._toast('O link do perfil precisa começar com https://','err');return;}
