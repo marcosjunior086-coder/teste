@@ -219,6 +219,7 @@
     svgPk()      { return `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`; }
     svgCalendar(){ return `<svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>`; }
     svgPaint(){ return `<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.3A4.9 4.9 0 0 0 22 11.6C22 6.9 17.5 3 12 3zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>`; }
+    svgPriv()    { return `<svg viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>`; }
     svgRules()   { return `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`; }
     svgBoost()   { return `<svg viewBox="0 0 24 24"><path d="M12 2s6 4 6 11c0 3.5-1.5 6.5-3 8H9c-1.5-1.5-3-4.5-3-8C6 6 12 2 12 2zm0 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 13h8v-2H8v2z"/></svg>`; }
     svgAfiliado(){ return `<svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6Zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z"/></svg>`; }
@@ -1127,6 +1128,7 @@
                 <button class="nit nav-toggle" id="nMore" type="button">${this.svgChevron()} <span data-i18n="more">MAIS</span></button>
                 <div class="nav-more" id="navMore">
                     <button class="nit" id="nS">${this.svgUser()} <span data-i18n="profile">PERFIL</span></button>
+                    <button class="nit" id="nPriv">${this.svgPriv()} <span>PRIVACIDADE</span></button>
                     <button class="nit" id="nMolduras">${this.svgFrame()} <span data-i18n="frames">MOLDURAS</span></button>
                     <button class="nit" id="nRank">${this.svgRank()} <span data-i18n="ranking">RANKING</span></button>
                     <button class="nit" id="nVotacao">${this.svgVote()} <span data-i18n="vote">VOTAÇÃO</span></button>
@@ -1508,7 +1510,17 @@
                         <p class="lvp-txt">Quando você estiver ao vivo, aparece nessa categoria na aba LIVES do site, pra quem procura esse tipo de live.</p>
                         <div id="alLvp" class="al"></div>
                         <div id="lvpCorpo"><p class="lvp-txt">Carregando…</p></div>
-                        <div id="lvpOcultaBox"></div>
+                    </div>
+                </div>
+
+                <!-- ══════ PRIVACIDADE E PARTICIPAÇÃO — preenchido por _privCarregar() ══════ -->
+                <div id="vPriv" class="view" style="width:100%;">
+                    <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
+                    <div class="card">
+                        <h2 class="raaj" style="font-size:.9rem;margin-bottom:6px;color:var(--cyan);border-bottom:1px solid var(--border);padding-bottom:8px;">PRIVACIDADE E PARTICIPAÇÃO</h2>
+                        <p class="lvp-txt">Escolha onde você não quer aparecer ou participar. Seus diamantes, horas e histórico não mudam.</p>
+                        <div id="alPriv" class="al"></div>
+                        <div id="privCorpo"><p class="lvp-txt">Carregando…</p></div>
                     </div>
                 </div>
 
@@ -1849,7 +1861,7 @@
         ['Meu desempenho', [['nD','Resumo','inicio dashboard diamantes horas'], ['nRank','Ranking','posicao'], ['nPk','PK Diário','batalha']]],
         ['Ganhos',         [['nC','Carteira','saldo dinheiro saque pix'], ['nImpulso','Impulso','boost impulsionar'], ['nTickets','Tickets & Presentes','premio resgate'], ['nAfiliado','Indicações','afiliado indicar convidar link bonus recrutar']]],
         ['Comunidade',     [['avisos','Avisos','notificacoes comunicados'], ['nEventos','Eventos','calendario agenda inscricao interesse pk'], ['nPers','Personalização','template moldura fundo ranking visual estilo cor'], ['nVotacao','Votação','votar'], ['nMolduras','Molduras','foto perfil']]],
-        ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
+        ['Conta',          [['nS','Perfil e dados de pagamento','pix email whatsapp endereco senha'], ['nPriv','Privacidade e participação','ocultar esconder live ranking pk nao participar sair'], ['nViolacoes','Situação da conta','violacao punicao banido bloqueio prova'], ['nRegras','Regras e Diretrizes','politicas regulamento']]],
         ['Acesso rápido',  [['nAtalhoAdmin','Painel Admin','administrador'], ['nAtalhoAgente','Painel do Agente','agente'], ['nAtalhoSub','Painel da Sub','sub agencia']]],
     ]; }
 
@@ -2032,6 +2044,7 @@
         this.qs('#nEventos').addEventListener('click',()=>this.goEventos());
         this.qs('#nPers').addEventListener('click',()=>this.goPers());
         this.qs('#nViolacoes').addEventListener('click',()=>this.goViolacoes());
+        this.qs('#nPriv').addEventListener('click',()=>this.goPriv());
         this.qs('#btnVerificarViola')?.addEventListener('click',()=>this.verificarViolacoes());
         this.qs('#violaAviso').addEventListener('click',e=>{ if(e.target.closest('[data-viola-abrir]')) this.goViolacoes(); });
         this.qs('#regrasEl')?.addEventListener('regras-aceitar', e=>this._aceitarTermo(e.detail || {}));
@@ -2637,7 +2650,6 @@
         const corpo=this.qs('#lvpCorpo'); if(!corpo || !uid) return;
         const L0={uid,carregando:true}; this._lvp=L0;
         corpo.innerHTML='<p class="lvp-txt">Carregando…</p>';
-        const caixaOc=this.qs('#lvpOcultaBox'); if(caixaOc) caixaOc.innerHTML='';
         try{
             const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/categoria-live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,acao:'ler'})});
             if(this._lvp!==L0 || this.sessionUid!==uid) return; // resposta de outra sessão/carregamento
@@ -2646,9 +2658,8 @@
             if(this._lvp!==L0 || this.sessionUid!==uid) return;
             if(!res.ok||!d||!d.sucesso) throw new Error((d&&d.erro)||'');
             const a=d.atual||{};
-            this._lvp={uid, dados:d, grupo:a.grupo_desativado?null:a.grupo, cat:a.desativada?null:a.categoria_id, q:'', salvando:false, oculta:a.oculta_live_site===true, salvandoOculta:false};
+            this._lvp={uid, dados:d, grupo:a.grupo_desativado?null:a.grupo, cat:a.desativada?null:a.categoria_id, q:'', salvando:false};
             this._lvpRender();
-            this._lvpRenderOculta();
         }catch(_){
             if(this._lvp!==L0) return;
             this._lvp=null;
@@ -2682,37 +2693,71 @@
         if(q){ q.addEventListener('input',()=>{ L.q=q.value; const pos=q.selectionStart; this._lvpRender(); const n=this.qs('#lvpQ'); if(n){n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}} }); }
         this.qs('#btnLvpSalvar')?.addEventListener('click',()=>this._lvpSalvar());
     }
-    // Interruptor: o streamer esconde a PRÓPRIA live da página inicial (faixa de lives, live grande,
-    // aba LIVES e vídeo de abertura). Continua ao vivo no Kwai e no ranking. Salva na hora.
-    _lvpRenderOculta(){
-        const box=this.qs('#lvpOcultaBox'), L=this._lvp; if(!box||!L||!L.dados) return;
-        box.innerHTML=`<div class="lvp-sep"></div>
-            <h3 class="lvp-sub">VISIBILIDADE NA PÁGINA INICIAL</h3>
-            <div id="alLvpOculta" class="al"></div>
-            <label class="lvp-sw"><input type="checkbox" id="lvpOculta" ${L.oculta?'checked':''} ${L.salvandoOculta?'disabled':''}><span class="lvp-trilho" aria-hidden="true"></span>
-                <span class="lvp-sw-txt"><b>Ocultar minha live da página inicial</b><small>Sua live deixa de aparecer na faixa de lives, na live grande e na aba LIVES do site. Você continua ao vivo no Kwai e no ranking.</small></span></label>`;
-        this.qs('#lvpOculta').addEventListener('change',e=>this._lvpOcultar(e.target.checked));
+    // ── Privacidade e participação (Conta → Privacidade) ──────────────
+    // Worker dashboard POST /api/perfil/privacidade ({acao:'ler'|'salvar', campo:'live'|'ranking'|'pk'}).
+    // Cada interruptor salva na hora. Ranking ocultado pela agência fica bloqueado (só a agência reverte).
+    goPriv(){
+        this.navigate('vPriv'); this.navActive('nPriv');
+        window.scrollTo({top:0});
+        this._privCarregar(true);
     }
-    async _lvpOcultar(valor){
-        const L=this._lvp; if(!L||!L.dados||L.salvandoOculta||L.uid!==this.sessionUid) return;
-        L.salvandoOculta=true; this._lvpRenderOculta();
+    async _privPost(corpo){
+        const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/privacidade`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:this.sessionUid,...corpo})});
+        const d=await res.json().catch(()=>null);
+        return {res,d};
+    }
+    async _privCarregar(forcar){
+        const uid=this.sessionUid; if(!uid) return;
+        if(this._priv && this._priv.uid===uid && !forcar) return this._privRender();
+        const corpo=this.qs('#privCorpo'); if(!corpo) return;
+        const P0={uid,estado:null,salvando:null}; this._priv=P0;
+        corpo.innerHTML='<p class="lvp-txt">Carregando…</p>';
         try{
-            const res=await this._fetchAutenticado(`${this.apiUrl}/api/perfil/categoria-live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:L.uid,acao:'ocultar',oculta:valor===true})});
-            if(res.status===401||this._lvp!==L) return;
-            const d=await res.json().catch(()=>null);
+            const {res,d}=await this._privPost({acao:'ler'});
+            if(this._priv!==P0 || this.sessionUid!==uid) return;
+            if(res.status===401){ this._priv=null; return; }
+            if(!res.ok||!d||!d.sucesso) throw new Error();
+            P0.estado=d; this._privRender();
+        }catch(_){
+            if(this._priv!==P0) return;
+            this._priv=null;
+            corpo.innerHTML='<p class="lvp-txt">Não deu pra carregar agora. <button type="button" class="lvp-link" id="privTentar">Tentar de novo</button></p>';
+            this.qs('#privTentar')?.addEventListener('click',()=>this._privCarregar(true));
+        }
+    }
+    _privRender(){
+        const corpo=this.qs('#privCorpo'), P=this._priv; if(!corpo||!P||!P.estado) return;
+        const s=P.estado, ocupado=!!P.salvando;
+        const item=(campo,ligado,titulo,desc,extra,bloqueado)=>`<label class="lvp-sw" style="margin-bottom:16px"><input type="checkbox" data-priv="${campo}" ${ligado?'checked':''} ${(ocupado||bloqueado)?'disabled':''}><span class="lvp-trilho" aria-hidden="true"></span>
+            <span class="lvp-sw-txt"><b>${titulo}</b><small>${desc}</small>${extra||''}</span></label>`;
+        corpo.innerHTML=`<h3 class="lvp-sub">VISIBILIDADE PÚBLICA</h3>
+            ${item('live',s.live,'Ocultar minha live da página inicial','Sua live deixa de aparecer na faixa de lives, na live grande e na aba LIVES do site. Você continua ao vivo no Kwai e no ranking.')}
+            ${item('ranking',s.ranking,'Ocultar meu perfil do ranking geral','Você deixa de aparecer no ranking público do site. Seus diamantes e horas continuam contando normalmente.',
+                s.ranking_bloqueado?'<small style="color:var(--red)">A agência ocultou você do ranking. Fale com a agência pra voltar a aparecer.</small>':'', s.ranking_bloqueado)}
+            <div class="lvp-sep"></div>
+            <h3 class="lvp-sub">PARTICIPAÇÃO EM ATIVIDADES</h3>
+            ${item('pk',s.pk,'Não quero participar do PK diário','A agência deixa de te colocar nos confrontos do PK diário. O confronto de hoje, se já estiver marcado, continua; a saída vale a partir de amanhã. Pode voltar quando quiser.')}`;
+        corpo.querySelectorAll('[data-priv]').forEach(i=>i.addEventListener('change',()=>this._privSalvar(i.dataset.priv,i.checked)));
+    }
+    async _privSalvar(campo,valor){
+        const P=this._priv; if(!P||!P.estado||P.salvando||P.uid!==this.sessionUid) return;
+        if(campo==='pk' && valor && !window.confirm('Sair do PK diário? A saída vale a partir de amanhã.')){ this._privRender(); return; }
+        P.salvando=campo; this._privRender();
+        let msg='', erro=false;
+        try{
+            const {res,d}=await this._privPost({acao:'salvar',campo,valor});
+            if(res.status===401||this._priv!==P) return;
             if(!res.ok||!d||!d.sucesso) throw new Error((d&&d.erro)||'Não foi possível salvar agora.');
-            L.oculta=d.oculta===true;
-            this.showAlert('#alLvpOculta',L.oculta?'Pronto: sua live não aparece mais na página inicial (pode levar até 2 minutos).':'Pronto: sua live volta a aparecer na página inicial (pode levar até 2 minutos).',false);
-        }catch(err){
-            if(this._lvp===L) this.showAlert('#alLvpOculta',err.message||'Não foi possível salvar agora.');
-        }finally{
-            L.salvandoOculta=false;
-            if(this._lvp===L){
-                // reconstrói o interruptor mantendo a mensagem que acabou de aparecer
-                const msg=this.qs('#alLvpOculta'), txt=msg?msg.textContent:'', cls=msg?msg.className:'', st=msg?msg.getAttribute('style'):'';
-                this._lvpRenderOculta();
-                const n=this.qs('#alLvpOculta'); if(n&&txt){ n.textContent=txt; n.className=cls; if(st) n.setAttribute('style',st); }
-            }
+            P.estado={...P.estado,...d};
+            const msgs={
+                live:valor?'Pronto: sua live não aparece mais na página inicial (pode levar até 2 minutos).':'Pronto: sua live volta a aparecer na página inicial (pode levar até 2 minutos).',
+                ranking:valor?'Pronto: você não aparece mais no ranking geral (pode levar até 1 minuto).':'Pronto: você volta a aparecer no ranking geral.',
+                pk:valor?'Pronto: você não participa mais do PK diário a partir de amanhã.':'Pronto: você pode voltar a ser incluído no PK diário.'};
+            msg=msgs[campo];
+        }catch(err){ msg=err.message||'Não foi possível salvar agora.'; erro=true; }
+        finally{
+            P.salvando=null;
+            if(this._priv===P){ this._privRender(); if(msg) this.showAlert('#alPriv',msg,erro?undefined:false); }
         }
     }
 
