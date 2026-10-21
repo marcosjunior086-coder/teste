@@ -162,7 +162,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['afiliados','','indicacao indicar streamer link bonus programa'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
     ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
-    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live'],['livesCategorias','','lives categoria jogos entretenimento free fire capa aba home descoberta']]],
+    ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live'],['livesCategorias','','lives categoria jogos entretenimento free fire capa aba home descoberta'],['vitrine','','loja produtos shopee afiliado comissao vitrine comprar link']]],
     ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
   ]; }
   _montarMenuMobile(){
@@ -321,6 +321,8 @@ class DimaiorAdmin extends HTMLElement {
       arrow_right:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
       download:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
       eye:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+      // Lucide (ISC)
+      bag:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
     };
     return icons[name]||icons.search;
   }
@@ -396,7 +398,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',livesCategorias:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',livesCategorias:'engajamento',vitrine:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -408,7 +410,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),livesCategorias:()=>this._carregarLivesCat(),mapaAcessos:()=>this._carregarMapaAcessos()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),livesCategorias:()=>this._carregarLivesCat(),vitrine:()=>this._carregarVitrine(),mapaAcessos:()=>this._carregarMapaAcessos()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -2134,6 +2136,247 @@ class DimaiorAdmin extends HTMLElement {
       if(r?.ok){if(m.firstElementChild===raiz)this._fechaModal('mPers');this._toast('Categoria salva');this._carregarLivesCat();}
       else this._toast(r?.erro||'Erro ao salvar','err');
     });
+    this._abrirModal('mPers');
+  }
+
+  // ── VITRINE (aba LOJA da home e página /loja.html — produtos de afiliado) ───
+  // Worker admin: /admin/vitrine/* · site: js/components/vitrine.js (+ menu-mobile.js) · SQL/vitrine-shopee.sql
+  async _carregarVitrine(){
+    const s=this.shadowRoot,el=s.getElementById('vtLista');
+    if(!el)return;
+    if(!this._vtBound){
+      this._vtBound=true;
+      s.getElementById('btnAtuVt')?.addEventListener('click',()=>this._carregarVitrine());
+      s.getElementById('btnVtNovo')?.addEventListener('click',()=>this._vtForm(null));
+    }
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/vitrine');
+    if(!d?.ok){s.getElementById('vtConfig').innerHTML='';el.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar');return;}
+    this._vtDados=d;
+    this._renderVt();
+  }
+  // Foto da Shopee passa pelo weserv (mesmo proxy do site). Aceita só o código da foto (br-11134207-...) também.
+  _vtImgUrl(v){v=String(v||'').trim();return /^[a-z]{2}-\d{8}-[\w-]+$/i.test(v)?`https://cf.shopee.sg/file/${v}`:v;}
+  _vtFotoRaw(u,w=240){const safe=this._normalizarImagemUrl(this._vtImgUrl(u));return safe?`https://images.weserv.nl/?url=${encodeURIComponent(safe)}&w=${w}&h=${w}&fit=cover&output=webp`:'';}
+  _vtFoto(u,w=240){return this._esc(this._vtFotoRaw(u,w));} // pra usar dentro de atributo HTML; pra .src use _vtFotoRaw
+  // "39,90" e "1.299,90" (jeito brasileiro) ou "39.90" → número; vazio → null; lixo → NaN
+  _vtNum(v){v=String(v??'').trim().replace(/^R\$\s*/i,'');if(v==='')return null;if(v.includes(','))v=v.replace(/\./g,'').replace(',','.');return/^\d+(\.\d+)?$/.test(v)?Number(v):NaN;}
+  // Loja do link (a etiqueta no card): só pra avisar aqui; quem valida de verdade é o Worker
+  _vtMk(u){
+    try{
+      const h=new URL(String(u||'').trim()).hostname.toLowerCase();
+      for(const [id,nome,hs] of [['shopee','Shopee',['shopee.com.br','shope.ee','shp.ee','collshp.com']],['mercadolivre','Mercado Livre',['mercadolivre.com.br','mercadolivre.com','mercadolibre.com','meli.la']],['amazon','Amazon',['amazon.com.br','amzn.to','amzn.com','a.co']]])
+        if(hs.some(d=>h===d||h.endsWith('.'+d)))return {id,nome};
+    }catch{}
+    return null;
+  }
+  _vtAgo(iso){
+    const m=Math.round((Date.now()-Date.parse(iso))/60000);
+    if(!(m>=0))return '';
+    if(m<1)return 'agora há pouco';
+    if(m<60)return `há ${m} min`;
+    const h=Math.round(m/60);
+    return h<48?`há ${h} h`:`há ${Math.round(h/24)} dias`;
+  }
+  _renderVt(){
+    const s=this.shadowRoot,d=this._vtDados,cfg=s.getElementById('vtConfig'),el=s.getElementById('vtLista');
+    if(!d||!el)return;
+    const c=d.config,ativos=d.produtos.filter(p=>p.ativo).length;
+    const INT=[[10,'10 minutos'],[15,'15 minutos'],[30,'30 minutos'],[60,'1 hora']];
+    const u=c.sync_ultima;
+    const ultima=!u?'Ainda não rodou.':u.ok
+      ?`Última vez ${this._vtAgo(u.em)}: ${u.atualizados} produto(s) atualizado(s)${u.novos?`, ${u.novos} novo(s) trazido(s)`:''}${u.fora_da_vitrine?`, ${u.fora_da_vitrine} que não estão mais na sua vitrine`:''}.`
+      :`A última tentativa (${this._vtAgo(u.em)}) deu erro: ${this._esc(u.erro||'')}`;
+    const sw=(id,on,txt,extra='')=>`<label class="vt-sw"><span class="tog-switch"><input type="checkbox" id="${id}" ${on?'checked':''}><span class="tog-slider"></span></span><span>${txt}${extra}</span></label>`;
+    cfg.innerHTML=`<div class="va-cfg">
+      <div class="va-cfg-txt"><b>${c.ativo?'Loja ligada':'Loja desligada — ninguém vê'}</b><br>${c.ativo?(ativos?`${ativos} produto(s) ativo(s). Os botões abaixo escolhem onde ela aparece.`:'Ligada, mas sem produto ativo: nada aparece até você ativar um.'):'Ligue para a loja existir no site (os botões abaixo só valem com ela ligada).'}</div>
+      ${sw('vtAtivo',c.ativo,'Loja ligada')}
+    </div>
+    <div class="va-cfg">
+      <div class="va-cfg-txt"><b>Onde a loja aparece</b><br>Cada lugar liga e desliga sozinho. O botão da lateral abre a loja num painel do lado (igual ao LIVES); os itens do menu abrem a página inteira.</div>
+      <div class="vt-lista">
+        ${sw('vtLateral',c.botao_lateral,'Botão "LOJA" na lateral da home')}
+        ${sw('vtMenuD',c.menu_desktop,'Item "Loja" no menu do topo (computador)')}
+        ${sw('vtMenuM',c.menu_mobile,'Item "Loja" no menu ☰ (celular)')}
+      </div>
+      <a class="btn btn-o btn-sm" href="/loja.html" target="_blank" rel="noopener" title="Abre a página inteira da loja (precisa estar ligada)">${this._ico('eye',12)} Ver a página</a>
+    </div>
+    <div class="va-cfg">
+      <div class="va-cfg-txt"><b>Atualização automática</b><br>Atualiza preço, vendidos, nota, estoque e promoções dos produtos da Shopee pela sua vitrine (collshp.com). ${ultima}</div>
+      <div class="vt-lista">
+        ${sw('vtSync',c.sync_ativo,'Atualizar sozinho')}
+        <label class="vt-sw" style="padding-left:2px">De quanto em quanto tempo <select id="vtInt">${INT.map(([m,t])=>`<option value="${m}" ${c.sync_intervalo_min===m?'selected':''}>${t}</option>`).join('')}</select></label>
+        ${sw('vtNovos',c.sync_novos,'Trazer também os produtos novos da minha vitrine')}
+      </div>
+      <button class="btn btn-o btn-sm" id="vtAtuAgora">${this._ico('refresh',12)} Atualizar agora</button>
+    </div>`;
+    const salva=async(corpo,msg,desfaz)=>{
+      const r=await this._api('POST','/admin/vitrine/config',corpo);
+      if(r?.ok){Object.assign(c,corpo);if(msg)this._toast(msg);return true;}
+      this._toast(r?.erro||'Erro','err');if(desfaz)desfaz();return false;
+    };
+    const liga=(id,chave,nomeLigado,nomeDesligado)=>s.getElementById(id).addEventListener('change',async e=>{
+      const on=e.target.checked;
+      if(chave==='ativo'&&!on&&!confirm('Desligar a loja? Ela some do site inteiro (botão, menus e página).')){e.target.checked=true;return;}
+      if(await salva({[chave]:on},on?nomeLigado:nomeDesligado,()=>{e.target.checked=!on;}))this._renderVt();
+    });
+    liga('vtAtivo','ativo','Loja ligada no site','Loja desligada');
+    liga('vtLateral','botao_lateral','Botão da lateral ligado','Botão da lateral desligado');
+    liga('vtMenuD','menu_desktop','Item no menu do computador ligado','Item no menu do computador desligado');
+    liga('vtMenuM','menu_mobile','Item no menu do celular ligado','Item no menu do celular desligado');
+    liga('vtSync','sync_ativo','Atualização automática ligada','Atualização automática desligada');
+    liga('vtNovos','sync_novos','Vai trazer também os produtos novos','Só atualiza os que já estão aqui');
+    s.getElementById('vtInt').addEventListener('change',async e=>{
+      const antes=c.sync_intervalo_min;
+      if(!await salva({sync_intervalo_min:Number(e.target.value)},'Intervalo salvo',()=>{e.target.value=String(antes);}))return;
+    });
+    s.getElementById('vtAtuAgora').addEventListener('click',async e=>{
+      const b=e.currentTarget;b.disabled=true;b.textContent='Atualizando…';
+      const r=await this._api('POST','/admin/vitrine/sincronizar');
+      b.disabled=false;
+      if(r?.ok){const x=r.resultado||{};this._toast(`Pronto: ${x.atualizados||0} atualizado(s)${x.novos?`, ${x.novos} novo(s)`:''}`);}
+      else this._toast(r?.erro||'Não consegui atualizar agora','err');
+      this._carregarVitrine();
+    });
+
+    if(!d.produtos.length){el.innerHTML=this._empty('bag','Nenhum produto ainda — use "Novo produto" lá em cima'+(c.sync_novos?'':', ou ligue "Trazer também os produtos novos" e clique em "Atualizar agora"'));return;}
+    // Agrupa por nicho (na ordem da taxonomia) e mostra a subcategoria em cada card
+    const ordem=new Map((d.taxonomia||[]).map((t,i)=>[t.nome,i]));
+    const grupos=[];
+    d.produtos.forEach(p=>{let g=grupos.find(x=>x.nome===p.categoria);if(!g)grupos.push(g={nome:p.categoria,itens:[]});g.itens.push(p);});
+    grupos.sort((a,b)=>(ordem.get(a.nome)??99)-(ordem.get(b.nome)??99));
+    el.innerHTML=grupos.map(g=>`<div class="vt-cat">${this._esc(g.nome)} <span>${g.itens.length}</span></div>
+      <div class="adp-grid vt-grid">${g.itens.map(p=>this._vtCard(p)).join('')}</div>`).join('');
+    const acha=id=>d.produtos.find(p=>p.id===id);
+    el.querySelectorAll('[data-vt-edit]').forEach(b=>b.addEventListener('click',()=>this._vtForm(acha(b.dataset.vtEdit))));
+    el.querySelectorAll('[data-vt-ativo]').forEach(b=>b.addEventListener('click',async()=>{
+      const r=await this._api('PATCH',`/admin/vitrine/${b.dataset.vtAtivo}`,{ativo:b.dataset.v==='1'});
+      if(r?.ok){this._toast(b.dataset.v==='1'?'Produto ativado':'Produto pausado — não aparece mais no site');this._carregarVitrine();}else this._toast(r?.erro||'Erro','err');
+    }));
+    el.querySelectorAll('[data-vt-esg]').forEach(b=>b.addEventListener('click',async()=>{
+      const r=await this._api('PATCH',`/admin/vitrine/${b.dataset.vtEsg}`,{esgotado:b.dataset.v==='1'});
+      if(r?.ok){this._toast(b.dataset.v==='1'?'Marcado como esgotado':'Voltou a ter estoque');this._carregarVitrine();}else this._toast(r?.erro||'Erro','err');
+    }));
+    el.querySelectorAll('[data-vt-del]').forEach(b=>b.addEventListener('click',()=>{
+      const p=acha(b.dataset.vtDel);
+      this._confirmarDel(`Excluir "${p.titulo.slice(0,60)}" da vitrine? Não dá pra desfazer. Se for só tirar do site por um tempo, use Pausar.`,async()=>{
+        const r=await this._api('DELETE',`/admin/vitrine/${p.id}`);
+        if(r?.ok){this._toast('Produto excluído');this._carregarVitrine();}else this._toast(r?.erro||'Erro ao excluir','err');
+      });
+    }));
+  }
+  _vtCard(p){
+    const img=this._vtFoto(p.imagem_url);
+    const desc=p.preco_original&&p.preco_original>p.preco?Math.round((1-p.preco/p.preco_original)*100):0;
+    const mk=({shopee:'Shopee',mercadolivre:'Mercado Livre',amazon:'Amazon'})[p.marketplace]||'Shopee';
+    const info=[p.loja_nome,p.vendidos!=null?`${this._num(p.vendidos)} vendidos`:'',p.nota!=null?`★ ${String(p.nota).replace('.',',')}`:''].filter(Boolean).map(x=>this._esc(x)).join(' · ');
+    return `<div class="adp-card ${p.ativo?'':'off'}">
+      <div class="vt-foto">${img?`<img src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}${desc?`<span class="vt-desc">-${desc}%</span>`:''}</div>
+      <div class="vt-tit" title="${this._esc(p.titulo)}">${this._esc(p.titulo)}</div>
+      <div class="vt-preco"><b>${this._brl(p.preco)}</b>${p.preco_original?`<s>${this._brl(p.preco_original)}</s>`:''}</div>
+      ${info?`<div class="adp-meta">${info}</div>`:''}
+      <div><span class="adp-chip ${p.ativo?'on':''}">${p.ativo?'Ativo':'Pausado'}</span><span class="adp-chip">${mk}</span>${p.subcategoria?`<span class="adp-chip">${this._esc(p.subcategoria)}</span>`:''}${p.loja_oficial?'<span class="adp-chip">Oficial</span>':''}${p.esgotado?'<span class="adp-chip warn">Esgotado</span>':''}${p.promocao?`<span class="adp-chip warn">${this._esc(p.promocao)}</span>`:''}</div>
+      <div class="adp-acoes">
+        <button class="btn btn-o" data-vt-edit="${p.id}">${this._ico('edit',11)} Editar</button>
+        <button class="btn btn-o" data-vt-ativo="${p.id}" data-v="${p.ativo?0:1}">${this._ico(p.ativo?'eye_off':'eye',11)} ${p.ativo?'Pausar':'Ativar'}</button>
+        <button class="btn btn-o" data-vt-esg="${p.id}" data-v="${p.esgotado?0:1}" title="${p.esgotado?'Voltou a ter estoque':'Marcar como esgotado (fica por último, cinza)'}">${p.esgotado?'Tem estoque':'Esgotou'}</button>
+        <a class="btn btn-o" href="${this._esc(/^https:\/\//.test(p.link_url||'')?p.link_url:'#')}" target="_blank" rel="noopener noreferrer" title="Testar o link de afiliado" aria-label="Abrir o link">${this._ico('globe',11)}</a>
+        <button class="btn btn-o" data-vt-del="${p.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4)" aria-label="Excluir">${this._ico('trash',11)}</button>
+      </div></div>`;
+  }
+  _vtForm(it){
+    const m=this._persModal(520),novo=!it;
+    const v=(k,d='')=>it&&it[k]!=null?it[k]:d;
+    const tax=this._vtDados?.taxonomia||[];
+    const num=k=>it&&it[k]!=null?String(it[k]).replace('.',','):'';
+    const optsSub=(nicho,sel)=>{const n=tax.find(t=>t.nome===nicho);return `<option value="">(sem subcategoria)</option>`+(n?n.subs:[]).map(x=>`<option value="${this._esc(x)}" ${x===sel?'selected':''}>${this._esc(x)}</option>`).join('');};
+    const nichoAtual=it?.categoria||'';
+    m.innerHTML=`<div class="modal adp-form" style="max-width:520px;max-height:92vh;overflow:auto">
+      <div class="m-titulo">${this._ico('bag',16)} ${novo?'Novo produto na vitrine':'Editar produto'}</div>
+      <div class="mc"><label>Link de afiliado <span style="color:var(--verm)">*</span></label>
+        <input id="vtLink" maxlength="500" value="${this._esc(v('link_url'))}" placeholder="https://s.shopee.com.br/...  ou  https://meli.la/...  ou  https://amzn.to/...">
+        <div class="dica" id="vtMkNote">O link curto que a loja gera pra você. Funciona com <b>Shopee</b>, <b>Mercado Livre</b> e <b>Amazon</b>: o card mostra a etiqueta da loja sozinho. É por esse link que a comissão conta — o link normal do produto não paga nada.</div></div>
+      <div class="mc"><label>Nome do produto <span style="color:var(--verm)">*</span></label><input id="vtTitulo" maxlength="160" value="${this._esc(v('titulo'))}" placeholder="Igual ao título na loja"></div>
+      <div class="mc"><label>Foto do produto <span style="color:var(--verm)">*</span></label>
+        <div style="display:flex;gap:10px;align-items:flex-start"><div class="vt-prev" id="vtPrevBox" style="${v('imagem_url')?'':'display:none'}"><img id="vtPrev" alt="" referrerpolicy="no-referrer" src="${this._vtFoto(v('imagem_url'),200)}"></div>
+          <div style="flex:1;min-width:0"><input id="vtImg" maxlength="500" value="${this._esc(v('imagem_url'))}" placeholder="https://cf.shopee.sg/file/br-11134207-..."><div class="dica">Na loja, clique com o botão direito na foto → "Copiar endereço da imagem". Na Shopee pode colar só o código (br-11134207-...).</div></div></div></div>
+      <div class="grid2"><div class="mc"><label>Preço (R$) <span style="color:var(--verm)">*</span></label><input id="vtPreco" inputmode="decimal" value="${num('preco')}" placeholder="39,90"></div>
+        <div class="mc"><label>Preço antes (riscado)</label><input id="vtOrig" inputmode="decimal" value="${num('preco_original')}" placeholder="49,90"></div></div>
+      <div class="dica" style="margin:-4px 0 12px">O desconto (-20%) é calculado sozinho a partir dos dois preços.</div>
+      <div class="grid2"><div class="mc"><label>Vendidos</label><input id="vtVend" inputmode="numeric" value="${v('vendidos')}" placeholder="1500"></div>
+        <div class="mc"><label>Nota (0 a 5)</label><input id="vtNota" inputmode="decimal" value="${num('nota')}" placeholder="4,9"></div></div>
+      <div class="mc"><label>Nome da loja</label><input id="vtLoja" maxlength="80" value="${this._esc(v('loja_nome'))}" placeholder="Ex: Principia Skincare"></div>
+      <div class="grid2"><div class="mc"><label>Categoria (nicho)</label><select id="vtCat">${tax.map(t=>`<option value="${this._esc(t.nome)}" ${t.nome===(nichoAtual||'Outros')?'selected':''}>${this._esc(t.nome)}</option>`).join('')}</select></div>
+        <div class="mc"><label>Subcategoria</label><select id="vtSub">${optsSub(nichoAtual||'Outros',it?.subcategoria||'')}</select></div></div>
+      <div class="dica" id="vtCatNote" style="margin:-4px 0 12px">A categoria e a subcategoria são escolhidas sozinhas pelo nome do produto (ex.: Beleza › Cuidados masculinos); pode trocar. Se não reconhecer, fica em "Outros".</div>
+      <div class="grid2"><div class="mc"><label>Ordem</label><input id="vtOrdem" type="number" min="0" max="999" step="1" value="${v('ordem',0)}"></div><div></div></div>
+      <div class="dica" style="margin:-4px 0 12px">Ordem menor aparece primeiro dentro da categoria.</div>
+      <div class="mc"><label>Link normal do produto <span style="color:var(--t3);font-size:11px">(opcional, só Shopee)</span></label><input id="vtProd" maxlength="500" value="" placeholder="https://shopee.com.br/produto-i.373261329.43852360893">
+        <div class="dica">Guarda o código do produto na Shopee pra atualizar preço e vendidos sozinho. Não aparece no site.</div></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="vtOficial" ${v('loja_oficial',false)?'checked':''} style="width:auto"> Loja oficial (mostra o selo "Oficial")</label>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="vtEsg" ${v('esgotado',false)?'checked':''} style="width:auto"> Esgotado (fica por último, em cinza)</label>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="vtAtivoF" ${v('ativo',true)?'checked':''} style="width:auto"> Ativo (aparece na loja)</label>
+      <div class="mf"><button class="btn btn-o" id="vtCancel">Cancelar</button><button class="btn btn-g" id="vtSalvar">${this._ico('check',13)} Salvar</button></div></div>`;
+    const raiz=m.firstElementChild,$=id=>raiz.querySelector('#'+id);
+    const atualizaFoto=()=>{
+      const u=this._vtFotoRaw($('vtImg').value,200);
+      $('vtPrevBox').style.display=u?'':'none';
+      if(u)$('vtPrev').src=u;else $('vtPrev').removeAttribute('src');
+    };
+    // Loja do link (Shopee / Mercado Livre / Amazon)
+    const notaLink=()=>{
+      const x=$('vtLink').value.trim();
+      if(!x)return;
+      const mk=this._vtMk(x);
+      $('vtMkNote').textContent=mk?`Loja reconhecida: ${mk.nome}. A etiqueta "${mk.nome}" aparece sozinha no card.`:'Esse endereço não é da Shopee, do Mercado Livre nem da Amazon — o site não vai aceitar.';
+      $('vtMkNote').style.color=mk?'var(--verde,#4ade80)':'#fbbf24';
+    };
+    $('vtLink').addEventListener('input',notaLink);
+    // Nicho/subcategoria automáticos (o Worker escolhe pelo nome) enquanto o admin não mexer nos seletores
+    let catManual=!!(it&&it.categoria&&it.categoria!=='Outros');
+    const poe=(cat,sub)=>{$('vtCat').value=cat;$('vtSub').innerHTML=optsSub(cat,sub);};
+    const sugere=async()=>{
+      if(catManual)return;
+      const t=$('vtTitulo').value.trim();
+      if(!t)return;
+      const r=await this._api('POST','/admin/vitrine/classificar',{titulo:t});
+      if(catManual||!r?.ok)return;
+      poe(r.categoria,r.subcategoria||'');
+      $('vtCatNote').textContent=r.reconhecida?`Escolhida pelo nome do produto: ${r.categoria}${r.subcategoria?' › '+r.subcategoria:''} — pode trocar.`:'Não reconheci a categoria pelo nome: escolha uma (ou fica em "Outros").';
+    };
+    $('vtTitulo').addEventListener('input',this._dbc(sugere,350));
+    $('vtCat').addEventListener('change',()=>{catManual=true;$('vtSub').innerHTML=optsSub($('vtCat').value,'');});
+    $('vtSub').addEventListener('change',()=>{catManual=true;});
+    $('vtImg').addEventListener('change',atualizaFoto);
+    $('vtImg').addEventListener('blur',atualizaFoto);
+    $('vtCancel').addEventListener('click',()=>this._fechaModal('mPers'));
+    $('vtSalvar').addEventListener('click',async()=>{
+      const link=$('vtLink').value.trim(),titulo=$('vtTitulo').value.trim(),img=this._vtImgUrl($('vtImg').value);
+      const preco=this._vtNum($('vtPreco').value),orig=this._vtNum($('vtOrig').value),vend=this._vtNum($('vtVend').value),nota=this._vtNum($('vtNota').value);
+      if(!/^https:\/\//.test(link)){this._toast('Cole o link de afiliado (começa com https://)','err');return;}
+      if(!this._vtMk(link)){this._toast('O link precisa ser da Shopee, do Mercado Livre ou da Amazon','err');return;}
+      if(!titulo){this._toast('Informe o nome do produto','err');return;}
+      if(!/^https:\/\//.test(img)){this._toast('Informe a foto do produto','err');return;}
+      if(preco===null||Number.isNaN(preco)){this._toast('Informe o preço (ex.: 39,90)','err');return;}
+      if(Number.isNaN(orig)){this._toast('Preço antes inválido','err');return;}
+      if(Number.isNaN(vend)||(vend!==null&&!Number.isInteger(vend))){this._toast('Vendidos: só números inteiros','err');return;}
+      if(Number.isNaN(nota)||(nota!==null&&(nota<0||nota>5))){this._toast('A nota vai de 0 a 5','err');return;}
+      if(orig!==null&&orig<=preco&&!confirm('O "preço antes" não é maior que o preço atual, então não vai aparecer riscado nem com desconto. Salvar assim mesmo?'))return;
+      let host='';try{host=new URL(link).hostname.toLowerCase();}catch{}
+      if((host==='shopee.com.br'||host==='www.shopee.com.br'||host.endsWith('mercadolivre.com.br')||host.endsWith('amazon.com.br'))&&!confirm('Esse parece o link normal do produto, não o link de afiliado. Por ele você NÃO ganha comissão. Salvar mesmo assim?'))return;
+      const b=$('vtSalvar');b.disabled=true;
+      if(!catManual)await sugere(); // salvou rápido demais: garante a categoria pelo nome
+      // Códigos do produto/loja (só guardados, pra atualizar pela vitrine depois): do link normal, ou os que já estavam salvos
+      const mp=$('vtProd').value.match(/\/product\/(\d+)\/(\d+)|-i\.(\d+)\.(\d+)/);
+      const body={link_url:link,titulo,imagem_url:img,preco,preco_original:orig,vendidos:vend,nota,loja_nome:$('vtLoja').value.trim()||null,
+        categoria:$('vtCat').value,subcategoria:$('vtSub').value||null,ordem:Number($('vtOrdem').value)||0,loja_oficial:$('vtOficial').checked,esgotado:$('vtEsg').checked,ativo:$('vtAtivoF').checked,
+        shopee_shop_id:mp?(mp[1]||mp[3]):(it?.shopee_shop_id||null),shopee_item_id:mp?(mp[2]||mp[4]):(it?.shopee_item_id||null)};
+      const r=await this._api(novo?'POST':'PATCH',novo?'/admin/vitrine':`/admin/vitrine/${it.id}`,body);
+      b.disabled=false;
+      if(r?.ok){if(m.firstElementChild===raiz)this._fechaModal('mPers');this._toast(novo?'Produto criado':'Produto salvo');this._carregarVitrine();}
+      else this._toast(r?.erro||'Erro ao salvar','err');
+    });
+    if(it)notaLink();
     this._abrirModal('mPers');
   }
 
@@ -8308,6 +8551,20 @@ class DimaiorAdmin extends HTMLElement {
     .adp-tab th,.adp-tab td{padding:7px 8px;border-bottom:1px solid var(--brddim);text-align:left;color:var(--t2)}
     .adp-tab th{color:var(--t3);font-size:11px;font-weight:700}
     @media(max-width:700px){.adp-form .grid2{grid-template-columns:1fr}.adp-grid{grid-template-columns:1fr}}
+    .vt-cat{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--t1);margin:6px 0 10px}
+    .vt-cat span{font-size:11px;font-weight:600;color:var(--t3);border:1px solid var(--brd);border-radius:99px;padding:0 8px}
+    .vt-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+    @media(max-width:700px){.vt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .vt-foto{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#05070c}
+    .vt-foto img{width:100%;height:100%;object-fit:cover;display:block}
+    .vt-desc{position:absolute;top:6px;left:6px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px}
+    .vt-tit{font-size:12.5px;line-height:1.35;color:var(--t1);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+    .vt-preco{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 8px}.vt-preco b{font-size:16px;color:var(--t1)}.vt-preco s{font-size:11px;color:var(--t3)}
+    .vt-prev{width:96px;aspect-ratio:1;border-radius:10px;background:#05070c;overflow:hidden;flex:none}
+    .vt-prev img{width:100%;height:100%;object-fit:cover;display:block}
+    .vt-lista{display:flex;flex-direction:column;gap:9px;flex:1;min-width:230px}
+    .vt-sw{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--t2);cursor:pointer}
+    .vt-sw select{width:auto;font-size:12px;padding:5px 8px}
     .arq-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
     .arq-card{background:var(--glass);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;min-width:0}
     .arq-card.larga{grid-column:span 2}
@@ -8497,7 +8754,8 @@ class DimaiorAdmin extends HTMLElement {
               ni('play_circle','historicoLive','Histórico de Live')+
               ni('medal','personalizacao','Personalização')+
               ni('play_circle','videosAbertura','Vídeos de Abertura')+
-              ni('live','livesCategorias','Lives — Categorias')
+              ni('live','livesCategorias','Lives — Categorias')+
+              ni('bag','vitrine','Vitrine (Loja)')
             )}
             ${navSec('sistema','Sistema',
               ni('server','monitor','Monitor Kwai')+
@@ -9124,6 +9382,10 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-videosAbertura">${ph('Vídeos de Abertura','play_circle','Vídeo curto de uma streamer que aparece ao abrir a home (com Pular aos 3s e a live dela no canto se estiver ao vivo)','btnAtuVa',`<button class="btn btn-g" id="btnVaNovo">${this._ico('plus',13)} Novo vídeo</button>`)}
               <div id="vaConfig"></div>
               <div id="vaLista">${this._loading()}</div>
+            </div>
+            <div class="pag" id="pag-vitrine">${ph('Vitrine (Loja)','bag','Produtos de afiliado (Shopee, Mercado Livre, Amazon) na aba LOJA da home e na página da loja, separados por nicho. O clique leva direto ao produto pelo link de afiliado','btnAtuVt',`<button class="btn btn-g" id="btnVtNovo">${this._ico('plus',13)} Novo produto</button>`)}
+              <div id="vtConfig"></div>
+              <div id="vtLista">${this._loading()}</div>
             </div>
             <div class="pag" id="pag-livesCategorias">${ph('Lives — Categorias','live','Categorias da aba LIVES da home. O streamer escolhe a dele no painel (Perfil) e o site agrupa quem está ao vivo','btnAtuLc',`<button class="btn btn-g" id="btnLcNova">${this._ico('plus',13)} Nova subcategoria</button>`)}
               <div id="lcConfig"></div>

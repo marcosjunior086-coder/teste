@@ -37,6 +37,10 @@ class MenuMobileDMaior extends HTMLElement {
     this.bindEvents();
     this.applyPreferences();
     this.checkAuth();
+    this._syncLoja();
+    this._lojaHandler = (e) => this._syncLoja(e.detail);
+    window.addEventListener('dmaior:vitrine', this._lojaHandler);
+    this._lojaBuscar();
     // Guarda referências para poder remover corretamente no disconnectedCallback
     this._storageHandler = (e) => {
       if (['dm_token', 'dm_foto', 'dm_nome', 'dm_atalho_admin', 'dm_atalho_agente', 'dm_atalho_sub'].includes(e.key)) this.checkAuth();
@@ -57,6 +61,46 @@ class MenuMobileDMaior extends HTMLElement {
     window.removeEventListener('dmaior:auth', this._authHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
     window.removeEventListener('dmaior:layout', this._layoutHandler);
+    window.removeEventListener('dmaior:vitrine', this._lojaHandler);
+  }
+
+  // Item "Loja" do menu: abre a página inteira (loja.html). Dois lugares, cada um ligado/desligado
+  // no admin (aba Vitrine): menu do topo do computador (#topLoja) e menu ☰ (#menuLoja).
+  // Quem manda é o Worker rank (/vitrine/config); a última resposta fica no localStorage
+  // (dm_vitrine_cfg) pra todas as páginas já nascerem certas, e o <dmaior-vitrine> (home e loja.html)
+  // atualiza na hora por evento.
+  _syncLoja(cfg) {
+    if (!cfg) {
+      try { cfg = JSON.parse(localStorage.getItem('dm_vitrine_cfg') || 'null'); } catch (_) { cfg = null; }
+    }
+    const r = this.shadowRoot;
+    const top = r.getElementById('topLoja'), mob = r.getElementById('menuLoja');
+    if (top) top.hidden = !(cfg && cfg.menu_desktop);
+    if (mob) mob.hidden = !(cfg && cfg.menu_mobile);
+  }
+
+  // Confere com o servidor no máximo a cada 15 min (e só depois da página assentar)
+  _lojaBuscar() {
+    let c = null;
+    try { c = JSON.parse(localStorage.getItem('dm_vitrine_cfg') || 'null'); } catch (_) {}
+    if (c && Date.now() - (c.t || 0) < 15 * 60 * 1000) return;
+    const base = window.DmaiorConfig && window.DmaiorConfig.workers && window.DmaiorConfig.workers.rank;
+    const ir = async () => {
+      const rank = base || (window.DmaiorConfig && window.DmaiorConfig.workers && window.DmaiorConfig.workers.rank);
+      if (!rank) return;
+      const guarda = (cfg) => { try { localStorage.setItem('dm_vitrine_cfg', JSON.stringify({ ...cfg, t: Date.now() })); } catch (_) {} };
+      try {
+        const r = await fetch(rank + '/vitrine/config');
+        // Sem resposta boa (Worker ainda não atualizado, rede...): trata como desligado e só tenta de novo em 15 min
+        if (!r.ok) { guarda({ ativo: false, menu_desktop: false, menu_mobile: false }); return; }
+        const d = await r.json();
+        const cfg = { ativo: !!d.ativo, menu_desktop: !!(d.ativo && d.menu_desktop), menu_mobile: !!(d.ativo && d.menu_mobile) };
+        guarda(cfg);
+        this._syncLoja(cfg);
+      } catch (_) { guarda({ ativo: false, menu_desktop: false, menu_mobile: false }); }
+    };
+    // api.js (que define DmaiorConfig) é deferido: espera a página assentar
+    if (document.readyState === 'complete') setTimeout(ir, 800); else window.addEventListener('load', () => setTimeout(ir, 800), { once: true });
   }
 
   _syncThemeHost() {
@@ -110,6 +154,8 @@ class MenuMobileDMaior extends HTMLElement {
     const SVG_SHIELD = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>`;
     const SVG_AGENTE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
     const SVG_USER   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+    // Sacola de loja (genérica) — o ícone da LOJA; o logo de cada marketplace só aparece dentro do produto
+    const SVG_BAG    = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
     const SVG_BELL   = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
 
     // Itens com disabled:true são exibidos mas não navegam — páginas ainda não criadas
@@ -121,6 +167,8 @@ class MenuMobileDMaior extends HTMLElement {
       ]},
       { label: 'Cursos',      link: 'cursos.html',            icon: SVG_BOOK   },
       { label: 'Ferramentas', link: 'ferramentas.html',        icon: SVG_TOOL   },
+      // Loja: só aparece se o admin ligar "Mostrar no menu ☰" (ver _syncLoja)
+      { label: 'Loja',        link: 'loja.html',               icon: SVG_BAG, id: 'menuLoja', hidden: true },
       { label: 'Portfólio',   icon: SVG_INFO, subItems: [
           { label: 'Quem Somos?', link: 'quem-somos.html' },
       ]},
@@ -149,7 +197,7 @@ class MenuMobileDMaior extends HTMLElement {
           </div>`;
       } else {
         menuHTML += `
-          <a href="${item.link}" class="menu-item direct">
+          <a href="${item.link}" class="menu-item direct"${item.id ? ` id="${item.id}"` : ''}${item.hidden ? ' hidden' : ''}>
             <div class="menu-content">${item.icon}<span>${item.label}</span></div>
           </a>`;
       }
@@ -204,6 +252,9 @@ class MenuMobileDMaior extends HTMLElement {
       .topnav{ display:none; align-items:center; gap:2px; margin-left:14px; }
       .topnav a{ font-size:.84rem; font-weight:600; color:var(--dm-text-sub); padding:8px 12px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; text-decoration:none; white-space:nowrap; transition:background .2s,color .2s; }
       .topnav a:hover, .topnav a.on{ background:var(--dm-cyan-08); color:var(--dm-text); }
+      .topnav a.top-loja{ display:inline-flex; align-items:center; gap:6px; }
+      .topnav a.top-loja svg{ flex-shrink:0; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
+      .topnav a.top-loja[hidden], .menu-item[hidden]{ display:none !important; }
       :host([data-layout="webpro"]) .topnav{ display:flex; }
       @media (max-width:920px){ :host([data-layout="webpro"]) .topnav{ display:none; } }
       :host([data-app-shell]) .topnav,
@@ -374,6 +425,8 @@ class MenuMobileDMaior extends HTMLElement {
         <a href="ferramentas.html"  data-nav="ferramentas">Ferramentas</a>
         <a href="quem-somos.html"   data-nav="quem-somos">Portfólio</a>
         <a href="politicas-host.html" data-nav="politicas">Políticas</a>
+        <!-- Loja (vitrine de afiliado): abre a página inteira; só aparece se o admin ligar "menu do computador" (ver _syncLoja) -->
+        <a href="loja.html"         data-nav="loja" class="top-loja" id="topLoja" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Loja</a>
       </nav>
 
       <div class="topbar-right">

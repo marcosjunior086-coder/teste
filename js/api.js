@@ -209,6 +209,15 @@ window.DmaiorAPI = {
       return window.DmaiorAPI._get(window.DmaiorConfig.workers.rank, '/lives/descoberta');
     },
 
+    /**
+     * Vitrine de produtos da aba LOJA (sem auth — público).
+     * Retorna { ativo:false } quando desligada no admin; senão { ativo:true, categorias, produtos }.
+     * Ver Worker rank /vitrine.
+     */
+    async getVitrine() {
+      return window.DmaiorAPI._get(window.DmaiorConfig.workers.rank, '/vitrine');
+    },
+
     /** UIDs de quem ocultou a própria live da página inicial. Retorna { uids: [...] }. */
     async getLivesOcultas() {
       return window.DmaiorAPI._get(window.DmaiorConfig.workers.rank, '/lives/ocultas');
