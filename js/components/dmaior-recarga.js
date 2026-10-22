@@ -7,76 +7,40 @@
 //
 //  Fluxo (máquina de estados):
 //    AGUARDANDO_ID → VALIDANDO → CONFIRMANDO_PERFIL → ESCOLHENDO_DIAMANTES
-//    → CRIANDO_ORDEM → COLETANDO_DADOS → GERANDO_PAGAMENTO
-//    → AGUARDANDO_PAGAMENTO → CONCLUIDO | FALHOU
+//    → CRIANDO_ORDEM → GERANDO_PAGAMENTO → AGUARDANDO_PAGAMENTO → CONCLUIDO | FALHOU
+//
+//  O chat não pede nome, CPF nem WhatsApp: quem pede é o provedor, na página dele. Aqui o cliente
+//  só informa o ID do Kwai e a quantidade.
 //
 //  Atributos:
 //    data-worker-url   URL do Worker (padrão https://recarga.agencydmaior.com.br)
 //    data-logo         logo da DMaior   (padrão assets/icons/dmaior-logo.png)
 //    data-logo-parceiro logo do parceiro (padrão assets/icons/rocketbunny.png)
 //    data-mock         presença = modo simulado, sem rede (painel de teste)
-//    data-mock-pay-way "dlocal" (nome+CPF+WhatsApp) | "enjoy_3" (só WhatsApp) — só no modo simulado
 //    data-suporte-url  link do botão "Falar com o suporte" (opcional)
 //
 //  Eventos: "dmaior-recarga:req" { rota, status, ms, ok, mock, corpo } — corpo já mascarado.
 //  Métodos: reiniciar(), simularStatus('AGUARDANDO'|'PAGO'|'FALHOU') (só modo simulado).
 //
 //  Visual: herda os tokens --dm-* do css/global.css (4 temas do site), igual ao <dmaior-afiliado>.
-//  Privacidade: CPF/nome/WhatsApp só existem nos campos do formulário e no envio ao Worker;
-//  nada vai pra localStorage/cookies/URL e os campos são limpos assim que o pagamento é gerado.
+//  Privacidade: o site não coleta nome, CPF nem WhatsApp em momento nenhum.
 // ============================================================
 (function () {
   'use strict';
 
   const MIN = 100;
-  const MAX = 500000;
+  const MAX = 400000;   // maior faixa que o parceiro oferece (igual ao Worker)
   const RAPIDOS = [100, 500, 1000, 5000, 10000];
   const WORKER_PADRAO = 'https://recarga.agencydmaior.com.br';
   const PRECO_MOCK = 0.0692;
-  // QR fictício (só aparece no modo simulado; o do pagamento real vem do RocketBunny)
-  const QR_MOCK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABi0lEQVR42u3aQY6DMAwFUO5/6ekBRsB3XJJQvSwrih8by7F9/L3qHLi4uLi4uLgbcI/4JM//f6YTCxcXdy33JpVccs+IZ7/ksXBxcXfgXlPyAKeBh2Lh4uK+hVstbnBxcX+bm5QpGyUyXFzcNrd6+clbHlvc1XBxcYvcahPzLExS4kzt7+Li4g5xC8POy5KlSn98JoyLi9veZ0jSU9IiydGFNisuLu50btLozNumY+PYmw/AxcVdxB1DVBPTWNGDi4s7n5snr84SRqvhgouLuwE3H44m16RkZHvTZsXFxZ3OHWt9Ji2P5J3R87i4uIu41wVNJ3nlCxnlISsuLu5j3GpKug6QD0iSFgwuLu5abuEq0ljkylMeLi7uWm71jC1d5Wsc5ckPLi7uA9xvLXPn70z+i4uLuwM3f0XS4KimvMGKDBcXdwq3Sul8AC4u7u9xx5od+VgFFxf3vdz+GDUqgHBxcZdyq2sZ1SWMfNUDFxd3B261EOmPWvPhLi4u7nzu/gcXFxcXFxd30fkAK/FQlhHLGXEAAAAASUVORK5CYII=';
 
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const pausa = ms => new Promise(r => setTimeout(r, ms));
   const brl = n => Number(n).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const num = n => Number(n).toLocaleString('pt-BR');
-  const soDigitos = v => String(v || '').replace(/\D/g, '');
   // Host do link de pagamento: o cliente precisa saber ONDE vai digitar o CPF.
   const hostDe = u => { try { return new URL(u).hostname; } catch { return 'site do parceiro'; } };
 
-  // Tira o 55 ANTES de cortar: colar "5511987654321" não pode virar um número nacional diferente.
-  function telNacional(v) {
-    let d = soDigitos(v);
-    if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
-    return d.slice(0, 11);
-  }
-  function mascaraTel(v) {
-    const d = telNacional(v);
-    if (d.length <= 2) return d;
-    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
-    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-  }
-  function mascaraCpf(v) {
-    const d = soDigitos(v).slice(0, 11);
-    if (d.length <= 3) return d;
-    if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
-    if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
-    return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
-  }
-  function cpfValido(v) {
-    const d = soDigitos(v);
-    if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
-    for (const t of [9, 10]) {
-      let s = 0;
-      for (let i = 0; i < t; i++) s += Number(d[i]) * (t + 1 - i);
-      if (((s * 10) % 11) % 10 !== Number(d[t])) return false;
-    }
-    return true;
-  }
-  const telValido = v => { const d = telNacional(v); return d.length === 10 || d.length === 11; };
-  // Mesma regra do Worker (que é quem decide de verdade): nome+CPF no dlocal, só WhatsApp no enjoy_3.
-  const exigeCpf = pw => { const p = String(pw || '').toLowerCase(); return p === 'dlocal' || p === 'mock'; };
 
   const ICONES = {
     gem: '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
@@ -136,7 +100,6 @@
       this._orderNo = null;
       this._ticket = '';       // assinatura do pedido, vem do Worker; sem ela pagar/consultar/trocar é recusado
       this._pedidoSeq = 0;     // sobe a cada troca/encerramento: invalida consulta em voo do pedido antigo
-      this._payWay = '';
       this._pollTimer = null;
       this._pollN = 0;
       this._falhasPoll = 0;
@@ -175,7 +138,7 @@
     reiniciar() {
       this._gen++;
       this._pararPoll();
-      this._perfil = null; this._diamantes = 0; this._valor = null; this._orderNo = null; this._ticket = ''; this._payWay = '';
+      this._perfil = null; this._diamantes = 0; this._valor = null; this._orderNo = null; this._ticket = '';
       this._pedidoSeq++; this._wPag = null; this._acoes = null; this._humor('neutro');
       this._mockStatus = 'AGUARDANDO';
       if (this._log) this._log.innerHTML = '';
@@ -463,30 +426,17 @@
         return R(200, { ok: true, perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null } });
       }
       if (rota === '/get-price') return R(200, { ok: true, diamantes: c.diamantes, valor: Math.round(c.diamantes * PRECO_MOCK * 100) / 100, estimado: true });
-      // O ticket de mentira imita o do Worker: vale só pro par pedido+forma de pagamento.
-      const tk = (ordem, pw) => `mock:${ordem}:${pw}`;
-      const tkOk = c2 => c2.ticket === tk(c2.order_no, c2.pay_way || '');
+      // O ticket de mentira imita o do Worker: vale só pro pedido que o assinou.
+      const tk = ordem => `mock:${ordem}`;
       if (rota === '/create-order') {
         this._mockStatus = 'AGUARDANDO';
-        const ordem = `MOCK-${Date.now()}-OK`, pw = this.getAttribute('data-mock-pay-way') || 'dlocal';
-        return R(200, { ok: true, order_no: ordem, ticket: tk(ordem, pw), pay_way: pw });
-      }
-      if (!tkOk(c)) return R(403, { ok: false, erro: 'Pedido inválido ou expirado. Comece uma nova recarga.' });
-      if (rota === '/pay-order') {
-        // Imita o que cada forma devolve de verdade: dlocal = PIX + QR aqui dentro;
-        // enjoy_* = só link pra página do parceiro (verificado na API real em 2026-10-22).
-        const dl = exigeCpf(c.pay_way);
-        return R(200, dl
-          ? { ok: true, order_no: c.order_no, pix_copia_cola: '00020126MOCK-PIX-DE-TESTE-NAO-PAGAVEL5204000053039865802BR5909DMAIOR6009SAO PAULO6304TEST', qr_data: QR_MOCK, pay_url: null }
-          : { ok: true, order_no: c.order_no, pix_copia_cola: null, qr_data: null, pay_url: 'https://cashier-hub.enjoypayment.com/pix-p01/reference/MOCK/teste' });
-      }
-      if (rota === '/check-status') return R(200, { ok: true, status: this._mockStatus });
-      if (rota === '/change-payway') {
-        const novo = exigeCpf(c.pay_way) ? 'enjoy_3' : 'dlocal';
-        this.setAttribute('data-mock-pay-way', novo); this._mockStatus = 'AGUARDANDO';
         const ordem = `MOCK-${Date.now()}-OK`;
-        return R(200, { ok: true, order_no: ordem, ticket: tk(ordem, novo), pay_way: novo });
+        return R(200, { ok: true, order_no: ordem, ticket: tk(ordem) });
       }
+      if (c.ticket !== tk(c.order_no)) return R(403, { ok: false, erro: 'Pedido inválido ou expirado. Comece uma nova recarga.' });
+      // Na vida real o pagamento é sempre uma página do provedor (verificado em 2026-10-22).
+      if (rota === '/pay-link') return R(200, { ok: true, order_no: c.order_no, pay_url: 'https://cashier-hub.enjoypayment.com/pix-p01/reference/MOCK/teste' });
+      if (rota === '/check-status') return R(200, { ok: true, status: this._mockStatus });
       return R(404, { ok: false, erro: 'Rota inexistente' });
     }
 
@@ -615,89 +565,41 @@
       }
       this._orderNo = r.json.order_no;
       this._ticket = String(r.json.ticket || '');
-      this._payWay = String(r.json.pay_way || '');
-      this._coletarDados();
+      this._pedirPagamento();
     }
 
-    // ── passo 4: dados do pagador ────────────────────────────────
-    _coletarDados() {
+    // ── passo 4: link do pagamento ───────────────────────────────
+    // Nome e CPF são pedidos pelo provedor, na página dele. Aqui não coletamos nada disso.
+    async _pedirPagamento() {
       const g = this._gen;
-      this._step = 'COLETANDO_DADOS';
-      this._humor('neutro');          // a espera acabou: sai do "pensando"
-      const cpf = exigeCpf(this._payWay);
-      this._add('bot', cpf
-        ? 'Pedido criado! Para gerar o <strong>PIX</strong>, preciso de alguns dados de quem vai pagar.'
-        : 'Pedido criado! Para gerar o pagamento, informe seu <strong>WhatsApp</strong>.');
-      const f = this._bloco(`
-        ${cpf ? `<label class="field"><span>Nome completo</span><input name="nome" autocomplete="name" maxlength="80" placeholder="Nome e sobrenome"></label>
-        <label class="field"><span>CPF</span><input name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00"></label>` : ''}
-        <label class="field"><span>WhatsApp</span><input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="22" placeholder="(00) 00000-0000"></label>
-        <p class="small">${ico('lock')}Enviados ao parceiro de pagamento só para gerar esta cobrança. O site não guarda esses dados; o parceiro mantém os dele conforme as regras dele.</p>
-        <div class="inline-erro" data-erro role="alert" hidden></div>
-        <button class="btn full" type="submit">Gerar pagamento</button>`, '', 'form');
-      f.noValidate = true;
-      const nomeI = f.elements.nome, cpfI = f.elements.cpf, telI = f.elements.whatsapp;
-      const erroEl = f.querySelector('[data-erro]');
-      const mostrar = t => { erroEl.textContent = t; erroEl.hidden = !t; };
-      if (cpfI) cpfI.addEventListener('input', () => { cpfI.value = mascaraCpf(cpfI.value); });
-      telI.addEventListener('input', () => { telI.value = mascaraTel(telI.value); });
-      const travar = v => f.querySelectorAll('input,button').forEach(el => { el.disabled = v; });
-      f.addEventListener('submit', async e => {
-        e.preventDefault();
-        if (!this._ok(g)) return;
-        mostrar('');
-        if (cpf) {
-          if (String(nomeI.value).trim().split(/\s+/).filter(Boolean).length < 2) { mostrar('Informe nome e sobrenome.'); nomeI.focus(); return; }
-          if (!cpfValido(cpfI.value)) { mostrar('CPF inválido. Confira os números.'); cpfI.focus(); return; }
-        }
-        if (!telValido(telI.value)) { mostrar('WhatsApp inválido. Use DDD + número.'); telI.focus(); return; }
-        travar(true);
-        this._step = 'GERANDO_PAGAMENTO';
-        this._humor('pensando');
-        const corpo = { order_no: this._orderNo, ticket: this._ticket, pay_way: this._payWay, whatsapp: soDigitos(telI.value) };
-        if (cpf) { corpo.nome = String(nomeI.value).trim(); corpo.cpf = soDigitos(cpfI.value); }
-        const r = await this._chamar('/pay-order', corpo);
-        if (!this._ok(g)) return;
-        if (!r.ok) {
-          this._step = 'COLETANDO_DADOS';
-          travar(false);
-          mostrar(this._msgErro(r, 'Não foi possível gerar o pagamento. Confira os dados.'));
-          if (r.status === 503) this._botoes([{ html: 'Recomeçar', cls: 'sec', fn: () => this.reiniciar() }]);
-          return;
-        }
-        f.remove();                       // some com CPF/nome/WhatsApp da tela
-        this._add('user', `${ico('check')} Dados enviados`);
-        this._mostrarPagamento(r.json);
-      });
-      (cpf ? nomeI : telI).focus({ preventScroll: true });
+      this._step = 'GERANDO_PAGAMENTO';
+      this._add('bot', `Pedido <strong>#${esc(this._orderNo)}</strong> criado: ${num(this._diamantes)} diamantes${this._valor ? ` · ${brl(this._valor)}` : ''}.`);
+      const dig = this._digitando();
+      const r = await this._chamar('/pay-link', { order_no: this._orderNo, ticket: this._ticket });
+      dig.remove();
+      if (!this._ok(g)) return;
+      if (!r.ok || !r.json.pay_url) {
+        this._add('erro', `${ico('alert')} ${esc(this._msgErro(r, 'Não foi possível abrir o pagamento agora.'))}`);
+        this._botoes([
+          { html: `${ico('refresh')} Tentar de novo`, fn: () => { if (this._ok(g)) this._pedirPagamento(); } },
+          { html: 'Recomeçar', cls: 'sec', fn: () => this.reiniciar() },
+        ]);
+        return;
+      }
+      this._mostrarPagamento(r.json);
     }
 
-    // ── passo 5: pagamento + acompanhamento ──────────────────────
+    // ── passo 5: acompanhamento do pagamento ─────────────────────
     _mostrarPagamento(d) {
       const g = this._gen;
       this._step = 'AGUARDANDO_PAGAMENTO';
       this._humor('neutro');
-      const qr = typeof d.qr_data === 'string' && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(d.qr_data) ? d.qr_data : '';
-      const pix = typeof d.pix_copia_cola === 'string' ? d.pix_copia_cola : '';
       const url = typeof d.pay_url === 'string' && /^https:\/\//i.test(d.pay_url) ? d.pay_url : '';
-      this._add('bot', `Pedido <strong>#${esc(this._orderNo)}</strong>: ${num(this._diamantes)} diamantes${this._valor ? ` · ${brl(this._valor)}` : ''}.${qr || pix ? ' Pague com o PIX abaixo:' : url ? ' Para pagar, abra a página segura do parceiro:' : ''}`);
+      this._add('bot', 'Tudo pronto. Para pagar, abra a página segura do provedor:');
       const w = this._bloco(`
-        ${qr ? '<div class="qr"><img alt="QR Code do PIX"></div>' : ''}
-        ${pix ? `<div class="lbl">PIX copia e cola</div><div class="code" tabindex="0">${esc(pix)}</div><button type="button" class="btn" data-copiar>${ico('copy')} Copiar código</button>` : ''}
         ${url ? `<a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir pagamento seguro</a>
-        <p class="small">${ico('lock')}Abre em outra aba, no site do parceiro de pagamento (<strong>${esc(hostDe(url))}</strong>). Lá você informa <strong>nome e CPF</strong> e paga o PIX. Confira o endereço e o valor antes de pagar — o resultado aparece aqui.</p>` : ''}
-        ${!qr && !pix && !url ? '<p class="small">Não recebemos o código de pagamento. Tente trocar a forma de pagamento.</p>' : ''}
+        <p class="small">${ico('lock')}Abre em outra aba, no site do provedor de pagamento (<strong>${esc(hostDe(url))}</strong>). Lá você informa <strong>nome e CPF</strong> e paga o PIX. Confira o endereço e o valor antes de pagar — o resultado aparece aqui.</p>` : '<p class="small">Não recebemos o endereço de pagamento. Tente de novo em instantes.</p>'}
         <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
-      if (qr) w.querySelector('.qr img').src = qr;
-      const copiar = w.querySelector('[data-copiar]');
-      if (copiar) copiar.addEventListener('click', async () => {
-        let ok = false;
-        try { await navigator.clipboard.writeText(pix); ok = true; } catch (_) {
-          try { const rg = document.createRange(); rg.selectNodeContents(w.querySelector('.code')); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); ok = document.execCommand('copy'); s.removeAllRanges(); } catch (__) { ok = false; }
-        }
-        copiar.innerHTML = ok ? `${ico('check')} Código copiado!` : 'Selecione e copie o código acima';
-        setTimeout(() => { if (copiar.isConnected) copiar.innerHTML = `${ico('copy')} Copiar código`; }, 2500);
-      });
       this._wPag = w;
       this._focarProx = true;           // o formulário sumiu: foco vai pro "Já paguei"
       this._acoesPagamento(g);
@@ -707,7 +609,6 @@
     _acoesPagamento(g) {
       this._acoes = this._botoes([
         { html: `${ico('refresh')} Já paguei`, fn: () => { this._acoesPagamento(g); this._checar(g, true); } },
-        { html: 'Trocar forma de pagamento', cls: 'sec', fn: () => this._trocarPagamento() },
         { html: 'Parar de acompanhar', cls: 'sec', fn: () => {
           this._pararPoll();
           this._pedidoSeq++;                 // invalida qualquer consulta em voo
@@ -769,7 +670,7 @@
       // Guarda qual pedido está sendo consultado: se trocar de pedido no meio, a resposta velha não vale
       // (senão um "PAGO" do pedido antigo concluiria o novo).
       const seqPedido = this._pedidoSeq, pedido = this._orderNo;
-      const r = await this._chamar('/check-status', { order_no: pedido, ticket: this._ticket, pay_way: this._payWay });
+      const r = await this._chamar('/check-status', { order_no: pedido, ticket: this._ticket });
       if (!this._ok(g) || this._step !== 'AGUARDANDO_PAGAMENTO' || seqPedido !== this._pedidoSeq || pedido !== this._orderNo) return;
       if (!r.ok) {
         this._falhasPoll++;
@@ -784,34 +685,6 @@
       else this._setStt('Aguardando o pagamento…');
       this._agendarPoll(g);
     }
-    async _trocarPagamento() {
-      const g = this._gen;
-      this._pararPoll();
-      const seqPedido = ++this._pedidoSeq;   // consultas do pedido antigo deixam de valer aqui
-      const antigo = this._orderNo;
-      this._step = 'CRIANDO_ORDEM';
-      this._congelarPagamento(true);
-      this._setStt('Trocando a forma de pagamento…');
-      const dig = this._digitando();
-      const r = await this._chamar('/change-payway', { order_no: antigo, ticket: this._ticket, pay_way: this._payWay });
-      dig.remove();
-      if (!this._ok(g) || seqPedido !== this._pedidoSeq) return;
-      if (!r.ok || !r.json.order_no || !r.json.pay_way) {
-        this._step = 'AGUARDANDO_PAGAMENTO';
-        this._congelarPagamento(false);   // a troca não saiu: o código anterior volta a valer
-        this._add('erro', `${ico('alert')} ${esc(this._msgErro(r, 'Não foi possível trocar a forma de pagamento.'))}`);
-        this._acoesPagamento(g); this._agendarPoll(g);
-        return;
-      }
-      // O PIX/link do pedido antigo sai da tela: ele não é mais acompanhado.
-      this._encerrarPagamento('Pagamento anterior substituído');
-      this._orderNo = r.json.order_no;
-      this._ticket = String(r.json.ticket || '');
-      this._payWay = String(r.json.pay_way);
-      this._add('bot', `Pronto, trocamos a forma de pagamento. O pedido anterior (<strong>#${esc(antigo)}</strong>) foi substituído — <strong>não pague o código antigo</strong>.`);
-      this._coletarDados();
-    }
-
     // ── final ────────────────────────────────────────────────────
     _concluir() {
       this._pararPoll();
