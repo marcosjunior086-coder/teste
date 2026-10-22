@@ -122,6 +122,13 @@
       if (this._obsLives) this._obsLives.disconnect();
       clearTimeout(this._t);
       this._travarRolagem(false);
+      if (this.aberto && !this._pagina) this._avisaMidia(false);
+    }
+
+    // Painel aberto por cima da home: avisa quem toca vídeo/live no fundo (live-widget,
+    // carrossel de banners) pra pausar enquanto ele estiver aberto, e retomar ao fechar.
+    _avisaMidia(pausar) {
+      try { window.dispatchEvent(new CustomEvent('dmaior:midia-pausa', { detail: { pausar: !!pausar, motivo: 'loja' } })); } catch (_) {}
     }
 
     // ── Dados ────────────────────────────────────────────────────────────────
@@ -199,6 +206,7 @@
       if (querAberto === this.aberto) return;
       const r = this.shadowRoot, painel = r.getElementById('painel');
       this.aberto = querAberto;
+      this._avisaMidia(querAberto);
       if (querAberto) {
         this._medirTopo();
         painel.hidden = false;
@@ -438,6 +446,8 @@
       .card{display:flex;flex-direction:column;min-width:0;border-radius:12px;overflow:hidden;background:var(--dm-bg-card);border:1px solid var(--dm-border-dim);
         color:inherit;text-decoration:none;transition:transform .2s,border-color .2s;-webkit-tap-highlight-color:transparent}
       .card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--dm-cyan);outline:none}
+      /* Cards fora da tela não são pintados nem medidos até chegarem perto (grid com dezenas de produtos) */
+      .card{content-visibility:auto;contain-intrinsic-size:auto 340px}
       .foto{position:relative;display:block;aspect-ratio:1;background:var(--dm-bg-4,#111827);overflow:hidden}
       .foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
       .foto img.falhou{display:none}

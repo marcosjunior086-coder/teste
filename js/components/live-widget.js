@@ -31,6 +31,7 @@ class KwaiLiveWidget extends HTMLElement {
     // Agora sobem em fila, um a cada ~1,3s (ver _pumpMiniQueue).
     this.ENABLE_MINI_PREVIEW = true;
     this._docHidden = (typeof document !== 'undefined' && document.hidden) || false;
+    this._pausaMidia = false; // Loja/painel aberto por cima da home (evento dmaior:midia-pausa)
     this._narrow    = this._isNarrow();
     this._maxMini   = this._calcMaxMini();  // teto fixo (recalc no resize)
     this._pumpGap   = this._narrow ? 400 : 300;  // cascata rápida: parece simultâneo sem largar tudo no mesmo instante (hls.js + buffer 5s deixou cada bolinha leve)
@@ -118,6 +119,17 @@ class KwaiLiveWidget extends HTMLElement {
       // atualizar a página.
       else this._requeueVisible();
     };
+    // A Loja (vitrine.js) e o painel de Lives (lives-descoberta.js) cobrem a home:
+    // enquanto abertos, as bolinhas voltam pra foto e a live grande pausa (ver
+    // playFeaturedInto). Ao fechar, a fila religa só o que está na tela.
+    this._pausaHandler = (e) => {
+      const pausar = !!(e && e.detail && e.detail.pausar);
+      if (pausar === this._pausaMidia) return;
+      this._pausaMidia = pausar;
+      if (pausar) this._trimMiniPlayers();
+      else this._requeueVisible();
+      if (this._featuredSync) this._featuredSync();
+    };
     // Recalcula o teto de mini-players quando a janela muda de tamanho
     // (ex: girar o celular, redimensionar a janela).
     this._resizeHandler = () => {
@@ -135,6 +147,7 @@ class KwaiLiveWidget extends HTMLElement {
     window.addEventListener('storage', this._storageThemeHandler);
     window.addEventListener('dmaior:tema', this._themeHandler);
     window.addEventListener('dmaior:openLive', this._openLiveHandler);
+    window.addEventListener('dmaior:midia-pausa', this._pausaHandler);
     window.addEventListener('resize', this._resizeHandler);
     document.addEventListener('visibilitychange', this._visHandler);
   }
@@ -150,6 +163,7 @@ class KwaiLiveWidget extends HTMLElement {
     window.removeEventListener('storage', this._storageThemeHandler);
     window.removeEventListener('dmaior:tema', this._themeHandler);
     window.removeEventListener('dmaior:openLive', this._openLiveHandler);
+    window.removeEventListener('dmaior:midia-pausa', this._pausaHandler);
     window.removeEventListener('resize', this._resizeHandler);
     document.removeEventListener('visibilitychange', this._visHandler);
   }
@@ -584,8 +598,11 @@ class KwaiLiveWidget extends HTMLElement {
     return 12;
   }
 
+  // Aba escondida OU Loja/painel por cima da home: nada de vídeo rodando no fundo
+  get _parado() { return this._docHidden || this._pausaMidia; }
+
   get MAX_MINI_PLAYERS() {
-    if (this._docHidden)  return 0;
+    if (this._parado)  return 0;
     // Nos ~3s logo depois que a live grande do hero começa, a faixa segura os
     // mini-players — assim a live principal pega a rede primeiro.
     if (this._heroWarmup) return 0;
@@ -618,7 +635,7 @@ class KwaiLiveWidget extends HTMLElement {
   // players foram parados sem o card sair da tela — o IntersectionObserver
   // só avisa quando a visibilidade MUDA, então ninguém mais os religaria.
   _requeueVisible() {
-    if (!this.ENABLE_MINI_PREVIEW || this._docHidden || this._autoplayBlocked) return;
+    if (!this.ENABLE_MINI_PREVIEW || this._parado || this._autoplayBlocked) return;
     this.activePlayers.forEach((e, u) => {
       if (!e.playing && !e.starting && this._isReallyVisible(u)) this._enqueueMini(u);
     });
@@ -951,11 +968,14 @@ class KwaiLiveWidget extends HTMLElement {
     this._trimMiniPlayers();
 
     let hls = null, dead = false, watchdog = null, lastT = -1, frozen = 0, attempt = 0;
+    // Suspensa = parada de propósito (Loja/painel por cima, ou quadro fora da tela):
+    // o watchdog e o "voltou pra aba" não podem religar sozinhos.
+    let suspenso = false, atachado = false, desde = 0, fora = false, foraT = null, io = null;
 
     // Voltou pra aba: o navegador costuma pausar o vídeo em segundo plano —
     // dá play na hora em vez de esperar o watchdog (até 8s).
     const onVis = () => {
-      if (dead || document.hidden) return;
+      if (dead || document.hidden || suspenso) return;
       lastT = -1; frozen = 0;
       if (videoEl.paused) this._play(videoEl);
     };
@@ -968,6 +988,9 @@ class KwaiLiveWidget extends HTMLElement {
       this._heroWarmup = false;
       clearTimeout(this._heroWarmupT);
       clearInterval(watchdog);
+      clearTimeout(foraT);
+      if (io) io.disconnect();
+      if (this._featuredSync === sync) this._featuredSync = null;
       document.removeEventListener('visibilitychange', onVis);
       try { hls && hls.destroy(); } catch (_) {}
       hls = null;
@@ -976,6 +999,7 @@ class KwaiLiveWidget extends HTMLElement {
 
     const attach = (useProxy) => {
       if (dead) return;
+      atachado = true;
       const tok = ++attempt; // eventos de tentativas anteriores são ignorados
       // Link mais recente (o radar renova a assinatura a cada ciclo).
       const cur = (this.activePlayers.get(url)?.streamer?.playUrl) || playUrl;
@@ -1024,7 +1048,7 @@ class KwaiLiveWidget extends HTMLElement {
       clearInterval(watchdog);
       lastT = -1; frozen = 0;
       watchdog = setInterval(() => {
-        if (dead || document.hidden) return;
+        if (dead || document.hidden || suspenso) return;
         if (videoEl.paused) this._play(videoEl);
         // Imagem parada por 2 checagens seguidas (~16s) — travou, ou nunca
         // começou, ou a tentativa pelo proxy também falhou: recomeça do zero
@@ -1040,7 +1064,35 @@ class KwaiLiveWidget extends HTMLElement {
       }, 8000);
     };
 
-    const go = () => attach(false);
+    // Para de baixar e de decodificar enquanto a live não está sendo vista; ao
+    // voltar: pausa curta retoma de onde parou, pausa longa recomeça do ao vivo.
+    const sync = () => {
+      if (dead) return;
+      const parar = this._pausaMidia || fora;
+      if (parar && !suspenso) {
+        suspenso = true; desde = Date.now();
+        try { hls && hls.stopLoad(); } catch (_) {}
+        try { videoEl.pause(); } catch (_) {}
+      } else if (!parar && suspenso) {
+        suspenso = false;
+        lastT = -1; frozen = 0;
+        if (!atachado || Date.now() - desde > 6000) attach(false);
+        else { try { hls && hls.startLoad(-1); } catch (_) {} this._play(videoEl); }
+      }
+    };
+    this._featuredSync = sync;
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver((ents) => {
+        const vis = ents[ents.length - 1].isIntersecting;
+        clearTimeout(foraT);
+        if (vis) { fora = false; sync(); }
+        else foraT = setTimeout(() => { fora = true; sync(); }, 2500); // rolou só de passagem: não corta
+      }, { threshold: 0.01 });
+      io.observe(videoEl);
+    }
+    if (this._pausaMidia) sync();
+
+    const go = () => { if (!suspenso) attach(false); }; // se já nasceu suspensa, só liga quando voltar
     if (this._engine(videoEl) === 'wait') this._whenHlsLib().then(() => { if (!dead) go(); });
     else go();
 
@@ -1174,7 +1226,7 @@ class KwaiLiveWidget extends HTMLElement {
   // mesmo instante — que era o que fazia todos travarem (o site da Fox roda
   // ~7 num celular fraco justamente porque escalona a entrada).
   _enqueueMini(url) {
-    if (!this.ENABLE_MINI_PREVIEW || this._docHidden) return;
+    if (!this.ENABLE_MINI_PREVIEW || this._parado) return;
     const e = this.activePlayers.get(url);
     if (!e || !e.streamer.playUrl) return;
     // Voltou pra tela antes do grace terminar — cancela a parada e segue tocando.
@@ -1200,7 +1252,7 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   _pumpMiniQueue() {
-    if (this._miniPumpT || this._docHidden || !this.ENABLE_MINI_PREVIEW || this._autoplayBlocked) return;
+    if (this._miniPumpT || this._parado || !this.ENABLE_MINI_PREVIEW || this._autoplayBlocked) return;
     const ativos = (this._miniPlayerOrder || []).length;
     if (ativos >= this.MAX_MINI_PLAYERS) return;
     let url = null;

@@ -112,6 +112,13 @@
       clearTimeout(this._t); clearInterval(this._tRel); clearTimeout(this._pvT); clearTimeout(this._pvTE);
       this._pvParar();
       this._travarRolagem(false);
+      if (this.aberto) this._avisaMidia(false);
+    }
+
+    // Painel aberto por cima da home: avisa quem toca vídeo/live no fundo (live-widget,
+    // carrossel de banners) pra pausar enquanto ele estiver aberto, e retomar ao fechar.
+    _avisaMidia(pausar) {
+      try { window.dispatchEvent(new CustomEvent('dmaior:midia-pausa', { detail: { pausar: !!pausar, motivo: 'lives' } })); } catch (_) {}
     }
 
     // ── Dados ────────────────────────────────────────────────────────────────
@@ -193,6 +200,7 @@
       if (querAberto === this.aberto) return;
       const r = this.shadowRoot, painel = r.getElementById('painel');
       this.aberto = querAberto;
+      this._avisaMidia(querAberto);
       if (querAberto) {
         this._medirTopo();
         painel.hidden = false;
