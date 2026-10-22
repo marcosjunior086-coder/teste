@@ -661,6 +661,8 @@ class MenuMobileDMaior extends HTMLElement {
       const shouldClose = force === false || (force === null && isOpen);
       sidebar.classList.toggle('on', !shouldClose);
       overlay.classList.toggle('on', !shouldClose);
+      // Avisa as abas da borda direita (LOJA/LIVES) pra saírem de cima do menu aberto
+      try { window.dispatchEvent(new CustomEvent('dmaior:menu', { detail: { aberto: !shouldClose } })); } catch (_) {}
     };
 
     openBtn.addEventListener('click',  () => toggle());

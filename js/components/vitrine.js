@@ -70,6 +70,8 @@
       this._t = null;
       this._onPop = () => this._sync();
       this._onKey = (e) => { if (e.key === 'Escape' && this.aberto) this.fechar(); };
+      // Menu ☰ aberto: a aba LOJA da borda não pode ficar por cima dele
+      this._onMenu = (e) => this.toggleAttribute('data-menu', !!(e.detail && e.detail.aberto));
       this._obsLives = null;
     }
 
@@ -104,6 +106,7 @@
       }
 
       window.addEventListener('popstate', this._onPop);
+      window.addEventListener('dmaior:menu', this._onMenu);
       document.addEventListener('keydown', this._onKey);
       // A aba LIVES (outro componente) tem o painel dela: enquanto aberto, esconde a LOJA pra não ficar por cima
       const lives = document.querySelector('dmaior-lives');
@@ -118,6 +121,7 @@
 
     disconnectedCallback() {
       window.removeEventListener('popstate', this._onPop);
+      window.removeEventListener('dmaior:menu', this._onMenu);
       document.removeEventListener('keydown', this._onKey);
       if (this._obsLives) this._obsLives.disconnect();
       clearTimeout(this._t);
@@ -383,6 +387,7 @@
         font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.72rem;letter-spacing:3px;line-height:1;
         box-shadow:-4px 0 22px var(--dm-effect-glow,rgba(59,130,246,.28));transition:right .38s cubic-bezier(.4,0,.2,1),left .38s cubic-bezier(.4,0,.2,1),background .2s;-webkit-tap-highlight-color:transparent}
       .tab .chev{display:none;transform:rotate(90deg)}
+      :host([data-menu]) .tab{display:none}
       @media(prefers-reduced-motion:reduce){.painel,.ovl,.tab{transition:none!important}}
       :host([data-aberto]) .tab{background:var(--dm-bg-panel);color:var(--dm-cyan);border:1px solid var(--dm-border);border-right:0;box-shadow:-4px 0 18px var(--dm-shadow-sm,rgba(0,0,0,.3))}
       :host([data-aberto]) .tab .chev{display:block}
