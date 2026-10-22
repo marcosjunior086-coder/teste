@@ -64,8 +64,8 @@ class MenuMobileDMaior extends HTMLElement {
     window.removeEventListener('dmaior:vitrine', this._lojaHandler);
   }
 
-  // Item "Loja" do menu: abre a página inteira (loja.html). Dois lugares, cada um ligado/desligado
-  // no admin (aba Vitrine): menu do topo do computador (#topLoja) e menu ☰ (#menuLoja).
+  // Item "Loja" do menu: abre a página inteira (loja.html). Menu do topo do computador (#topLoja): liga/desliga
+  // no admin (aba Vitrine). Menu ☰ (#menuLoja): aparece sempre que a loja está ativa.
   // Quem manda é o Worker rank (/vitrine/config); a última resposta fica no localStorage
   // (dm_vitrine_cfg) pra todas as páginas já nascerem certas, e o <dmaior-vitrine> (home e loja.html)
   // atualiza na hora por evento.
@@ -76,7 +76,7 @@ class MenuMobileDMaior extends HTMLElement {
     const r = this.shadowRoot;
     const top = r.getElementById('topLoja'), mob = r.getElementById('menuLoja');
     if (top) top.hidden = !(cfg && cfg.menu_desktop);
-    if (mob) mob.hidden = !(cfg && cfg.menu_mobile);
+    if (mob) mob.hidden = !(cfg && cfg.ativo); // ☰ (celular e telas estreitas): sempre que a loja estiver ativa
   }
 
   // Confere com o servidor no máximo a cada 15 min (e só depois da página assentar)
@@ -156,6 +156,13 @@ class MenuMobileDMaior extends HTMLElement {
     const SVG_USER   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
     // Sacola de loja (genérica) — o ícone da LOJA; o logo de cada marketplace só aparece dentro do produto
     const SVG_BAG    = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
+    // Ícones do menu do topo (computador): 16px, traço do tema (cor definida em .topnav a svg)
+    const topIco = (d) => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+    const TOP_HOME = topIco('<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>');
+    const TOP_BOOK = topIco('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>');
+    const TOP_TOOL = topIco('<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>');
+    const TOP_PORT = topIco('<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>');
+    const TOP_POL  = topIco('<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>');
     const SVG_BELL   = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
 
     // Itens com disabled:true são exibidos mas não navegam — páginas ainda não criadas
@@ -167,11 +174,11 @@ class MenuMobileDMaior extends HTMLElement {
       ]},
       { label: 'Cursos',      link: 'cursos.html',            icon: SVG_BOOK   },
       { label: 'Ferramentas', link: 'ferramentas.html',        icon: SVG_TOOL   },
-      // Loja: só aparece se o admin ligar "Mostrar no menu ☰" (ver _syncLoja)
-      { label: 'Loja',        link: 'loja.html',               icon: SVG_BAG, id: 'menuLoja', hidden: true },
       { label: 'Portfólio',   icon: SVG_INFO, subItems: [
           { label: 'Quem Somos?', link: 'quem-somos.html' },
       ]},
+      // Loja: por último; aparece quando a loja está ativa (ver _syncLoja)
+      { label: 'Loja',        link: 'loja.html',               icon: SVG_BAG, id: 'menuLoja', hidden: true },
     ];
 
     let menuHTML = '';
@@ -252,8 +259,8 @@ class MenuMobileDMaior extends HTMLElement {
       .topnav{ display:none; align-items:center; gap:2px; margin-left:14px; }
       .topnav a{ font-size:.84rem; font-weight:600; color:var(--dm-text-sub); padding:8px 12px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; text-decoration:none; white-space:nowrap; transition:background .2s,color .2s; }
       .topnav a:hover, .topnav a.on{ background:var(--dm-cyan-08); color:var(--dm-text); }
-      .topnav a.top-loja{ display:inline-flex; align-items:center; gap:6px; }
-      .topnav a.top-loja svg{ flex-shrink:0; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
+      .topnav a{ display:inline-flex; align-items:center; gap:6px; }
+      .topnav a svg{ flex-shrink:0; color:var(--dm-effect-accent,var(--dm-rank-cyan,#00d4d4)); }
       .topnav a.top-loja[hidden], .menu-item[hidden]{ display:none !important; }
       :host([data-layout="webpro"]) .topnav{ display:flex; }
       @media (max-width:920px){ :host([data-layout="webpro"]) .topnav{ display:none; } }
@@ -272,6 +279,17 @@ class MenuMobileDMaior extends HTMLElement {
       .top-me .top-me-ph{ display:inline-flex; }
       .top-me .top-me-ph svg{ width:20px; height:20px; color:var(--dm-text-sub); }
       :host([data-layout="webpro"]) .top-me.logged{ display:inline-flex; }
+
+      /* Computador (Web Pro): o menu do topo já tem tudo, então o ☰ some. Conta/Sair/atalhos de painel ficam no menu do avatar. */
+      .top-me-wrap{ position:relative; display:inline-flex; }
+      .top-dd{ display:none; }
+      @media (min-width:921px){
+        :host([data-layout="webpro"]:not([data-app-shell])) .hamburger{ display:none; }
+        :host([data-layout="webpro"]:not([data-app-shell])) .top-me-wrap::after{ content:""; position:absolute; left:-12px; right:-12px; top:100%; height:12px; } /* ponte: o menu não fecha ao descer o mouse */
+        :host([data-layout="webpro"]:not([data-app-shell])) .top-dd{ position:absolute; top:calc(100% + 10px); right:0; min-width:210px; padding:8px; flex-direction:column; gap:2px; background:var(--dm-bg-2); border:1px solid var(--dm-effect-35,var(--dm-rank-cyan-35,rgba(0,212,212,.35))); border-radius:16px; box-shadow:0 18px 46px var(--dm-shadow-lg),0 0 26px var(--dm-effect-glow,var(--dm-rank-glow,rgba(59,130,246,.28))); z-index:10001; }
+        :host([data-layout="webpro"]:not([data-app-shell])) .top-me-wrap:hover .top-dd,
+        :host([data-layout="webpro"]:not([data-app-shell])) .top-me-wrap:focus-within .top-dd{ display:flex; animation:ddFadeIn .15s ease; }
+      }
 
       /* ── Engrenagem de layout ── */
       .topbar-right{ display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:auto; }
@@ -420,11 +438,11 @@ class MenuMobileDMaior extends HTMLElement {
 
       <!-- Nav do site — visível só no layout "Web Pro" em telas largas -->
       <nav class="topnav" aria-label="Navegação do site">
-        <a href="index.html"        data-nav="index">Início</a>
-        <a href="cursos.html"       data-nav="cursos">Cursos</a>
-        <a href="ferramentas.html"  data-nav="ferramentas">Ferramentas</a>
-        <a href="quem-somos.html"   data-nav="quem-somos">Portfólio</a>
-        <a href="politicas-host.html" data-nav="politicas">Políticas</a>
+        <a href="index.html"        data-nav="index">${TOP_HOME}Início</a>
+        <a href="cursos.html"       data-nav="cursos">${TOP_BOOK}Cursos</a>
+        <a href="ferramentas.html"  data-nav="ferramentas">${TOP_TOOL}Ferramentas</a>
+        <a href="quem-somos.html"   data-nav="quem-somos">${TOP_PORT}Portfólio</a>
+        <a href="politicas-host.html" data-nav="politicas">${TOP_POL}Políticas</a>
         <!-- Loja (vitrine de afiliado): abre a página inteira; só aparece se o admin ligar "menu do computador" (ver _syncLoja) -->
         <a href="loja.html"         data-nav="loja" class="top-loja" id="topLoja" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Loja</a>
       </nav>
@@ -433,7 +451,17 @@ class MenuMobileDMaior extends HTMLElement {
 
         <!-- Web Pro: "Entrar na Agência" (deslogado) OU foto do usuário (logado) -->
         <a href="recrutamento.html" class="top-enter" id="topEnter">Entrar na Agência</a>
-        <a href="painel/index.html" class="top-me" id="topMe" title="Meu painel" aria-label="Meu painel"><span class="top-me-ph">${SVG_USER}</span></a>
+        <div class="top-me-wrap">
+          <a href="painel/index.html" class="top-me" id="topMe" title="Meu painel" aria-label="Meu painel"><span class="top-me-ph">${SVG_USER}</span></a>
+          <!-- Menu do avatar (só computador): o que ficava na gaveta ☰ -->
+          <div class="top-dd" id="topDd">
+            <a href="painel/index.html" class="auth-link">${SVG_PAINEL} Painel do Host</a>
+            <a href="admin/index.html" class="auth-link hidden" id="topLinkAdmin">${SVG_SHIELD} Painel Admin</a>
+            <a href="agente/index.html" class="auth-link hidden" id="topLinkAgente">${SVG_AGENTE} Painel Agente</a>
+            <a href="adminsub/index.html" class="auth-link hidden" id="topLinkSub">${SVG_SHIELD} Painel da Sub</a>
+            <button class="auth-link danger" id="topLogout" type="button">${SVG_LOGOUT} Sair</button>
+          </div>
+        </div>
 
         <!-- Engrenagem: alterna entre layout Original e Dinâmico Pro -->
         <div style="position:relative;">
@@ -577,6 +605,9 @@ class MenuMobileDMaior extends HTMLElement {
       if (linkAdmin)  linkAdmin.classList.toggle('hidden', !detail.atalhoAdmin);
       if (linkAgente) linkAgente.classList.toggle('hidden', !detail.atalhoAgente);
       if (linkSub)    linkSub.classList.toggle('hidden', !detail.atalhoSub);
+      root.getElementById('topLinkAdmin')?.classList.toggle('hidden', !detail.atalhoAdmin);
+      root.getElementById('topLinkAgente')?.classList.toggle('hidden', !detail.atalhoAgente);
+      root.getElementById('topLinkSub')?.classList.toggle('hidden', !detail.atalhoSub);
       // Se a lista já estiver aberta e os links mudarem (ex: atalho ativado
       // depois do login), recalcula a altura pra não cortar o conteúdo novo.
       const userCardToggle = root.getElementById('userCardToggle');
@@ -807,6 +838,9 @@ class MenuMobileDMaior extends HTMLElement {
         window.dispatchEvent(new CustomEvent('dmaior:logout'));
       });
     }
+
+    const topLogout = root.getElementById('topLogout');
+    if (topLogout) topLogout.addEventListener('click', () => window.dispatchEvent(new CustomEvent('dmaior:logout')));
 
     // Sino de avisos
     const bellBtn = root.getElementById('bellBtn');

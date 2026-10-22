@@ -2197,7 +2197,6 @@ class DimaiorAdmin extends HTMLElement {
       <div class="vt-lista">
         ${sw('vtLateral',c.botao_lateral,'Botão "LOJA" na lateral da home')}
         ${sw('vtMenuD',c.menu_desktop,'Item "Loja" no menu do topo (computador)')}
-        ${sw('vtMenuM',c.menu_mobile,'Item "Loja" no menu ☰ (celular)')}
       </div>
       <a class="btn btn-o btn-sm" href="/loja.html" target="_blank" rel="noopener" title="Abre a página inteira da loja (precisa estar ligada)">${this._ico('eye',12)} Ver a página</a>
     </div>
@@ -2223,7 +2222,6 @@ class DimaiorAdmin extends HTMLElement {
     liga('vtAtivo','ativo','Loja ligada no site','Loja desligada');
     liga('vtLateral','botao_lateral','Botão da lateral ligado','Botão da lateral desligado');
     liga('vtMenuD','menu_desktop','Item no menu do computador ligado','Item no menu do computador desligado');
-    liga('vtMenuM','menu_mobile','Item no menu do celular ligado','Item no menu do celular desligado');
     liga('vtSync','sync_ativo','Atualização automática ligada','Atualização automática desligada');
     liga('vtNovos','sync_novos','Vai trazer também os produtos novos','Só atualiza os que já estão aqui');
     s.getElementById('vtInt').addEventListener('change',async e=>{
