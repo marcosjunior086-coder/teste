@@ -688,7 +688,17 @@
       this._acoesPagamento(g);
       // O chat rola pro fim a cada mensagem, e isso cortava o topo da moldura de pagamento.
       // Aqui ele volta pro começo dela, que é por onde o cliente precisa continuar.
-      requestAnimationFrame(() => { if (w.isConnected) w.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
+      requestAnimationFrame(() => {
+        if (!w.isConnected) return;
+        w.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        // No celular o menu do site fica fixo no topo e cobriria justamente a barra com o endereço
+        // do provedor, que é o que a pessoa precisa conferir antes de digitar o CPF.
+        setTimeout(() => {
+          if (!w.isConnected) return;
+          const folga = 72, t = w.getBoundingClientRect().top;
+          if (t < folga) window.scrollBy({ top: t - folga, behavior: 'smooth' });
+        }, 450);
+      });
       this._pollN = 0; this._falhasPoll = 0;
       this._agendarPoll(g);
     }
