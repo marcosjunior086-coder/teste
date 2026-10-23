@@ -1223,7 +1223,10 @@
     // Tentativas espaçadas: a página do voucher costuma ficar pronta em poucos segundos, e depois
     // de um minuto sem nada é porque não vem mesmo (outro meio de pagamento, mudança do provedor).
     async _buscarPix(g, w, url) {
-      for (const espera of [2500, 4000, 7000, 12000, 20000]) {
+      this._setStt('Gerando o código PIX…');
+      // Até dois minutos: o provedor as vezes demora pra publicar a página do voucher, e desistir
+      // cedo demais deixa o cliente sem o código por nada.
+      for (const espera of [2500, 4000, 7000, 10000, 15000, 20000, 30000, 30000]) {
         await pausa(espera);
         if (!this._ok(g) || this._step !== 'AGUARDANDO_PAGAMENTO' || !w.isConnected) return;
         const r = await this._chamar('/pix', { order_no: this._orderNo, ticket: this._ticket });
@@ -1231,8 +1234,11 @@
         const pix = r.ok && typeof r.json.pix === 'string' && r.json.pix.length < 900 && crcPixOk(r.json.pix) ? r.json.pix : '';
         if (!pix) continue;
         this._trocarPorPix(w, pix, url);
+        this._setStt('Aguardando o pagamento…');
         return;
       }
+      // Não veio: o botão do provedor continua valendo, e o status volta ao normal.
+      if (this._ok(g) && this._step === 'AGUARDANDO_PAGAMENTO' && w.isConnected) this._setStt('Aguardando o pagamento…');
     }
 
     // Troca o botão do provedor pela tela do PIX, sem mexer no resto da conversa.
