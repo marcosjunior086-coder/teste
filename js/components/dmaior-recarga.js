@@ -7,7 +7,8 @@
 //
 //  Fluxo (máquina de estados):
 //    AGUARDANDO_ID → VALIDANDO → CONFIRMANDO_PERFIL → ESCOLHENDO_DIAMANTES
-//    → CRIANDO_ORDEM → GERANDO_PAGAMENTO → AGUARDANDO_PAGAMENTO → CONCLUIDO | FALHOU
+//    → CRIANDO_ORDEM → DADOS_DO_PAGADOR → GERANDO_PAGAMENTO → AGUARDANDO_PAGAMENTO
+//    → CONCLUIDO | FALHOU
 //
 //  O chat não pede nome, CPF nem WhatsApp: quem pede é o provedor, na página dele. Aqui o cliente
 //  só informa o ID do Kwai e a quantidade.
@@ -63,6 +64,51 @@
       if (lista.length) localStorage.setItem(CHAVE_IDS, JSON.stringify(lista));
       else localStorage.removeItem(CHAVE_IDS);
     } catch (_) { /* idem */ }
+  }
+
+  // ── NOME E DOCUMENTO DO PAGADOR ────────────────────────────────────────────
+  // Mesma conferência que o Worker faz, repetida aqui só pra avisar o cliente antes de enviar: quem
+  // decide é sempre o Worker. Nada disso é guardado — nem no aparelho, nem no evento do painel.
+  function digitoCpfOk(d) {
+    if (d.split('').every(c => c === d[0])) return false;            // 111.111.111-11 e afins fecham na conta
+    for (const [ate, peso] of [[9, 10], [10, 11]]) {
+      let soma = 0;
+      for (let i = 0; i < ate; i++) soma += Number(d[i]) * (peso - i);
+      if ((soma * 10) % 11 % 10 !== Number(d[ate])) return false;
+    }
+    return true;
+  }
+  function digitoCnpjOk(d) {
+    if (d.split('').every(c => c === d[0])) return false;
+    const pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    for (const ate of [12, 13]) {
+      const p = pesos.slice(pesos.length - ate);
+      let soma = 0;
+      for (let i = 0; i < ate; i++) soma += Number(d[i]) * p[i];
+      const resto = soma % 11;
+      if ((resto < 2 ? 0 : 11 - resto) !== Number(d[ate])) return false;
+    }
+    return true;
+  }
+  function documentoValido(v) {
+    const d = String(v || '').replace(/\D/g, '');
+    if (d.length === 11) return digitoCpfOk(d);
+    if (d.length === 14) return digitoCnpjOk(d);
+    return false;
+  }
+  function nomeValido(v) {
+    const n = String(v || '').replace(/\s+/g, ' ').trim();
+    return n.length >= 2 && n.length <= 50;
+  }
+  // Vira 000.000.000-00 enquanto é CPF e 00.000.000/0000-00 quando passa de 11 dígitos.
+  function formatarDocumento(v) {
+    const d = String(v || '').replace(/\D/g, '').slice(0, 14);
+    if (d.length <= 11) {
+      return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+              .replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2');
+    }
+    return d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2');
   }
 
   const ICONES = {
@@ -271,6 +317,12 @@
         .preco strong{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:1.35rem; color:var(--c-cyan); }
         .small{ font-size:.75rem; color:var(--c-muted); line-height:1.4; }
         .small .ico{ margin-right:3px; }
+        /* Resumo do pedido, antes de pedir nome e documento */
+        .resumo{ display:grid; gap:6px; padding:10px 12px; border-radius:12px; background:var(--c-solid); border:1px solid var(--c-border); }
+        .resumo div{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+        .resumo span{ font-size:.76rem; color:var(--c-sub); }
+        .resumo strong{ font-size:.9rem; color:var(--c-text); font-weight:600; text-align:right; word-break:break-all; }
+
         .inline-erro{ font-size:.8rem; color:var(--c-red); line-height:1.35; }
         .inline-erro[hidden]{ display:none; }
 
@@ -403,7 +455,7 @@
       if (corpo.kwai_id) c.kwai_id = corpo.kwai_id;
       if (corpo.diamantes) c.diamantes = corpo.diamantes;
       if (corpo.pay_way) c.pay_way = corpo.pay_way;
-      const pessoais = ['nome', 'cpf', 'whatsapp'].filter(k => corpo[k]);
+      const pessoais = ['nome', 'cpf', 'documento', 'whatsapp'].filter(k => corpo[k]);
       if (pessoais.length) c.campos_enviados = pessoais;
       return c;
     }
@@ -424,7 +476,7 @@
         }
       } catch (_) { json = null; }
       const res = { ok: !!(json && json.ok), status, json: json || {}, rede: !json };
-      this.dispatchEvent(new CustomEvent('dmaior-recarga:req', { detail: { rota, status, ms: Math.round(performance.now() - t0), ok: res.ok, mock: this._mock, corpo: this._resumo(corpo), resposta: res.ok ? undefined : (json && json.erro) || 'sem resposta' } }));
+      this.dispatchEvent(new CustomEvent('dmaior-recarga:req', { detail: { rota, status, ms: Math.round(performance.now() - t0), ok: res.ok, mock: this._mock, corpo: this._resumo(corpo), resposta: res.ok ? undefined : (res.rede ? 'sem resposta' : 'erro ' + status) } }));
       return res;
     }
     _msgErro(r, padrao) {
@@ -449,8 +501,14 @@
         return R(200, { ok: true, order_no: ordem, ticket: tk(ordem) });
       }
       if (c.ticket !== tk(c.order_no)) return R(403, { ok: false, erro: 'Pedido inválido ou expirado. Comece uma nova recarga.' });
-      // Na vida real o pagamento é sempre uma página do provedor (verificado em 2026-10-22).
-      if (rota === '/pay-link') return R(200, { ok: true, order_no: c.order_no, pay_url: 'https://cashier-hub.enjoypayment.com/pix-p01/reference/MOCK/teste' });
+      if (rota === '/pay-link') {
+        // Mesmas recusas do Worker, pra dar pra ver a tela de erro sem rede. "Recusado" como nome
+        // imita o provedor rejeitando dados que passaram na nossa conferência.
+        if (!nomeValido(c.nome)) return R(400, { ok: false, erro: 'Informe o nome do titular da conta que vai pagar.' });
+        if (!documentoValido(c.documento)) return R(400, { ok: false, erro: 'CPF ou CNPJ inválido. Confira os números e tente de novo.' });
+        if (/recusad/i.test(c.nome)) return R(409, { ok: false, erro: 'O titular não confere com a conta do PIX.' });
+        return R(200, { ok: true, order_no: c.order_no, pay_url: 'https://pay.dlocal.com/APM/MOCK/teste' });
+      }
       if (rota === '/check-status') return R(200, { ok: true, status: this._mockStatus });
       return R(404, { ok: false, erro: 'Rota inexistente' });
     }
@@ -611,23 +669,96 @@
       }
       this._orderNo = r.json.order_no;
       this._ticket = String(r.json.ticket || '');
-      this._pedirPagamento();
+      this._dadosDoPagador();
     }
 
-    // ── passo 4: link do pagamento ───────────────────────────────
-    // Nome e CPF são pedidos pelo provedor, na página dele. Aqui não coletamos nada disso.
-    async _pedirPagamento() {
+    // ── passo 4: nome e documento de quem vai pagar ──────────────
+    // O provedor exige o titular da conta que paga o PIX. Esta tela existia no site do parceiro;
+    // trazê-la pra cá poupa duas telas do cliente. O que é digitado aqui vai direto pro provedor
+    // pela nossa API: não é guardado no aparelho, não vai pro evento do painel e some com a conversa.
+    _dadosDoPagador() {
+      const g = this._gen;
+      this._step = 'DADOS_DO_PAGADOR';
+      // Pedir de novo tira da tela a tentativa anterior, com o que estava digitado nela.
+      if (this._wDados?.isConnected) this._wDados.remove();
+      this._add('bot', `Pedido <strong>#${esc(this._orderNo)}</strong> criado. Agora preciso dos dados de quem vai pagar:`);
+      const w = this._bloco(`
+        <div class="lbl">Resumo do pedido</div>
+        <div class="resumo">
+          <div><span>Diamantes</span><strong>${num(this._diamantes)}</strong></div>
+          <div><span>ID do Kwai</span><strong>${esc(this._perfil.kwai_id)}</strong></div>
+          ${this._valor ? `<div><span>Total a pagar</span><strong>${brl(this._valor)}</strong></div>` : ''}
+        </div>
+        <label class="field"><span>Nome do titular</span><input data-nome autocomplete="name" maxlength="50" placeholder="Como está na conta do PIX"></label>
+        <label class="field"><span>CPF ou CNPJ</span><input data-doc inputmode="numeric" autocomplete="off" maxlength="18" placeholder="000.000.000-00"></label>
+        <div class="inline-erro" data-erro role="alert" hidden></div>
+        <p class="small">${ico('lock')}Precisa ser do titular da conta que vai pagar, senão o provedor recusa. Usamos só pra gerar este PIX: enviamos para a Rocket Bunny e para o provedor de pagamento, e não guardamos nada no site.</p>
+        <button type="button" class="btn full" data-ir disabled>Gerar PIX</button>`);
+
+      this._wDados = w;
+      const nomeEl = w.querySelector('[data-nome]');
+      const docEl = w.querySelector('[data-doc]');
+      const erroEl = w.querySelector('[data-erro]');
+      const ir = w.querySelector('[data-ir]');
+
+      const conferir = () => {
+        erroEl.hidden = true;
+        ir.disabled = !(nomeValido(nomeEl.value) && documentoValido(docEl.value));
+      };
+      nomeEl.addEventListener('input', conferir);
+      docEl.addEventListener('input', () => {
+        // Desde 2026 existe CNPJ com letras, mas o provedor ainda só aceita número. Apagar a letra
+        // sem dizer nada faria a pessoa achar que o teclado falhou.
+        const tinhaLetra = /[a-z]/i.test(docEl.value);
+        docEl.value = formatarDocumento(docEl.value);
+        if (tinhaLetra) {
+          erroEl.textContent = 'Por enquanto o provedor só aceita CPF e CNPJ com números.';
+          erroEl.hidden = false;
+          ir.disabled = !(nomeValido(nomeEl.value) && documentoValido(docEl.value));
+          return;
+        }
+        conferir();
+      });
+      // Mostrar o erro só quando a pessoa sai do campo evita acusar erro enquanto ela digita.
+      docEl.addEventListener('blur', () => {
+        const d = docEl.value.replace(/\D/g, '');
+        if (!d || documentoValido(d)) return;
+        erroEl.textContent = d.length === 11 || d.length === 14
+          ? 'Esse CPF/CNPJ não confere. Veja se não trocou algum número.'
+          : 'O CPF tem 11 números e o CNPJ, 14.';
+        erroEl.hidden = false;
+      });
+      for (const el of [nomeEl, docEl]) {
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!ir.disabled) ir.click(); } });
+      }
+      ir.addEventListener('click', () => {
+        if (ir.disabled || !this._ok(g)) return;
+        const nome = nomeEl.value.replace(/\s+/g, ' ').trim();
+        const documento = docEl.value.replace(/\D/g, '');
+        // O bloco inteiro sai da tela: campo desabilitado continua guardando o que foi digitado, e
+        // o shadow DOM é aberto — qualquer script da página leria dali. Na conversa não fica nem o
+        // nome, só o aviso de que os dados seguiram.
+        w.remove();
+        this._add('user', 'Dados enviados');
+        this._pedirPagamento(nome, documento);
+      });
+      nomeEl.focus({ preventScroll: true });
+    }
+
+    // ── passo 5: endereço do pagamento ──────────────────────────
+    // Nome e documento chegam por parâmetro e morrem aqui: nunca viram propriedade do componente,
+    // justamente pra não sobrar nada legível depois que o pagamento é gerado.
+    async _pedirPagamento(nome, documento) {
       const g = this._gen;
       this._step = 'GERANDO_PAGAMENTO';
-      this._add('bot', `Pedido <strong>#${esc(this._orderNo)}</strong> criado: ${num(this._diamantes)} diamantes${this._valor ? ` · ${brl(this._valor)}` : ''}.`);
       const dig = this._digitando();
-      const r = await this._chamar('/pay-link', { order_no: this._orderNo, ticket: this._ticket });
+      const r = await this._chamar('/pay-link', { order_no: this._orderNo, ticket: this._ticket, nome, documento });
       dig.remove();
       if (!this._ok(g)) return;
       if (!r.ok || !r.json.pay_url) {
         this._add('erro', `${ico('alert')} ${esc(this._msgErro(r, 'Não foi possível abrir o pagamento agora.'))}`);
         this._botoes([
-          { html: `${ico('refresh')} Tentar de novo`, fn: () => { if (this._ok(g)) this._pedirPagamento(); } },
+          { html: `${ico('refresh')} Informar de novo`, fn: () => { if (this._ok(g)) this._dadosDoPagador(); } },
           { html: 'Recomeçar', cls: 'sec', fn: () => this.reiniciar() },
         ]);
         return;
@@ -652,15 +783,14 @@
         ]);
         return;
       }
-      this._add('bot', 'Tudo pronto. Para pagar, abra a página segura do provedor:');
-      // O pagamento NÃO abre numa moldura aqui dentro, e isso é de propósito: a página do parceiro
-      // manda o cliente pra outro domínio (pay.dlocal.com) depois do nome e do CPF, e de fora do
-      // frame não dá pra acompanhar essa troca — a barra que mostrasse o endereço continuaria
-      // dizendo o host antigo justo na hora de digitar o CPF. Em outra aba quem mostra o endereço
-      // é o navegador, que não mente. O chat continua consultando o status e avisa aqui quando cair.
+      this._add('bot', 'Tudo pronto! Agora é só pagar o PIX:');
+      // A tela do PIX abre em outra aba, não numa moldura aqui dentro, e isso é de propósito: o
+      // provedor pode trocar de domínio no meio do caminho e, de fora do frame, não dá pra
+      // acompanhar — a barra que mostrasse o endereço acabaria mentindo bem na hora de pagar. Em
+      // outra aba quem mostra o endereço é o navegador. O chat segue consultando e avisa aqui.
       const w = this._bloco(`
-        <a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir pagamento</a>
-        <p class="small">${ico('lock')}Abre em outra aba, no site do provedor de pagamento (<strong>${esc(hostDe(url))}</strong>). Lá você confirma o pedido, informa <strong>nome e CPF</strong> e paga o PIX. Confira o endereço e o valor antes de pagar — o resultado aparece aqui.</p>
+        <a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Pagar com PIX</a>
+        <p class="small">${ico('lock')}Abre em outra aba, no provedor de pagamento (<strong>${esc(hostDe(url))}</strong>), com o código PIX e o QR. Confira o valor antes de pagar — o resultado aparece aqui.</p>
         <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
       this._wPag = w;
       this._focarProx = true;           // o formulário sumiu: foco vai pro "Já paguei"
