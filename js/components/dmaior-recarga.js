@@ -467,6 +467,9 @@
             .replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2');
   }
 
+  // Payload com CRC válido, igual ao que o dLocal devolve, só pro modo simulado.
+  const PIX_MOCK = '00020101021226870014br.gov.bcb.pix2565qrcode.dlocal.com/qr/25021356/v1/2c52ff906dfe4f8da75bbf071433c80a5204000053039865802BR5906DLOCAL6009SAO PAULO62070503***6304FE8A';
+
   const ICONES = {
     gem: '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
     send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
@@ -567,6 +570,7 @@
       this._perfil = null; this._diamantes = 0; this._valor = null; this._orderNo = null; this._ticket = '';
       this._pedidoSeq++; this._wPag = null; this._acoes = null; this._humor('neutro');
       this._mockStatus = 'AGUARDANDO';
+      this._mockPixN = 0;
       if (this._log) this._log.innerHTML = '';
       this._boasVindas(true);
     }
@@ -871,7 +875,12 @@
         if (/recusad/i.test(c.nome)) return R(409, { ok: false, erro: 'O titular não confere com a conta do PIX.' });
         return R(200, { ok: true, order_no: c.order_no, pay_url: 'https://pay.dlocal.com/apm-frontend/voucher/MOCK',
           // Payload com CRC válido, igual ao que o dLocal devolve.
-          pix: /sempix/i.test(c.nome) ? '' : '00020101021226870014br.gov.bcb.pix2565qrcode.dlocal.com/qr/25021356/v1/2c52ff906dfe4f8da75bbf071433c80a5204000053039865802BR5906DLOCAL6009SAO PAULO62070503***6304FE8A' });
+          pix: /sempix|tardio/i.test(c.nome) ? '' : PIX_MOCK });
+      }
+      // "tardio" no nome faz o código só aparecer na 2ª consulta, pra exercitar a troca de tela.
+      if (rota === '/pix') {
+        this._mockPixN = (this._mockPixN || 0) + 1;
+        return R(200, { ok: true, order_no: c.order_no, pix: this._mockPixN >= 2 ? PIX_MOCK : '' });
       }
       if (rota === '/check-status') return R(200, { ok: true, status: this._mockStatus });
       return R(404, { ok: false, erro: 'Rota inexistente' });
@@ -1168,41 +1177,83 @@
         <p class="small">${ico('lock')}Abre em outra aba, no provedor de pagamento (<strong>${esc(hostDe(url))}</strong>), com o código PIX e o QR. Confira o valor antes de pagar — o resultado aparece aqui.</p>
         <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
 
-      const copiar = w.querySelector('[data-copiar]');
-      if (copiar) {
-        copiar.addEventListener('click', async () => {
-          const antes = copiar.innerHTML;
-          let deu = false, selecionou = false;
-          try { await navigator.clipboard.writeText(pix); deu = true; } catch (_) {
-            // Navegador sem permissão de área de transferência (ou página sem https): deixa o código
-            // selecionado pra pessoa copiar na mão, que é o que ela faria de qualquer jeito.
-            const el = w.querySelector('[data-pix]');
-            const sel = this.shadowRoot.getSelection ? this.shadowRoot.getSelection() : window.getSelection();
-            if (el && sel) {
-              try {
-                const faixa = document.createRange();
-                faixa.selectNodeContents(el);
-                sel.removeAllRanges();
-                sel.addRange(faixa);
-                el.focus({ preventScroll: true });
-                selecionou = String(sel).trim().startsWith('0002');
-              } catch (_) { selecionou = false; }
-            }
-          }
-          // Sem área de transferência e sem seleção, o jeito é a pessoa marcar o código na mão —
-          // e aí não adianta anunciar o que não aconteceu.
-          copiar.innerHTML = deu ? `${ico('check')} Código copiado`
-            : selecionou ? `${ico('copy')} Código selecionado — agora é só copiar`
-            : `${ico('copy')} Marque o código acima e copie`;
-          setTimeout(() => { if (copiar.isConnected) copiar.innerHTML = antes; }, 3200);
-        });
-      }
+      this._ligarCopiar(w, pix);
       this._wPag = w;
       this._focarProx = true;           // o formulário sumiu: foco vai pro "Já paguei"
       this._acoesPagamento(g);
+      // Sem o código, o provedor pode só não tê-lo publicado ainda: o chat volta a perguntar por
+      // alguns instantes e troca o botão pela tela do PIX assim que ele aparecer.
+      if (!pix) this._buscarPix(g, w, url);
       this._pollN = 0; this._falhasPoll = 0;
       this._agendarPoll(g);
     }
+    // Copiar o código: pela área de transferência quando o navegador deixa, senão deixando o texto
+    // selecionado. Serve tanto pra tela que já nasce com o PIX quanto pra que o recebe depois.
+    _ligarCopiar(w, pix) {
+      const copiar = w.querySelector('[data-copiar]');
+      if (!copiar) return;
+      copiar.addEventListener('click', async () => {
+        const antes = copiar.innerHTML;
+        let deu = false, selecionou = false;
+        try { await navigator.clipboard.writeText(pix); deu = true; } catch (_) {
+          // Navegador sem permissão de área de transferência (ou página sem https): deixa o código
+          // selecionado pra pessoa copiar na mão, que é o que ela faria de qualquer jeito.
+          const el = w.querySelector('[data-pix]');
+          const sel = this.shadowRoot.getSelection ? this.shadowRoot.getSelection() : window.getSelection();
+          if (el && sel) {
+            try {
+              const faixa = document.createRange();
+              faixa.selectNodeContents(el);
+              sel.removeAllRanges();
+              sel.addRange(faixa);
+              el.focus({ preventScroll: true });
+              selecionou = String(sel).trim().startsWith('0002');
+            } catch (_) { selecionou = false; }
+          }
+        }
+        // Sem área de transferência e sem seleção, o jeito é a pessoa marcar o código na mão —
+        // e aí não adianta anunciar o que não aconteceu.
+        copiar.innerHTML = deu ? `${ico('check')} Código copiado`
+          : selecionou ? `${ico('copy')} Código selecionado — agora é só copiar`
+          : `${ico('copy')} Marque o código acima e copie`;
+        setTimeout(() => { if (copiar.isConnected) copiar.innerHTML = antes; }, 3200);
+      });
+    }
+
+    // Tentativas espaçadas: a página do voucher costuma ficar pronta em poucos segundos, e depois
+    // de um minuto sem nada é porque não vem mesmo (outro meio de pagamento, mudança do provedor).
+    async _buscarPix(g, w, url) {
+      for (const espera of [2500, 4000, 7000, 12000, 20000]) {
+        await pausa(espera);
+        if (!this._ok(g) || this._step !== 'AGUARDANDO_PAGAMENTO' || !w.isConnected) return;
+        const r = await this._chamar('/pix', { order_no: this._orderNo, ticket: this._ticket });
+        if (!this._ok(g) || this._step !== 'AGUARDANDO_PAGAMENTO' || !w.isConnected) return;
+        const pix = r.ok && typeof r.json.pix === 'string' && r.json.pix.length < 900 && crcPixOk(r.json.pix) ? r.json.pix : '';
+        if (!pix) continue;
+        this._trocarPorPix(w, pix, url);
+        return;
+      }
+    }
+
+    // Troca o botão do provedor pela tela do PIX, sem mexer no resto da conversa.
+    _trocarPorPix(w, pix, url) {
+      const matriz = qrMatriz(pix);
+      const svg = matriz ? qrSvg(matriz) : '';
+      const stt = w.querySelector('[data-stt]');
+      w.querySelectorAll('a.btn, .small').forEach(el => el.remove());
+      const bloco = document.createElement('div');
+      bloco.style.display = 'contents';
+      bloco.innerHTML = `
+        ${svg ? `<div class="qr" style="--mods:${matriz.length + 8}"><img alt="QR Code do PIX" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}"></div>` : ''}
+        <div class="lbl">PIX copia e cola</div>
+        <div class="code" tabindex="0" data-pix>${esc(pix)}</div>
+        <button type="button" class="btn full" data-copiar>${ico('copy')} Copiar código PIX</button>
+        <p class="small">${ico('lock')}Abra o app do seu banco, escolha pagar com PIX e cole o código — ou leia o QR por outro aparelho. Assim que o pagamento cair, eu aviso aqui.</p>
+        ${url ? `<a class="pagprov" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir a página do provedor</a>` : ''}`;
+      if (stt) w.insertBefore(bloco, stt); else w.appendChild(bloco);
+      this._ligarCopiar(w, pix);
+    }
+
     _acoesPagamento(g) {
       this._acoes = this._botoes([
         { html: `${ico('refresh')} Já paguei`, fn: () => { this._acoesPagamento(g); this._checar(g, true); } },
