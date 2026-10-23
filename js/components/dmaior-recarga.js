@@ -691,7 +691,8 @@
       const w = this._wPag;
       if (!w || !w.isConnected) return;
       this._setStt(texto, true);
-      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .lbl').forEach(el => el.remove());
+      // Sai tudo que só servia pra pagar: link, código e o aviso de como pagar no provedor.
+      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .lbl, .small').forEach(el => el.remove());
       this._acoes?.remove();
       this._wPag = null;
     }
