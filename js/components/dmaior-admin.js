@@ -3371,6 +3371,24 @@ class DimaiorAdmin extends HTMLElement {
     else this._toast(d?.erro||'Falha ao consultar a Kwai','err');
     this._carregarViolacoes();
   }
+  // Pergunta UM UID direto pra Kwai (o campo "Nome ou ID de streamer" da tela
+  // deles acha streamer que não vem na lista geral — banido, fora da agência).
+  // Mostra o diagnóstico no lugar do "Última busca", pra dar pra diferenciar
+  // "a Kwai não conhece esse UID" de "conhece e não tem violação".
+  async _verificarViolacoesUid(){
+    const s=this.shadowRoot, b=s.getElementById('btnViolUid'), info=s.getElementById('violSync');
+    const uid=(s.getElementById('violBusca')?.value||'').trim().replace(/^@/,'');
+    if(!/^[1-9]\d{4,19}$/.test(uid)){this._toast('Escreva o UID (só números) no campo de busca','err');return;}
+    if(b){b.disabled=true;b.innerHTML=`${this._ico('refresh',13)} Consultando...`;}
+    const d=await this._api('POST',`/admin/violacoes/verificar-uid?uid=${encodeURIComponent(uid)}`);
+    if(b){b.disabled=false;b.innerHTML=`${this._ico('search',13)} Consultar UID na Kwai`;}
+    if(!d?.ok){this._toast(d?.erro||'Falha ao consultar a Kwai','err');return;}
+    this._toast(d.novas?`${d.novas} violação(ões) nova(s) de ${uid}`:(d.total?`${d.total} violação(ões) de ${uid} (nada novo)`:`A Kwai não devolveu violação pro UID ${uid}`));
+    if(s.getElementById('violDias')) s.getElementById('violDias').value='tudo';
+    if(s.getElementById('violNovas')) s.getElementById('violNovas').checked=false;
+    await this._carregarViolacoes(); // recarrega primeiro: ele reescreve o #violSync
+    if(info) info.innerHTML=`UID ${this._esc(uid)}: ${d.total} violação(ões) · ${d.na_lista?'apareceu':'<b>NÃO apareceu</b>'} na lista da Kwai · ${d.itens_historico??0} no histórico · sessões: ${this._esc((d.sessoes||[]).join(', ')||'—')}${(d.avisos||[]).length?` · <span style="color:var(--warn)">${this._esc(d.avisos.join(' | '))}</span>`:''}`;
+  }
   async _marcarViolacoesVistas(chaves){
     const d=await this._api('POST','/admin/violacoes/vistas',chaves?{chaves}:{todas:true});
     if(d?.ok){this._toast(chaves?'Marcada como conferida':'Todas marcadas como conferidas');this._carregarViolacoes();}
@@ -4655,6 +4673,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAtuViol')?.addEventListener('click',()=>this._carregarViolacoes());
     s.getElementById('btnSyncViol')?.addEventListener('click',()=>this._sincronizarViolacoes());
     s.getElementById('btnVistasViol')?.addEventListener('click',()=>this._marcarViolacoesVistas());
+    s.getElementById('btnViolUid')?.addEventListener('click',()=>this._verificarViolacoesUid());
     ['violDias','violStatus','violNovas'].forEach(id=>s.getElementById(id)?.addEventListener('change',()=>this._carregarViolacoes()));
     s.getElementById('violBusca')?.addEventListener('keydown',e=>{if(e.key==='Enter')this._carregarViolacoes();});
     s.getElementById('btnAtualizarRosterStatus')?.addEventListener('click',()=>this._atualizarRosterStatus());
@@ -9036,6 +9055,7 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead"><div class="btitulo">${this._ico('warning',14)} Violações dos streamers</div>
                   <div class="bacoes" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                     <div class="busca">${this._ico('search',12)}<input id="violBusca" type="text" placeholder="Nome, @ ou UID (Enter)" style="width:170px"/></div>
+                    ${this._sub?'':`<button class="btn btn-o" id="btnViolUid" title="Pergunta esse UID direto pra Kwai, mesmo que ele não venha na lista geral">${this._ico('search',13)} Consultar UID na Kwai</button>`}
                     <select id="violDias" class="viol-sel"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option><option value="tudo">Tudo</option></select>
                     <select id="violStatus" class="viol-sel"><option value="">Todos os status</option><option value="2">Banido</option><option value="3">Banido temporariamente</option><option value="1">Ativado</option><option value="4">Cancelado</option><option value="0">Solicitando</option><option value="5">Recusado</option><option value="-1">Sem permissão</option></select>
                     <label style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--t2)"><input type="checkbox" id="violNovas"/> Só não conferidas</label>
