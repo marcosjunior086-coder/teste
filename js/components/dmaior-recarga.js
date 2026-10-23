@@ -66,6 +66,362 @@
     } catch (_) { /* idem */ }
   }
 
+  // ── QR CODE ────────────────────────────────────────────────────────────────
+  // Gerador próprio (modo byte, correção M, versões 1 a 20 — um payload PIX tem ~190 bytes). É
+  // escrito aqui de propósito: pedir a imagem do QR a um serviço de fora mandaria o código do
+  // pagamento pra um terceiro. Assim ele não sai do aparelho de quem paga.
+  // Conferido lendo de volta com um decodificador de verdade (jsQR) em 620 textos, versões 1 a 19.
+
+  const EC_M = {
+    1: [10, 1, 0], 2: [16, 1, 0], 3: [26, 1, 0], 4: [18, 2, 0], 5: [24, 2, 0],
+    6: [16, 4, 0], 7: [18, 4, 0], 8: [22, 2, 2], 9: [22, 3, 2], 10: [26, 4, 1],
+    11: [30, 1, 4], 12: [22, 6, 2], 13: [22, 8, 1], 14: [24, 4, 5], 15: [24, 5, 5],
+    16: [28, 7, 3], 17: [28, 10, 1], 18: [26, 9, 4], 19: [26, 3, 11], 20: [26, 3, 13],
+  };
+
+  // Total de códigos (dados + correção) por versão.
+  const TOTAL_CODEWORDS = {
+    1: 26, 2: 44, 3: 70, 4: 100, 5: 134, 6: 172, 7: 196, 8: 242, 9: 292, 10: 346,
+    11: 404, 12: 466, 13: 532, 14: 581, 15: 655, 16: 733, 17: 815, 18: 901, 19: 991, 20: 1085,
+  };
+
+  // Onde ficam os centros dos padrões de alinhamento, por versão.
+  const ALINHAMENTO = {
+    1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30], 6: [6, 34],
+    7: [6, 22, 38], 8: [6, 24, 42], 9: [6, 26, 46], 10: [6, 28, 50], 11: [6, 30, 54],
+    12: [6, 32, 58], 13: [6, 34, 62], 14: [6, 26, 46, 66], 15: [6, 26, 48, 70],
+    16: [6, 26, 50, 74], 17: [6, 30, 54, 78], 18: [6, 30, 56, 82], 19: [6, 30, 58, 86],
+    20: [6, 34, 62, 90],
+  };
+
+  // ── aritmética do corpo de Galois GF(256), usada pela correção de erros ──────
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (() => {
+    let x = 1;
+    for (let i = 0; i < 255; i++) {
+      EXP[i] = x;
+      LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;            // polinômio do QR
+    }
+    for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+
+  const mul = (a, b) => (a === 0 || b === 0 ? 0 : EXP[LOG[a] + LOG[b]]);
+
+  // Polinômio gerador para n códigos de correção.
+  function gerador(n) {
+    let g = [1];
+    for (let i = 0; i < n; i++) {
+      const novo = new Array(g.length + 1).fill(0);
+      for (let j = 0; j < g.length; j++) {
+        novo[j] ^= g[j];
+        novo[j + 1] ^= mul(g[j], EXP[i]);
+      }
+      g = novo;
+    }
+    return g;
+  }
+
+  // Resto da divisão dos dados pelo gerador: são esses bytes que permitem reconstruir o código.
+  function correcao(dados, n) {
+    const g = gerador(n);
+    const resto = new Array(n).fill(0);
+    for (const byte of dados) {
+      const fator = byte ^ resto[0];
+      resto.shift();
+      resto.push(0);
+      if (fator !== 0) for (let i = 0; i < n; i++) resto[i] ^= mul(g[i + 1], fator);
+    }
+    return resto;
+  }
+
+  // ── máscara e informação de formato ─────────────────────────────────────────
+  const MASCARAS = [
+    (l, c) => (l + c) % 2 === 0,
+    l => l % 2 === 0,
+    (l, c) => c % 3 === 0,
+    (l, c) => (l + c) % 3 === 0,
+    (l, c) => (Math.floor(l / 2) + Math.floor(c / 3)) % 2 === 0,
+    (l, c) => ((l * c) % 2) + ((l * c) % 3) === 0,
+    (l, c) => (((l * c) % 2) + ((l * c) % 3)) % 2 === 0,
+    (l, c) => (((l + c) % 2) + ((l * c) % 3)) % 2 === 0,
+  ];
+
+  function bitsDeFormato(mascara) {
+    // 0b00 = nível M. 5 bits de dado, 10 de correção BCH, e no fim o XOR fixo da norma.
+    const dados = (0b00 << 3) | mascara;
+    let v = dados << 10;
+    for (let i = 4; i >= 0; i--) if (v & (1 << (i + 10))) v ^= 0b10100110111 << i;
+    return ((dados << 10) | v) ^ 0b101010000010010;
+  }
+
+  function bitsDeVersao(versao) {
+    // Só a partir da versão 7 o código carrega essa informação.
+    let v = versao << 12;
+    for (let i = 5; i >= 0; i--) if (v & (1 << (i + 12))) v ^= 0b1111100100101 << i;
+    return (versao << 12) | v;
+  }
+
+  // ── montagem da matriz ──────────────────────────────────────────────────────
+  function moldura(versao) {
+    const n = versao * 4 + 17;
+    const m = Array.from({ length: n }, () => new Array(n).fill(null));   // null = ainda livre
+    const fixo = Array.from({ length: n }, () => new Array(n).fill(false));
+
+    const marcar = (l, c, v) => { m[l][c] = v; fixo[l][c] = true; };
+
+    // Os três alvos dos cantos, com a borda clara em volta.
+    for (const [li, ci] of [[0, 0], [0, n - 7], [n - 7, 0]]) {
+      for (let l = -1; l <= 7; l++) {
+        for (let c = -1; c <= 7; c++) {
+          const L = li + l, C = ci + c;
+          if (L < 0 || C < 0 || L >= n || C >= n) continue;
+          const borda = l === -1 || l === 7 || c === -1 || c === 7;
+          const anel = l === 0 || l === 6 || c === 0 || c === 6;
+          const miolo = l >= 2 && l <= 4 && c >= 2 && c <= 4;
+          marcar(L, C, !borda && (anel || miolo));
+        }
+      }
+    }
+
+    // As duas linhas de sincronismo.
+    for (let i = 8; i < n - 8; i++) {
+      marcar(6, i, i % 2 === 0);
+      marcar(i, 6, i % 2 === 0);
+    }
+
+    // Padrões de alinhamento, menos onde esbarrariam nos alvos dos cantos.
+    const centros = ALINHAMENTO[versao];
+    for (const l of centros) {
+      for (const c of centros) {
+        if ((l <= 7 && c <= 7) || (l <= 7 && c >= n - 8) || (l >= n - 8 && c <= 7)) continue;
+        for (let dl = -2; dl <= 2; dl++) {
+          for (let dc = -2; dc <= 2; dc++) {
+            marcar(l + dl, c + dc, Math.max(Math.abs(dl), Math.abs(dc)) !== 1);
+          }
+        }
+      }
+    }
+
+    // Lugares reservados para formato e versão: valor entra depois, mas já saem do caminho dos dados.
+    for (let i = 0; i < 9; i++) {
+      if (m[8][i] === null) marcar(8, i, false);
+      if (m[i][8] === null) marcar(i, 8, false);
+    }
+    for (let i = 0; i < 8; i++) {
+      if (m[8][n - 1 - i] === null) marcar(8, n - 1 - i, false);
+      if (m[n - 1 - i][8] === null) marcar(n - 1 - i, 8, false);
+    }
+    marcar(n - 8, 8, true);                        // módulo escuro, sempre aceso
+    if (versao >= 7) {
+      for (let i = 0; i < 18; i++) {
+        const l = Math.floor(i / 3), c = i % 3;
+        if (m[l][n - 11 + c] === null) marcar(l, n - 11 + c, false);
+        if (m[n - 11 + c][l] === null) marcar(n - 11 + c, l, false);
+      }
+    }
+    return { m, fixo, n };
+  }
+
+  // Penalidade das quatro regras da norma: quanto menor, mais fácil de ler.
+  function penalidade(m, n) {
+    let p = 0;
+    const em = (l, c) => m[l][c] === true;
+
+    for (let l = 0; l < n; l++) {
+      for (const horizontal of [true, false]) {
+        let run = 1;
+        for (let i = 1; i < n; i++) {
+          const a = horizontal ? em(l, i) : em(i, l);
+          const b = horizontal ? em(l, i - 1) : em(i - 1, l);
+          if (a === b) { run++; continue; }
+          if (run >= 5) p += run - 2;
+          run = 1;
+        }
+        if (run >= 5) p += run - 2;
+      }
+    }
+
+    for (let l = 0; l < n - 1; l++) {
+      for (let c = 0; c < n - 1; c++) {
+        const v = em(l, c);
+        if (v === em(l, c + 1) && v === em(l + 1, c) && v === em(l + 1, c + 1)) p += 3;
+      }
+    }
+
+    // Sequência que imita o alvo dos cantos, nas duas direções.
+    const alvo = [true, false, true, true, true, false, true];
+    const claros = [false, false, false, false];
+    const temNaLinha = (arr, padrao) => {
+      let achou = 0;
+      for (let i = 0; i + padrao.length <= arr.length; i++) {
+        let bate = true;
+        for (let j = 0; j < padrao.length; j++) if (arr[i + j] !== padrao[j]) { bate = false; break; }
+        if (bate) achou++;
+      }
+      return achou;
+    };
+    for (let i = 0; i < n; i++) {
+      for (const horizontal of [true, false]) {
+        const linha = [];
+        for (let j = 0; j < n; j++) linha.push(horizontal ? em(i, j) : em(j, i));
+        p += 40 * (temNaLinha(linha, [...alvo, ...claros]) + temNaLinha(linha, [...claros, ...alvo]));
+      }
+    }
+
+    let escuros = 0;
+    for (let l = 0; l < n; l++) for (let c = 0; c < n; c++) if (em(l, c)) escuros++;
+    const pct = (escuros * 100) / (n * n);
+    p += Math.floor(Math.abs(pct - 50) / 5) * 10;
+    return p;
+  }
+
+  // Gera a matriz do QR (true = módulo escuro) para um texto. Devolve null se não couber.
+  function qrMatriz(texto) {
+    const bytes = new TextEncoder().encode(texto);
+
+    // Menor versão onde o texto cabe, já descontando cabeçalho e correção.
+    let versao = 0;
+    for (let v = 1; v <= 20; v++) {
+      const [ecPorBloco, g1, g2] = EC_M[v];
+      const capacidade = TOTAL_CODEWORDS[v] - ecPorBloco * (g1 + g2);
+      // Em bits, não em bytes: o cabeçalho ocupa 12 ou 20 bits, e arredondar pra cima jogava fora o
+      // último byte que ainda cabia (e empurrava textos pequenos pra uma versão maior à toa).
+      const cabecalho = 4 + (v >= 10 ? 16 : 8);
+      if (cabecalho + bytes.length * 8 <= capacidade * 8) { versao = v; break; }
+    }
+    if (!versao) return null;
+
+    const [ecPorBloco, g1, g2] = EC_M[versao];
+    const totalBlocos = g1 + g2;
+    const capacidade = TOTAL_CODEWORDS[versao] - ecPorBloco * totalBlocos;
+
+    // ── fluxo de bits: modo byte, tamanho, dados, terminador e enchimento ──
+    const bits = [];
+    const push = (valor, quantos) => { for (let i = quantos - 1; i >= 0; i--) bits.push((valor >> i) & 1); };
+    push(0b0100, 4);
+    push(bytes.length, versao >= 10 ? 16 : 8);
+    for (const b of bytes) push(b, 8);
+    push(0, Math.min(4, capacidade * 8 - bits.length));
+    while (bits.length % 8) bits.push(0);
+    const dados = [];
+    for (let i = 0; i < bits.length; i += 8) {
+      let b = 0;
+      for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+      dados.push(b);
+    }
+    for (let i = 0; dados.length < capacidade; i++) dados.push(i % 2 === 0 ? 0xec : 0x11);
+
+    // ── divisão em blocos e correção de cada um ──
+    const porBloco1 = Math.floor(capacidade / totalBlocos);
+    const blocosDados = [], blocosEC = [];
+    let pos = 0;
+    for (let i = 0; i < totalBlocos; i++) {
+      const tam = i < g1 ? porBloco1 : porBloco1 + 1;
+      const bloco = dados.slice(pos, pos + tam);
+      pos += tam;
+      blocosDados.push(bloco);
+      blocosEC.push(correcao(bloco, ecPorBloco));
+    }
+
+    // Intercalados, como a norma manda.
+    const fluxo = [];
+    for (let i = 0; i < porBloco1 + 1; i++) {
+      for (const b of blocosDados) if (i < b.length) fluxo.push(b[i]);
+    }
+    for (let i = 0; i < ecPorBloco; i++) {
+      for (const b of blocosEC) fluxo.push(b[i]);
+    }
+
+    // ── desenho: zigue-zague de baixo pra cima, duas colunas por vez ──
+    const { m, fixo, n } = moldura(versao);
+    let bit = 0;
+    const totalBits = fluxo.length * 8;
+    const proximoBit = () => {
+      if (bit >= totalBits) return false;                 // sobra vira módulo claro
+      const v = (fluxo[bit >> 3] >> (7 - (bit & 7))) & 1;
+      bit++;
+      return v === 1;
+    };
+    // A direção alterna a cada par de colunas percorrido — e a coluna 6, que é de sincronismo, é
+    // pulada inteira sem entrar nessa conta. Por isso o par é contado à parte, e não deduzido da
+    // posição da coluna.
+    let par = 0;
+    for (let col = n - 1; col > 0; col -= 2) {
+      if (col === 6) col--;
+      const subindo = par % 2 === 0;
+      par++;
+      for (let i = 0; i < n; i++) {
+        const l = subindo ? n - 1 - i : i;
+        for (const c of [col, col - 1]) {
+          if (fixo[l][c]) continue;
+          m[l][c] = proximoBit();
+        }
+      }
+    }
+
+    // ── escolhe a máscara de menor penalidade ──
+    let melhor = null;
+    for (let mk = 0; mk < 8; mk++) {
+      const teste = m.map(linha => linha.slice());
+      for (let l = 0; l < n; l++) {
+        for (let c = 0; c < n; c++) {
+          if (!fixo[l][c] && MASCARAS[mk](l, c)) teste[l][c] = !teste[l][c];
+        }
+      }
+      // Formato nos dois lugares em que ele aparece. A sequência entra do bit mais significativo
+      // para o menos: `ler(0)` é o bit 14.
+      const f = bitsDeFormato(mk);
+      const ler = i => ((f >> (14 - i)) & 1) === 1;
+      for (let i = 0; i <= 5; i++) teste[8][i] = ler(i);
+      teste[8][7] = ler(6);
+      teste[8][8] = ler(7);
+      teste[7][8] = ler(8);
+      for (let i = 9; i <= 14; i++) teste[14 - i][8] = ler(i);
+      for (let i = 0; i <= 7; i++) teste[n - 1 - i][8] = ler(i);
+      for (let i = 8; i <= 14; i++) teste[8][n - 15 + i] = ler(i);
+      teste[n - 8][8] = true;
+      if (versao >= 7) {
+        const vb = bitsDeVersao(versao);
+        for (let i = 0; i < 18; i++) {
+          const v = ((vb >> i) & 1) === 1;
+          const l = Math.floor(i / 3), c = i % 3;
+          teste[l][n - 11 + c] = v;
+          teste[n - 11 + c][l] = v;
+        }
+      }
+      const p = penalidade(teste, n);
+      if (!melhor || p < melhor.p) melhor = { p, m: teste };
+    }
+    return melhor.m;
+  }
+
+  // SVG a partir da matriz (qrMatriz), com a borda clara que a norma pede. Vira data: URL.
+  function qrSvg(m, lado = 210) {
+    if (!m) return '';
+    const n = m.length, borda = 4, total = n + borda * 2;
+    let d = '';
+    for (let l = 0; l < n; l++) {
+      for (let c = 0; c < n; c++) {
+        if (m[l][c]) d += `M${c + borda} ${l + borda}h1v1h-1z`;
+      }
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${lado}" height="${lado}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><rect width="${total}" height="${total}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+  }
+
+  // O payload EMV termina em 6304 + CRC16-CCITT de tudo que vem antes. Mesma conferência do Worker.
+  function crcPixOk(pix) {
+    if (!/^0002/.test(pix) || pix.length < 50 || !/6304[0-9A-Fa-f]{4}$/.test(pix)) return false;
+    let crc = 0xffff;
+    const corpo = pix.slice(0, -4);
+    for (let k = 0; k < corpo.length; k++) {
+      crc ^= corpo.charCodeAt(k) << 8;
+      for (let b = 0; b < 8; b++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0') === pix.slice(-4).toUpperCase();
+  }
+
   // ── NOME E DOCUMENTO DO PAGADOR ────────────────────────────────────────────
   // Mesma conferência que o Worker faz, repetida aqui só pra avisar o cliente antes de enviar: quem
   // decide é sempre o Worker. Nada disso é guardado — nem no aparelho, nem no evento do painel.
@@ -326,7 +682,13 @@
         .inline-erro{ font-size:.8rem; color:var(--c-red); line-height:1.35; }
         .inline-erro[hidden]{ display:none; }
 
-        .qr{ align-self:center; width:min(210px,70%); aspect-ratio:1; background:#fff; padding:8px; border-radius:12px; }
+        /* Link pra página do provedor: existe, mas não compete com o copia e cola */
+        .pagprov{ align-self:center; display:inline-flex; align-items:center; gap:5px; font-size:.78rem; color:var(--c-sub); text-decoration:none; }
+        .pagprov:hover{ color:var(--c-cyan); text-decoration:underline; }
+
+        /* Largura puxada pela quantidade de módulos (4px cada, contando a borda clara), limitada
+           pelo espaço da conversa: módulo miúdo demais a câmera do celular não enxerga. */
+        .qr{ align-self:center; width:min(calc(var(--mods,69) * 4px), 100%); max-width:300px; aspect-ratio:1; background:#fff; padding:8px; border-radius:12px; }
         .qr img{ display:block; width:100%; height:100%; image-rendering:pixelated; }
         .code{ padding:10px 12px; border-radius:12px; border:1px dashed var(--c-border); background:var(--c-solid); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.72rem; line-height:1.4; word-break:break-all; max-height:86px; overflow:auto; user-select:all; }
         .stt{ display:flex; align-items:center; gap:9px; font-size:.85rem; color:var(--c-sub); }
@@ -507,7 +869,9 @@
         if (!nomeValido(c.nome)) return R(400, { ok: false, erro: 'Informe o nome do titular da conta que vai pagar.' });
         if (!documentoValido(c.documento)) return R(400, { ok: false, erro: 'CPF ou CNPJ inválido. Confira os números e tente de novo.' });
         if (/recusad/i.test(c.nome)) return R(409, { ok: false, erro: 'O titular não confere com a conta do PIX.' });
-        return R(200, { ok: true, order_no: c.order_no, pay_url: 'https://pay.dlocal.com/APM/MOCK/teste' });
+        return R(200, { ok: true, order_no: c.order_no, pay_url: 'https://pay.dlocal.com/apm-frontend/voucher/MOCK',
+          // Payload com CRC válido, igual ao que o dLocal devolve.
+          pix: /sempix/i.test(c.nome) ? '' : '00020101021226870014br.gov.bcb.pix2565qrcode.dlocal.com/qr/25021356/v1/2c52ff906dfe4f8da75bbf071433c80a5204000053039865802BR5906DLOCAL6009SAO PAULO62070503***6304FE8A' });
       }
       if (rota === '/check-status') return R(200, { ok: true, status: this._mockStatus });
       return R(404, { ok: false, erro: 'Rota inexistente' });
@@ -783,15 +1147,56 @@
         ]);
         return;
       }
+      // O Worker já conferiu, mas quem mostra o código na tela é esta linha: um payload quebrado
+      // viraria um PIX que o banco recusa, e a culpa cairia em quem pagou.
+      const pix = typeof d.pix === 'string' && d.pix.length < 900 && crcPixOk(d.pix) ? d.pix : '';
+      const matriz = pix ? qrMatriz(pix) : null;
+      const svg = matriz ? qrSvg(matriz) : '';
       this._add('bot', 'Tudo pronto! Agora é só pagar o PIX:');
-      // A tela do PIX abre em outra aba, não numa moldura aqui dentro, e isso é de propósito: o
-      // provedor pode trocar de domínio no meio do caminho e, de fora do frame, não dá pra
-      // acompanhar — a barra que mostrasse o endereço acabaria mentindo bem na hora de pagar. Em
-      // outra aba quem mostra o endereço é o navegador. O chat segue consultando e avisa aqui.
-      const w = this._bloco(`
+      // Com o código em mãos, o pagamento acontece aqui mesmo: copia e cola no app do banco, ou lê
+      // o QR de outro aparelho. O link do provedor continua embaixo, pra quem preferir a página
+      // dele — e é o único caminho quando o código não vem (outro meio de pagamento, por exemplo).
+      const w = this._bloco(pix ? `
+        ${svg ? `<div class="qr" style="--mods:${matriz.length + 8}"><img alt="QR Code do PIX" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}"></div>` : ''}
+        <div class="lbl">PIX copia e cola</div>
+        <div class="code" tabindex="0" data-pix>${esc(pix)}</div>
+        <button type="button" class="btn full" data-copiar>${ico('copy')} Copiar código PIX</button>
+        <p class="small">${ico('lock')}Abra o app do seu banco, escolha pagar com PIX e cole o código — ou leia o QR por outro aparelho. Assim que o pagamento cair, eu aviso aqui.</p>
+        <a class="pagprov" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir a página do provedor</a>
+        <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>` : `
         <a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Pagar com PIX</a>
         <p class="small">${ico('lock')}Abre em outra aba, no provedor de pagamento (<strong>${esc(hostDe(url))}</strong>), com o código PIX e o QR. Confira o valor antes de pagar — o resultado aparece aqui.</p>
         <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
+
+      const copiar = w.querySelector('[data-copiar]');
+      if (copiar) {
+        copiar.addEventListener('click', async () => {
+          const antes = copiar.innerHTML;
+          let deu = false, selecionou = false;
+          try { await navigator.clipboard.writeText(pix); deu = true; } catch (_) {
+            // Navegador sem permissão de área de transferência (ou página sem https): deixa o código
+            // selecionado pra pessoa copiar na mão, que é o que ela faria de qualquer jeito.
+            const el = w.querySelector('[data-pix]');
+            const sel = this.shadowRoot.getSelection ? this.shadowRoot.getSelection() : window.getSelection();
+            if (el && sel) {
+              try {
+                const faixa = document.createRange();
+                faixa.selectNodeContents(el);
+                sel.removeAllRanges();
+                sel.addRange(faixa);
+                el.focus({ preventScroll: true });
+                selecionou = String(sel).trim().startsWith('0002');
+              } catch (_) { selecionou = false; }
+            }
+          }
+          // Sem área de transferência e sem seleção, o jeito é a pessoa marcar o código na mão —
+          // e aí não adianta anunciar o que não aconteceu.
+          copiar.innerHTML = deu ? `${ico('check')} Código copiado`
+            : selecionou ? `${ico('copy')} Código selecionado — agora é só copiar`
+            : `${ico('copy')} Marque o código acima e copie`;
+          setTimeout(() => { if (copiar.isConnected) copiar.innerHTML = antes; }, 3200);
+        });
+      }
       this._wPag = w;
       this._focarProx = true;           // o formulário sumiu: foco vai pro "Já paguei"
       this._acoesPagamento(g);
@@ -817,7 +1222,7 @@
     _congelarPagamento(congelar) {
       const w = this._wPag;
       if (!w || !w.isConnected) return;
-      w.querySelectorAll('.qr, .code, [data-copiar], a.btn').forEach(el => {
+      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .pagprov').forEach(el => {
         el.style.opacity = congelar ? '.35' : '';
         el.style.pointerEvents = congelar ? 'none' : '';
         if (el.tagName === 'BUTTON') el.disabled = congelar;
@@ -838,7 +1243,7 @@
       if (!w || !w.isConnected) return;
       this._setStt(texto, true);
       // Sai tudo que só servia pra pagar: link, código e o aviso de como pagar no provedor.
-      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .lbl, .small').forEach(el => el.remove());
+      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .pagprov, .lbl, .small').forEach(el => el.remove());
       this._acoes?.remove();
       this._wPag = null;
     }
