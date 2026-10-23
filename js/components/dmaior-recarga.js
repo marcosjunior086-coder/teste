@@ -14,8 +14,7 @@
 //
 //  Atributos:
 //    data-worker-url   URL do Worker (padrão https://recarga.agencydmaior.com.br)
-//    data-logo         logo da DMaior   (padrão assets/icons/dmaior-logo.png)
-//    data-logo-parceiro logo do parceiro (padrão assets/icons/rocketbunny.png)
+//    data-logo-parceiro logo do parceiro no cabeçalho (padrão assets/icons/rocketbunny.png)
 //    data-mock         presença = modo simulado, sem rede (painel de teste)
 //    data-suporte-url  link do botão "Falar com o suporte" (opcional)
 //
@@ -199,14 +198,7 @@
         /* Só as marcas, sem texto: a logo de cada empresa fala por si */
         .brand{ display:flex; align-items:center; gap:9px; min-width:0; flex:1; }
         .marca{ display:grid; place-items:center; min-width:0; }
-        .marca .lg{ height:28px; width:auto; max-width:100%; object-fit:contain; display:block; }
-        .brand .x{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1rem; color:var(--c-cyan); flex-shrink:0; }
-        /* A logo da DMaior é clara. Nos temas de fundo claro ela é pintada de preto, igual ao resto
-           do site (dmaior-app.js, footer.js e menu-mobile.js usam o mesmo brightness(0)). */
-        .marca.agencia .lg{ transition:filter .25s ease; }
-        :host([data-theme="branco"]) .marca.agencia .lg,
-        :host([data-theme="rosa"]) .marca.agencia .lg,
-        :host([data-theme="laranja"]) .marca.agencia .lg{ filter:brightness(0); }
+        .marca .lg{ height:30px; width:auto; max-width:100%; object-fit:contain; display:block; }
         @media (max-width:430px){ .marca .lg{ height:24px; } .on span{ display:none; } }
         .on{ display:flex; align-items:center; gap:6px; font-size:.72rem; color:var(--c-muted); flex-shrink:0; }
         .on i{ width:8px; height:8px; border-radius:50%; background:var(--c-green); box-shadow:0 0 6px var(--c-green); }
@@ -301,8 +293,6 @@
       <div class="wrap">
         <header class="top">
           <div class="brand">
-            <span class="marca agencia"><img class="lg" alt="DMaior Agency"></span>
-            <span class="x" aria-hidden="true">×</span>
             <span class="marca parceiro"><img class="lg" alt="Rocket Bunny"></span>
           </div>
           <div class="on" role="status"><i></i><span>Atendimento digital</span></div>
@@ -314,22 +304,18 @@
         </form>
         <p class="foot">${ico('lock')}Conexão segura · Seus dados não ficam salvos no site</p>
       </div>`;
-      const dm = this.getAttribute('data-logo') || 'assets/icons/dmaior-logo.png';
-      const pa = this.getAttribute('data-logo-parceiro') || 'assets/icons/rocketbunny.png';
-      const marcas = this.shadowRoot.querySelectorAll('.marca');
-      marcas.forEach((m, i) => {
-        const img = m.querySelector('.lg');
-        // Logo que não carrega: tira a marca e o "×" junto, pra não sobrar separador solto.
-        img.addEventListener('error', () => {
-          m.remove();
-          this.shadowRoot.querySelector('.brand .x')?.remove();
-          const resto = this.shadowRoot.querySelector('.marca');
-          if (resto) resto.title = resto.querySelector('.lg')?.getAttribute('alt') || '';
-          // Nenhuma logo carregou: sobra o nome da agência, que é de quem é o site.
-          else { const t = document.createElement('b'); t.className = 'raaj'; t.textContent = 'DMaior Agency'; this.shadowRoot.querySelector('.brand')?.appendChild(t); }
-        });
-        img.src = i === 0 ? dm : pa;
+      // Só a marca do parceiro: o site em volta já é da DMaior.
+      const marca = this.shadowRoot.querySelector('.marca.parceiro');
+      const img = marca.querySelector('.lg');
+      img.addEventListener('error', () => {
+        // Sem a logo, entra o nome escrito pra não ficar um buraco no cabeçalho.
+        marca.remove();
+        const t = document.createElement('b');
+        t.className = 'raaj';
+        t.textContent = 'Recarga de diamantes';
+        this.shadowRoot.querySelector('.brand')?.appendChild(t);
       });
+      img.src = this.getAttribute('data-logo-parceiro') || 'assets/icons/rocketbunny.png';
       this._log = this.shadowRoot.querySelector('.log');
       this._bar = this.shadowRoot.querySelector('.bar');
       this._in = this._bar.querySelector('input');
@@ -562,9 +548,9 @@
         <div class="lbl">Escolha ou digite</div>
         <div class="chips">${RAPIDOS.map(n => `<button type="button" class="chip" data-q="${n}">${num(n)}</button>`).join('')}</div>
         <label class="field"><span>Quantidade de diamantes</span><input data-qtd inputmode="numeric" autocomplete="off" maxlength="6" placeholder="Ex.: 1000"></label>
-        <div class="preco"><span class="small">Total estimado</span><strong data-preco>—</strong></div>
+        <div class="preco"><span class="small">Total a pagar</span><strong data-preco>—</strong></div>
         <div class="inline-erro" data-erro role="alert" hidden></div>
-        <p class="small">O valor final é confirmado na hora do pagamento.</p>
+        <p class="small">Esse é o valor do PIX. Mínimo de 100 diamantes.</p>
         <button type="button" class="btn full" data-ir disabled>Continuar</button>`);
       const qtd = w.querySelector('[data-qtd]');
       const preco = w.querySelector('[data-preco]');
