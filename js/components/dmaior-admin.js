@@ -3389,6 +3389,37 @@ class DimaiorAdmin extends HTMLElement {
     await this._carregarViolacoes(); // recarrega primeiro: ele reescreve o #violSync
     if(info) info.innerHTML=`UID ${this._esc(uid)}: ${d.total} violação(ões) · ${d.na_lista?'apareceu':'<b>NÃO apareceu</b>'} na lista da Kwai · ${d.itens_historico??0} no histórico · sessões: ${this._esc((d.sessoes||[]).join(', ')||'—')}${(d.avisos||[]).length?` · <span style="color:var(--warn)">${this._esc(d.avisos.join(' | '))}</span>`:''}`;
   }
+  // Varredura: pergunta pra Kwai UID por UID, o roster inteiro, em lotes
+  // encadeados. A busca geral não devolve streamer banido — só a consulta com o
+  // UID escrito. Cada chamada volta com o ponto onde parou e o painel chama a
+  // próxima, então a barra anda em vez de ficar uns minutos parada.
+  async _varrerViolacoes(reiniciar){
+    const s=this.shadowRoot, b=s.getElementById('btnVarrerViol'), info=s.getElementById('violSync');
+    if(this._varrendo){ this._varrerCancelar=true; return; }
+    this._varrendo=true; this._varrerCancelar=false;
+    if(b){b.innerHTML=`${this._ico('x',13)} Parar varredura`;b.classList.add('btn-g');}
+    let d=null, primeiro=reiniciar!==false;
+    try{
+      do{
+        d=await this._api('POST',`/admin/violacoes/varredura?reiniciar=${primeiro?'1':'0'}`);
+        primeiro=false;
+        if(!d?.ok){this._toast(d?.erro||'Falha na varredura','err');break;}
+        const pct=d.total?Math.round(d.indice/d.total*100):0;
+        if(info) info.innerHTML=`Varredura por UID: <b>${d.indice} de ${d.total}</b> (${pct}%) · ${d.encontrados} com violação · ${d.novas} nova(s)${d.erros?` · ${d.erros} falha(s)`:''}`;
+      }while(!d.concluido && !this._varrerCancelar);
+    }finally{
+      this._varrendo=false;
+      if(b){b.innerHTML=`${this._ico('refresh',13)} Varrer todos por UID`;b.classList.remove('btn-g');}
+    }
+    if(d?.ok){
+      this._toast(this._varrerCancelar?`Varredura parada em ${d.indice} de ${d.total}`
+        :`Varredura concluída: ${d.novas} violação(ões) nova(s) em ${d.encontrados} streamer(s)`);
+      const txt=info?.innerHTML;
+      if(s.getElementById('violDias')) s.getElementById('violDias').value='tudo';
+      await this._carregarViolacoes(); // reescreve o #violSync
+      if(info&&txt) info.innerHTML=txt;
+    }
+  }
   async _marcarViolacoesVistas(chaves){
     const d=await this._api('POST','/admin/violacoes/vistas',chaves?{chaves}:{todas:true});
     if(d?.ok){this._toast(chaves?'Marcada como conferida':'Todas marcadas como conferidas');this._carregarViolacoes();}
@@ -4674,6 +4705,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSyncViol')?.addEventListener('click',()=>this._sincronizarViolacoes());
     s.getElementById('btnVistasViol')?.addEventListener('click',()=>this._marcarViolacoesVistas());
     s.getElementById('btnViolUid')?.addEventListener('click',()=>this._verificarViolacoesUid());
+    s.getElementById('btnVarrerViol')?.addEventListener('click',()=>this._varrerViolacoes(true));
     ['violDias','violStatus','violNovas'].forEach(id=>s.getElementById(id)?.addEventListener('change',()=>this._carregarViolacoes()));
     s.getElementById('violBusca')?.addEventListener('keydown',e=>{if(e.key==='Enter')this._carregarViolacoes();});
     s.getElementById('btnAtualizarRosterStatus')?.addEventListener('click',()=>this._atualizarRosterStatus());
@@ -9055,7 +9087,8 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead"><div class="btitulo">${this._ico('warning',14)} Violações dos streamers</div>
                   <div class="bacoes" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                     <div class="busca">${this._ico('search',12)}<input id="violBusca" type="text" placeholder="Nome, @ ou UID (Enter)" style="width:170px"/></div>
-                    ${this._sub?'':`<button class="btn btn-o" id="btnViolUid" title="Pergunta esse UID direto pra Kwai, mesmo que ele não venha na lista geral">${this._ico('search',13)} Consultar UID na Kwai</button>`}
+                    ${this._sub?'':`<button class="btn btn-o" id="btnViolUid" title="Pergunta esse UID direto pra Kwai, mesmo que ele não venha na lista geral">${this._ico('search',13)} Consultar UID na Kwai</button>
+                    <button class="btn btn-o" id="btnVarrerViol" title="Pergunta pra Kwai UID por UID, o roster inteiro — pega os banidos, que não vêm na busca geral">${this._ico('refresh',13)} Varrer todos por UID</button>`}
                     <select id="violDias" class="viol-sel"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option><option value="tudo">Tudo</option></select>
                     <select id="violStatus" class="viol-sel"><option value="">Todos os status</option><option value="2">Banido</option><option value="3">Banido temporariamente</option><option value="1">Ativado</option><option value="4">Cancelado</option><option value="0">Solicitando</option><option value="5">Recusado</option><option value="-1">Sem permissão</option></select>
                     <label style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--t2)"><input type="checkbox" id="violNovas"/> Só não conferidas</label>
