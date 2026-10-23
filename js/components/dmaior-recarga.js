@@ -63,7 +63,58 @@
       const lista = idsSalvos().filter(x => x.toLowerCase() !== id.toLowerCase());
       if (lista.length) localStorage.setItem(CHAVE_IDS, JSON.stringify(lista));
       else localStorage.removeItem(CHAVE_IDS);
+      esquecerPerfil(id);
     } catch (_) { /* idem */ }
+  }
+
+  // Junto do ID, o que o perfil tem de público: nome, foto, seguidores e seguindo. Serve pra os
+  // atalhos mostrarem de quem é cada ID. Nada disso é dado do pagador — nome e CPF de quem paga
+  // nunca passam por aqui.
+  const CHAVE_PERFIS = 'dmaior_recarga_perfis';
+  function perfisSalvos() {
+    try {
+      const v = JSON.parse(localStorage.getItem(CHAVE_PERFIS) || '{}');
+      return v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+    } catch (_) { return {}; }
+  }
+  function perfilSalvo(id) {
+    const p = perfisSalvos()[String(id).toLowerCase()];
+    return p && typeof p === 'object' ? p : null;
+  }
+  function guardarPerfil(p) {
+    try {
+      const todos = perfisSalvos();
+      const chave = String(p.kwai_id).toLowerCase();
+      const n = v => (Number.isInteger(v) && v >= 0 ? v : null);
+      todos[chave] = {
+        nome: String(p.nome || '').slice(0, 60),
+        foto: typeof p.foto_url === 'string' && /^https:\/\//i.test(p.foto_url) ? p.foto_url.slice(0, 500) : '',
+        seguidores: n(p.seguidores),
+        seguindo: n(p.seguindo),
+        verificado: p.verificado === true,
+        salvo_em: Date.now(),
+      };
+      // Só os perfis dos IDs que ainda estão nos atalhos: o resto sai, pra não acumular.
+      const vivos = new Set(idsSalvos().map(x => x.toLowerCase()));
+      vivos.add(chave);
+      for (const k of Object.keys(todos)) if (!vivos.has(k)) delete todos[k];
+      localStorage.setItem(CHAVE_PERFIS, JSON.stringify(todos));
+    } catch (_) { /* sem storage: segue sem salvar */ }
+  }
+  function esquecerPerfil(id) {
+    try {
+      const todos = perfisSalvos();
+      delete todos[String(id).toLowerCase()];
+      if (Object.keys(todos).length) localStorage.setItem(CHAVE_PERFIS, JSON.stringify(todos));
+      else localStorage.removeItem(CHAVE_PERFIS);
+    } catch (_) { /* idem */ }
+  }
+
+  // 915 → "915", 12.345 → "12,3 mil", 1.250.000 → "1,3 mi"
+  function contagemCurta(n) {
+    if (!Number.isInteger(n) || n < 0) return '';
+    try { return new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }).format(n); }
+    catch (_) { return String(n); }
   }
 
   // ── QR CODE ────────────────────────────────────────────────────────────────
@@ -648,6 +699,14 @@
         .av img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
         .pn{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1.02rem; line-height:1.15; overflow-wrap:anywhere; }
         .pid{ font-size:.78rem; color:var(--c-muted); margin-top:2px; overflow-wrap:anywhere; }
+        .pnum{ display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:5px; font-size:.8rem; color:var(--c-sub); }
+        .pnum strong{ color:var(--c-text); font-weight:700; }
+        .selo{ display:inline-grid; place-items:center; width:16px; height:16px; margin-left:6px; border-radius:50%; background:var(--c-cyan); color:#fff; font-size:.6rem; vertical-align:2px; }
+        .chip .cft{ width:22px; height:22px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+        .chip-id .chip{ display:inline-flex; align-items:center; gap:7px; }
+        .chip .ctxt{ display:flex; flex-direction:column; align-items:flex-start; line-height:1.1; min-width:0; }
+        .chip .cnome{ font-size:.74rem; font-weight:600; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .chip .cid{ font-size:.7rem; opacity:.75; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
         .btns{ align-self:flex-start; display:flex; flex-wrap:wrap; gap:8px; max-width:100%; animation:in .25s ease both; }
         .btn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding:10px 18px; border-radius:999px; border:1px solid var(--c-border); background:var(--c-grad); color:#000;
@@ -856,7 +915,10 @@
       const R = (status, json) => ({ status, json });
       if (rota === '/validate-id') {
         if (/nao.?existe|invalido/i.test(c.kwai_id)) return R(404, { ok: false, erro: 'ID do Kwai não encontrado. Confira e tente de novo.' });
-        return R(200, { ok: true, perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null } });
+        // "semnumeros" no ID imita a busca da Kwai fora do ar: o cartão aparece sem a linha de números.
+        const semNum = /semnumeros/i.test(c.kwai_id);
+        return R(200, { ok: true, perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null,
+          seguidores: semNum ? null : 12345, seguindo: semNum ? null : 445, verificado: !semNum } });
       }
       if (rota === '/get-price') return R(200, { ok: true, diamantes: c.diamantes, valor: Math.round(c.diamantes * PRECO_MOCK * 100) / 100, estimado: true });
       // O ticket de mentira imita o do Worker: vale só pro pedido que o assinou.
@@ -906,10 +968,16 @@
       if (!ids.length) return;
       const w = this._bloco(`
         <div class="lbl">Usar de novo, neste aparelho</div>
-        <div class="chips" data-ids>${ids.map(id => `
-          <span class="chip-id"><button type="button" class="chip" data-usar="${esc(id)}">${esc(id)}</button><button type="button" class="esq" data-esquecer="${esc(id)}" aria-label="Esquecer ${esc(id)}" title="Esquecer este ID">${ico('lixo')}</button></span>`).join('')}
+        <div class="chips" data-ids>${ids.map(id => {
+          const pf = perfilSalvo(id);
+          const ft = pf && typeof pf.foto === 'string' && /^https:\/\//i.test(pf.foto) ? pf.foto : '';
+          const nm = pf && pf.nome ? `<span class="cnome">${esc(pf.nome)}</span>` : '';
+          return `
+          <span class="chip-id"><button type="button" class="chip" data-usar="${esc(id)}">${ft ? `<img class="cft" alt="" referrerpolicy="no-referrer" loading="lazy" data-src="${esc(ft)}">` : ''}<span class="ctxt">${nm}<span class="cid">${esc(id)}</span></span></button><button type="button" class="esq" data-esquecer="${esc(id)}" aria-label="Esquecer ${esc(id)}" title="Esquecer este ID">${ico('lixo')}</button></span>`;
+        }).join('')}
         </div>
         <p class="small">Fica salvo só neste aparelho. Toque na lixeira para esquecer.</p>`);
+      w.querySelectorAll('img.cft').forEach(im => { im.addEventListener('error', () => im.remove()); im.src = im.dataset.src; });
       w.addEventListener('click', e => {
         const usar = e.target.closest('[data-usar]');
         if (usar && this._ok(g) && this._step === 'AGUARDANDO_ID') {
@@ -960,12 +1028,17 @@
       this._add('bot', 'Encontrei este perfil. <strong>É você?</strong>');
       const foto = typeof p.foto_url === 'string' && /^https:\/\//i.test(p.foto_url) ? p.foto_url : '';
       const inicial = esc(String(p.nome || p.kwai_id || '?').trim().charAt(0).toUpperCase() || '?');
+      // Seguidores e seguindo ajudam a pessoa a ter certeza de que é o perfil certo. Quando a busca
+      // não traz os números, a linha simplesmente não aparece.
+      const seg = contagemCurta(p.seguidores), sgd = contagemCurta(p.seguindo);
+      const numeros = (seg || sgd) ? `<div class="pnum">${seg ? `<span><strong>${seg}</strong> seguidores</span>` : ''}${sgd ? `<span><strong>${sgd}</strong> seguindo</span>` : ''}</div>` : '';
+      const selo = p.verificado === true ? `<span class="selo" title="Perfil verificado" aria-label="Perfil verificado">${ico('check')}</span>` : '';
       const card = this._bloco(`<div class="perfil"><div class="av"><b>${inicial}</b>${foto ? '<img alt="" referrerpolicy="no-referrer" loading="lazy">' : ''}</div>
-        <div style="min-width:0"><div class="pn">${esc(p.nome || p.kwai_id)}</div><div class="pid">ID: ${esc(p.kwai_id)}</div></div></div>`);
+        <div style="min-width:0"><div class="pn">${esc(p.nome || p.kwai_id)}${selo}</div><div class="pid">ID: ${esc(p.kwai_id)}</div>${numeros}</div></div>`);
       const img = card.querySelector('img');
       if (img) { img.addEventListener('error', () => img.remove()); img.src = foto; }
       this._botoes([
-        { html: `${ico('check')} Sim, sou eu`, fn: () => { if (!this._ok(g)) return; guardarId(p.kwai_id); this._add('user', 'Sim, sou eu'); this._calculadora(); } },
+        { html: `${ico('check')} Sim, sou eu`, fn: () => { if (!this._ok(g)) return; guardarId(p.kwai_id); guardarPerfil(p); this._add('user', 'Sim, sou eu'); this._calculadora(); } },
         { html: 'Não sou eu', cls: 'sec', fn: () => { if (!this._ok(g)) return; this._add('user', 'Não sou eu'); this._perfil = null; this._pedirId('Sem problema! Digite o <strong>ID do Kwai</strong> de novo.'); } },
       ]);
     }

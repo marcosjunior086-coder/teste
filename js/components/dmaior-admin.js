@@ -161,7 +161,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Ranking e resultados',[['ranking','Ranking do Mês'],['diario'],['desempenho'],['historico'],['mesesRanking'],['dashDesemp','','comparativo grafico']]],
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['afiliados','','indicacao indicar streamer link bonus programa'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
-    ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate']]],
+    ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate'],['recargas','','recarga diamantes rocket bunny vendas pedidos ranking clientes parceiros comissao']]],
     ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live'],['livesCategorias','','lives categoria jogos entretenimento free fire capa aba home descoberta'],['vitrine','','loja produtos shopee afiliado comissao vitrine comprar link']]],
     ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
   ]; }
@@ -398,7 +398,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',livesCategorias:'engajamento',vitrine:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',recargas:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',livesCategorias:'engajamento',vitrine:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -410,7 +410,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),livesCategorias:()=>this._carregarLivesCat(),vitrine:()=>this._carregarVitrine(),mapaAcessos:()=>this._carregarMapaAcessos()};
+    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),recargas:()=>this._carregarRecargas(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),livesCategorias:()=>this._carregarLivesCat(),vitrine:()=>this._carregarVitrine(),mapaAcessos:()=>this._carregarMapaAcessos()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -4679,6 +4679,20 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnBuscarUidAgente')?.addEventListener('click',()=>this._buscarStreamerParaVincular());
     s.getElementById('inpUidVincular')?.addEventListener('keydown',e=>{ if(e.key==='Enter')this._buscarStreamerParaVincular(); });
     s.getElementById('btnConfirmarVincular')?.addEventListener('click',()=>this._confirmarVincularStreamer());
+    // Recargas
+    s.getElementById('btnAtuRecargas')?.addEventListener('click',()=>this._carregarRecargas(true));
+    s.getElementById('recSubTabs')?.addEventListener('click',e=>{
+      const b=e.target.closest('[data-sub]');if(!b)return;
+      this._recSubAtual=b.dataset.sub;
+      this._carregarRecargas();
+    });
+    s.getElementById('recRankingDias')?.addEventListener('change',()=>this._carregarRecRanking());
+    s.getElementById('recPedidosStatus')?.addEventListener('change',()=>{this._recPedidosPag=1;this._carregarRecPedidos();});
+    s.getElementById('recPedidos')?.addEventListener('click',e=>{
+      const b=e.target.closest('[data-recpg]');if(!b||b.disabled)return;
+      this._recPedidosPag=Math.max(1,(this._recPedidosPag||1)+(b.dataset.recpg==='next'?1:-1));
+      this._carregarRecPedidos();
+    });
     // Tickets & Presentes
     s.getElementById('btnAtuTickets')?.addEventListener('click',()=>this._carregarTickets());
     s.getElementById('ticketsSubTabs')?.addEventListener('click',e=>{
@@ -8792,7 +8806,8 @@ class DimaiorAdmin extends HTMLElement {
               ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)+
               ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)+
               ni('award','premios','Prêmios')+
-              ni('star','tickets','Tickets',`<span class="nb gold" id="nbTicketsResgates" style="display:none">0</span>`)
+              ni('star','tickets','Tickets',`<span class="nb gold" id="nbTicketsResgates" style="display:none">0</span>`)+
+              ni('diamond','recargas','Recargas')
             )}
             ${navSec('engajamento','Engajamento',
               ni('bolt','impulsoCtrl','Controle do Impulso')+
@@ -9324,6 +9339,41 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="box" style="margin-top:14px">
                   <div class="bhead"><div class="btitulo">${this._ico('unlock',14)} Streamers Liberados</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuTicketsLiberados">${this._ico('refresh',12)} Atualizar</button></div></div>
                   <div id="tbTicketsLiberados">${this._loading()}</div>
+                </div>
+              </div>
+            </div>
+             <div class="pag" id="pag-recargas">${ph('Recargas de Diamantes','diamond','Vendas, pedidos e ranking de quem recarrega — lidos do painel de revendedor do Rocket Bunny','btnAtuRecargas')}
+              <div class="month-tabs" id="recSubTabs" style="display:flex;gap:6px;padding:0 0 12px">
+                <button class="month-tab on" data-sub="resumo">Resumo</button>
+                <button class="month-tab" data-sub="ranking">Ranking</button>
+                <button class="month-tab" data-sub="pedidos">Pedidos</button>
+                <button class="month-tab" data-sub="parceiros">Parceiros</button>
+              </div>
+              <div id="rec-sub-resumo"><div id="recResumo">${this._loading()}</div></div>
+              <div id="rec-sub-ranking" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('trophy',14)} Quem mais recarrega</div>
+                    <div class="bacoes"><select id="recRankingDias" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
+                      <option value="7">Últimos 7 dias</option><option value="15">Últimos 15 dias</option><option value="30" selected>Últimos 30 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option>
+                    </select></div>
+                  </div>
+                  <div id="recRanking">${this._loading()}</div>
+                </div>
+              </div>
+              <div id="rec-sub-pedidos" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('bag',14)} Pedidos</div>
+                    <div class="bacoes"><select id="recPedidosStatus" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
+                      <option value="2">Concluídos</option><option value="1">Pagos, aguardando recarga</option><option value="0">Não pagos</option>
+                    </select></div>
+                  </div>
+                  <div id="recPedidos">${this._loading()}</div>
+                </div>
+              </div>
+              <div id="rec-sub-parceiros" style="display:none">
+                <div class="box">
+                  <div class="bhead"><div class="btitulo">${this._ico('users',14)} Rede de Parceiros</div></div>
+                  <div id="recParceiros">${this._loading()}</div>
                 </div>
               </div>
             </div>
@@ -11520,6 +11570,120 @@ class DimaiorAdmin extends HTMLElement {
 
   _ticketsSubAtual='regras';
   _ticketsIconeDiamanteUrl=undefined;
+
+  // ── RECARGAS ──────────────────────────────────────────────────────────────
+  // Tudo vem do worker recarga, que lê o painel de revendedor com a conta da agência. Os números
+  // têm cache curto lá (2 a 10 min), então "Atualizar" pode mostrar o mesmo por alguns minutos.
+  async _carregarRecargas(){
+    const s=this.shadowRoot;
+    const sub=this._recSubAtual||'resumo';
+    s.querySelectorAll('#recSubTabs .month-tab').forEach(t=>t.classList.toggle('on',t.dataset.sub===sub));
+    ['resumo','ranking','pedidos','parceiros'].forEach(k=>{const el=s.getElementById(`rec-sub-${k}`);if(el)el.style.display=k===sub?'':'none';});
+    if(sub==='resumo')this._carregarRecResumo();
+    if(sub==='ranking')this._carregarRecRanking();
+    if(sub==='pedidos')this._carregarRecPedidos();
+    if(sub==='parceiros')this._carregarRecParceiros();
+  }
+  // Mensagem de erro do worker recarga explica o que falta configurar — vale mostrar inteira.
+  _recErro(d,padrao){return this._empty('warning',(d&&d.erro)||padrao);}
+  _recForma(f){const m={dlocal:'dLocal',enjoy_2:'EnjoyPayment',enjoy_3:'EnjoyPayment'};return this._esc(m[f]||f||'—');}
+  _recData(d){if(!d)return'—';const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}:\d{2}))?/);return m?`${m[3]}/${m[2]}${m[4]?' '+m[4]:''}`:this._esc(d);}
+
+  async _carregarRecResumo(){
+    const el=this.shadowRoot.getElementById('recResumo');if(!el)return;
+    el.innerHTML=this._loading();
+    const [v,rk]=await Promise.all([this._api('GET','/admin/recarga/vendas'),this._api('GET','/admin/recarga/ranking?dias=30')]);
+    if(!v?.ok){el.innerHTML=this._recErro(v,'Não foi possível ler o relatório de vendas');return;}
+    const linhas=v.vendas||[];
+    const acha=re=>linhas.find(l=>re.test(l.rotulo));
+    const hoje=acha(/^Vendas hoje/i), ped=acha(/^Pedidos hoje/i), periodo=acha(/^Vendas do per[ií]odo(?! anterior)/i), anterior=acha(/anterior/i);
+    const cartao=(cor,ico,val,lbl)=>`<div class="dc2 dc2-${cor}"><div class="dc2-ico">${this._ico(ico,26)}</div><div class="dc2-val">${val}</div><div class="dc2-lbl">${lbl}</div></div>`;
+    const rotuloPeriodo=l=>this._esc((l?.rotulo||'').replace(/^Vendas do /i,'').replace(/^per[ií]odo /i,'Quinzena '));
+    const cartoes=`<div class="dc2-grid">
+      ${cartao('cyan','diamond',hoje?this._num(hoje.quantidade):'—','Diamantes hoje')}
+      ${cartao('verde','wallet',hoje?.valor!=null?this._brl(hoje.valor):'—','Vendido hoje')}
+      ${cartao('indigo','bag',ped?this._num(ped.quantidade):'—','Pedidos hoje')}
+      ${cartao('gold','chart',periodo?.valor!=null?this._brl(periodo.valor):'—',rotuloPeriodo(periodo)||'Quinzena atual')}
+      ${rk?.ok?cartao('indigo','users',this._num(rk.clientes),'Clientes em 30 dias'):''}
+    </div>`;
+    // O relatório completo, como o painel mostra: linhas com "-" são o detalhe da de cima
+    const tabela=`<div class="box"><div class="bhead"><div class="btitulo">${this._ico('chart',14)} Relatório de vendas</div></div>
+      <div style="padding:6px 0">${linhas.map(l=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 18px;${l.detalhe?'padding-left:34px;font-size:12px;color:var(--t3)':'border-top:1px solid var(--brddim);font-size:13px'}">
+        <span>${this._esc(l.detalhe?l.rotulo.replace(/^-\s*/,''):l.rotulo)}</span>
+        <span style="white-space:nowrap;text-align:right">${l.quantidade!=null&&/vendas/i.test(l.rotulo)?`${this._num(l.quantidade)} ${this._dia()} &nbsp;`:''}${l.quantidade!=null&&!/vendas/i.test(l.rotulo)?this._num(l.quantidade):''}${l.valor!=null?`<strong style="color:${l.valor<0?'var(--verm)':'var(--t1)'}">${this._brl(l.valor)}</strong>`:''}</span>
+      </div>`).join('')}</div>
+      <div style="padding:10px 18px 14px;font-size:11px;color:var(--t3)">O painel do Rocket Bunny atualiza esse relatório a cada 10 minutos.${v.do_cache?' Mostrando a leitura guardada há pouco.':''}</div></div>`;
+    el.innerHTML=cartoes+tabela;
+  }
+
+  async _carregarRecRanking(){
+    const s=this.shadowRoot;const el=s.getElementById('recRanking');if(!el)return;
+    const dias=Number(s.getElementById('recRankingDias')?.value||30);
+    el.innerHTML=this._loading();
+    const d=await this._api('GET',`/admin/recarga/ranking?dias=${dias}`);
+    if(!d?.ok){el.innerHTML=this._recErro(d,'Não foi possível montar o ranking');return;}
+    const lista=d.ranking||[];
+    const avisos=[];
+    if(d.historico_curto)avisos.push(`O painel do Rocket Bunny só tem pedidos a partir de ${d.ultimo_disponivel?this._recData(d.ultimo_disponivel):'uma data recente'} — o período escolhido começa antes disso, então o ranking cobre menos dias.`);
+    if(d.incompleto)avisos.push('Há mais pedidos do que dá pra ler de uma vez. O ranking mostra os mais recentes.');
+    const aviso=avisos.length?`<div style="margin:12px 16px 0;padding:10px 14px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:var(--rs);font-size:12px;color:var(--amber-txt);display:flex;gap:8px;align-items:flex-start">${this._ico('warning',13)}<span>${avisos.map(a=>this._esc(a)).join('<br>')}</span></div>`:'';
+    const resumo=`<div style="display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 18px 4px;font-size:12px;color:var(--t2)">
+      <span><strong style="color:var(--t1)">${this._num(d.clientes)}</strong> clientes</span>
+      <span><strong style="color:var(--t1)">${this._num(d.pedidos)}</strong> pedidos</span>
+      <span><strong style="color:var(--t1)">${this._num(d.diamantes)}</strong> ${this._dia()}</span>
+      <span><strong style="color:var(--t1)">${this._brl(d.valor)}</strong></span>
+      <span>comissão <strong style="color:var(--verde)">${this._brl(d.comissao)}</strong></span></div>`;
+    if(!lista.length){el.innerHTML=aviso+this._empty('trophy','Nenhum pedido concluído nesse período');return;}
+    const medalha=i=>i<3?`<span style="color:${['#f0c040','#c0c8d0','#d08850'][i]}">${this._ico('trophy',13)}</span>`:`<span style="color:var(--t3)">${i+1}º</span>`;
+    const tabela=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>ID do Kwai</th><th>Pedidos</th><th>Diamantes</th><th>Valor</th><th>Comissão</th><th>Última</th></tr></thead><tbody>
+      ${lista.map((x,i)=>`<tr><td>${medalha(i)}</td><td>${this._esc(x.kwai_id)}</td><td>${this._num(x.pedidos)}</td><td>${this._num(x.diamantes)} ${this._dia()}</td><td><strong>${this._brl(x.valor)}</strong></td><td style="color:var(--verde)">${this._brl(x.comissao)}</td><td style="font-size:11px;color:var(--t3)">${this._recData(x.ultima)}</td></tr>`).join('')}
+    </tbody></table></div>`;
+    const lista_mob=`<div class="hist-lista hist-mobile-only">${lista.map((x,i)=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><span class="hist-pos">${i+1}</span><div class="hist-info"><div class="hist-nome">${this._esc(x.kwai_id)}</div><div class="hist-diam">${this._ico('diamond',10)} ${this._num(x.diamantes)} · ${this._brl(x.valor)}</div></div><span class="hist-chevron">${this._ico('down',11)}</span></div>
+      <div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Pedidos</div><div class="hist-val">${this._num(x.pedidos)}</div></div><div class="hist-cel"><div class="hist-lbl">Comissão</div><div class="hist-val" style="color:var(--verde)">${this._brl(x.comissao)}</div></div><div class="hist-cel"><div class="hist-lbl">Última</div><div class="hist-val">${this._recData(x.ultima)}</div></div></div></div></div>`).join('')}</div>`;
+    el.innerHTML=aviso+resumo+tabela+lista_mob;
+  }
+
+  async _carregarRecPedidos(){
+    const s=this.shadowRoot;const el=s.getElementById('recPedidos');if(!el)return;
+    const st=s.getElementById('recPedidosStatus')?.value||'2';
+    const pg=this._recPedidosPag||1;
+    el.innerHTML=this._loading();
+    const d=await this._api('GET',`/admin/recarga/pedidos?status=${encodeURIComponent(st)}&pagina=${pg}`);
+    if(!d?.ok){el.innerHTML=this._recErro(d,'Não foi possível ler os pedidos');return;}
+    const lista=d.pedidos||[];
+    // A página que vale é a que o servidor devolveu. Próxima "null" = não deu pra conferir: o botão
+    // fica liberado, pra tentar.
+    const atual=Number(d.pagina)||pg; this._recPedidosPag=atual;
+    const prox=d.tem_proxima!==false;
+    const pager=(atual>1||prox)?`<div class="pag-bar"><button ${atual<=1?'disabled':''} data-recpg="prev">Anterior</button><span class="pn">Pág ${atual}</span><button ${prox?'':'disabled'} data-recpg="next">Próxima</button></div>`:'';
+    if(!lista.length){el.innerHTML=this._empty('bag','Nenhum pedido aqui')+pager;return;}
+    const tabela=`<div class="hist-table-wrap"><table><thead><tr><th>Pedido</th><th>ID do Kwai</th><th>Diamantes</th><th>Valor</th><th>Comissão</th><th>Pagamento</th><th>Data</th></tr></thead><tbody>
+      ${lista.map(x=>`<tr><td style="font-size:11px;color:var(--t3);font-family:ui-monospace,Consolas,monospace">${this._esc(x.numero)}</td><td>${this._esc(x.kwai_id)}</td><td>${x.diamantes!=null?`${this._num(x.diamantes)} ${this._dia()}`:'—'}</td><td><strong>${x.valor!=null?this._brl(x.valor):'—'}</strong></td><td style="color:var(--verde)">${x.comissao!=null?this._brl(x.comissao):'—'}</td><td style="font-size:12px">${this._recForma(x.forma_pagamento)}</td><td style="font-size:11px;color:var(--t3)">${this._recData(x.data)}</td></tr>`).join('')}
+    </tbody></table></div>`;
+    const lista_mob=`<div class="hist-lista hist-mobile-only">${lista.map(x=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><div class="hist-info"><div class="hist-nome">${this._esc(x.kwai_id)}</div><div class="hist-diam">${this._ico('diamond',10)} ${x.diamantes!=null?this._num(x.diamantes):'—'} · ${x.valor!=null?this._brl(x.valor):'—'}</div></div><span class="hist-chevron">${this._ico('down',11)}</span></div>
+      <div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Pedido</div><div class="hist-val" style="font-size:11px">${this._esc(x.numero)}</div></div><div class="hist-cel"><div class="hist-lbl">Comissão</div><div class="hist-val" style="color:var(--verde)">${x.comissao!=null?this._brl(x.comissao):'—'}</div></div><div class="hist-cel"><div class="hist-lbl">Pagamento</div><div class="hist-val">${this._recForma(x.forma_pagamento)}</div></div><div class="hist-cel"><div class="hist-lbl">Data</div><div class="hist-val">${this._recData(x.data)}</div></div></div></div></div>`).join('')}</div>`;
+    el.innerHTML=tabela+lista_mob+pager;
+  }
+
+  async _carregarRecParceiros(){
+    const el=this.shadowRoot.getElementById('recParceiros');if(!el)return;
+    el.innerHTML=this._loading();
+    const d=await this._api('GET','/admin/recarga/parceiros');
+    if(!d?.ok){el.innerHTML=this._recErro(d,'Não foi possível ler a Rede de Parceiros');return;}
+    const lista=d.parceiros||[];
+    if(!lista.length){el.innerHTML=this._empty('users','Nenhum parceiro na rede');return;}
+    // Os rótulos dos números vêm do próprio painel ("Hoje", "Comissão total"...), então as colunas
+    // seguem o que estiver lá — se o parceiro mudar um nome, a tabela acompanha.
+    const rotulos=[...new Set(lista.flatMap(p=>Object.keys(p.numeros||{})))];
+    const fmt=(r,v)=>v==null?'—':/comiss/i.test(r)?this._brl(v):this._num(v);
+    const status=p=>p.ativo?'<span class="badge on">Ativo</span>':`<span class="badge off">${this._esc(p.status||'Inativo')}</span>`;
+    const tabela=`<div class="hist-table-wrap"><table><thead><tr><th>Parceiro</th><th>Status</th>${rotulos.map(r=>`<th>${this._esc(r)}</th>`).join('')}</tr></thead><tbody>
+      ${lista.map(p=>`<tr><td><div>${this._esc(p.nome||p.kwai_id)}</div><div style="font-size:11px;color:var(--t3)">${this._esc(p.kwai_id)}</div></td><td>${status(p)}</td>${rotulos.map(r=>`<td${/comiss/i.test(r)?' style="color:var(--verde)"':''}>${fmt(r,(p.numeros||{})[r])}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+    const lista_mob=`<div class="hist-lista hist-mobile-only">${lista.map(p=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><div class="hist-info"><div class="hist-nome">${this._esc(p.nome||p.kwai_id)}</div><div class="hist-diam">${this._esc(p.kwai_id)}</div></div><div class="hist-right">${status(p)}</div><span class="hist-chevron">${this._ico('down',11)}</span></div>
+      <div class="hist-body"><div class="hist-body-grid">${rotulos.map(r=>`<div class="hist-cel"><div class="hist-lbl">${this._esc(r)}</div><div class="hist-val">${fmt(r,(p.numeros||{})[r])}</div></div>`).join('')}</div></div></div>`).join('')}</div>`;
+    el.innerHTML=tabela+lista_mob;
+  }
 
   async _carregarTickets(){
     await this._garantirIconeDiamanteTickets();
