@@ -274,17 +274,6 @@
         .inline-erro{ font-size:.8rem; color:var(--c-red); line-height:1.35; }
         .inline-erro[hidden]{ display:none; }
 
-        /* Pagamento do provedor dentro do chat, com o endereço dele sempre à vista */
-        .pagbox{ border:1px solid var(--c-border); border-radius:14px; overflow:hidden; background:#fff; }
-        .pagtop{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; background:var(--c-solid); border-bottom:1px solid var(--c-border); }
-        .pagdom{ display:inline-flex; align-items:center; gap:5px; min-width:0; flex:1; font-size:.72rem; color:var(--c-sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .pagdom strong{ overflow:hidden; text-overflow:ellipsis; }
-        .pagdom strong{ color:var(--c-text); font-weight:600; }
-        .pagabrir{ display:inline-flex; align-items:center; gap:4px; font-size:.72rem; color:var(--c-cyan); text-decoration:none; white-space:nowrap; flex-shrink:0; }
-        .pagabrir:hover{ text-decoration:underline; }
-        .pagframe{ display:block; width:100%; height:560px; border:0; background:#fff; }
-        @media (max-width:480px){ .pagframe{ height:520px; } }
-
         .qr{ align-self:center; width:min(210px,70%); aspect-ratio:1; background:#fff; padding:8px; border-radius:12px; }
         .qr img{ display:block; width:100%; height:100%; image-rendering:pixelated; }
         .code{ padding:10px 12px; border-radius:12px; border:1px dashed var(--c-border); background:var(--c-solid); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.72rem; line-height:1.4; word-break:break-all; max-height:86px; overflow:auto; user-select:all; }
@@ -652,54 +641,30 @@
       this._step = 'AGUARDANDO_PAGAMENTO';
       this._humor('neutro');
       const url = typeof d.pay_url === 'string' && /^https:\/\//i.test(d.pay_url) ? d.pay_url : '';
-      this._add('bot', 'Tudo pronto. Agora é só pagar o PIX aqui mesmo:');
-      // O pagamento roda numa moldura dentro do chat, mas o endereço do provedor fica à vista em
-      // cima dela: quem paga precisa poder conferir onde está digitando o CPF. Quem preferir, abre
-      // numa aba à parte pelo link ao lado — e é pra lá que caímos se a moldura não carregar.
-      const w = this._bloco(`
-        ${url ? `
-        <div class="pagbox">
-          <div class="pagtop">
-            <span class="pagdom">${ico('lock')}<strong>${esc(hostDe(url))}</strong></span>
-            <a class="pagabrir" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Abrir em outra aba">${ico('ext')} Outra aba</a>
-          </div>
-          <iframe class="pagframe" title="Pagamento PIX" referrerpolicy="no-referrer"
-                  sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"></iframe>
-        </div>
-        <p class="small">${ico('lock')}Esta é a página do provedor de pagamento, aberta aqui dentro. Informe <strong>nome e CPF</strong> e pague o PIX — assim que cair, eu aviso aqui.</p>` : '<p class="small">Não recebemos o endereço de pagamento. Tente de novo em instantes.</p>'}
-        <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
-      // Moldura bloqueada (navegador restritivo, provedor mudando de ideia): vira o botão de sempre.
-      const frame = w.querySelector('.pagframe');
-      if (frame) {
-        let abriu = false;
-        frame.addEventListener('load', () => { abriu = true; });
-        frame.src = url;
-        setTimeout(() => {
-          if (abriu || !frame.isConnected) return;
-          w.querySelector('.pagbox')?.remove();
-          const alt = document.createElement('a');
-          alt.className = 'btn';
-          alt.href = url; alt.target = '_blank'; alt.rel = 'noopener noreferrer';
-          alt.innerHTML = `${ico('ext')} Abrir pagamento seguro`;
-          w.prepend(alt);
-        }, 8000);
+      // Endereço que não serve (veio vazio ou fora de https): sem ele não há o que pagar, então em
+      // vez de deixar o cliente num "aguardando" que nunca sai, devolvemos o pedido de novo.
+      if (!url) {
+        this._step = 'FALHOU';
+        this._add('erro', `${ico('alert')} Não recebemos o endereço de pagamento.`);
+        this._botoes([
+          { html: `${ico('refresh')} Tentar de novo`, fn: () => { if (this._ok(g)) this._pedirPagamento(); } },
+          { html: 'Recomeçar', cls: 'sec', fn: () => this.reiniciar() },
+        ]);
+        return;
       }
+      this._add('bot', 'Tudo pronto. Para pagar, abra a página segura do provedor:');
+      // O pagamento NÃO abre numa moldura aqui dentro, e isso é de propósito: a página do parceiro
+      // manda o cliente pra outro domínio (pay.dlocal.com) depois do nome e do CPF, e de fora do
+      // frame não dá pra acompanhar essa troca — a barra que mostrasse o endereço continuaria
+      // dizendo o host antigo justo na hora de digitar o CPF. Em outra aba quem mostra o endereço
+      // é o navegador, que não mente. O chat continua consultando o status e avisa aqui quando cair.
+      const w = this._bloco(`
+        <a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir pagamento</a>
+        <p class="small">${ico('lock')}Abre em outra aba, no site do provedor de pagamento (<strong>${esc(hostDe(url))}</strong>). Lá você confirma o pedido, informa <strong>nome e CPF</strong> e paga o PIX. Confira o endereço e o valor antes de pagar — o resultado aparece aqui.</p>
+        <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
       this._wPag = w;
       this._focarProx = true;           // o formulário sumiu: foco vai pro "Já paguei"
       this._acoesPagamento(g);
-      // O chat rola pro fim a cada mensagem, e isso cortava o topo da moldura de pagamento.
-      // Aqui ele volta pro começo dela, que é por onde o cliente precisa continuar.
-      requestAnimationFrame(() => {
-        if (!w.isConnected) return;
-        w.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        // No celular o menu do site fica fixo no topo e cobriria justamente a barra com o endereço
-        // do provedor, que é o que a pessoa precisa conferir antes de digitar o CPF.
-        setTimeout(() => {
-          if (!w.isConnected) return;
-          const folga = 72, t = w.getBoundingClientRect().top;
-          if (t < folga) window.scrollBy({ top: t - folga, behavior: 'smooth' });
-        }, 450);
-      });
       this._pollN = 0; this._falhasPoll = 0;
       this._agendarPoll(g);
     }
@@ -722,7 +687,7 @@
     _congelarPagamento(congelar) {
       const w = this._wPag;
       if (!w || !w.isConnected) return;
-      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .pagbox').forEach(el => {
+      w.querySelectorAll('.qr, .code, [data-copiar], a.btn').forEach(el => {
         el.style.opacity = congelar ? '.35' : '';
         el.style.pointerEvents = congelar ? 'none' : '';
         if (el.tagName === 'BUTTON') el.disabled = congelar;
@@ -743,7 +708,7 @@
       if (!w || !w.isConnected) return;
       this._setStt(texto, true);
       // Sai tudo que só servia pra pagar: link, código e o aviso de como pagar no provedor.
-      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .lbl, .small, .pagbox').forEach(el => el.remove());
+      w.querySelectorAll('.qr, .code, [data-copiar], a.btn, .lbl, .small').forEach(el => el.remove());
       this._acoes?.remove();
       this._wPag = null;
     }
