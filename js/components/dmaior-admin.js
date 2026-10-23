@@ -3309,8 +3309,8 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // ── Violações / punições da Kwai ────────────────────────────────────────────
-  // O monitor.kwai busca 1x/dia (03h) todas as violações da agência (últimos
-  // 30 dias) e grava em streamer_violacoes, ligadas pelo UID. "Verificar
+  // O monitor.kwai busca 1x/dia (03h) todas as violações da agência (SEM filtro
+  // de data na Kwai) e grava em streamer_violacoes, ligadas pelo UID. "Verificar
   // agora" força a busca. "Conferida" = vista_admin_em (some do contador).
   static VIOLA_STATUS={'-1':'Sem permissão','0':'Solicitando','1':'Ativado','2':'Banido','3':'Banido temporariamente','4':'Cancelado','5':'Recusado'};
   // punishResult em código da Kwai (Anchor = streamer). Tradução confirmada pelo dono 2026-09-24.
@@ -9036,7 +9036,7 @@ class DimaiorAdmin extends HTMLElement {
                 <div class="bhead"><div class="btitulo">${this._ico('warning',14)} Violações dos streamers</div>
                   <div class="bacoes" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                     <div class="busca">${this._ico('search',12)}<input id="violBusca" type="text" placeholder="Nome, @ ou UID (Enter)" style="width:170px"/></div>
-                    <select id="violDias" class="viol-sel"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option></select>
+                    <select id="violDias" class="viol-sel"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option><option value="tudo">Tudo</option></select>
                     <select id="violStatus" class="viol-sel"><option value="">Todos os status</option><option value="2">Banido</option><option value="3">Banido temporariamente</option><option value="1">Ativado</option><option value="4">Cancelado</option><option value="0">Solicitando</option><option value="5">Recusado</option><option value="-1">Sem permissão</option></select>
                     <label style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--t2)"><input type="checkbox" id="violNovas"/> Só não conferidas</label>
                     <button class="btn btn-o" id="btnVistasViol">${this._ico('check',13)} Marcar todas como conferidas</button>

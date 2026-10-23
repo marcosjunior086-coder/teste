@@ -3004,10 +3004,15 @@
         const d = this._violacoes;
         if(!d || d.erro){ el.innerHTML=''; return; }
         if(d.destaque){
-            const txt = d.destaque.status_conta_texto || this.constructor.VIOLA_STATUS[String(d.destaque.status_conta)] || 'Punição ativa';
+            // suspensao_dias > 0 = a Kwai suspendeu as LIVES por N dias, mesmo com
+            // a conta ainda "Ativado"/"Solicitando" — não dá pra dizer "sua conta está: Solicitando".
+            const dias = Number(d.destaque.suspensao_dias) || 0;
+            const txt = dias
+                ? `Você está suspenso de fazer live${dias ? ` (${dias} ${dias === 1 ? 'dia' : 'dias'})` : ''}`
+                : `Sua conta está: ${d.destaque.status_conta_texto || this.constructor.VIOLA_STATUS[String(d.destaque.status_conta)] || 'Punição ativa'}`;
             el.innerHTML = `<button type="button" class="viola-faixa" data-viola-abrir>
                 <span class="viola-ico">${this.svgAlerta()}</span>
-                <span class="viola-txt"><b>Sua conta está: ${this._escHtml(txt)}</b>${d.destaque.resultado ? `<small>${this._violaResultado(d.destaque.resultado)}</small>` : ''}<small>Toque para ver o motivo</small></span></button>`;
+                <span class="viola-txt"><b>${this._escHtml(txt)}</b>${d.destaque.resultado ? `<small>${this._violaResultado(d.destaque.resultado)}</small>` : ''}<small>Toque para ver o motivo</small></span></button>`;
         } else if(d.novas > 0){
             el.innerHTML = `<button type="button" class="viola-faixa leve" data-viola-abrir>
                 <span class="viola-ico">${this.svgAlerta()}</span>
@@ -3049,12 +3054,12 @@
         if(!d) return;
         const sub = this.qs('#violaSub');
         if(sub) sub.textContent = d.ultima_verificacao
-            ? `Violações registradas pela Kwai nos últimos 30 dias · última verificação: ${this._violaData(d.ultima_verificacao)}`
-            : 'Violações registradas pela Kwai nos últimos 30 dias.';
+            ? `Violações registradas pela Kwai na sua conta · última verificação: ${this._violaData(d.ultima_verificacao)}`
+            : 'Violações registradas pela Kwai na sua conta.';
         if(d.erro){ lista.innerHTML = '<p class="txn-empty" style="color:var(--red)">Não foi possível consultar agora. Tente de novo em alguns minutos.</p>'; return; }
         if(!d.ultima_verificacao){ lista.innerHTML = '<p class="txn-empty">A primeira verificação com a Kwai ainda não aconteceu. Volte mais tarde.</p>'; return; }
         const itens = d.violacoes || [];
-        if(!itens.length){ lista.innerHTML = `<p class="txn-empty viola-ok"><span class="viola-ok-ico">${this.svgOk()}</span>Nenhuma violação nos últimos 30 dias</p>`; return; }
+        if(!itens.length){ lista.innerHTML = `<p class="txn-empty viola-ok"><span class="viola-ok-ico">${this.svgOk()}</span>Nenhuma violação registrada na sua conta</p>`; return; }
         const ST = this.constructor.VIOLA_STATUS;
         lista.innerHTML = itens.map(v => {
             const st = v.status_conta_texto || ST[String(v.status_conta)] || '';
