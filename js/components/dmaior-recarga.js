@@ -42,6 +42,30 @@
   const hostDe = u => { try { return new URL(u).hostname; } catch { return 'site do parceiro'; } };
 
 
+  // IDs do Kwai já usados, guardados SÓ neste aparelho (não há conta no sistema, então isso evita
+  // digitar tudo de novo). O ID do Kwai é público — é o @ do perfil —, e some com a limpeza do
+  // navegador ou pelo botão de remover.
+  const CHAVE_IDS = 'dmaior_recarga_ids';
+  function idsSalvos() {
+    try {
+      const v = JSON.parse(localStorage.getItem(CHAVE_IDS) || '[]');
+      return Array.isArray(v) ? v.filter(x => typeof x === 'string' && /^[A-Za-z0-9_.\-]{2,40}$/.test(x)).slice(0, 5) : [];
+    } catch (_) { return []; }
+  }
+  function guardarId(id) {
+    try {
+      const lista = [id, ...idsSalvos().filter(x => x.toLowerCase() !== id.toLowerCase())].slice(0, 5);
+      localStorage.setItem(CHAVE_IDS, JSON.stringify(lista));
+    } catch (_) { /* navegador sem storage (anônimo, bloqueado): segue sem salvar */ }
+  }
+  function esquecerId(id) {
+    try {
+      const lista = idsSalvos().filter(x => x.toLowerCase() !== id.toLowerCase());
+      if (lista.length) localStorage.setItem(CHAVE_IDS, JSON.stringify(lista));
+      else localStorage.removeItem(CHAVE_IDS);
+    } catch (_) { /* idem */ }
+  }
+
   const ICONES = {
     gem: '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
     send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
@@ -51,6 +75,7 @@
     ext: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
     refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
     alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    lixo: '<path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
     help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
   };
   const ico = n => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONES[n] || ''}</svg>`;
@@ -241,6 +266,10 @@
         .chips{ display:flex; flex-wrap:wrap; gap:6px; }
         .chip{ min-height:36px; padding:6px 14px; border-radius:999px; border:1px solid var(--c-border); background:transparent; color:var(--c-sub); font:inherit; font-size:.8rem; cursor:pointer; }
         .chip.on{ border-color:var(--c-cyan); color:var(--c-cyan); background:var(--c-tint); }
+        .chip-id{ display:inline-flex; align-items:center; }
+        .chip-id .chip{ border-top-right-radius:0; border-bottom-right-radius:0; border-right:none; max-width:170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .chip-id .esq{ display:grid; place-items:center; width:32px; min-height:36px; border:1px solid var(--c-border); border-left:none; border-radius:0 999px 999px 0; background:transparent; color:var(--c-muted); cursor:pointer; font-size:.8rem; }
+        .chip-id .esq:hover{ color:var(--c-red); background:var(--c-row); }
         .field{ display:flex; flex-direction:column; gap:5px; }
         .field span{ font-size:.72rem; color:var(--c-muted); letter-spacing:.06em; text-transform:uppercase; }
         input{ width:100%; min-height:44px; padding:10px 13px; border-radius:12px; border:1px solid var(--c-border); background:var(--c-solid); color:var(--c-text); font:inherit; font-size:16px; }
@@ -450,6 +479,36 @@
       this._step = 'AGUARDANDO_ID';
       this._add('bot', msg || 'Primeiro, me informe o <strong>ID do Kwai</strong> que vai receber os diamantes.');
       this._entrada(true, 'Digite o ID do Kwai…');
+      this._mostrarIdsSalvos();
+    }
+
+    // Atalho para quem já recarregou neste aparelho.
+    _mostrarIdsSalvos() {
+      const g = this._gen;
+      const ids = idsSalvos();
+      if (!ids.length) return;
+      const w = this._bloco(`
+        <div class="lbl">Usar de novo, neste aparelho</div>
+        <div class="chips" data-ids>${ids.map(id => `
+          <span class="chip-id"><button type="button" class="chip" data-usar="${esc(id)}">${esc(id)}</button><button type="button" class="esq" data-esquecer="${esc(id)}" aria-label="Esquecer ${esc(id)}" title="Esquecer este ID">${ico('lixo')}</button></span>`).join('')}
+        </div>
+        <p class="small">Fica salvo só neste aparelho. Toque na lixeira para esquecer.</p>`);
+      w.addEventListener('click', e => {
+        const usar = e.target.closest('[data-usar]');
+        if (usar && this._ok(g) && this._step === 'AGUARDANDO_ID') {
+          w.remove();
+          this._in.value = usar.dataset.usar;
+          this._onEnviarId();
+          return;
+        }
+        const esquecer = e.target.closest('[data-esquecer]');
+        if (esquecer) {
+          esquecerId(esquecer.dataset.esquecer);
+          esquecer.closest('.chip-id')?.remove();
+          if (!w.querySelector('.chip-id')) w.remove();
+        }
+      });
+      this._idsBloco = w;
     }
     async _onEnviarId() {
       if (this._step !== 'AGUARDANDO_ID') return;
@@ -459,6 +518,7 @@
         return;
       }
       const g = this._gen;
+      if (this._idsBloco?.isConnected) { this._idsBloco.remove(); this._idsBloco = null; }
       this._add('user', esc(id));
       this._entrada(false);
       this._step = 'VALIDANDO';
@@ -488,7 +548,7 @@
       const img = card.querySelector('img');
       if (img) { img.addEventListener('error', () => img.remove()); img.src = foto; }
       this._botoes([
-        { html: `${ico('check')} Sim, sou eu`, fn: () => { if (!this._ok(g)) return; this._add('user', 'Sim, sou eu'); this._calculadora(); } },
+        { html: `${ico('check')} Sim, sou eu`, fn: () => { if (!this._ok(g)) return; guardarId(p.kwai_id); this._add('user', 'Sim, sou eu'); this._calculadora(); } },
         { html: 'Não sou eu', cls: 'sec', fn: () => { if (!this._ok(g)) return; this._add('user', 'Não sou eu'); this._perfil = null; this._pedirId('Sem problema! Digite o <strong>ID do Kwai</strong> de novo.'); } },
       ]);
     }
@@ -598,7 +658,7 @@
       this._add('bot', 'Tudo pronto. Para pagar, abra a página segura do provedor:');
       const w = this._bloco(`
         ${url ? `<a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir pagamento seguro</a>
-        <p class="small">${ico('lock')}Abre em outra aba, no site do provedor de pagamento (<strong>${esc(hostDe(url))}</strong>). Lá você informa <strong>nome e CPF</strong> e paga o PIX. Confira o endereço e o valor antes de pagar — o resultado aparece aqui.</p>` : '<p class="small">Não recebemos o endereço de pagamento. Tente de novo em instantes.</p>'}
+        <p class="small">${ico('lock')}Abre em outra aba, no site do provedor de pagamento (<strong>${esc(hostDe(url))}</strong>). Lá você confirma o pedido, informa <strong>nome e CPF</strong> e paga o PIX. Confira o endereço e o valor antes de pagar — o resultado aparece aqui.</p>` : '<p class="small">Não recebemos o endereço de pagamento. Tente de novo em instantes.</p>'}
         <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
       this._wPag = w;
       this._focarProx = true;           // o formulário sumiu: foco vai pro "Já paguei"
