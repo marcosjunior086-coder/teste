@@ -277,7 +277,8 @@
         /* Pagamento do provedor dentro do chat, com o endereço dele sempre à vista */
         .pagbox{ border:1px solid var(--c-border); border-radius:14px; overflow:hidden; background:#fff; }
         .pagtop{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; background:var(--c-solid); border-bottom:1px solid var(--c-border); }
-        .pagdom{ display:inline-flex; align-items:center; gap:5px; font-size:.72rem; color:var(--c-sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pagdom{ display:inline-flex; align-items:center; gap:5px; min-width:0; flex:1; font-size:.72rem; color:var(--c-sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pagdom strong{ overflow:hidden; text-overflow:ellipsis; }
         .pagdom strong{ color:var(--c-text); font-weight:600; }
         .pagabrir{ display:inline-flex; align-items:center; gap:4px; font-size:.72rem; color:var(--c-cyan); text-decoration:none; white-space:nowrap; flex-shrink:0; }
         .pagabrir:hover{ text-decoration:underline; }
@@ -660,7 +661,7 @@
         <div class="pagbox">
           <div class="pagtop">
             <span class="pagdom">${ico('lock')}<strong>${esc(hostDe(url))}</strong></span>
-            <a class="pagabrir" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir em outra aba</a>
+            <a class="pagabrir" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Abrir em outra aba">${ico('ext')} Outra aba</a>
           </div>
           <iframe class="pagframe" title="Pagamento PIX" referrerpolicy="no-referrer"
                   sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"></iframe>
