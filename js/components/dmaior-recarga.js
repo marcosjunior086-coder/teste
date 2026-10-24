@@ -921,8 +921,9 @@
         // "manual" no ID imita o parceiro e a Kwai sem mostrar o perfil.
         if (/manual/i.test(c.kwai_id)) return R(200, { ok: true, fonte: 'manual', confirmacao: 'mock', perfil: { nome: '', kwai_id: c.kwai_id, foto_url: null, seguidores: null, seguindo: null, verificado: false } });
         return R(200, { ok: true, fonte: 'parceiro', confirmacao: 'mock', perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null,
-          seguidores: semNum ? null : 12345, seguindo: semNum ? null : 445, verificado: !semNum } });
+          seguidores: (semNum || /tardio/i.test(c.kwai_id)) ? null : 12345, seguindo: semNum ? null : 445, verificado: !semNum } });
       }
+      if (rota === '/seguidores') { await pausa(1200); return R(200, { ok: true, seguidores: /semnumeros/i.test(c.kwai_id) ? null : 98765 }); }
       if (rota === '/get-price') return R(200, { ok: true, diamantes: c.diamantes, valor: Math.round(c.diamantes * PRECO_MOCK * 100) / 100, estimado: true });
       // O ticket de mentira imita o do Worker: vale só pro pedido que o assinou.
       const tk = ordem => `mock:${ordem}`;
@@ -1081,10 +1082,23 @@
         <div style="min-width:0"><div class="pn">${esc(p.nome || p.kwai_id)}${selo}</div><div class="pid">ID: ${esc(p.kwai_id)}</div>${numeros}</div></div>`);
       const img = card.querySelector('img');
       if (img) { img.addEventListener('error', () => img.remove()); img.src = foto; }
+      if (!numeros) this._buscarSeguidores(g, card, p);
       this._botoes([
         { html: `${ico('check')} Sim, sou eu`, fn: () => { if (!this._ok(g)) return; guardarId(p.kwai_id); guardarPerfil(p); this._add('user', 'Sim, sou eu'); this._calculadora(); } },
         { html: 'Não sou eu', cls: 'sec', fn: () => { if (!this._ok(g)) return; this._add('user', 'Não sou eu'); this._perfil = null; this._pedirId('Sem problema! Digite o <strong>ID do Kwai</strong> de novo.'); } },
       ]);
+    }
+
+    // A página pública da Kwai (de onde vêm os seguidores) demora; o cartão aparece sem esperar por
+    // ela e o número entra aqui quando chegar. Se não vier, o cartão fica como está.
+    async _buscarSeguidores(g, card, p) {
+      const r = await this._chamar('/seguidores', { kwai_id: p.kwai_id });
+      if (!this._ok(g) || !card.isConnected || this._perfil !== p) return;
+      const seg = r.ok ? contagemCurta(r.json.seguidores) : '';
+      if (!seg) return;
+      p.seguidores = r.json.seguidores;
+      const pid = card.querySelector('.pid');
+      if (pid && !card.querySelector('.pnum')) pid.insertAdjacentHTML('afterend', `<div class="pnum"><span><strong>${seg}</strong> seguidores</span></div>`);
     }
 
     // ── passo 2: quantidade de diamantes ─────────────────────────
