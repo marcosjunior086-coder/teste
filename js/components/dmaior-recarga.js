@@ -1126,7 +1126,7 @@
       const g = this._gen;
       this._step = 'DADOS_DO_PAGADOR';
       // Pedir de novo tira da tela a tentativa anterior, com o que estava digitado nela.
-      if (this._wDados?.isConnected) this._wDados.remove();
+      this._largarDados();
       this._add('bot', `Pedido <strong>#${esc(this._orderNo)}</strong> criado. Agora preciso dos dados de quem vai pagar:`);
       const w = this._bloco(`
         <div class="lbl">Resumo do pedido</div>
@@ -1184,11 +1184,21 @@
         // O bloco inteiro sai da tela: campo desabilitado continua guardando o que foi digitado, e
         // o shadow DOM é aberto — qualquer script da página leria dali. Na conversa não fica nem o
         // nome, só o aviso de que os dados seguiram.
-        w.remove();
+        this._largarDados();
         this._add('user', 'Dados enviados');
         this._pedirPagamento(nome, documento);
       });
       nomeEl.focus({ preventScroll: true });
+    }
+
+    // Elemento fora da tela continua com os valores nos campos enquanto alguém segurar a referência;
+    // por isso apaga os campos e solta o bloco, em vez de só removê-lo.
+    _largarDados() {
+      const w = this._wDados;
+      this._wDados = null;
+      if (!w) return;
+      for (const el of w.querySelectorAll('input')) el.value = '';
+      w.remove();
     }
 
     // ── passo 5: endereço do pagamento ──────────────────────────
@@ -1402,6 +1412,15 @@
       if (!this._ok(g) || this._step !== 'AGUARDANDO_PAGAMENTO' || seqPedido !== this._pedidoSeq || pedido !== this._orderNo) return;
       if (!r.ok) {
         this._falhasPoll++;
+        if (r.status === 429) {
+          // Limite de consultas: insistir de 5 em 5s só prolonga o bloqueio. Espera um minuto e
+          // não conta essa volta no máximo de consultas automáticas.
+          this._pollN--;
+          this._setStt('Muitas consultas agora. Verifico de novo em 1 minuto…');
+          this._pararPoll();
+          this._pollTimer = setTimeout(() => this._checar(g, false), 60000);
+          return;
+        }
         if (this._falhasPoll >= 3 || manual) this._setStt(r.rede ? 'Sem conexão. Tentando de novo…' : 'Não consegui consultar agora. Tentando de novo…');
         this._agendarPoll(g); return;
       }

@@ -392,7 +392,7 @@ class DmaiorHomeWebpro extends HTMLElement {
 
     <!-- RECARGA -->
     <section class="wrap sec">
-      <a href="https://rocketbunny.club/@DMAIOR_AGENCY" target="_blank" rel="noopener noreferrer" class="surface strip recarga">
+      <a href="recarga" class="surface strip recarga">
         <div class="l">
           <span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg></span>
           <div><h2>Recarga de Diamantes</h2><p>Rápido, seguro e pelo melhor preço — direto no seu perfil Kwai.</p></div>

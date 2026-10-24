@@ -6,9 +6,12 @@
 /rank-geral/    /painel/index.html 301
 /ranking.html   /painel/index.html 301
 /ranking.html/  /painel/index.html 301
-/recarga        https://rocketbunny.club/@DMAIOR_AGENCY  301
-/recarga/       https://rocketbunny.club/@DMAIOR_AGENCY  301
-/recarga.html   https://rocketbunny.club/@DMAIOR_AGENCY  301
+# Recarga de diamantes: o chat próprio (recarga-chat.html). Reescrita (200), a URL do navegador
+# continua /recarga. Destino SEM .html, como no /recrutamento (o Pages já serve a URL limpa).
+# A página define <base href="/">, então os arquivos dela resolvem certo mesmo servida aqui.
+/recarga        /recarga-chat  200
+/recarga/       /recarga       301
+/recarga.html   /recarga       301
 /formulario     /recrutamento.html  301
 # Links de indicação dos afiliados: /recrutamento/<id> e o curto /r/<id>. Reescrita (200),
 # a URL do navegador não muda; recrutamento.html lê o código em location.pathname.
