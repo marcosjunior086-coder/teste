@@ -619,6 +619,7 @@
       this._gen++;
       this._pararPoll();
       this._perfil = null; this._diamantes = 0; this._valor = null; this._orderNo = null; this._ticket = '';
+      this._confirmacao = ''; this._idParaConfirmar = null;
       this._pedidoSeq++; this._wPag = null; this._acoes = null; this._humor('neutro');
       this._mockStatus = 'AGUARDANDO';
       this._mockPixN = 0;
@@ -917,7 +918,9 @@
         if (/nao.?existe|invalido/i.test(c.kwai_id)) return R(404, { ok: false, erro: 'ID do Kwai não encontrado. Confira e tente de novo.' });
         // "semnumeros" no ID imita a busca da Kwai fora do ar: o cartão aparece sem a linha de números.
         const semNum = /semnumeros/i.test(c.kwai_id);
-        return R(200, { ok: true, perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null,
+        // "manual" no ID imita o parceiro e a Kwai sem mostrar o perfil.
+        if (/manual/i.test(c.kwai_id)) return R(200, { ok: true, fonte: 'manual', confirmacao: 'mock', perfil: { nome: '', kwai_id: c.kwai_id, foto_url: null, seguidores: null, seguindo: null, verificado: false } });
+        return R(200, { ok: true, fonte: 'parceiro', confirmacao: 'mock', perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null,
           seguidores: semNum ? null : 12345, seguindo: semNum ? null : 445, verificado: !semNum } });
       }
       if (rota === '/get-price') return R(200, { ok: true, diamantes: c.diamantes, valor: Math.round(c.diamantes * PRECO_MOCK * 100) / 100, estimado: true });
@@ -996,6 +999,7 @@
       this._idsBloco = w;
     }
     async _onEnviarId() {
+      if (this._step === 'CONFIRMANDO_ID') return this._conferirRedigitado();
       if (this._step !== 'AGUARDANDO_ID') return;
       const id = this._in.value.trim().replace(/^@+/, '').replace(/\s+/g, '');
       if (!/^[A-Za-z0-9_.\-]{2,40}$/.test(id)) {
@@ -1017,8 +1021,48 @@
         return;
       }
       this._perfil = r.json.perfil;
+      this._confirmacao = String(r.json.confirmacao || '');
+      if (r.json.fonte === 'manual') return this._confirmarManual(id);
       this._humor('feliz');
       this._mostrarPerfil();
+    }
+
+    // Nem o parceiro nem a Kwai mostraram o perfil (o parceiro passou a exigir login com Google em
+    // 2026-10-24, e a Kwai às vezes manda a página sem dados). Isso NÃO quer dizer que o ID não
+    // existe: o cliente confere no app e digita de novo. Os diamantes vão pro ID digitado, então
+    // errar aqui é o que mais custa — por isso a segunda digitação, sem atalho nem preenchimento.
+    // Sem atalho mesmo pra ID salvo no aparelho: "já usado aqui" não prova que estava certo.
+    _confirmarManual(id) {
+      this._humor('neutro');
+      this._step = 'CONFIRMANDO_ID';
+      this._idParaConfirmar = id;
+      this._add('bot', `Não consegui mostrar o perfil agora. Os diamantes vão para o ID <strong>${esc(id)}</strong>, então confira no aplicativo do Kwai (no seu perfil, abaixo do nome) e <strong>digite o ID de novo</strong> para confirmar.`);
+      this._entrada(true, 'Digite o ID de novo…');
+      this._in.setAttribute('autocomplete', 'off');
+      this._in.focus({ preventScroll: true });
+    }
+    _conferirRedigitado() {
+      const de = this._idParaConfirmar || '';
+      const id = this._in.value.trim().replace(/^@+/, '').replace(/\s+/g, '');
+      if (!id) return;
+      this._add('user', esc(id));
+      this._entrada(false);
+      this._idParaConfirmar = null;
+      if (id.toLowerCase() !== de.toLowerCase()) {
+        this._perfil = null; this._confirmacao = '';
+        this._add('erro', `${ico('alert')} Os dois IDs não são iguais.`);
+        this._pedirId('Vamos de novo: digite o <strong>ID do Kwai</strong> que vai receber os diamantes.');
+        return;
+      }
+      this._idConfirmado(de);
+    }
+    // Não salva o ID aqui: no modo manual ele só vai pra lista do aparelho depois do pagamento
+    // confirmado (em _concluir), pra um ID digitado errado não virar atalho.
+    _idConfirmado(id) {
+      this._perfil = { kwai_id: id, nome: '', foto_url: null, manual: true };
+      this._add('bot', `${ico('check')} ID <strong>${esc(id)}</strong> confirmado.`);
+      this._humor('feliz');
+      this._calculadora();
     }
 
     _mostrarPerfil() {
@@ -1102,9 +1146,16 @@
       const g = this._gen;
       this._step = 'CRIANDO_ORDEM';
       const dig = this._digitando();
-      const r = await this._chamar('/create-order', { kwai_id: this._perfil.kwai_id, diamantes: this._diamantes });
+      const r = await this._chamar('/create-order', { kwai_id: this._perfil.kwai_id, diamantes: this._diamantes, confirmacao: this._confirmacao });
       dig.remove();
       if (!this._ok(g)) return;
+      if (r.status === 403) {
+        // Confirmação vencida (passou mais de uma hora) ou de outro ID: confere o ID de novo.
+        this._add('erro', `${ico('alert')} ${esc(this._msgErro(r, 'Confirme o ID do Kwai de novo.'))}`);
+        this._perfil = null; this._confirmacao = '';
+        this._pedirId();
+        return;
+      }
       if (!r.ok || !r.json.order_no) {
         this._add('erro', `${ico('alert')} ${esc(this._msgErro(r, 'Não foi possível criar o pedido agora.'))}`);
         this._botoes([
@@ -1133,6 +1184,7 @@
         <div class="resumo">
           <div><span>Diamantes</span><strong>${num(this._diamantes)}</strong></div>
           <div><span>ID do Kwai</span><strong>${esc(this._perfil.kwai_id)}</strong></div>
+          ${this._perfil.manual ? `<div class="small">Os diamantes vão para este ID. Se estiver errado, não gere o PIX: recarregue a página e comece de novo.</div>` : ''}
           ${this._valor ? `<div><span>Total a pagar</span><strong>${brl(this._valor)}</strong></div>` : ''}
         </div>
         <label class="field"><span>Nome do titular</span><input data-nome autocomplete="name" maxlength="50" placeholder="Como está na conta do PIX"></label>
@@ -1437,6 +1489,7 @@
       this._pararPoll();
       this._step = 'CONCLUIDO';
       this._pedidoSeq++;
+      if (this._perfil?.manual) guardarId(this._perfil.kwai_id);
       this._encerrarPagamento('Pagamento confirmado');
       this._add('ok', `${ico('check')} <strong>Pagamento confirmado!</strong> Estamos creditando <strong>${num(this._diamantes)} diamantes</strong> em <strong>${esc(this._perfil?.nome || this._perfil?.kwai_id || 'sua conta')}</strong>. Costuma levar poucos minutos.`);
       this._fim();
