@@ -1072,10 +1072,10 @@
       this._add('bot', 'Encontrei este perfil. <strong>É você?</strong>');
       const foto = typeof p.foto_url === 'string' && /^https:\/\//i.test(p.foto_url) ? p.foto_url : '';
       const inicial = esc(String(p.nome || p.kwai_id || '?').trim().charAt(0).toUpperCase() || '?');
-      // Seguidores e seguindo ajudam a pessoa a ter certeza de que é o perfil certo. Quando a busca
-      // não traz os números, a linha simplesmente não aparece.
-      const seg = contagemCurta(p.seguidores), sgd = contagemCurta(p.seguindo);
-      const numeros = (seg || sgd) ? `<div class="pnum">${seg ? `<span><strong>${seg}</strong> seguidores</span>` : ''}${sgd ? `<span><strong>${sgd}</strong> seguindo</span>` : ''}</div>` : '';
+      // Os seguidores ajudam a pessoa a ter certeza de que é o perfil certo ("seguindo" saiu a pedido
+      // do dono: poluía sem ajudar). Quando a busca não traz o número, a linha não aparece.
+      const seg = contagemCurta(p.seguidores);
+      const numeros = seg ? `<div class="pnum"><span><strong>${seg}</strong> seguidores</span></div>` : '';
       const selo = p.verificado === true ? `<span class="selo" title="Perfil verificado" aria-label="Perfil verificado">${ico('check')}</span>` : '';
       const card = this._bloco(`<div class="perfil"><div class="av"><b>${inicial}</b>${foto ? '<img alt="" referrerpolicy="no-referrer" loading="lazy">' : ''}</div>
         <div style="min-width:0"><div class="pn">${esc(p.nome || p.kwai_id)}${selo}</div><div class="pid">ID: ${esc(p.kwai_id)}</div>${numeros}</div></div>`);
