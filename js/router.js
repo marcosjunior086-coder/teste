@@ -14,7 +14,7 @@ const Router = {
   routes: {
     '/':                '/index.html',
     '/rank-geral':      '/painel/index.html', // ranking agora é exclusivo do painel do streamer
-    '/recarga':         '/recarga',
+    '/recarga':         'https://rocketbunny.club/@DMAIOR_AGENCY',
     '/politicas':       '/politicas.html',
     '/tutoriais':       '/tutoriais.html',
     '/formulario':      '/recrutamento.html',
