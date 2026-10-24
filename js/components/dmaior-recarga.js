@@ -700,8 +700,6 @@
         .av img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
         .pn{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:1.02rem; line-height:1.15; overflow-wrap:anywhere; }
         .pid{ font-size:.78rem; color:var(--c-muted); margin-top:2px; overflow-wrap:anywhere; }
-        .pnum{ display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:5px; font-size:.8rem; color:var(--c-sub); }
-        .pnum strong{ color:var(--c-text); font-weight:700; }
         .selo{ display:inline-grid; place-items:center; width:16px; height:16px; margin-left:6px; border-radius:50%; background:var(--c-cyan); color:#fff; font-size:.6rem; vertical-align:2px; }
         .chip .cft{ width:22px; height:22px; border-radius:50%; object-fit:cover; flex-shrink:0; }
         .chip-id .chip{ display:inline-flex; align-items:center; gap:7px; }
@@ -923,7 +921,7 @@
         return R(200, { ok: true, fonte: 'parceiro', confirmacao: 'mock', perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null,
           seguidores: (semNum || /tardio/i.test(c.kwai_id)) ? null : 12345, seguindo: semNum ? null : 445, verificado: !semNum } });
       }
-      if (rota === '/seguidores') { await pausa(1200); return R(200, { ok: true, seguidores: /semnumeros/i.test(c.kwai_id) ? null : 98765 }); }
+      if (rota === '/foto') { await pausa(1200); return R(200, { ok: true, foto_url: /semfoto/i.test(c.kwai_id) ? null : 'https://images.weserv.nl/?url=placehold.co/80x80.png' }); }
       if (rota === '/get-price') return R(200, { ok: true, diamantes: c.diamantes, valor: Math.round(c.diamantes * PRECO_MOCK * 100) / 100, estimado: true });
       // O ticket de mentira imita o do Worker: vale só pro pedido que o assinou.
       const tk = ordem => `mock:${ordem}`;
@@ -1073,32 +1071,33 @@
       this._add('bot', 'Encontrei este perfil. <strong>É você?</strong>');
       const foto = typeof p.foto_url === 'string' && /^https:\/\//i.test(p.foto_url) ? p.foto_url : '';
       const inicial = esc(String(p.nome || p.kwai_id || '?').trim().charAt(0).toUpperCase() || '?');
-      // Os seguidores ajudam a pessoa a ter certeza de que é o perfil certo ("seguindo" saiu a pedido
-      // do dono: poluía sem ajudar). Quando a busca não traz o número, a linha não aparece.
-      const seg = contagemCurta(p.seguidores);
-      const numeros = seg ? `<div class="pnum"><span><strong>${seg}</strong> seguidores</span></div>` : '';
+      // Só nome, ID e foto: seguidores saíram a pedido do dono (deixavam a confirmação lenta).
       const selo = p.verificado === true ? `<span class="selo" title="Perfil verificado" aria-label="Perfil verificado">${ico('check')}</span>` : '';
       const card = this._bloco(`<div class="perfil"><div class="av"><b>${inicial}</b>${foto ? '<img alt="" referrerpolicy="no-referrer" loading="lazy">' : ''}</div>
-        <div style="min-width:0"><div class="pn">${esc(p.nome || p.kwai_id)}${selo}</div><div class="pid">ID: ${esc(p.kwai_id)}</div>${numeros}</div></div>`);
+        <div style="min-width:0"><div class="pn">${esc(p.nome || p.kwai_id)}${selo}</div><div class="pid">ID: ${esc(p.kwai_id)}</div></div></div>`);
       const img = card.querySelector('img');
       if (img) { img.addEventListener('error', () => img.remove()); img.src = foto; }
-      if (!numeros) this._buscarSeguidores(g, card, p);
+      if (!foto) this._buscarFoto(g, card, p);
       this._botoes([
         { html: `${ico('check')} Sim, sou eu`, fn: () => { if (!this._ok(g)) return; guardarId(p.kwai_id); guardarPerfil(p); this._add('user', 'Sim, sou eu'); this._calculadora(); } },
         { html: 'Não sou eu', cls: 'sec', fn: () => { if (!this._ok(g)) return; this._add('user', 'Não sou eu'); this._perfil = null; this._pedirId('Sem problema! Digite o <strong>ID do Kwai</strong> de novo.'); } },
       ]);
     }
 
-    // A página pública da Kwai (de onde vêm os seguidores) demora; o cartão aparece sem esperar por
-    // ela e o número entra aqui quando chegar. Se não vier, o cartão fica como está.
-    async _buscarSeguidores(g, card, p) {
-      const r = await this._chamar('/seguidores', { kwai_id: p.kwai_id });
+    // A foto só existe na página pública da Kwai, que demora; o cartão aparece sem ela (com a
+    // inicial) e a foto entra aqui quando chegar. Se não vier, fica a inicial.
+    async _buscarFoto(g, card, p) {
+      const r = await this._chamar('/foto', { kwai_id: p.kwai_id });
       if (!this._ok(g) || !card.isConnected || this._perfil !== p) return;
-      const seg = r.ok ? contagemCurta(r.json.seguidores) : '';
-      if (!seg) return;
-      p.seguidores = r.json.seguidores;
-      const pid = card.querySelector('.pid');
-      if (pid && !card.querySelector('.pnum')) pid.insertAdjacentHTML('afterend', `<div class="pnum"><span><strong>${seg}</strong> seguidores</span></div>`);
+      const url = r.ok && typeof r.json.foto_url === 'string' && /^https:\/\//i.test(r.json.foto_url) ? r.json.foto_url : '';
+      const av = card.querySelector('.av');
+      if (!url || !av || av.querySelector('img')) return;
+      const img = document.createElement('img');
+      img.alt = ''; img.referrerPolicy = 'no-referrer';
+      img.addEventListener('load', () => { p.foto_url = url; }, { once: true });
+      img.addEventListener('error', () => img.remove(), { once: true });
+      img.src = url;
+      av.appendChild(img);
     }
 
     // ── passo 2: quantidade de diamantes ─────────────────────────
