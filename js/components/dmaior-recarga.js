@@ -503,6 +503,26 @@
     if (d.length === 14) return digitoCnpjOk(d);
     return false;
   }
+  // WhatsApp do Brasil: DDD + número (10 ou 11 dígitos), aceitando o 55 na frente.
+  function whatsDigitos(v) {
+    let d = String(v || '').replace(/\D/g, '');
+    if ((d.length === 12 || d.length === 13) && d.startsWith('55')) d = d.slice(2);
+    return d;
+  }
+  function whatsValido(v) {
+    const d = whatsDigitos(v);
+    if (d.length !== 10 && d.length !== 11) return false;
+    if (!/^[1-9][1-9]/.test(d)) return false;
+    return d.length === 10 || d[2] === '9';
+  }
+  // (85) 99999-9999 enquanto digita.
+  function formatarWhats(v) {
+    const d = String(v || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '').slice(0, 11);
+    if (d.length <= 2) return d.length ? '(' + d : '';
+    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  }
   function nomeValido(v) {
     const n = String(v || '').replace(/\s+/g, ' ').trim();
     return n.length >= 2 && n.length <= 50;
@@ -936,6 +956,7 @@
         // imita o provedor rejeitando dados que passaram na nossa conferência.
         if (!nomeValido(c.nome)) return R(400, { ok: false, erro: 'Informe o nome do titular da conta que vai pagar.' });
         if (!documentoValido(c.documento)) return R(400, { ok: false, erro: 'CPF ou CNPJ inválido. Confira os números e tente de novo.' });
+        if (c.whatsapp != null && !whatsValido(c.whatsapp)) return R(400, { ok: false, erro: 'WhatsApp inválido. Use DDD + número, ex.: (85) 99999-9999.' });
         if (/recusad/i.test(c.nome)) return R(409, { ok: false, erro: 'O titular não confere com a conta do PIX.' });
         return R(200, { ok: true, order_no: c.order_no, pay_url: 'https://pay.dlocal.com/apm-frontend/voucher/MOCK',
           // Payload com CRC válido, igual ao que o dLocal devolve.
@@ -1202,19 +1223,22 @@
         </div>
         <label class="field"><span>Nome do titular</span><input data-nome autocomplete="name" maxlength="50" placeholder="Como está na conta do PIX"></label>
         <label class="field"><span>CPF ou CNPJ</span><input data-doc inputmode="numeric" autocomplete="off" maxlength="18" placeholder="000.000.000-00"></label>
+        <label class="field"><span>WhatsApp</span><input data-whats inputmode="tel" autocomplete="tel-national" maxlength="24" placeholder="(85) 99999-9999"></label>
         <div class="inline-erro" data-erro role="alert" hidden></div>
-        <p class="small">${ico('lock')}Precisa ser do titular da conta que vai pagar, senão o provedor recusa. Usamos só pra gerar este PIX: enviamos para a Rocket Bunny e para o provedor de pagamento, e não guardamos nada no site.</p>
+        <p class="small">${ico('lock')}Nome e CPF precisam ser do titular da conta que vai pagar, senão o provedor recusa. O WhatsApp é pra revenda falar com você se houver algum problema com o pedido (como ID do Kwai errado). Enviamos para a Rocket Bunny e para o provedor de pagamento, e não guardamos nada no site.</p>
         <button type="button" class="btn full" data-ir disabled>Gerar PIX</button>`);
 
       this._wDados = w;
       const nomeEl = w.querySelector('[data-nome]');
       const docEl = w.querySelector('[data-doc]');
+      const whatsEl = w.querySelector('[data-whats]');
       const erroEl = w.querySelector('[data-erro]');
       const ir = w.querySelector('[data-ir]');
 
+      const tudoOk = () => nomeValido(nomeEl.value) && documentoValido(docEl.value) && whatsValido(whatsEl.value);
       const conferir = () => {
         erroEl.hidden = true;
-        ir.disabled = !(nomeValido(nomeEl.value) && documentoValido(docEl.value));
+        ir.disabled = !tudoOk();
       };
       nomeEl.addEventListener('input', conferir);
       docEl.addEventListener('input', () => {
@@ -1225,7 +1249,7 @@
         if (tinhaLetra) {
           erroEl.textContent = 'Por enquanto o provedor só aceita CPF e CNPJ com números.';
           erroEl.hidden = false;
-          ir.disabled = !(nomeValido(nomeEl.value) && documentoValido(docEl.value));
+          ir.disabled = !tudoOk();
           return;
         }
         conferir();
@@ -1239,19 +1263,27 @@
           : 'O CPF tem 11 números e o CNPJ, 14.';
         erroEl.hidden = false;
       });
-      for (const el of [nomeEl, docEl]) {
+      whatsEl.addEventListener('input', () => { whatsEl.value = formatarWhats(whatsEl.value); conferir(); });
+      whatsEl.addEventListener('blur', () => {
+        const d = whatsDigitos(whatsEl.value);
+        if (!d || whatsValido(d)) return;
+        erroEl.textContent = 'Confira o WhatsApp: DDD + número, ex.: (85) 99999-9999.';
+        erroEl.hidden = false;
+      });
+      for (const el of [nomeEl, docEl, whatsEl]) {
         el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!ir.disabled) ir.click(); } });
       }
       ir.addEventListener('click', () => {
         if (ir.disabled || !this._ok(g)) return;
         const nome = nomeEl.value.replace(/\s+/g, ' ').trim();
         const documento = docEl.value.replace(/\D/g, '');
+        const whatsapp = whatsDigitos(whatsEl.value);
         // O bloco inteiro sai da tela: campo desabilitado continua guardando o que foi digitado, e
         // o shadow DOM é aberto — qualquer script da página leria dali. Na conversa não fica nem o
         // nome, só o aviso de que os dados seguiram.
         this._largarDados();
         this._add('user', 'Dados enviados');
-        this._pedirPagamento(nome, documento);
+        this._pedirPagamento(nome, documento, whatsapp);
       });
       nomeEl.focus({ preventScroll: true });
     }
@@ -1269,11 +1301,11 @@
     // ── passo 5: endereço do pagamento ──────────────────────────
     // Nome e documento chegam por parâmetro e morrem aqui: nunca viram propriedade do componente,
     // justamente pra não sobrar nada legível depois que o pagamento é gerado.
-    async _pedirPagamento(nome, documento) {
+    async _pedirPagamento(nome, documento, whatsapp) {
       const g = this._gen;
       this._step = 'GERANDO_PAGAMENTO';
       const dig = this._digitando();
-      const r = await this._chamar('/pay-link', { order_no: this._orderNo, ticket: this._ticket, nome, documento });
+      const r = await this._chamar('/pay-link', { order_no: this._orderNo, ticket: this._ticket, nome, documento, whatsapp });
       dig.remove();
       if (!this._ok(g)) return;
       if (!r.ok || !r.json.pay_url) {
