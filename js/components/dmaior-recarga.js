@@ -912,7 +912,8 @@
           ({ status, json } = await this._mockApi(rota, corpo));
         } else {
           const ctrl = new AbortController();
-          const to = setTimeout(() => ctrl.abort(), 20000);
+          // A criação também reconfirma a conta na Kwai antes de falar com o parceiro.
+          const to = setTimeout(() => ctrl.abort(), rota === '/create-order' ? 45000 : 20000);
           try {
             const r = await fetch(this._workerUrl + rota, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo), signal: ctrl.signal, credentials: 'omit', cache: 'no-store' });
             status = r.status;
@@ -938,10 +939,10 @@
         // "semnumeros" no ID imita a busca da Kwai fora do ar: o cartão aparece sem a linha de números.
         const semNum = /semnumeros/i.test(c.kwai_id);
         if (/manual/i.test(c.kwai_id)) return R(422, { ok: false, erro: 'Não consegui encontrar esse perfil. Confira no aplicativo do Kwai o ID abaixo do seu nome e digite novamente.' });
-        return R(200, { ok: true, fonte: 'parceiro', confirmacao: 'mock', perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, foto_url: null,
+        return R(200, { ok: true, fonte: 'kwai', confirmacao: 'mock', perfil: { nome: `Perfil de teste ${c.kwai_id}`, kwai_id: c.kwai_id, kwai_uid: '1', foto_url: null,
           seguidores: (semNum || /tardio/i.test(c.kwai_id)) ? null : 12345, seguindo: semNum ? null : 445, verificado: !semNum } });
       }
-      if (rota === '/foto') { await pausa(1200); return R(200, { ok: true, foto_url: /semfoto/i.test(c.kwai_id) ? null : 'https://images.weserv.nl/?url=placehold.co/80x80.png', confirmacao: 'mock' }); }
+      if (rota === '/foto') { await pausa(1200); return R(200, { ok: true, kwai_id: c.kwai_id, kwai_uid: c.kwai_uid, foto_url: /semfoto/i.test(c.kwai_id) ? null : 'https://images.weserv.nl/?url=placehold.co/80x80.png', confirmacao: 'mock' }); }
       if (rota === '/get-price') return R(200, { ok: true, diamantes: c.diamantes, valor: Math.round(c.diamantes * PRECO_MOCK * 100) / 100, estimado: true });
       // O ticket de mentira imita o do Worker: vale só pro pedido que o assinou.
       const tk = ordem => `mock:${ordem}`;
@@ -1038,7 +1039,7 @@
       dig.remove();
       if (!this._ok(g)) return;
       const p = r.json.perfil;
-      if (!r.ok || !p || r.json.fonte === 'manual' || p.kwai_id !== id) {
+      if (!r.ok || !p || r.json.fonte !== 'kwai' || p.kwai_id !== id || typeof p.kwai_uid !== 'string' || !/^[1-9][0-9]{0,24}$/.test(p.kwai_uid)) {
         this._add('erro', `${ico('alert')} ${esc(this._msgErro(r, 'Não consegui encontrar esse perfil. Confira no aplicativo do Kwai o ID abaixo do seu nome e digite novamente.'))}`);
         this._pedirId('Tente de novo com o seu <strong>ID do Kwai</strong>.');
         return;
@@ -1103,9 +1104,9 @@
 
     // Sem foto e assinatura do Worker, a confirmação continua bloqueada.
     async _buscarFoto(g, card, p) {
-      const r = await this._chamar('/foto', { kwai_id: p.kwai_id });
+      const r = await this._chamar('/foto', { kwai_id: p.kwai_id, kwai_uid: p.kwai_uid });
       if (!this._ok(g) || !card.isConnected || this._perfil !== p || this._step !== 'CONFIRMANDO_PERFIL') return '';
-      const url = r.ok && typeof r.json.foto_url === 'string' && /^https:\/\//i.test(r.json.foto_url) ? r.json.foto_url : '';
+      const url = r.ok && r.json.kwai_id === p.kwai_id && r.json.kwai_uid === p.kwai_uid && typeof r.json.foto_url === 'string' && /^https:\/\//i.test(r.json.foto_url) ? r.json.foto_url : '';
       this._confirmacao = url ? String(r.json.confirmacao || '') : '';
       return url;
     }
@@ -1166,7 +1167,7 @@
 
     // ── passo 3: cria o pedido ───────────────────────────────────
     async _criarOrdem() {
-      if (!this._perfilConfirmado || !this._perfil?.foto_url || !this._confirmacao) {
+      if (!this._perfilConfirmado || !this._perfil?.foto_url || !this._perfil.kwai_uid || !this._confirmacao) {
         this._pedirId('Confirme seu <strong>perfil com foto</strong> antes de continuar a recarga.');
         return;
       }
@@ -1177,7 +1178,7 @@
       dig.remove();
       if (!this._ok(g)) return;
       if (r.status === 403) {
-        // Confirmação vencida (passou mais de uma hora) ou de outro ID: confere o ID de novo.
+        // Confirmação vencida ou identidade alterada: consulta o perfil de novo.
         this._add('erro', `${ico('alert')} ${esc(this._msgErro(r, 'Confirme o ID do Kwai de novo.'))}`);
         this._perfil = null; this._confirmacao = '';
         this._pedirId();
