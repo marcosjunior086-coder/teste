@@ -2845,21 +2845,22 @@ class DimaiorAdmin extends HTMLElement {
   }
   // ── Rendimentos brutos da agência (cálculo e permissões no Worker) ──
   _rendPagina(ph){return `<div class="pag" id="pag-rendimentos">
-    ${ph('Rendimentos da agência','bars_up','Estimativa mensal por streamer · Política de julho de 2025','btnAtuRend',`<button class="btn btn-o" id="rendExportar" disabled>${this._ico('download',13)} Exportar CSV</button>`)}
+    ${ph('Rendimentos da agência','bars_up','Estimativa por streamer e total do mês · Política de julho de 2025','btnAtuRend',`<button class="btn btn-o" id="rendExportar" disabled>${this._ico('download',13)} Exportar CSV</button>`)}
     <div class="box rend-filtros"><div class="rend-filter-grid">
       <label>Mês<input id="rendMes" type="month" min="2025-07" aria-label="Mês dos rendimentos"></label>
       <label>Organização<select id="rendOrg" aria-label="Organização dos rendimentos"><option value="todas">Todas as organizações</option></select></label>
-      <label>Situação<select id="rendStatus"><option value="todos">Todas as situações</option><option value="ativo">Metas cumpridas</option><option value="em_meta">Metas em andamento</option><option value="pendencias">Com pendências</option><option value="recebido">Recebido informado</option></select></label>
+      <label>Situação<select id="rendStatus"><option value="todos">Todas as situações</option><option value="ativo">Metas cumpridas</option><option value="em_meta">Metas em andamento</option><option value="pendencias">Com pendências</option><option value="sem_calculo">Produção sem cálculo</option><option value="recebido">Recebido informado</option></select></label>
       <label>Buscar streamer<input id="rendBusca" type="search" placeholder="Nome ou UID" autocomplete="off"></label>
     </div><p class="rend-note">Valores brutos da organização selecionada. Repasses, custos e bônus pagos ao próprio streamer ficam fora deste cálculo.</p></div>
     <div id="rendMensagem" role="status" aria-live="polite"></div>
     <div class="dc2-grid rend-resumo" id="rendResumo"></div>
-    <details class="box rend-config"><summary>Conversão e critérios do cálculo</summary>
-      <form id="rendConfigForm"><div class="rend-config-grid">
+    <div id="rendIndicadores" class="rend-indicadores" role="status" aria-live="polite"></div>
+    <details class="box rend-config" id="rendConversao"><summary>Conversão e critérios do cálculo</summary>
+      <form id="rendConfigForm"><label class="rend-auto"><input id="rendAutoCot" type="checkbox" checked> Buscar o dólar automaticamente no Banco Central</label><div id="rendCambio" class="rend-note"></div><div class="rend-config-grid">
         <label>Koins por US$<input id="rendKpd" type="number" min="0.0001" max="1000000" step="any" required value="100"></label>
         <label>Cotação de referência (R$)<input id="rendCot" type="number" min="0.000001" max="1000000" step="any" placeholder="Opcional"></label>
         <button class="btn btn-o" type="submit" id="rendSalvarConfig">Salvar conversão do mês</button>
-      </div><p class="rend-note">100 Koins por US$ é uma referência inicial. Confira no demonstrativo. Valores em reais são estimativas pela cotação informada; o recebimento fica registrado em Koins.</p></form>
+      </div><p class="rend-note">100 Koins por US$ é uma referência inicial. O dólar automático usa a última cotação diária disponível; para meses anteriores, usa o fechamento até o fim daquele mês. O câmbio do repasse da Kwai pode ser diferente.</p></form>
       <ul class="rend-regras" id="rendRegras"></ul>
     </details>
     <div class="box"><div class="rend-list-head"><h2>Rendimento por streamer</h2><span id="rendContagem"></span></div><div id="rendLista">${this._loading()}</div></div>
@@ -2876,11 +2877,16 @@ class DimaiorAdmin extends HTMLElement {
       const pag=e.target.closest('[data-rend-pg]');if(pag){this._rendPg=Number(pag.dataset.rendPg);this._rendRender();}
     });
     s.getElementById('rendExportar')?.addEventListener('click',()=>this._rendExportar());
+    s.getElementById('rendAutoCot')?.addEventListener('change',e=>{s.getElementById('rendCot').disabled=e.target.checked;});
+    s.getElementById('rendIndicadores')?.addEventListener('click',e=>{
+      if(e.target.closest('[data-rend-cotacao]')){s.getElementById('rendConversao').open=true;s.getElementById('rendConversao').scrollIntoView({block:'center'});}
+      if(e.target.closest('[data-rend-pendentes]')){s.getElementById('rendStatus').value='sem_calculo';this._rendPg=1;this._rendRender();}
+    });
     s.getElementById('rendConfigForm')?.addEventListener('submit',async e=>{
       e.preventDefault();if(!e.target.reportValidity()||!this._rendDados)return;
       const mes=this._rendDados.periodo.mes,b=s.getElementById('rendSalvarConfig');b.disabled=true;
       try{
-        const d=await this._api('PUT',`/admin/rendimentos/config?mes=${mes}`,{koin_por_dolar:Number(s.getElementById('rendKpd').value),cotacao_dolar:s.getElementById('rendCot').value===''?null:Number(s.getElementById('rendCot').value)});
+        const d=await this._api('PUT',`/admin/rendimentos/config?mes=${mes}`,{koin_por_dolar:Number(s.getElementById('rendKpd').value),cotacao_dolar:s.getElementById('rendAutoCot').checked||s.getElementById('rendCot').value===''?null:Number(s.getElementById('rendCot').value)});
         if(!d?.ok)throw new Error(d?.erro||'Não foi possível salvar. Tente novamente.');
         this._toast('Conversão do mês salva.','ok');if(s.getElementById('rendMes').value===mes)await this._carregarRendimentos();
       }catch(err){this._toast(err.message,'err');}finally{b.disabled=false;}
@@ -2893,6 +2899,7 @@ class DimaiorAdmin extends HTMLElement {
     this._rendDados=null;this._rendPg=1;
     s.getElementById('rendExportar').disabled=true;s.getElementById('rendSalvarConfig').disabled=true;
     s.getElementById('rendDetalhe').hidden=true;s.getElementById('rendResumo').innerHTML='';
+    s.getElementById('rendIndicadores').textContent='';s.getElementById('rendCambio').textContent='';
     s.getElementById('rendContagem').textContent='';s.getElementById('rendMensagem').textContent='';
     if(!mesInput.reportValidity()){
       s.getElementById('rendLista').innerHTML=this._empty('calendar','Selecione um mês válido entre julho de 2025 e o mês atual.');return;
@@ -2908,6 +2915,11 @@ class DimaiorAdmin extends HTMLElement {
     org.innerHTML=`<option value="todas">Todas as organizações</option>${d.orgs.map(o=>`<option value="${this._esc(String(o.id))}">${this._esc(o.nome||String(o.id))}</option>`).join('')}<option value="sem_org">Organização não identificada</option>`;
     org.value=[...org.options].some(o=>o.value===selecionada)?selecionada:'todas';this._rendOrgInicializada=true;
     s.getElementById('rendKpd').value=d.config.koin_por_dolar;s.getElementById('rendCot').value=d.config.cotacao_dolar??'';
+    const auto=d.config.cotacao_origem==='bcb'||d.config.cotacao_dolar==null;
+    s.getElementById('rendAutoCot').checked=auto;s.getElementById('rendCot').disabled=auto;
+    s.getElementById('rendCambio').innerHTML=d.config.cotacao_aviso?this._esc(d.config.cotacao_aviso):auto&&d.config.cotacao_data?
+      `<a href="https://dadosabertos.bcb.gov.br/dataset/1-taxa-de-cambio---livre---dolar-americano-venda---diario" target="_blank" rel="noopener noreferrer">Banco Central · PTAX venda</a> de ${this._fdtData(d.config.cotacao_data)}: US$ 1 = R$ ${Number(d.config.cotacao_dolar).toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})}. Atualização diária; esta é a última taxa disponível para o período.`:
+      d.config.cotacao_dolar!=null?'Cotação manual salva para este mês. Ative a busca automática e salve para usar a taxa do Banco Central.':'A cotação automática ficará disponível com a atualização do serviço. Os valores em Koins continuam calculados.';
     s.getElementById('rendRegras').innerHTML=(d.avisos||[]).map(a=>`<li>${this._esc(a)}</li>`).join('');
     const corte=d.ultima_atualizacao?this._fdt(d.ultima_atualizacao):'sem produção registrada';
     s.getElementById('rendMensagem').textContent=`Última atualização da produção: ${corte}. Estimativas podem mudar com a revisão da Kwai. Dados recebidos devem ser conferidos no demonstrativo.`;
@@ -2919,12 +2931,17 @@ class DimaiorAdmin extends HTMLElement {
     const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     const busca=norm(s.getElementById('rendBusca').value.trim());
     return(this._rendDados?.streamers||[]).filter(r=>(org==='todas'||(org==='sem_org'?!r.org_id:String(r.org_id)===org))&&
-      (status==='todos'||(status==='ativo'?r.ativo===true:status==='pendencias'?r.pendencias.length>0:status==='recebido'?r.recebido_koin!==null:r.status==='em_meta'))&&
+      (status==='todos'||(status==='ativo'?r.ativo===true:status==='pendencias'?r.pendencias.length>0:status==='sem_calculo'?r.estimado_koin===null&&r.diamantes>0:status==='recebido'?r.recebido_koin!==null:r.status==='em_meta'))&&
       (!busca||norm(r.nome).includes(busca)||r.kwai_uid.includes(busca)));
   }
   _rendKoin(v){return v===null||v===undefined?'—':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:2})+' Koins';}
   _rendCategoria(r){return({novo:'Novo',crescimento:'Em crescimento',pro:'Pro'})[r.categoria]||'Pendente';}
   _rendHoras(min){return `${Math.floor(min/60)}h${String(min%60).padStart(2,'0')}`;}
+  _rendTetoBrl(r){
+    if(r.teto_brl!==undefined)return r.teto_brl;
+    const c=this._rendDados?.config;
+    return r.teto_koin!==null&&Number(c?.koin_por_dolar)>0&&Number(c?.cotacao_dolar)>0?Math.round(r.teto_koin/Number(c.koin_por_dolar)*Number(c.cotacao_dolar)*100)/100:null;
+  }
   _rendRender(){
     if(!this._rendDados)return;
     const s=this.shadowRoot,lista=this._rendFiltrados(),total=lista.length,porPag=20,pags=Math.max(1,Math.ceil(total/porPag));
@@ -2933,21 +2950,26 @@ class DimaiorAdmin extends HTMLElement {
     const soma=campo=>lista.reduce((a,r)=>a+(r[campo]??0),0),pendentes=lista.filter(r=>r.pendencias.length).length;
     const card=(cor,ico,valor,label,nota)=>`<div class="dc2 dc2-${cor}"><span class="dc2-ico">${this._ico(ico,22)}</span><div class="dc2-val">${valor}</div><div class="dc2-lbl">${label}</div><div class="dc2-prev">${nota}</div></div>`;
     const temBrl=lista.some(r=>r.estimado_brl!==null),recebidos=lista.filter(r=>r.recebido_koin!==null).length;
-    s.getElementById('rendResumo').innerHTML=card('azul','wallet',this._rendKoin(soma('estimado_koin')),'Subtotal estimado',temBrl?`${this._brl(soma('estimado_brl'))} de referência`:'Parte calculável; bônus desconhecidos ficam fora')+
-      card('verde','check_c',this._rendKoin(soma('recebido_koin')),'Recebido informado',`${recebidos} de ${total} streamer(s) com recebimento informado`)+
-      card('roxo','users',String(lista.filter(r=>r.ativo===true).length),'Metas cumpridas',`${total} streamer(s) nos filtros atuais`)+
-      card('gold','warning',String(pendentes),'Com pendências','Confira classificação, baseline e bônus');
+    const semCalculo=lista.filter(r=>r.estimado_koin===null&&r.diamantes>0),diamantesPendentes=semCalculo.reduce((a,r)=>a+r.diamantes,0);
+    const tetoBrl=lista.reduce((a,r)=>a+(this._rendTetoBrl(r)??0),0),cfg=this._rendDados.config;
+    s.getElementById('rendResumo').innerHTML=card('azul','wallet',temBrl?this._brl(soma('estimado_brl')):this._rendKoin(soma('estimado_koin')),'Rendimento estimado',`${this._rendKoin(soma('estimado_koin'))} · parte calculável`)+
+      card('roxo','trend',temBrl?this._brl(tetoBrl):this._rendKoin(soma('teto_koin')),'Com extra máximo','Cenário estimado; sujeito à aprovação da Kwai')+
+      card('gold','diamond',this._num(soma('diamantes')),'Diamantes do período',`${lista.filter(r=>r.diamantes>0).length} streamer(s) com diamantes`)+
+      card('verde','check_c',recebidos?this._rendKoin(soma('recebido_koin')):'Não informado','Recebido da Kwai',`${recebidos} de ${total} streamer(s) com recebimento informado`);
+    s.getElementById('rendIndicadores').innerHTML=`<p class="rend-note">${lista.filter(r=>r.ativo===true).length} streamer(s) com metas cumpridas · ${pendentes} com pendências. Os valores somam os ${total} streamers dos filtros, incluindo as outras páginas.</p>
+      ${semCalculo.length?`<p class="rend-note">${this._num(diamantesPendentes)} diamantes de ${semCalculo.length} streamer(s) ainda estão fora da estimativa por falta de dados. <button type="button" class="btn btn-o" data-rend-pendentes>Ver produção sem cálculo</button></p>`:''}
+      <p class="rend-note">${temBrl?cfg.cotacao_origem==='bcb'?`Conversão automática: dólar de ${this._fdtData(cfg.cotacao_data)} do Banco Central. `:'Conversão pela cotação manual do mês. ':'Cotação em reais indisponível; as estimativas em Koins continuam visíveis. '}<button type="button" class="btn btn-o" data-rend-cotacao>Ver cotação e fonte</button></p>`;
     s.getElementById('rendContagem').textContent=`${total} streamer(s) · página ${this._rendPg} de ${pags}`;
     if(!total){s.getElementById('rendLista').innerHTML=this._empty('search','Nenhum streamer para os filtros selecionados.');s.getElementById('rendDetalhe').hidden=true;return;}
     const situacao=r=>r.recebido_koin!==null?'Recebido informado':r.ativo===true?'Metas cumpridas':r.ativo===false?'Metas em andamento':'Dados pendentes';
     const nome=r=>`<strong>${this._esc(r.nome)}</strong><small>UID ${this._esc(r.kwai_uid)} · ${this._esc(r.org_nome||'Organização não identificada')}</small>`;
     const categoria=r=>`${this._rendCategoria(r)}<small>${r.categoria_origem==='oficial'?'Informada pela Kwai':'Classificação estimada'}</small>`;
     const base=r=>r.baseline===null?'—':this._num(r.baseline)+`<small>${r.baseline_origem==='oficial'?'Oficial':'Estimada'}</small>`;
-    const valor=r=>this._rendKoin(r.estimado_koin)+`<small>${r.parcial?'Subtotal parcial':'Estimativa pelas regras'}${r.estimado_brl!==null?' · '+this._brl(r.estimado_brl):''}</small>`;
+    const valor=r=>r.estimado_koin===null?'Aguardando dados':`${r.estimado_brl!==null?this._brl(r.estimado_brl):this._rendKoin(r.estimado_koin)}<small>${r.estimado_brl!==null?this._rendKoin(r.estimado_koin)+' · ':''}${r.parcial?'Parte calculável':'Estimativa pelas regras'}</small>${r.teto_koin>r.estimado_koin?`<small>Com extra máximo: ${this._rendTetoBrl(r)!==null?this._brl(this._rendTetoBrl(r)):this._rendKoin(r.teto_koin)}</small>`:''}`;
     const acao=r=>`<button type="button" class="btn btn-o rend-abrir" data-rend-uid="${this._esc(r.kwai_uid)}" aria-label="Ver cálculo e dados de ${this._esc(r.nome)}">Ver cálculo</button>`;
     const meta=r=>r.ativo?'Metas cumpridas':r.meta_dias===null?'Complete os dados':`Faltam ${r.faltam_dias} dia(s), ${this._rendHoras(r.faltam_minutos)} e ${this._num(r.faltam_diamantes)} diamantes`;
-    s.getElementById('rendLista').innerHTML=`<div class="rend-tabela"><table><caption class="rend-sr">Rendimentos estimados e recebimentos informados por streamer</caption><thead><tr><th scope="col">Streamer</th><th scope="col">Categoria / baseline</th><th scope="col">Produção / atividade</th><th scope="col">Base / crescimento</th><th scope="col">Bônus extra</th><th scope="col">Subtotal estimado</th><th scope="col">Recebido</th><th scope="col">Conferência</th></tr></thead><tbody>${pagina.map(r=>`<tr><td>${nome(r)}</td><td>${categoria(r)}<div class="rend-baseline">${base(r)}</div></td><td>${this._num(r.diamantes)} diamantes<small>${r.dias_validos} dias válidos · ${this._rendHoras(r.minutos)}</small><small>${meta(r)}</small></td><td>${this._rendKoin(r.base_koin)}<small>Crescimento: ${this._rendKoin(r.crescimento_koin)}</small></td><td>${r.extra_koin===null?'Aguardando Kwai':this._rendKoin(r.extra_koin)}</td><td class="rend-valor">${valor(r)}</td><td>${this._rendKoin(r.recebido_koin)}</td><td><small>${this._esc(situacao(r))}${r.pendencias.length?' · '+r.pendencias.length+' pendência(s)':''}</small>${acao(r)}</td></tr>`).join('')}</tbody></table></div>
-      <div class="rend-cards">${pagina.map(r=>`<article class="rend-card"><div>${nome(r)}</div><div class="rend-card-meta">${categoria(r)} · Baseline ${base(r)}</div><dl><div><dt>Diamantes</dt><dd>${this._num(r.diamantes)}</dd></div><div><dt>Atividade</dt><dd>${r.dias_validos} dias · ${this._rendHoras(r.minutos)}</dd></div><div><dt>Base</dt><dd>${this._rendKoin(r.base_koin)}</dd></div><div><dt>Crescimento</dt><dd>${this._rendKoin(r.crescimento_koin)}</dd></div><div><dt>Bônus extra</dt><dd>${r.extra_koin===null?'Aguardando Kwai':this._rendKoin(r.extra_koin)}</dd></div><div><dt>Recebido</dt><dd>${this._rendKoin(r.recebido_koin)}</dd></div></dl><div class="rend-card-total"><span>Subtotal estimado</span><strong>${valor(r)}</strong></div><p class="rend-note">${meta(r)}${r.pendencias.length?' · '+r.pendencias.length+' pendência(s)':''}</p>${acao(r)}</article>`).join('')}</div>
+    s.getElementById('rendLista').innerHTML=`<div class="rend-tabela"><table><caption class="rend-sr">Rendimentos estimados e recebimentos informados por streamer</caption><thead><tr><th scope="col">Streamer</th><th scope="col">Categoria / baseline</th><th scope="col">Produção / atividade</th><th scope="col">Base / crescimento</th><th scope="col">Bônus extra</th><th scope="col">Estimativa da agência</th><th scope="col">Recebido</th><th scope="col">Conferência</th></tr></thead><tbody>${pagina.map(r=>`<tr><td>${nome(r)}</td><td>${categoria(r)}<div class="rend-baseline">${base(r)}</div></td><td>${this._num(r.diamantes)} diamantes<small>${r.dias_validos} dias válidos · ${this._rendHoras(r.minutos)}</small><small>${meta(r)}</small></td><td>${this._rendKoin(r.base_koin)}<small>Crescimento: ${this._rendKoin(r.crescimento_koin)}</small></td><td>${r.extra_koin===null?'Aguardando Kwai':this._rendKoin(r.extra_koin)}</td><td class="rend-valor">${valor(r)}</td><td>${this._rendKoin(r.recebido_koin)}</td><td><small>${this._esc(situacao(r))}${r.pendencias.length?' · '+r.pendencias.length+' pendência(s)':''}</small>${acao(r)}</td></tr>`).join('')}</tbody></table></div>
+      <div class="rend-cards">${pagina.map(r=>`<article class="rend-card"><div>${nome(r)}</div><div class="rend-card-meta">${categoria(r)} · Baseline ${base(r)}</div><dl><div><dt>Diamantes</dt><dd>${this._num(r.diamantes)}</dd></div><div><dt>Atividade</dt><dd>${r.dias_validos} dias · ${this._rendHoras(r.minutos)}</dd></div><div><dt>Base</dt><dd>${this._rendKoin(r.base_koin)}</dd></div><div><dt>Crescimento</dt><dd>${this._rendKoin(r.crescimento_koin)}</dd></div><div><dt>Bônus extra</dt><dd>${r.extra_koin===null?'Aguardando Kwai':this._rendKoin(r.extra_koin)}</dd></div><div><dt>Recebido</dt><dd>${this._rendKoin(r.recebido_koin)}</dd></div></dl><div class="rend-card-total"><span>Estimativa da agência</span><strong>${valor(r)}</strong></div><p class="rend-note">${meta(r)}${r.pendencias.length?' · '+r.pendencias.length+' pendência(s)':''}</p>${acao(r)}</article>`).join('')}</div>
       ${pags>1?`<div class="pag-bar"><button data-rend-pg="${this._rendPg-1}" ${this._rendPg===1?'disabled':''}>Anterior</button><span class="pn">${this._rendPg} / ${pags}</span><button data-rend-pg="${this._rendPg+1}" ${this._rendPg===pags?'disabled':''}>Próxima</button></div>`:''}`;
   }
   _rendAbrirDetalhe(uid){
@@ -2993,8 +3015,8 @@ class DimaiorAdmin extends HTMLElement {
   }
   _rendExportar(){
     if(!this._rendDados)return;
-    const cab=['Mes','Organizacao','UID','Streamer','Categoria','Origem categoria','Baseline','Diamantes','Dias validos','Minutos','Base Koins','Crescimento Koins','Extra Koins','Subtotal estimado Koins','Estimativa parcial','Recebido informado Koins','BRL referencia','Pendencias'];
-    const linhas=this._rendFiltrados().map(r=>[this._rendDados.periodo.mes,r.org_nome||'',"'"+r.kwai_uid,r.nome,this._rendCategoria(r),r.categoria_origem,r.baseline,r.diamantes,r.dias_validos,r.minutos,r.base_koin,r.crescimento_koin,r.extra_koin,r.estimado_koin,r.parcial?'Sim':'Nao',r.recebido_koin,r.estimado_brl,r.pendencias.join(' | ')]);
+    const cab=['Mes','Organizacao','UID','Streamer','Categoria','Origem categoria','Baseline','Diamantes','Dias validos','Minutos','Base Koins','Crescimento Koins','Extra Koins','Subtotal estimado Koins','Estimativa parcial','Recebido informado Koins','BRL referencia','Cenario extra maximo Koins','Cenario extra maximo BRL','Fonte cambio','Data cambio','Pendencias'];
+    const linhas=this._rendFiltrados().map(r=>[this._rendDados.periodo.mes,r.org_nome||'',"'"+r.kwai_uid,r.nome,this._rendCategoria(r),r.categoria_origem,r.baseline,r.diamantes,r.dias_validos,r.minutos,r.base_koin,r.crescimento_koin,r.extra_koin,r.estimado_koin,r.parcial?'Sim':'Nao',r.recebido_koin,r.estimado_brl,r.teto_koin,this._rendTetoBrl(r),this._rendDados.config.cotacao_fonte||this._rendDados.config.cotacao_origem||'',this._rendDados.config.cotacao_data||'',r.pendencias.join(' | ')]);
     const cell=v=>{let t=v==null?'':String(v);if(/^[\s]*[=+@-]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"';};
     const blob=new Blob(['\uFEFF'+[cab,...linhas].map(l=>l.map(cell).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8;'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`rendimentos-agencia-${this._rendDados.periodo.mes}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -8903,6 +8925,12 @@ class DimaiorAdmin extends HTMLElement {
     #pag-rendimentos .rend-note{margin:10px 0 0}
     .rend-config summary,.rend-of-metricas summary{cursor:pointer;min-height:44px;align-content:center;color:var(--t1);font-weight:600;font-size:13px}
     .rend-config-grid{display:grid;grid-template-columns:minmax(130px,1fr) minmax(140px,1fr) auto;gap:12px;align-items:end}
+    #pag-rendimentos .rend-auto{flex-direction:row;align-items:center;min-height:44px;gap:10px;margin:0 0 8px}
+    #pag-rendimentos .rend-auto input{width:20px;min-height:20px;height:20px;flex:none;accent-color:var(--cyan)}
+    #rendCambio{margin:0 0 14px!important}
+    #rendCambio a{color:var(--cyan);text-underline-offset:3px}
+    .rend-indicadores{margin:-4px 0 18px;color:var(--t2)}
+    .rend-indicadores .btn{margin:4px 0 4px 6px;white-space:normal;text-align:left}
     .rend-regras{font-size:12px;line-height:1.7;color:var(--t2);padding-left:20px}
     .rend-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border-bottom:1px solid var(--brddim)}
     .rend-list-head h2{font:700 18px var(--dm-font-title,'Rajdhani',sans-serif);color:var(--t1);margin:0}
