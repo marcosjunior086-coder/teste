@@ -161,7 +161,7 @@ class DimaiorAdmin extends HTMLElement {
     ['Ranking e resultados',[['ranking','Ranking do Mês'],['diario'],['desempenho'],['historico'],['mesesRanking'],['dashDesemp','','comparativo grafico']]],
     ['Streamers',[['streamers'],['streamersPremium','','selo'],['statusStreamers','','ativo inativo'],['uids','Autorização de UIDs','liberar conta senha bloquear'],['buscaUid','','username'],['violacoes','','punicao banido prova kwai'],['metricas']]],
     ['Recrutamento e agentes',[['recrutamento','','candidatos'],['convites','','candidaturas link'],['agentes','','comissao'],['afiliados','','indicacao indicar streamer link bonus programa'],['agenteMigracoes','Migrações de Agente'],['solicitacoesFormularios','','google forms'],['subAcessos','Acessos das Subs','sub agencia login senha'],['subConvites','Convites','convidar streamer']]],
-    ['Financeiro',[['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate'],['recargas','','recarga diamantes rocket bunny vendas pedidos ranking clientes parceiros comissao']]],
+    ['Financeiro',[['rendimentos','','receita rendimento ganhos comissao kwai politica baseline'],['carteira','','saldo'],['saques','','pix pagamento'],['premios','','premiacao'],['tickets','','presentes resgate'],['recargas','','recarga diamantes rocket bunny vendas pedidos ranking clientes parceiros comissao']]],
     ['Engajamento',[['impulsoCtrl','Controle do Impulso','boost'],['comunicados','','avisos'],['notificacoes','','push'],['votacoes'],['pkDiario'],['historicoLive'],['personalizacao','','template moldura fundo ranking visual liberar streamer'],['videosAbertura','','video abertura home inicio pular streamer live'],['livesCategorias','','lives categoria jogos entretenimento free fire capa aba home descoberta'],['vitrine','','loja produtos shopee afiliado comissao vitrine comprar link']]],
     ['Sistema',[['monitor','','kwai cookie sessao'],['logs','','auditoria historico'],['config','','configuracoes carteira impulso premiacao taxa'],['arquivos','','fotos videos imagens armazenamento espaco r2 cloudflare apagar'],['configFormularios'],['__aparencia','Aparência','tema fonte idioma']]],
   ]; }
@@ -398,7 +398,7 @@ class DimaiorAdmin extends HTMLElement {
   _abrirNavSec(){}
   // Mapa página → seção da sidebar, só pra reabrir a seção certa quando a
   // navegação não veio de clicar num item já visível (ex: link direto).
-  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',recargas:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',livesCategorias:'engajamento',vitrine:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
+  static _NAV_SECAO_POR_PAGINA={dashboard:'principal',aoVivo:'principal',mapaAcessos:'principal',ranking:'ranking',diario:'ranking',desempenho:'ranking',historico:'ranking',mesesRanking:'ranking',dashDesemp:'ranking',streamers:'streamers',streamersPremium:'streamers',statusStreamers:'streamers',uids:'streamers',buscaUid:'streamers',violacoes:'streamers',metricas:'streamers',recrutamento:'recrutamento',convites:'recrutamento',agentes:'recrutamento',afiliados:'recrutamento',agenteMigracoes:'recrutamento',solicitacoesFormularios:'recrutamento',rendimentos:'financeiro',carteira:'financeiro',saques:'financeiro',premios:'financeiro',tickets:'financeiro',recargas:'financeiro',impulsoCtrl:'engajamento',comunicados:'engajamento',notificacoes:'engajamento',votacoes:'engajamento',pkDiario:'engajamento',historicoLive:'engajamento',personalizacao:'engajamento',videosAbertura:'engajamento',livesCategorias:'engajamento',vitrine:'engajamento',monitor:'sistema',logs:'sistema',config:'sistema',configFormularios:'sistema',arquivos:'sistema',subAcessos:'recrutamento',subConvites:'recrutamento'};
   _ir(pag){
     if(this._sub&&!DimaiorAdmin.PAGINAS_SUB.includes(pag)) pag='dashboard';
     const s=this.shadowRoot;s.querySelectorAll('.pag').forEach(e=>e.classList.remove('on'));s.getElementById('pag-'+pag)?.classList.add('on');
@@ -410,7 +410,7 @@ class DimaiorAdmin extends HTMLElement {
     this._syncMobileNav?.(pag);
     const voltar=s.getElementById('admVoltar');if(voltar)voltar.hidden=pag==='dashboard';
     setTimeout(()=>{if(this._sendHeight)this._sendHeight();},150);
-    const mapa={dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),recargas:()=>this._carregarRecargas(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),livesCategorias:()=>this._carregarLivesCat(),vitrine:()=>this._carregarVitrine(),mapaAcessos:()=>this._carregarMapaAcessos()};
+    const mapa={rendimentos:()=>this._carregarRendimentos(),dashboard:()=>this._carregarDash(),aoVivo:()=>this._carregarLives(),ranking:()=>this._carregarRanking(),diario:()=>this._carregarDiario(),desempenho:()=>this._carregarDesempenho(),historico:()=>this._carregarHistorico(),mesesRanking:()=>this._carregarMesesRanking(),dashDesemp:()=>this._carregarDashboardDesempenho(),streamers:()=>this._carregarStreamers(),streamersPremium:()=>this._carregarStreamersPremium(),statusStreamers:()=>this._carregarStatusStreamers(),buscaUid:()=>this._prepararBuscaUid(),violacoes:()=>this._carregarViolacoes(),metricas:()=>this._carregarMetricas(),recrutamento:()=>this._carregarRecrutamento(),logs:()=>this._carregarLogs(),config:()=>this._carregarConfig(),uids:()=>this._carregarUids(),carteira:()=>this._carregarCarteiraDash(),saques:()=>this._carregarSaques(),agenteMigracoes:()=>this._carregarMigracoesAgente(),solicitacoesFormularios:()=>this._carregarSolicForm(),configFormularios:()=>this._carregarConfigForm(),premios:()=>this._carregarPremios(),comunicados:()=>this._carregarComunicados(),notificacoes:()=>this._carregarNotificacoes(),votacoes:()=>this._carregarVotacoes(),pkDiario:()=>this._carregarPkDiario(),historicoLive:()=>this._carregarHistoricoLive(),impulsoCtrl:()=>this._carregarImpulsoCtrl(),monitor:()=>this._carregarMonitor(),convites:()=>this._carregarConvites(),agentes:()=>this._carregarAgentes(),afiliados:()=>this._carregarAfiliados(),tickets:()=>this._carregarTickets(),recargas:()=>this._carregarRecargas(),arquivos:()=>this._carregarArquivos(),personalizacao:()=>this._carregarPers(),videosAbertura:()=>this._carregarVideosAbertura(),livesCategorias:()=>this._carregarLivesCat(),vitrine:()=>this._carregarVitrine(),mapaAcessos:()=>this._carregarMapaAcessos()};
     mapa.subAcessos=()=>this._carregarAcessosSub();
     if(this._sub){ mapa.monitor=()=>{}; mapa.subConvites=()=>this._carregarSubConvites(); mapa.subStreamers=()=>this._carregarSubStreamers(); }
     mapa[pag]?.();
@@ -2843,6 +2843,163 @@ class DimaiorAdmin extends HTMLElement {
     el.querySelector('[data-pg="prev"]')?.addEventListener('click',()=>{this._pg.diario--;this._carregarDiario();});
     el.querySelector('[data-pg="next"]')?.addEventListener('click',()=>{this._pg.diario++;this._carregarDiario();});
   }
+  // ── Rendimentos brutos da agência (cálculo e permissões no Worker) ──
+  _rendPagina(ph){return `<div class="pag" id="pag-rendimentos">
+    ${ph('Rendimentos da agência','bars_up','Estimativa mensal por streamer · Política de julho de 2025','btnAtuRend',`<button class="btn btn-o" id="rendExportar" disabled>${this._ico('download',13)} Exportar CSV</button>`)}
+    <div class="box rend-filtros"><div class="rend-filter-grid">
+      <label>Mês<input id="rendMes" type="month" min="2025-07" aria-label="Mês dos rendimentos"></label>
+      <label>Organização<select id="rendOrg" aria-label="Organização dos rendimentos"><option value="todas">Todas as organizações</option></select></label>
+      <label>Situação<select id="rendStatus"><option value="todos">Todas as situações</option><option value="ativo">Metas cumpridas</option><option value="em_meta">Metas em andamento</option><option value="pendencias">Com pendências</option><option value="recebido">Recebido informado</option></select></label>
+      <label>Buscar streamer<input id="rendBusca" type="search" placeholder="Nome ou UID" autocomplete="off"></label>
+    </div><p class="rend-note">Valores brutos da organização selecionada. Repasses, custos e bônus pagos ao próprio streamer ficam fora deste cálculo.</p></div>
+    <div id="rendMensagem" role="status" aria-live="polite"></div>
+    <div class="dc2-grid rend-resumo" id="rendResumo"></div>
+    <details class="box rend-config"><summary>Conversão e critérios do cálculo</summary>
+      <form id="rendConfigForm"><div class="rend-config-grid">
+        <label>Koins por US$<input id="rendKpd" type="number" min="0.0001" max="1000000" step="any" required value="100"></label>
+        <label>Cotação de referência (R$)<input id="rendCot" type="number" min="0.000001" max="1000000" step="any" placeholder="Opcional"></label>
+        <button class="btn btn-o" type="submit" id="rendSalvarConfig">Salvar conversão do mês</button>
+      </div><p class="rend-note">100 Koins por US$ é uma referência inicial. Confira no demonstrativo. Valores em reais são estimativas pela cotação informada; o recebimento fica registrado em Koins.</p></form>
+      <ul class="rend-regras" id="rendRegras"></ul>
+    </details>
+    <div class="box"><div class="rend-list-head"><h2>Rendimento por streamer</h2><span id="rendContagem"></span></div><div id="rendLista">${this._loading()}</div></div>
+    <section class="box rend-detalhe" id="rendDetalhe" hidden aria-label="Dados oficiais do streamer"></section>
+  </div>`;}
+  _rendBind(){
+    const s=this.shadowRoot;
+    s.getElementById('btnAtuRend')?.addEventListener('click',()=>this._carregarRendimentos());
+    s.getElementById('rendMes')?.addEventListener('change',()=>this._carregarRendimentos());
+    for(const id of ['rendOrg','rendStatus'])s.getElementById(id)?.addEventListener('change',()=>{this._rendPg=1;this._rendRender();});
+    s.getElementById('rendBusca')?.addEventListener('input',this._dbc(()=>{this._rendPg=1;this._rendRender();},180));
+    s.getElementById('rendLista')?.addEventListener('click',e=>{
+      const detalhe=e.target.closest('[data-rend-uid]');if(detalhe)this._rendAbrirDetalhe(detalhe.dataset.rendUid);
+      const pag=e.target.closest('[data-rend-pg]');if(pag){this._rendPg=Number(pag.dataset.rendPg);this._rendRender();}
+    });
+    s.getElementById('rendExportar')?.addEventListener('click',()=>this._rendExportar());
+    s.getElementById('rendConfigForm')?.addEventListener('submit',async e=>{
+      e.preventDefault();if(!e.target.reportValidity()||!this._rendDados)return;
+      const mes=this._rendDados.periodo.mes,b=s.getElementById('rendSalvarConfig');b.disabled=true;
+      try{
+        const d=await this._api('PUT',`/admin/rendimentos/config?mes=${mes}`,{koin_por_dolar:Number(s.getElementById('rendKpd').value),cotacao_dolar:s.getElementById('rendCot').value===''?null:Number(s.getElementById('rendCot').value)});
+        if(!d?.ok)throw new Error(d?.erro||'Não foi possível salvar. Tente novamente.');
+        this._toast('Conversão do mês salva.','ok');if(s.getElementById('rendMes').value===mes)await this._carregarRendimentos();
+      }catch(err){this._toast(err.message,'err');}finally{b.disabled=false;}
+    });
+  }
+  async _carregarRendimentos(){
+    const s=this.shadowRoot,mesInput=s.getElementById('rendMes');if(!mesInput||this._sub)return;
+    const hoje=this._dataHojeBR();mesInput.max=hoje.slice(0,7);if(!mesInput.value)mesInput.value=hoje.slice(0,7);
+    const mes=mesInput.value,seq=this._rendSeq=(this._rendSeq||0)+1;
+    this._rendDados=null;this._rendPg=1;
+    s.getElementById('rendExportar').disabled=true;s.getElementById('rendSalvarConfig').disabled=true;
+    s.getElementById('rendDetalhe').hidden=true;s.getElementById('rendResumo').innerHTML='';
+    s.getElementById('rendContagem').textContent='';s.getElementById('rendMensagem').textContent='';
+    if(!mesInput.reportValidity()){
+      s.getElementById('rendLista').innerHTML=this._empty('calendar','Selecione um mês válido entre julho de 2025 e o mês atual.');return;
+    }
+    s.getElementById('rendLista').innerHTML=this._loading();
+    const d=await this._api('GET',`/admin/rendimentos?mes=${encodeURIComponent(mes)}`);
+    if(seq!==this._rendSeq)return;
+    if(!d?.ok||!Array.isArray(d.streamers)){
+      s.getElementById('rendLista').innerHTML=this._empty('warning',d?.erro||'Não foi possível carregar. Use Atualizar para tentar novamente.');return;
+    }
+    this._rendDados=d;
+    const org=s.getElementById('rendOrg'),selecionada=this._rendOrgInicializada?org.value:String(d.politica.org_principal);
+    org.innerHTML=`<option value="todas">Todas as organizações</option>${d.orgs.map(o=>`<option value="${this._esc(String(o.id))}">${this._esc(o.nome||String(o.id))}</option>`).join('')}<option value="sem_org">Organização não identificada</option>`;
+    org.value=[...org.options].some(o=>o.value===selecionada)?selecionada:'todas';this._rendOrgInicializada=true;
+    s.getElementById('rendKpd').value=d.config.koin_por_dolar;s.getElementById('rendCot').value=d.config.cotacao_dolar??'';
+    s.getElementById('rendRegras').innerHTML=(d.avisos||[]).map(a=>`<li>${this._esc(a)}</li>`).join('');
+    const corte=d.ultima_atualizacao?this._fdt(d.ultima_atualizacao):'sem produção registrada';
+    s.getElementById('rendMensagem').textContent=`Última atualização da produção: ${corte}. Estimativas podem mudar com a revisão da Kwai. Dados recebidos devem ser conferidos no demonstrativo.`;
+    s.getElementById('rendExportar').disabled=false;s.getElementById('rendSalvarConfig').disabled=false;
+    this._rendRender();
+  }
+  _rendFiltrados(){
+    const s=this.shadowRoot,org=s.getElementById('rendOrg').value,status=s.getElementById('rendStatus').value;
+    const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const busca=norm(s.getElementById('rendBusca').value.trim());
+    return(this._rendDados?.streamers||[]).filter(r=>(org==='todas'||(org==='sem_org'?!r.org_id:String(r.org_id)===org))&&
+      (status==='todos'||(status==='ativo'?r.ativo===true:status==='pendencias'?r.pendencias.length>0:status==='recebido'?r.recebido_koin!==null:r.status==='em_meta'))&&
+      (!busca||norm(r.nome).includes(busca)||r.kwai_uid.includes(busca)));
+  }
+  _rendKoin(v){return v===null||v===undefined?'—':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:2})+' Koins';}
+  _rendCategoria(r){return({novo:'Novo',crescimento:'Em crescimento',pro:'Pro'})[r.categoria]||'Pendente';}
+  _rendHoras(min){return `${Math.floor(min/60)}h${String(min%60).padStart(2,'0')}`;}
+  _rendRender(){
+    if(!this._rendDados)return;
+    const s=this.shadowRoot,lista=this._rendFiltrados(),total=lista.length,porPag=20,pags=Math.max(1,Math.ceil(total/porPag));
+    this._rendPg=Math.max(1,Math.min(this._rendPg||1,pags));
+    const pagina=lista.slice((this._rendPg-1)*porPag,this._rendPg*porPag);
+    const soma=campo=>lista.reduce((a,r)=>a+(r[campo]??0),0),pendentes=lista.filter(r=>r.pendencias.length).length;
+    const card=(cor,ico,valor,label,nota)=>`<div class="dc2 dc2-${cor}"><span class="dc2-ico">${this._ico(ico,22)}</span><div class="dc2-val">${valor}</div><div class="dc2-lbl">${label}</div><div class="dc2-prev">${nota}</div></div>`;
+    const temBrl=lista.some(r=>r.estimado_brl!==null),recebidos=lista.filter(r=>r.recebido_koin!==null).length;
+    s.getElementById('rendResumo').innerHTML=card('azul','wallet',this._rendKoin(soma('estimado_koin')),'Subtotal estimado',temBrl?`${this._brl(soma('estimado_brl'))} de referência`:'Parte calculável; bônus desconhecidos ficam fora')+
+      card('verde','check_c',this._rendKoin(soma('recebido_koin')),'Recebido informado',`${recebidos} de ${total} streamer(s) com recebimento informado`)+
+      card('roxo','users',String(lista.filter(r=>r.ativo===true).length),'Metas cumpridas',`${total} streamer(s) nos filtros atuais`)+
+      card('gold','warning',String(pendentes),'Com pendências','Confira classificação, baseline e bônus');
+    s.getElementById('rendContagem').textContent=`${total} streamer(s) · página ${this._rendPg} de ${pags}`;
+    if(!total){s.getElementById('rendLista').innerHTML=this._empty('search','Nenhum streamer para os filtros selecionados.');s.getElementById('rendDetalhe').hidden=true;return;}
+    const situacao=r=>r.recebido_koin!==null?'Recebido informado':r.ativo===true?'Metas cumpridas':r.ativo===false?'Metas em andamento':'Dados pendentes';
+    const nome=r=>`<strong>${this._esc(r.nome)}</strong><small>UID ${this._esc(r.kwai_uid)} · ${this._esc(r.org_nome||'Organização não identificada')}</small>`;
+    const categoria=r=>`${this._rendCategoria(r)}<small>${r.categoria_origem==='oficial'?'Informada pela Kwai':'Classificação estimada'}</small>`;
+    const base=r=>r.baseline===null?'—':this._num(r.baseline)+`<small>${r.baseline_origem==='oficial'?'Oficial':'Estimada'}</small>`;
+    const valor=r=>this._rendKoin(r.estimado_koin)+`<small>${r.parcial?'Subtotal parcial':'Estimativa pelas regras'}${r.estimado_brl!==null?' · '+this._brl(r.estimado_brl):''}</small>`;
+    const acao=r=>`<button type="button" class="btn btn-o rend-abrir" data-rend-uid="${this._esc(r.kwai_uid)}" aria-label="Ver cálculo e dados de ${this._esc(r.nome)}">Ver cálculo</button>`;
+    const meta=r=>r.ativo?'Metas cumpridas':r.meta_dias===null?'Complete os dados':`Faltam ${r.faltam_dias} dia(s), ${this._rendHoras(r.faltam_minutos)} e ${this._num(r.faltam_diamantes)} diamantes`;
+    s.getElementById('rendLista').innerHTML=`<div class="rend-tabela"><table><caption class="rend-sr">Rendimentos estimados e recebimentos informados por streamer</caption><thead><tr><th scope="col">Streamer</th><th scope="col">Categoria / baseline</th><th scope="col">Produção / atividade</th><th scope="col">Base / crescimento</th><th scope="col">Bônus extra</th><th scope="col">Subtotal estimado</th><th scope="col">Recebido</th><th scope="col">Conferência</th></tr></thead><tbody>${pagina.map(r=>`<tr><td>${nome(r)}</td><td>${categoria(r)}<div class="rend-baseline">${base(r)}</div></td><td>${this._num(r.diamantes)} diamantes<small>${r.dias_validos} dias válidos · ${this._rendHoras(r.minutos)}</small><small>${meta(r)}</small></td><td>${this._rendKoin(r.base_koin)}<small>Crescimento: ${this._rendKoin(r.crescimento_koin)}</small></td><td>${r.extra_koin===null?'Aguardando Kwai':this._rendKoin(r.extra_koin)}</td><td class="rend-valor">${valor(r)}</td><td>${this._rendKoin(r.recebido_koin)}</td><td><small>${this._esc(situacao(r))}${r.pendencias.length?' · '+r.pendencias.length+' pendência(s)':''}</small>${acao(r)}</td></tr>`).join('')}</tbody></table></div>
+      <div class="rend-cards">${pagina.map(r=>`<article class="rend-card"><div>${nome(r)}</div><div class="rend-card-meta">${categoria(r)} · Baseline ${base(r)}</div><dl><div><dt>Diamantes</dt><dd>${this._num(r.diamantes)}</dd></div><div><dt>Atividade</dt><dd>${r.dias_validos} dias · ${this._rendHoras(r.minutos)}</dd></div><div><dt>Base</dt><dd>${this._rendKoin(r.base_koin)}</dd></div><div><dt>Crescimento</dt><dd>${this._rendKoin(r.crescimento_koin)}</dd></div><div><dt>Bônus extra</dt><dd>${r.extra_koin===null?'Aguardando Kwai':this._rendKoin(r.extra_koin)}</dd></div><div><dt>Recebido</dt><dd>${this._rendKoin(r.recebido_koin)}</dd></div></dl><div class="rend-card-total"><span>Subtotal estimado</span><strong>${valor(r)}</strong></div><p class="rend-note">${meta(r)}${r.pendencias.length?' · '+r.pendencias.length+' pendência(s)':''}</p>${acao(r)}</article>`).join('')}</div>
+      ${pags>1?`<div class="pag-bar"><button data-rend-pg="${this._rendPg-1}" ${this._rendPg===1?'disabled':''}>Anterior</button><span class="pn">${this._rendPg} / ${pags}</span><button data-rend-pg="${this._rendPg+1}" ${this._rendPg===pags?'disabled':''}>Próxima</button></div>`:''}`;
+  }
+  _rendAbrirDetalhe(uid){
+    const d=this._rendDados,r=d?.streamers.find(r=>r.kwai_uid===uid);if(!r)return;
+    const s=this.shadowRoot,el=s.getElementById('rendDetalhe'),o=r.oficial||{},val=k=>this._esc(o[k]??'');
+    const campo=(id,label,tipo='number',attrs='')=>`<label>${label}<input id="rendOf-${id}" name="${id}" type="${tipo}" value="${val(id)}" ${attrs}></label>`;
+    el.hidden=false;el.innerHTML=`<div class="rend-list-head"><h2>${this._esc(r.nome)} · ${this._esc(d.periodo.mes)}</h2><button type="button" class="btn btn-o" id="rendFechar">Fechar</button></div><div class="rend-detail-body">
+      <p class="rend-note">UID ${this._esc(uid)}. Preencha com os dados da Kwai deste mês. Campo vazio mantém o dado como desconhecido ou usa a estimativa; zero registra um valor oficial zero.</p>
+      <div class="rend-calculo"><p>Base: <strong>${this._rendKoin(r.base_koin)}</strong> · Crescimento da agência: <strong>${this._rendKoin(r.crescimento_koin)}</strong> · Extra informado: <strong>${this._rendKoin(r.extra_koin)}</strong>.</p><p>Subtotal: <strong>${this._rendKoin(r.estimado_koin)}</strong>${r.parcial?' (parcial)':''}. Cenário com extra máximo: ${this._rendKoin(r.teto_koin)}${r.crescimento_koin===null?' (crescimento ainda pendente)':''}. Não representa pagamento garantido.</p>${r.proxima_meta_diamantes?`<p>Próxima faixa de crescimento: ${this._num(r.proxima_meta_diamantes)} diamantes.</p>`:''}</div>
+      ${r.pendencias.length||r.avisos.length?`<ul class="rend-regras">${[...r.pendencias,...r.avisos].map(a=>`<li>${this._esc(a)}</li>`).join('')}</ul>`:''}
+      <form id="rendOficialForm"><div class="rend-form-grid">
+        <label>Categoria oficial<select id="rendOf-categoria" name="categoria"><option value="">Usar estimativa / pendente</option>${[['novo','Novo'],['crescimento','Em crescimento'],['pro','Pro']].map(([v,l])=>`<option value="${v}" ${o.categoria===v?'selected':''}>${l}</option>`).join('')}</select></label>
+        ${campo('baseline','Baseline oficial','number','min="0" max="1000000000000" step="any"')}
+        <label>Alto potencial neste mês<select id="rendOf-alto_potencial" name="alto_potencial"><option value="">Não informado</option><option value="sim" ${o.alto_potencial===true?'selected':''}>Sim, consta na lista da Kwai</option><option value="nao" ${o.alto_potencial===false?'selected':''}>Não</option></select></label>
+        ${campo('data_entrada','Primeira entrada oficial','date',`max="${d.periodo.fim}"`)}
+        ${campo('bonus_extra_percentual','Bônus extra aprovado (%)','number',`min="0" max="${r.percentual_extra_maximo??10}" step="0.001"`)}
+        ${campo('recebido_koin','Recebido da Kwai (Koins)','number','min="0" max="1000000000000" step="0.01"')}
+      </div><p class="rend-note">Entrada usada no cálculo: ${r.entrada?this._fdtData(r.entrada):'pendente'}. Bônus extra é o percentual adicional aprovado, sem incluir a comissão base.</p>
+      <details class="rend-of-metricas"><summary>Corrigir produção e atividade com dados oficiais</summary><div class="rend-form-grid">
+        ${campo('diamantes','Diamantes oficiais','number','min="0" max="1000000000000" step="1"')}
+        ${campo('dias_validos','Dias válidos oficiais','number',`min="0" max="${d.periodo.dias}" step="1"`)}
+        ${campo('minutos_live','Duração oficial em minutos','number',`min="0" max="${d.periodo.dias*1440}" step="1"`)}
+      </div><p class="rend-note">A correção vale só para esta apuração. O histórico de lives e o ranking continuam usando os dados coletados.</p></details>
+      <label class="rend-observacao">Observação / referência do demonstrativo<textarea id="rendOf-observacao" name="observacao" maxlength="1000" rows="3">${val('observacao')}</textarea></label>
+      <p class="rend-note">${o.atualizado_em?'Último registro: '+this._fdt(o.atualizado_em):'Nenhum dado oficial salvo para este mês.'}</p>
+      <div class="rend-form-actions"><button class="btn" type="submit" id="rendOfSalvar">Salvar dados da Kwai</button><span id="rendOfErro" role="alert"></span></div></form></div>`;
+    s.getElementById('rendFechar').onclick=()=>{el.hidden=true;s.querySelector(`[data-rend-uid="${uid}"]`)?.focus();};
+    s.getElementById('rendOficialForm').onsubmit=async e=>{
+      e.preventDefault();if(!e.target.reportValidity())return;
+      const body={},b=s.getElementById('rendOfSalvar'),erro=s.getElementById('rendOfErro');
+      for(const k of ['baseline','diamantes','dias_validos','minutos_live','bonus_extra_percentual','recebido_koin']){const v=s.getElementById('rendOf-'+k).value;body[k]=v===''?null:Number(v);}
+      body.categoria=s.getElementById('rendOf-categoria').value||null;body.data_entrada=s.getElementById('rendOf-data_entrada').value||null;
+      const ap=s.getElementById('rendOf-alto_potencial').value;body.alto_potencial=ap===''?null:ap==='sim';body.observacao=s.getElementById('rendOf-observacao').value;
+      b.disabled=true;erro.textContent='';
+      try{
+        const resp=await this._api('PUT',`/admin/rendimentos/oficial/${encodeURIComponent(uid)}?mes=${d.periodo.mes}`,body);
+        if(!resp?.ok)throw new Error(resp?.erro||'Não foi possível salvar. Tente novamente.');
+        this._toast('Dados oficiais do mês salvos.','ok');
+        if(s.getElementById('rendMes').value===d.periodo.mes)await this._carregarRendimentos();
+      }catch(err){erro.textContent=err.message;}finally{b.disabled=false;}
+    };
+    el.scrollIntoView({block:'start',behavior:'auto'});s.getElementById('rendOf-categoria').focus({preventScroll:true});
+  }
+  _rendExportar(){
+    if(!this._rendDados)return;
+    const cab=['Mes','Organizacao','UID','Streamer','Categoria','Origem categoria','Baseline','Diamantes','Dias validos','Minutos','Base Koins','Crescimento Koins','Extra Koins','Subtotal estimado Koins','Estimativa parcial','Recebido informado Koins','BRL referencia','Pendencias'];
+    const linhas=this._rendFiltrados().map(r=>[this._rendDados.periodo.mes,r.org_nome||'',"'"+r.kwai_uid,r.nome,this._rendCategoria(r),r.categoria_origem,r.baseline,r.diamantes,r.dias_validos,r.minutos,r.base_koin,r.crescimento_koin,r.extra_koin,r.estimado_koin,r.parcial?'Sim':'Nao',r.recebido_koin,r.estimado_brl,r.pendencias.join(' | ')]);
+    const cell=v=>{let t=v==null?'':String(v);if(/^[\s]*[=+@-]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"';};
+    const blob=new Blob(['\uFEFF'+[cab,...linhas].map(l=>l.map(cell).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`rendimentos-agencia-${this._rendDados.periodo.mes}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
   async _carregarDesempenho(){
     const s=this.shadowRoot;s.getElementById('resumoDesemp').innerHTML=this._loading('grid-column:1/-1');s.getElementById('tbDesemp').innerHTML='';
     const d=await this._api('GET','/admin/desempenho');if(!d?.ok){s.getElementById('resumoDesemp').innerHTML=this._empty('warning','Erro');return;}
@@ -4499,6 +4656,7 @@ class DimaiorAdmin extends HTMLElement {
 
   _bindEvents(){
     const s=this.shadowRoot;const dbc=this._dbc.bind(this);
+    this._rendBind();
     const _bind=(id,ev,fn)=>{const el=s.getElementById(id);if(el)el.addEventListener(ev,fn);else console.warn('[admin] elemento não encontrado no _bindEvents:',id);};
     s.getElementById('btnL').addEventListener('click',()=>this._doLogin());s.getElementById('iP').addEventListener('keydown',e=>{if(e.key==='Enter')this._doLogin();});s.getElementById('iU').addEventListener('keydown',e=>{if(e.key==='Enter')s.getElementById('iP').focus();});
     _bind('btnEyeAdm','click',()=>{const ip=s.getElementById('iP');const on=ip.type==='password';ip.type=on?'text':'password';s.getElementById('btnEyeAdm').style.color=on?'var(--azul)':'';});
@@ -7399,8 +7557,9 @@ class DimaiorAdmin extends HTMLElement {
     .ap-gear:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
     .ap-backdrop{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s ease}
     .ap-backdrop.on{opacity:1;pointer-events:auto}
-    .ap-panel{position:fixed;top:0;right:0;bottom:0;z-index:401;width:min(360px,92vw);transform:translateX(102%);background:var(--panel-solid);border-left:1px solid var(--brd);box-shadow:-22px 0 55px rgba(0,0,0,.4);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto}
-    .ap-panel.on{transform:translateX(0)}
+    .ap-panel{position:fixed;top:0;right:0;bottom:0;z-index:401;width:min(360px,92vw);transform:translateX(100%);background:var(--panel-solid);border-left:1px solid var(--brd);box-shadow:-22px 0 55px rgba(0,0,0,.4);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto}
+    .ap-panel[aria-hidden="true"]{visibility:hidden}
+    .ap-panel.on{transform:translateX(0);visibility:visible}
     .ap-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--brd);position:sticky;top:0;background:var(--panel-solid)}
     .ap-head h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t1)}
     .ap-close{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.1);color:var(--verm);cursor:pointer}
@@ -7473,7 +7632,7 @@ class DimaiorAdmin extends HTMLElement {
     .viol-ok{font-size:12px;color:var(--verde);display:inline-flex;gap:4px;align-items:center}
     .viol-prova img,.viol-prova video{display:block;max-width:100%;max-height:420px;border-radius:10px;margin-top:10px}
     .viol-prova audio{display:block;width:100%;margin-top:10px}
-    .content{flex:1;padding:20px;background:transparent;min-height:0;}
+    .content{flex:1;min-width:0;padding:20px;background:transparent;min-height:0;}
     .pag{display:none}.pag.on{display:block;animation:fadeUp .3s ease both}
     .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
     .titulo{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:clamp(1rem,3vw,1.4rem);font-weight:700;letter-spacing:2px;color:var(--t1);text-transform:uppercase;display:flex;align-items:center;gap:8px}.psub{font-size:11px;color:var(--t3);margin-top:3px}.ph-r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
@@ -8724,6 +8883,49 @@ class DimaiorAdmin extends HTMLElement {
       .pm-ver{text-align:center;font-size:11px;color:var(--t3);opacity:.55;margin-top:18px;}
       .msheet [hidden],.msheet.buscando .pm-sobusca-some{display:none !important;}
     }
+    /* Rendimentos: herda tokens e componentes do admin; estilos restritos à nova área. */
+    #pag-rendimentos{min-width:0}
+    #pag-rendimentos [hidden]{display:none!important}
+    #pag-rendimentos .rend-resumo{grid-template-columns:repeat(4,minmax(0,1fr))}
+    #pag-rendimentos .dc2-val{font-size:clamp(1.2rem,2.2vw,1.9rem);overflow-wrap:anywhere}
+    #pag-rendimentos .dc2-prev{line-height:1.5}
+    .rend-filtros,.rend-config{padding:16px}
+    .rend-filter-grid{display:grid;grid-template-columns:minmax(130px,.7fr) minmax(150px,1fr) minmax(150px,1fr) minmax(160px,1fr);gap:12px}
+    #pag-rendimentos label{display:flex;flex-direction:column;gap:6px;color:var(--t2);font-size:12px;min-width:0}
+    #pag-rendimentos input,#pag-rendimentos select,#pag-rendimentos textarea{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--brd);border-radius:var(--rs);background:var(--input-bg);color:var(--t1);font:inherit;color-scheme:dark}
+    :host([data-theme="branco"]) #pag-rendimentos input,:host([data-theme="branco"]) #pag-rendimentos select,:host([data-theme="branco"]) #pag-rendimentos textarea{color-scheme:light}
+    #pag-rendimentos :is(input,select,textarea,button,summary):focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+    #pag-rendimentos button{min-height:44px}
+    #pag-rendimentos button:disabled{opacity:.5;cursor:not-allowed}
+    #pag-rendimentos button:active:not(:disabled){transform:translateY(1px)}
+    #pag-rendimentos .rend-note,#rendMensagem{font-size:12px;color:var(--t2);line-height:1.6;overflow-wrap:anywhere}
+    #rendMensagem{margin:0 0 16px}
+    #pag-rendimentos .rend-note{margin:10px 0 0}
+    .rend-config summary,.rend-of-metricas summary{cursor:pointer;min-height:44px;align-content:center;color:var(--t1);font-weight:600;font-size:13px}
+    .rend-config-grid{display:grid;grid-template-columns:minmax(130px,1fr) minmax(140px,1fr) auto;gap:12px;align-items:end}
+    .rend-regras{font-size:12px;line-height:1.7;color:var(--t2);padding-left:20px}
+    .rend-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border-bottom:1px solid var(--brddim)}
+    .rend-list-head h2{font:700 18px var(--dm-font-title,'Rajdhani',sans-serif);color:var(--t1);margin:0}
+    #rendContagem{color:var(--t2);font-size:12px}
+    .rend-tabela{overflow-x:auto}
+    .rend-tabela table{width:100%;min-width:980px;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+    .rend-tabela th{text-align:left;font-size:11px;color:var(--t2);padding:12px;white-space:normal;letter-spacing:.03em}
+    .rend-tabela td{padding:14px 12px;border-top:1px solid var(--brddim);vertical-align:top;color:var(--t1)}
+    .rend-tabela td:first-child{max-width:230px;overflow-wrap:anywhere}
+    .rend-tabela small,.rend-card small{display:block;color:var(--t2);font-size:11px;line-height:1.6;margin-top:4px}
+    .rend-baseline{margin-top:8px}.rend-valor{font-weight:700;color:var(--cyan)!important}
+    .rend-abrir{margin-top:8px;white-space:nowrap}
+    .rend-cards{display:none}.rend-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+    .rend-detalhe{scroll-margin-top:72px}.rend-detail-body{padding:16px}
+    .rend-calculo{font-size:13px;line-height:1.7;color:var(--t2);padding:12px 0}.rend-calculo p{margin:4px 0}
+    .rend-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+    .rend-of-metricas{margin:18px 0;border-top:1px solid var(--brddim);border-bottom:1px solid var(--brddim);padding:8px 0 16px}
+    .rend-observacao{margin-top:16px}.rend-form-actions{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+    #rendOfErro{color:var(--verm);font-size:12px;overflow-wrap:anywhere}
+    @media(max-width:1100px){.rend-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#pag-rendimentos .rend-resumo{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:900px){.rend-tabela{display:none}.rend-cards{display:block}.rend-card{padding:16px;border-bottom:1px solid var(--brddim);overflow-wrap:anywhere}.rend-card:last-child{border:0}.rend-card-meta{margin-top:10px;font-size:12px;color:var(--t2)}.rend-card-meta small{display:inline}.rend-card dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}.rend-card dt{font-size:11px;color:var(--t2)}.rend-card dd{margin:4px 0 0;font-size:13px;color:var(--t1);font-variant-numeric:tabular-nums}.rend-card-total{border-top:1px solid var(--brddim);padding-top:12px;display:flex;justify-content:space-between;gap:12px;font-size:12px}.rend-card-total strong{color:var(--cyan);text-align:right}.rend-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:540px){.rend-config-grid,.rend-form-grid{grid-template-columns:1fr}.rend-list-head{align-items:flex-start;flex-wrap:wrap}#pag-rendimentos .ph-r{flex-wrap:wrap}#pag-rendimentos .rend-resumo{gap:8px}.rend-filtros,.rend-config,.rend-detail-body,.rend-card{padding:12px}#pag-rendimentos .dc2{padding:12px}#pag-rendimentos .dc2-lbl{letter-spacing:.5px;font-size:10px}.rend-filter-grid{gap:10px}#pag-rendimentos .dc2-val{font-size:1.25rem}}
+
   `;}
 
   _html(){
@@ -8803,6 +9005,7 @@ class DimaiorAdmin extends HTMLElement {
               ni('clipboard','solicitacoesFormularios','Solicitações de Formulários',`<span class="nb gold" id="nbSolicForm" style="display:none">0</span>`)
             )}
             ${navSec('financeiro','Financeiro',
+              ni('bars_up','rendimentos','Rendimentos')+
               ni('wallet','carteira','Carteira',`<span class="nb" style="background:rgba(0,229,229,.25);color:var(--cyan)">R$</span>`)+
               ni('send','saques','Saques',`<span class="nb gold" id="nbSaques" style="display:none">0</span>`)+
               ni('award','premios','Prêmios')+
@@ -9240,6 +9443,7 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
               </div>
             </div>
+            ${this._rendPagina(ph)}
             <div class="pag" id="pag-carteira">${ph('Carteira Financeira','wallet','Saldos dos streamers','btnAtuCart',`<button class="btn btn-g" id="btnCreditoRapido">${this._ico('plus',13)} Adicionar Saldo</button>`)}<div class="dc2-grid" id="carteiraResumo">${this._loading('grid-column:1/-1')}</div><div id="carteiraStreamers">${this._loading()}</div></div>
             <div class="pag" id="pag-agenteMigracoes">${ph('Migrações de Streamer (Agente)','refresh','Solicitações de migração enviadas pelos agentes','btnAtuMigracoesAgente')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('refresh',14)} Migrações</div><select id="migracaoAgFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaMigracoesAgente">${this._loading()}</div><div class="pag-bar" id="pgMigracoesAgente"></div></div></div>
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
