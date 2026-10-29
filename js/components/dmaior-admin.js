@@ -10245,7 +10245,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||d?.mensagem||'Erro ao buscar convites no Voyager.');return;}
     const lista=d.convites||[];
     const total=d.total||0,totalPg=d.total_pages||1;
-    const elegiveis=lista.filter(c=>c.reenviavel).length;
+    const elegiveis=lista.filter(c=>/expir/i.test(c.inviteProcessText||'')).length;
 
     // Paginação
     const _pgBtn=(lbl,p,dis=false)=>`<button class="btn btn-sm${dis?' btn-dis':''}" ${dis?'disabled':''} data-conv-pg="${p}" style="min-width:32px">${lbl}</button>`;
@@ -10259,7 +10259,7 @@ class DimaiorAdmin extends HTMLElement {
 
     el.innerHTML=`
     <div style="padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--brddim)">
-      <span style="font-size:11px;color:var(--t3)">${total} convites · <span style="color:var(--cyan)">${elegiveis} reenviáveis nesta página</span></span>
+      <span style="font-size:11px;color:var(--t3)">${total} convites · <span style="color:var(--cyan)">${elegiveis} expirados nesta página</span></span>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
         <span style="font-size:11px;color:var(--t3)">por página:</span>
         ${[10,20,50].map(n=>`<button class="btn btn-sm${cnt===n?' btn-dis':''}" ${cnt===n?'disabled':''} data-conv-cnt="${n}">${n}</button>`).join('')}
@@ -10283,7 +10283,7 @@ class DimaiorAdmin extends HTMLElement {
         </td>
         <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||'—')}</td>
         <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'—')}</td>
-        <td style="padding:8px">${c.reenviavel?`<button class="btn btn-sm btn-o" data-conv-reenv="${c.id}" data-conv-mid="${this._esc(String(c.memberId||''))}">${this._ico('refresh',11)} Reenviar</button>`:''}</td>
+        <td style="padding:8px">${/expir/i.test(c.inviteProcessText||'')&&(c.kwaiId||c.memberId)?`<button class="btn btn-sm btn-o" data-conv-novo="${this._esc(String(c.kwaiId||c.memberId))}" title="Envia um convite novo, como se nunca tivesse sido enviado">${this._ico('send',11)} Novo convite</button>`:''}</td>
       </tr>`).join('')}</tbody>
     </table>
     <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
@@ -10294,7 +10294,8 @@ class DimaiorAdmin extends HTMLElement {
         ${_pgBtn('→',pg+1,pg>=totalPg)}
       </div>
     </div>`;
-    el.querySelectorAll('[data-conv-reenv]').forEach(b=>b.addEventListener('click',()=>this._reenviarConvite(b.dataset.convReenv,b.dataset.convMid,b)));
+    // Expirado = convite novo: abre a busca manual já preenchida (a Kwai confere se libera).
+    el.querySelectorAll('[data-conv-novo]').forEach(b=>b.addEventListener('click',()=>this._abrirModalConvPerfil(b.dataset.convNovo)));
     el.querySelectorAll('[data-conv-pg]').forEach(b=>b.addEventListener('click',()=>!b.disabled&&this._carregarConvitesVoyager(+b.dataset.convPg)));
     el.querySelectorAll('[data-conv-cnt]').forEach(b=>b.addEventListener('click',()=>!b.disabled&&this._carregarConvitesVoyager(1,+b.dataset.convCnt)));
   }
@@ -10362,12 +10363,12 @@ class DimaiorAdmin extends HTMLElement {
       </tr>`).join('')}</tbody></table>`;
   }
 
-  async _abrirModalConvPerfil(){
+  async _abrirModalConvPerfil(uidInicial=''){
     const s=this.shadowRoot;
     const m=s.getElementById('mConvPerfil');if(!m)return;
     const root=s.getElementById('root');
     if(root&&m.parentElement!==root)root.appendChild(m);
-    s.getElementById('mConvUid').value='';
+    s.getElementById('mConvUid').value=uidInicial;
     s.getElementById('mConvPerfilResult').innerHTML='';
     s.getElementById('mConvEnvioArea').style.display='none';
     s.getElementById('mConvEnvioResult').innerHTML='';
@@ -10393,6 +10394,7 @@ class DimaiorAdmin extends HTMLElement {
       this._atualizarResumoRecrutador();
     }
     m.style.display='flex';
+    if(uidInicial)this._buscarPerfilConvite();
   }
 
   _atualizarResumoRecrutador(){
@@ -10672,11 +10674,11 @@ class DimaiorAdmin extends HTMLElement {
       </div></div>`;
     if(r.status==='LIVRE'||r.acao==='ENVIAR')s.getElementById('mConvEnvioArea').style.display='';
     this._convPerfilAtual=r.perfil;
-    // Convite expirado: a verificação já sabe que dá pra reenviar — oferece a ação aqui
-    // (antes só aparecia o texto "pode ser reenviado" e nenhum botão).
+    // Convite expirado normalmente volta como LIVRE (convite novo). Reenvio só aparece
+    // quando a Kwai recusou o convite novo e ainda libera reenviar o antigo.
     if(r.status==='CONVITE_REENVIAVEL'&&r.invite_id){
       const box=s.getElementById('mConvPerfilResult');
-      box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:4px 0 8px">${this._esc(r.mensagem||'')}</div><button class="btn btn-o btn-sm" id="mConvBtnReenviar">${this._ico('refresh',13)} Reenviar convite</button>`);
+      box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:4px 0 8px">${this._esc(r.mensagem||'')}</div><button class="btn btn-o btn-sm" id="mConvBtnReenviar">${this._ico('refresh',13)} Reenviar convite antigo</button>`);
       s.getElementById('mConvBtnReenviar')?.addEventListener('click',e=>this._reenviarConvite(r.invite_id,r.perfil?.memberId,e.currentTarget,()=>this._buscarPerfilConvite()));
     }else if(r.mensagem&&r.status!=='LIVRE'){
       s.getElementById('mConvPerfilResult').insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:2px 0 6px">${this._esc(r.mensagem)}</div>`);
