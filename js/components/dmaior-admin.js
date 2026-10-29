@@ -10654,6 +10654,8 @@ class DimaiorAdmin extends HTMLElement {
       return;
     }
     const p=r.perfil;
+    const kwaiId=String(p.kwaiId||'').trim().replace(/^@+/,'');
+    const perfilUrl=kwaiId?`https://www.kwai.com/@${encodeURIComponent(kwaiId)}`:'';
     const foto=p.foto?`<img src="${this._safeImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(p.foto)}&w=60&h=60&fit=cover&output=webp`)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid var(--brd);flex-shrink:0" onerror="this.style.display='none'">`:'';
     const agBadge=p.agencia?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);color:var(--gold)">${this._esc(p.agencia)}</span>`:'';
     const stBadge=r.status==='LIVRE'?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--verde)">Livre</span>`:
@@ -10666,6 +10668,7 @@ class DimaiorAdmin extends HTMLElement {
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome||p.kwaiId||'—')}</div>
         <div style="font-size:10px;color:var(--t3)">ID: ${this._esc(p.memberId||'—')} · Kwai: ${this._esc(p.kwaiId||'—')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${stBadge}${agBadge}</div>
+        ${perfilUrl?`<a class="btn btn-o btn-sm" href="${this._esc(perfilUrl)}" target="_blank" rel="noopener noreferrer" style="margin-top:8px;text-decoration:none" title="Abrir o perfil no Kwai">${this._ico('globe',11)} Verificar perfil no Kwai</a>`:''}
       </div></div>`;
     if(r.status==='LIVRE'||r.acao==='ENVIAR')s.getElementById('mConvEnvioArea').style.display='';
     this._convPerfilAtual=r.perfil;
@@ -10673,7 +10676,7 @@ class DimaiorAdmin extends HTMLElement {
     // (antes só aparecia o texto "pode ser reenviado" e nenhum botão).
     if(r.status==='CONVITE_REENVIAVEL'&&r.invite_id){
       const box=s.getElementById('mConvPerfilResult');
-      box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:4px 0 8px">${this._esc(r.mensagem||'')}</div><button class="btn btn-o" id="mConvBtnReenviar">${this._ico('refresh',13)} Reenviar convite</button>`);
+      box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:4px 0 8px">${this._esc(r.mensagem||'')}</div><button class="btn btn-o btn-sm" id="mConvBtnReenviar">${this._ico('refresh',13)} Reenviar convite</button>`);
       s.getElementById('mConvBtnReenviar')?.addEventListener('click',e=>this._reenviarConvite(r.invite_id,r.perfil?.memberId,e.currentTarget,()=>this._buscarPerfilConvite()));
     }else if(r.mensagem&&r.status!=='LIVRE'){
       s.getElementById('mConvPerfilResult').insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--t2);padding:2px 0 6px">${this._esc(r.mensagem)}</div>`);
