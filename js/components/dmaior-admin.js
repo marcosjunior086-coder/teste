@@ -10938,7 +10938,8 @@ class DimaiorAdmin extends HTMLElement {
           <td>${a.telefone ? this._esc(a.telefone) : '—'}</td>
           <td><span style="color:var(--cyan);font-weight:700">${a.total_streamers||0}</span></td>
           <td>${a.ativo ? `<span style="color:var(--verde);font-size:12px">● Ativo</span>` : `<span style="color:var(--verm);font-size:12px">● Inativo</span>`}</td>
-          <td><button class="btn btn-sm btn-o" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}">${this._ico('search',12)} Ver</button></td>
+          <td style="white-space:nowrap"><button class="btn btn-sm btn-o" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}">${this._ico('search',12)} Ver</button>
+            <button class="btn btn-sm btn-o" data-agente-del="${a.id}" data-agente-nome="${this._esc(a.nome)}" style="color:var(--verm);border-color:rgba(248,113,113,.4)" aria-label="Excluir agente">${this._ico('trash',12)}</button></td>
         </tr>`).join('')}
       </tbody></table></div>
       <div class="ag-local-mobile-only">
@@ -10954,11 +10955,19 @@ class DimaiorAdmin extends HTMLElement {
             <div class="ag-local-metric"><div class="ag-local-lbl">Telefone</div><div class="ag-local-val">${a.telefone ? this._esc(a.telefone) : '—'}</div></div>
             <div class="ag-local-metric"><div class="ag-local-lbl">Streamers</div><div class="ag-local-val" style="color:var(--cyan)">${a.total_streamers || 0}</div></div>
           </div>
-          <button class="btn btn-o btn-sm" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}" style="width:100%;justify-content:center">${this._ico('search',12)} Ver agente</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-o btn-sm" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}" style="flex:1;justify-content:center">${this._ico('search',12)} Ver agente</button>
+            <button class="btn btn-o btn-sm" data-agente-del="${a.id}" data-agente-nome="${this._esc(a.nome)}" style="justify-content:center;color:var(--verm);border-color:rgba(248,113,113,.4)" aria-label="Excluir agente">${this._ico('trash',12)} Excluir</button>
+          </div>
         </div>`).join('')}
       </div>`;
       tb.querySelectorAll('[data-agente-id]').forEach(btn => {
         btn.addEventListener('click', () => this._abrirDetalheAgente(btn.dataset.agenteId));
+      });
+      tb.querySelectorAll('[data-agente-del]').forEach(btn => {
+        btn.addEventListener('click', () => this._confirmarDel(
+          `Excluir "${btn.dataset.agenteNome || 'este agente'}" definitivamente? Só funciona se ele nunca teve streamer vinculado — caso já tenha histórico, use Editar e mude o status pra Inativo em vez de excluir.`,
+          () => this._excluirAgenteAtual(btn.dataset.agenteDel)));
       });
     } catch(e) { tb.innerHTML = `<div style="padding:20px;color:var(--verm)">${e.message}</div>`; }
   }
@@ -11703,10 +11712,10 @@ class DimaiorAdmin extends HTMLElement {
     } catch(e) { this._toast(e.message,'err'); }
   }
 
-  async _excluirAgenteAtual() {
-    if (!this._agenteAtualId) return;
+  async _excluirAgenteAtual(id = this._agenteAtualId) {
+    if (!id) return;
     try {
-      await this._delete(`/admin/agentes/${this._agenteAtualId}`);
+      await this._delete(`/admin/agentes/${id}`);
       this._toast('Agente excluído!','ok');
       this._mostrarListaAgentes();
     } catch(e) { this._toast(e.message,'err'); }
