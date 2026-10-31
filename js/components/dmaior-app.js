@@ -226,6 +226,7 @@
     svgTicket()  { return `<svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/></svg>`; }
     svgFrame()   { return `<svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v2.17A3 3 0 0 0 16.17 5H19zM5 5h2.83A3 3 0 0 0 5 7.83V5zm0 14v-2.83A3 3 0 0 0 7.83 19H5zm14 0h-2.83A3 3 0 0 0 19 16.17V19zM9 19a5 5 0 0 1 10-5V10a5 5 0 0 1-5-5h-4a5 5 0 0 1-5 5v4a5 5 0 0 1 4 5z"/></svg>`; }
     svgKey()     { return `<svg viewBox="0 0 24 24"><path d="M12.65 10A6 6 0 1 0 14 14.65L14 14h2v2h2v2h2v-2.18A6.002 6.002 0 0 0 12.65 10zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>`; }
+    svgRecarga() { return `<svg viewBox="0 0 24 24"><path d="M19 3H5L2 9l10 12L22 9l-3-6zM9.62 8l1.5-3h1.76l1.5 3H9.62zM11 10v6.68L5.44 10H11zm2 0h5.56L13 16.68V10zm6.26-2h-2.65l-1.5-3h2.65l1.5 3zM6.24 5h2.65l-1.5 3H4.74l1.5-3z"/></svg>`; }
     svgWallet()  { return `<svg viewBox="0 0 24 24"><path d="M21 7H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H3V9h18v10zm-9-1c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM1 5h20V3H1v2z"/></svg>`; }
     svgShield()  { return `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.5 14.5L6 11l1.41-1.41L10.5 12.67l6.09-6.09L18 8l-7.5 7.5z"/></svg>`; }
     svgAgente()  { return `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`; }
@@ -1154,7 +1155,7 @@
                     <button type="button" data-nav="nC" aria-label="Carteira">${this.svgWallet()}</button>
                 </div>
                 <div class="mgrp" data-g="b">
-                    <button type="button" data-nav="nImpulso" aria-label="Impulso">${this.svgBoost()}</button>
+                    <button type="button" data-href="/recarga" aria-label="Recarga">${this.svgRecarga()}</button>
                     <button type="button" data-nav="nRank" aria-label="Ranking">${this.svgRank()}</button>
                 </div>
             </nav>
@@ -1794,6 +1795,10 @@
         // Barra: cada botão dispara o clique do item real do .bnav (reusa toda a lógica de navegação)
         nav.querySelectorAll('button[data-nav]').forEach(b=>{
             b.addEventListener('click', ()=>{ this.qs('#'+b.dataset.nav)?.click(); });
+        });
+        // Recarga é outra página do site (não uma aba do painel): abre direto
+        nav.querySelectorAll('button[data-href]').forEach(b=>{
+            b.addEventListener('click', ()=>{ window.location.href = b.dataset.href; });
         });
         fab.addEventListener('click', ()=> sheet.classList.contains('on') ? closeSheet() : openSheet());
         this.qs('#mSheetBack')?.addEventListener('click', closeSheet);

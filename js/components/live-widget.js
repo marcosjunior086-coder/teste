@@ -631,6 +631,36 @@ class KwaiLiveWidget extends HTMLElement {
     return p;
   }
 
+  // Detecta "som rodando, imagem parada": o relógio do <video> (currentTime)
+  // continua andando puxado pelo áudio mesmo com o decodificador de vídeo
+  // travado, então o watchdog por currentTime nunca pega esse caso. Aqui
+  // conta os quadros que de fato foram mostrados. Duas checagens seguidas
+  // sem quadro novo (com o relógio andando) = imagem congelada → onStuck().
+  // Lives só de áudio (videoWidth 0) e navegadores sem a API são ignorados.
+  _watchFrames(video, onStuck, every = 4000) {
+    let lastFrames = -1, lastT = -1, stuck = 0;
+    const id = setInterval(() => {
+      if (document.hidden || video.paused || video.seeking || video.readyState < 2 || !video.videoWidth) {
+        lastFrames = -1; lastT = -1; stuck = 0; return;
+      }
+      let frames = -1;
+      if (video.getVideoPlaybackQuality) {
+        const q = video.getVideoPlaybackQuality();
+        frames = q.totalVideoFrames - q.droppedVideoFrames;
+      } else if (typeof video.webkitDecodedFrameCount === 'number') {
+        frames = video.webkitDecodedFrameCount;
+      }
+      const t = video.currentTime;
+      if (frames >= 0 && lastFrames >= 0 && (t - lastT) > (every / 1000) * 0.5 && frames <= lastFrames) {
+        if (++stuck >= 2) { stuck = 0; lastFrames = -1; lastT = -1; onStuck(); return; }
+      } else {
+        stuck = 0;
+      }
+      lastFrames = frames; lastT = t;
+    }, every);
+    return () => clearInterval(id);
+  }
+
   // Põe na fila os cards visíveis que estão parados (foto). Usado quando os
   // players foram parados sem o card sair da tela — o IntersectionObserver
   // só avisa quando a visibilidade MUDA, então ninguém mais os religaria.
@@ -967,7 +997,7 @@ class KwaiLiveWidget extends HTMLElement {
     }, 1500);
     this._trimMiniPlayers();
 
-    let hls = null, dead = false, watchdog = null, lastT = -1, frozen = 0, attempt = 0;
+    let hls = null, dead = false, watchdog = null, lastT = -1, frozen = 0, attempt = 0, stopFrames = null;
     // Suspensa = parada de propósito (Loja/painel por cima, ou quadro fora da tela):
     // o watchdog e o "voltou pra aba" não podem religar sozinhos.
     let suspenso = false, atachado = false, desde = 0, fora = false, foraT = null, io = null;
@@ -988,6 +1018,7 @@ class KwaiLiveWidget extends HTMLElement {
       this._heroWarmup = false;
       clearTimeout(this._heroWarmupT);
       clearInterval(watchdog);
+      try { stopFrames && stopFrames(); } catch (_) {}
       clearTimeout(foraT);
       if (io) io.disconnect();
       if (this._featuredSync === sync) this._featuredSync = null;
@@ -1047,6 +1078,15 @@ class KwaiLiveWidget extends HTMLElement {
       }
       clearInterval(watchdog);
       lastT = -1; frozen = 0;
+      // Imagem congelada com o som seguindo (o currentTime não denuncia):
+      // 1º tenta destravar o decodificador, depois recomeça do zero.
+      try { stopFrames && stopFrames(); } catch (_) {}
+      let stuckN = 0;
+      stopFrames = this._watchFrames(videoEl, () => {
+        if (dead || suspenso || tok !== attempt) return;
+        if (++stuckN === 1 && hls) { try { hls.recoverMediaError(); } catch (_) {} }
+        else { stuckN = 0; attach(false); }
+      });
       watchdog = setInterval(() => {
         if (dead || document.hidden || suspenso) return;
         if (videoEl.paused) this._play(videoEl);
@@ -1190,6 +1230,8 @@ class KwaiLiveWidget extends HTMLElement {
     const entry = this.activePlayers.get(url);
     if (!entry) return;
     clearInterval(entry.watchdog);
+    try { entry._stopFrames?.(); } catch (_) {}
+    entry._stopFrames = null;
     clearTimeout(entry._stopT); entry._stopT = null;
     clearTimeout(entry._startT);
     // Invalida a tentativa em andamento: o "error" que o <video> dispara ao
@@ -1350,6 +1392,12 @@ class KwaiLiveWidget extends HTMLElement {
       entry.playing = true;
       entry.starting = false;
       startWatchdog();
+      // Bolinha com imagem congelada e som (mudo) rodando: reinicia do zero.
+      try { entry._stopFrames?.(); } catch (_) {}
+      entry._stopFrames = this._watchFrames(vid, () => {
+        if (stale()) return;
+        this.stopMiniPlayer(url); this._enqueueMini(url);
+      }, 5000);
     };
 
     // Não começou a tocar em 15s (nem deu erro — acontece no HLS nativo, que
@@ -1508,7 +1556,12 @@ class KwaiLiveWidget extends HTMLElement {
     this.shadowRoot.getElementById('bufferBar').style.display = 'none';
   }
 
-  destroyHLSModal() { try { this.hlsModal?.destroy(); } catch (_) {} this.hlsModal = null; }
+  destroyHLSModal() {
+    try { this._stopModalFrames?.(); } catch (_) {}
+    this._stopModalFrames = null;
+    try { this.hlsModal?.destroy(); } catch (_) {}
+    this.hlsModal = null;
+  }
   clearBufferTimer() { clearInterval(this.bufferTimer); this.bufferTimer = null; }
 
   setMuteIcon(muted) {
@@ -1579,6 +1632,11 @@ class KwaiLiveWidget extends HTMLElement {
       video.addEventListener('canplay', () => onReady(), { once: true });
       video.addEventListener('error',   () => onFatal(), { once: true });
       video.load();
+      // HLS nativo (iOS): imagem congelada com som → recarrega a live.
+      this._stopModalFrames?.();
+      this._stopModalFrames = this._watchFrames(video, () => {
+        video.src = src; video.load(); video.play().catch(() => {});
+      });
     } else if (engine === 'hlsjs') {
       // Mesma observação do mini player: quando useProxy=true, "src" já é a
       // URL do proxy e o Worker já devolve o m3u8 com as URIs internas
@@ -1588,6 +1646,11 @@ class KwaiLiveWidget extends HTMLElement {
       const hlsCfg = {
         enableWorker:            false,
         lowLatencyMode:          false,
+        // O quadro do modal é pequeno (~46vh): não adianta puxar 720p/1080p.
+        // Qualidade alta demais sobrecarrega o decodificador do celular e é o
+        // que deixa a imagem congelada com o som seguindo (visto em algumas
+        // lives). O teto vale pro ABR; o nível mais baixo continua liberado.
+        capLevelToPlayerSize:    true,
         maxBufferLength:         30,
         maxMaxBufferLength:      60,
         backBufferLength:        10,
@@ -1596,19 +1659,47 @@ class KwaiLiveWidget extends HTMLElement {
         fragLoadingMaxRetry:     6,
         fragLoadingRetryDelay:   1000,
       };
+      // Depois de congelar 3 vezes seguidas nesta live, recarrega na menor qualidade.
+      if (this._modalForceLow) { hlsCfg.autoLevelCapping = 0; hlsCfg.startLevel = 0; this._modalForceLow = false; }
       this.hlsModal = new window.Hls(hlsCfg);
+      const hlsM = this.hlsModal;
       this.hlsModal.loadSource(src);
       this.hlsModal.attachMedia(video);
+      // Imagem congelada com som rodando: escalona — 1º reinicia o decodificador,
+      // 2º trava a qualidade um degrau abaixo, 3º recarrega a live do zero na
+      // menor qualidade.
+      let stuckStage = 0;
+      this._stopModalFrames?.();
+      this._stopModalFrames = this._watchFrames(video, () => {
+        if (this.hlsModal !== hlsM) return;
+        stuckStage++;
+        try {
+          if (stuckStage === 1) {
+            hlsM.recoverMediaError();
+          } else if (stuckStage === 2) {
+            const cur = hlsM.currentLevel >= 0 ? hlsM.currentLevel : hlsM.loadLevel;
+            hlsM.autoLevelCapping = Math.max(0, (cur >= 0 ? cur : 1) - 1);
+            hlsM.swapAudioCodec();
+            hlsM.recoverMediaError();
+          } else {
+            this._modalForceLow = true;
+            this._playM3U8WithMode(url, useProxy);
+          }
+        } catch (_) {}
+      });
       // Sem "currentTime = 0": numa live isso pulava pro trecho mais antigo
       // da playlist (um pedaço a mais pra baixar antes de tocar e ~4s mais
       // atrasado). O hls.js já começa perto do ao vivo sozinho.
       this.hlsModal.on(window.Hls.Events.MANIFEST_PARSED, () => onReady());
-      let networkRetries = 0;
+      let networkRetries = 0, mediaRetries = 0;
       this.hlsModal.on(window.Hls.Events.ERROR, (_, d) => {
         if (!d.fatal) return;
         if (d.type === window.Hls.ErrorTypes.NETWORK_ERROR && networkRetries < 3) {
           networkRetries++;
           this.hlsModal.startLoad();
+        } else if (d.type === window.Hls.ErrorTypes.MEDIA_ERROR && mediaRetries < 3) {
+          mediaRetries++;
+          this.hlsModal.recoverMediaError();
         } else {
           onFatal();
         }
