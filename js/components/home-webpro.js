@@ -900,6 +900,10 @@ class DmaiorHomeWebpro extends HTMLElement {
     const vids = slides.map(el => el.querySelector('video'));
     let i = 0, timer = null, prepT = null;
     let loja = false, fora = false; // pausas: Loja/painel aberto por cima · carrossel fora da tela
+    // Vídeos que já mostraram imagem nesta passada do slide. Engasgo (waiting) no
+    // MEIO da reprodução não pode cobrir o slide: cobrir e descobrir a cada
+    // engasgo é o que fazia o banner de vídeo pesado ficar piscando parado nele.
+    const mostrou = new WeakSet();
     const parado = () => loja || fora || document.hidden;
     const limpa = () => { clearTimeout(timer); timer = null; };
     const agenda = (ms) => { limpa(); timer = setTimeout(() => go(i + 1), ms); };
@@ -922,6 +926,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       prepT = setTimeout(prepara, 800);
       if (!v) { agenda(5000); return; }
       if (v.error) { sl.classList.add('erro'); agenda(2500); return; }
+      mostrou.delete(v);
       try { v.currentTime = 0; } catch (_) {}
       if (v.readyState < 3) sl.classList.add('load');
       v.play().catch(() => {});
@@ -959,11 +964,12 @@ class DmaiorHomeWebpro extends HTMLElement {
       v.addEventListener('canplay', pronto);
       v.addEventListener('playing', () => {
         pronto();
+        mostrou.add(v);
         if (k !== i || parado()) return;
         const ms = v.duration > 0 && isFinite(v.duration) ? Math.min(v.duration, 60) * 1000 + 400 : 60000;
         agenda(ms);
       });
-      v.addEventListener('waiting', () => { if (k === i) sl.classList.add('load'); });
+      v.addEventListener('waiting', () => { if (k === i && !mostrou.has(v)) sl.classList.add('load'); });
       v.addEventListener('ended', () => { if (k === i && !parado()) go(i + 1); });
       v.addEventListener('error', () => {
         sl.classList.remove('load'); sl.classList.add('erro');
