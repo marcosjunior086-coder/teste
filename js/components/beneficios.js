@@ -1,5 +1,5 @@
 /**
- * beneficios.js — Grid de benefícios + FAQ sanfona
+ * beneficios.js - Grid de benefícios + FAQ sanfona
  *
  * Custom Element: <widget-beneficios>
  * Shadow DOM preservado. Sem chamadas de API.

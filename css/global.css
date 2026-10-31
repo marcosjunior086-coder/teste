@@ -1,5 +1,5 @@
 /**
- * global.css — Design System DMaior Agency
+ * global.css - Design System DMaior Agency
  *
  * Variáveis de cor, fontes, reset e estilos base.
  * Importado em TODAS as páginas.
@@ -384,7 +384,7 @@ html {
   background-color: var(--dm-bg);
   /* Tira o flash azul/cinza ao tocar em botão/link no mobile. É propriedade
      herdada, então descendo daqui alcança TODOS os web components (shadow DOM)
-     via herança — sem precisar repetir em cada componente. */
+     via herança - sem precisar repetir em cada componente. */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -412,7 +412,7 @@ body {
   body { background-attachment: scroll; }
 }
 
-/* Tema dark — preto puro (html + body para cobrir overscroll no mobile) */
+/* Tema dark - preto puro (html + body para cobrir overscroll no mobile) */
 [data-theme="dark"] html,
 [data-theme="dark"] body {
   background: #000;
@@ -431,7 +431,7 @@ body {
   color-scheme: light;
 }
 
-/* Temas claros — restaura fundo sólido sem o gradiente escuro */
+/* Temas claros - restaura fundo sólido sem o gradiente escuro */
 [data-theme="branco"] html,
 [data-theme="rosa"]   html,
 [data-theme="laranja"] html {

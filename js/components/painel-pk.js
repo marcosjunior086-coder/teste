@@ -1,14 +1,14 @@
 /* eslint-env browser */
 // ============================================================
-//  DMaior Agency — Custom Element: <painel-pk> (Fase 4)
+//  DMaior Agency - Custom Element: <painel-pk> (Fase 4)
 //  Autocontido, no mesmo padrão de dmaior-votacao.js/ranking.js:
 //  lê dm_uid/dm_token do localStorage sozinho e busca os dados via
-//  window.DmaiorAPI.pk.* — não recebe mais estado por atributo.
+//  window.DmaiorAPI.pk.* - não recebe mais estado por atributo.
 //  Exclusivo do painel do streamer logado (dmaior-app.js).
 //
 //  Visual: cards claros com placar em pílula rosa/azul e anel de
 //  avatar gradiente, seguindo a referência enviada (estilo nativo
-//  Kwai) — acompanha os temas do site (--tema em :host-context),
+//  Kwai) - acompanha os temas do site (--tema em :host-context),
 //  mesmo padrão de dmaior-votacao.js.
 // ============================================================
 class PainelPK extends HTMLElement {
@@ -42,7 +42,7 @@ class PainelPK extends HTMLElement {
     window.removeEventListener('dmaior:tema', this._themeHandler);
   }
 
-  // Mesmo mecanismo de tema de dmaior-votacao.js/ranking.js — lê
+  // Mesmo mecanismo de tema de dmaior-votacao.js/ranking.js - lê
   // dm_tema do localStorage e espelha no atributo data-theme do
   // próprio host, pra CSS :host-context/:host([data-theme]) reagir.
   _syncThemeHost() {
@@ -52,7 +52,7 @@ class PainelPK extends HTMLElement {
     else this.setAttribute('data-theme', tema);
   }
 
-  // Chamado por dmaior-app.js ao abrir a aba — cobre o caso do elemento já
+  // Chamado por dmaior-app.js ao abrir a aba - cobre o caso do elemento já
   // existir no DOM desde antes do login terminar (mesmo padrão de
   // ranking-dmaior/dmaior-votacao).
   verificarSessao() {
@@ -94,7 +94,7 @@ class PainelPK extends HTMLElement {
     // Abre direto no dia de hoje, não no mais antigo da lista (índice 0 era
     // sempre o primeiro dia da liga inteira, ex: "ontem" logo que um novo dia
     // é gerado). Sem confronto de hoje na lista (liga ainda não começou ou já
-    // encerrou), cai pro último dia disponível — mais últil que o mais antigo.
+    // encerrou), cai pro último dia disponível - mais últil que o mais antigo.
     const idxHoje = this._datas.indexOf(this._hojeISO());
     this._dataIdx = idxHoje !== -1 ? idxHoje : Math.max(0, this._datas.length - 1);
   }
@@ -165,7 +165,7 @@ class PainelPK extends HTMLElement {
         .tab-btn svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
         .tab-btn.active { background: linear-gradient(135deg, var(--pk-pink), var(--pk-blue)); color: #fff; }
         /* 3 abas (Confrontos/Ranking/Regras) não cabiam num celular estreito
-           com o padding padrão — o container tinha width:fit-content sem
+           com o padding padrão - o container tinha width:fit-content sem
            limite, então "Regras" ficava cortado fora da tela em vez de
            encolher junto com as outras. */
         @media (max-width: 420px) {
@@ -252,9 +252,9 @@ class PainelPK extends HTMLElement {
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 
-        /* ══ Temas claros — mesmo padrão de dmaior-votacao.js/ranking.js ══ */
+        /* ══ Temas claros - mesmo padrão de dmaior-votacao.js/ranking.js ══ */
         /* card-bg um degrau mais escuro que o fundo da página (mesmos tons de
-           --dm-bg-1 do global.css) — senão o card some contra o fundo claro,
+           --dm-bg-1 do global.css) - senão o card some contra o fundo claro,
            quase da mesma cor. */
         :host-context([data-theme="branco"]), :host([data-theme="branco"]) { --cyan:#0095a8; --cyan-d:rgba(0,149,168,.14); --text:#0d1117; --muted:#5b6472; --border:rgba(0,0,0,.08); --card-bg:#eaeff6; }
         :host-context([data-theme="rosa"]), :host([data-theme="rosa"]) { --cyan:#e91e8c; --cyan-d:rgba(233,30,140,.14); --text:#1a0010; --muted:#7a4060; --border:rgba(0,0,0,.06); --card-bg:#fce4ec; }
@@ -287,9 +287,9 @@ class PainelPK extends HTMLElement {
     this._renderConteudo();
   }
 
-  // Botão manual — evita ter que sair da aba ou dar refresh na página
+  // Botão manual - evita ter que sair da aba ou dar refresh na página
   // inteira só pra ver diamantes/confrontos atualizados. Não usa o estado
-  // "carregando" de tela cheia (ficaria piscando a cada clique) — só gira o
+  // "carregando" de tela cheia (ficaria piscando a cada clique) - só gira o
   // ícone do próprio botão enquanto busca de novo.
   async _atualizar() {
     const btn = this.shadowRoot.getElementById('btn-pk-refresh');
@@ -326,7 +326,7 @@ class PainelPK extends HTMLElement {
     return Number(n || 0).toLocaleString('pt-BR');
   }
 
-  // Data local (fuso do navegador do streamer) em ISO — usada só pra
+  // Data local (fuso do navegador do streamer) em ISO - usada só pra
   // decidir rótulos de exibição (não precisa ser BRT exato como no Worker).
   _hojeISO() {
     const h = new Date();
@@ -343,7 +343,7 @@ class PainelPK extends HTMLElement {
   }
 
   // Mesma conversão de link do Drive usada no admin (_normalizarImagemUrl) e
-  // na votação (_imgUrl), duplicada aqui de propósito — cada custom element
+  // na votação (_imgUrl), duplicada aqui de propósito - cada custom element
   // deste projeto é autocontido, sem import entre componentes.
   _imgUrl(url, w = 800, h = 280) {
     if (!url || typeof url !== 'string') return '';
@@ -369,7 +369,7 @@ class PainelPK extends HTMLElement {
     return `<img class="pk-banner-liga" src="${this._esc(url)}" alt="" loading="eager" onerror="this.remove()">`;
   }
 
-  // Banner de agendamento — só aparece quando a liga tem início futuro
+  // Banner de agendamento - só aparece quando a liga tem início futuro
   // e/ou data de encerramento definida (liga contínua sem essas datas não
   // mostra nada aqui).
   _renderAvisoAgendamento() {
@@ -379,7 +379,7 @@ class PainelPK extends HTMLElement {
     if (prog.data_inicio) {
       const dias = this._diasAte(prog.data_inicio);
       partes.push(dias > 0
-        ? `Começa em ${dias} dia${dias === 1 ? '' : 's'} — ${this._fmtBr(prog.data_inicio)}`
+        ? `Começa em ${dias} dia${dias === 1 ? '' : 's'} - ${this._fmtBr(prog.data_inicio)}`
         : `Em andamento desde ${this._fmtBr(prog.data_inicio)}`);
     }
     if (prog.data_fim) partes.push(`Até ${this._fmtBr(prog.data_fim)}`);
@@ -395,7 +395,7 @@ class PainelPK extends HTMLElement {
     const bannerUrl = this._imgUrl(this._programacoes[this._progIdx]?.banner_url || '');
     if (bannerWrap) bannerWrap.innerHTML = this._renderBannerLiga(bannerUrl);
     // Com banner e só 1 liga, o pill de nome fica redundante (o banner já
-    // ocupa o lugar dele) — mas com mais de 1 liga o pill continua sendo o
+    // ocupa o lugar dele) - mas com mais de 1 liga o pill continua sendo o
     // único jeito de trocar entre elas, então some só o texto, nunca a troca.
     const esconderPills = !!bannerUrl && this._programacoes.length <= 1;
     nav.style.display = esconderPills ? 'none' : '';
@@ -440,7 +440,7 @@ class PainelPK extends HTMLElement {
 
     if (this._carregando) { el.innerHTML = `<div class="state-msg"><div class="spinner"></div>Carregando...</div>`; return; }
     if (this._erro) { el.innerHTML = `<div class="state-msg">${this._esc(this._erro)}</div>`; return; }
-    // Regras é conteúdo estático — funciona mesmo sem nenhuma liga ativa.
+    // Regras é conteúdo estático - funciona mesmo sem nenhuma liga ativa.
     if (this._abaAtiva === 'regras') { el.innerHTML = this._renderRegras(); return; }
     if (!this._programacoes.length) { el.innerHTML = `<div class="state-msg">Nenhuma programação de PK disponível no momento.</div>`; return; }
 
@@ -448,7 +448,7 @@ class PainelPK extends HTMLElement {
     el.innerHTML = avisoAgendamento + (this._abaAtiva === 'ranking' ? this._renderRanking() : this._renderConfrontos());
   }
 
-  // Placar mostrado na pílula — usa score_a/score_b reais quando o admin
+  // Placar mostrado na pílula - usa score_a/score_b reais quando o admin
   // registrou (opcional), senão deriva um placar simples 1-0/0-1/0-0 a
   // partir do resultado, só pra dar a mesma leitura visual da referência.
   _placarConfronto(c, resultado) {
@@ -478,14 +478,14 @@ class PainelPK extends HTMLElement {
 
       const [dia, mes] = [String(c.data_confronto).slice(8,10), String(c.data_confronto).slice(5,7)];
       // Confronto pendente normalmente é o de hoje (a liga fecha à meia-noite
-      // e não existe mais horário fixo por confronto) — mas com início
+      // e não existe mais horário fixo por confronto) - mas com início
       // agendado no futuro a rodada 1 já fica visível com antecedência,
       // datada num dia que ainda vai chegar.
       const dataLabel = pendente
-        ? (isHoje ? 'Hoje' : `Agendado — ${dia}/${mes}`)
+        ? (isHoje ? 'Hoje' : `Agendado - ${dia}/${mes}`)
         : `${dia}/${mes}/${String(c.data_confronto).slice(0,4)}`;
 
-      // Confronto com vencedor definido — cada lado ganha um badge próprio
+      // Confronto com vencedor definido - cada lado ganha um badge próprio
       // (Vitória dourado / Derrota cinza) em vez do rótulo genérico no topo,
       // e o lado perdedor fica com foto e anel em cinza.
       const finalizado = winA || winB;
@@ -503,7 +503,7 @@ class PainelPK extends HTMLElement {
       if (cancelado) {
         barraHtml = `<div class="pk-scorebar neutro"><div class="side">Confronto cancelado</div></div>`;
       } else if (pendente && isHoje) {
-        // Placar parcial de hoje — só pra acompanhar, quem tiver mais
+        // Placar parcial de hoje - só pra acompanhar, quem tiver mais
         // diamantes ATÉ AGORA fica com a barra maior. O resultado oficial
         // só é decidido à meia-noite (isso aqui nunca decide ponto).
         const diamA = Number(c.diamantes_hoje_a || 0), diamB = Number(c.diamantes_hoje_b || 0);
@@ -596,13 +596,13 @@ class PainelPK extends HTMLElement {
 
   _renderRegras() {
     const regras = [
-      'Todo dia você é pareado com <strong>1 streamer</strong> — não é uma live conjunta, cada um transmite normal, separado.',
+      'Todo dia você é pareado com <strong>1 streamer</strong> - não é uma live conjunta, cada um transmite normal, separado.',
       'À meia-noite, o sistema compara quantos <strong>diamantes cada um dos dois recebeu naquele dia</strong>. Quem fez mais vence e ganha <strong>1 ponto</strong> no ranking.',
       'Empate (inclusive 0 a 0) não rende ponto pra nenhum lado.',
-      'O ranking é por <strong>vitórias</strong>, não por diamantes — quem vence mais confrontos sobe na tabela.',
+      'O ranking é por <strong>vitórias</strong>, não por diamantes - quem vence mais confrontos sobe na tabela.',
       'Em caso de <strong>empate no total de pontos</strong> entre dois ou mais streamers, o desempate é feito por quem recebeu mais diamantes ao longo do período.',
       'Ninguém é eliminado: mesmo perdendo, você recebe um <strong>novo adversário no dia seguinte</strong>, automaticamente.',
-      'O primeiro confronto de cada streamer usa o desempenho do <strong>mês anterior</strong> só pra equilibrar o início — depois disso, os pares seguem o desempenho dentro da própria liga.',
+      'O primeiro confronto de cada streamer usa o desempenho do <strong>mês anterior</strong> só pra equilibrar o início - depois disso, os pares seguem o desempenho dentro da própria liga.',
     ];
     return `<div class="rules-wrap">` + regras.map((texto, i) => `
       <div class="rule-card">

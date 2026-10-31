@@ -1,5 +1,5 @@
 /**
- * video-compat.js — vídeo de banner/aviso que funciona no navegador da Xiaomi.
+ * video-compat.js - vídeo de banner/aviso que funciona no navegador da Xiaomi.
  *
  * O Mi Browser (e UC, Quark, QQ, Huawei, Heytap, Vivo) troca o <video> por um
  * player NATIVO fora da página: ignora border-radius/z-index/transform, mostra
@@ -7,14 +7,14 @@
  * .claude/skills/compat-navegador-xiaomi.
  *
  * Nesses navegadores o <video> continua tocando (escondido, 2px), mas quem
- * aparece é um <canvas> comum que recebe os quadros — o canvas obedece CSS,
+ * aparece é um <canvas> comum que recebe os quadros - o canvas obedece CSS,
  * z-index e camadas normais. Nos demais navegadores só entram atributos
  * inofensivos; o vídeo fica como sempre foi.
  *
  * Uso: window.DmaiorVideoCompat.apply(raizDoDOM)  (depois de inserir o HTML)
  *
  * 2026-10-06: o canvas ficou vazio no Mi Browser real, então nesses navegadores
- * o vídeo vira uma IMAGEM (a capa do vídeo) — sem player, sem controles, sem
+ * o vídeo vira uma IMAGEM (a capa do vídeo) - sem player, sem controles, sem
  * ficar por cima de menus. Capa = `#poster=<url>` no fim da URL do vídeo (o admin
  * grava ao subir) ou, nos vídeos antigos, assets/banners/<nome-do-arquivo>-capa.webp.
  * Sem capa nenhuma: um cartão neutro com o título.
@@ -24,7 +24,7 @@
   'use strict';
 
   // O modo canvas é EXPERIMENTAL e fica DESLIGADO por padrão: no Mi Browser real
-  // (2026-10-02) o canvas ficou vazio e o banner sumiu — o vídeo vem do R2 sem
+  // (2026-10-02) o canvas ficou vazio e o banner sumiu - o vídeo vem do R2 sem
   // CORS e não dá pra conferir os pixels. Só liga com ?canvasvideo=1 na URL.
   // ?vcdebug=1 mostra um painel com o estado do vídeo (pra print de diagnóstico).
   // Navegadores que trocam o <video> pelo player nativo do sistema

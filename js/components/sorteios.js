@@ -1,5 +1,5 @@
 /**
- * sorteios.js — Ferramenta de sorteios da DMaior Agency
+ * sorteios.js - Ferramenta de sorteios da DMaior Agency
  *
  * Custom Element: <dmaior-sorteios>
  * Shadow DOM, sem login/backend próprio. Três modalidades independentes:
@@ -10,7 +10,7 @@
  *
  * A lógica/efeito da roleta (contagem 3,2,1,GO!, giro, desaceleração,
  * resultado, confete) foi adaptada de uma ferramenta de sorteios usada em
- * outra agência — só o EFEITO foi reaproveitado, com cores/layout próprios
+ * outra agência - só o EFEITO foi reaproveitado, com cores/layout próprios
  * do site DMaior (var(--dm-cyan) etc.), sem copiar o visual original.
  */
 
@@ -85,7 +85,7 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
-  //  SOM — sintetizado via Web Audio API (sem arquivo de áudio)
+  //  SOM - sintetizado via Web Audio API (sem arquivo de áudio)
   // ════════════════════════════════════════════════════════
 
   _audio() {
@@ -117,7 +117,7 @@ class DmaiorSorteios extends HTMLElement {
     this._beep(ehGo ? 880 : 520, ehGo ? 0.18 : 0.09, 'square', 0.13);
   }
 
-  // Tick curto — usado no giro da roleta customizável (uma vez por fatia passada).
+  // Tick curto - usado no giro da roleta customizável (uma vez por fatia passada).
   _beepTick() {
     this._beep(700, 0.035, 'square', 0.1);
   }
@@ -140,7 +140,7 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
-  //  MODALIDADE 1 — SORTEIO GERAL (nomes)
+  //  MODALIDADE 1 - SORTEIO GERAL (nomes)
   // ════════════════════════════════════════════════════════
 
   addGeralIndividual() {
@@ -208,11 +208,11 @@ class DmaiorSorteios extends HTMLElement {
   _prepararSorteioN(disponiveis, poolCompleto, nSolicitado) {
     if (!disponiveis.length) {
       disponiveis.push(...poolCompleto);
-      this.toast('Todos já foram sorteados — lista reiniciada!', 'info');
+      this.toast('Todos já foram sorteados - lista reiniciada!', 'info');
     }
     let n = Math.max(1, parseInt(nSolicitado, 10) || 1);
     if (n > disponiveis.length) {
-      this.toast(`Só há ${disponiveis.length} disponível${disponiveis.length !== 1 ? 'is' : ''} — sorteando ${disponiveis.length}.`, 'info');
+      this.toast(`Só há ${disponiveis.length} disponível${disponiveis.length !== 1 ? 'is' : ''} - sorteando ${disponiveis.length}.`, 'info');
       n = disponiveis.length;
     }
     const vencedores = [];
@@ -237,7 +237,7 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
-  //  MODALIDADE 2 — SORTEIO DE RIFA (números)
+  //  MODALIDADE 2 - SORTEIO DE RIFA (números)
   // ════════════════════════════════════════════════════════
 
   gerarRifa() {
@@ -263,7 +263,7 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
-  //  MODALIDADE 3 — SORTEIO POR ID KWAI
+  //  MODALIDADE 3 - SORTEIO POR ID KWAI
   // ════════════════════════════════════════════════════════
 
   _idJaExiste(id) {
@@ -426,7 +426,7 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
-  //  MODALIDADE 4 — ROLETA CUSTOMIZÁVEL (roda com fatias e cores)
+  //  MODALIDADE 4 - ROLETA CUSTOMIZÁVEL (roda com fatias e cores)
   // ════════════════════════════════════════════════════════
 
   addRoletaIndividual() {
@@ -600,7 +600,7 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
-  //  MODALIDADE 5 — CARA OU COROA
+  //  MODALIDADE 5 - CARA OU COROA
   // ════════════════════════════════════════════════════════
 
   async jogarMoeda() {
@@ -639,7 +639,7 @@ class DmaiorSorteios extends HTMLElement {
 
   _tocarSomMoeda() {
     // Sequência curta de tiques simulando a moeda girando no ar, mais lenta
-    // no fim — igual ao efeito da roleta, só que num intervalo fixo (a moeda
+    // no fim - igual ao efeito da roleta, só que num intervalo fixo (a moeda
     // sempre gira o mesmo tempo, não depende de quantos itens existem).
     const atrasos = [0, 0.15, 0.32, 0.52, 0.75, 1.0, 1.3, 1.65];
     atrasos.forEach(s => this._beep(500, 0.05, 'square', 0.09, s));
@@ -653,7 +653,7 @@ class DmaiorSorteios extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════
-  //  ROLETA — animação compartilhada (efeito adaptado)
+  //  ROLETA - animação compartilhada (efeito adaptado)
   // ════════════════════════════════════════════════════════
 
   async _abrirRoleta({ tipo, pool, vencedores }) {

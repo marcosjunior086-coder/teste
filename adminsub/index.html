@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-title" content="DMaior Sub">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="color-scheme" content="dark light">
-  <title>Painel da Sub — DMaior Agency</title>
+  <title>Painel da Sub - DMaior Agency</title>
   <meta name="robots" content="noindex, nofollow">
 
   <!-- Boot de tema: aplica data-theme antes do 1º paint (mesmo dm_tema do site/agente) -->
@@ -31,7 +31,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { background: #060B16; min-height: 100%; width: 100%; }
-    /* Fundo da página inteira = mesmo --dm-bg do site (css/global.css) por tema */
+    /* Fundo da página inteira = mesmo --dm-bg do site (css/global.css?v=20261031-traco) por tema */
     html[data-theme="dark"],    html[data-theme="dark"] body    { background: #000; }
     html[data-theme="branco"],  html[data-theme="branco"] body  { background: #f0f4f8; }
     html[data-theme="rosa"],    html[data-theme="rosa"] body    { background: #fff5f8; }
@@ -48,16 +48,16 @@
   <dmaior-footer></dmaior-footer>
 
   <!-- api.js expõe DmaiorConfig (URLs dos workers) para o componente usar -->
-  <script charset=utf-8 src="js/utils/helpers.js"></script>
-  <script charset=utf-8 src="js/api.js?v=20260915-maioridade"></script>
-  <!-- Motor de preferências (tema/fonte/idioma) — mesmo do site/agente. Expõe window.DMaiorPrefs -->
+  <script charset=utf-8 src="js/utils/helpers.js?v=20261031-traco"></script>
+  <script charset=utf-8 src="js/api.js?v=20261031-traco"></script>
+  <!-- Motor de preferências (tema/fonte/idioma) - mesmo do site/agente. Expõe window.DMaiorPrefs -->
   <script charset=utf-8 src="js/preferences.js?v=20260905-admin-aparencia"></script>
-  <!-- Componente admin original — contém todo visual e lógica de login/painel -->
-  <script charset=utf-8 src="js/components/dmaior-admin.js?v=20261030-agente-excluir-lista"></script>
+  <!-- Componente admin original - contém todo visual e lógica de login/painel -->
+  <script charset=utf-8 src="js/components/dmaior-admin.js?v=20261031-traco"></script>
   <!-- router.js NÃO é carregado aqui: o admin tem login próprio embutido -->
-  <script defer charset=utf-8 src="js/components/footer.js?v=20261031-kwai-cnpj"></script>
+  <script defer charset=utf-8 src="js/components/footer.js?v=20261031-traco"></script>
   <dmaior-cookie-consent></dmaior-cookie-consent>
-  <script charset=utf-8 src="js/components/cookie-consent.js"></script>
+  <script charset=utf-8 src="js/components/cookie-consent.js?v=20261031-traco"></script>
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
   <!-- Diagnóstico no celular: só carrega com ?debug=1 na URL (mostra console/erros num painel) -->
   <script>

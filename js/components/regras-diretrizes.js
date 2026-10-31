@@ -1,11 +1,11 @@
 /* eslint-env browser */
 // ============================================================
-//  DMaior Agency — Custom Element: <regras-dmaior>
+//  DMaior Agency - Custom Element: <regras-dmaior>
 //  Aba "Regras e Diretrizes" do painel do streamer: regulamento da
 //  campanha de livestream da plataforma + Termo de Cooperação da agência.
 //  Conteúdo estático, sem chamada de rede.
 //  Usado no painel do streamer (aba Regras) e no recrutamento.html (janela
-//  "Ler" dos aceites, com secao="..." unica) — texto num lugar só.
+//  "Ler" dos aceites, com secao="..." unica) - texto num lugar só.
 //
 //  Renderiza no DOM normal (sem shadow) de propósito: herda as variáveis
 //  de tema do painel (--text, --muted, --border, --glass, --gold, --red,
@@ -23,7 +23,7 @@
     <div class="card rg-head">
       <span class="rg-kicker">Campanha de Livestream · 2H2026</span>
       <h2>Regulamento da Campanha de Livestream 2H2026</h2>
-      <p>Versão consolidada — inclui as Atualizações de Políticas de Livestream 2H2026.</p>
+      <p>Versão consolidada - inclui as Atualizações de Políticas de Livestream 2H2026.</p>
       <p class="rg-legend">Os itens com o selo ${UPD} foram alterados nesta versão.</p>
     </div>
 
@@ -69,7 +69,7 @@
         <div class="rg-sev mod">
           <h3><span class="rg-num">2.3</span>Infração Moderada</h3>
           <ul>
-            <li>Lives gravadas (vídeo transmitido como se fosse live) são proibidas — a campanha é para conteúdo transmitido em tempo real.</li>
+            <li>Lives gravadas (vídeo transmitido como se fosse live) são proibidas - a campanha é para conteúdo transmitido em tempo real.</li>
             <li>Outras violações não mencionadas que coloquem a plataforma em risco.</li>
           </ul>
           <p class="rg-pen"><b>Penalidade:</b> banimento de 7 dias na primeira constatação e remoção da campanha a partir da segunda.</p>
@@ -89,7 +89,7 @@
   // ── Termo de Cooperação DMaior Agency (lido no painel e aceito no recrutamento) ──
   // Texto do PDF "Termos Dmaior Agency" (2026-09). Única adaptação: os campos
   // em branco (nome/CPF/endereço) e o bloco de assinatura viraram aceite
-  // digital — o streamer é identificado pelo UID e pelos dados da candidatura,
+  // digital - o streamer é identificado pelo UID e pelos dados da candidatura,
   // e o aceite (data/hora + TERMO_AGENCIA_VERSAO) é gravado em `candidaturas`.
   // Mudou o texto? Troque a versão, pra dar pra saber quem aceitou qual.
   const TERMO_AGENCIA_VERSAO = '2026-09';

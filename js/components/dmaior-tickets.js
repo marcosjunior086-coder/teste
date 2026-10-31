@@ -1,13 +1,13 @@
 /* eslint-env browser */
 // ============================================================
-//  DMaior Agency — Custom Element: <dmaior-tickets>
+//  DMaior Agency - Custom Element: <dmaior-tickets>
 //  Autocontido, mesmo padrão de dmaior-impulso.js: lê dm_uid/dm_token/
 //  dm_refresh do localStorage sozinho, recebe worker-url (aponta pro
 //  dashboard.agencydmaior.com.br, mesmo worker que já serve /api/carteira).
 //  Exclusivo do painel do streamer logado (dmaior-app.js).
 //
 //  Visual e comportamento portados do protótipo aprovado em conversa
-//  (_mockup-tickets-streamer.html) — mesma estrutura de cards de nível,
+//  (_mockup-tickets-streamer.html) - mesma estrutura de cards de nível,
 //  galeria e histórico, agora consumindo dados reais em vez de mock.
 // ============================================================
 class DmaiorTickets extends HTMLElement {
@@ -59,7 +59,7 @@ class DmaiorTickets extends HTMLElement {
     window.removeEventListener('dmaior:tema', this._themeHandler);
   }
 
-  // Mesmo mecanismo de tema de painel-pk.js/dmaior-votacao.js — lê dm_tema
+  // Mesmo mecanismo de tema de painel-pk.js/dmaior-votacao.js - lê dm_tema
   // do localStorage e espelha no atributo data-theme do próprio host, pra
   // CSS :host([data-theme]) reagir.
   _syncThemeHost() {
@@ -69,7 +69,7 @@ class DmaiorTickets extends HTMLElement {
     else this.setAttribute('data-theme', tema);
   }
 
-  // Chamado por dmaior-app.js ao abrir a aba — cobre o caso do elemento já
+  // Chamado por dmaior-app.js ao abrir a aba - cobre o caso do elemento já
   // existir no DOM desde antes do login terminar (mesmo padrão de painel-pk).
   verificarSessao() {
     if (!this._iniciado && this._isLoggedIn()) this._iniciar();
@@ -146,7 +146,7 @@ class DmaiorTickets extends HTMLElement {
     } catch (_) {}
   }
 
-  // Mesmo proxy/cache do weserv.nl usado no admin — imagem do Drive não é
+  // Mesmo proxy/cache do weserv.nl usado no admin - imagem do Drive não é
   // buscada de novo a cada visita, o weserv já entrega com CDN/cache próprio.
   _proxyImg(url) {
     if (!url) return null;
@@ -159,12 +159,12 @@ class DmaiorTickets extends HTMLElement {
 
   _esc(s) { return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   _num(n) { return Number(n || 0).toLocaleString('pt-BR'); }
-  _fdt(v) { if (!v) return '—'; const d = new Date(v); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+  _fdt(v) { if (!v) return '-'; const d = new Date(v); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
 
   _icoTicket() { return `<svg class="ico" viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"/></svg>`; }
   // Ícone de diamante configurável pelo admin (Tickets → Regras → link do
   // Drive); sem link cadastrado, cai no mesmo SVG já usado no resto do painel
-  // (dmaior-app.js svgDiamond) — nunca usa emoji, pedido explícito do usuário.
+  // (dmaior-app.js svgDiamond) - nunca usa emoji, pedido explícito do usuário.
   _icoDiamante() {
     const img = this._proxyImg(this._iconeDiamanteUrl);
     if (img) return `<img class="ico" src="${this._esc(img)}" alt="" style="object-fit:contain">`;
@@ -179,9 +179,9 @@ class DmaiorTickets extends HTMLElement {
         --verde:#4ade80; --verm:#f87171; font-family:'Exo 2',sans-serif; color:var(--dm-text); }
       *{box-sizing:border-box}
 
-      /* Temas claros — mesmo padrão de painel-pk.js/dmaior-votacao.js/ranking.js:
+      /* Temas claros - mesmo padrão de painel-pk.js/dmaior-votacao.js/ranking.js:
          data-theme espelhado no host via _syncThemeHost(), lê dm_tema do
-         localStorage. Só troca as variáveis — todo o resto do CSS já usa
+         localStorage. Só troca as variáveis - todo o resto do CSS já usa
          var(--dm-*), então reage sozinho. */
       :host([data-theme="branco"]){ --dm-card:#eaeff6; --dm-border:rgba(0,0,0,.08); --dm-text:#0d1117; --dm-text-muted:#5b6472; --dm-cyan:#0095a8; --dm-cyan-rgb:0,149,168; }
       :host([data-theme="rosa"]){ --dm-card:#fce4ec; --dm-border:rgba(0,0,0,.06); --dm-text:#1a0010; --dm-text-muted:#7a4060; --dm-cyan:#e91e8c; --dm-cyan-rgb:233,30,140; }
@@ -262,7 +262,7 @@ class DmaiorTickets extends HTMLElement {
       .btn-resgatar.bloq{background:rgba(255,255,255,.04);border:1px solid var(--dm-border);color:var(--dm-text-muted);cursor:not-allowed}
       .btn-resgatar[disabled]{opacity:.6;pointer-events:none}
 
-      /* Desktop (painel): aproveita o espaço — galeria com 6 por linha */
+      /* Desktop (painel): aproveita o espaço - galeria com 6 por linha */
       @media(min-width:1200px){
         .wrap{max-width:1160px}
         .galeria-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
@@ -363,7 +363,7 @@ class DmaiorTickets extends HTMLElement {
     if (!el) return;
     const regras = this._regrasAtivas;
     if (!regras.length) {
-      el.innerHTML = `<div class="empty-box">Nenhuma meta configurada ainda — fale com a agência.</div>`;
+      el.innerHTML = `<div class="empty-box">Nenhuma meta configurada ainda - fale com a agência.</div>`;
       return;
     }
 
@@ -418,7 +418,7 @@ class DmaiorTickets extends HTMLElement {
     }
 
     el.innerHTML = `
-      <div class="niveis-nota">Os níveis não se somam — ao completar o próximo, você recebe só a diferença até o valor total dele.</div>
+      <div class="niveis-nota">Os níveis não se somam - ao completar o próximo, você recebe só a diferença até o valor total dele.</div>
       <div class="niveis-strip">${cardsHtml}</div>
       ${detalheHtml}
     `;
@@ -499,12 +499,12 @@ class DmaiorTickets extends HTMLElement {
   // ── Histórico ──────────────────────────────────────────────────────────────
   _linhaMov(m) {
     const v = Number(m.quantidade || 0);
-    return `<div class="hist-row"><div><div class="hist-desc">${this._esc(m.motivo || '—')}</div><div class="hist-data">${this._fdt(m.criado_em)}</div></div><div class="hist-val ${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : ''}${this._num(v)}</div></div>`;
+    return `<div class="hist-row"><div><div class="hist-desc">${this._esc(m.motivo || '-')}</div><div class="hist-data">${this._fdt(m.criado_em)}</div></div><div class="hist-val ${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : ''}${this._num(v)}</div></div>`;
   }
   _linhaResg(r) {
     const BADGE = { pendente: 'Pendente', aprovado: 'Aprovado', enviado: 'Enviado', cancelado: 'Cancelado' };
     const COR   = { pendente: 'var(--dm-gold)', aprovado: 'var(--dm-cyan)', enviado: 'var(--verde)', cancelado: 'var(--verm)' };
-    return `<div class="hist-row"><div><div class="hist-desc">${this._esc(r.presente_nome_no_momento || '—')}</div><div class="hist-data">${this._fdt(r.solicitado_em)} · ${this._num(r.custo_tickets_no_momento)} tickets</div></div><div class="hist-val" style="color:${COR[r.status] || 'var(--dm-text-muted)'}">${BADGE[r.status] || r.status}</div></div>`;
+    return `<div class="hist-row"><div><div class="hist-desc">${this._esc(r.presente_nome_no_momento || '-')}</div><div class="hist-data">${this._fdt(r.solicitado_em)} · ${this._num(r.custo_tickets_no_momento)} tickets</div></div><div class="hist-val" style="color:${COR[r.status] || 'var(--dm-text-muted)'}">${BADGE[r.status] || r.status}</div></div>`;
   }
 
   _renderHistInline() {
@@ -536,7 +536,7 @@ class DmaiorTickets extends HTMLElement {
 
   _abrirHistCompleto(tipo) {
     const overlay = this.shadowRoot.getElementById('ticHistOverlay');
-    this.shadowRoot.getElementById('ticHistOverlayTitulo').textContent = tipo === 'mov' ? 'Movimentações — histórico completo' : 'Resgates — histórico completo';
+    this.shadowRoot.getElementById('ticHistOverlayTitulo').textContent = tipo === 'mov' ? 'Movimentações - histórico completo' : 'Resgates - histórico completo';
     this.shadowRoot.getElementById('ticHistOverlayBody').innerHTML = tipo === 'mov'
       ? this._movimentacoes.map(m => this._linhaMov(m)).join('')
       : this._resgates.map(r => this._linhaResg(r)).join('');

@@ -1,10 +1,10 @@
 /**
- * live-widget.js — Widget de transmissões ao vivo dos streamers DMaior
+ * live-widget.js - Widget de transmissões ao vivo dos streamers DMaior
  *
  * Adaptado de kwai-live-widget.js (Wix Custom Element) para Hostinger estático.
  *
  * MUDANÇAS EM RELAÇÃO AO ORIGINAL:
- *  - this.PROXY e this.API_DMAIOR removidos — substituídos por getter _proxyBase
+ *  - this.PROXY e this.API_DMAIOR removidos - substituídos por getter _proxyBase
  *    e chamadas a window.DmaiorAPI.live.*
  *  - fetchEntries() usa window.DmaiorAPI.live.getLives() (sem fetch direto)
  *  - proxyFetch() usa window.DmaiorAPI.live.proxy() (sem fetch direto)
@@ -25,7 +25,7 @@ class KwaiLiveWidget extends HTMLElement {
     this.CACHE_KEY     = 'widget_live_v6';
     this.CACHE_TTL     = 70000;
     this.BATCH_SIZE    = 5;
-    // Prévia em vídeo nas bolinhas — liga em mobile E desktop. O que travava
+    // Prévia em vídeo nas bolinhas - liga em mobile E desktop. O que travava
     // NÃO era o número de streams (o site da Fox roda ~7 num celular fraco
     // sem engasgo), era a LARGADA: todos os players subiam no mesmo instante.
     // Agora sobem em fila, um a cada ~1,3s (ver _pumpMiniQueue).
@@ -58,7 +58,7 @@ class KwaiLiveWidget extends HTMLElement {
     this.BUFFER_TARGET   = 8;
   }
 
-  // ── Getter: URL base do proxy (vem de DmaiorConfig — sem hardcode) ─────────
+  // ── Getter: URL base do proxy (vem de DmaiorConfig - sem hardcode) ─────────
   // Usado pelo HLS xhrSetup e nas URLs de src proxy do player
   get _proxyBase() {
     return window.DmaiorConfig.workers.live.replace(/\/$/, '') + '/?';
@@ -66,7 +66,7 @@ class KwaiLiveWidget extends HTMLElement {
 
   // ── Helpers de segurança ───────────────────────────────────────────────────
 
-  // Escapa caracteres HTML — evita XSS em innerHTML
+  // Escapa caracteres HTML - evita XSS em innerHTML
   _safe(str) {
     return String(str || '').replace(/[&<>"']/g, (c) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
@@ -87,7 +87,7 @@ class KwaiLiveWidget extends HTMLElement {
     this._syncThemeHost();
     this.render();
     // Nasce fechado (só a barra "N AO VIVO") e updateTop() abre sozinho assim
-    // que os primeiros streamers chegam — quem entra no site já vê as lives
+    // que os primeiros streamers chegam - quem entra no site já vê as lives
     // sem precisar clicar. Se o usuário fechar manualmente (botão −), fica
     // fechado por conta dele (userMinimized) até ele abrir de novo; a única
     // coisa que força fechar é não sobrar ninguém ao vivo.
@@ -96,7 +96,7 @@ class KwaiLiveWidget extends HTMLElement {
     this._scheduleHlsLib();
     this.initObserver();
     this.init();
-    // Atualiza as lives a cada 60 segundos — timer guardado para limpeza.
+    // Atualiza as lives a cada 60 segundos - timer guardado para limpeza.
     // (era 30s; a lista de quem está ao vivo não muda tão rápido e cada
     // ciclo remexe nos cards, atrapalhando o vídeo que já está tocando.)
     this.refreshTimer = setInterval(() => this.init(), 60000);
@@ -115,7 +115,7 @@ class KwaiLiveWidget extends HTMLElement {
       if (document.hidden) this._trimMiniPlayers();
       // Voltou pra aba: o trim acima parou TODOS os mini-players e o
       // IntersectionObserver não re-dispara (os cards continuam na mesma
-      // posição) — sem reenfileirar, as bolinhas ficavam só na foto até
+      // posição) - sem reenfileirar, as bolinhas ficavam só na foto até
       // atualizar a página.
       else this._requeueVisible();
     };
@@ -183,7 +183,7 @@ class KwaiLiveWidget extends HTMLElement {
       // então o preconnect disparava cedo demais e o Lighthouse marcava como
       // "não usado". O próprio <script> abre a conexão na hora certa.
       const s   = document.createElement('script');
-      s.src     = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20'; // versão fixada — evita quebra por update automático
+      s.src     = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.20'; // versão fixada - evita quebra por update automático
       s.onload  = resolve;
       s.onerror = resolve; // não bloqueia se CDN falhar
       document.head.appendChild(s);
@@ -193,9 +193,9 @@ class KwaiLiveWidget extends HTMLElement {
   // Qual player usar num <video>: 'hlsjs' | 'native' | 'wait' (hls.js ainda
   // carregando) | null (nenhum disponível).
   // hls.js PRIMEIRO onde existe MediaSource (Android, Chrome/Edge/Firefox,
-  // Mac) — igual ao site da Fox. Antes era o contrário: o Chrome (Android
+  // Mac) - igual ao site da Fox. Antes era o contrário: o Chrome (Android
   // sempre; desktop desde as versões recentes) diz que toca HLS sozinho, e o
-  // player nativo dele não deixa controlar buffer nem ponto de início —
+  // player nativo dele não deixa controlar buffer nem ponto de início - 
   // demorava mais pra começar e pesava com várias bolinhas. No iPhone não
   // existe MediaSource (só o ManagedMediaSource) → continua o nativo do
   // Safari, que lá é o melhor. Se o hls.js não carregar (CDN bloqueado), cai
@@ -220,7 +220,7 @@ class KwaiLiveWidget extends HTMLElement {
     });
   }
 
-  // Adia o hls.js (123 KB) pra depois do 1º paint / load — assim ele não
+  // Adia o hls.js (123 KB) pra depois do 1º paint / load - assim ele não
   // disputa banda com o conteúdo da página. A live ainda entra sozinha, só
   // ~1s mais tarde. Quem pedir a lib antes (raro) cai no loadHlsLib() na hora.
   _scheduleHlsLib() {
@@ -264,11 +264,11 @@ class KwaiLiveWidget extends HTMLElement {
           overflow:hidden;
           padding:14px clamp(12px,2vw,22px) 16px;
         }
-        /* reserva a altura do estado aberto só no desktop — no mobile essa
+        /* reserva a altura do estado aberto só no desktop - no mobile essa
            faixa fica no topo e 130px reservados atrasam o Speed Index */
         @media (min-width:1001px){
           :host([data-layout="webpro"]) #liveWidget{ min-height:132px; }
-          /* Minimizado no desktop: tira a reserva de altura — senão o card
+          /* Minimizado no desktop: tira a reserva de altura - senão o card
              ficava com espaço vazio sobrando embaixo da barra "N AO VIVO"
              em vez de fechar de verdade (a reserva é só pro estado aberto). */
           :host([data-layout="webpro"]) #liveWidget.minimized{ min-height:0; }
@@ -279,10 +279,10 @@ class KwaiLiveWidget extends HTMLElement {
         }
 
         #liveTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding:0 8px;}
-        /* Cor do texto "N AO VIVO" e bolinha — usa --dm-green que já adapta por tema */
+        /* Cor do texto "N AO VIVO" e bolinha - usa --dm-green que já adapta por tema */
         #liveCount{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm-green,#4ade80);display:flex;align-items:center;gap:6px;}
         .live-dot{width:6px;height:6px;border-radius:50%;background:var(--dm-green,#4ade80);box-shadow:0 0 6px var(--dm-green,#4ade80);animation:dotPulse 2s infinite;}
-        /* só opacity (composited) — antes animava box-shadow e travava a thread */
+        /* só opacity (composited) - antes animava box-shadow e travava a thread */
         @keyframes dotPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
         .top-right{display:flex;align-items:center;gap:8px;}
@@ -312,7 +312,7 @@ class KwaiLiveWidget extends HTMLElement {
           transition:opacity .3s ease;
         }
         #liveRow::-webkit-scrollbar{display:none;}
-        /* Minimizado (botão −): fecha por completo — só a barra "N AO VIVO"
+        /* Minimizado (botão −): fecha por completo - só a barra "N AO VIVO"
            fica visível, nenhuma foto/card aparece. */
         #liveRow.collapsed{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important;min-height:0!important;overflow:hidden;}
         #emptyMsg{color:var(--dm-text-sub);font-size:.7rem;padding:8px 0;align-self:center;}
@@ -320,14 +320,14 @@ class KwaiLiveWidget extends HTMLElement {
         .live-card{flex-shrink:0;text-align:center;cursor:pointer;width:52px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s;}
         .live-card:hover{transform:scale(1.07);}
 
-        /* Anel do avatar — usa var(--dm-cyan) para seguir o tema atual */
+        /* Anel do avatar - usa var(--dm-cyan) para seguir o tema atual */
         .avatar-wrap{position:relative;width:52px;height:52px;margin:0 auto;border-radius:50%;
           background:var(--dm-grad-cyan,linear-gradient(135deg,var(--dm-cyan,#00e5e5),#007f9f,var(--dm-cyan,#00e5e5)));padding:2.5px;
           box-shadow:0 0 0 3px var(--dm-cyan-08,rgba(0,212,212,.18)),0 0 14px var(--dm-cyan-30,rgba(0,212,212,.6));}
         @media(min-width:600px){.live-card{width:60px;}.avatar-wrap{width:60px;height:60px;}#liveRow{gap:10px;}}
         /* o "pulso" do anel fica no ::after (transform/opacity = composited);
            o glow do box-shadow agora e estatico (antes animava e travava a thread) */
-        /* Ring pulse — usa var(--dm-cyan-30) para seguir a cor de acento do tema */
+        /* Ring pulse - usa var(--dm-cyan-30) para seguir a cor de acento do tema */
         .avatar-wrap::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--dm-cyan-30,rgba(0,229,229,.5));animation:ringPulse 2s ease-in-out infinite;pointer-events:none;}
         @keyframes ringPulse{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.28);opacity:0;}}
 
@@ -351,13 +351,13 @@ class KwaiLiveWidget extends HTMLElement {
           clip-path:circle(50% at 50% 50%);-webkit-clip-path:circle(50% at 50% 50%);
         }
 
-        /* Badge LIVE — fundo = cor de acento do tema; texto #000 no dark (cyan claro), #fff nos temas claros (pink/laranja/teal saturado) */
+        /* Badge LIVE - fundo = cor de acento do tema; texto #000 no dark (cyan claro), #fff nos temas claros (pink/laranja/teal saturado) */
         .live-badge{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);z-index:5;
           background:var(--dm-cyan);color:#000;font-size:.42rem;font-weight:700;letter-spacing:1px;
           padding:1px 5px;border-radius:5px;border:1.5px solid var(--dm-bg-3);white-space:nowrap;
           box-shadow:0 0 8px var(--dm-cyan-30);}
         @media(min-width:600px){.live-badge{font-size:.46rem;padding:1px 6px;}}
-        /* Temas claros — texto branco sobre fundo saturado */
+        /* Temas claros - texto branco sobre fundo saturado */
         :host-context([data-theme="branco"]) .live-badge, :host([data-theme="branco"]) .live-badge,
         :host-context([data-theme="rosa"]) .live-badge, :host([data-theme="rosa"]) .live-badge,
         :host-context([data-theme="laranja"]) .live-badge, :host([data-theme="laranja"]) .live-badge{color:#fff;}
@@ -382,7 +382,7 @@ class KwaiLiveWidget extends HTMLElement {
         #modalBox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
           background:linear-gradient(90deg,transparent,var(--dm-cyan),transparent);z-index:5;}
 
-        /* Proporção portrait 3:4 — Kwai é plataforma vertical */
+        /* Proporção portrait 3:4 - Kwai é plataforma vertical */
         .modal-video-wrap{position:relative;width:100%;padding-top:min(116%, 46vh);background:#000;overflow:hidden;}
         @media(max-width:480px){.modal-video-wrap{padding-top:min(108%, 43vh);}}
         #modalVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s;}
@@ -463,7 +463,7 @@ class KwaiLiveWidget extends HTMLElement {
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
-                <span id="modalViewers">—</span>
+                <span id="modalViewers">-</span>
               </div>
               <div id="modalSpinner">
                 <div class="spinner-ring"></div>
@@ -477,7 +477,7 @@ class KwaiLiveWidget extends HTMLElement {
               <div class="modal-header">
                 <img class="modal-avatar" id="modalAvatar" src="" alt="">
                 <div class="modal-meta">
-                  <div class="modal-name" id="modalName">—</div>
+                  <div class="modal-name" id="modalName">-</div>
                   <div class="modal-sub"  id="modalCaption"></div>
                 </div>
               </div>
@@ -534,7 +534,7 @@ class KwaiLiveWidget extends HTMLElement {
     const row = this.shadowRoot.getElementById('liveRow');
     // IntersectionObserver: só toca as lives que estão DE FATO na tela agora.
     // Ao deslizar a faixa pro lado, os cards que entram começam a rodar e os
-    // que saem param — em vez de tentar abrir a faixa inteira de uma vez.
+    // que saem param - em vez de tentar abrir a faixa inteira de uma vez.
     // Margem mínima (~meio card de antecipação) só pra o vídeo já estar
     // pronto quando o card termina de entrar. No desktop, um pouco mais.
     const margin = this._narrow ? '0px 24px 0px 24px' : '0px 90px 0px 90px';
@@ -562,7 +562,7 @@ class KwaiLiveWidget extends HTMLElement {
   // do liveRow AGORA (sem a margem de antecipação). Usado só para decidir
   // prioridade na fila do MAX_MINI_PLAYERS. Feito com getBoundingClientRect
   // em vez de um segundo IntersectionObserver: dois observers rodam em
-  // callbacks assíncronos independentes, sem ordem garantida entre si — isso
+  // callbacks assíncronos independentes, sem ordem garantida entre si - isso
   // causava uma corrida onde a fila decidia com informação desatualizada,
   // deixava o card errado tocando por um instante e logo o expulsava assim
   // que o outro observer "corrigia" o estado (o vídeo que aparecia e sumia
@@ -580,10 +580,10 @@ class KwaiLiveWidget extends HTMLElement {
   // tempo. Não é mais um número fixo: acompanha quantos cards cabem de fato
   // na tela agora (mobile ~6, desktop largo pode caber 15+), com uma margem
   // pra já preparar os próximos. Um número fixo baixo (era 8) travava telas
-  // largas — onde cabem mais cards visíveis do que o limite — num cabo de
+  // largas - onde cabem mais cards visíveis do que o limite - num cabo de
   // guerra permanente entre cards igualmente visíveis disputando as mesmas
   // vagas, expulsando uns aos outros sem nenhum realmente ficar estável.
-  // Teto FIXO de mini-players tocando ao mesmo tempo — sem getBoundingClientRect
+  // Teto FIXO de mini-players tocando ao mesmo tempo - sem getBoundingClientRect
   // por chamada (isso forçava reflow em todos os cards e travava justo na hora
   // de dar play). Recalculado só no resize.
   _isNarrow() {
@@ -604,14 +604,14 @@ class KwaiLiveWidget extends HTMLElement {
   get MAX_MINI_PLAYERS() {
     if (this._parado)  return 0;
     // Nos ~3s logo depois que a live grande do hero começa, a faixa segura os
-    // mini-players — assim a live principal pega a rede primeiro.
+    // mini-players - assim a live principal pega a rede primeiro.
     if (this._heroWarmup) return 0;
     return this._maxMini;
   }
 
   // play() que registra quando o navegador BLOQUEIA a reprodução automática
   // (modo economia de bateria do iPhone, autoplay desligado nas configurações).
-  // Nesses casos o vídeo nunca vai começar sozinho — as religações abaixo
+  // Nesses casos o vídeo nunca vai começar sozinho - as religações abaixo
   // param de insistir (senão ficariam repetindo tentativas, passando pela
   // ponte, sem chance de dar certo). Um toque na página libera de novo.
   _play(v) {
@@ -662,7 +662,7 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   // Põe na fila os cards visíveis que estão parados (foto). Usado quando os
-  // players foram parados sem o card sair da tela — o IntersectionObserver
+  // players foram parados sem o card sair da tela - o IntersectionObserver
   // só avisa quando a visibilidade MUDA, então ninguém mais os religaria.
   _requeueVisible() {
     if (!this.ENABLE_MINI_PREVIEW || this._parado || this._autoplayBlocked) return;
@@ -673,7 +673,7 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   // Corta o excesso de mini-players quando o limite baixa (ex: hero começou a
-  // tocar). stopMiniPlayer volta o card pra foto parada — nada some.
+  // tocar). stopMiniPlayer volta o card pra foto parada - nada some.
   _trimMiniPlayers() {
     if (!this._miniPlayerOrder) return;
     let guard = 0;
@@ -721,11 +721,11 @@ class KwaiLiveWidget extends HTMLElement {
     }
   }
 
-  // ── Chamadas de rede — todas via window.DmaiorAPI (sem fetch direto) ──────
+  // ── Chamadas de rede - todas via window.DmaiorAPI (sem fetch direto) ──────
 
   /**
    * Faz proxy de uma URL externa (página Kwai) via Worker de live.
-   * Delega para window.DmaiorAPI.live.proxy() — nenhum fetch direto aqui.
+   * Delega para window.DmaiorAPI.live.proxy() - nenhum fetch direto aqui.
    * @param {string} url - URL da página Kwai
    * @returns {Promise<string|null>} HTML ou null
    */
@@ -735,7 +735,7 @@ class KwaiLiveWidget extends HTMLElement {
 
   /**
    * Busca lista de streamers ao vivo do KV do Worker.
-   * Delega para window.DmaiorAPI.live.getLivesHome() (sem quem ocultou a própria live) — nenhum fetch direto aqui.
+   * Delega para window.DmaiorAPI.live.getLivesHome() (sem quem ocultou a própria live) - nenhum fetch direto aqui.
    * @returns {Promise<Array>} Array de streamers
    */
   async fetchEntries() {
@@ -787,7 +787,7 @@ class KwaiLiveWidget extends HTMLElement {
       });
     }
 
-    // Vazio pode ser erro de rede pontual — não remove ninguém na primeira vez.
+    // Vazio pode ser erro de rede pontual - não remove ninguém na primeira vez.
     // Mas se vier vazio DE NOVO no ciclo seguinte (~60s depois), já não é rede:
     // todo mundo saiu do ar de verdade, e sem esse 2º gatilho o widget ficava
     // preso mostrando os cards antigos (ou "Nenhuma live" sem nunca fechar)
@@ -805,7 +805,7 @@ class KwaiLiveWidget extends HTMLElement {
 
     const liveUrls = new Set(entries.map((e) => e.url));
 
-    // Remove quem saiu da live — mas só depois de faltar em 2 ciclos seguidos.
+    // Remove quem saiu da live - mas só depois de faltar em 2 ciclos seguidos.
     // A lista principal do radar às vezes some por alguns segundos (a chave no
     // KV expira antes da próxima gravação) e a API devolve só as sub-agências;
     // tirar na hora fazia todo mundo sumir e sobrar 1 live até o ciclo seguinte.
@@ -825,7 +825,7 @@ class KwaiLiveWidget extends HTMLElement {
     }
 
     // Atualiza quem já está na tela: espectadores e o link do vídeo (o radar
-    // manda um link assinado novo a cada ciclo — quem não está tocando agora
+    // manda um link assinado novo a cada ciclo - quem não está tocando agora
     // usa o mais recente na próxima tentativa). Quem tinha desistido depois
     // de várias falhas ganha outra chance a cada ciclo, em vez de ficar na
     // foto até atualizar a página.
@@ -844,7 +844,7 @@ class KwaiLiveWidget extends HTMLElement {
     this.updateTop();
   }
 
-  // KV já tem stream_url — só faz checkLive (proxy) como fallback
+  // KV já tem stream_url - só faz checkLive (proxy) como fallback
   async checkAndAdd(entry) {
     let result;
     const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.name)}&background=1a1a2e&color=00c8c8&bold=true`;
@@ -945,7 +945,7 @@ class KwaiLiveWidget extends HTMLElement {
     const empty = this.shadowRoot.getElementById('emptyMsg');
     empty.style.display = visible.length === 0 ? '' : 'none';
     empty.textContent   = this.isFirstLoad ? 'A procurar transmissões ao vivo...' : 'Nenhuma live no momento...';
-    // Abre sozinho assim que tem gente ao vivo — quem entra no site já vê as
+    // Abre sozinho assim que tem gente ao vivo - quem entra no site já vê as
     // lives sem precisar clicar. Só não abre se o usuário fechou manualmente
     // (userMinimized). Fecha sozinho sempre que não sobra ninguém ao vivo,
     // mesmo que o usuário tenha aberto/fechado manualmente antes.
@@ -962,9 +962,9 @@ class KwaiLiveWidget extends HTMLElement {
       .map((p) => ({
         name:      p.streamer.name,
         url:       p.streamer.url,
-        // foto do hero já redimensionada (WebP ~440px) — evita o JPEG 200px cru
+        // foto do hero já redimensionada (WebP ~440px) - evita o JPEG 200px cru
         image:     this._thumb(this._safeUrl(p.streamer.image) || '', 440),
-        // original, sem passar pelo weserv — usado como fallback se o proxy
+        // original, sem passar pelo weserv - usado como fallback se o proxy
         // falhar (bloqueado por algum DNS/ad-block, visto em alguns Xiaomi)
         imageRaw:  this._safeUrl(p.streamer.image) || '',
         viewCount: (typeof p.streamer.viewCount === 'number') ? p.streamer.viewCount : null,
@@ -992,7 +992,7 @@ class KwaiLiveWidget extends HTMLElement {
     this._heroWarmupT = setTimeout(() => {
       this._heroWarmup = false;
       // reenfileira os cards visíveis (o IntersectionObserver não re-dispara
-      // sozinho) — a fila escalonada sobe eles um a um.
+      // sozinho) - a fila escalonada sobe eles um a um.
       this._requeueVisible();
     }, 1500);
     this._trimMiniPlayers();
@@ -1002,7 +1002,7 @@ class KwaiLiveWidget extends HTMLElement {
     // o watchdog e o "voltou pra aba" não podem religar sozinhos.
     let suspenso = false, atachado = false, desde = 0, fora = false, foraT = null, io = null;
 
-    // Voltou pra aba: o navegador costuma pausar o vídeo em segundo plano —
+    // Voltou pra aba: o navegador costuma pausar o vídeo em segundo plano - 
     // dá play na hora em vez de esperar o watchdog (até 8s).
     const onVis = () => {
       if (dead || document.hidden || suspenso) return;
@@ -1049,12 +1049,12 @@ class KwaiLiveWidget extends HTMLElement {
         }, { once: true });
         this._play(videoEl);
       } else if (engine === 'hlsjs') {
-        // Buffer de view principal (não de "preview") — segura melhor a
+        // Buffer de view principal (não de "preview") - segura melhor a
         // oscilação da rede sem travar, como o player do modal.
         hls = new window.Hls({
           enableWorker: true, lowLatencyMode: false,
-          capLevelToPlayerSize: true, // quadro do hero é pequeno — não puxa 720p/1080p à toa
-          // Buffer de player "de assistir" — igual em espírito ao do admin, que
+          capLevelToPlayerSize: true, // quadro do hero é pequeno - não puxa 720p/1080p à toa
+          // Buffer de player "de assistir" - igual em espírito ao do admin, que
           // roda liso: 30s à frente / 60s de teto aguentam a oscilação da rede
           // sem congelar a imagem. Antes eram 14/24s (copiados da miniatura) e
           // qualquer engasgo da rede estourava o buffer e travava.
@@ -1090,7 +1090,7 @@ class KwaiLiveWidget extends HTMLElement {
       watchdog = setInterval(() => {
         if (dead || document.hidden || suspenso) return;
         if (videoEl.paused) this._play(videoEl);
-        // Imagem parada por 2 checagens seguidas (~16s) — travou, ou nunca
+        // Imagem parada por 2 checagens seguidas (~16s) - travou, ou nunca
         // começou, ou a tentativa pelo proxy também falhou: recomeça do zero
         // com o link mais recente. Antes só chamava play(), que não destrava
         // uma live, e o quadro ficava congelado até atualizar a página.
@@ -1193,7 +1193,7 @@ class KwaiLiveWidget extends HTMLElement {
       <div class="live-name">${safeName}</div>`;
 
     // Se a miniatura via weserv falhar (proxy bloqueado por DNS/ad-block em
-    // alguns Android/Xiaomi — visto em produção), troca pra foto original do
+    // alguns Android/Xiaomi - visto em produção), troca pra foto original do
     // Kwai em vez de deixar o ícone de imagem quebrada.
     if (imgSrc !== rawImg) {
       const imgEl = card.querySelector('.avatar-circle img');
@@ -1220,7 +1220,7 @@ class KwaiLiveWidget extends HTMLElement {
   }
 
   // ── Mini player (círculo de avatar) ─────────────────────────────────────
-  // Limita quantos mini-players decodificam vídeo de verdade ao mesmo tempo —
+  // Limita quantos mini-players decodificam vídeo de verdade ao mesmo tempo - 
   // com muitos streamers ao vivo, deixar todos os círculos visíveis tocarem
   // HLS sem limite sobrecarrega o celular (cada um é uma decodificação real,
   // só pra mostrar uma bolinha de ~52px). Os que não estão na vez ficam com
@@ -1241,7 +1241,7 @@ class KwaiLiveWidget extends HTMLElement {
     entry.hlsInst  = null;
     entry.playing  = false;
     entry.starting = false;
-    // Remove TODAS as ocorrências (não só a primeira) — defesa extra caso
+    // Remove TODAS as ocorrências (não só a primeira) - defesa extra caso
     // alguma duplicata residual ainda exista na fila por qualquer motivo.
     if (this._miniPlayerOrder) {
       this._miniPlayerOrder = this._miniPlayerOrder.filter((u) => u !== url);
@@ -1258,20 +1258,20 @@ class KwaiLiveWidget extends HTMLElement {
         if (img && img.src) vid.poster = img.src;
       }
     }
-    // Abriu uma vaga — deixa a fila andar.
+    // Abriu uma vaga - deixa a fila andar.
     this._pumpMiniQueue();
   }
 
   // ── Fila escalonada dos mini-players ──────────────────────────────────────
   // O IntersectionObserver joga os cards visíveis aqui; a fila sobe UM por vez
   // (~1,3s entre cada) até o teto. Isso evita a "largada" de N players HLS no
-  // mesmo instante — que era o que fazia todos travarem (o site da Fox roda
+  // mesmo instante - que era o que fazia todos travarem (o site da Fox roda
   // ~7 num celular fraco justamente porque escalona a entrada).
   _enqueueMini(url) {
     if (!this.ENABLE_MINI_PREVIEW || this._parado) return;
     const e = this.activePlayers.get(url);
     if (!e || !e.streamer.playUrl) return;
-    // Voltou pra tela antes do grace terminar — cancela a parada e segue tocando.
+    // Voltou pra tela antes do grace terminar - cancela a parada e segue tocando.
     if (e._stopT) { clearTimeout(e._stopT); e._stopT = null; }
     if (e.playing || e.starting) return;
     if (!this._miniQueue.includes(url)) this._miniQueue.push(url);
@@ -1283,7 +1283,7 @@ class KwaiLiveWidget extends HTMLElement {
     const e = this.activePlayers.get(url);
     if (!e) return;
     // Grace de ~2,5s: se o card só passou rápido ao deslizar, não destrói o
-    // player na hora — se ele voltar pra tela nesse tempo, continua sem
+    // player na hora - se ele voltar pra tela nesse tempo, continua sem
     // recarregar. Se ficou fora mesmo, aí para e libera a vaga.
     if (e.playing || e.starting) {
       clearTimeout(e._stopT);
@@ -1325,7 +1325,7 @@ class KwaiLiveWidget extends HTMLElement {
 
     if (!this._miniPlayerOrder) this._miniPlayerOrder = [];
     // Já no teto: volta pra fila e espera abrir vaga (o pump reencaixa quando
-    // algum player para). Sem expulsar ninguém — a expulsão em cadeia era o
+    // algum player para). Sem expulsar ninguém - a expulsão em cadeia era o
     // "cabo de guerra" que deixava os cards piscando.
     if (this._miniPlayerOrder.length >= this.MAX_MINI_PLAYERS) {
       if (!this._miniQueue.includes(url)) this._miniQueue.push(url);
@@ -1337,7 +1337,7 @@ class KwaiLiveWidget extends HTMLElement {
 
   _startHls(vid, playUrl, useProxy, entry, url) {
     // hls.js ainda não carregou (ele é adiado pra depois do load): espera a
-    // lib em vez de não fazer nada — antes a bolinha ficava presa em
+    // lib em vez de não fazer nada - antes a bolinha ficava presa em
     // "starting" sem nunca tocar.
     const engine = this._engine(vid);
     if (engine === 'wait' || !engine) {
@@ -1374,7 +1374,7 @@ class KwaiLiveWidget extends HTMLElement {
         if (stale()) return;
         if (vid.paused) this._play(vid);
         // Imagem parada por 2 checagens seguidas (~16s): play() sozinho não
-        // destrava uma live que perdeu a posição — reinicia o player do zero
+        // destrava uma live que perdeu a posição - reinicia o player do zero
         // (volta pra fila com o link mais recente).
         if (vid.currentTime === lastT) {
           if (++frozen >= 2) { this.stopMiniPlayer(url); this._enqueueMini(url); return; }
@@ -1400,7 +1400,7 @@ class KwaiLiveWidget extends HTMLElement {
       }, 5000);
     };
 
-    // Não começou a tocar em 15s (nem deu erro — acontece no HLS nativo, que
+    // Não começou a tocar em 15s (nem deu erro - acontece no HLS nativo, que
     // às vezes só fica esperando): trata como falha. Antes a vaga ficava
     // presa em "starting" pra sempre e a bolinha nunca saía da foto.
     clearTimeout(entry._startT);
@@ -1430,7 +1430,7 @@ class KwaiLiveWidget extends HTMLElement {
       } else {
         entry.playing  = false;
         entry.starting = false;
-        // Libera a vaga de verdade agora — sem isso, essa URL ficava
+        // Libera a vaga de verdade agora - sem isso, essa URL ficava
         // "fantasma" ocupando um lugar em _miniPlayerOrder até a próxima
         // tentativa (até 50s depois), fazendo a fila parecer cheia e
         // expulsar outros cards que estavam tocando bem sem necessidade.
@@ -1442,7 +1442,7 @@ class KwaiLiveWidget extends HTMLElement {
         if (entry.retries < 6)
           setTimeout(() => this._enqueueMini(url), Math.min(5000 * entry.retries, 50000));
         else
-          this._pumpMiniQueue(); // desistiu deste — deixa a fila seguir
+          this._pumpMiniQueue(); // desistiu deste - deixa a fila seguir
       }
     };
 
@@ -1455,7 +1455,7 @@ class KwaiLiveWidget extends HTMLElement {
       this._play(vid);
 
     } else {
-      // Nota: quando useProxy=true, "src" já é a URL do proxy — o próprio
+      // Nota: quando useProxy=true, "src" já é a URL do proxy - o próprio
       // Worker devolve o m3u8 com todas as URIs internas (segmentos e
       // sub-playlists) já reescritas para passar por ele. NÃO reescrever
       // de novo aqui via xhrSetup: fazer isso envolveria a URL do proxy
@@ -1466,14 +1466,14 @@ class KwaiLiveWidget extends HTMLElement {
       // prévia em miniatura, não a visualização principal. Os valores
       // antigos (30-60s de buffer, 6 segmentos = ~24s atrás do ao vivo)
       // foram copiados do player grande e faziam cada mini-player brigar
-      // por banda/CPU/memória tentando acumular um buffer gigante — com
+      // por banda/CPU/memória tentando acumular um buffer gigante - com
       // vários rodando ao mesmo tempo isso é o que dava a sensação de
       // "baixando o vídeo antes de tocar" e travava mais fácil no mobile.
       // Poucos segundos bastam pra uma bolinha pequena continuar rolando.
       const hlsCfg = {
         enableWorker:              true,
         lowLatencyMode:            false,
-        autoLevelCapping:          0,      // menor rendição — é uma bolinha de 56px
+        autoLevelCapping:          0,      // menor rendição - é uma bolinha de 56px
         maxBufferLength:           5,      // igual à Fox: começa rápido, pouca memória por bolinha
         maxMaxBufferLength:        10,
         liveSyncDurationCount:     3,
@@ -1623,7 +1623,7 @@ class KwaiLiveWidget extends HTMLElement {
     const src = useProxy ? this._proxyBase + encodeURIComponent(url) : url;
 
     // Toca assim que o manifesto carrega, sem esperar acumular buffer antes
-    // (o admin faz assim e abre liso — a espera de buffer aqui era o que
+    // (o admin faz assim e abre liso - a espera de buffer aqui era o que
     // deixava "carregando" por muito tempo e às vezes travava/ficava preto
     // num fluxo ao vivo, que não tem buffer acumulado igual um vídeo gravado).
     const engine = this._engine(video);
@@ -1640,7 +1640,7 @@ class KwaiLiveWidget extends HTMLElement {
     } else if (engine === 'hlsjs') {
       // Mesma observação do mini player: quando useProxy=true, "src" já é a
       // URL do proxy e o Worker já devolve o m3u8 com as URIs internas
-      // reescritas para passar por ele. Nada de xhrSetup aqui — reaplicar
+      // reescritas para passar por ele. Nada de xhrSetup aqui - reaplicar
       // o proxy sobre uma URL que já é do proxy vira "proxy do proxy" e o
       // Worker rejeita com 403 (host decodificado = o próprio domínio).
       const hlsCfg = {
@@ -1665,7 +1665,7 @@ class KwaiLiveWidget extends HTMLElement {
       const hlsM = this.hlsModal;
       this.hlsModal.loadSource(src);
       this.hlsModal.attachMedia(video);
-      // Imagem congelada com som rodando: escalona — 1º reinicia o decodificador,
+      // Imagem congelada com som rodando: escalona - 1º reinicia o decodificador,
       // 2º trava a qualidade um degrau abaixo, 3º recarrega a live do zero na
       // menor qualidade.
       let stuckStage = 0;

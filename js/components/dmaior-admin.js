@@ -1,6 +1,6 @@
 /* eslint-env browser */
 // ════════════════════════════════════════════════════════════
-// DMaior Agency — Admin Panel v2.1
+// DMaior Agency - Admin Panel v2.1
 // CORREÇÕES v2.1:
 //   • _carregarListaCarteiras: usa /admin/carteira/streamers
 //     (retorna TODOS os perfis, não limit=20 de antes)
@@ -39,10 +39,10 @@ class DimaiorAdmin extends HTMLElement {
     // PK Diário
     this._pkAbertaId       = null;   // id da liga aberta na tela de gerenciar
     this._pkElegiveis      = [];     // última lista buscada em /admin/pk/elegiveis (form de criação)
-    this._pkSelecionados   = new Map(); // kwai_uid -> {kwai_uid,nome,foto,diamantes,novato,origem} — roster inicial (form de criação)
+    this._pkSelecionados   = new Map(); // kwai_uid -> {kwai_uid,nome,foto,diamantes,novato,origem} - roster inicial (form de criação)
     this._pkDetElegiveis   = [];     // última lista buscada em /admin/pk/elegiveis (tela de gerenciar)
     this._pkDetalheCache   = null;   // último GET /admin/pk/programacoes/:id (participantes/confrontos)
-    // Lives — layout e modo (persistido em localStorage)
+    // Lives - layout e modo (persistido em localStorage)
     const _lo = (() => { try { return JSON.parse(localStorage.getItem('dm_lives_opts')||'{}'); } catch { return {}; } })();
     this._livesOpts = { cols: _lo.cols||2, modo: _lo.modo||'capa', ordenar: _lo.ordenar||'padrao', estilo: _lo.estilo||1, dashboardAoVivo: _lo.dashboardAoVivo!==false };
     this._livesData = null;
@@ -152,7 +152,7 @@ class DimaiorAdmin extends HTMLElement {
     s.querySelectorAll('#admMnav button').forEach(b=>{ b.dataset.p===p?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'); });
     s.querySelectorAll('#admMsheetNav .pm-row').forEach(b=>{ b.dataset.p===p?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'); });
   }
-  // Categorias do menu do "+" (mobile). Só reorganiza a VISÃO mobile — o menu
+  // Categorias do menu do "+" (mobile). Só reorganiza a VISÃO mobile - o menu
   // lateral do desktop continua com as seções dele. Ícone, nome e contador vêm
   // do item real do .side; item novo que não estiver aqui cai em "Outros"
   // sozinho (não some). 2º campo = nome no menu (vazio = o do .side), 3º = palavras extras pra busca.
@@ -283,9 +283,9 @@ class DimaiorAdmin extends HTMLElement {
       star:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
       warning:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
       check:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
-      // Lucide (ISC), via api.iconify.design — mesmo traço dos demais ícones do admin
+      // Lucide (ISC), via api.iconify.design - mesmo traço dos demais ícones do admin
       play:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>`,
-      // Lucide (ISC) — no lugar dos emojis antigos (2026-09-24)
+      // Lucide (ISC) - no lugar dos emojis antigos (2026-09-24)
       x:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
       medal:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.21 15L2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15M11 12L5.12 2.2M13 12l5.88-9.8M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></svg>`,
       pin:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4a1 1 0 0 1 1 1z"/></svg>`,
@@ -355,15 +355,15 @@ class DimaiorAdmin extends HTMLElement {
       const payload = JSON.parse(atob(partes[1].replace(/-/g,'+').replace(/_/g,'/')));
       const agora   = Math.floor(Date.now()/1000);
       if(payload.exp && payload.exp < agora){
-        // Token expirado — limpa e mostra login
+        // Token expirado - limpa e mostra login
         this._token = '';
         localStorage.removeItem(this.TK_KEY);
         return;
       }
-      // Token válido — abre o app
+      // Token válido - abre o app
       this._abrirApp();
     } catch {
-      // Token corrompido — limpa
+      // Token corrompido - limpa
       this._token = '';
       localStorage.removeItem(this.TK_KEY);
     }
@@ -392,7 +392,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('sideBackdrop')?.classList.add('on');
     s.getElementById('btnHam')?.setAttribute('aria-expanded','true');
   }
-  // Seções da sidebar não colapsam mais — ficam sempre abertas. Métodos mantidos
+  // Seções da sidebar não colapsam mais - ficam sempre abertas. Métodos mantidos
   // como no-op pra não quebrar quem ainda os chama.
   _toggleNavSec(){}
   _abrirNavSec(){}
@@ -416,12 +416,12 @@ class DimaiorAdmin extends HTMLElement {
     mapa[pag]?.();
   }
 
-  _fdt(v){if(!v)return'—';const d=new Date(v);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
-  _fdtCurto(v){if(!v)return'—';const d=new Date(v);return d.toLocaleDateString('pt-BR');}
+  _fdt(v){if(!v)return'-';const d=new Date(v);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+  _fdtCurto(v){if(!v)return'-';const d=new Date(v);return d.toLocaleDateString('pt-BR');}
   // Datas "YYYY-MM-DD" (coluna `date`, sem hora) não podem passar por
-  // `new Date(v)` + hora local — vira UTC-meia-noite e no fuso BR (UTC-3)
+  // `new Date(v)` + hora local - vira UTC-meia-noite e no fuso BR (UTC-3)
   // exibe o dia anterior. Faz o parse direto da string.
-  _fdtData(v){if(!v)return'—';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return this._fdtCurto(v);return`${m[3]}/${m[2]}/${m[1]}`;}
+  _fdtData(v){if(!v)return'-';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return this._fdtCurto(v);return`${m[3]}/${m[2]}/${m[1]}`;}
   _dataHojeBR(){
     const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
     const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
@@ -435,9 +435,9 @@ class DimaiorAdmin extends HTMLElement {
   }
   _proxyFoto(url){url=this._normalizarImagemUrl(url);if(!url||url==='null'||url==='undefined')return null;if(url.includes('flaticon')||url.includes('149071'))return null;if(url.includes('weserv.nl'))return url;return`https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=100&h=100&fit=cover&output=webp`;}
   // Mesmo proxy/cache do weserv.nl, mas sem recortar em círculo (fit=contain)
-  // e num tamanho maior — pra presente de galeria mostrar a arte inteira.
+  // e num tamanho maior - pra presente de galeria mostrar a arte inteira.
   // Usado tanto no admin (preview) quanto pelo painel do streamer, pra imagens
-  // do Drive não serem buscadas direto a cada vez que alguém abre a tela —
+  // do Drive não serem buscadas direto a cada vez que alguém abre a tela - 
   // o weserv.nl já entrega com cache/CDN próprio, então carrega mais rápido
   // nas próximas visitas sem depender do Drive de novo.
   _proxyPresenteImg(url){url=this._normalizarImagemUrl(url);if(!url||url==='null'||url==='undefined')return null;if(url.includes('weserv.nl'))return url;return`https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&fit=contain&output=webp`;}
@@ -450,7 +450,7 @@ class DimaiorAdmin extends HTMLElement {
   _ini(n){return(n||'?').charAt(0).toUpperCase();}
   // Ícone no meio do texto (substitui emoji): alinhado à linha e com respiro à direita.
   _ii(nome,size=12){return`<span class="ii">${this._ico(nome,size)}</span>`;}
-  // Diamante "moeda" — mesmo ícone `diamond` do menu, em ciano
+  // Diamante "moeda" - mesmo ícone `diamond` do menu, em ciano
   _dia(size=12){return`<span class="ii ii-dia" aria-label="diamantes">${this._ico('diamond',size)}</span>`;}
   _loading(st=''){return`<div class="loading" style="${st}"><div class="sp"></div><span>Carregando...</span></div>`;}
   _empty(ico,msg){return`<div class="empty">${this._ico(ico,32)}<p>${this._esc(msg)}</p></div>`;}
@@ -458,7 +458,7 @@ class DimaiorAdmin extends HTMLElement {
   _numK(n){if(n>=1000)return(n/1000).toFixed(1)+'K';return String(n||0);}
   _brl(n){return'R$ '+Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
   _dbc(fn,t){let id;return(...a)=>{clearTimeout(id);id=setTimeout(()=>fn(...a),t);};}
-  _varBadge(v){if(v===null||v===undefined)return'<span class="vbadge neutro">—</span>';const cls=v>0?'up':v<0?'down':'neutro';const ico=v>0?this._ico('up',10):v<0?this._ico('down',10):'';return`<span class="vbadge ${cls}">${ico} ${v>0?'+':''}${v}%</span>`;}
+  _varBadge(v){if(v===null||v===undefined)return'<span class="vbadge neutro">-</span>';const cls=v>0?'up':v<0?'down':'neutro';const ico=v>0?this._ico('up',10):v<0?this._ico('down',10):'';return`<span class="vbadge ${cls}">${ico} ${v>0?'+':''}${v}%</span>`;}
   _renderPg(elId,n,qtd,lim,fn){const el=this.shadowRoot.getElementById(elId);if(!el)return;el.innerHTML=`<button ${n<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${n}</span><button ${qtd<lim?'disabled':''}>Próxima</button>`;el.children[0].addEventListener('click',()=>fn(n-1));el.children[2].addEventListener('click',()=>fn(n+1));}
   // Cartão de progresso (canto da tela): arquivo, "34 de 56 MB", porcentagem, barra e cancelar.
   // Também mostra a conversão de vídeo. Some sozinho se ninguém atualizar por 20 s.
@@ -536,8 +536,8 @@ class DimaiorAdmin extends HTMLElement {
     try{this.scrollIntoView({behavior:'instant',block:'start'});}catch{}
   }
 
-  // Cards coloridos 2x2 do Dashboard (estilo referência) — chamado sozinho
-  // (skeleton, com "—"/spinner) e de novo cada vez que uma das duas fontes
+  // Cards coloridos 2x2 do Dashboard (estilo referência) - chamado sozinho
+  // (skeleton, com "-"/spinner) e de novo cada vez que uma das duas fontes
   // de dado (métricas gerais / diamantes do dia) resolve. Nunca espera as
   // duas juntas: o que já chegou aparece, o resto continua girando.
   _dashValOuSpinner(disponivel,valFmt){
@@ -623,8 +623,8 @@ class DimaiorAdmin extends HTMLElement {
       }
       const q=P[i];
       const val=q?`<text x="${q.x.toFixed(1)}" y="${(q.y-11).toFixed(1)}" text-anchor="middle" class="v">${this._numK(p.total)}</text>
-        <circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${p.hoje?5.5:4.5}" class="pt ${p.hoje?'hj':''}"><title>${this._num(p.total)}${p.hoje?' — hoje, em andamento':''}</title></circle>`
-        :`<text x="${xs[i].toFixed(1)}" y="${(padT+ih/2).toFixed(1)}" text-anchor="middle" class="v">${p.total===null?'—':'…'}</text>`;
+        <circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${p.hoje?5.5:4.5}" class="pt ${p.hoje?'hj':''}"><title>${this._num(p.total)}${p.hoje?' - hoje, em andamento':''}</title></circle>`
+        :`<text x="${xs[i].toFixed(1)}" y="${(padT+ih/2).toFixed(1)}" text-anchor="middle" class="v">${p.total===null?'-':'…'}</text>`;
       return `${val}<text x="${xs[i].toFixed(1)}" y="${H-22}" text-anchor="middle" class="x ${p.hoje?'now':''}">${p.hoje?'Hoje •':lbl}</text>${chg}`;
     }).join('');
     const grafico=`<svg class="dia-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Diamantes por dia, últimos 7 dias">
@@ -652,10 +652,10 @@ class DimaiorAdmin extends HTMLElement {
     }
   }
 
-  // Toggle "fonte dos dados do Dashboard" — kwai (oficial, direto da Kwai,
+  // Toggle "fonte dos dados do Dashboard" - kwai (oficial, direto da Kwai,
   // já soma sub-agências) ou banco (calculado do nosso Supabase, como
   // sempre foi). Falha ao consultar a Kwai cai sozinho pro banco (ver
-  // rotaDashboard no worker) — o toggle só reflete a preferência, não
+  // rotaDashboard no worker) - o toggle só reflete a preferência, não
   // garante que está de fato usando a Kwai nesse carregamento.
   async _carregarDashFonteToggle(){
     const s=this.shadowRoot,chk=s.getElementById('dashFonteToggle');
@@ -677,15 +677,15 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;
     this._contarViolacoesNovas(); // badge "Violações" + "Precisa de atenção" (sem await)
     this._contarInscricoes();     // badge "Comunicados" (inscrições novas nos eventos)
-    // Skeleton na hora: a grade de métricas já aparece com "—"/spinner em
-    // vez de travar a tela toda esperando a rede — e o Acesso Rápido (que
+    // Skeleton na hora: a grade de métricas já aparece com "-"/spinner em
+    // vez de travar a tela toda esperando a rede - e o Acesso Rápido (que
     // não depende de nenhum dado do banco) nem precisa esperar nada.
     this._dashMetricas=null;
     this._dashDiamantesDia=null;
     this._renderDashMetricasGrid();
     if(!this._sub) this._carregarDashFonteToggle();
 
-    // As duas chamadas rodam independentes — cada uma preenche só a parte
+    // As duas chamadas rodam independentes - cada uma preenche só a parte
     // dela assim que responder, sem uma travar a outra (Diamantes do Dia
     // costuma voltar bem mais rápido que o resumo geral).
     this._api('GET','/admin/dashboard').then(d=>{
@@ -698,7 +698,7 @@ class DimaiorAdmin extends HTMLElement {
       this._renderDashMetricasGrid();
       this._renderDashDiasChart();
     });
-    // Gráfico "Diamantes por dia": hoje (em andamento) + 6 dias fechados — mesma
+    // Gráfico "Diamantes por dia": hoje (em andamento) + 6 dias fechados - mesma
     // rota do "Diamantes do Dia", uma chamada por data; cada barra aparece
     // quando o seu dia responde.
     this._dashDias={};
@@ -712,7 +712,7 @@ class DimaiorAdmin extends HTMLElement {
       }).catch(()=>{this._dashDias[dt]=null;this._renderDashDiasChart();});
     }
 
-    // Ações Rápidas — estilo lista colorida (referência imagem 1)
+    // Ações Rápidas - estilo lista colorida (referência imagem 1)
     const qas=[
       {lbl:'Streamers',   sub:'Perfis cadastrados', pag:'streamers',   ico:'users',   cor:'indigo'},
       {lbl:'Ao Vivo',     sub:'Transmissões agora',  pag:'aoVivo',      ico:'live',    cor:'verm'},
@@ -839,7 +839,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // Players HLS do modo "vídeo" da aba Ao Vivo. Cada render criava um Hls novo sem destruir o
-  // anterior (vazava decoder/buffer a cada clique) — no iPhone/Android fraco isso derruba a aba.
+  // anterior (vazava decoder/buffer a cada clique) - no iPhone/Android fraco isso derruba a aba.
   _pararVideosInline(){
     try{ (this._vidTimers||[]).forEach(t=>clearTimeout(t)); }catch{}
     this._vidTimers=[];
@@ -854,7 +854,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){if(el)el.innerHTML=this._empty('warning','Erro ao buscar lives');return;}
     if(badge)badge.textContent=d.total??0;if(!el)return;
     this._livesData=d;
-    // Sempre renderiza o header (ao vivo/hoje/ontem) mesmo com 0 streamers agora —
+    // Sempre renderiza o header (ao vivo/hoje/ontem) mesmo com 0 streamers agora - 
     // só a lista de cards fica vazia (ver _renderLives).
     this._renderLives(d,el);
   }
@@ -869,7 +869,7 @@ class DimaiorAdmin extends HTMLElement {
     const ordenar=this._livesOpts.ordenar;
     const estilo=this._livesOpts.estilo||1;
     const dashboardAoVivo=this._livesOpts.dashboardAoVivo!==false;
-    // No mobile com >1 col, Estilo 1 (horizontal) não funciona — forçar estilo 2
+    // No mobile com >1 col, Estilo 1 (horizontal) não funciona - forçar estilo 2
     // Estilo efetivo: no mobile com >1 col, horizontal não é viável → usa vertical
     // Mas com 1 col o horizontal funciona normalmente
     const estiloEfetivo=(isMobile && cols>1 && estilo===1)?2:estilo;
@@ -885,7 +885,7 @@ class DimaiorAdmin extends HTMLElement {
     else if(ordenar==='horas') lista.sort((a,b)=>(Number(a.inicio||Date.now()))-(Number(b.inicio||Date.now())));
 
     // ── Filtro Todas / Principal / <sub> (lives das sub-agências vêm do
-    // radar separado — ver _livesSubs no Worker admin) ──────────────────────
+    // radar separado - ver _livesSubs no Worker admin) ──────────────────────
     const subsInfo=Array.isArray(d.subs)?d.subs:[];
     const orgDe=l=>l.org_id||'principal';
     let orgSel=this._livesOpts.org||'todas';
@@ -1087,7 +1087,7 @@ class DimaiorAdmin extends HTMLElement {
     })();
     return this._hlsLibP;
   }
-  // Toca um HLS num <video> com recuperação de erro. hls.js (MSE) vem ANTES do player nativo — Chrome
+  // Toca um HLS num <video> com recuperação de erro. hls.js (MSE) vem ANTES do player nativo - Chrome
   // desktop/Android respondem canPlayType('mpegurl') e caíam no nativo, sem controle de buffer/retry
   // (travava ou ficava preto). Nativo só no iPhone (sem MediaSource) ou se a lib não carregar.
   // Retorna uma função que para tudo. opt: {mini, onPlaying(), onFail(msg), onStatus(msg)}
@@ -1131,7 +1131,7 @@ class DimaiorAdmin extends HTMLElement {
         vid.src=url;vid.play().catch(()=>{});
       }else{falhou('HLS não suportado neste navegador');return;}
       // nunca começou a tocar em 15s → tenta de novo
-      // (se já tem quadro carregado, o navegador só segurou o play — não é falha de rede, não reinicia)
+      // (se já tem quadro carregado, o navegador só segurou o play - não é falha de rede, não reinicia)
       tStart=setTimeout(()=>{if(vid.readyState>=2){vid.play().catch(()=>{});return;}reiniciar('Demorou demais para carregar');},15000);
       vigiar();
     };
@@ -1161,8 +1161,8 @@ class DimaiorAdmin extends HTMLElement {
 
     // Área de mídia: vídeo inline (modo vídeo) ou capa clicável (modo capa)
     const mediaHtml = modo==='video' && sv.stream_url
-      ? `<div class="lc-capa lc-capa-video"><video id="lv-vid-${i}" class="lvc-video" autoplay muted playsinline${ca&&/^https?:\/\//i.test(ca)?` poster="${this._esc(ca)}"`:''}></video><div class="lc-capa-overlay"><div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`
-      : `<div class="lc-capa lc-play-area" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${ca&&/^https?:\/\//i.test(ca)?`<img src="${this._esc(ca)}" class="lc-capa-img" onerror="this.style.display='none'"/>`:''}<div class="lc-capa-overlay">${sv.stream_url?`<div class="lc-play">${this._ico('live',20)}</div>`:''}<div class="lc-studio">Studio: ${this._esc(sv.living_id||'—')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`;
+      ? `<div class="lc-capa lc-capa-video"><video id="lv-vid-${i}" class="lvc-video" autoplay muted playsinline${ca&&/^https?:\/\//i.test(ca)?` poster="${this._esc(ca)}"`:''}></video><div class="lc-capa-overlay"><div class="lc-studio">Studio: ${this._esc(sv.living_id||'-')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`
+      : `<div class="lc-capa lc-play-area" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${ca&&/^https?:\/\//i.test(ca)?`<img src="${this._esc(ca)}" class="lc-capa-img" onerror="this.style.display='none'"/>`:''}<div class="lc-capa-overlay">${sv.stream_url?`<div class="lc-play">${this._ico('live',20)}</div>`:''}<div class="lc-studio">Studio: ${this._esc(sv.living_id||'-')}</div></div>${tc?`<div class="lc-tempo">${tc}</div>`:''}</div>`;
 
     const cardClass=`live-card-full${estilo===2?' lc-estilo2':' lc-horizontal'}`;
     // Ocultar a live no site público (só o admin principal; o painel da sub não tem essa rota)
@@ -1171,7 +1171,7 @@ class DimaiorAdmin extends HTMLElement {
     const btnOcultar=(!this._sub&&/^\d+$/.test(uid))
       ?`<button class="btn btn-o btn-sm lc-ocultar" data-uid="${this._esc(uid)}" data-oculta="${oculta?1:0}" data-nome="${this._esc(sv.nome||'')}" data-kid="${this._esc(sv.kwai_id||'')}" data-foto="${this._esc(fo)}" title="${oculta?'Voltar a mostrar esta live no site':'Esconder esta live da faixa Ao vivo e da live grande do site'}" style="${oculta?'border-color:rgba(74,222,128,.4);color:var(--verde)':'border-color:rgba(248,113,113,.4);color:var(--verm)'}">${this._ico(oculta?'eye':'eye_off',12)} ${oculta?'Mostrar no site':'Ocultar do site'}</button>`:'';
     return`<div class="${cardClass}">${mediaHtml}<div class="lc-info">
-      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'—')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'—')}</div>${sv.org_id&&sv.org_id!=='principal'?`<span class="lc-org" title="Live de sub-agência">${this._esc(sv.org_nome||'Sub')}</span>`:''}${oculta?`<span class="lc-org lc-oculta" title="Esta live não aparece no site público">${this._ico('eye_off',10)} Oculta no site</span>`:''}</div></div>
+      <div class="lc-streamer"><div class="lc-foto-wrap">${fo&&/^https?:\/\//i.test(fo)?`<img src="${this._esc(fo)}" class="lc-foto" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}<div class="av-fb lc-foto-fb" style="${fo?'display:none':''}">${this._ini(sv.nome)}</div></div><div style="min-width:0;flex:1"><div class="lc-nome">${this._esc(sv.nome||'-')}</div><div class="lc-id">ID:${this._esc(sv.kwai_id||'-')}</div>${sv.org_id&&sv.org_id!=='principal'?`<span class="lc-org" title="Live de sub-agência">${this._esc(sv.org_nome||'Sub')}</span>`:''}${oculta?`<span class="lc-org lc-oculta" title="Esta live não aparece no site público">${this._ico('eye_off',10)} Oculta no site</span>`:''}</div></div>
       <div class="lc-stats"><div class="lc-stat-row">${this._ico('users',12)}<span class="lc-stat-lbl">Seguidores</span><strong>${Number(sv.fans||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('heart',12)}<span class="lc-stat-lbl">Curtidas</span><strong>${Number(sv.likes||0).toLocaleString('pt-BR')}</strong></div><div class="lc-stat-row">${this._ico('gift',12)}<span class="lc-stat-lbl">Presentes</span><strong style="color:var(--gold)">${sv.gifts||0}</strong></div></div>
       <div class="lc-footer"><div class="lc-espects"><div style="font-size:11px;color:var(--t3);font-family:var(--dm-font-body,'Exo 2',sans-serif)">Espectadores</div><div style="font-size:24px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.espectadores||0}</div></div><div class="lc-acoes">${sv.stream_url?`<button class="btn btn-g btn-sm lc-play-btn" data-stream="${this._esc(sv.stream_url||'')}" data-nome-live="${this._esc(sv.nome||'')}" data-capa-live="${this._esc(ca)}">${this._ico('live',12)} Assistir</button>`:''}${sv.jump_url&&/^https?:\/\//i.test(sv.jump_url)?`<a href="${this._esc(sv.jump_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="text-decoration:none">${this._ico('live',11)} Kwai</a>`:''}${btnOcultar}</div></div>
     </div></div>`;
@@ -1202,13 +1202,13 @@ class DimaiorAdmin extends HTMLElement {
       this._modalStop=this._tocarHls(vid,url,{
         onPlaying:()=>{capaEl.style.display='none';status.textContent='Reproduzindo ao vivo';},
         onStatus:(m)=>{status.textContent=m;},
-        onFail:(m)=>{status.textContent=(m||'Sem sinal')+' — a live pode ter acabado. Feche e atualize a lista.';}
+        onFail:(m)=>{status.textContent=(m||'Sem sinal')+' - a live pode ter acabado. Feche e atualize a lista.';}
       });
     };
   }
 
   // ── PERSONALIZAÇÃO (templates e molduras do ranking) ─────────────────────
-  _persData(iso){ if(!iso)return '—'; const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/); return m?`${m[3]}/${m[2]}/${m[1]}`:String(iso); }
+  _persData(iso){ if(!iso)return '-'; const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/); return m?`${m[3]}/${m[2]}/${m[1]}`:String(iso); }
   _persN(n){ return Number(n||0).toLocaleString('pt-BR'); }
   async _carregarPers(){
     const s=this.shadowRoot,el=s.getElementById('persLista');
@@ -1227,7 +1227,7 @@ class DimaiorAdmin extends HTMLElement {
     this._renderPers();
   }
   _persResumo(it){
-    if(it.regra==='manual') return 'Manual — só quem você liberar por UID';
+    if(it.regra==='manual') return 'Manual - só quem você liberar por UID';
     if(it.regra==='tempo') return `${String(it.anos_agencia).replace('.',',')} ${Number(it.anos_agencia)===1?'ano':'anos'} de agência`;
     if(it.regra==='diamantes') return `${this._persN(it.meta_diamantes)} diamantes em um mês · ${it.validade_meses?`vale ${it.validade_meses} meses`:'vale pra sempre'}${it.contar_desde?` · contando desde ${this._persData(it.contar_desde)}`:''}`;
     return `Evento ${this._persData(it.evento_inicio)} a ${this._persData(it.evento_fim)} · ${it.evento_publico==='todos'?'todos podem usar':'só inscritos'} · ${it.evento_meta_diamantes?`meta ${this._persN(it.evento_meta_diamantes)} diamantes pra ficar`:'só empréstimo, sem meta'}`;
@@ -1248,15 +1248,15 @@ class DimaiorAdmin extends HTMLElement {
         <button class="btn btn-o" data-pers-ativo="${it.id}" data-v="${it.ativo?0:1}">${this._ico(it.ativo?'eye_off':'eye',11)} ${it.ativo?'Desligar':'Ligar'}</button>
         <button class="btn btn-o" data-pers-del="${it.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4)">${this._ico('trash',11)}</button>
       </div></div>`;
-    const sec=(tipo,tit)=>{const l=d.itens.filter(i=>i.tipo===tipo);return `<div class="adp-sec">${tit} (${l.length})</div>${l.length?`<div class="adp-grid">${l.map(card).join('')}</div>`:this._empty('image','Nenhum ainda — use o botão de cima pra criar')}`;};
-    el.innerHTML=sec('template','Templates — fundo da linha no ranking')+sec('moldura','Molduras — aro da foto no ranking');
+    const sec=(tipo,tit)=>{const l=d.itens.filter(i=>i.tipo===tipo);return `<div class="adp-sec">${tit} (${l.length})</div>${l.length?`<div class="adp-grid">${l.map(card).join('')}</div>`:this._empty('image','Nenhum ainda - use o botão de cima pra criar')}`;};
+    el.innerHTML=sec('template','Templates - fundo da linha no ranking')+sec('moldura','Molduras - aro da foto no ranking');
     const acha=id=>d.itens.find(i=>i.id===id);
     el.querySelectorAll('[data-pers-edit]').forEach(b=>b.addEventListener('click',()=>{const it=acha(b.dataset.persEdit);this._persForm(it,it.tipo);}));
     el.querySelectorAll('[data-pers-lib]').forEach(b=>b.addEventListener('click',()=>this._persLiberar(acha(b.dataset.persLib))));
     el.querySelectorAll('[data-pers-avisar]').forEach(b=>b.addEventListener('click',()=>this._persAvisar(acha(b.dataset.persAvisar))));
     el.querySelectorAll('[data-pers-ativo]').forEach(b=>b.addEventListener('click',async()=>{
       const r=await this._api('PATCH',`/admin/personalizacao/itens/${b.dataset.persAtivo}`,{ativo:b.dataset.v==='1'});
-      if(r?.ok){this._toast(b.dataset.v==='1'?'Item ligado':'Item desligado — some do painel dos streamers e do ranking');this._carregarPers();}else this._toast(r?.erro||'Erro','err');
+      if(r?.ok){this._toast(b.dataset.v==='1'?'Item ligado':'Item desligado - some do painel dos streamers e do ranking');this._carregarPers();}else this._toast(r?.erro||'Erro','err');
     }));
     el.querySelectorAll('[data-pers-del]').forEach(b=>b.addEventListener('click',()=>{
       const it=acha(b.dataset.persDel);
@@ -1271,7 +1271,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!it)return;
     const s=this.shadowRoot,m=this._persModal(460);
     const tipoTxt=it.tipo==='template'?'template':'moldura';
-    m.innerHTML=`<div class="modal" style="max-width:460px"><div class="m-titulo">${this._ico('bell',16)} ${recemCriado?'Item criado — avisar os streamers?':'Avisar os streamers'}</div>
+    m.innerHTML=`<div class="modal" style="max-width:460px"><div class="m-titulo">${this._ico('bell',16)} ${recemCriado?'Item criado - avisar os streamers?':'Avisar os streamers'}</div>
       <p style="color:var(--t2);font-size:13px;line-height:1.6;margin:0 0 6px">Vai chegar uma notificação no celular de quem ativou os avisos:</p>
       <p style="background:var(--glass);border:1px solid var(--brd);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--t1);margin:0 0 14px"><b>Novo ${tipoTxt} de ${this._esc(it.nome)} disponível</b><br><span style="color:var(--t3)">${this._esc(this._persResumo(it))}</span></p>
       <p style="color:var(--t3);font-size:11px;margin:0 0 4px">Ao tocar, abre direto a aba Personalização. O texto da mensagem é montado pelo sistema.</p>
@@ -1336,7 +1336,7 @@ class DimaiorAdmin extends HTMLElement {
           <label><span style="min-width:90px">Cor do fundo</span><input type="color" id="pjCor" value="${an.canto}" style="width:48px;height:30px;padding:0;flex:0 0 48px"><span class="adp-meta">(pega do canto da imagem)</span></label>
           <label><span style="min-width:90px">Tolerância</span><input type="range" id="pjTol" min="5" max="100" value="${an.margem&&!an.chave?25:40}"></label>
           <label><input type="checkbox" id="pjGlobal" ${miolo?'checked':''} style="width:auto"> Apagar também dentro da arte (miolo de moldura)</label>
-          <div class="adp-meta">Sem essa última opção, só o fundo ligado às bordas some — brilhos e estrelas brancos dentro da arte ficam intactos.</div></div>
+          <div class="adp-meta">Sem essa última opção, só o fundo ligado às bordas some - brilhos e estrelas brancos dentro da arte ficam intactos.</div></div>
         <div class="mf"><button class="btn btn-o" id="pjCancel">Cancelar</button><button class="btn btn-g" id="pjOk">${this._ico('check',13)} Usar esta imagem</button></div></div>`;
       const $=id=>s.getElementById(id);
       let timer=null,seq=0;
@@ -1450,7 +1450,7 @@ class DimaiorAdmin extends HTMLElement {
       const apaga=i=>{const dd=dist(i);if(dd<=lim)px[i+3]=0;else if(dd<lim+suave)px[i+3]=Math.min(px[i+3],Math.round(255*(dd-lim)/suave));};
       if(k.global){for(let i=0;i<px.length;i+=4)apaga(i);}
       else{
-        // só o fundo ligado às bordas (flood fill) — preserva brilhos/estrelas da mesma cor dentro da arte
+        // só o fundo ligado às bordas (flood fill) - preserva brilhos/estrelas da mesma cor dentro da arte
         const seen=new Uint8Array(ow*oh),fila=new Int32Array(ow*oh);let ini=0,fimF=0;
         const poe=(a,b)=>{const p=b*ow+a;if(seen[p])return;seen[p]=1;if(px[p*4+3]<16||dist(p*4)<=lim+suave){fila[fimF++]=p;}};
         for(let a=0;a<ow;a++){poe(a,0);poe(a,oh-1);}for(let b=0;b<oh;b++){poe(0,b);poe(ow-1,b);}
@@ -1479,25 +1479,25 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot,m=this._persModal(), novo=!it;
     const v=(k,d='')=>it&&it[k]!=null?it[k]:d;
     const mesIni=new Date().toISOString().slice(0,8)+'01';
-    const evs=(this._persDados?.eventos||[]).map(e=>`<option value="${e.id}" ${v('evento_id')===e.id?'selected':''}>${this._esc(e.nome||'(sem nome)')} — ${this._esc(e.mes||'')}</option>`).join('');
+    const evs=(this._persDados?.eventos||[]).map(e=>`<option value="${e.id}" ${v('evento_id')===e.id?'selected':''}>${this._esc(e.nome||'(sem nome)')} - ${this._esc(e.mes||'')}</option>`).join('');
     const dica=tipo==='template'
       ?'Faixa <b>1800 × 300 px</b> (6:1), WebP ou PNG. Desenho do tema à <b>direita do centro</b> (50% a 85% da largura); os 45% da esquerda e os 15% da direita ficam calmos (ali ficam posição, foto, nome e diamantes). O admin recorta a margem e ajusta sozinho.'
       :'Quadrado <b>512 × 512 px</b>, PNG ou WebP com fundo transparente. A foto fica no círculo central de ~70% (358 px); os enfeites passam pra fora.';
     m.innerHTML=`<div class="modal adp-form" style="max-width:${m.dataset.larg}px;max-height:92vh;overflow:auto">
       <div class="m-titulo">${novo?'Novo':'Editar'} ${tipo==='template'?'template':'moldura'}</div>
       <div class="mc"><label>Nome <span style="color:var(--verm)">*</span></label><input id="pfNome" maxlength="60" value="${this._esc(v('nome'))}" placeholder="${tipo==='template'?'Ex: 1 Ano de DMaior':'Ex: Moldura Ouro'}"></div>
-      <div class="mc"><label>Descrição <span style="color:var(--t3);font-size:11px">(opcional — aparece pro streamer)</span></label><input id="pfDesc" maxlength="200" value="${this._esc(v('descricao'))}"></div>
-      <div class="mc"><label>Tema / campanha <span style="color:var(--t3);font-size:11px">(identifica o conjunto — ex.: aniversario-2-anos, natal, halloween)</span></label><input id="pfTema" maxlength="40" list="pfTemas" value="${this._esc(v('tema'))}" placeholder="aniversario-2-anos"><datalist id="pfTemas">${[...new Set((this._persDados?.itens||[]).map(i=>i.tema).filter(Boolean))].map(t=>`<option value="${this._esc(t)}">`).join('')}</datalist></div>
+      <div class="mc"><label>Descrição <span style="color:var(--t3);font-size:11px">(opcional - aparece pro streamer)</span></label><input id="pfDesc" maxlength="200" value="${this._esc(v('descricao'))}"></div>
+      <div class="mc"><label>Tema / campanha <span style="color:var(--t3);font-size:11px">(identifica o conjunto - ex.: aniversario-2-anos, natal, halloween)</span></label><input id="pfTema" maxlength="40" list="pfTemas" value="${this._esc(v('tema'))}" placeholder="aniversario-2-anos"><datalist id="pfTemas">${[...new Set((this._persDados?.itens||[]).map(i=>i.tema).filter(Boolean))].map(t=>`<option value="${this._esc(t)}">`).join('')}</datalist></div>
       <div class="mc"><label>${tipo==='template'?'Imagem da linha':'Imagem da moldura'} <span style="color:var(--verm)">*</span></label>
         <div class="adp-up"><button type="button" class="btn btn-o" id="pfUp1">${this._ico('upload',13)} Enviar imagem</button><input type="file" id="pfFile1" accept="image/png,image/webp,image/gif" style="display:none"><img id="pfPrev1" src="${this._safeImgSrc(v('imagem_url'))}" style="${v('imagem_url')?'':'display:none'}" alt=""><span id="pfInfo1" class="adp-meta"></span></div>
         <input type="hidden" id="pfImg1" value="${this._esc(v('imagem_url'))}"><div class="dica">${dica}</div></div>
       ${tipo==='template'?`<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--t2);text-transform:none;letter-spacing:0;margin:-4px 0 12px"><input type="checkbox" id="pfForma" ${v('forma_propria',false)?'checked':''} style="width:auto;margin-top:2px"><span>A arte já traz borda e cantos arredondados próprios <span style="color:var(--t3)">(o sistema não desenha a borda dele em volta. Marcado sozinho quando os cantos da imagem são transparentes)</span></span></label>`:''}
       <div id="pfMock"></div>
-      ${tipo==='template'?`<div class="mc"><label>Imagem do pódio <span style="color:var(--t3);font-size:11px">(opcional — fundo do card de quem ficar no top 3)</span></label>
+      ${tipo==='template'?`<div class="mc"><label>Imagem do pódio <span style="color:var(--t3);font-size:11px">(opcional - fundo do card de quem ficar no top 3)</span></label>
         <div class="adp-up"><button type="button" class="btn btn-o" id="pfUp2">${this._ico('upload',13)} Enviar imagem</button><button type="button" class="btn btn-o" id="pfRm2" style="${v('imagem_podio_url')?'':'display:none'}">Remover</button><input type="file" id="pfFile2" accept="image/png,image/webp,image/gif" style="display:none"><img id="pfPrev2" src="${this._safeImgSrc(v('imagem_podio_url'))}" style="${v('imagem_podio_url')?'':'display:none'}" alt=""><span id="pfInfo2" class="adp-meta"></span></div>
         <input type="hidden" id="pfImg2" value="${this._esc(v('imagem_podio_url'))}"><div class="dica"><b>600 × 900 px</b> (2:3). Pode ser uma <b>arte de fundo completa</b> (fica atrás do card do pódio) ou só enfeites com fundo transparente (aí o degradê dourado/azul/roxo aparece). Desenho do tema <b>embaixo à esquerda</b> (62% a 94% da altura); topo e meio calmos (foto, nome, diamantes e prêmio) e canto direito livre pro número da posição.</div></div>`:''}
       <div class="mc"><label>Como libera</label><select id="pfRegra">
-        <option value="manual" ${v('regra','manual')==='manual'?'selected':''}>Manual — só quem eu liberar por UID (exclusivo)</option>
+        <option value="manual" ${v('regra','manual')==='manual'?'selected':''}>Manual - só quem eu liberar por UID (exclusivo)</option>
         <option value="tempo" ${v('regra')==='tempo'?'selected':''}>Tempo de agência (anos)</option>
         <option value="diamantes" ${v('regra')==='diamantes'?'selected':''}>Meta de diamantes dentro de um mês</option>
         <option value="evento" ${v('regra')==='evento'?'selected':''}>Evento (período + meta pra ficar)</option></select></div>
@@ -1509,8 +1509,8 @@ class DimaiorAdmin extends HTMLElement {
       <div id="pfSecEv">
         <div class="grid2"><div class="mc"><label>Início do evento</label><input type="date" id="pfEvIni" value="${v('evento_inicio')}"></div><div class="mc"><label>Fim do evento</label><input type="date" id="pfEvFim" value="${v('evento_fim')}"></div></div>
         <div class="mc"><label>Quem pode usar durante o evento</label><select id="pfEvPub"><option value="todos" ${v('evento_publico','todos')==='todos'?'selected':''}>Todos os streamers</option><option value="inscritos" ${v('evento_publico')==='inscritos'?'selected':''}>Só quem se inscreveu no evento…</option></select></div>
-        <div class="mc" id="pfEvSel"><label>Evento (inscrições do painel)</label><select id="pfEvId"><option value="">— escolha —</option>${evs}</select></div>
-        <div class="mc"><label>Meta pra ficar com o item <span style="color:var(--t3);font-size:11px">(diamantes dentro do período — vazio = só empréstimo)</span></label><input type="number" id="pfEvMeta" min="1" step="1" value="${v('evento_meta_diamantes','')}" placeholder="50000"><div class="dica">Durante o evento ele usa de graça. Se bater a meta dentro do período, <b>conquista pra sempre</b>; se não, o item some no fim.</div></div></div>
+        <div class="mc" id="pfEvSel"><label>Evento (inscrições do painel)</label><select id="pfEvId"><option value=""> - escolha - </option>${evs}</select></div>
+        <div class="mc"><label>Meta pra ficar com o item <span style="color:var(--t3);font-size:11px">(diamantes dentro do período - vazio = só empréstimo)</span></label><input type="number" id="pfEvMeta" min="1" step="1" value="${v('evento_meta_diamantes','')}" placeholder="50000"><div class="dica">Durante o evento ele usa de graça. Se bater a meta dentro do período, <b>conquista pra sempre</b>; se não, o item some no fim.</div></div></div>
       <div class="mc"><label>Ordem na lista <span style="color:var(--t3);font-size:11px">(menor aparece primeiro)</span></label><input type="number" id="pfOrdem" min="0" max="999" value="${v('ordem',0)}"></div>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="pfAtivo" ${v('ativo',true)?'checked':''}> Ativo (aparece pros streamers)</label>
       <div class="mf"><button class="btn btn-o" id="pfCancel">Cancelar</button><button class="btn btn-g" id="pfSalvar">${this._ico('check',13)} Salvar</button></div></div>`;
@@ -1560,9 +1560,9 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot,m=this._persModal(620);
     m.innerHTML=`<div class="modal adp-form" style="max-width:620px;max-height:92vh;overflow:auto">
       <div class="m-titulo">Liberar "${this._esc(it.nome)}"</div>
-      <div class="dica" style="margin-bottom:10px;font-size:12px;color:var(--t3)">Libera na mão pra streamers específicos (vale além da regra do item) — bom pra algo especial ou fora do público. Cole um UID por linha (só números).</div>
+      <div class="dica" style="margin-bottom:10px;font-size:12px;color:var(--t3)">Libera na mão pra streamers específicos (vale além da regra do item) - bom pra algo especial ou fora do público. Cole um UID por linha (só números).</div>
       <div class="mc"><label>UIDs</label><textarea id="plUids" rows="4" placeholder="150001398819765&#10;150001756165363"></textarea></div>
-      <div class="mc"><label>Vale até <span style="color:var(--t3);font-size:11px">(opcional — vazio = pra sempre)</span></label><input type="date" id="plAte"></div>
+      <div class="mc"><label>Vale até <span style="color:var(--t3);font-size:11px">(opcional - vazio = pra sempre)</span></label><input type="date" id="plAte"></div>
       <div class="mf" style="margin-top:0;margin-bottom:14px"><button class="btn btn-g" id="plBtn">${this._ico('check',13)} Liberar</button></div>
       <div class="adp-sec" style="font-size:14px">Quem tem o item</div><div id="plLista">${this._loading()}</div>
       <div class="mf"><button class="btn btn-o" id="plFechar">Fechar</button></div></div>`;
@@ -1574,7 +1574,7 @@ class DimaiorAdmin extends HTMLElement {
       if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||'Erro');return;}
       if(!d.liberacoes.length){el.innerHTML='<div class="adp-meta">Ninguém ainda.</div>';return;}
       const origem={manual:'você',tempo:'tempo de agência',diamantes:'meta de diamantes',evento:'evento'};
-      el.innerHTML=`<table class="adp-tab"><tr><th>Streamer</th><th>Como</th><th>Vale até</th><th></th></tr>${d.liberacoes.map(l=>`<tr><td>${this._esc(l.nome||'—')}<br><span class="adp-meta">${this._esc(l.kwai_uid)}</span></td><td>${origem[l.origem]||l.origem}</td><td>${l.expira_em?this._persData(l.expira_em):'sempre'}</td><td><button class="btn btn-o" data-rev="${l.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4);padding:4px 8px;font-size:11px">Revogar</button></td></tr>`).join('')}</table>`;
+      el.innerHTML=`<table class="adp-tab"><tr><th>Streamer</th><th>Como</th><th>Vale até</th><th></th></tr>${d.liberacoes.map(l=>`<tr><td>${this._esc(l.nome||'-')}<br><span class="adp-meta">${this._esc(l.kwai_uid)}</span></td><td>${origem[l.origem]||l.origem}</td><td>${l.expira_em?this._persData(l.expira_em):'sempre'}</td><td><button class="btn btn-o" data-rev="${l.id}" style="color:var(--verm);border-color:rgba(248,113,113,.4);padding:4px 8px;font-size:11px">Revogar</button></td></tr>`).join('')}</table>`;
       el.querySelectorAll('[data-rev]').forEach(b=>b.addEventListener('click',async()=>{const r=await this._api('DELETE',`/admin/personalizacao/liberacoes/${b.dataset.rev}`);if(r?.ok){this._toast('Revogado');lista();}else this._toast(r?.erro||'Erro','err');}));
     };
     $('plBtn').addEventListener('click',async()=>{
@@ -1593,7 +1593,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="m-titulo">Datas de entrada na agência</div>
       <div class="dica" style="margin-bottom:10px;font-size:12px;color:var(--t3);line-height:1.5">É daqui que sai o "tempo de agência". A data vem da <b>própria Kwai</b> (data de entrada do streamer na agência) e se atualiza sozinha. Só corrija se estiver errada, por exemplo de quem trocou de agência ou sub. O que você corrigir ("você") nunca é sobrescrito. "Automática" = streamer que não está mais na lista da Kwai (usa o 1º dia nos resultados).</div>
       <div class="mf" style="justify-content:flex-start;margin:0 0 12px"><button class="btn btn-o" id="peSync">${this._ico('refresh',12)} Carregar todos os streamers</button></div>
-      <div class="mc"><label>Colar várias de uma vez <span style="color:var(--t3);font-size:11px">(UID e data, uma por linha — ex.: 150001398819765 15/03/2024)</span></label><textarea id="peBulk" rows="3" placeholder="150001398819765 15/03/2024&#10;150001756165363;2023-11-02"></textarea>
+      <div class="mc"><label>Colar várias de uma vez <span style="color:var(--t3);font-size:11px">(UID e data, uma por linha - ex.: 150001398819765 15/03/2024)</span></label><textarea id="peBulk" rows="3" placeholder="150001398819765 15/03/2024&#10;150001756165363;2023-11-02"></textarea>
         <div class="mf" style="margin-top:6px"><button class="btn btn-g" id="peBulkBtn">${this._ico('check',13)} Salvar datas coladas</button></div></div>
       <div class="mc"><input id="peBusca" placeholder="Buscar por nome ou UID…"></div>
       <div id="peLista">${this._loading()}</div>
@@ -1605,7 +1605,7 @@ class DimaiorAdmin extends HTMLElement {
       const q=($('peBusca').value||'').trim().toLowerCase();
       const l=(this._persEnt||[]).filter(e=>!q||e.kwai_uid.includes(q)||(e.nome||'').toLowerCase().includes(q));
       if(!l.length){el.innerHTML='<div class="adp-meta">Nada aqui. Use "Carregar todos os streamers".</div>';return;}
-      el.innerHTML=`<div class="adp-meta" style="margin-bottom:6px">${l.length} streamer(s)${l.length>200?' — mostrando 200, use a busca':''}</div><table class="adp-tab"><tr><th>Streamer</th><th>Data de entrada</th><th>Origem</th><th></th></tr>${l.slice(0,200).map(e=>`<tr><td>${this._esc(e.nome||'—')}<br><span class="adp-meta">${this._esc(e.kwai_uid)}</span></td><td><input type="date" value="${this._esc(e.data_entrada)}" data-d="${this._esc(e.kwai_uid)}" style="padding:4px 6px"></td><td>${e.origem==='admin'?'<span class="adp-chip on">você</span>':e.origem==='kwai'?'<span class="adp-chip">Kwai</span>':'<span class="adp-chip">automática</span>'}</td><td><button class="btn btn-o" data-sv="${this._esc(e.kwai_uid)}" style="padding:4px 8px;font-size:11px">Salvar</button></td></tr>`).join('')}</table>`;
+      el.innerHTML=`<div class="adp-meta" style="margin-bottom:6px">${l.length} streamer(s)${l.length>200?' - mostrando 200, use a busca':''}</div><table class="adp-tab"><tr><th>Streamer</th><th>Data de entrada</th><th>Origem</th><th></th></tr>${l.slice(0,200).map(e=>`<tr><td>${this._esc(e.nome||'-')}<br><span class="adp-meta">${this._esc(e.kwai_uid)}</span></td><td><input type="date" value="${this._esc(e.data_entrada)}" data-d="${this._esc(e.kwai_uid)}" style="padding:4px 6px"></td><td>${e.origem==='admin'?'<span class="adp-chip on">você</span>':e.origem==='kwai'?'<span class="adp-chip">Kwai</span>':'<span class="adp-chip">automática</span>'}</td><td><button class="btn btn-o" data-sv="${this._esc(e.kwai_uid)}" style="padding:4px 8px;font-size:11px">Salvar</button></td></tr>`).join('')}</table>`;
       el.querySelectorAll('[data-sv]').forEach(b=>b.addEventListener('click',async()=>{
         const uid=b.dataset.sv,data=el.querySelector(`[data-d="${uid}"]`).value;
         const r=await this._api('POST','/admin/personalizacao/entradas',{linhas:[{uid,data}]});
@@ -1632,7 +1632,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // ── ARQUIVOS (R2) ────────────────────────────────────────────────────────
-  static get ARQ_LIMITE_GB(){ return 10; } // plano gratuito do R2 — só referência da barra
+  static get ARQ_LIMITE_GB(){ return 10; } // plano gratuito do R2 - só referência da barra
   _arqPasta(p){return ({home:'Home (banners)',eventos:'Eventos',pk:'PK Diário',votacao:'Votações',geral:'Geral',templates:'Templates (ranking)',molduras:'Molduras (ranking)','(raiz)':'Sem pasta'})[p]||p;}
   _arqBytes(n){n=Number(n)||0;if(n>=1073741824)return (n/1073741824).toFixed(2).replace('.',',')+' GB';if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB';if(n>=1024)return Math.round(n/1024)+' KB';return n+' B';}
   // ── MAPA DE ACESSOS ─────────────────────────────────────────────────────────
@@ -1688,7 +1688,7 @@ class DimaiorAdmin extends HTMLElement {
     // Agrupamentos
     const soma=(chave,f)=>{ const m=new Map(); locais.forEach(l=>{ if(f&&!f(l)) return; const k=chave(l); if(!k) return; const o=m.get(k)||{k,sessoes:0,paginas:0}; o.sessoes+=l.sessoes; o.paginas+=l.paginas; m.set(k,o); }); return [...m.values()].sort((a,b)=>b.sessoes-a.sessoes||b.paginas-a.paginas); };
     const paises=soma(l=>l.pais), estados=soma(l=>l.regiao,l=>l.pais==='BR'&&l.regiao);
-    const cidades=locais.filter(l=>l.cidade).map(l=>({k:l.cidade+(l.pais==='BR'?(l.regiao?' — '+l.regiao:''):' — '+nomePais(l.pais)),sessoes:l.sessoes,paginas:l.paginas})).sort((a,b)=>b.sessoes-a.sessoes||b.paginas-a.paginas);
+    const cidades=locais.filter(l=>l.cidade).map(l=>({k:l.cidade+(l.pais==='BR'?(l.regiao?' - '+l.regiao:''):' - '+nomePais(l.pais)),sessoes:l.sessoes,paginas:l.paginas})).sort((a,b)=>b.sessoes-a.sessoes||b.paginas-a.paginas);
     // Mapa
     let mapa='';
     if(G){
@@ -1696,8 +1696,8 @@ class DimaiorAdmin extends HTMLElement {
       const porUf=Object.fromEntries(estados.map(e=>[e.k,e])), maxUf=Math.max(1,...estados.map(e=>e.sessoes));
       const pts=locais.filter(l=>l.lat!=null&&l.lon!=null&&(!brasil||l.pais==='BR'));
       const maxP=Math.max(1,...pts.map(l=>l.sessoes||l.paginas));
-      const info=(t,sub)=>esc(`<b>${t}</b> — ${sub}`);
-      // Estados em 3D: quem tem acesso "sobe" do mapa — quanto mais visitas, mais alto e
+      const info=(t,sub)=>esc(`<b>${t}</b> - ${sub}`);
+      // Estados em 3D: quem tem acesso "sobe" do mapa - quanto mais visitas, mais alto e
       // mais claro. A altura é em pixels de tela (camadas empilhadas, refeitas a cada zoom
       // em _mpEscalarMarcas), então não vira um paredão quando aproxima.
       const altUf={};
@@ -1725,7 +1725,7 @@ class DimaiorAdmin extends HTMLElement {
       const bolas=[...pts].sort((a,b)=>b.sessoes-a.sessoes).map(l=>{
         const r=(4+13*Math.sqrt((l.sessoes||l.paginas)/maxP)).toFixed(1), x=X(l.lon).toFixed(1), y=Y(l.lat).toFixed(1);
         const ergue=brasil&&l.pais==='BR'?(altUf[l.regiao]||0):0;
-        const nome=(l.cidade||'Local não identificado')+(l.regiao&&l.pais==='BR'?' — '+l.regiao:' — '+nomePais(l.pais));
+        const nome=(l.cidade||'Local não identificado')+(l.regiao&&l.pais==='BR'?' - '+l.regiao:' - '+nomePais(l.pais));
         return`<g class="mp-mk" data-x="${x}" data-y="${y}" data-e="${ergue.toFixed(1)}" transform="translate(${x} ${y})" data-mpinfo="${info(esc(nome),`${n(l.sessoes)} visitas · ${n(l.paginas)} páginas`)}"><title>${esc(nome)}: ${n(l.sessoes)} visitas</title><circle r="${r}" class="mp-pt"/><text class="mp-lb" y="${(-r-5).toFixed(1)}">${esc(l.cidade||'')}</text></g>`;
       }).join('');
       mapa=`<div class="mp-mapa"><div class="mp-info" id="mpInfo">Toque numa bolinha${brasil?' ou estado':''} pra ver os números</div>
@@ -1745,7 +1745,7 @@ class DimaiorAdmin extends HTMLElement {
         <div class="arq-card"><div class="l">Visitas</div><div class="v">${n(tot.sessoes)}</div><div class="s">pessoas que chegaram ao site</div></div>
         <div class="arq-card"><div class="l">Páginas vistas</div><div class="v">${n(tot.paginas)}</div><div class="s">no período</div></div>
         <div class="arq-card"><div class="l">Cidades</div><div class="v">${n(cidades.length)}</div><div class="s">${n(paises.length)} ${paises.length===1?'país':'países'}</div></div>
-        <div class="arq-card"><div class="l">Estados</div><div class="v">${n(estados.length)}</div><div class="s">${estados[0]?esc(uf[estados[0].k]||estados[0].k)+' lidera':'—'}</div></div>
+        <div class="arq-card"><div class="l">Estados</div><div class="v">${n(estados.length)}</div><div class="s">${estados[0]?esc(uf[estados[0].k]||estados[0].k)+' lidera':'-'}</div></div>
       </div>
       <div class="box">${mapa}</div>
       <div id="mpSerie"></div>
@@ -1875,7 +1875,7 @@ class DimaiorAdmin extends HTMLElement {
     }
   }
 
-  // ── LIVES — CATEGORIAS (aba LIVES da home) ──────────────────────────────────
+  // ── LIVES - CATEGORIAS (aba LIVES da home) ──────────────────────────────────
   // Worker admin: /admin/lives-categorias/* · site: js/components/lives-descoberta.js
   // Principais fixas (Entretenimento, Jogos) + subcategorias com capa 3:4.
   async _carregarLivesCat(){
@@ -1901,14 +1901,14 @@ class DimaiorAdmin extends HTMLElement {
     if(!d||!el)return;
     const semCapa=d.categorias.filter(c=>c.ativo&&!c.capa_url).length;
     cfg.innerHTML=`<div class="va-cfg">
-      <div class="va-cfg-txt"><b>${d.config.ativo?'Aparecendo na home':'Desligado — ninguém vê'}</b><br>${d.config.ativo?'A aba LIVES aparece na lateral da home para todos os visitantes.':'Cadastre as categorias e as capas, peça aos streamers para escolherem a deles no painel e depois ligue.'}${semCapa?`<br><span style="color:var(--amber)">${semCapa} subcategoria(s) ativa(s) sem capa — no site aparece só o nome sobre um fundo azul.</span>`:''}</div>
+      <div class="va-cfg-txt"><b>${d.config.ativo?'Aparecendo na home':'Desligado - ninguém vê'}</b><br>${d.config.ativo?'A aba LIVES aparece na lateral da home para todos os visitantes.':'Cadastre as categorias e as capas, peça aos streamers para escolherem a deles no painel e depois ligue.'}${semCapa?`<br><span style="color:var(--amber)">${semCapa} subcategoria(s) ativa(s) sem capa - no site aparece só o nome sobre um fundo azul.</span>`:''}</div>
       <label><span class="tog-switch"><input type="checkbox" id="lcAtivo" ${d.config.ativo?'checked':''}><span class="tog-slider"></span></span> Mostrar a aba LIVES na home</label>
       <label><span class="tog-switch"><input type="checkbox" id="lcVazias" ${d.config.mostrar_vazias?'checked':''}><span class="tog-slider"></span></span> Mostrar categorias sem ninguém ao vivo (apagadinhas)</label>
       <a class="btn btn-o btn-sm" href="/#lives" target="_blank" rel="noopener" title="Abre a home já com a área Lives aberta (precisa estar ligado)">${this._ico('live',12)} Ver na home</a>
     </div>`;
     const salvaCfg=async(chave,on,inp)=>{
       const r=await this._api('POST','/admin/lives-categorias/config',{[chave]:on});
-      if(r?.ok){d.config[chave]=on;this._toast('Salvo — o site atualiza em até 1 minuto');this._renderLivesCat();}
+      if(r?.ok){d.config[chave]=on;this._toast('Salvo - o site atualiza em até 1 minuto');this._renderLivesCat();}
       else{this._toast(r?.erro||'Erro','err');inp.checked=!on;}
     };
     s.getElementById('lcAtivo').addEventListener('change',e=>{
@@ -1938,9 +1938,9 @@ class DimaiorAdmin extends HTMLElement {
               <button class="btn btn-o" data-lc-mover="${c.id}" data-dir="1" ${i===cats.length-1?'disabled':''} aria-label="Descer">${this._ico('down',11)}</button>
               <button class="btn btn-o" data-lc-edit="${c.id}">${this._ico('edit',11)} Editar</button>
               <button class="btn btn-o" data-lc-ativo="${c.id}" data-v="${c.ativo?0:1}">${this._ico(c.ativo?'eye_off':'eye',11)} ${c.ativo?'Desativar':'Ativar'}</button>
-              <button class="btn btn-o" data-lc-del="${c.id}" ${c.streamers?`disabled title="Tem streamer usando — desative em vez de excluir"`:''} style="color:var(--verm);border-color:rgba(248,113,113,.4)" aria-label="Excluir">${this._ico('trash',11)}</button>
+              <button class="btn btn-o" data-lc-del="${c.id}" ${c.streamers?`disabled title="Tem streamer usando - desative em vez de excluir"`:''} style="color:var(--verm);border-color:rgba(248,113,113,.4)" aria-label="Excluir">${this._ico('trash',11)}</button>
             </div>
-          </div></div>`).join('')}</div>`:`<div class="adp-meta" style="padding:6px 2px 4px">Nenhuma subcategoria ainda — use "Nova subcategoria" lá em cima.</div>`}
+          </div></div>`).join('')}</div>`:`<div class="adp-meta" style="padding:6px 2px 4px">Nenhuma subcategoria ainda - use "Nova subcategoria" lá em cima.</div>`}
       </div>`;
     }).join('')+`<div class="adp-meta" style="margin-top:4px">Capas em pé, <b>3:4</b> (recomendado 600×800). Subcategoria desativada some do site e do painel, mas quem já tinha escolhido continua com ela salva (o painel pede pra trocar).</div>`;
 
@@ -1983,7 +1983,7 @@ class DimaiorAdmin extends HTMLElement {
     const st=r.streamer,at=r.atual||{},uid=st.kwai_uid;
     const grupos=d.grupos.filter(g=>g.ativo);
     const foto=/^https?:\/\//.test(st.foto||'')?`<img src="${this._esc(st.foto)}" alt="" referrerpolicy="no-referrer">`:this._ico('user',18);
-    const atualTxt=at.grupo?`${this._esc((d.grupos.find(g=>g.id===at.grupo)||{}).nome||at.grupo)}${at.categoria_id?' › '+this._esc((d.categorias.find(c=>c.id===at.categoria_id)||{}).nome||'—'):''}`:'nenhuma';
+    const atualTxt=at.grupo?`${this._esc((d.grupos.find(g=>g.id===at.grupo)||{}).nome||at.grupo)}${at.categoria_id?' › '+this._esc((d.categorias.find(c=>c.id===at.categoria_id)||{}).nome||'-'):''}`:'nenhuma';
     res.innerHTML=`<div class="lvc-sres">
       <div class="lvc-sfoto">${foto}</div>
       <div class="lvc-sinfo"><div class="adp-nome">${this._esc(st.nome||'Sem nome')}</div><div class="adp-meta">UID ${this._esc(st.kwai_uid)}${st.kwai_id?` · ID ${this._esc(st.kwai_id)}`:''} · categoria atual: <b>${atualTxt}</b></div></div>
@@ -2009,7 +2009,7 @@ class DimaiorAdmin extends HTMLElement {
     };
     s.getElementById('lcsSalvar').addEventListener('click',e=>{
       if(!gSel.value){this._toast('Escolha a categoria principal','err');return;}
-      salvar({grupo:gSel.value,categoria_id:cSel.value||null},'Categoria do streamer salva — o site atualiza em até 1 minuto',e.currentTarget);
+      salvar({grupo:gSel.value,categoria_id:cSel.value||null},'Categoria do streamer salva - o site atualiza em até 1 minuto',e.currentTarget);
     });
     s.getElementById('lcsLimpar').addEventListener('click',e=>salvar({grupo:null,categoria_id:null},'Categoria removida',e.currentTarget));
   }
@@ -2041,7 +2041,7 @@ class DimaiorAdmin extends HTMLElement {
       const desenha=(c,w,h)=>{const r=recorte(),x=c.getContext('2d');c.width=w;c.height=h;x.imageSmoothingQuality='high';x.drawImage(im,r.sx,r.sy,r.sw,r.sh,0,0,w,h);return r;};
       const prev=()=>{
         const r=desenha(cv,alvo.w/2,alvo.h/2);
-        $('lcAviso').innerHTML=r.sw<alvo.w*0.75?`<span style="color:var(--amber)">Imagem pequena para esse corte — pode ficar borrada no site. O ideal é ter pelo menos ${alvo.w}×${alvo.h}.</span>`:'';
+        $('lcAviso').innerHTML=r.sw<alvo.w*0.75?`<span style="color:var(--amber)">Imagem pequena para esse corte - pode ficar borrada no site. O ideal é ter pelo menos ${alvo.w}×${alvo.h}.</span>`:'';
       };
       ['lcZoom','lcX','lcY'].forEach(id=>$(id).addEventListener('input',prev));
       prev();
@@ -2052,7 +2052,7 @@ class DimaiorAdmin extends HTMLElement {
         const out=document.createElement('canvas');desenha(out,Math.max(1,Math.round(alvo.w*k)),Math.max(1,Math.round(alvo.h*k)));
         const blob=await new Promise(ok=>out.toBlob(ok,'image/webp',0.86));
         if(!blob){this._toast('Não consegui gerar a capa neste navegador','err');return fim(null);}
-        // iPhone antigo devolve PNG mesmo pedindo WebP — usa o tipo real
+        // iPhone antigo devolve PNG mesmo pedindo WebP - usa o tipo real
         fim(new File([blob],'capa.'+(blob.type==='image/webp'?'webp':'png'),{type:blob.type||'image/png'}));
       });
     });
@@ -2091,7 +2091,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="mc"><label>Categoria principal <span style="color:var(--verm)">*</span></label>
         <select id="lfGrupo">${d.grupos.map(g=>`<option value="${g.id}" ${v('grupo','jogos')===g.id?'selected':''}>${this._esc(g.nome)}</option>`).join('')}</select></div>
       <div class="mc"><label>Nome <span style="color:var(--verm)">*</span></label><input id="lfNome" maxlength="40" value="${this._esc(v('nome'))}" placeholder="Ex: Free Fire"></div>
-      <div class="mc"><label>Capa</label>${this._lcCampoImg('lfCapa',v('capa_url'),'Em pé, <b>3:4</b> — recomendado <b>600×800</b>. Você ajusta o corte antes de enviar.','3/4')}</div>
+      <div class="mc"><label>Capa</label>${this._lcCampoImg('lfCapa',v('capa_url'),'Em pé, <b>3:4</b> - recomendado <b>600×800</b>. Você ajusta o corte antes de enviar.','3/4')}</div>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="lfAtivo" ${v('ativo',true)?'checked':''} style="width:auto"> Ativa (aparece no site e o streamer pode escolher)</label>
       <div class="mf"><button class="btn btn-o" id="lfNao">Cancelar</button><button class="btn btn-g" id="lfSim">${this._ico('check',13)} Salvar</button></div></div>`;
     const raiz=m.firstElementChild,$=id=>raiz.querySelector('#'+id);
@@ -2118,7 +2118,7 @@ class DimaiorAdmin extends HTMLElement {
     m.innerHTML=`<div class="modal adp-form" style="max-width:480px;max-height:92vh;overflow:auto">
       <div class="m-titulo">${this._ico(g.id==='jogos'?'gamepad':'drama',16)} Categoria principal</div>
       <div class="mc"><label>Nome <span style="color:var(--verm)">*</span></label><input id="lgNome" maxlength="40" value="${this._esc(g.nome)}"></div>
-      <div class="mc"><label>Banner (opcional)</label>${this._lcCampoImg('lgBan',g.banner_url,'Deitado, <b>1200×450</b>. Reservado para um cabeçalho da categoria — hoje o site mostra só o nome no filtro.','1200/450')}</div>
+      <div class="mc"><label>Banner (opcional)</label>${this._lcCampoImg('lgBan',g.banner_url,'Deitado, <b>1200×450</b>. Reservado para um cabeçalho da categoria - hoje o site mostra só o nome no filtro.','1200/450')}</div>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2);margin-bottom:8px"><input type="checkbox" id="lgAtivo" ${g.ativo?'checked':''} style="width:auto"> Ativa (o streamer pode escolher)</label>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t2)"><input type="checkbox" id="lgPub" ${g.publico?'checked':''} style="width:auto"> Aparece no site</label>
       <div class="mf"><button class="btn btn-o" id="lgNao">Cancelar</button><button class="btn btn-g" id="lgSim">${this._ico('check',13)} Salvar</button></div></div>`;
@@ -2139,7 +2139,7 @@ class DimaiorAdmin extends HTMLElement {
     this._abrirModal('mPers');
   }
 
-  // ── VITRINE (aba LOJA da home e página /loja.html — produtos de afiliado) ───
+  // ── VITRINE (aba LOJA da home e página /loja.html - produtos de afiliado) ───
   // Worker admin: /admin/vitrine/* · site: js/components/vitrine.js (+ menu-mobile.js) · SQL/vitrine-shopee.sql
   async _carregarVitrine(){
     const s=this.shadowRoot,el=s.getElementById('vtLista');
@@ -2189,7 +2189,7 @@ class DimaiorAdmin extends HTMLElement {
       :`A última tentativa (${this._vtAgo(u.em)}) deu erro: ${this._esc(u.erro||'')}`;
     const sw=(id,on,txt,extra='')=>`<label class="vt-sw"><span class="tog-switch"><input type="checkbox" id="${id}" ${on?'checked':''}><span class="tog-slider"></span></span><span>${txt}${extra}</span></label>`;
     cfg.innerHTML=`<div class="va-cfg">
-      <div class="va-cfg-txt"><b>${c.ativo?'Loja ligada':'Loja desligada — ninguém vê'}</b><br>${c.ativo?(ativos?`${ativos} produto(s) ativo(s). Os botões abaixo escolhem onde ela aparece.`:'Ligada, mas sem produto ativo: nada aparece até você ativar um.'):'Ligue para a loja existir no site (os botões abaixo só valem com ela ligada).'}</div>
+      <div class="va-cfg-txt"><b>${c.ativo?'Loja ligada':'Loja desligada - ninguém vê'}</b><br>${c.ativo?(ativos?`${ativos} produto(s) ativo(s). Os botões abaixo escolhem onde ela aparece.`:'Ligada, mas sem produto ativo: nada aparece até você ativar um.'):'Ligue para a loja existir no site (os botões abaixo só valem com ela ligada).'}</div>
       ${sw('vtAtivo',c.ativo,'Loja ligada')}
     </div>
     <div class="va-cfg">
@@ -2237,7 +2237,7 @@ class DimaiorAdmin extends HTMLElement {
       this._carregarVitrine();
     });
 
-    if(!d.produtos.length){el.innerHTML=this._empty('bag','Nenhum produto ainda — use "Novo produto" lá em cima'+(c.sync_novos?'':', ou ligue "Trazer também os produtos novos" e clique em "Atualizar agora"'));return;}
+    if(!d.produtos.length){el.innerHTML=this._empty('bag','Nenhum produto ainda - use "Novo produto" lá em cima'+(c.sync_novos?'':', ou ligue "Trazer também os produtos novos" e clique em "Atualizar agora"'));return;}
     // Agrupa por nicho (na ordem da taxonomia) e mostra a subcategoria em cada card
     const ordem=new Map((d.taxonomia||[]).map((t,i)=>[t.nome,i]));
     const grupos=[];
@@ -2249,7 +2249,7 @@ class DimaiorAdmin extends HTMLElement {
     el.querySelectorAll('[data-vt-edit]').forEach(b=>b.addEventListener('click',()=>this._vtForm(acha(b.dataset.vtEdit))));
     el.querySelectorAll('[data-vt-ativo]').forEach(b=>b.addEventListener('click',async()=>{
       const r=await this._api('PATCH',`/admin/vitrine/${b.dataset.vtAtivo}`,{ativo:b.dataset.v==='1'});
-      if(r?.ok){this._toast(b.dataset.v==='1'?'Produto ativado':'Produto pausado — não aparece mais no site');this._carregarVitrine();}else this._toast(r?.erro||'Erro','err');
+      if(r?.ok){this._toast(b.dataset.v==='1'?'Produto ativado':'Produto pausado - não aparece mais no site');this._carregarVitrine();}else this._toast(r?.erro||'Erro','err');
     }));
     el.querySelectorAll('[data-vt-esg]').forEach(b=>b.addEventListener('click',async()=>{
       const r=await this._api('PATCH',`/admin/vitrine/${b.dataset.vtEsg}`,{esgotado:b.dataset.v==='1'});
@@ -2293,7 +2293,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="m-titulo">${this._ico('bag',16)} ${novo?'Novo produto na vitrine':'Editar produto'}</div>
       <div class="mc"><label>Link de afiliado <span style="color:var(--verm)">*</span></label>
         <input id="vtLink" maxlength="500" value="${this._esc(v('link_url'))}" placeholder="https://s.shopee.com.br/...  ou  https://meli.la/...  ou  https://amzn.to/...">
-        <div class="dica" id="vtMkNote">O link curto que a loja gera pra você. Funciona com <b>Shopee</b>, <b>Mercado Livre</b> e <b>Amazon</b>: o card mostra a etiqueta da loja sozinho. É por esse link que a comissão conta — o link normal do produto não paga nada.</div></div>
+        <div class="dica" id="vtMkNote">O link curto que a loja gera pra você. Funciona com <b>Shopee</b>, <b>Mercado Livre</b> e <b>Amazon</b>: o card mostra a etiqueta da loja sozinho. É por esse link que a comissão conta - o link normal do produto não paga nada.</div></div>
       <div class="mc"><label>Nome do produto <span style="color:var(--verm)">*</span></label><input id="vtTitulo" maxlength="160" value="${this._esc(v('titulo'))}" placeholder="Igual ao título na loja"></div>
       <div class="mc"><label>Foto do produto <span style="color:var(--verm)">*</span></label>
         <div style="display:flex;gap:10px;align-items:flex-start"><div class="vt-prev" id="vtPrevBox" style="${v('imagem_url')?'':'display:none'}"><img id="vtPrev" alt="" referrerpolicy="no-referrer" src="${this._vtFoto(v('imagem_url'),200)}"></div>
@@ -2326,7 +2326,7 @@ class DimaiorAdmin extends HTMLElement {
       const x=$('vtLink').value.trim();
       if(!x)return;
       const mk=this._vtMk(x);
-      $('vtMkNote').textContent=mk?`Loja reconhecida: ${mk.nome}. A etiqueta "${mk.nome}" aparece sozinha no card.`:'Esse endereço não é da Shopee, do Mercado Livre nem da Amazon — o site não vai aceitar.';
+      $('vtMkNote').textContent=mk?`Loja reconhecida: ${mk.nome}. A etiqueta "${mk.nome}" aparece sozinha no card.`:'Esse endereço não é da Shopee, do Mercado Livre nem da Amazon - o site não vai aceitar.';
       $('vtMkNote').style.color=mk?'var(--verde,#4ade80)':'#fbbf24';
     };
     $('vtLink').addEventListener('input',notaLink);
@@ -2340,7 +2340,7 @@ class DimaiorAdmin extends HTMLElement {
       const r=await this._api('POST','/admin/vitrine/classificar',{titulo:t});
       if(catManual||!r?.ok)return;
       poe(r.categoria,r.subcategoria||'');
-      $('vtCatNote').textContent=r.reconhecida?`Escolhida pelo nome do produto: ${r.categoria}${r.subcategoria?' › '+r.subcategoria:''} — pode trocar.`:'Não reconheci a categoria pelo nome: escolha uma (ou fica em "Outros").';
+      $('vtCatNote').textContent=r.reconhecida?`Escolhida pelo nome do produto: ${r.categoria}${r.subcategoria?' › '+r.subcategoria:''} - pode trocar.`:'Não reconheci a categoria pelo nome: escolha uma (ou fica em "Outros").';
     };
     $('vtTitulo').addEventListener('input',this._dbc(sugere,350));
     $('vtCat').addEventListener('change',()=>{catManual=true;$('vtSub').innerHTML=optsSub($('vtCat').value,'');});
@@ -2435,7 +2435,7 @@ class DimaiorAdmin extends HTMLElement {
     const [mN,mU]=fMin%1440===0?[fMin/1440,1440]:fMin%60===0?[fMin/60,60]:[fMin,1];
     const ativos=d.videos.filter(v=>v.ativo).length;
     cfg.innerHTML=`<div class="va-cfg">
-      <div class="va-cfg-txt"><b>${d.config.ativo?'Aparecendo na home':'Desligado — ninguém vê'}</b><br>${d.config.ativo?(ativos?`${ativos} vídeo(s) ativo(s). Cada visitante vê no máximo 1 vídeo no período escolhido, sorteado entre os que ele ainda não viu.`:'Ligado, mas sem vídeo ativo: nada aparece até você ativar um.'):'Ligue para a janela aparecer pros visitantes da home.'}</div>
+      <div class="va-cfg-txt"><b>${d.config.ativo?'Aparecendo na home':'Desligado - ninguém vê'}</b><br>${d.config.ativo?(ativos?`${ativos} vídeo(s) ativo(s). Cada visitante vê no máximo 1 vídeo no período escolhido, sorteado entre os que ele ainda não viu.`:'Ligado, mas sem vídeo ativo: nada aparece até você ativar um.'):'Ligue para a janela aparecer pros visitantes da home.'}</div>
       <label><span class="tog-switch"><input type="checkbox" id="vaAtivo" ${d.config.ativo?'checked':''}><span class="tog-slider"></span></span> Mostrar na home</label>
       <label>No máximo 1 vez a cada <select id="vaFreq">${FREQ.map(([m,t])=>`<option value="${m}" ${!manual&&fMin===m?'selected':''}>${t}</option>`).join('')}<option value="manual" ${manual?'selected':''}>Manual…</option></select></label>
       <span id="vaFreqMan" style="display:${manual?'inline-flex':'none'};align-items:center;gap:6px"><input id="vaFreqN" type="number" min="1" max="43200" step="1" value="${mN}" style="width:76px" aria-label="Tempo entre um vídeo e outro"><select id="vaFreqU" aria-label="Unidade"><option value="1" ${mU===1?'selected':''}>minutos</option><option value="60" ${mU===60?'selected':''}>horas</option><option value="1440" ${mU===1440?'selected':''}>dias</option></select><button type="button" class="btn btn-o btn-sm" id="vaFreqOk">${this._ico('check',12)} Salvar</button></span>
@@ -2466,7 +2466,7 @@ class DimaiorAdmin extends HTMLElement {
       await salvaFreq(min,null);
     });
 
-    if(!d.videos.length){el.innerHTML=this._empty('play_circle','Nenhum vídeo ainda — use "Novo vídeo" lá em cima');return;}
+    if(!d.videos.length){el.innerHTML=this._empty('play_circle','Nenhum vídeo ainda - use "Novo vídeo" lá em cima');return;}
     const src=u=>/^https:\/\//.test(u||'')?this._esc(u):'';
     el.innerHTML=`<div class="adp-grid va-grid">${d.videos.map(v=>`<div class="adp-card ${v.ativo?'':'off'}">
       <div class="va-thumb"><video src="${src(v.video_url)}" ${src(v.poster_url)?`poster="${src(v.poster_url)}"`:''} controls playsinline preload="none"></video></div>
@@ -2481,7 +2481,7 @@ class DimaiorAdmin extends HTMLElement {
     el.querySelectorAll('[data-va-edit]').forEach(b=>b.addEventListener('click',()=>this._vaForm(acha(b.dataset.vaEdit))));
     el.querySelectorAll('[data-va-ativo]').forEach(b=>b.addEventListener('click',async()=>{
       const r=await this._api('PATCH',`/admin/videos-abertura/${b.dataset.vaAtivo}`,{ativo:b.dataset.v==='1'});
-      if(r?.ok){this._toast(b.dataset.v==='1'?'Vídeo ativado':'Vídeo pausado — não aparece mais na home');this._carregarVideosAbertura();}else this._toast(r?.erro||'Erro','err');
+      if(r?.ok){this._toast(b.dataset.v==='1'?'Vídeo ativado':'Vídeo pausado - não aparece mais na home');this._carregarVideosAbertura();}else this._toast(r?.erro||'Erro','err');
     }));
     el.querySelectorAll('[data-va-del]').forEach(b=>b.addEventListener('click',()=>{
       const v=acha(b.dataset.vaDel);
@@ -2507,7 +2507,7 @@ class DimaiorAdmin extends HTMLElement {
         <div class="adp-up"><button type="button" class="btn btn-o" id="vfUp">${this._ico('upload',13)} ${novo?'Enviar vídeo':'Trocar vídeo'}</button><input type="file" id="vfFile" accept="video/mp4,video/webm" style="display:none"><span id="vfInfo" class="adp-meta">${this._vaDur(v('duracao_seg'))}</span></div>
         <div class="va-prev" id="vfPrev" style="margin-top:10px;${v('video_url')?'':'display:none'}"><video id="vfVid" controls playsinline preload="metadata" ${/^https:\/\//.test(v('poster_url'))?`poster="${this._esc(v('poster_url'))}"`:''} src="${/^https:\/\//.test(v('video_url'))?this._esc(v('video_url')):''}"></video></div>
         <input type="hidden" id="vfVideo" value="${this._esc(v('video_url'))}"><input type="hidden" id="vfPoster" value="${this._esc(v('poster_url'))}"><input type="hidden" id="vfDur" value="${this._esc(v('duracao_seg'))}">
-        <div class="dica">Em pé (<b>9:16</b>, formato de live), até <b>1 min 30 s</b>, MP4 com som, até <b>80 MB</b>. MP4 comum (H.264, o padrão de celular e editores) sobe do jeito que está, <b>na qualidade original</b>. Outros formatos (ex.: HEVC/iPhone, WebM) são convertidos no navegador em 1080p — leva o tempo do vídeo; use o Chrome ou o Edge no computador e deixe a aba aberta.</div></div>
+        <div class="dica">Em pé (<b>9:16</b>, formato de live), até <b>1 min 30 s</b>, MP4 com som, até <b>80 MB</b>. MP4 comum (H.264, o padrão de celular e editores) sobe do jeito que está, <b>na qualidade original</b>. Outros formatos (ex.: HEVC/iPhone, WebM) são convertidos no navegador em 1080p - leva o tempo do vídeo; use o Chrome ou o Edge no computador e deixe a aba aberta.</div></div>
       <div class="mc"><label>Botão "Pular" aparece</label>
         <select id="vfPular">${[[0,'Na hora (assim que o vídeo abre)'],[3,'Depois de 3 segundos'],[5,'Depois de 5 segundos'],[10,'Depois de 10 segundos']].map(([s,t])=>`<option value="${s}" ${Number(v('pular_apos_seg',3))===s?'selected':''}>${t}</option>`).join('')}</select>
         <div class="dica">Pra anúncio e promoção, 5 s costuma garantir que a pessoa veja o começo.</div></div>
@@ -2534,7 +2534,7 @@ class DimaiorAdmin extends HTMLElement {
 
     const mostraAchou=st=>{
       const foto=st?.foto||'';
-      $('vfAchou').innerHTML=st?`<div class="va-achou">${foto?`<img src="${this._safeImgSrc(foto)}" alt="" onerror="this.style.display='none'">`:''}<div><b style="color:var(--t1)">${this._esc(st.nome||'—')}</b>${st.kwai_id?`<br><span style="color:var(--t3)">@${this._esc(st.kwai_id)}</span>`:''}</div></div>`:'';
+      $('vfAchou').innerHTML=st?`<div class="va-achou">${foto?`<img src="${this._safeImgSrc(foto)}" alt="" onerror="this.style.display='none'">`:''}<div><b style="color:var(--t1)">${this._esc(st.nome||'-')}</b>${st.kwai_id?`<br><span style="color:var(--t3)">@${this._esc(st.kwai_id)}</span>`:''}</div></div>`:'';
     };
     $('vfBuscar').addEventListener('click',async()=>{
       const uid=$('vfUid').value.replace(/\D/g,'');$('vfUid').value=uid;
@@ -2555,9 +2555,9 @@ class DimaiorAdmin extends HTMLElement {
       const info=$('vfInfo');info.className='adp-meta';
       const meta=await this._vaMeta(f);
       if(!meta){this._toast('Não consegui abrir esse vídeo (use MP4)','err');return;}
-      if(meta.dur>90.5){this._toast(`O vídeo tem ${this._vaDur(meta.dur)} — o limite é 1 min 30 s`,'err');return;}
+      if(meta.dur>90.5){this._toast(`O vídeo tem ${this._vaDur(meta.dur)} - o limite é 1 min 30 s`,'err');return;}
       const r916=meta.w&&meta.h?Math.abs(meta.w/meta.h-9/16)/(9/16):0;
-      if(r916>0.06&&!confirm(`Esse vídeo não está em pé (9:16) — está ${meta.w}×${meta.h}. Ele vai ser cortado no meio. Continuar?`))return;
+      if(r916>0.06&&!confirm(`Esse vídeo não está em pé (9:16) - está ${meta.w}×${meta.h}. Ele vai ser cortado no meio. Continuar?`))return;
       enviando=true;$('vfUp').disabled=true;$('vfSalvar').disabled=true;
       try{
         // MP4 H.264 + AAC (o que todo celular toca) sobe como está, sem perder qualidade. Qualquer outra
@@ -2566,7 +2566,7 @@ class DimaiorAdmin extends HTMLElement {
         if(await this._vaCompativel(f))blob=f;
         else{
           try{blob=await this._vaRegravar(f,p=>{info.textContent=`convertendo vídeo… ${p}%`;this._upProg('Convertendo vídeo',p);});}catch{blob=null;}
-          if(!blob){info.textContent='';this._toast('Não consegui preparar esse vídeo neste navegador. Use o Chrome ou o Edge no computador e deixe esta aba aberta enquanto converte — ou exporte o vídeo em MP4 (H.264).','err');return;}
+          if(!blob){info.textContent='';this._toast('Não consegui preparar esse vídeo neste navegador. Use o Chrome ou o Edge no computador e deixe esta aba aberta enquanto converte - ou exporte o vídeo em MP4 (H.264).','err');return;}
         }
         if(blob.size>this._VA_MAX_MB*1048576){this._toast(`Vídeo grande demais (${(blob.size/1048576).toFixed(0)} MB, máx ${this._VA_MAX_MB} MB). Exporte com bitrate menor.`,'err');info.textContent='';return;}
         info.textContent='enviando…';
@@ -2648,7 +2648,7 @@ class DimaiorAdmin extends HTMLElement {
   // Regrava no navegador em 1080×1920 (9:16, corte central), H.264 ~5 Mbps + som AAC (só quando o MP4 original não é H.264).
   // O som passa por um AudioContext ligado só no gravador (não sai na caixa de som).
   // Reproduz em tempo real (90s de vídeo = ~90s). Devolve null se o navegador não
-  // grava MP4 com som (Firefox/Safari) ou se o vídeo não tocar até o fim — aí o
+  // grava MP4 com som (Firefox/Safari) ou se o vídeo não tocar até o fim - aí o
   // formulário avisa e NÃO sobe nada. Toda etapa tem tempo máximo e, em qualquer
   // saída, gravador, faixas e desenho são desligados.
   async _vaRegravar(file,onProg){
@@ -2691,7 +2691,7 @@ class DimaiorAdmin extends HTMLElement {
         v.requestVideoFrameCallback?v.requestVideoFrameCallback(desenha):requestAnimationFrame(desenha);
       };
       await espera('canplay',15000,()=>v.readyState>=3);
-      // Aba fora de vista: o navegador para de desenhar os quadros mas o som segue —
+      // Aba fora de vista: o navegador para de desenhar os quadros mas o som segue - 
       // sairia um vídeo congelado. Se acontecer, descarta.
       if(document.hidden) return null;
       let largaAba;const aba=new Promise((_,rej)=>{largaAba=rej;});aba.catch(()=>{});
@@ -2703,7 +2703,7 @@ class DimaiorAdmin extends HTMLElement {
       await Promise.race([v.play(),aba,new Promise((_,rej)=>setTimeout(()=>rej(new Error('tempo')),10000))]);
       desenha();
       // Aba em segundo plano pausa o vídeo e o "ended" não chega; vídeo com quadros
-      // corrompidos dispara "error" — nos dois casos desiste
+      // corrompidos dispara "error" - nos dois casos desiste
       const teto=((isFinite(v.duration)&&v.duration>0?v.duration:15)*3+10)*1000;
       const acabou=await Promise.race([espera('ended',teto).then(()=>true,()=>false),aba.then(()=>false,()=>false)]);
       vivo=false;rec.stop();await parou;
@@ -2770,7 +2770,7 @@ class DimaiorAdmin extends HTMLElement {
       const midia=x.tipo==='video'
         ?`<video src="${u}#t=0.1" muted playsinline preload="metadata"></video>`
         :`<img src="${u}" alt="" loading="lazy" onerror="this.style.opacity='.2'">`;
-      const dt=x.uploaded?new Date(x.uploaded).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—';
+      const dt=x.uploaded?new Date(x.uploaded).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'-';
       return`<div class="arq-item"><a class="arq-thumb" href="${u}" target="_blank" rel="noopener noreferrer" title="Abrir em tamanho real">${midia}<span class="tag">${this._esc(this._arqPasta(x.pasta||'(raiz)'))}${x.tipo==='video'?' · vídeo':''}</span><span class="uso ${x.em_uso?'':'livre'}">${x.em_uso?'Em uso':'Sem uso'}</span></a>
         <div class="arq-info"><div class="arq-nome" title="${this._esc(x.key)}">${this._esc(nome)}</div><div class="arq-meta">${this._arqBytes(x.size)} · ${dt}</div></div>
         <div class="arq-acoes"><button class="btn btn-o btn-sm" data-arq-copiar="${this._esc(x.url)}">${this._ico('file_text',12)} Link</button><button class="btn btn-o btn-sm" data-arq-del="${this._esc(x.key)}" style="color:var(--verm);border-color:rgba(248,113,113,.4)">${this._ico('trash',12)} Apagar</button></div></div>`;
@@ -2788,7 +2788,7 @@ class DimaiorAdmin extends HTMLElement {
     this._confirmarDel(aviso,async()=>{
       const r=await this._api('DELETE',`/admin/arquivos?key=${encodeURIComponent(key)}`);
       if(r?.ok){
-        this._toast(`Apagado — ${this._arqBytes(r.liberado)} liberados`);
+        this._toast(`Apagado - ${this._arqBytes(r.liberado)} liberados`);
         const d=this._arqDados;if(d){d.arquivos=d.arquivos.filter(a=>a.key!==key);d.total=Math.max(0,d.total-1);d.total_bytes=Math.max(0,d.total_bytes-(r.liberado||0));}
         this._renderArquivos();
       }else this._toast(r?.erro||'Erro ao apagar','err');
@@ -2801,7 +2801,7 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=this._loading();
     const rotaRank=this._sub?`/admin/ranking?escopo=${this._rankEscopo||'meus'}`:'/admin/ranking';
     const [d,prem]=await Promise.all([this._api('GET',rotaRank),this._api('GET','/admin/premios/config?tipo=diamantes')]);
-    // Painel da sub: "Meus streamers" renumera as posições só entre eles —
+    // Painel da sub: "Meus streamers" renumera as posições só entre eles - 
     // prêmio por posição não vale ali (só no ranking geral da agência).
     if(this._sub&&this._rankEscopo!=='agencia'&&prem) prem.premios=[];
     if(!d?.ok||!d.streamers?.length){el.innerHTML=this._empty('trophy',this._sub&&this._rankEscopo!=='agencia'?'Nenhum streamer seu no ranking deste mês ainda':'Nenhum dado');return;}
@@ -2934,7 +2934,7 @@ class DimaiorAdmin extends HTMLElement {
       (status==='todos'||(status==='ativo'?r.ativo===true:status==='pendencias'?r.pendencias.length>0:status==='sem_calculo'?r.estimado_koin===null&&r.diamantes>0:status==='recebido'?r.recebido_koin!==null:r.status==='em_meta'))&&
       (!busca||norm(r.nome).includes(busca)||r.kwai_uid.includes(busca)));
   }
-  _rendKoin(v){return v===null||v===undefined?'—':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:2})+' Koins';}
+  _rendKoin(v){return v===null||v===undefined?'-':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:2})+' Koins';}
   _rendCategoria(r){return({novo:'Novo',crescimento:'Em crescimento',pro:'Pro'})[r.categoria]||'Pendente';}
   _rendHoras(min){return `${Math.floor(min/60)}h${String(min%60).padStart(2,'0')}`;}
   _rendTetoBrl(r){
@@ -2964,7 +2964,7 @@ class DimaiorAdmin extends HTMLElement {
     const situacao=r=>r.recebido_koin!==null?'Recebido informado':r.ativo===true?'Metas cumpridas':r.ativo===false?'Metas em andamento':'Dados pendentes';
     const nome=r=>`<strong>${this._esc(r.nome)}</strong><small>UID ${this._esc(r.kwai_uid)} · ${this._esc(r.org_nome||'Organização não identificada')}</small>`;
     const categoria=r=>`${this._rendCategoria(r)}<small>${r.categoria_origem==='oficial'?'Informada pela Kwai':'Classificação estimada'}</small>`;
-    const base=r=>r.baseline===null?'—':this._num(r.baseline)+`<small>${r.baseline_origem==='oficial'?'Oficial':'Estimada'}</small>`;
+    const base=r=>r.baseline===null?'-':this._num(r.baseline)+`<small>${r.baseline_origem==='oficial'?'Oficial':'Estimada'}</small>`;
     const valor=r=>r.estimado_koin===null?'Aguardando dados':`${r.estimado_brl!==null?this._brl(r.estimado_brl):this._rendKoin(r.estimado_koin)}<small>${r.estimado_brl!==null?this._rendKoin(r.estimado_koin)+' · ':''}${r.parcial?'Parte calculável':'Estimativa pelas regras'}</small>${r.teto_koin>r.estimado_koin?`<small>Com extra máximo: ${this._rendTetoBrl(r)!==null?this._brl(this._rendTetoBrl(r)):this._rendKoin(r.teto_koin)}</small>`:''}`;
     const acao=r=>`<button type="button" class="btn btn-o rend-abrir" data-rend-uid="${this._esc(r.kwai_uid)}" aria-label="Ver cálculo e dados de ${this._esc(r.nome)}">Ver cálculo</button>`;
     const meta=r=>r.ativo?'Metas cumpridas':r.meta_dias===null?'Complete os dados':`Faltam ${r.faltam_dias} dia(s), ${this._rendHoras(r.faltam_minutos)} e ${this._num(r.faltam_diamantes)} diamantes`;
@@ -3036,7 +3036,7 @@ class DimaiorAdmin extends HTMLElement {
       const POR_PAG=10;let lista=(d.streamers||[]);if(filtro)lista=lista.filter(sv=>sv.status===filtro);
       const total=lista.length,inicio=(this._pg.desemp-1)*POR_PAG,pagina=lista.slice(inicio,inicio+POR_PAG);
       const el=s.getElementById('listaDesemp');if(!pagina.length){el.innerHTML=this._empty('search','Nenhum');return;}
-      el.innerHTML=pagina.map(sv=>`<div class="dc-card ${this._esc(sv.status)}"><div class="dc-topo"><div class="dc-pos">${sv.posicao}</div><div>${this._avatar(sv.foto,sv.nome)}</div><div class="dc-info"><div class="dc-nome">${this._esc(sv.nome||'—')}</div><div class="dc-id">${this._esc(sv.kwai_id||sv.kwai_uid||'—')}</div></div><div>${this._statusBadgeDesemp(sv.status)}</div></div><div class="dc-meta-group"><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('calendar',11)} Dias</span><span class="dc-meta-val ${sv.dias_validos>=20?'ok':''}">${sv.dias_validos}/20</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_dias}%;background:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('live',11)} Horas</span><span class="dc-meta-val ${sv.horas_num>=40?'ok':''}">${this._esc(sv.horas_str)}/40h</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_horas}%;background:${sv.horas_num>=40?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('chart',11)} Diamantes</span><span class="dc-meta-val" style="color:var(--azul)">${this._num(sv.diamantes)}</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:100%;background:var(--azul)"></div></div></div></div></div>`).join('');
+      el.innerHTML=pagina.map(sv=>`<div class="dc-card ${this._esc(sv.status)}"><div class="dc-topo"><div class="dc-pos">${sv.posicao}</div><div>${this._avatar(sv.foto,sv.nome)}</div><div class="dc-info"><div class="dc-nome">${this._esc(sv.nome||'-')}</div><div class="dc-id">${this._esc(sv.kwai_id||sv.kwai_uid||'-')}</div></div><div>${this._statusBadgeDesemp(sv.status)}</div></div><div class="dc-meta-group"><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('calendar',11)} Dias</span><span class="dc-meta-val ${sv.dias_validos>=20?'ok':''}">${sv.dias_validos}/20</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_dias}%;background:${sv.dias_validos>=20?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('live',11)} Horas</span><span class="dc-meta-val ${sv.horas_num>=40?'ok':''}">${this._esc(sv.horas_str)}/40h</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:${sv.prog_horas}%;background:${sv.horas_num>=40?'var(--verde)':'var(--verm)'}"></div></div></div><div class="dc-meta"><div class="dc-meta-row"><span class="dc-meta-lbl">${this._ico('chart',11)} Diamantes</span><span class="dc-meta-val" style="color:var(--azul)">${this._num(sv.diamantes)}</span></div><div class="dc-bar-bg"><div class="dc-bar" style="width:100%;background:var(--azul)"></div></div></div></div></div>`).join('');
       const totalPags=Math.ceil(total/POR_PAG);const pgEl=s.getElementById('pgDesemp');
       if(pgEl){pgEl.innerHTML=total>POR_PAG?`<button ${this._pg.desemp<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${this._pg.desemp} / ${totalPags}</span><button ${this._pg.desemp>=totalPags?'disabled':''}>Próxima</button>`:`<span class="pn" style="color:var(--t3);font-size:11px">${total} streamers</span>`;if(total>POR_PAG){pgEl.children[0].addEventListener('click',()=>{this._pg.desemp--;render(s.getElementById('filtroDesemp')?.value||'');});pgEl.children[2].addEventListener('click',()=>{this._pg.desemp++;render(s.getElementById('filtroDesemp')?.value||'');});}}
     };
@@ -3060,9 +3060,9 @@ class DimaiorAdmin extends HTMLElement {
       s.querySelectorAll('.month-tab').forEach(t=>t.classList.toggle('on',parseInt(t.dataset.idx)===idx));
       const c=s.getElementById('monthContent');if(!m.rows?.length){c.innerHTML=this._empty('history','Sem dados');return;}
       const POR_PAG=30,total=m.rows.length,inicio=(pgHist[idx]-1)*POR_PAG,pagina=m.rows.slice(inicio,inicio+POR_PAG),totalPags=Math.ceil(total/POR_PAG);
-      // Desktop: tabela — Mobile: accordion
-      const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>Diamantes</th><th>Var. ${this._dia()}</th><th>Horas</th><th>Var. ${this._ii('clock_r',12)}</th></tr></thead><tbody>${pagina.map(sv=>`<tr><td style="color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.posicao}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--t1)">${this._esc(sv.nome||'—')}</td><td style="color:var(--azul);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._num(sv.diamantes||0)}</td><td>${this._varBadge(sv.variacao)}</td><td style="color:var(--t2)">${sv.horas||'—'}</td><td>${this._varBadge(sv.var_horas)}</td></tr>`).join('')}</tbody></table></div>`;
-      const accordionHtml=`<div class="hist-lista hist-mobile-only">${pagina.map(sv=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><span class="hist-pos">${sv.posicao}</span><div class="hist-av">${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</div><div class="hist-info"><div class="hist-nome">${this._esc(sv.nome||'—')}</div><div class="hist-diam">${this._ico('diamond',10)} ${this._num(sv.diamantes||0)}</div></div><div class="hist-right">${this._varBadge(sv.variacao)}</div><span class="hist-chevron">${this._ico('down',11)}</span></div><div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Diamantes</div><div class="hist-val" style="color:var(--azul)">${this._num(sv.diamantes||0)}</div></div><div class="hist-cel"><div class="hist-lbl">Var.</div><div class="hist-val">${this._varBadge(sv.variacao)}</div></div><div class="hist-cel"><div class="hist-lbl">Horas</div><div class="hist-val">${sv.horas||'—'}</div></div><div class="hist-cel"><div class="hist-lbl">Var. Horas</div><div class="hist-val">${this._varBadge(sv.var_horas)}</div></div></div></div></div>`).join('')}</div>`;
+      // Desktop: tabela - Mobile: accordion
+      const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>#</th><th>Perfil</th><th>Nome</th><th>Diamantes</th><th>Var. ${this._dia()}</th><th>Horas</th><th>Var. ${this._ii('clock_r',12)}</th></tr></thead><tbody>${pagina.map(sv=>`<tr><td style="color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${sv.posicao}</td><td>${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</td><td style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--t1)">${this._esc(sv.nome||'-')}</td><td style="color:var(--azul);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._num(sv.diamantes||0)}</td><td>${this._varBadge(sv.variacao)}</td><td style="color:var(--t2)">${sv.horas||'-'}</td><td>${this._varBadge(sv.var_horas)}</td></tr>`).join('')}</tbody></table></div>`;
+      const accordionHtml=`<div class="hist-lista hist-mobile-only">${pagina.map(sv=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><span class="hist-pos">${sv.posicao}</span><div class="hist-av">${this._avatar(this._proxyFoto(sv.foto||''),sv.nome||'')}</div><div class="hist-info"><div class="hist-nome">${this._esc(sv.nome||'-')}</div><div class="hist-diam">${this._ico('diamond',10)} ${this._num(sv.diamantes||0)}</div></div><div class="hist-right">${this._varBadge(sv.variacao)}</div><span class="hist-chevron">${this._ico('down',11)}</span></div><div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Diamantes</div><div class="hist-val" style="color:var(--azul)">${this._num(sv.diamantes||0)}</div></div><div class="hist-cel"><div class="hist-lbl">Var.</div><div class="hist-val">${this._varBadge(sv.variacao)}</div></div><div class="hist-cel"><div class="hist-lbl">Horas</div><div class="hist-val">${sv.horas||'-'}</div></div><div class="hist-cel"><div class="hist-lbl">Var. Horas</div><div class="hist-val">${this._varBadge(sv.var_horas)}</div></div></div></div></div>`).join('')}</div>`;
       c.innerHTML=tabelaHtml+accordionHtml+`${total>POR_PAG?`<div class="pag-bar"><button id="hPrev" ${pgHist[idx]<=1?'disabled':''}>Anterior</button><span class="pn">Pág ${pgHist[idx]} / ${totalPags}</span><button id="hNext" ${pgHist[idx]>=totalPags?'disabled':''}>Próxima</button></div>`:''}`;
       if(total>POR_PAG){s.getElementById('hPrev')?.addEventListener('click',()=>{pgHist[idx]--;renderMes(idx);});s.getElementById('hNext')?.addEventListener('click',()=>{pgHist[idx]++;renderMes(idx);});}
     };
@@ -3206,7 +3206,7 @@ class DimaiorAdmin extends HTMLElement {
     const _badge=(isVerif,isPremium)=>isPremium?`<span style="font-size:9px;background:rgba(255,214,0,.12);border:1px solid rgba(255,87,34,.5);color:var(--warn);border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._ii('check',11)}PREMIUM</span>`:isVerif?`<span style="font-size:9px;background:rgba(0,212,212,.15);border:1px solid rgba(0,212,212,.4);color:#00d4d4;border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700">${this._ii('check',11)}VERIFICADO</span>`:'';
     const _extTag=`<span style="font-size:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:var(--t3);border-radius:4px;padding:1px 6px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)">SEM CONTA</span>`;
     const _renderItem=(sv,isExterno)=>{
-      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'—';const nome=sv.nome||sv.nome_social||'—';
+      const foto=this._proxyFoto(sv.foto||sv.foto_url||'');const uid=sv.kwai_uid||'-';const nome=sv.nome||sv.nome_social||'-';
       const isVerif=sv.verificado===true;const isPremium=sv.verificado_premium===true;
       const isAtalhoAdmin=sv.atalho_admin===true;const isAtalhoAgente=sv.atalho_agente===true;const isAtalhoSub=sv.atalho_sub===true;
       const rotaBase=isExterno?`/admin/streamers/externos/${encodeURIComponent(uid)}`:`/admin/streamers/${encodeURIComponent(uid)}`;
@@ -3215,9 +3215,9 @@ class DimaiorAdmin extends HTMLElement {
         ?`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" data-externo="1" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" data-externo="1" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:var(--warn)'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button><button class="btn btn-sm" data-uid="${this._esc(uid)}" data-externo-del="1" style="border-color:rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',12)} Remover</button>`
         :`<button class="btn btn-sm sv-toggle-verif ${isVerif?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado" data-val="${isVerif}" style="${isVerif?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(0,212,212,.4);color:var(--cyan)'}">${this._ico(isVerif?'x_circle':'check_c',12)} ${isVerif?'Remover Verif.':'Verificado'}</button><button class="btn btn-sm sv-toggle-premium ${isPremium?'btn-d':'btn-o'}" data-uid="${this._esc(uid)}" data-campo="verificado_premium" data-val="${isPremium}" style="${isPremium?'border-color:rgba(248,113,113,.4);color:var(--verm)':'border-color:rgba(255,152,0,.5);color:var(--warn)'}">${this._ico(isPremium?'x_circle':'check_c',12)} ${isPremium?'Remover Premium':'Premium'}</button>${atalhosBtns}`;
       const campos=isExterno
-        ?[['UID',uid],['Kwai ID',sv.kwai_id||'—'],['Adicionado em',this._fdt(sv.adicionado_em)]]
-        :[['UID',uid],['Email',sv.email||'—'],['WhatsApp',sv.whatsapp||'—'],['Endereço',sv.endereco||'—'],['PIX Tipo',sv.pix_tipo||'—'],['PIX Chave',sv.pix_chave||'—'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]];
-      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px;flex-wrap:wrap">${this._esc(nome)} ${_badge(isVerif,isPremium)} ${isExterno?_extTag:''}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div>${this._seloTermos(termos.get(String(uid)))}</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'—')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${campos.map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">${acoesBtns}<button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
+        ?[['UID',uid],['Kwai ID',sv.kwai_id||'-'],['Adicionado em',this._fdt(sv.adicionado_em)]]
+        :[['UID',uid],['Email',sv.email||'-'],['WhatsApp',sv.whatsapp||'-'],['Endereço',sv.endereco||'-'],['PIX Tipo',sv.pix_tipo||'-'],['PIX Chave',sv.pix_chave||'-'],['Cadastro',this._fdt(sv.cadastrado||sv.criado_em)]];
+      return`<div class="rec-item"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><div>${this._avatar(foto,nome,'av')}</div><div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px;flex-wrap:wrap">${this._esc(nome)} ${_badge(isVerif,isPremium)} ${isExterno?_extTag:''}</div><div style="font-size:10px;color:var(--cyan)">${this._esc(uid)}</div>${this._seloTermos(termos.get(String(uid)))}</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:10px;color:var(--t3)">${this._esc(sv.whatsapp||'-')}</span><span class="rec-chevron">${this._ico('down',12)}</span></div></div><div class="rec-body"><div class="rec-campos">${campos.map(([lbl,val])=>`<div class="rec-campo"><div class="rec-campo-lbl">${lbl}</div><div class="rec-campo-val">${this._esc(val)}</div><button class="rec-copy-btn" data-copy="${this._esc(val)}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">${acoesBtns}<button class="btn btn-o btn-sm" onclick="this.closest('.rec-item').classList.remove('open')">${this._ico('check',12)} Fechar</button></div></div></div>`;
     };
     el.innerHTML=`<div id="listaUsers"></div>`;
     const lu=s.getElementById('listaUsers');
@@ -3306,7 +3306,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d.encontrado){prev.style.display='block';prev.innerHTML=`<div style="color:var(--t3);font-size:13px;text-align:center">Nenhum streamer encontrado com esse UID / Kwai ID.<br><span style="font-size:11px">Verifique se o streamer já apareceu na planilha de resultados.</span></div>`;return;}
     const sv=d.streamer;const foto=this._proxyFoto(sv.foto||'');
     prev.style.display='block';
-    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'—')}</div>${d.ja_cadastrado?`<div style="font-size:10px;color:var(--warn);margin-top:4px">Já cadastrado nos externos</div>`:''}</div></div>`;
+    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'-')}</div>${d.ja_cadastrado?`<div style="font-size:10px;color:var(--warn);margin-top:4px">Já cadastrado nos externos</div>`:''}</div></div>`;
     acoes.style.display='flex';
     acoes.innerHTML=`<button id="mVerifExtSalvar" class="btn btn-o" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Marcar Verificado</button><button id="mVerifExtPremium" class="btn btn-o" style="border-color:rgba(255,152,0,.5);color:var(--warn)">${this._ico('check_c',13)} Marcar Premium</button>`;
     s.getElementById('mVerifExtSalvar').addEventListener('click',async()=>{
@@ -3320,7 +3320,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // ── Ocultar streamer do Ranking Geral público ──────────────────────────
-  // Não mexe em diamantes/premiação/histórico — só esconde da tela pública.
+  // Não mexe em diamantes/premiação/histórico - só esconde da tela pública.
   // O streamer continua aparecendo no Rank do Mês do admin, com uma tag "Oculto".
   async _abrirModalOcultarRanking(){
     const s=this.shadowRoot;
@@ -3331,7 +3331,7 @@ class DimaiorAdmin extends HTMLElement {
       over.innerHTML=`<div style="background:var(--panel-solid);box-shadow:0 18px 50px var(--shadow,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:12px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:24px;position:relative">
         <button id="mOcultRankFechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px" aria-label="Fechar">${this._ico('x',18)}</button>
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:17px;font-weight:700;color:var(--t1);margin-bottom:16px">${this._ico('settings',16)} Ocultar do Ranking Geral</div>
-        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">O streamer some só da tela pública de ranking — diamantes, dólar e premiação continuam contabilizados normalmente.</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">O streamer some só da tela pública de ranking - diamantes, dólar e premiação continuam contabilizados normalmente.</div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
           <input id="mOcultRankInput" type="text" placeholder="UID ou Kwai ID..." style="flex:1;background:rgba(0,0,0,.4);border:1px solid var(--brd);border-radius:8px;color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/>
           <button id="mOcultRankBuscar" class="btn btn-o" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('search',13)} Buscar</button>
@@ -3373,7 +3373,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d.encontrado){prev.style.display='block';prev.innerHTML=`<div style="color:var(--t3);font-size:13px;text-align:center">Nenhum streamer encontrado com esse UID / Kwai ID.<br><span style="font-size:11px">Verifique se o streamer já apareceu na planilha de resultados.</span></div>`;return;}
     const sv=d.streamer;const foto=this._proxyFoto(sv.foto||'');
     prev.style.display='block';
-    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'—')}</div>${d.ja_oculto?`<div style="font-size:10px;color:var(--warn);margin-top:4px">Já está oculto do ranking${d.motivo?' — '+this._esc(d.motivo):''}</div>`:''}</div></div>`;
+    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'-')}</div>${d.ja_oculto?`<div style="font-size:10px;color:var(--warn);margin-top:4px">Já está oculto do ranking${d.motivo?' - '+this._esc(d.motivo):''}</div>`:''}</div></div>`;
     if(d.ja_oculto){
       acoes.style.display='flex';
       acoes.innerHTML=`<button id="mOcultRankReexibir" class="btn btn-o" style="border-color:rgba(74,222,128,.4);color:var(--verde)">${this._ico('check',13)} Reexibir no Ranking</button>`;
@@ -3454,7 +3454,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d.encontrado){prev.style.display='block';prev.innerHTML=`<div style="color:var(--t3);font-size:13px;text-align:center">Nenhum streamer encontrado com esse UID / Kwai ID.<br><span style="font-size:11px">Procuramos em quem está ao vivo agora e no histórico de resultados.</span></div>`;return;}
     const sv=d.streamer;const foto=this._proxyFoto(sv.foto||'');
     prev.style.display='block';
-    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'—')}${d.ao_vivo?' · <span style="color:var(--verm)">ao vivo agora</span>':''}</div>${d.ja_oculto?`<div style="font-size:10px;color:var(--warn);margin-top:4px">A live já está oculta no site${d.motivo?' — '+this._esc(d.motivo):''}</div>`:''}</div></div>`;
+    prev.innerHTML=`<div style="display:flex;gap:12px;align-items:center">${this._avatar(foto,sv.nome,'av')}<div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(sv.nome)}</div><div style="font-size:11px;color:var(--cyan)">UID: ${this._esc(sv.kwai_uid)}</div><div style="font-size:11px;color:var(--t3)">Kwai ID: ${this._esc(sv.kwai_id||'-')}${d.ao_vivo?' · <span style="color:var(--verm)">ao vivo agora</span>':''}</div>${d.ja_oculto?`<div style="font-size:10px;color:var(--warn);margin-top:4px">A live já está oculta no site${d.motivo?' - '+this._esc(d.motivo):''}</div>`:''}</div></div>`;
     const recarregar=()=>{this._buscarStreamerLive();this._carregarListaLivesOcultas();this._carregarLives();};
     acoes.style.display='flex';
     if(d.ja_oculto){
@@ -3494,7 +3494,7 @@ class DimaiorAdmin extends HTMLElement {
   static VIOLA_STATUS={'-1':'Sem permissão','0':'Solicitando','1':'Ativado','2':'Banido','3':'Banido temporariamente','4':'Cancelado','5':'Recusado'};
   // punishResult em código da Kwai (Anchor = streamer). Tradução confirmada pelo dono 2026-09-24.
   _violaResultado(raw){const t=String(raw||'').trim();if(!t)return'';const cod=t.replace(/^(ao vivo|live)\s*/i,'').replace(/\s+/g,'');const m=/^AnchorBan_?(\d+)?$/i.exec(cod);const txt=/^AnchorStop$/i.test(cod)?'Live encerrada pela Kwai':/^AnchorMask$/i.test(cod)?'Live ocultada (fora das recomendações)':m?`Suspenso de fazer live${m[1]?` (${m[1]} ${m[1]==='1'?'dia':'dias'})`:''}`:null;return txt?`${this._esc(txt)} <span class="viol-ids">(${this._esc(cod)})</span>`:this._esc(t);}
-  _violaData(iso){if(!iso)return'—';try{return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return'—';}}
+  _violaData(iso){if(!iso)return'-';try{return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return'-';}}
   async _contarViolacoesNovas(){
     const d=await this._api('GET','/admin/violacoes/contagem');
     const b=this.shadowRoot.getElementById('nbViolacoes'); if(!b) return;
@@ -3512,19 +3512,19 @@ class DimaiorAdmin extends HTMLElement {
     this._contarViolacoesNovas();
     if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||'Não foi possível carregar as violações');return;}
     const u=d.ultima_sincronizacao;
-    if(info) info.innerHTML=!u?'A primeira busca na Kwai ainda não rodou — use <b>Verificar agora</b>.'
+    if(info) info.innerHTML=!u?'A primeira busca na Kwai ainda não rodou - use <b>Verificar agora</b>.'
       :u.ok?`Última busca: ${this._violaData(u.executado_em)} (${u.origem==='manual'?'manual':'automática'}) · ${u.total} na Kwai · ${u.novas} nova(s)${u.erro?` · <span style="color:var(--warn)">aviso: ${this._esc(u.erro)}</span>`:''}`
       :`<span style="color:var(--verm)">A última busca FALHOU em ${this._violaData(u.executado_em)}: ${this._esc(u.erro||'erro desconhecido')}. A lista abaixo pode estar desatualizada.</span>`;
     const lista=d.violacoes||[];
     if(!lista.length){el.innerHTML=this._empty('check_c','Nenhuma violação no período/filtro');return;}
     const ST=DimaiorAdmin.VIOLA_STATUS;
     el.innerHTML=lista.map(v=>{
-      const stT=v.status_conta_texto||ST[String(v.status_conta)]||'—';
+      const stT=v.status_conta_texto||ST[String(v.status_conta)]||'-';
       const cls=(v.status_conta===2||v.status_conta===3)?'nok':v.status_conta===4?'ok':'warn';
       const extras=(v.motivos&&typeof v.motivos==='object')?Object.entries(v.motivos).filter(([k,x])=>k!=='violationTopReason'&&typeof x==='string'&&x.trim()&&x!==v.motivo).map(([,x])=>`<li>${this._esc(x)}</li>`).join(''):'';
       return`<div class="viol-item${v.vista_admin_em?'':' nova'}">
         <div class="viol-top">
-          <div><b class="viol-nome">${this._esc(v.nome||v.kwai_id||v.kwai_uid)}</b><span class="viol-ids">@${this._esc(v.kwai_id||'—')} · UID ${this._esc(v.kwai_uid)}</span></div>
+          <div><b class="viol-nome">${this._esc(v.nome||v.kwai_id||v.kwai_uid)}</b><span class="viol-ids">@${this._esc(v.kwai_id||'-')} · UID ${this._esc(v.kwai_uid)}</span></div>
           <span class="viol-st ${cls}">${this._esc(stT)}</span>
         </div>
         <div class="viol-motivo">${this._esc(v.motivo||v.tipo||'Violação')}</div>
@@ -3546,12 +3546,12 @@ class DimaiorAdmin extends HTMLElement {
     if(b){b.disabled=true;b.innerHTML=`${this._ico('refresh',13)} Consultando a Kwai...`;}
     const d=await this._api('POST','/admin/violacoes/sincronizar');
     if(b){b.disabled=false;b.innerHTML=`${this._ico('refresh',13)} Verificar agora`;}
-    if(d?.ok) this._toast(d.novas?`${d.novas} violação(ões) nova(s) encontrada(s)`:'Busca concluída — nenhuma violação nova');
+    if(d?.ok) this._toast(d.novas?`${d.novas} violação(ões) nova(s) encontrada(s)`:'Busca concluída - nenhuma violação nova');
     else this._toast(d?.erro||'Falha ao consultar a Kwai','err');
     this._carregarViolacoes();
   }
   // Pergunta UM UID direto pra Kwai (o campo "Nome ou ID de streamer" da tela
-  // deles acha streamer que não vem na lista geral — banido, fora da agência).
+  // deles acha streamer que não vem na lista geral - banido, fora da agência).
   // Mostra o diagnóstico no lugar do "Última busca", pra dar pra diferenciar
   // "a Kwai não conhece esse UID" de "conhece e não tem violação".
   async _verificarViolacoesUid(){
@@ -3566,10 +3566,10 @@ class DimaiorAdmin extends HTMLElement {
     if(s.getElementById('violDias')) s.getElementById('violDias').value='tudo';
     if(s.getElementById('violNovas')) s.getElementById('violNovas').checked=false;
     await this._carregarViolacoes(); // recarrega primeiro: ele reescreve o #violSync
-    if(info) info.innerHTML=`UID ${this._esc(uid)}: ${d.total} violação(ões) · ${d.na_lista?'apareceu':'<b>NÃO apareceu</b>'} na lista da Kwai · ${d.itens_historico??0} no histórico · sessões: ${this._esc((d.sessoes||[]).join(', ')||'—')}${(d.avisos||[]).length?` · <span style="color:var(--warn)">${this._esc(d.avisos.join(' | '))}</span>`:''}`;
+    if(info) info.innerHTML=`UID ${this._esc(uid)}: ${d.total} violação(ões) · ${d.na_lista?'apareceu':'<b>NÃO apareceu</b>'} na lista da Kwai · ${d.itens_historico??0} no histórico · sessões: ${this._esc((d.sessoes||[]).join(', ')||'-')}${(d.avisos||[]).length?` · <span style="color:var(--warn)">${this._esc(d.avisos.join(' | '))}</span>`:''}`;
   }
   // Varredura: pergunta pra Kwai UID por UID, o roster inteiro, em lotes
-  // encadeados. A busca geral não devolve streamer banido — só a consulta com o
+  // encadeados. A busca geral não devolve streamer banido - só a consulta com o
   // UID escrito. Cada chamada volta com o ponto onde parou e o painel chama a
   // próxima, então a barra anda em vez de ficar uns minutos parada.
   async _varrerViolacoes(reiniciar){
@@ -3604,7 +3604,7 @@ class DimaiorAdmin extends HTMLElement {
     if(d?.ok){this._toast(chaves?'Marcada como conferida':'Todas marcadas como conferidas');this._carregarViolacoes();}
     else this._toast(d?.erro||'Erro ao marcar','err');
   }
-  // Prova: imagem direto; vídeo/áudio da Kwai chegam como "roteiro" JSON —
+  // Prova: imagem direto; vídeo/áudio da Kwai chegam como "roteiro" JSON - 
   // procura dentro dele um arquivo que o navegador toca sozinho.
   // Vídeo-prova (.flv em pedaços) → mpegts.js, versão fixa + SRI. Cada pedaço
   // passa pelo worker admin (/admin/violacoes/prova?chave=…&sub=URL). ~20 MB a
@@ -3766,9 +3766,9 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('POST',enviar?'/admin/convites/enviar':'/admin/convites/verificar',{uid,categoria});
     if(!d){out.innerHTML='';return;}
     const p=d.perfil||{};
-    const perfil=p.memberId?`<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">${this._avatar(this._proxyFoto(p.foto||''),p.nome||p.kwaiId,'av')}<div><b style="color:var(--t1)">${this._esc(p.nome||p.kwaiId||uid)}</b><div class="viol-ids">@${this._esc(p.kwaiId||'—')} · UID ${this._esc(p.memberId)}</div></div></div>`:'';
+    const perfil=p.memberId?`<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">${this._avatar(this._proxyFoto(p.foto||''),p.nome||p.kwaiId,'av')}<div><b style="color:var(--t1)">${this._esc(p.nome||p.kwaiId||uid)}</b><div class="viol-ids">@${this._esc(p.kwaiId||'-')} · UID ${this._esc(p.memberId)}</div></div></div>`:'';
     const okCor=enviar?d.ok:d.pode_enviar;
-    const msg=enviar?(d.ok?'Convite enviado! O streamer recebe o convite no app da Kwai.':(d.mensagem||d.erro||'Não foi possível enviar')):(d.mensagem||d.erro||'—');
+    const msg=enviar?(d.ok?'Convite enviado! O streamer recebe o convite no app da Kwai.':(d.mensagem||d.erro||'Não foi possível enviar')):(d.mensagem||d.erro||'-');
     out.innerHTML=`<div style="border:1px solid ${okCor?'rgba(74,222,128,.4)':'rgba(248,113,113,.4)'};border-radius:10px;padding:12px 14px">${perfil}<div style="font-size:13px;color:${okCor?'var(--verde)':'var(--verm)'}">${this._ii(okCor?'check_c':'warning',13)}${this._esc(msg)}</div></div>`;
     if(bEnv) bEnv.disabled=!(!enviar&&d.pode_enviar);
     if(!enviar&&d.pode_reenviar&&d.invite_id){
@@ -3786,7 +3786,7 @@ class DimaiorAdmin extends HTMLElement {
     const rot={convite_enviado:['Enviado','var(--verde)'],dry_run:['Simulação','var(--gold)'],erro:['Recusado pela Kwai','var(--verm)']};
     // Situação real na Kwai (quando deu pra consultar): aceito/recusado/aguardando
     const corKwai=t=>{const x=String(t||'').toLowerCase();return /aceit|conclu|aprov|sucesso|coopera/.test(x)?'var(--verde)':/recus|rejeit|expir|cancel|falh|inv[aá]lid/.test(x)?'var(--verm)':'var(--gold)';};
-    const aviso=d&&d.kwai_ok===false?`<div class="viol-ids" style="padding:0 0 8px">Não deu pra consultar a situação dos convites na Kwai agora — mostrando só o histórico de envio.</div>`:'';
+    const aviso=d&&d.kwai_ok===false?`<div class="viol-ids" style="padding:0 0 8px">Não deu pra consultar a situação dos convites na Kwai agora - mostrando só o histórico de envio.</div>`:'';
     el.innerHTML=aviso+lista.map(c=>{let pl={};try{pl=typeof c.payload==='string'?JSON.parse(c.payload||'{}'):(c.payload||{});}catch{}
       let [t,cor]=rot[c.status]||[c.status,'var(--t3)'], extra='';
       if(c.ja_membro){t='Já é seu streamer';cor='var(--verde)';}
@@ -3810,9 +3810,9 @@ class DimaiorAdmin extends HTMLElement {
     const lista=q?todos.filter(m=>[m.nome,m.kwai_id,m.uid].some(v=>String(v||'').toLowerCase().includes(q))):todos;
     const tot=s.getElementById('ssTotal'); if(tot) tot.textContent=`${todos.length} streamer${todos.length===1?'':'s'}${q?` · ${lista.length} na busca`:''}`;
     const info=s.getElementById('ssInfo');
-    if(info) info.textContent=d.fonte==='kwai'?`Direto da Kwai · atualizado às ${new Date(d.atualizado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} (quem aceitou o convite aparece aqui em até 3 minutos — ou clique em Atualizar)`:'A Kwai não respondeu agora — mostrando a lista salva às 03h de hoje. Tente Atualizar daqui a pouco.';
+    if(info) info.textContent=d.fonte==='kwai'?`Direto da Kwai · atualizado às ${new Date(d.atualizado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} (quem aceitou o convite aparece aqui em até 3 minutos - ou clique em Atualizar)`:'A Kwai não respondeu agora - mostrando a lista salva às 03h de hoje. Tente Atualizar daqui a pouco.';
     if(!lista.length){el.innerHTML=this._empty('users',q?'Ninguém encontrado nessa busca':'Nenhum streamer vinculado à sua sub ainda');return;}
-    const data=v=>{if(!v)return'—';try{return new Date(v).toLocaleDateString('pt-BR');}catch{return'—';}};
+    const data=v=>{if(!v)return'-';try{return new Date(v).toLocaleDateString('pt-BR');}catch{return'-';}};
     el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px">${lista.map(m=>{
       const ok=m.status==null||m.status===1;
       return`<div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--brddim);border-radius:var(--rs);background:var(--sunk);min-width:0">${this._avatar(m.foto||'',m.nome,'av')}<div style="min-width:0;flex:1"><div style="display:flex;gap:6px;align-items:center;min-width:0"><b class="viol-nome" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(m.nome)}</b>${m.ao_vivo?`<span class="viol-st" style="color:var(--verm);border:1px solid currentColor;padding:1px 6px">Ao vivo</span>`:''}</div><div class="viol-ids" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.kwai_id?'@'+this._esc(m.kwai_id)+' · ':''}UID ${this._esc(m.uid)}</div><div class="viol-ids">Entrou em ${data(m.entrou)}${m.status_texto&&!ok?` · <span style="color:var(--verm)">${this._esc(m.status_texto)}</span>`:''}</div></div></div>`;}).join('')}</div>`;
@@ -3844,7 +3844,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSaGerar')?.addEventListener('click',()=>{
       const abc='abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', v=new Uint32Array(10); crypto.getRandomValues(v);
       if(inpSenha){ inpSenha.value=[...v].map(n=>abc[n%abc.length]).join(''); inpSenha.type='text'; inpSenha.select(); }
-      this._toast('Senha gerada — copie e mande pra pessoa antes de criar');
+      this._toast('Senha gerada - copie e mande pra pessoa antes de criar');
     });
   }
   async _carregarAcessosSub(){
@@ -3854,7 +3854,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){el.innerHTML=this._empty('warning',d?.erro||'Erro ao carregar');return;}
     this._subOrgs=d.orgs||[];
     const sel=s.getElementById('saOrg');
-    if(sel) sel.innerHTML=this._subOrgs.map(o=>`<option value="${this._esc(o.org_id)}">${this._esc(o.nome)} (${this._esc(o.org_id)})${o.tem_sessao?'':' — sem sessão Kwai: convites não funcionam'}</option>`).join('')||'<option value="">Nenhuma sub configurada</option>';
+    if(sel) sel.innerHTML=this._subOrgs.map(o=>`<option value="${this._esc(o.org_id)}">${this._esc(o.nome)} (${this._esc(o.org_id)})${o.tem_sessao?'':' - sem sessão Kwai: convites não funcionam'}</option>`).join('')||'<option value="">Nenhuma sub configurada</option>';
     const contas=d.contas||[];
     if(!contas.length){el.innerHTML=this._empty('key_uid','Nenhum acesso criado ainda');return;}
     el.innerHTML=contas.map(c=>`<div class="viol-item" data-id="${this._esc(c.id)}">
@@ -3948,21 +3948,21 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('boxRankingMesImpulso')?.remove();
     if(ultimos.length){
       const linhaDesktop=u=>`<tr${u.uid_divergente?' style="background:rgba(248,113,113,.08)"':''}>
-          <td><div style="display:flex;align-items:center;gap:8px;min-width:0">${this._avatar(u.foto_streamer,u.nome_streamer||u.uid_solicitante,'av')}<div style="min-width:0"><div style="font-size:12px;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${this._esc(u.nome_streamer||u.uid_solicitante||'—')}</div><div style="font-size:10px;color:var(--t3)">${this._esc(u.uid_solicitante||'—')}</div></div></div>${u.uid_divergente?`<div style="color:var(--verm);font-size:10px;margin-top:4px" title="A live desse link pertence a outro UID">${this._ii('warning',12)}live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td>
-          <td style="font-size:11px;max-width:220px"><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-link">${this._esc(u.kwai_link||'—')}</a></td>
-          <td>${this._esc(u.tempo_escolhido||'—')}</td>
-          <td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td>
+          <td><div style="display:flex;align-items:center;gap:8px;min-width:0">${this._avatar(u.foto_streamer,u.nome_streamer||u.uid_solicitante,'av')}<div style="min-width:0"><div style="font-size:12px;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${this._esc(u.nome_streamer||u.uid_solicitante||'-')}</div><div style="font-size:10px;color:var(--t3)">${this._esc(u.uid_solicitante||'-')}</div></div></div>${u.uid_divergente?`<div style="color:var(--verm);font-size:10px;margin-top:4px" title="A live desse link pertence a outro UID">${this._ii('warning',12)}live é do UID ${this._esc(u.uid_divergente)}</div>`:''}</td>
+          <td style="font-size:11px;max-width:220px"><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-link">${this._esc(u.kwai_link||'-')}</a></td>
+          <td>${this._esc(u.tempo_escolhido||'-')}</td>
+          <td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'-')}</span></td>
           <td style="white-space:nowrap">${this._fdt(u.created_at)}</td>
         </tr>`;
       const cardMobile=(u,i)=>`<div class="met-item" data-met-idx="${i}">
           <div class="met-preview">
             <div class="met-av">${this._avatar(u.foto_streamer,u.nome_streamer||u.uid_solicitante,'av')}</div>
             <div class="met-info">
-              <div class="met-nome">${this._esc(u.nome_streamer||u.uid_solicitante||'—')}</div>
-              <div class="met-uid">${this._esc(u.uid_solicitante||'—')}</div>
+              <div class="met-nome">${this._esc(u.nome_streamer||u.uid_solicitante||'-')}</div>
+              <div class="met-uid">${this._esc(u.uid_solicitante||'-')}</div>
             </div>
             <div class="met-right">
-              <span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span>
+              <span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'-')}</span>
               <span class="met-data">${this._fdt(u.created_at)}</span>
             </div>
             <span class="met-chevron">${this._ico('down',12)}</span>
@@ -3970,8 +3970,8 @@ class DimaiorAdmin extends HTMLElement {
           <div class="met-body">
             ${u.uid_divergente?`<div style="color:var(--verm);font-size:11px;margin-bottom:6px">${this._ii('warning',12)}a live desse link pertence a outro UID: ${this._esc(u.uid_divergente)}</div>`:''}
             <div class="met-body-grid">
-              <div class="met-cel"><div class="met-lbl">Link<button class="btn-copy-uid met-copy-link" data-copy="${this._esc(u.kwai_link||'')}" title="Copiar link">${this._ico('clipboard',11)}</button></div><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-val met-link">${this._esc(u.kwai_link||'—')}</a></div>
-              <div class="met-cel"><div class="met-lbl">Tempo</div><div class="met-val">${this._esc(u.tempo_escolhido||'—')}</div></div>
+              <div class="met-cel"><div class="met-lbl">Link<button class="btn-copy-uid met-copy-link" data-copy="${this._esc(u.kwai_link||'')}" title="Copiar link">${this._ico('clipboard',11)}</button></div><a href="${this._esc(u.kwai_link||'#')}" target="_blank" rel="noopener" class="met-val met-link">${this._esc(u.kwai_link||'-')}</a></div>
+              <div class="met-cel"><div class="met-lbl">Tempo</div><div class="met-val">${this._esc(u.tempo_escolhido||'-')}</div></div>
             </div>
           </div>
         </div>`;
@@ -3990,7 +3990,7 @@ class DimaiorAdmin extends HTMLElement {
     if(rankingMes.length){
       const medalCor=pos=>pos===1?'var(--gold)':pos===2?'#94a3b8':pos===3?'#a86c31':'var(--t3)';
       el.insertAdjacentHTML('afterend',`<div class="box" id="boxRankingMesImpulso" style="margin-top:16px">
-        <div class="bhead"><div class="btitulo">${this._ico('trophy',14)} Rank de Uso do Impulso — Mês Atual</div></div>
+        <div class="bhead"><div class="btitulo">${this._ico('trophy',14)} Rank de Uso do Impulso - Mês Atual</div></div>
         <div class="rank-table-wrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead><tr style="text-align:left;color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:1px"><th style="padding:8px">#</th><th></th><th>Streamer</th><th>UID</th><th style="text-align:right;padding-right:14px">Boosts no mês</th></tr></thead>
           <tbody>${rankingMes.map((r,i)=>`<tr style="border-top:1px solid var(--brddim)">
@@ -4014,8 +4014,8 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--brddim)"><span style="color:var(--t3);font-size:11px">${this._ico('users',12)} <strong style="color:var(--cyan)">${d.total}</strong> candidatos</span><div class="busca">${this._ico('search',12)}<input id="bRec" type="text" placeholder="Buscar..." value="${this._esc(busca)}" style="width:160px"/></div></div><div id="listaRec"></div>`;
     const lista=s.getElementById('listaRec');
     lista.innerHTML=candidatos.map((c,i)=>{
-      const cols=headers.slice(0,4);const preview=cols.map(h=>`<span style="color:var(--t2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${this._esc(c[h]||'—')}</span>`).join('<span style="color:var(--brddim);margin:0 6px">|</span>');
-      return`<div class="rec-item" data-idx="${i}"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><span style="color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;width:28px;flex-shrink:0">${d.total-i}</span><div style="flex:1;display:flex;gap:12px;align-items:center;min-width:0;flex-wrap:wrap">${preview}</div><span class="rec-chevron">${this._ico('down',12)}</span></div><div class="rec-body"><div class="rec-campos">${headers.map(h=>`<div class="rec-campo"><div class="rec-campo-lbl">${this._esc(h)}</div><div class="rec-campo-val">${this._esc(c[h]||'—')}</div><button class="rec-copy-btn" data-copy="${this._esc(c[h]||'')}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div></div></div>`;
+      const cols=headers.slice(0,4);const preview=cols.map(h=>`<span style="color:var(--t2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${this._esc(c[h]||'-')}</span>`).join('<span style="color:var(--brddim);margin:0 6px">|</span>');
+      return`<div class="rec-item" data-idx="${i}"><div class="rec-preview" onclick="this.closest('.rec-item').classList.toggle('open')"><span style="color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:13px;width:28px;flex-shrink:0">${d.total-i}</span><div style="flex:1;display:flex;gap:12px;align-items:center;min-width:0;flex-wrap:wrap">${preview}</div><span class="rec-chevron">${this._ico('down',12)}</span></div><div class="rec-body"><div class="rec-campos">${headers.map(h=>`<div class="rec-campo"><div class="rec-campo-lbl">${this._esc(h)}</div><div class="rec-campo-val">${this._esc(c[h]||'-')}</div><button class="rec-copy-btn" data-copy="${this._esc(c[h]||'')}" title="Copiar">${this._ico('clipboard',11)}</button></div>`).join('')}</div></div></div>`;
     }).join('');
     const inp=s.getElementById('bRec');if(inp)inp.addEventListener('input',this._dbc(()=>this._carregarRecrutamento(),400));
   }
@@ -4024,13 +4024,13 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/logs?pagina=${this._pg.l}&tipo=${encodeURIComponent(busca)}`);
     const el=s.getElementById('tbL');if(!d?.ok||!d.logs?.length){el.innerHTML=this._empty('search','Nenhum log');return;}
     const cls=t=>{t=(t||'').toLowerCase();if(t.includes('login'))return'login';if(t.includes('uid')||t.includes('autoriza'))return'edit';if(t.includes('remov')||t.includes('erro')||t.includes('rejeit'))return'del';if(t.includes('carteira')||t.includes('saque')||t.includes('premio'))return'cfg';return'edit';};
-    el.innerHTML=d.logs.map(l=>`<div class="log"><span class="log-tag ${cls(l.tipo)}">${this._esc(l.tipo||'—')}</span><div class="log-info">${this._esc(l.mensagem||'')}</div><div class="log-hora">${this._fdt(l.criado_em)}</div></div>`).join('');
+    el.innerHTML=d.logs.map(l=>`<div class="log"><span class="log-tag ${cls(l.tipo)}">${this._esc(l.tipo||'-')}</span><div class="log-info">${this._esc(l.mensagem||'')}</div><div class="log-hora">${this._fdt(l.criado_em)}</div></div>`).join('');
     this._renderPg('pgL',this._pg.l,d.logs.length,50,n=>{this._pg.l=n;this._carregarLogs();});
   }
   async _carregarConfig(){
     const s=this.shadowRoot;s.getElementById('tbC').innerHTML=this._loading();const d=await this._api('GET','/admin/config');const el=s.getElementById('tbC');
     // revisao_* tem tela própria com botões em Monitor Kwai, dashboard_limite_* tem
-    // tela própria em Evolução Mensal — não repete aqui como texto livre
+    // tela própria em Evolução Mensal - não repete aqui como texto livre
     const NAO_LISTAR=new Set(['revisao_modo','revisao_diamantes','revisao_horas','dashboard_limite_atencao','dashboard_limite_critico','home_videos_ativo','home_videos_frequencia_horas','home_videos_frequencia_min']);
     if(d?.config)d.config=d.config.filter(c=>!NAO_LISTAR.has(c.chave));
     if(!d?.ok||!d.config?.length){el.innerHTML=this._empty('settings','Sem configurações');return;}
@@ -4038,24 +4038,24 @@ class DimaiorAdmin extends HTMLElement {
       taxa_saque_mp:{label:'Taxa fixa por saque (R$)',hint:'Deixe 0.00 para não cobrar taxa.'},
       taxa_saque_perc:{label:'Taxa percentual (%)',hint:'Ex: 0.99 = 0,99%.'},
       aviso_financeiro:{label:'Aviso no painel',hint:'Texto na aba Carteira.'},
-      badge_verificado_url:{label:'Badge Verificado — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão azul.',preview:true},
-      badge_premium_url:{label:'Badge Premium — URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão laranja.',preview:true},
+      badge_verificado_url:{label:'Badge Verificado - URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão azul.',preview:true},
+      badge_premium_url:{label:'Badge Premium - URL da imagem',hint:'Cole a URL da imagem (PNG, JPG, SVG ou Google Drive público). Vazio = ícone padrão laranja.',preview:true},
       sub_org_ids:{label:'IDs das sub-agências (Kwai)',hint:'Separados por vírgula (ex: 1005856,1005733). A correção busca o org principal + cada uma dessas subs, pra não deixar ninguém de fora.'},
-      premiacao_automatica_ativa:{label:'Premiação automática do dia 1º',hint:'Desligado: o pagamento do ranking do mês anterior não roda sozinho — precisa processar manualmente em Premiações.',bool:true},
+      premiacao_automatica_ativa:{label:'Premiação automática do dia 1º',hint:'Desligado: o pagamento do ranking do mês anterior não roda sozinho - precisa processar manualmente em Premiações.',bool:true},
       // grupo:'painel' = liga/desliga recurso do painel do streamer pra TODOS.
       // Pra um novo: linha painel_<recurso>_ativa no sistema_config + entrada aqui
       // + RECURSOS_PAINEL no worker dashboard + MAPA no dmaior-app.js (_aplicarRecursos)
-      painel_carteira_ativa:{label:'Carteira',hint:'Desligado: a aba Carteira some do painel de todos os streamers e o saque fica bloqueado. Saldo e créditos (inclusive premiação) continuam normais — só não aparecem até religar.',bool:true,grupo:'painel'},
+      painel_carteira_ativa:{label:'Carteira',hint:'Desligado: a aba Carteira some do painel de todos os streamers e o saque fica bloqueado. Saldo e créditos (inclusive premiação) continuam normais - só não aparecem até religar.',bool:true,grupo:'painel'},
       painel_impulso_ativa:{label:'Impulso',hint:'Desligado: a aba Impulso some do painel de todos os streamers, novos pedidos são recusados e os agendamentos automáticos ficam pausados (voltam sozinhos ao religar).',bool:true,grupo:'painel'},
     };
     // Lives das sub-agências: 1 linha lives_sub_<orgId>_visivel por sub
     // (descricao = nome da sub). Nova sub = nova linha no sistema_config.
     d.config.forEach(c=>{const m=/^lives_sub_(\d+)_visivel$/.exec(c.chave);if(!m)return;const nome=c.descricao||('Sub '+m[1]);labels[c.chave]={label:`${nome}: mostrar lives no site`,hint:`Ligado: as lives da ${nome} aparecem no site (widget de lives e contador "ao vivo"). Desligado: só aparecem no Ao Vivo do admin e pros agentes vinculados.`,bool:true,grupo:'subs'};});
-    const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio — usando ícone SVG padrão</span>`;};
-    const _cfgRow=c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const isBool=lbl?.bool;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';const campo=isBool?`<label class="tog-switch"><input type="checkbox" class="cfg-bool-inp" id="cfg_${this._esc(c.chave)}" ${c.valor==='true'?'checked':''}><span class="tog-slider"></span></label>`:isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'—')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`;return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${campo}${isRO||isBool?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;};
+    const _prevHtml=(chave,val)=>{const safe=this._normalizarImagemUrl(val);return safe?`<img src="${this._esc(safe)}" width="28" height="28" style="border-radius:50%;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview</span>`:`<span style="font-size:10px;color:var(--t3)">Vazio - usando ícone SVG padrão</span>`;};
+    const _cfgRow=c=>{const lbl=labels[c.chave];const isRO=lbl?.readonly;const isBool=lbl?.bool;const t=(c.chave.includes('key')||c.chave.includes('api'))?'password':'text';const campo=isBool?`<label class="tog-switch"><input type="checkbox" class="cfg-bool-inp" id="cfg_${this._esc(c.chave)}" ${c.valor==='true'?'checked':''}><span class="tog-slider"></span></label>`:isRO?`<div style="padding:7px 12px;background:rgba(0,0,0,.3);border:1px solid var(--brddim);border-radius:6px;font-size:11px;color:var(--t2);min-width:80px">${this._esc(c.valor||'-')}</div>`:`<input class="cfg-inp" id="cfg_${this._esc(c.chave)}" type="${t}" value="${this._esc(c.valor||'')}"/>`;return`<div class="cfg-row" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:160px"><div class="cfg-chave">${this._esc(lbl?.label||c.chave)}</div>${lbl?.hint?`<div style="font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4">${lbl.hint}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${campo}${isRO||isBool?'':`<button class="btn btn-o btn-sm" id="cfgSave_${this._esc(c.chave)}">${this._ico('check',12)} Salvar</button>`}</div>${lbl?.preview?`<div id="cfgPrev_${this._esc(c.chave)}" style="display:flex;align-items:center;gap:8px;width:100%;padding:4px 0">${_prevHtml(c.chave,c.valor)}</div>`:''}</div>`;};
     const _cfgHead=(ico,txt)=>`<div style="padding:12px 14px;background:var(--sunk);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico(ico,12)} ${txt}</div>`;
     const cfgPainel=d.config.filter(c=>labels[c.chave]?.grupo==='painel'),cfgSubs=d.config.filter(c=>labels[c.chave]?.grupo==='subs'),cfgResto=d.config.filter(c=>!['painel','subs'].includes(labels[c.chave]?.grupo));
-    el.innerHTML=(cfgPainel.length?_cfgHead('users','<strong style="color:var(--t2)">Painel do Streamer</strong> — liga/desliga recursos para <strong>todos</strong> os streamers.')+cfgPainel.map(_cfgRow).join(''):'')+(cfgSubs.length?_cfgHead('live','<strong style="color:var(--t2)">Lives das sub-agências</strong>: mostrar ou não no site.')+cfgSubs.map(_cfgRow).join(''):'')+_cfgHead('settings','Configurações financeiras e de exibição.')+cfgResto.map(_cfgRow).join('');
+    el.innerHTML=(cfgPainel.length?_cfgHead('users','<strong style="color:var(--t2)">Painel do Streamer</strong> - liga/desliga recursos para <strong>todos</strong> os streamers.')+cfgPainel.map(_cfgRow).join(''):'')+(cfgSubs.length?_cfgHead('live','<strong style="color:var(--t2)">Lives das sub-agências</strong>: mostrar ou não no site.')+cfgSubs.map(_cfgRow).join(''):'')+_cfgHead('settings','Configurações financeiras e de exibição.')+cfgResto.map(_cfgRow).join('');
     d.config.filter(c=>labels[c.chave]?.bool).forEach(c=>{
       s.getElementById(`cfg_${c.chave}`)?.addEventListener('change',async e=>{
         if(labels[c.chave].grupo==='painel'&&!e.target.checked&&!confirm(`Desligar "${labels[c.chave].label}" para TODOS os streamers?\n\n${labels[c.chave].hint.replace(/^Desligado: /,'')}`)){e.target.checked=true;return;}
@@ -4102,12 +4102,12 @@ class DimaiorAdmin extends HTMLElement {
     if(container){container.querySelectorAll('.uid-revogar').forEach(btn=>{btn.addEventListener('click',()=>this._revogarUid(btn.dataset.uid,false));});container.querySelectorAll('.uid-reativar').forEach(btn=>{btn.addEventListener('click',()=>this._revogarUid(btn.dataset.uid,true));});container.querySelectorAll('.uid-bloquear').forEach(btn=>{btn.addEventListener('click',()=>this._bloquearAcessoUid(btn.dataset.uid,true));});container.querySelectorAll('.uid-desbloquear').forEach(btn=>{btn.addEventListener('click',()=>this._bloquearAcessoUid(btn.dataset.uid,false));});container.querySelectorAll('.uid-resetar-senha').forEach(btn=>{btn.addEventListener('click',()=>this._resetarSenhaUid(btn.dataset.uid));});container.querySelectorAll('.uid-apagar-conta').forEach(btn=>{btn.addEventListener('click',()=>this._apagarContaUid(btn.dataset.uid));});}
   }
   async _bloquearAcessoUid(uid,bloquear=true){
-    const acao=bloquear?'bloquear o acesso':'desbloquear o acesso';if(!confirm(`Confirmar ${acao} do UID ${uid}?\n\nA conta, carteira e histórico continuam intactos — só o login é ${bloquear?'suspenso':'liberado'}.`))return;
+    const acao=bloquear?'bloquear o acesso':'desbloquear o acesso';if(!confirm(`Confirmar ${acao} do UID ${uid}?\n\nA conta, carteira e histórico continuam intactos - só o login é ${bloquear?'suspenso':'liberado'}.`))return;
     const d=await this._api('POST',`/admin/uids/${uid}/${bloquear?'bloquear':'desbloquear'}`);
     if(d?.ok){this._toast(`Acesso ${bloquear?'bloqueado':'desbloqueado'}!`);this._carregarUids();}else this._toast(d?.erro||'Erro','err');
   }
   async _apagarContaUid(uid){
-    if(!confirm(`Apagar a CONTA (login) do UID ${uid}?\n\nIsso remove o acesso ao painel dele definitivamente. Carteira, saldo e histórico de diamantes NÃO são apagados — ficam preservados pra registro contábil e ranking.\n\nEssa ação não tem volta (mas o UID pode ser reautorizado do zero depois, se ele voltar pra agência).`))return;
+    if(!confirm(`Apagar a CONTA (login) do UID ${uid}?\n\nIsso remove o acesso ao painel dele definitivamente. Carteira, saldo e histórico de diamantes NÃO são apagados - ficam preservados pra registro contábil e ranking.\n\nEssa ação não tem volta (mas o UID pode ser reautorizado do zero depois, se ele voltar pra agência).`))return;
     const d=await this._api('DELETE',`/admin/uids/${uid}/conta`);
     if(d?.ok){this._toast('Conta apagada. Carteira e histórico preservados.');this._carregarUids();}else this._toast(d?.erro||'Erro','err');
   }
@@ -4147,10 +4147,10 @@ class DimaiorAdmin extends HTMLElement {
     const bgMap={verde:'rgba(74,222,128,.12)',azul:'rgba(59,130,246,.12)',gold:'rgba(240,192,64,.12)',vermelho:'rgba(248,113,113,.12)'};
     const cor=corMap[cls.cor]||'var(--t3)',bg=bgMap[cls.cor]||'rgba(255,255,255,.05)';
     const seta=delta>=0?'▲':'▼';
-    const pctTxt=d.percentual!==null&&d.percentual!==undefined?`${d.percentual>=0?'+':''}${d.percentual.toFixed(1)}%`:'—';
+    const pctTxt=d.percentual!==null&&d.percentual!==undefined?`${d.percentual>=0?'+':''}${d.percentual.toFixed(1)}%`:'-';
     const fraseDelta=delta>=0?`${this._num(Math.abs(delta))} diamantes acima`:`${this._num(Math.abs(delta))} diamantes abaixo`;
     // Escala as duas barras pelo maior dos dois valores (nunca pelo "anterior" fixo em
-    // 100%) — senão, quando o mês atual supera o anterior, a barra dele ficava sempre
+    // 100%) - senão, quando o mês atual supera o anterior, a barra dele ficava sempre
     // travada na mesma altura da anterior, escondendo visualmente o quanto está à frente.
     const maiorValor=Math.max(d.mes_atual.total_ate_hoje,d.mes_anterior.total_ate_mesmo_dia,1);
     const alturaPrev=Math.max(4,(d.mes_anterior.total_ate_mesmo_dia/maiorValor)*100);
@@ -4189,7 +4189,7 @@ class DimaiorAdmin extends HTMLElement {
     const eq=h.dia_equivalente_mes_anterior;
     const sobeDesce=h.delta>=0?'▲':'▼';
     const corDelta=h.delta>=0?'var(--verde)':'var(--verm)';
-    const pctTxt=h.percentual!==null&&h.percentual!==undefined?`${h.percentual>=0?'+':''}${h.percentual.toFixed(1)}%`:'—';
+    const pctTxt=h.percentual!==null&&h.percentual!==undefined?`${h.percentual>=0?'+':''}${h.percentual.toFixed(1)}%`:'-';
     const maior=Math.max(h.total_diamantes,eq.total_diamantes,1);
     const alturaHoje=Math.max(4,(h.total_diamantes/maior)*100);
     const alturaEq=Math.max(4,(eq.total_diamantes/maior)*100);
@@ -4197,7 +4197,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="dd-hoje-row">
         <div class="dd-hoje-head">
           <span class="dd-hoje-dot"></span>
-          <span class="dd-hoje-txt">Hoje (dia ${h.dia}, em andamento) vs. dia ${eq.dia} de ${this._esc(eq.nome)} — atualiza a cada carregamento, sobe conforme os diamantes de hoje entram.</span>
+          <span class="dd-hoje-txt">Hoje (dia ${h.dia}, em andamento) vs. dia ${eq.dia} de ${this._esc(eq.nome)} - atualiza a cada carregamento, sobe conforme os diamantes de hoje entram.</span>
         </div>
         <div class="dd-hoje-compare">
           <div class="dd-hoje-col">
@@ -4220,7 +4220,7 @@ class DimaiorAdmin extends HTMLElement {
   _ddRenderStats(d){
     const s=this.shadowRoot;const melhor=d.melhor_mes;const fechados=d.ultimos_3_fechados||[];
     const ultimo=fechados[fechados.length-1],penultimo=fechados[fechados.length-2];
-    let variacaoTxt='—',variacaoCls='dc2-cyan';
+    let variacaoTxt='-',variacaoCls='dc2-cyan';
     if(ultimo&&penultimo&&penultimo.total_diamantes>0){
       const v=((ultimo.total_diamantes-penultimo.total_diamantes)/penultimo.total_diamantes)*100;
       variacaoCls=v>=0?'dc2-verde':'dc2-verm';
@@ -4228,8 +4228,8 @@ class DimaiorAdmin extends HTMLElement {
     }
     s.getElementById('ddStats').innerHTML=`
       <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('diamond',26)}</div><div class="dc2-val">${this._num(d.total_ano)}</div><div class="dc2-lbl">Acumulado ${d.ano}</div></div>
-      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('award',26)}</div><div class="dc2-val">${melhor?this._esc(melhor.nome):'—'}</div><div class="dc2-lbl">${melhor?this._num(melhor.total_diamantes)+' '+this._dia()+' · melhor mês':'—'}</div></div>
-      <div class="dc2 ${variacaoCls}"><div class="dc2-ico">${this._ico('bars_up',26)}</div><div class="dc2-val">${ultimo?this._esc(ultimo.nome):'—'}</div><div class="dc2-lbl">${variacaoTxt}</div></div>`;
+      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('award',26)}</div><div class="dc2-val">${melhor?this._esc(melhor.nome):'-'}</div><div class="dc2-lbl">${melhor?this._num(melhor.total_diamantes)+' '+this._dia()+' · melhor mês':'-'}</div></div>
+      <div class="dc2 ${variacaoCls}"><div class="dc2-ico">${this._ico('bars_up',26)}</div><div class="dc2-val">${ultimo?this._esc(ultimo.nome):'-'}</div><div class="dc2-lbl">${variacaoTxt}</div></div>`;
   }
   _ddRenderChartAno(d){
     const s=this.shadowRoot;const meses=d.meses||[];
@@ -4238,7 +4238,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('ddChartAno').innerHTML=`<div class="dd-bars">${meses.map(m=>`
       <div class="col">
         <span class="val">${this._numK(m.total_diamantes)}</span>
-        <div class="stick ${m.fechado?'':'progress'}" style="height:${Math.max(4,(m.total_diamantes/max)*100)}%" title="${this._num(m.total_diamantes)}${m.fechado?'':' — em andamento'}"></div>
+        <div class="stick ${m.fechado?'':'progress'}" style="height:${Math.max(4,(m.total_diamantes/max)*100)}%" title="${this._num(m.total_diamantes)}${m.fechado?'':' - em andamento'}"></div>
         <span class="lbl ${m.fechado?'':'now'}">${this._esc(m.nome.slice(0,3))}${m.fechado?'':' •'}</span>
       </div>`).join('')}</div>`;
   }
@@ -4333,7 +4333,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){s.getElementById('uidLookupResult').innerHTML=`<div class="uid-lookup-err">${this._ico('warning',16)} ${this._esc(d?.erro||'Erro ao buscar UID')}</div>`;return;}
     this._uidLookup=d;let html='';
     if(d.autorizacao_existente){const a=d.autorizacao_existente;if(a.ativo&&!a.utilizado){html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} Já possui autorização ativa.</div>`;}else if(a.utilizado){html+=`<div class="uid-lookup-err">${this._ico('lock_r',14)} Já criou uma conta.</div>`;s.getElementById('uidLookupResult').innerHTML=html;return;}else{html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} Autorização revogada. Confirmar irá reativar.</div>`;}}
-    if(d.tem_historico&&d.streamer){const st=d.streamer;html+=`<div class="uid-lookup-card ok"><div class="uid-lookup-avatar">${this._avatar(st.foto,st.nome,'uid-lookup-av')}</div><div class="uid-lookup-info"><div class="uid-lookup-nome">${this._esc(st.nome)}</div><div class="uid-lookup-id">UID: ${this._esc(uid)}</div><div class="uid-lookup-stats"><span>${this._ico('diamond',11)} ${this._num(st.total_diamantes)}</span><span>${this._ico('clock_r',11)} ${st.total_horas}</span><span>${this._ico('live',11)} ${st.dias_com_live} dias</span></div><div class="uid-lookup-datas"><span>Primeira live: ${this._fdtCurto(st.primeira_live)||'—'}</span><span>Última live: ${this._fdtCurto(st.ultima_live)||'—'}</span></div></div></div>`;}
+    if(d.tem_historico&&d.streamer){const st=d.streamer;html+=`<div class="uid-lookup-card ok"><div class="uid-lookup-avatar">${this._avatar(st.foto,st.nome,'uid-lookup-av')}</div><div class="uid-lookup-info"><div class="uid-lookup-nome">${this._esc(st.nome)}</div><div class="uid-lookup-id">UID: ${this._esc(uid)}</div><div class="uid-lookup-stats"><span>${this._ico('diamond',11)} ${this._num(st.total_diamantes)}</span><span>${this._ico('clock_r',11)} ${st.total_horas}</span><span>${this._ico('live',11)} ${st.dias_com_live} dias</span></div><div class="uid-lookup-datas"><span>Primeira live: ${this._fdtCurto(st.primeira_live)||'-'}</span><span>Última live: ${this._fdtCurto(st.ultima_live)||'-'}</span></div></div></div>`;}
     else{html+=`<div class="uid-lookup-warn">${this._ico('warning',14)} <strong>Sem transmissões registradas.</strong> Pode liberar mesmo assim.</div>`;}
     if(d.tem_conta){html+=`<div class="uid-lookup-warn">${this._ico('lock_r',14)} Este UID já possui conta no painel.</div>`;s.getElementById('uidLookupResult').innerHTML=html;return;}
     s.getElementById('uidLookupResult').innerHTML=html;s.getElementById('btnConfirmarUID').style.display='flex';
@@ -4386,7 +4386,7 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/carteira/${uid}`);btn.disabled=false;btn.textContent='Buscar';
     if(!d?.ok){infoEl.innerHTML=`<div class="uid-lookup-err">${this._ico('warning',14)} ${this._esc(d?.erro||'Não encontrado.')}</div>`;return;}
     this._creditoRapidoUid=uid;const p=d.perfil||{},c=d.carteira||{};infoEl.style.display='none';
-    s.getElementById('mCrStreamerCard').innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.25);border-radius:var(--rs)">${p.foto&&/^https?:\/\//i.test(p.foto)?`<img src="${this._esc(p.foto)}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,212,212,.4)" onerror="this.style.display='none'">`:`<div class="av-fb" style="width:42px;height:42px;font-size:16px">${this._ini(p.nome||uid)}</div>`}<div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(p.nome||'—')}</div><div style="font-size:11px;color:var(--t3)">UID: ${this._esc(uid)}</div>${p.pix_tipo&&p.pix_chave?`<div style="font-size:10px;color:var(--t3)">${this._ico('pix_ico',10)} PIX ${this._esc(p.pix_tipo)}: ${this._esc(p.pix_chave)}</div>`:''}</div><div style="text-align:right"><div style="font-size:10px;color:var(--t3)">Saldo atual</div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;font-weight:700;color:var(--verde)">${this._brl(c.saldo||0)}</div></div></div>`;
+    s.getElementById('mCrStreamerCard').innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.25);border-radius:var(--rs)">${p.foto&&/^https?:\/\//i.test(p.foto)?`<img src="${this._esc(p.foto)}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,212,212,.4)" onerror="this.style.display='none'">`:`<div class="av-fb" style="width:42px;height:42px;font-size:16px">${this._ini(p.nome||uid)}</div>`}<div style="flex:1;min-width:0"><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:15px;font-weight:700;color:var(--t1)">${this._esc(p.nome||'-')}</div><div style="font-size:11px;color:var(--t3)">UID: ${this._esc(uid)}</div>${p.pix_tipo&&p.pix_chave?`<div style="font-size:10px;color:var(--t3)">${this._ico('pix_ico',10)} PIX ${this._esc(p.pix_tipo)}: ${this._esc(p.pix_chave)}</div>`:''}</div><div style="text-align:right"><div style="font-size:10px;color:var(--t3)">Saldo atual</div><div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;font-weight:700;color:var(--verde)">${this._brl(c.saldo||0)}</div></div></div>`;
     s.getElementById('mCrPasso2').style.display='block';s.getElementById('btnCrConfirmar').style.display='flex';setTimeout(()=>s.getElementById('mCrValor')?.focus(),100);
   }
   async _confirmarCreditoRapido(){
@@ -4411,7 +4411,7 @@ class DimaiorAdmin extends HTMLElement {
       const rows=filtro?lista.filter(c=>(c.nome||'').toLowerCase().includes(filtro)||c.kwai_uid.includes(filtro)):lista;
       const el=s.getElementById('listaCarteiraRows');if(!el)return;
       if(!rows.length){el.innerHTML=this._empty('search','Nenhum resultado');return;}
-      // Cards accordion — compacto por padrão, expande ao toque
+      // Cards accordion - compacto por padrão, expande ao toque
       el.innerHTML=rows.map(c=>{
         const nome=c.nome||c.kwai_uid;
         const saldoColor=c.saldo>0?'var(--verde)':'var(--t3)';
@@ -4430,8 +4430,8 @@ class DimaiorAdmin extends HTMLElement {
           </div>
           <div class="sc-body">
             <div class="sc-body-grid">
-              <div class="sc-detalhe"><div class="sc-dlbl">Pendente</div><div class="sc-dval" style="color:var(--amber)">${c.saldo_pendente>0?this._brl(c.saldo_pendente):'—'}</div></div>
-              <div class="sc-detalhe"><div class="sc-dlbl">Total Recebido</div><div class="sc-dval">${c.total_recebido>0?this._brl(c.total_recebido):'—'}</div></div>
+              <div class="sc-detalhe"><div class="sc-dlbl">Pendente</div><div class="sc-dval" style="color:var(--amber)">${c.saldo_pendente>0?this._brl(c.saldo_pendente):'-'}</div></div>
+              <div class="sc-detalhe"><div class="sc-dlbl">Total Recebido</div><div class="sc-dval">${c.total_recebido>0?this._brl(c.total_recebido):'-'}</div></div>
             </div>
             <div class="sc-body-acoes">
               <button class="btn btn-g btn-sm sc-add" data-uid="${this._esc(c.kwai_uid)}" data-nome="${this._esc(nome)}">${this._ico('plus',12)} Adicionar Saldo</button>
@@ -4447,14 +4447,14 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   async _abrirDetalheCarteira(uid,nome){
-    const s=this.shadowRoot;s.getElementById('mCartTitulo').textContent=`Carteira — ${nome}`;s.getElementById('mCartBody').innerHTML=this._loading();this._cartOp={uid,nome,tipo:null};this._abrirModal('mCart');
+    const s=this.shadowRoot;s.getElementById('mCartTitulo').textContent=`Carteira - ${nome}`;s.getElementById('mCartBody').innerHTML=this._loading();this._cartOp={uid,nome,tipo:null};this._abrirModal('mCart');
     const d=await this._api('GET',`/admin/carteira/${uid}`);if(!d?.ok){s.getElementById('mCartBody').innerHTML=this._empty('warning','Erro');return;}
     const c=d.carteira,txs=d.transacoes||[],sqs=d.saques||[];
-    s.getElementById('mCartBody').innerHTML=`<div class="cart-saldo-row"><div class="cart-saldo-box cy"><div class="cart-saldo-lbl">Disponível</div><div class="cart-saldo-val">${this._brl(c.saldo)}</div></div><div class="cart-saldo-box" style="border-color:rgba(251,191,36,.3)"><div class="cart-saldo-lbl">Pendente</div><div class="cart-saldo-val" style="color:var(--amber)">${this._brl(c.saldo_pendente)}</div></div><div class="cart-saldo-box vd"><div class="cart-saldo-lbl">Recebido</div><div class="cart-saldo-val">${this._brl(c.total_recebido)}</div></div><div class="cart-saldo-box az"><div class="cart-saldo-lbl">Sacado</div><div class="cart-saldo-val">${this._brl(c.total_sacado)}</div></div></div><div class="cart-pix-row">${this._ico('pix_ico',13)} PIX: <strong>${this._esc(d.perfil?.pix_tipo||'—')}</strong> ${this._esc(d.perfil?.pix_chave||'—')}</div><div class="cart-acoes-row"><button class="btn btn-g" id="btnCartCredito">${this._ico('plus',14)} Adicionar Saldo</button><button class="btn" style="background:rgba(248,113,113,.2);color:var(--verm);border:1px solid rgba(248,113,113,.4)" id="btnCartDebito">${this._ico('trash',14)} Remover Saldo</button></div>${txs.length?`<div class="cart-hist-titulo">${this._ico('history',13)} Transações (${txs.length})</div><div class="cart-hist-lista">${txs.map(t=>{const ent=['credito','premio_ranking'].includes(t.tipo);const tL={credito:'Crédito',debito:'Débito',saque_solicitado:'Saque Sol.',saque_aprovado:'Saque Aprov.',saque_rejeitado:'Saque Rejeit.',premio_ranking:'Prêmio',estorno:'Estorno'}[t.tipo]||t.tipo;return`<div class="tx-item"><span class="tx-tipo-badge ${ent?'tx-entrada':'tx-saida'}">${ent?'+':'−'}</span><div class="tx-desc"><span class="tx-uid">${this._esc(tL)}</span><span class="tx-detalhe">${this._esc(t.descricao||'—')}</span></div><div style="text-align:right"><div class="tx-valor ${ent?'tx-positivo':'tx-negativo'}">${this._brl(t.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(t.criado_em)}</div></div></div>`;}).join('')}</div>`:''}${sqs.length?`<div class="cart-hist-titulo">${this._ico('send',13)} Saques (${sqs.length})</div><div class="cart-hist-lista">${sqs.map(sg=>`<div class="tx-item"><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}"> ${this._esc(sg.status)}</span><div class="tx-desc"><span class="tx-uid">${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}</span></div><div style="text-align:right"><div class="tx-valor tx-negativo">${this._brl(sg.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(sg.solicitado_em)}</div></div></div>`).join('')}</div>`:''}`;
+    s.getElementById('mCartBody').innerHTML=`<div class="cart-saldo-row"><div class="cart-saldo-box cy"><div class="cart-saldo-lbl">Disponível</div><div class="cart-saldo-val">${this._brl(c.saldo)}</div></div><div class="cart-saldo-box" style="border-color:rgba(251,191,36,.3)"><div class="cart-saldo-lbl">Pendente</div><div class="cart-saldo-val" style="color:var(--amber)">${this._brl(c.saldo_pendente)}</div></div><div class="cart-saldo-box vd"><div class="cart-saldo-lbl">Recebido</div><div class="cart-saldo-val">${this._brl(c.total_recebido)}</div></div><div class="cart-saldo-box az"><div class="cart-saldo-lbl">Sacado</div><div class="cart-saldo-val">${this._brl(c.total_sacado)}</div></div></div><div class="cart-pix-row">${this._ico('pix_ico',13)} PIX: <strong>${this._esc(d.perfil?.pix_tipo||'-')}</strong> ${this._esc(d.perfil?.pix_chave||'-')}</div><div class="cart-acoes-row"><button class="btn btn-g" id="btnCartCredito">${this._ico('plus',14)} Adicionar Saldo</button><button class="btn" style="background:rgba(248,113,113,.2);color:var(--verm);border:1px solid rgba(248,113,113,.4)" id="btnCartDebito">${this._ico('trash',14)} Remover Saldo</button></div>${txs.length?`<div class="cart-hist-titulo">${this._ico('history',13)} Transações (${txs.length})</div><div class="cart-hist-lista">${txs.map(t=>{const ent=['credito','premio_ranking'].includes(t.tipo);const tL={credito:'Crédito',debito:'Débito',saque_solicitado:'Saque Sol.',saque_aprovado:'Saque Aprov.',saque_rejeitado:'Saque Rejeit.',premio_ranking:'Prêmio',estorno:'Estorno'}[t.tipo]||t.tipo;return`<div class="tx-item"><span class="tx-tipo-badge ${ent?'tx-entrada':'tx-saida'}">${ent?'+':'−'}</span><div class="tx-desc"><span class="tx-uid">${this._esc(tL)}</span><span class="tx-detalhe">${this._esc(t.descricao||'-')}</span></div><div style="text-align:right"><div class="tx-valor ${ent?'tx-positivo':'tx-negativo'}">${this._brl(t.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(t.criado_em)}</div></div></div>`;}).join('')}</div>`:''}${sqs.length?`<div class="cart-hist-titulo">${this._ico('send',13)} Saques (${sqs.length})</div><div class="cart-hist-lista">${sqs.map(sg=>`<div class="tx-item"><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}"> ${this._esc(sg.status)}</span><div class="tx-desc"><span class="tx-uid">${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}</span></div><div style="text-align:right"><div class="tx-valor tx-negativo">${this._brl(sg.valor)}</div><div style="font-size:9px;color:var(--t3)">${this._fdtCurto(sg.solicitado_em)}</div></div></div>`).join('')}</div>`:''}`;
     s.getElementById('btnCartCredito')?.addEventListener('click',()=>{this._fechaModal('mCart');this._abrirModalOperacao(uid,nome,'credito');});s.getElementById('btnCartDebito')?.addEventListener('click',()=>{this._fechaModal('mCart');this._abrirModalOperacao(uid,nome,'debito');});
   }
   _abrirModalOperacao(uid,nome,tipo){
-    const s=this.shadowRoot;this._cartOp={uid,nome,tipo};const isC=tipo==='credito';s.getElementById('mOpTitulo').textContent=`${isC?'Adicionar':'Remover'} Saldo — ${nome}`;s.getElementById('mOpValor').value='';s.getElementById('mOpDesc').value='';s.getElementById('mOpConfirmar').textContent=isC?'Confirmar Crédito':'Confirmar Débito';s.getElementById('mOpConfirmar').style.background=isC?'var(--grad)':'linear-gradient(135deg,#c00030,#f87171)';this._abrirModal('mOp');setTimeout(()=>s.getElementById('mOpValor')?.focus(),200);
+    const s=this.shadowRoot;this._cartOp={uid,nome,tipo};const isC=tipo==='credito';s.getElementById('mOpTitulo').textContent=`${isC?'Adicionar':'Remover'} Saldo - ${nome}`;s.getElementById('mOpValor').value='';s.getElementById('mOpDesc').value='';s.getElementById('mOpConfirmar').textContent=isC?'Confirmar Crédito':'Confirmar Débito';s.getElementById('mOpConfirmar').style.background=isC?'var(--grad)':'linear-gradient(135deg,#c00030,#f87171)';this._abrirModal('mOp');setTimeout(()=>s.getElementById('mOpValor')?.focus(),200);
   }
   async _confirmarOperacao(){
     const s=this.shadowRoot;const {uid,nome,tipo}=this._cartOp;const valor=s.getElementById('mOpValor').value;const descricao=s.getElementById('mOpDesc').value.trim();
@@ -4473,7 +4473,7 @@ class DimaiorAdmin extends HTMLElement {
     const lista=d.saques||[];if(!lista.length){if(container)container.innerHTML=this._empty('check_c','Nenhuma solicitação');return;}
     if(container)container.innerHTML=lista.map(sg=>{
       const isPend=sg.status==='pendente';
-      return`<div class="saque-card ${isPend?'saque-pend':''}"><div class="saque-header"><div><div class="saque-nome">${this._esc(sg.nome_streamer||sg.kwai_uid)}</div><div class="saque-uid">${this._esc(sg.kwai_uid)}</div></div><div style="text-align:right"><div class="saque-valor">${this._brl(sg.valor)}</div><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}">${this._esc(sg.status)}</span></div></div><div class="saque-pix">${this._ico('pix_ico',12)} ${this._esc(sg.pix_tipo)}: <strong>${this._esc(sg.pix_chave)}</strong></div><div class="saque-meta"><span>${this._ico('calendar',11)} ${this._fdt(sg.solicitado_em)}</span>${sg.processado_em?`<span>${this._ico('check_c',11)} ${this._fdt(sg.processado_em)} por ${this._esc(sg.processado_por||'—')}</span>`:''}${sg.observacao?`<span>${this._ico('warning',11)} ${this._esc(sg.observacao)}</span>`:''}</div>${isPend?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-pagar-mp" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}" style="background:linear-gradient(135deg,#00b450,#00802e)"><img src="assets/icons/pix.webp" style="width:13px;height:13px;object-fit:contain;flex-shrink:0" alt="pix"> Pagar PIX</button><button class="btn btn-g btn-sm saque-aprovar" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('check_c',12)} Só Aprovar</button><button class="btn btn-sm saque-rejeitar" style="border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('x_circle',12)} Rejeitar</button><button class="btn btn-o btn-sm" data-pixcopy="${this._esc(sg.pix_chave)}">${this._ico('clipboard',11)} Copiar PIX</button></div>`:''}${sg.status==='aprovado'?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-marcar-pago" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" style="background:linear-gradient(135deg,#00b450,#008040)">${this._ico('check_c',12)} Marcar como Pago</button><button class="btn btn-o btn-sm saque-pagar-mp" data-id="${sg.id}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}">Pagar via MP (auto)</button></div>`:''}
+      return`<div class="saque-card ${isPend?'saque-pend':''}"><div class="saque-header"><div><div class="saque-nome">${this._esc(sg.nome_streamer||sg.kwai_uid)}</div><div class="saque-uid">${this._esc(sg.kwai_uid)}</div></div><div style="text-align:right"><div class="saque-valor">${this._brl(sg.valor)}</div><span class="badge ${sg.status==='aprovado'||sg.status==='pago'?'on':sg.status==='rejeitado'?'off':''}">${this._esc(sg.status)}</span></div></div><div class="saque-pix">${this._ico('pix_ico',12)} ${this._esc(sg.pix_tipo)}: <strong>${this._esc(sg.pix_chave)}</strong></div><div class="saque-meta"><span>${this._ico('calendar',11)} ${this._fdt(sg.solicitado_em)}</span>${sg.processado_em?`<span>${this._ico('check_c',11)} ${this._fdt(sg.processado_em)} por ${this._esc(sg.processado_por||'-')}</span>`:''}${sg.observacao?`<span>${this._ico('warning',11)} ${this._esc(sg.observacao)}</span>`:''}</div>${isPend?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-pagar-mp" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}" style="background:linear-gradient(135deg,#00b450,#00802e)"><img src="assets/icons/pix.webp" style="width:13px;height:13px;object-fit:contain;flex-shrink:0" alt="pix"> Pagar PIX</button><button class="btn btn-g btn-sm saque-aprovar" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('check_c',12)} Só Aprovar</button><button class="btn btn-sm saque-rejeitar" style="border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}">${this._ico('x_circle',12)} Rejeitar</button><button class="btn btn-o btn-sm" data-pixcopy="${this._esc(sg.pix_chave)}">${this._ico('clipboard',11)} Copiar PIX</button></div>`:''}${sg.status==='aprovado'?`<div class="saque-acoes"><button class="btn btn-g btn-sm saque-marcar-pago" data-id="${sg.id}" data-nome="${this._esc(sg.nome_streamer||sg.kwai_uid)}" data-val="${sg.valor}" style="background:linear-gradient(135deg,#00b450,#008040)">${this._ico('check_c',12)} Marcar como Pago</button><button class="btn btn-o btn-sm saque-pagar-mp" data-id="${sg.id}" data-pix="${this._esc(sg.pix_tipo)}: ${this._esc(sg.pix_chave)}">Pagar via MP (auto)</button></div>`:''}
       </div>`;
     }).join('');
     if(container){
@@ -4499,13 +4499,13 @@ class DimaiorAdmin extends HTMLElement {
   _abrirModalPix(data){
     const s=this.shadowRoot;const foto=data.foto||'';const imgEl=s.getElementById('mPixFoto');
     if(foto){imgEl.src=foto;imgEl.onerror=()=>{imgEl.src='';imgEl.style.display='none';};}else{imgEl.style.display='none';}
-    s.getElementById('mPixNome').textContent=data.nome_streamer||data.uid||'—';s.getElementById('mPixUid').textContent=data.uid||'';s.getElementById('mPixValor').textContent=this._brl(data.valor);s.getElementById('mPixTipo').textContent=data.pix_tipo||'—';s.getElementById('mPixChave').textContent=data.pix_chave||'—';s.getElementById('mPixSaqueId').value=data.saque_id||'';this._abrirModal('mPix');
+    s.getElementById('mPixNome').textContent=data.nome_streamer||data.uid||'-';s.getElementById('mPixUid').textContent=data.uid||'';s.getElementById('mPixValor').textContent=this._brl(data.valor);s.getElementById('mPixTipo').textContent=data.pix_tipo||'-';s.getElementById('mPixChave').textContent=data.pix_chave||'-';s.getElementById('mPixSaqueId').value=data.saque_id||'';this._abrirModal('mPix');
     const btnCopiar=s.getElementById('mPixCopiarChave');if(btnCopiar){btnCopiar.onclick=()=>{navigator.clipboard?.writeText(data.pix_chave||'').then(()=>{this._toast('Chave PIX copiada!');btnCopiar.innerHTML=`${this._ico('check_c',13)} Copiado!`;setTimeout(()=>{btnCopiar.innerHTML=`${this._ico('clipboard',13)} Copiar chave PIX`;},2000);}).catch(()=>{this._toast('Não foi possível copiar','err');});};}
   }
   _abrirModalSaque(id,nome,valor,acao){
     const s=this.shadowRoot;this._saqueId=id;this._saqueAcao=acao;
     const labels={aprovar:{titulo:'Aprovar Saque',btn:'Confirmar Aprovação',cor:'var(--grad)',obs:'Observação (opcional)'},rejeitar:{titulo:'Rejeitar Saque',btn:'Confirmar Rejeição',cor:'linear-gradient(135deg,#c00030,#f87171)',obs:'Motivo (opcional)'},marcar_pago:{titulo:'Marcar como Pago',btn:'Confirmar Pagamento',cor:'linear-gradient(135deg,#00b450,#008040)',obs:'ID/comprovante (opcional)'}};
-    const l=labels[acao]||labels.aprovar;s.getElementById('mSaqueTitulo').textContent=`${l.titulo} — ${nome}`;s.getElementById('mSaqueInfo').textContent=`Valor: ${this._brl(valor)}`;s.getElementById('mSaqueObs').value='';s.getElementById('mSaqueConfirmar').textContent=l.btn;s.getElementById('mSaqueConfirmar').style.background=l.cor;s.getElementById('mSaqueObsLabel').textContent=l.obs;this._abrirModal('mSaque');
+    const l=labels[acao]||labels.aprovar;s.getElementById('mSaqueTitulo').textContent=`${l.titulo} - ${nome}`;s.getElementById('mSaqueInfo').textContent=`Valor: ${this._brl(valor)}`;s.getElementById('mSaqueObs').value='';s.getElementById('mSaqueConfirmar').textContent=l.btn;s.getElementById('mSaqueConfirmar').style.background=l.cor;s.getElementById('mSaqueObsLabel').textContent=l.obs;this._abrirModal('mSaque');
   }
   async _confirmarSaqueAcao(){
     try{
@@ -4539,7 +4539,7 @@ class DimaiorAdmin extends HTMLElement {
     if(container)container.innerHTML=lista.map(m=>{
       const isPend=m.status==='pendente';
       const nome=this._esc(m.streamer_nome||m.streamer_uid);
-      const kwai=this._esc(m.streamer_kwai_id||'—');
+      const kwai=this._esc(m.streamer_kwai_id||'-');
       const evid=(m.evidencias||[]).map((e,i)=>`<a href="${this._esc(e)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="margin:2px 4px 2px 0">${this._ico('clipboard',11)} Evidência ${i+1}</a>`).join('');
       return`<div class="migra-card ${isPend?'migra-pend':''}">
         <div class="migra-header">
@@ -4553,14 +4553,14 @@ class DimaiorAdmin extends HTMLElement {
           </div>
         </div>
         <div class="migra-meta">
-          <span>${this._ico('users',11)} Solicitado por: <strong>${this._esc(m.agente_nome||'—')}</strong></span>
-          <span>${this._ico('server',11)} Agência atual: ${this._esc(m.agencia_atual||'—')}</span>
+          <span>${this._ico('users',11)} Solicitado por: <strong>${this._esc(m.agente_nome||'-')}</strong></span>
+          <span>${this._ico('server',11)} Agência atual: ${this._esc(m.agencia_atual||'-')}</span>
           <span>${this._ico('calendar',11)} Migração prevista: ${this._fdtData(m.mes_migracao)}</span>
         </div>
         ${m.observacao_agente?`<div class="migra-obs">${this._ico('clipboard',11)} <strong>Obs. do agente:</strong> ${this._esc(m.observacao_agente)}</div>`:''}
         ${m.descricao?`<div class="migra-obs">${this._esc(m.descricao)}</div>`:''}
         ${evid?`<div class="migra-evid">${evid}</div>`:''}
-        ${m.observacao_admin?`<div class="migra-meta"><span>${this._ico('check_c',11)} ${this._fdtCurto(m.processado_em)} por ${this._esc(m.processado_por||'—')}: ${this._esc(m.observacao_admin)}</span></div>`:''}
+        ${m.observacao_admin?`<div class="migra-meta"><span>${this._ico('check_c',11)} ${this._fdtCurto(m.processado_em)} por ${this._esc(m.processado_por||'-')}: ${this._esc(m.observacao_admin)}</span></div>`:''}
         ${isPend?`<div class="saque-acoes"><button class="btn btn-g btn-sm migra-aprovar" data-id="${m.id}" data-nome="${nome}">${this._ico('check_c',12)} Aprovar</button><button class="btn btn-sm migra-rejeitar" style="border:1px solid rgba(248,113,113,.4);color:var(--verm);background:rgba(248,113,113,.08)" data-id="${m.id}" data-nome="${nome}">${this._ico('x_circle',12)} Rejeitar</button></div>`:''}
       </div>`;
     }).join('');
@@ -4575,7 +4575,7 @@ class DimaiorAdmin extends HTMLElement {
     const s=this.shadowRoot;this._migracaoAgId=id;this._migracaoAgAcao=acao;
     const labels={aprovar:{titulo:'Aprovar Migração',btn:'Confirmar Aprovação',cor:'var(--grad)'},rejeitar:{titulo:'Rejeitar Migração',btn:'Confirmar Rejeição',cor:'linear-gradient(135deg,#c00030,#f87171)'}};
     const l=labels[acao];
-    s.getElementById('mMigracaoAgTitulo').textContent=`${l.titulo} — ${nome}`;
+    s.getElementById('mMigracaoAgTitulo').textContent=`${l.titulo} - ${nome}`;
     s.getElementById('mMigracaoAgObs').value='';
     s.getElementById('mMigracaoAgConfirmar').textContent=l.btn;
     s.getElementById('mMigracaoAgConfirmar').style.background=l.cor;
@@ -4626,7 +4626,7 @@ class DimaiorAdmin extends HTMLElement {
   async _carregarHistoricoPremios(){
     const s=this.shadowRoot;const d=await this._api('GET','/admin/carteira');const container=s.getElementById('historicoPremios');if(!container)return;
     const hist=d?.ultimas_premiacoes||[];if(!hist.length){container.innerHTML=this._empty('history','Nenhuma distribuição ainda');return;}
-    // Accordion — funciona em mobile e desktop sem cortar
+    // Accordion - funciona em mobile e desktop sem cortar
     container.innerHTML=hist.map((p,i)=>{
       const tipo=p.tipo_ranking==='diamantes'?`${this._ico('diamond',12)} Diamantes`:`${this._ico('clock_r',12)} Horas`;
       return`<div class="ph-acc-item">
@@ -4642,7 +4642,7 @@ class DimaiorAdmin extends HTMLElement {
           <div class="ph-acc-grid">
             <div class="ph-acc-cel"><div class="ph-acc-lbl">Premiados</div><div class="ph-acc-val" style="color:var(--verde)">${p.total_premiados}</div></div>
             <div class="ph-acc-cel"><div class="ph-acc-lbl">Total Distribuído</div><div class="ph-acc-val" style="color:var(--azul)">${this._brl(p.total_valor)}</div></div>
-            <div class="ph-acc-cel"><div class="ph-acc-lbl">Processado por</div><div class="ph-acc-val">${this._esc(p.processado_por||'—')}</div></div>
+            <div class="ph-acc-cel"><div class="ph-acc-lbl">Processado por</div><div class="ph-acc-val">${this._esc(p.processado_por||'-')}</div></div>
             <div class="ph-acc-cel"><div class="ph-acc-lbl">Quando</div><div class="ph-acc-val" style="font-size:11px">${this._fdt(p.processado_em)}</div></div>
           </div>
         </div>
@@ -4685,7 +4685,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnSair').addEventListener('click',()=>this._doLogout());
     s.getElementById('btnVoltarSite').addEventListener('click',()=>{
       // Mantém a mesma origem (mesmo domínio/subdominio) de onde o admin foi
-      // acessado — trocar de origem faria o navegador usar outro "armazenamento"
+      // acessado - trocar de origem faria o navegador usar outro "armazenamento"
       // de sessão, e ao voltar pro admin pareceria deslogado sem realmente ter saído.
       const base = window.location.pathname.startsWith('/teste/') ? '/teste/' : '/';
       const url  = window.location.origin + base;
@@ -4729,7 +4729,7 @@ class DimaiorAdmin extends HTMLElement {
         if(btn){btn.disabled=true;btn.textContent='Confirmando...';}
         const r=await this._api('POST',`/admin/saques/${saqueId}/processar`,{acao:'marcar_pago',observacao:'PIX pago manualmente'});
         console.log('[mPixConfirmar] resposta=',r);
-        if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('check_c',15)} Já Paguei — Confirmar`;}
+        if(btn){btn.disabled=false;btn.innerHTML=`${this._ico('check_c',15)} Já Paguei - Confirmar`;}
         if(r?.ok){this._fechaModal('mPix');this._toast('Saque marcado como pago!');setTimeout(()=>this._carregarSaques(),1000);}
         else{this._toast(r?.erro||r?.mensagem||'Erro ao confirmar pagamento','err');}
       }catch(e){console.error('[mPixConfirmar] erro:',e);this._toast('Erro interno: '+e.message,'err');}
@@ -4809,7 +4809,7 @@ class DimaiorAdmin extends HTMLElement {
       this._confirmarDel('Encerrar esta liga? O histórico de confrontos e ranking continua disponível.',()=>this._cancelarProgramacaoPk(this._pkAbertaId));
     });
     s.getElementById('btnPkExcluirDef').addEventListener('click',()=>{
-      this._confirmarDel('Excluir esta liga DEFINITIVAMENTE? Isso apaga pra sempre todo o histórico de confrontos e ranking dela — não dá pra desfazer.',()=>this._cancelarProgramacaoPk(this._pkAbertaId,true));
+      this._confirmarDel('Excluir esta liga DEFINITIVAMENTE? Isso apaga pra sempre todo o histórico de confrontos e ranking dela - não dá pra desfazer.',()=>this._cancelarProgramacaoPk(this._pkAbertaId,true));
     });
     s.getElementById('btnPkDetToggleAdd').addEventListener('click',()=>this._pkDetToggleAdd());
     s.getElementById('accPkPart').addEventListener('click',e=>{
@@ -4852,7 +4852,7 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('btnAgenteSenha')?.addEventListener('click',()=>this._alterarSenhaAgenteAtual());
     s.getElementById('btnAgenteExcluir')?.addEventListener('click',()=>{
       const nome=s.getElementById('agenteDetalheTitulo')?.textContent||'este agente';
-      this._confirmarDel(`Excluir "${nome}" definitivamente? Só funciona se ele nunca teve streamer vinculado — caso já tenha histórico, use Editar e mude o status pra Inativo em vez de excluir.`,()=>this._excluirAgenteAtual());
+      this._confirmarDel(`Excluir "${nome}" definitivamente? Só funciona se ele nunca teve streamer vinculado - caso já tenha histórico, use Editar e mude o status pra Inativo em vez de excluir.`,()=>this._excluirAgenteAtual());
     });
     s.getElementById('btnVincularStreamer')?.addEventListener('click',()=>{ const fb=s.getElementById('formVincularBox'); if(fb)fb.style.display=fb.style.display==='none'?'':'none'; });
     s.getElementById('btnCancelarVincular')?.addEventListener('click',()=>{ s.getElementById('formVincularBox').style.display='none'; s.getElementById('resultadoUidAgente').style.display='none'; s.getElementById('inpUidVincular').value=''; s.getElementById('btnConfirmarVincular').style.display='none'; this._buscaVincularStreamer=null; });
@@ -4991,7 +4991,7 @@ class DimaiorAdmin extends HTMLElement {
             <input id="notifUrl" type="text" placeholder="/painel/   ·   /painel/#carteira" style="${inp}"/>
           </div>
           <div style="padding:10px 14px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:var(--rs);font-size:11px;color:var(--gold)">
-            ${this._ico('warning',12)} Não escreva valor, saldo ou chave PIX — a notificação aparece na tela bloqueada. O detalhe fica no painel.
+            ${this._ico('warning',12)} Não escreva valor, saldo ou chave PIX - a notificação aparece na tela bloqueada. O detalhe fica no painel.
           </div>
           <div><button class="btn btn-g" id="btnEnviarNotif">${this._ico('send',13)} Enviar</button></div>
           <div id="notifResultado" style="font-size:12px;color:var(--t3)"></div>
@@ -5044,8 +5044,8 @@ class DimaiorAdmin extends HTMLElement {
     const r=await this._api('POST','/admin/notificacoes/enviar',body);
     btn.disabled=false;
     if(r&&(r.ok||r.event_id)){
-      const n=(r.enqueued!=null)?r.enqueued:'—';
-      out.textContent=`Enviado. ${n} aparelho(s) na fila — as notificações saem em até 2 minutos.`;
+      const n=(r.enqueued!=null)?r.enqueued:'-';
+      out.textContent=`Enviado. ${n} aparelho(s) na fila - as notificações saem em até 2 minutos.`;
       this._toast('Notificação enviada');
       s.getElementById('notifTitulo').value='';s.getElementById('notifMsg').value='';s.getElementById('notifUrl').value='';
     }else{
@@ -5095,7 +5095,7 @@ class DimaiorAdmin extends HTMLElement {
         ?`<span class="com-status" style="background:rgba(0,212,212,.1);color:var(--cyan);border-color:rgba(0,212,212,.3)">${this._ii('pin',11)}Importante</span>`
         :`<span class="com-status" style="background:rgba(240,192,64,.1);color:var(--gold);border-color:rgba(240,192,64,.3)">${this._ii('zap',11)}Rápido</span>`;
       const destaqueBadge=c.destaque?`<span class="com-status" style="background:rgba(240,192,64,.15);color:var(--gold);border-color:rgba(240,192,64,.3)">${this._ii('star',11)}Destaque</span>`:'';
-      const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'—';
+      const dataStr=c.criado_em?this._fdtCurto(c.criado_em):'-';
       const atualStr=c.atualizado_em&&c.atualizado_em!==c.criado_em?` · atualizado ${this._fdtCurto(c.atualizado_em)}`:'';
       const thumbHtml=c.imagem_url
         ?this._ehVideo(c.imagem_url)
@@ -5144,7 +5144,7 @@ class DimaiorAdmin extends HTMLElement {
     for(let i=-1;i<=2;i++){const d=new Date(h.getFullYear(),h.getMonth()+i,1);out.push({v:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,t:`${NM[d.getMonth()]}/${d.getFullYear()}`});}
     return out;
   }
-  _evMesRotulo(v){const o=this._evMesesOpcoes().find(x=>x.v===v);if(o)return o.t;const m=/^(\d{4})-(\d{2})$/.exec(v||'');return m?`${m[2]}/${m[1]}`:'—';}
+  _evMesRotulo(v){const o=this._evMesesOpcoes().find(x=>x.v===v);if(o)return o.t;const m=/^(\d{4})-(\d{2})$/.exec(v||'');return m?`${m[2]}/${m[1]}`:'-';}
   _evDias(dias){
     const a=[...(dias||[])].sort((x,y)=>x-y),out=[];let ini=null,ant=null;
     const fecha=()=>{if(ini===null)return;out.push(ini===ant?String(ini):(ant===ini+1?`${ini} e ${ant}`:`${ini} a ${ant}`));};
@@ -5234,7 +5234,7 @@ class DimaiorAdmin extends HTMLElement {
       const per=this._evPeriodoEf(e);
       const insc=e.link_inscricao?`<div class="ev-insc"><span class="ev-insc-t">Inscrição pelo painel:</span><button type="button" class="btn btn-sm ${e.inscricao_aberta?'btn-g':'btn-o'}" data-ev-insc-toggle="${e.id}" data-v="${e.inscricao_aberta?'0':'1'}" ${e.form_url?'':'disabled'}>${e.inscricao_aberta?'Abertas':'Fechadas'}</button><label class="ev-insc-t">inscrições até o dia <input type="number" min="1" max="31" class="ev-data ev-dia" data-ev-insc-ate="${e.id}" data-mes="${e.mes}" value="${e.inscricao_ate&&String(e.inscricao_ate).slice(0,7)===e.mes?Number(String(e.inscricao_ate).slice(8,10)):''}" placeholder="${e.periodo_insc?e.periodo_insc.ate:''}"></label>${per?`<span class="com-data ev-insc-q">${per.manual?'Definido por você':'Detectado na planilha'}: inscrições dias ${per.de} a ${per.ate} · evento depois disso</span>`:''}<span class="com-data ev-insc-q" title="Perguntas lidas do formulário da plataforma">${this._esc(this._evPerguntasTxt(e))}</span><button type="button" class="btn btn-o btn-sm" data-ev-reler="${e.id}">${this._ico('refresh',12)} Reler formulário</button>${ci.total?`<button type="button" class="btn btn-o btn-sm" data-ev-ver-insc="1">${this._ico('users',12)} ${ci.total} inscrito(s)${ci.novas?` · ${ci.novas} nova(s)`:''}</button>`:''}</div>`:'';
       return`<div class="com-item ev-item ${e.status==='ativo'?'is-important':'is-fast'}">
-        <div class="com-preview">${thumb}<div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1)">${this._esc(e.nome)}${e.nome_zh?` <span class="com-data" style="margin-left:4px">${this._esc(e.nome_zh)}</span>`:''}</strong><span class="com-texto">Dias ${this._esc(this._evDias(e.dias)||'—')}</span><div class="ev-links">${links}</div></div></div>
+        <div class="com-preview">${thumb}<div class="com-main"><strong style="display:block;font-size:13px;color:var(--t1)">${this._esc(e.nome)}${e.nome_zh?` <span class="com-data" style="margin-left:4px">${this._esc(e.nome_zh)}</span>`:''}</strong><span class="com-texto">Dias ${this._esc(this._evDias(e.dias)||'-')}</span><div class="ev-links">${links}</div></div></div>
         <div class="com-acoes">
           <button class="btn btn-o btn-sm" data-ev-img="${e.id}">${this._ico('image',12)} ${e.imagem_url?'Trocar imagem':'Imagem'}</button>
           ${e.status==='ativo'?`<button class="btn btn-o btn-sm" data-ev-st="${e.id}" data-v="oculto">${this._ico('eye_off',12)} Ocultar</button>`:`<button class="btn btn-g btn-sm" data-ev-st="${e.id}" data-v="ativo">${this._ico('check',12)} Ativar</button>`}
@@ -5259,7 +5259,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // Regras (Google Doc / PDF do Drive) e inscrição (Google Forms aberto, sem login) abrem
-  // numa janela aqui dentro — igual o streamer vê no painel dele. O link continua sendo um
+  // numa janela aqui dentro - igual o streamer vê no painel dele. O link continua sendo um
   // link normal (nova aba) pra o que não dá pra incorporar.
   _evEmbedRegras(u){
     const s=String(u||'');
@@ -5289,7 +5289,7 @@ class DimaiorAdmin extends HTMLElement {
   // ── INSCRIÇÕES NOS EVENTOS ──────────────────────────────────────────────────
   // O streamer se inscreve no painel dele. Aqui o admin vê quem se inscreveu, abre o
   // formulário da plataforma JÁ PREENCHIDO ("Inscrever fulano"), envia e marca como
-  // enviado — a linha fica verde e ele segue pro próximo.
+  // enviado - a linha fica verde e ele segue pro próximo.
   // Período de inscrição: "inscrições até o dia N" (definido aqui) vale mais que o detectado na planilha
   _evPeriodoEf(e){
     const dias=[...(e.dias||[])].sort((a,b)=>a-b);if(!dias.length||!e.link_inscricao)return null;
@@ -5301,7 +5301,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!e.form_url)return'o link de inscrição não é um Google Forms';
     const ps=e.form_perguntas.filter(q=>!q.auto);
     if(!ps.length)return'só interesse (o formulário não pede horário)';
-    return ps.map(q=>`${String(q.rotulo||'').slice(0,40)} — ${q.tipo==='multipla'?'várias opções':q.tipo==='unica'?'escolha única':'texto'}${q.opcoes?.length?` (${q.opcoes.length})`:''}`).join(' · ');
+    return ps.map(q=>`${String(q.rotulo||'').slice(0,40)} - ${q.tipo==='multipla'?'várias opções':q.tipo==='unica'?'escolha única':'texto'}${q.opcoes?.length?` (${q.opcoes.length})`:''}`).join(' · ');
   }
   _evInscResposta(e,i){
     const t=(e.form_perguntas||[]).filter(q=>!q.auto).map(q=>{const v=i.respostas?.[q.id];return v==null||v===''?'':(Array.isArray(v)?v.join(', '):String(v));}).filter(Boolean).join(' · ');
@@ -5352,8 +5352,8 @@ class DimaiorAdmin extends HTMLElement {
         const ok=i.status==='enviado',link=this._evFormLink(e,i),primeiro=String(i.nome||'streamer').trim().split(/\s+/)[0];
         const dt=i.enviado_em?new Date(i.enviado_em).toLocaleDateString('pt-BR'):'';
         return`<div class="insc-row${ok?' ok':''}${!i.visto?' nova':''}" data-insc="${i.id}">
-          <div class="insc-nome"><b>${this._esc(i.nome||'—')}</b>${!i.visto?`<span class="insc-nova">NOVA</span>`:''}</div>
-          <div class="insc-ids"><button type="button" class="ev-chip" data-ins-copy="${this._esc(i.kwai_uid)}" title="Copiar UID">UID ${this._esc(i.kwai_uid)}</button><button type="button" class="ev-chip" data-ins-copy="${this._esc(i.kwai_id||'')}" title="Copiar ID Kwai">ID ${this._esc(i.kwai_id||'—')}</button></div>
+          <div class="insc-nome"><b>${this._esc(i.nome||'-')}</b>${!i.visto?`<span class="insc-nova">NOVA</span>`:''}</div>
+          <div class="insc-ids"><button type="button" class="ev-chip" data-ins-copy="${this._esc(i.kwai_uid)}" title="Copiar UID">UID ${this._esc(i.kwai_uid)}</button><button type="button" class="ev-chip" data-ins-copy="${this._esc(i.kwai_id||'')}" title="Copiar ID Kwai">ID ${this._esc(i.kwai_id||'-')}</button></div>
           <div class="insc-resp">${this._esc(this._evInscResposta(e,i))}</div>
           <div class="insc-acoes">${ok
             ?`<span class="com-status ativo">${this._ii('check',11)}Enviado ${dt}</span><button type="button" class="btn btn-o btn-sm" data-ins-st="${i.id}" data-v="inscrito">Desfazer</button>`
@@ -5401,7 +5401,7 @@ class DimaiorAdmin extends HTMLElement {
   async _eventoInscToggle(id,aberta){
     const r=await this._api('PATCH',`/admin/eventos/${id}`,{inscricao_aberta:aberta});
     if(!r?.ok){this._toast(r?.erro||'Erro ao atualizar','err');return;}
-    this._toast(aberta?'Inscrições abertas — o streamer já vê "Tenho interesse"':'Inscrições fechadas');
+    this._toast(aberta?'Inscrições abertas - o streamer já vê "Tenho interesse"':'Inscrições fechadas');
     this._carregarEventos(this._evMes,true);
   }
   async _eventoInscAte(id,mes,dia){
@@ -5413,7 +5413,7 @@ class DimaiorAdmin extends HTMLElement {
     }
     const r=await this._api('PATCH',`/admin/eventos/${id}`,{inscricao_ate:data});
     if(!r?.ok){this._toast(r?.erro||'Erro ao salvar','err');return;}
-    this._toast(data?`Inscrições até o dia ${Number(dia)} — o resto vira "evento"`:'Voltou ao período detectado na planilha');
+    this._toast(data?`Inscrições até o dia ${Number(dia)} - o resto vira "evento"`:'Voltou ao período detectado na planilha');
     this._carregarEventos(this._evMes,true);
   }
   async _eventoRelerForm(id){
@@ -5428,9 +5428,9 @@ class DimaiorAdmin extends HTMLElement {
     return(alts||[]).map(a=>{
       if(a.campo==='novo')return'Evento novo na planilha';
       if(a.campo==='removido')return'Saiu da planilha';
-      if(a.campo==='dias'||a.campo==='dias_pk')return`${ROT[a.campo]}: ${this._evDias(a.de)||'—'} → ${this._evDias(a.para)||'—'}`;
-      if(a.campo==='publico')return`Público: ${a.de||'—'} → ${a.para||'—'}`;
-      if(a.campo==='nome')return`Nome: ${a.de||'—'} → ${a.para||'—'}`;
+      if(a.campo==='dias'||a.campo==='dias_pk')return`${ROT[a.campo]}: ${this._evDias(a.de)||'-'} → ${this._evDias(a.para)||'-'}`;
+      if(a.campo==='publico')return`Público: ${a.de||'-'} → ${a.para||'-'}`;
+      if(a.campo==='nome')return`Nome: ${a.de||'-'} → ${a.para||'-'}`;
       return`${ROT[a.campo]||a.campo} mudou`;
     }).join(' · ');
   }
@@ -5452,7 +5452,7 @@ class DimaiorAdmin extends HTMLElement {
   async _eventoStatus(id,v){
     const r=await this._api('PATCH',`/admin/eventos/${id}`,{status:v});
     if(!r?.ok){this._toast(r?.erro||'Erro ao atualizar','err');return;}
-    this._toast(v==='ativo'?'Evento ativo — as streamers já veem':'Evento oculto');
+    this._toast(v==='ativo'?'Evento ativo - as streamers já veem':'Evento oculto');
     this._carregarEventos(this._evMes,true);
   }
 
@@ -5497,7 +5497,7 @@ class DimaiorAdmin extends HTMLElement {
     if(r?.ok)this._carregarEventos(this._evMes,true);
   }
 
-  // Confirmação neutra (verde) — o modal mC é vermelho/lixeira por padrão, de exclusão.
+  // Confirmação neutra (verde) - o modal mC é vermelho/lixeira por padrão, de exclusão.
   _confirmarAcao(msg,cb,rotulo='Confirmar'){
     const s=this.shadowRoot,ok=s.getElementById('mCOk');
     s.getElementById('mCMsg').textContent=msg;
@@ -5533,7 +5533,7 @@ class DimaiorAdmin extends HTMLElement {
     });
   }
 
-  // Vídeo de IA (Flow etc.) sai com ~22 Mbps e 16:9/21:9 — pesado demais pra
+  // Vídeo de IA (Flow etc.) sai com ~22 Mbps e 16:9/21:9 - pesado demais pra
   // home. Regrava no navegador já recortado em 1920×540 (32:9, corte central
   // igual ao object-fit:cover do site), sem áudio, ~3,5 Mbps. Leva o tempo do
   // próprio vídeo (reproduz em tempo real). Devolve null se já está leve e no
@@ -5571,7 +5571,7 @@ class DimaiorAdmin extends HTMLElement {
       await v.play();
       desenha();
       // Trava: se a aba for pro segundo plano o Chrome pausa o vídeo e o
-      // "ended" nunca chega — desiste e sobe o original.
+      // "ended" nunca chega - desiste e sobe o original.
       const teto=((isFinite(v.duration)&&v.duration>0?v.duration:60)*3+10)*1000;
       let t; const acabou=await Promise.race([
         new Promise(r=>{v.onended=()=>r(true);}),
@@ -5594,7 +5594,7 @@ class DimaiorAdmin extends HTMLElement {
       let otim=null;
       try{ otim=await this._otimizarVideo(file,p=>{onStatus?.(`otimizando vídeo… ${p}%`);this._upProg('Otimizando vídeo',p);}); }catch{ otim=null; }
       if(otim){ blob=otim; ct='video/mp4'; }
-      if(blob.size>20*1024*1024){this._toast('Vídeo muito grande (máx 20 MB) — abra o admin no Chrome ou Edge, que ele reduz o vídeo sozinho','err');return null;}
+      if(blob.size>20*1024*1024){this._toast('Vídeo muito grande (máx 20 MB) - abra o admin no Chrome ou Edge, que ele reduz o vídeo sozinho','err');return null;}
       onStatus?.('enviando…');
     }else if(/gif/i.test(file.type)){
       if(file.size>4*1024*1024){this._toast('GIF muito grande (máx 4 MB)','err');return null;}
@@ -5604,19 +5604,19 @@ class DimaiorAdmin extends HTMLElement {
     }else{
       try{
         blob=await this._resizeImageToBlob(file);
-        // iPhone antigo ignora 'image/webp' no toBlob e devolve PNG — usa o
+        // iPhone antigo ignora 'image/webp' no toBlob e devolve PNG - usa o
         // tipo real do blob, senão o servidor grava PNG rotulado como webp.
         ct=(blob.type&&/^image\/(webp|png|jpe?g)$/i.test(blob.type))?blob.type:'image/png';
       }catch{ blob=file; ct=file.type; }
     }
-    if(!/^video\//i.test(ct)&&blob.size>4*1024*1024){this._toast('Imagem muito grande (máx 4 MB) — tente uma menor','err');return null;}
+    if(!/^video\//i.test(ct)&&blob.size>4*1024*1024){this._toast('Imagem muito grande (máx 4 MB) - tente uma menor','err');return null;}
     let r;
     try{
       r=await this._postComProgresso(`${this.WORKER}/admin/upload?pasta=${encodeURIComponent(pasta)}`,ct,blob,/^video\//i.test(ct)?'Enviando vídeo':'Enviando imagem');
     }catch(er){ if(!er?.cancelado)this._toast('Sem conexão com o servidor','err'); return null; }
     if(r.status===401||r.status===403){this._doLogout();return null;}
     let d=null; try{ d=await r.json(); }catch{}
-    if(r.status===501){this._toast('Upload ainda não ligado no servidor — cole um link por enquanto','err');return null;}
+    if(r.status===501){this._toast('Upload ainda não ligado no servidor - cole um link por enquanto','err');return null;}
     if(!r.ok||!d?.ok||!d.url){this._toast(d?.erro||'Falha ao enviar a imagem','err');return null;}
     // Vídeo: sobe também uma CAPA (quadro do vídeo) e grava junto como #poster=.
     // No navegador da Xiaomi o vídeo vira essa imagem (ver js/utils/video-compat.js).
@@ -5749,7 +5749,7 @@ class DimaiorAdmin extends HTMLElement {
     mostra(s.getElementById('mComCamposTexto'),!soHome);
     s.querySelectorAll('#mComSecImportante [data-so-avisos]').forEach(el=>mostra(el,!soHome));
     const grid=s.getElementById('mComGridLinks'); if(grid) grid.style.gridTemplateColumns=soHome?'1fr':'1fr 1fr';
-    const lbl=s.getElementById('mComLinkUrlLbl'); if(lbl) lbl.textContent=soHome?'Link ao clicar no banner (opcional)':'Botão principal — Link';
+    const lbl=s.getElementById('mComLinkUrlLbl'); if(lbl) lbl.textContent=soHome?'Link ao clicar no banner (opcional)':'Botão principal - Link';
     mostra(s.getElementById('mComModoHint'),soHome);
     mostra(s.getElementById('mComPushWrap'),locais.includes('painel'));
   }
@@ -5770,14 +5770,14 @@ class DimaiorAdmin extends HTMLElement {
       const r=w/h, ok=Math.abs(r-32/9)/(32/9)<0.04;
       dim.style.color=ok?'var(--verde,#34d399)':'var(--warn,#fbbf24)';
       dim.textContent=ok
-        ?`${w} × ${h} px${extra} — tamanho certo`
-        :`${w} × ${h} px${extra} — vai aparecer só o que está na prévia`;
+        ?`${w} × ${h} px${extra} - tamanho certo`
+        :`${w} × ${h} px${extra} - vai aparecer só o que está na prévia`;
     };
     if(safe&&video&&vid){
       img.style.display='none'; img.removeAttribute('src');
       vid.style.display='block';
       vid.onloadedmetadata=()=>{const d=vid.duration;conferir(vid.videoWidth,vid.videoHeight,isFinite(d)&&d>0?`, ${Math.round(d)}s`:'');};
-      vid.onerror=()=>{if(dim){dim.style.color='var(--warn,#fbbf24)';dim.textContent='Não consegui carregar o vídeo — confira o link ou envie pelo botão.';}};
+      vid.onerror=()=>{if(dim){dim.style.color='var(--warn,#fbbf24)';dim.textContent='Não consegui carregar o vídeo - confira o link ou envie pelo botão.';}};
       vid.src=safe;
       wrap.style.display='block';
     }else if(safe){
@@ -6081,7 +6081,7 @@ class DimaiorAdmin extends HTMLElement {
     this._abrirModal('mVotResultado');
   }
 
-  // Carrega Chart.js sob demanda — só quando o admin abre um resultado.
+  // Carrega Chart.js sob demanda - só quando o admin abre um resultado.
   // Nenhuma outra página do admin usa gráfico de canvas hoje.
   async _loadChartJS(){
     if(typeof Chart!=='undefined') return;
@@ -6095,7 +6095,7 @@ class DimaiorAdmin extends HTMLElement {
 
   async _renderResultadoVotacao(d){
     const s=this.shadowRoot;
-    s.getElementById('mVotResTit').textContent=`Resultado — ${d.votacao.titulo}`;
+    s.getElementById('mVotResTit').textContent=`Resultado - ${d.votacao.titulo}`;
     s.getElementById('mVotResCards').innerHTML=`
       <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('users',22)}</div><div class="dc2-val">${d.total_participantes}</div><div class="dc2-lbl">Participantes</div></div>
       <div class="dc2 dc2-verde"><div class="dc2-ico">${this._ico('vote',22)}</div><div class="dc2-val">${d.total_votos}</div><div class="dc2-lbl">Votos</div></div>
@@ -6195,13 +6195,13 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   _renderHistoricoLiveCards(lives){
-    if(!lives.length)return this._empty('play_circle','Nenhuma live encontrada — pode ainda não ter sido capturada (a captura roda quando a live encerra + de madrugada como reforço).');
+    if(!lives.length)return this._empty('play_circle','Nenhuma live encontrada - pode ainda não ter sido capturada (a captura roda quando a live encerra + de madrugada como reforço).');
     const fmtDur=seg=>{
-      if(seg==null)return'—';
+      if(seg==null)return'-';
       const h=Math.floor(seg/3600),m=Math.floor((seg%3600)/60),sg=seg%60;
       return h>0?`${h}:${String(m).padStart(2,'0')}:${String(sg).padStart(2,'0')}`:`${m}:${String(sg).padStart(2,'0')}`;
     };
-    const fmtDataHora=iso=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+    const fmtDataHora=iso=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
     return`
       <div style="font-size:11px;color:var(--t3);margin:16px 2px 12px">${lives.length} live(s) encontrada(s)</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
@@ -6219,7 +6219,7 @@ class DimaiorAdmin extends HTMLElement {
                 ${this._avatar(l.foto,l.nome)}
                 <div style="font-size:12px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(l.nome||l.kwai_uid||'')}</div>
               </div>
-              <div style="font-size:11px;color:var(--t3)">${fmtDataHora(l.inicio_em)} — ${fmtDataHora(l.fim_em)}</div>
+              <div style="font-size:11px;color:var(--t3)">${fmtDataHora(l.inicio_em)} - ${fmtDataHora(l.fim_em)}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--t2)">
                 <div>${this._dia()} ${this._num(l.diamantes)}</div>
                 <div>${this._ii('eye',12)}${this._num(l.espectadores)}</div>
@@ -6264,7 +6264,7 @@ class DimaiorAdmin extends HTMLElement {
     });
     el.querySelectorAll('[data-pk-excluir-def]').forEach(b=>b.addEventListener('click',()=>{
       this._confirmarDel(
-        'Excluir esta liga DEFINITIVAMENTE? Isso apaga pra sempre todo o histórico de confrontos e ranking dela — não dá pra desfazer.',
+        'Excluir esta liga DEFINITIVAMENTE? Isso apaga pra sempre todo o histórico de confrontos e ranking dela - não dá pra desfazer.',
         ()=>this._cancelarProgramacaoPk(b.dataset.pkExcluirDef,true));
     }));
   }
@@ -6321,7 +6321,7 @@ class DimaiorAdmin extends HTMLElement {
     const d=await this._api('GET',`/admin/pk/elegiveis?minimo=${minimo}&periodo=${periodo}`);
     if(!d?.ok){area.innerHTML=this._empty('warning','Erro ao buscar elegíveis');return;}
     this._pkElegiveis=d.streamers||[];
-    // pré-marca quem já bate o critério — admin pode desmarcar/marcar livremente
+    // pré-marca quem já bate o critério - admin pode desmarcar/marcar livremente
     this._pkElegiveis.forEach(st=>{
       if(st.elegivel && !this._pkSelecionados.has(st.kwai_uid)){
         this._pkSelecionados.set(st.kwai_uid,{...st,origem:'elegivel'});
@@ -6434,22 +6434,22 @@ class DimaiorAdmin extends HTMLElement {
 
     // Sem agendamento, "Ativar" já dispara a geração do dia 1 na hora (a
     // liga começa hoje). Com início/fim agendados, o motor só gera pares
-    // dentro dessa janela — a mensagem avisa isso pra não parecer travado.
+    // dentro dessa janela - a mensagem avisa isso pra não parecer travado.
     const hojeISO=(()=>{const h=new Date();return `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`;})();
     const fmtBr=iso=>iso?new Date(iso+'T00:00:00').toLocaleDateString('pt-BR'):null;
     let dica;
     if(st==='rascunho'){
       dica=d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO
-        ? `Clique em "Ativar" — a rodada 1 já é criada na hora, datada pra ${fmtBr(d.programacao.data_inicio)} (fica visível com antecedência), mas só fecha e gera as próximas de verdade a partir dessa data.`
-        :'Clique em "Ativar" pra começar a liga hoje — os confrontos do dia 1 são gerados automaticamente na hora, por desempenho do mês anterior.';
+        ? `Clique em "Ativar" - a rodada 1 já é criada na hora, datada pra ${fmtBr(d.programacao.data_inicio)} (fica visível com antecedência), mas só fecha e gera as próximas de verdade a partir dessa data.`
+        :'Clique em "Ativar" pra começar a liga hoje - os confrontos do dia 1 são gerados automaticamente na hora, por desempenho do mês anterior.';
     } else if(st==='ativa'){
       dica='Liga rodando sozinha: todo dia à meia-noite ela fecha o dia anterior (comparando diamantes reais) e já gera os pares seguintes. Use "Fechar agora" só se quiser forçar/reprocessar na hora.';
-      if(d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO) dica=`Liga ativa, início agendado pra ${fmtBr(d.programacao.data_inicio)} — a rodada 1 já foi gerada e fica visível com antecedência, mas só fecha de verdade a partir dessa data.`;
+      if(d.programacao.data_inicio&&d.programacao.data_inicio>hojeISO) dica=`Liga ativa, início agendado pra ${fmtBr(d.programacao.data_inicio)} - a rodada 1 já foi gerada e fica visível com antecedência, mas só fecha de verdade a partir dessa data.`;
       else if(d.programacao.data_fim) dica+=` Encerra automaticamente depois de ${fmtBr(d.programacao.data_fim)}.`;
     } else if(st==='pausada'){
-      dica='Liga pausada — fecha o dia em andamento, mas não gera pares novos até você clicar em "Ativar" de novo.';
+      dica='Liga pausada - fecha o dia em andamento, mas não gera pares novos até você clicar em "Ativar" de novo.';
     } else {
-      dica='Liga encerrada — histórico de confrontos e ranking continua disponível.';
+      dica='Liga encerrada - histórico de confrontos e ranking continua disponível.';
     }
     s.getElementById('pkFecharAgoraStatus').textContent=dica;
 
@@ -6482,7 +6482,7 @@ class DimaiorAdmin extends HTMLElement {
 
   async _pausarLigaPk(id){
     const r=await this._api('PUT',`/admin/pk/programacoes/${id}`,{status:'pausada'});
-    if(r?.ok){this._toast('Liga pausada — fecha o dia em andamento, mas não gera pares novos.');this._abrirDetalhePk(id);}
+    if(r?.ok){this._toast('Liga pausada - fecha o dia em andamento, mas não gera pares novos.');this._abrirDetalhePk(id);}
     else this._toast(r?.erro||'Erro ao pausar liga','err');
   }
 
@@ -6510,12 +6510,12 @@ class DimaiorAdmin extends HTMLElement {
     if(r.fechados)partes.push(`${r.fechados} confronto(s) fechado(s)`);
     if(r.gerados)partes.push(`${r.gerados} par(es) gerado(s)`);
     // Só usa o fallback genérico quando não há aviso nenhum explicando o
-    // motivo real (ex.: "liga ainda não começou") — senão a mensagem batia
+    // motivo real (ex.: "liga ainda não começou") - senão a mensagem batia
     // de frente com o aviso, tipo "pares já existem" + "ainda não começou".
     if(!partes.length && !(r.avisos&&r.avisos.length))partes.push('nada pra fazer agora (pares já existem pra essa data)');
     const msg=[...partes,...(r.avisos||[])].join(' · ');
     if(!silencioso)this._toast(partes.join(', '));
-    // _abrirDetalhePk limpa pkFecharAgoraStatus ao recarregar — escreve a
+    // _abrirDetalhePk limpa pkFecharAgoraStatus ao recarregar - escreve a
     // mensagem só DEPOIS do reload, senão o "Processando..." vira "" e a
     // mensagem some antes do usuário conseguir ler.
     await this._abrirDetalhePk(id);
@@ -6547,7 +6547,7 @@ class DimaiorAdmin extends HTMLElement {
     return parseInt(sel);
   }
 
-  // Roster da liga já em andamento — cada checkbox chama a API na hora (o
+  // Roster da liga já em andamento - cada checkbox chama a API na hora (o
   // roster é dinâmico: não existe "confirmar" em lote, diferente do form de
   // criação, que ainda não gravou nada no banco.
   async _buscarElegiveisPkDet(){
@@ -6610,7 +6610,7 @@ class DimaiorAdmin extends HTMLElement {
     const opcoes=['pendente','vitoria_a','vitoria_b','empate','cancelado'];
     const hoje=new Date(),pad=n=>String(n).padStart(2,'0');
     const isoHoje=`${hoje.getFullYear()}-${pad(hoje.getMonth()+1)}-${pad(hoje.getDate())}`;
-    // agrupa por data — mais recente primeiro (a lista já vem ordenada assim do Worker)
+    // agrupa por data - mais recente primeiro (a lista já vem ordenada assim do Worker)
     const porData=new Map();
     lista.forEach(c=>{if(!porData.has(c.data_confronto))porData.set(c.data_confronto,[]);porData.get(c.data_confronto).push(c);});
     el.innerHTML=[...porData.entries()].map(([data,confs])=>`
@@ -6718,7 +6718,7 @@ class DimaiorAdmin extends HTMLElement {
 
   // Paginado (25/página, igual ao Rank do Mês) + tabela no desktop / cards
   // no mobile (a tabela de 10 colunas não cabia na tela e não tinha limite
-  // de altura — igual ao padrão de _carregarRankingAnoStatus/_carregarRanking).
+  // de altura - igual ao padrão de _carregarRankingAnoStatus/_carregarRanking).
   _renderRankingPk(){
     const el=this.shadowRoot.getElementById('pkRankingArea');
     const lista=this._pkRankingLista||[];
@@ -6745,7 +6745,7 @@ class DimaiorAdmin extends HTMLElement {
           <td style="text-align:center;color:var(--verm)">${r.derrotas}</td>
           <td style="text-align:center;color:var(--t3)">${r.empates}</td>
           <td style="text-align:center;color:var(--t3)">${r.pendentes}</td>
-          <td style="text-align:center">${r.aproveitamento!=null?r.aproveitamento+'%':'—'}</td>
+          <td style="text-align:center">${r.aproveitamento!=null?r.aproveitamento+'%':'-'}</td>
           <td style="text-align:center;font-weight:700;color:var(--cyan)">${r.pontos}</td>
         </tr>`).join('')}
       </tbody>
@@ -6829,7 +6829,7 @@ class DimaiorAdmin extends HTMLElement {
     const render=()=>{
       const ehMobile=window.matchMedia('(max-width:520px)').matches;
       const mesB=new Date(mesBase.getFullYear(),mesBase.getMonth()+1,1);
-      const fmtBr=(d)=>d?d.toLocaleDateString('pt-BR'):'—';
+      const fmtBr=(d)=>d?d.toLocaleDateString('pt-BR'):'-';
       const gradeMeses=ehMobile
         ?this._gerarGradeMes(mesBase.getFullYear(),mesBase.getMonth(),inicio,fim)
         :`${this._gerarGradeMes(mesBase.getFullYear(),mesBase.getMonth(),inicio,fim)}${this._gerarGradeMes(mesB.getFullYear(),mesB.getMonth(),inicio,fim)}`;
@@ -6840,7 +6840,7 @@ class DimaiorAdmin extends HTMLElement {
           <button type="button" class="dm-cal-nav" id="dm-cal-next">›</button>
         </div>
         <div class="dm-cal-footer">
-          <span class="dm-cal-resumo">${fmtBr(inicio)} — ${fmtBr(fim)}</span>
+          <span class="dm-cal-resumo">${fmtBr(inicio)} - ${fmtBr(fim)}</span>
           <div style="display:flex;gap:8px">
             <button type="button" class="btn btn-o btn-sm" id="dm-cal-cancelar">Cancelar</button>
             <button type="button" class="btn btn-sm" id="dm-cal-confirmar" ${inicio&&fim?'':'disabled'}>Confirmar</button>
@@ -6906,11 +6906,11 @@ class DimaiorAdmin extends HTMLElement {
     const vivo=d.status==='COOKIE_VIVO';
     const cor=vivo?'var(--verde)':'var(--verm)';
     const ico=vivo?this._ico('check_c',16):this._ico('x_circle',16);
-    const txt=vivo?`Cookie ativo — ${d.total_itens??0} live(s) visível(is) no histórico`:'Cookie expirado ou inválido — precisa atualizar';
+    const txt=vivo?`Cookie ativo - ${d.total_itens??0} live(s) visível(is) no histórico`:'Cookie expirado ou inválido - precisa atualizar';
     el.style.cssText='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:10px;font-size:13px;background:'+(vivo?'rgba(74,222,128,.07)':'rgba(248,113,113,.07)')+';border:1px solid '+(vivo?'rgba(74,222,128,.3)':'rgba(248,113,113,.3)');
     el.innerHTML=`
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="color:${cor};display:flex;align-items:center;gap:6px">${ico} <strong>${this._esc(d.status??'—')}</strong></span>
+        <span style="color:${cor};display:flex;align-items:center;gap:6px">${ico} <strong>${this._esc(d.status??'-')}</strong></span>
         <span style="color:var(--t2)">${txt}</span>
       </div>
       ${this._renderTempoCookie(d.atualizado_em)}`;
@@ -6925,11 +6925,11 @@ class DimaiorAdmin extends HTMLElement {
     let nivel,cor,bg;
     if(horas<18){nivel='Saudável';cor='var(--verde)';bg='rgba(74,222,128,.12)';}
     else if(horas<24){nivel='Moderado';cor='var(--gold)';bg='rgba(240,192,64,.12)';}
-    else{nivel='Risco — atualize o cookie';cor='var(--verm)';bg='rgba(248,113,113,.12)';}
+    else{nivel='Risco - atualize o cookie';cor='var(--verm)';bg='rgba(248,113,113,.12)';}
     const h=Math.floor(Math.max(0,horas));
     const m=Math.round((horas-h)*60);
     const tempoTxt=h>0?`${h}h${m>0?` ${m}min`:''}`:`${m}min`;
-    return `<div style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 10px;border-radius:8px;background:${bg};color:${cor};width:fit-content;font-weight:700">${nivel} — atualizado há ${tempoTxt}</div>`;
+    return `<div style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 10px;border-radius:8px;background:${bg};color:${cor};width:fit-content;font-weight:700">${nivel} - atualizado há ${tempoTxt}</div>`;
   }
   async _atualizarCookie(){
     const s=this.shadowRoot;
@@ -7014,10 +7014,10 @@ class DimaiorAdmin extends HTMLElement {
       }
       if(job.status==='processando'){
         const prog=job.progresso??0;
-        const diaAtual=job.dia_atual??'—';
+        const diaAtual=job.dia_atual??'-';
         const pct=totalDias>0?Math.round(((prog)/totalDias)*100):0;
         statusEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px;font-size:12px;padding:10px 0">
-          <div style="display:flex;align-items:center;gap:8px;color:var(--t3)">${this._ico('refresh',13)} Dia ${prog+1} de ${totalDias} — <strong style="color:var(--t1)">${diaAtual}</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;color:var(--t3)">${this._ico('refresh',13)} Dia ${prog+1} de ${totalDias} - <strong style="color:var(--t1)">${diaAtual}</strong></div>
           <div style="height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden">
             <div style="height:100%;width:${pct}%;background:var(--cyan);transition:width .4s"></div>
           </div>
@@ -7028,10 +7028,10 @@ class DimaiorAdmin extends HTMLElement {
       if(job.status==='concluido'){
         statusEl.style.display='none';
         resultEl.style.display='block';
-        const fin=job.finalizado_em?new Date(job.finalizado_em).toLocaleString('pt-BR'):'—';
+        const fin=job.finalizado_em?new Date(job.finalizado_em).toLocaleString('pt-BR'):'-';
         resultEl.textContent=[
           `Modo:        Correção assíncrona concluída`,
-          `Período:     ${job.periodo??periodo??'—'}`,
+          `Período:     ${job.periodo??periodo??'-'}`,
           `Dias:        ${job.dias_processados??totalDias} processado(s)`,
           `Upserts:     ${job.resumo?.upserts??0}`,
           `Finalizado:  ${fin}`,
@@ -7050,16 +7050,16 @@ class DimaiorAdmin extends HTMLElement {
 
   _exibirResumoCorrecao(d,resultEl){
     const linhas=[
-      `Modo:        ${d.modo||d.status||'—'}`,
-      `Período:     ${d.periodo??'—'}`,
-      `Total Kwai:  ${d.total_kwai_bruto??'—'} lives brutas`,
-      `Válidos:     ${d.total_valido??'—'}`,
+      `Modo:        ${d.modo||d.status||'-'}`,
+      `Período:     ${d.periodo??'-'}`,
+      `Total Kwai:  ${d.total_kwai_bruto??'-'} lives brutas`,
+      `Válidos:     ${d.total_valido??'-'}`,
       `Inseridas:   ${d.inseridas?.length??0}`,
       `Corrigidas:  ${d.corrigidas?.length??0}`,
       `Ignoradas (recentes): ${d.ignoradas_recentes??0}`,
       `Ignoradas (iguais):   ${d.ignoradas_iguais??0}`,
       `Erros:       ${d.erros?.length??0}`,
-      `Duração:     ${d.duracao_segundos??'—'}s`,
+      `Duração:     ${d.duracao_segundos??'-'}s`,
     ];
     if(d.inseridas?.length>0){
       linhas.push('','── Inseridas ──');
@@ -7082,12 +7082,12 @@ class DimaiorAdmin extends HTMLElement {
     el.textContent='Carregando...';
     const d=await this._api('GET','/admin/monitor/debug-buffer');
     if(!d||d.erro){el.innerHTML=`<span style="color:var(--verm)">${this._esc(d?.erro||'Erro de conexão')}</span>`;return;}
-    if(!d.total_no_buffer){el.innerHTML='<span style="color:var(--verde)">Buffer vazio — nenhum dado pendente.</span>';return;}
+    if(!d.total_no_buffer){el.innerHTML='<span style="color:var(--verde)">Buffer vazio - nenhum dado pendente.</span>';return;}
     el.innerHTML=`<div style="margin-bottom:8px;color:var(--cyan);font-weight:600">${d.total_no_buffer} item(s) no buffer</div>`
       +`<div style="display:flex;flex-direction:column;gap:4px">${(d.itens||[]).slice(0,30).map(i=>
         `<div style="display:flex;gap:8px;font-size:11px;color:var(--t2);border-bottom:1px solid var(--brddim);padding-bottom:4px">
-          <span style="color:var(--t3);min-width:80px">${i.data||'—'}</span>
-          <span style="flex:1">${this._esc(i.nome||'—')}</span>
+          <span style="color:var(--t3);min-width:80px">${i.data||'-'}</span>
+          <span style="flex:1">${this._esc(i.nome||'-')}</span>
           <span style="color:var(--cyan)">${i.diamantes??0} ${this._dia()}</span>
           <span style="color:var(--t3)">${i.minutos_live??0}min</span>
         </div>`).join('')}
@@ -7129,7 +7129,7 @@ class DimaiorAdmin extends HTMLElement {
       s.getElementById('iLibManual').checked=!!match.impulso_liberado_manual;
       s.getElementById('iLibAutomatico').checked=!!match.impulso_liberado_automatico;
     } else {
-      infoEl.innerHTML=`<span style="color:var(--verm)">UID: ${this._esc(uid)} — sem conta criada ainda (precisa ter cadastro pra liberar).</span>`;
+      infoEl.innerHTML=`<span style="color:var(--verm)">UID: ${this._esc(uid)} - sem conta criada ainda (precisa ter cadastro pra liberar).</span>`;
       s.getElementById('iLibManual').checked=false;
       s.getElementById('iLibAutomatico').checked=false;
     }
@@ -7165,8 +7165,8 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div class="bloq-lista">${lista.map(l=>`
       <div class="bloq-item">
         <div class="bloq-info">
-          <div class="bloq-uid">${this._ico('unlock',13)} ${this._esc(l.nome)} <span style="color:var(--t3);font-weight:400">— UID: ${this._esc(l.kwai_uid)}</span></div>
-          <div class="bloq-motivo">${l.manual?'<span style="color:var(--verde)">Manual '+this._ico('check',11)+'</span>':'<span style="color:var(--t3)">Manual —</span>'} &nbsp;•&nbsp; ${l.automatico?'<span style="color:var(--verde)">Automático '+this._ico('check',11)+'</span>':'<span style="color:var(--t3)">Automático —</span>'}</div>
+          <div class="bloq-uid">${this._ico('unlock',13)} ${this._esc(l.nome)} <span style="color:var(--t3);font-weight:400"> - UID: ${this._esc(l.kwai_uid)}</span></div>
+          <div class="bloq-motivo">${l.manual?'<span style="color:var(--verde)">Manual '+this._ico('check',11)+'</span>':'<span style="color:var(--t3)">Manual - </span>'} &nbsp;•&nbsp; ${l.automatico?'<span style="color:var(--verde)">Automático '+this._ico('check',11)+'</span>':'<span style="color:var(--t3)">Automático - </span>'}</div>
         </div>
         <button class="btn btn-o btn-sm lib-rev" data-rev="${this._esc(l.kwai_uid)}" style="border-color:rgba(248,113,113,.4);color:var(--verm)">${this._ico('lock_r',12)} Revogar Tudo</button>
       </div>`).join('')}</div>`;
@@ -7254,7 +7254,7 @@ class DimaiorAdmin extends HTMLElement {
     el.innerHTML=`<div class="bloq-lista">${lista.map(p=>`
       <div class="bloq-item">
         <div class="bloq-info">
-          <div class="bloq-uid">${this._ico('award',13)} ${this._esc(p.nome)} <span style="color:var(--t3);font-weight:400">— UID: ${this._esc(p.kwai_uid)} · ${p.quantidade} usos/semana${p.dias_mes_anterior!=null?` · ${p.dias_mes_anterior} dias no mês passado`:''}</span></div>
+          <div class="bloq-uid">${this._ico('award',13)} ${this._esc(p.nome)} <span style="color:var(--t3);font-weight:400"> - UID: ${this._esc(p.kwai_uid)} · ${p.quantidade} usos/semana${p.dias_mes_anterior!=null?` · ${p.dias_mes_anterior} dias no mês passado`:''}</span></div>
           <div class="bloq-motivo">
             <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="ma-manual" data-uid="${this._esc(p.kwai_uid)}" ${p.ativo_manual?'checked':''}/> Manual</label>
             &nbsp;•&nbsp;
@@ -7306,7 +7306,7 @@ class DimaiorAdmin extends HTMLElement {
       el.innerHTML=`<div style="padding:12px 16px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:var(--rs);font-size:12px;color:var(--amber-txt);display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Ainda não há captura do roster da Kwai este mês. Clique em "Atualizar Roster" pra buscar agora, ou aguarde a captura automática diária.</div>`;
     } else if(d.comparacao_fonte==='atividade'){
       el.style.display='block';
-      el.innerHTML=`<div style="padding:12px 16px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Ainda não há snapshot do roster do mês anterior — "Novo"/"Saiu" abaixo estão baseados em atividade (fez diamante ou não), não no registro oficial da Kwai. A partir do próximo mês passa a usar o registro oficial, mais preciso.</div>`;
+      el.innerHTML=`<div style="padding:12px 16px;background:rgba(0,212,212,.06);border:1px solid rgba(0,212,212,.2);border-radius:var(--rs);font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px">${this._ico('warning',13)} Ainda não há snapshot do roster do mês anterior - "Novo"/"Saiu" abaixo estão baseados em atividade (fez diamante ou não), não no registro oficial da Kwai. A partir do próximo mês passa a usar o registro oficial, mais preciso.</div>`;
     } else {
       el.style.display='none';
     }
@@ -7323,8 +7323,8 @@ class DimaiorAdmin extends HTMLElement {
       <div class="dc2 dc2-indigo"><div class="dc2-ico">${this._ico('users',26)}</div><div class="dc2-val">${total}</div><div class="dc2-lbl">Total</div></div>
       <div class="dc2 dc2-verde"><div class="dc2-ico">${this._ico('check_c',26)}</div><div class="dc2-val">${ativos}</div><div class="dc2-lbl">Ativos (${this._esc(d.mes_atual)})</div></div>
       <div class="dc2 dc2-cyan"><div class="dc2-ico">${this._ico('clock_r',26)}</div><div class="dc2-val">${inativos}</div><div class="dc2-lbl">Inativos</div></div>
-      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('star',26)}</div><div class="dc2-val">${novos===null?'—':novos}</div><div class="dc2-lbl">Novos</div></div>
-      <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${saiu===null?'—':saiu}</div><div class="dc2-lbl">Saíram</div></div>`;
+      <div class="dc2 dc2-gold"><div class="dc2-ico">${this._ico('star',26)}</div><div class="dc2-val">${novos===null?'-':novos}</div><div class="dc2-lbl">Novos</div></div>
+      <div class="dc2 dc2-verm"><div class="dc2-ico">${this._ico('warning',26)}</div><div class="dc2-val">${saiu===null?'-':saiu}</div><div class="dc2-lbl">Saíram</div></div>`;
   }
   _renderStatusStreamersLista(){
     const s=this.shadowRoot;const el=s.getElementById('tbStatusStreamers');if(!el)return;
@@ -7352,13 +7352,13 @@ class DimaiorAdmin extends HTMLElement {
     const mesAnterior=this._statusStreamersInfo?.mes_anterior||'Mês anterior';
     const varTxt=x=>this._varBadge(x.percentual!==null&&x.percentual!==undefined?Math.round(x.percentual*10)/10:null);
 
-    // Desktop: tabela — Mobile: accordion (mesmo padrão do Histórico de Meses)
+    // Desktop: tabela - Mobile: accordion (mesmo padrão do Histórico de Meses)
     const tabelaHtml=`<div class="hist-table-wrap"><table><thead><tr><th>Streamer</th><th>UID</th><th>Agência</th><th>Status</th><th>${this._esc(mesAtual)}</th><th>${this._esc(mesAnterior)}</th><th>Variação</th><th></th></tr></thead><tbody>
       ${lista.map(x=>`
       <tr>
         <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(x.foto,x.nome)}<span>${this._esc(x.nome)}</span></div></td>
         <td style="font-size:11px;color:var(--t3)">${this._esc(x.kwai_uid)}</td>
-        <td style="font-size:11px;color:var(--t2)">${this._esc(x.org_name||'—')}</td>
+        <td style="font-size:11px;color:var(--t2)">${this._esc(x.org_name||'-')}</td>
         <td>${x.ativo?'<span class="badge on">Ativo</span>':'<span class="badge off">Inativo</span>'}${catBadge(x.categoria)}</td>
         <td>${this._num(x.diamantes_atual)} ${this._dia()}</td>
         <td style="color:var(--t3)">${this._num(x.diamantes_anterior)} ${this._dia()}</td>
@@ -7382,8 +7382,8 @@ class DimaiorAdmin extends HTMLElement {
         <div class="hist-body">
           <div class="hist-body-grid">
             <div class="hist-cel"><div class="hist-lbl">UID</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.kwai_uid)}</div></div>
-            <div class="hist-cel"><div class="hist-lbl">Agência</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.org_name||'—')}</div></div>
-            <div class="hist-cel"><div class="hist-lbl">Categoria</div><div class="hist-val">${catBadge(x.categoria)||'—'}</div></div>
+            <div class="hist-cel"><div class="hist-lbl">Agência</div><div class="hist-val" style="font-size:10.5px">${this._esc(x.org_name||'-')}</div></div>
+            <div class="hist-cel"><div class="hist-lbl">Categoria</div><div class="hist-val">${catBadge(x.categoria)||'-'}</div></div>
             <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAtual)}</div><div class="hist-val" style="color:var(--azul)">${this._num(x.diamantes_atual)} ${this._dia()}</div></div>
             <div class="hist-cel"><div class="hist-lbl">${this._esc(mesAnterior)}</div><div class="hist-val">${this._num(x.diamantes_anterior)} ${this._dia()}</div></div>
             <div class="hist-cel" style="grid-column:1/-1"><div class="hist-lbl">Variação</div><div class="hist-val">${varTxt(x)}</div></div>
@@ -7463,7 +7463,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!el)return;
     const lista=d?.historico||[];
     if(!d?.ok||!lista.length){el.innerHTML=this._empty('check_c','Nenhum UID divergente encontrado');this._renderPg('pgImpulsoHist',this._pg.impulso,0,30,n=>this._carregarImpulsoHistorico(n));return;}
-    el.innerHTML=`<table><thead><tr><th>Solicitante</th><th>UID da Live</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${lista.map(u=>`<tr style="background:rgba(248,113,113,.08)"><td style="font-size:11px">${u.nome_solicitante?`<div style="color:var(--t1);font-weight:600">${this._esc(u.nome_solicitante)}</div>`:''}<div style="color:var(--t3)">${this._esc(u.uid_solicitante||'—')}</div></td><td style="font-size:11px"><div style="color:var(--verm);font-weight:700">${this._esc(u.uid_divergente)}</div>${u.nome_divergente?`<div style="color:var(--t3)">${this._esc(u.nome_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'—')}</td><td>${this._esc(u.tempo_escolhido||'—')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'—')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table>`;
+    el.innerHTML=`<table><thead><tr><th>Solicitante</th><th>UID da Live</th><th>Link</th><th>Tempo</th><th>Status</th><th>Data</th></tr></thead><tbody>${lista.map(u=>`<tr style="background:rgba(248,113,113,.08)"><td style="font-size:11px">${u.nome_solicitante?`<div style="color:var(--t1);font-weight:600">${this._esc(u.nome_solicitante)}</div>`:''}<div style="color:var(--t3)">${this._esc(u.uid_solicitante||'-')}</div></td><td style="font-size:11px"><div style="color:var(--verm);font-weight:700">${this._esc(u.uid_divergente)}</div>${u.nome_divergente?`<div style="color:var(--t3)">${this._esc(u.nome_divergente)}</div>`:''}</td><td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this._esc(u.kwai_link||'-')}</td><td>${this._esc(u.tempo_escolhido||'-')}</td><td><span class="badge ${u.status==='success'?'on':u.status==='error'?'off':''}">${this._esc(u.status||'-')}</span></td><td>${this._fdt(u.created_at)}</td></tr>`).join('')}</tbody></table>`;
     this._renderPg('pgImpulsoHist',this._pg.impulso,lista.length,30,n=>this._carregarImpulsoHistorico(n));
   }
   async _salvarImpulsoConfig(){
@@ -7524,7 +7524,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="bloq-item">
         <div class="bloq-info">
           <div class="bloq-uid">${this._ico('lock_r',13)} UID: <strong>${this._esc(b.kwai_uid)}</strong></div>
-          <div class="bloq-motivo">${this._esc(b.motivo||'—')}</div>
+          <div class="bloq-motivo">${this._esc(b.motivo||'-')}</div>
           <div class="bloq-meta">
             Bloqueado: ${this._fdtCurto(b.bloqueado_em)}
             ${b.expira_em?` • Expira: ${this._fdtCurto(b.expira_em)}`:'<span style="color:var(--verm);margin-left:6px">Permanente</span>'}
@@ -7543,10 +7543,10 @@ class DimaiorAdmin extends HTMLElement {
       --cyan:#00d4d4;--cyan-d:rgba(0,212,212,.15);--azul:#3b82f6;--grad:linear-gradient(135deg,#3b82f6 0%,#00e5e5 100%);
       --bg0:#060B16;--bg1:#0b0b1a;--brd:rgba(0,230,230,.18);--brddim:rgba(0,212,212,.08);--glass:rgba(18,18,32,.85);
       --t1:#fff;--t2:#d0d8e8;--t3:#a0b8c8;--verde:#4ade80;--verm:#f87171;--gold:#f0c040;--r:16px;--rs:10px;
-      /* semânticos de status/badge — constantes entre temas de propósito */
+      /* semânticos de status/badge - constantes entre temas de propósito */
       --warn:#ff9800;--amber:#fbbf24;--amber-txt:#fcd34d;--info:#818cf8;--orange:#fb923c;--purple:#a855f7;
       --topbar:rgba(11,11,26,.95);--sidebar:rgba(8,8,20,.95);--panel-solid:#0b0b1a;--row-alt:rgba(0,0,0,.3);--input-bg:rgba(0,0,0,.4);--sunk:rgba(0,0,0,.28);--shadow:rgba(0,0,0,.32);}
-    /* ── Temas (aba Aparência) — o fundo :host = mesmo --dm-bg do site/global.css ── */
+    /* ── Temas (aba Aparência) - o fundo :host = mesmo --dm-bg do site/global.css ── */
     :host([data-theme="dark"]){background:#000;--bg0:#000;--bg1:#050608;--glass:rgba(9,10,13,.9);--panel-solid:#050608;--topbar:rgba(4,4,8,.96);--sidebar:rgba(3,3,7,.96);--brd:rgba(0,196,196,.16);--brddim:rgba(0,196,196,.07);--t1:#e8edf5;--t2:#aab6c8;--t3:#7a8698;--cyan:#00c4c4;--cyan-d:rgba(0,196,196,.14);--row-alt:rgba(255,255,255,.03);--input-bg:rgba(255,255,255,.04);--sunk:rgba(255,255,255,.03);--shadow:rgba(0,0,0,.5);}
     :host([data-theme="branco"]){--amber-txt:#92400e;background:#f0f4f8;--bg0:#f0f4f8;--bg1:#f7f9fc;--glass:#fff;--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:#f4f7fb;--brd:rgba(0,149,168,.22);--brddim:rgba(0,149,168,.1);--t1:#0d1117;--t2:#2d3748;--t3:#5a6577;--cyan:#0095a8;--cyan-d:rgba(0,149,168,.1);--gold:#b8860b;--verde:#16a34a;--verm:#dc2626;--row-alt:rgba(0,0,0,.025);--input-bg:#fff;--sunk:rgba(0,0,0,.03);--shadow:rgba(0,60,80,.1);}
     :host([data-theme="rosa"]){--amber-txt:#92400e;background:#fff5f8;--bg0:#fff5f8;--bg1:#fffafc;--glass:#fff;--panel-solid:#fff;--topbar:rgba(255,255,255,.96);--sidebar:#fff0f5;--brd:rgba(233,30,140,.22);--brddim:rgba(233,30,140,.1);--t1:#1a0010;--t2:#4a0028;--t3:#80004a;--cyan:#e91e8c;--cyan-d:rgba(233,30,140,.1);--azul:#e91e8c;--grad:linear-gradient(135deg,#e91e8c,#c2185b);--gold:#c2185b;--verde:#2e7d32;--verm:#c2185b;--row-alt:rgba(233,30,140,.025);--input-bg:#fff;--sunk:rgba(233,30,140,.035);--shadow:rgba(233,30,140,.1);}
@@ -7555,7 +7555,7 @@ class DimaiorAdmin extends HTMLElement {
     #root{width:100%;min-height:100dvh;overflow:visible;background:var(--bg0);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);display:flex;flex-direction:column;position:relative;}
     .glass{background:var(--glass);border:1px solid var(--brd);border-radius:20px;position:relative;overflow:hidden;backdrop-filter:blur(12px)}.glass::after{content:'';position:absolute;bottom:0;left:0;right:0;background:var(--grad);height:2px}
     #login{position:fixed;inset:0;min-height:100dvh;background:rgba(4,4,14,.98);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px}
-    /* Login — padrão "app moderno" (mesmo do painel do agente): campos em pílula + selo de ícone */
+    /* Login - padrão "app moderno" (mesmo do painel do agente): campos em pílula + selo de ícone */
     .lbox{padding:32px 22px;width:100%;max-width:400px;text-align:center;background:none;border:none;box-shadow:none;overflow:visible}
     .lbox::after{display:none}
     .llogo{height:44px;width:auto;margin:0 auto 16px;display:block}
@@ -7605,13 +7605,13 @@ class DimaiorAdmin extends HTMLElement {
     .btn-ham{width:32px;height:32px;background:rgba(0,0,0,.4);border:1px solid var(--brddim);border-radius:var(--rs);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--t3)}
     .btn-ham:hover{color:var(--azul);border-color:rgba(59,130,246,.4)}
     .shell{display:flex;flex:1;min-height:calc(100dvh - 52px);align-items:stretch;
-      /* faixa da esquerda sempre na cor da sidebar — sem "corte seco" quando a
+      /* faixa da esquerda sempre na cor da sidebar - sem "corte seco" quando a
          sidebar (fixa) é mais curta que a página */
       background:linear-gradient(to right, var(--sidebar) 0 221px, transparent 221px);}
     #app.nav-collapsed .shell{background:transparent;}
     .side{width:220px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--brd);padding:10px 0;overflow-y:auto;
       align-self:stretch;position:sticky;top:52px;max-height:calc(100dvh - 52px);}
-    /* Menu recolhível no desktop (nada some — o trilho só recolhe/volta pelo botão do topo) */
+    /* Menu recolhível no desktop (nada some - o trilho só recolhe/volta pelo botão do topo) */
     @media(min-width:701px){
       .btn-ham{display:flex;}
       .side{transition:width .22s ease,padding .22s ease,opacity .16s ease;}
@@ -7678,7 +7678,7 @@ class DimaiorAdmin extends HTMLElement {
     .dc2-azul{background:linear-gradient(135deg,rgba(29,78,216,.78),rgba(56,189,248,.45));border-color:rgba(96,165,250,.82);}.dc2-azul .dc2-ico,.dc2-azul .dc2-val{color:#bfdbfe;text-shadow:0 0 18px rgba(96,165,250,.7)}
     .dc2-spin{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
 
-    /* ══ Redesign v1 — cards do dashboard: gradiente forte -> tinta sutil sobre vidro,
+    /* ══ Redesign v1 - cards do dashboard: gradiente forte -> tinta sutil sobre vidro,
        sem glow. Mantém 1 cor por card (número + borda). Nada some, só suaviza. ══ */
     .dc2{background:var(--glass);border:1px solid var(--brd);box-shadow:0 4px 16px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.04);}
     .dc2-val{color:var(--t1);text-shadow:none;}
@@ -7717,7 +7717,7 @@ class DimaiorAdmin extends HTMLElement {
     .dd-compare-val{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:22px;color:var(--t1);}
     .dd-compare-sub{font-size:10.5px;color:var(--t3);margin-top:2px;}
     /* Barra fica dentro da própria coluna (Junho+barra cinza, Julho+barra
-       azul), logo abaixo do valor — em vez de uma faixa separada embaixo
+       azul), logo abaixo do valor - em vez de uma faixa separada embaixo
        de tudo, desgrudada dos números que ela representa. */
     .dd-bar-compare{height:54px;margin-top:14px;display:flex;align-items:flex-end;}
     .dd-bar-compare .seg{width:100%;border-radius:6px 6px 0 0;}
@@ -7744,7 +7744,7 @@ class DimaiorAdmin extends HTMLElement {
     .dd-bars .stick.progress{background:repeating-linear-gradient(135deg,rgba(0,212,212,.55) 0 6px,rgba(0,212,212,.24) 6px 12px);box-shadow:none;}
     .dd-bars .lbl{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);}
     .dd-bars .lbl.now{color:var(--cyan);}
-    /* Dashboard — painel "Diamantes por dia" (7 barras: 6 dias fechados + hoje) */
+    /* Dashboard - painel "Diamantes por dia" (7 barras: 6 dias fechados + hoje) */
     .dia-box{margin-top:14px;}
     .dia-sub{font-size:11px;color:var(--t3);}
     .dia-sub b{color:var(--t1);}
@@ -8069,9 +8069,9 @@ class DimaiorAdmin extends HTMLElement {
     .sc-dlbl{font-size:9px;color:var(--t3);font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
     .sc-dval{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1)}
     .sc-body-acoes{display:flex;gap:7px;flex-wrap:wrap}.sc-body-acoes .btn{flex:1;justify-content:center;min-width:0}
-    /* ══ Ao Vivo — Header e Painel Config ══ */
+    /* ══ Ao Vivo - Header e Painel Config ══ */
     .lv-header{display:flex;align-items:stretch;gap:12px;flex-wrap:nowrap;margin-bottom:0;padding:14px 16px;background:var(--glass);border:1px solid var(--brd);border-radius:var(--r) var(--r) 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
-    /* Cards dc2 no header — mesmo estilo do Dashboard */
+    /* Cards dc2 no header - mesmo estilo do Dashboard */
     .lv-dc2{border-radius:var(--r);padding:14px 18px 12px;position:relative;overflow:hidden;cursor:default;border:1px solid transparent;flex-shrink:0;min-width:130px;transition:transform .2s}
     @media(hover:hover){.lv-dc2:hover{transform:translateY(-2px);}}
     .lv-dc2-ico{position:absolute;top:10px;right:12px;opacity:.22}
@@ -8168,7 +8168,7 @@ class DimaiorAdmin extends HTMLElement {
       .btitulo{font-size:12px;}
       .bacoes{flex-wrap:wrap;gap:4px;}
       .busca{flex:1;min-width:0;}.busca input{width:100%;min-width:0;}
-      /* Tabelas: NUNCA empurram a página — scroll horizontal dentro do próprio container.
+      /* Tabelas: NUNCA empurram a página - scroll horizontal dentro do próprio container.
          (regra do usuário: no mobile nada rola pra horizontal, só o conteúdo interno) */
       .content table,.box table,#tbConfigForm table,#tbSolicForm table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;width:100%;}
       .content table td[style*="flex"]{flex-wrap:wrap;}
@@ -8252,7 +8252,7 @@ class DimaiorAdmin extends HTMLElement {
       .mf .btn{flex:1;justify-content:center;min-width:0;}
 
       /* ── Saques ── */
-      /* Saques — sem pirâmide, sem hover travado, botões legíveis */
+      /* Saques - sem pirâmide, sem hover travado, botões legíveis */
       .saque-card{padding:12px 14px;word-break:normal;overflow-wrap:normal;background:transparent !important;}
       .saque-card:hover{background:transparent !important;}
       .saque-card:active{background:rgba(0,212,212,.06) !important;}
@@ -8294,7 +8294,7 @@ class DimaiorAdmin extends HTMLElement {
       .cfg-inp{width:100% !important;}
 
       /* ── Lives ── */
-      /* Ao Vivo header mobile — compacto */
+      /* Ao Vivo header mobile - compacto */
       .lv-header{gap:8px;padding:10px 12px;}
       /* Estilo 1 em tela estreita: capa um pouco mais estreita */
       #root.narrow .live-card-full:not(.lc-estilo2) .lc-info{padding:8px 10px;}
@@ -8337,7 +8337,7 @@ class DimaiorAdmin extends HTMLElement {
        engano, o que fazia o "table-wrap"/"mobile-only" nunca alternar
        certo no desktop (Viram os dois ao mesmo tempo, sem estilo). Cada
        um já tem seu próprio @media interno pra alternar sozinho. O mesmo
-       engano prendia Histórico e Ranking/Diário logo abaixo — movidos
+       engano prendia Histórico e Ranking/Diário logo abaixo - movidos
        pra cá por corrigir o mesmo bug (tabela + accordion juntos no desktop). */
     }
     /* ── Histórico: tabela desktop / accordion mobile ── */
@@ -8357,7 +8357,7 @@ class DimaiorAdmin extends HTMLElement {
       .rank-mobile-only{display:block !important}
     }
     /* ── Métricas (Últimos Impulsionamentos): tabela desktop / accordion mobile ── */
-    /* Card com altura travada + scroll interno — o mês inteiro pode ter
+    /* Card com altura travada + scroll interno - o mês inteiro pode ter
        centenas de linhas, então em vez do card crescer sem fim, só a lista
        rola por dentro (mesmo padrão de altura fixa já usado em .ag-kwai-streamers). */
     .met-scroll{max-height:520px;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--brddim)}
@@ -8434,7 +8434,7 @@ class DimaiorAdmin extends HTMLElement {
       .ag-kwai-grid,.ag-local-grid{grid-template-columns:1fr}
     }
     /* Reabre aqui o @media "Base" (ver comentário acima, antes de
-       "Agentes locais") — o que vem a seguir ainda faz parte daquela
+       "Agentes locais") - o que vem a seguir ainda faz parte daquela
        seção original de estilos só-mobile. */
     @media(max-width:700px){
     /* Cards accordion Ranking/Diário */
@@ -8622,7 +8622,7 @@ class DimaiorAdmin extends HTMLElement {
     .bloq-meta{font-size:10px;color:var(--t3)}
     @media(max-width:600px){.bloq-item{flex-direction:column;align-items:flex-start}.impulso-toggle-row{flex-wrap:wrap}}
 
-    /* ═══════════ REDESIGN — overrides finais (vencem por ordem de fonte) ═══════════ */
+    /* ═══════════ REDESIGN - overrides finais (vencem por ordem de fonte) ═══════════ */
     /* Fora o "quadradinho azul" ao clicar (outline de foco do mouse) e o realce de toque.
        Foco por teclado (:focus-visible) segue com um anel sutil pra acessibilidade. */
     :host,*{-webkit-tap-highlight-color:transparent;}
@@ -8630,13 +8630,13 @@ class DimaiorAdmin extends HTMLElement {
     #app :focus-visible{outline:2px solid var(--cyan);outline-offset:1px;}
     ::selection{background:var(--cyan-d);color:var(--t1);}
     .ni.on svg{filter:none;}
-    /* Acesso Rápido: sem a barra colorida por card (poluía) — cards uniformes de vidro */
+    /* Acesso Rápido: sem a barra colorida por card (poluía) - cards uniformes de vidro */
     .qa-card::before{display:none!important;}
     .qa-card::after{display:none!important;}
     .qa-card,.qa-indigo,.qa-verm,.qa-verde,.qa-cyan,.qa-gold,.qa-slate{background:var(--glass);border-color:var(--brd);--qa-cor:var(--cyan);}
     .qa-card .qa-lbl{color:var(--t1);}
     .qa-card .qa-sub{color:var(--t3);}
-    /* Nos temas claros: Acesso Rápido no acento do tema — cor CHAPADA (sem degradê/brilho),
+    /* Nos temas claros: Acesso Rápido no acento do tema - cor CHAPADA (sem degradê/brilho),
        igual ao card "Fechamento de setembro" da referência. Letra branca. */
     :host([data-theme="branco"]) .qa-card,:host([data-theme="rosa"]) .qa-card,:host([data-theme="laranja"]) .qa-card{background:var(--azul);background-image:none;border-color:transparent;box-shadow:0 4px 14px rgba(0,0,0,.1);}
     :host([data-theme="branco"]) .qa-card .qa-lbl,:host([data-theme="rosa"]) .qa-card .qa-lbl,:host([data-theme="laranja"]) .qa-card .qa-lbl{color:#fff;}
@@ -8644,7 +8644,7 @@ class DimaiorAdmin extends HTMLElement {
     :host([data-theme="branco"]) .qa-ico-wrap,:host([data-theme="rosa"]) .qa-ico-wrap,:host([data-theme="laranja"]) .qa-ico-wrap{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.28);color:#fff;box-shadow:none;}
     :host([data-theme="branco"]) .qa-config-btn,:host([data-theme="rosa"]) .qa-config-btn,:host([data-theme="laranja"]) .qa-config-btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff;}
     :host([data-theme="branco"]) .qa-card:hover,:host([data-theme="rosa"]) .qa-card:hover,:host([data-theme="laranja"]) .qa-card:hover{background:var(--azul);filter:brightness(.95);}
-    /* dc2 (cards de cima): nos temas claros ficam iguais ao Acesso Rápido —
+    /* dc2 (cards de cima): nos temas claros ficam iguais ao Acesso Rápido - 
        cor CHAPADA do tema, ícone e texto brancos. */
     .dc2 .dc2-lbl{color:var(--t2);}
     :host([data-theme="branco"]) .dc2,:host([data-theme="rosa"]) .dc2,:host([data-theme="laranja"]) .dc2{background-image:none!important;background:var(--azul)!important;border-color:transparent!important;box-shadow:0 4px 14px rgba(0,0,0,.1)!important;}
@@ -8842,7 +8842,7 @@ class DimaiorAdmin extends HTMLElement {
     .lc-oculta{display:inline-flex;align-items:center;gap:4px;margin-left:4px;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.45);color:var(--verm)}
     .lc-ocultar{white-space:normal;line-height:1.2}
 
-    /* ── Navegação inferior flutuante (mobile) — padrão do demo/agente ── */
+    /* ── Navegação inferior flutuante (mobile) - padrão do demo/agente ── */
     .mnav,.msheet,.fab,.pm-voltar{display:none;}
     @media(max-width:700px){
       .btn-ham{display:none !important;}
@@ -8958,7 +8958,7 @@ class DimaiorAdmin extends HTMLElement {
 
   _html(){
     const ni=(ico,pag,lbl,extra='')=>`<div class="ni" data-p="${pag}"><span class="ico">${this._ico(ico,14)}</span><span class="nlb">${lbl}</span>${extra}</div>`;
-    // Seções da sidebar viram acordeão — só "Principal" começa aberta (é onde
+    // Seções da sidebar viram acordeão - só "Principal" começa aberta (é onde
     // cai o Dashboard, a página inicial). _ir() reabre a seção certa sozinha
     // se o usuário for parar numa página de seção fechada por outro caminho.
     const navSec=(chave,titulo,itensHtml)=>`<div class="ns" data-nav-sec="${chave}"><span>${titulo}</span></div><div class="acc-body" id="navSec-${chave}">${itensHtml}</div>`;
@@ -9049,7 +9049,7 @@ class DimaiorAdmin extends HTMLElement {
               ni('play_circle','historicoLive','Histórico de Live')+
               ni('medal','personalizacao','Personalização')+
               ni('play_circle','videosAbertura','Vídeos de Abertura')+
-              ni('live','livesCategorias','Lives — Categorias')+
+              ni('live','livesCategorias','Lives - Categorias')+
               ni('bag','vitrine','Vitrine (Loja)')
             )}
             ${navSec('sistema','Sistema',
@@ -9070,7 +9070,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-historico">${ph('Histórico de Meses','history','Variação mensal','btnAtuHist')}<div class="box" id="tbHistorico">${this._loading()}</div></div>
             <div class="pag" id="pag-mesesRanking">${ph('Meses do Ranking','calendar','Configuração das abas históricas','btnAtuRankMeses',`<button class="btn btn-g" id="btnSalvarRankMeses">${this._ico('check',13)} Salvar Meses</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Meses Históricos via Google Planilhas</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnReordenarRankMeses">${this._ico('refresh',12)} Reordenar</button><button class="btn btn-o btn-sm" id="btnAddRankMes">${this._ico('plus',12)} Adicionar</button></div></div><div style="padding:16px"><div class="premio-info-box">${this._ico('warning',13)} Cadastre aqui o nome do mês e o GID da aba do Google Planilhas. O ranking público passa a montar as abas automaticamente pelo KV do Worker Rank.</div><div id="rankMesesArea">${this._loading()}</div><div id="rankMesesStatus" style="font-size:11px;color:var(--t3);margin-top:10px"></div></div></div></div>
 
-            <div class="pag" id="pag-pkDiario">${ph('PK Diário','zap','Liga contínua entre streamers — fecha o dia e já monta os pares seguintes sozinha','btnAtuPk',`<button class="btn btn-o" id="btnVerRankingPk">${this._ico('trophy',13)} Ranking</button><button class="btn btn-g" id="btnNovaPk">${this._ico('plus',13)} Nova Liga</button>`)}
+            <div class="pag" id="pag-pkDiario">${ph('PK Diário','zap','Liga contínua entre streamers - fecha o dia e já monta os pares seguintes sozinha','btnAtuPk',`<button class="btn btn-o" id="btnVerRankingPk">${this._ico('trophy',13)} Ranking</button><button class="btn btn-g" id="btnNovaPk">${this._ico('plus',13)} Nova Liga</button>`)}
 
               <div class="box" id="pkListaWrap">
                 <div class="bhead"><div class="btitulo">${this._ico('calendar',14)} Ligas</div></div>
@@ -9082,9 +9082,9 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="bacoes"><button class="btn btn-o btn-sm" id="btnCancelarFormPk">Cancelar</button></div>
                 </div>
                 <div style="padding:16px">
-                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Nome da liga</div><input class="cfg-inp" style="width:100%" id="pkNome" placeholder="Ex: PK Diário — Squad Principal"></label></div>
+                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Nome da liga</div><input class="cfg-inp" style="width:100%" id="pkNome" placeholder="Ex: PK Diário - Squad Principal"></label></div>
 
-                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto — opcional)</span></div><input class="cfg-inp" type="url" style="width:100%" id="pkBanner" placeholder="https://drive.google.com/file/d/.../view"><div id="pkBannerPreview" style="margin-top:8px;display:none"><img id="pkBannerImg" style="width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"></div></label></div>
+                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto - opcional)</span></div><input class="cfg-inp" type="url" style="width:100%" id="pkBanner" placeholder="https://drive.google.com/file/d/.../view"><div id="pkBannerPreview" style="margin-top:8px;display:none"><img id="pkBannerImg" style="width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"></div></label></div>
 
                   <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Início agendado <span style="color:var(--t3);font-size:10px">(opcional)</span></div><input class="cfg-inp" type="date" id="pkDataInicioAgendada"></label>
@@ -9095,12 +9095,12 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Modo de pontuação</div>
                       <select class="cfg-inp" id="pkModoPontuacao" style="width:260px">
-                        <option value="padrao">Padrão — só vitória vale ponto</option>
-                        <option value="diamantes_vitoria">Diamantes + Vitória (nova) — 1 pt a cada 1.000 diamantes + 2 pts por vitória</option>
+                        <option value="padrao">Padrão - só vitória vale ponto</option>
+                        <option value="diamantes_vitoria">Diamantes + Vitória (nova) - 1 pt a cada 1.000 diamantes + 2 pts por vitória</option>
                       </select>
                     </label>
                   </div>
-                  <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Só vale pra essa liga — não muda a pontuação de nenhuma liga já criada.</div>
+                  <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Só vale pra essa liga - não muda a pontuação de nenhuma liga já criada.</div>
 
                   <div class="cfg-row" style="flex-wrap:wrap">
                     <label><div class="cfg-chave">Período de referência</div>
@@ -9111,7 +9111,7 @@ class DimaiorAdmin extends HTMLElement {
                     </label>
                     <label><div class="cfg-chave">Critério (diamantes)</div>
                       <select class="cfg-inp" id="pkCriterioSelect" style="width:210px">
-                        <option value="0">Sem critério — seleção manual</option>
+                        <option value="0">Sem critério - seleção manual</option>
                         <option value="1000">Acima de 1.000</option>
                         <option value="2000">Acima de 2.000</option>
                         <option value="5000">Acima de 5.000</option>
@@ -9132,7 +9132,7 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
 
                   <div style="margin-top:12px"><button class="btn btn-g" id="btnSalvarPk">${this._ico('check',13)} Criar Liga (rascunho)</button></div>
-                  <div style="font-size:10px;color:var(--t3);margin-top:4px">A liga começa como rascunho. Depois de criada, abra "Gerenciar" e clique em "Ativar" pra ligar o motor automático — ele fecha o dia anterior comparando diamantes reais e já gera os pares seguintes sozinho, todo dia, sem precisar sortear de novo.</div>
+                  <div style="font-size:10px;color:var(--t3);margin-top:4px">A liga começa como rascunho. Depois de criada, abra "Gerenciar" e clique em "Ativar" pra ligar o motor automático - ele fecha o dia anterior comparando diamantes reais e já gera os pares seguintes sozinho, todo dia, sem precisar sortear de novo.</div>
                 </div>
               </div>
 
@@ -9156,19 +9156,19 @@ class DimaiorAdmin extends HTMLElement {
                     <button class="btn btn-o btn-sm" id="btnPkSalvarAgendamento" style="margin-top:16px">${this._ico('check',12)} Salvar agendamento</button>
                   </div>
 
-                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto — opcional)</span></div><input class="cfg-inp" type="url" style="width:100%" id="pkDetBanner" placeholder="https://drive.google.com/file/d/.../view"><div id="pkDetBannerPreview" style="margin-top:8px;display:none"><img id="pkDetBannerImg" style="width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"></div></label></div>
+                  <div class="cfg-row"><label style="flex:1"><div class="cfg-chave">Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto - opcional)</span></div><input class="cfg-inp" type="url" style="width:100%" id="pkDetBanner" placeholder="https://drive.google.com/file/d/.../view"><div id="pkDetBannerPreview" style="margin-top:8px;display:none"><img id="pkDetBannerImg" style="width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"></div></label></div>
                   <div><button class="btn btn-o btn-sm" id="btnPkSalvarBanner">${this._ico('check',12)} Salvar banner</button></div>
 
                   <div class="cfg-row" style="flex-wrap:wrap;margin-top:12px">
                     <label><div class="cfg-chave">Modo de pontuação</div>
                       <select class="cfg-inp" id="pkDetModoPontuacao" style="width:260px">
-                        <option value="padrao">Padrão — só vitória vale ponto</option>
-                        <option value="diamantes_vitoria">Diamantes + Vitória (nova) — 1 pt a cada 1.000 diamantes + 2 pts por vitória</option>
+                        <option value="padrao">Padrão - só vitória vale ponto</option>
+                        <option value="diamantes_vitoria">Diamantes + Vitória (nova) - 1 pt a cada 1.000 diamantes + 2 pts por vitória</option>
                       </select>
                     </label>
                     <button class="btn btn-o btn-sm" id="btnPkSalvarModoPontuacao" style="margin-top:16px">${this._ico('check',12)} Salvar modo de pontuação</button>
                   </div>
-                  <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Recalcula o ranking dessa liga inteira (inclusive dias já fechados) com o novo modo — corrige na hora se a liga foi criada com o modo errado.</div>
+                  <div style="font-size:10px;color:var(--t3);margin:-8px 0 8px 2px">Recalcula o ranking dessa liga inteira (inclusive dias já fechados) com o novo modo - corrige na hora se a liga foi criada com o modo errado.</div>
 
                   <div class="bhead acc-toggle" id="accPkPart"><div class="btitulo">${this._ico('users',14)} Participantes ativos (<span id="pkDetParticipantesCount">0</span>)</div>
                     <div style="display:flex;align-items:center;gap:6px"><button class="btn btn-o btn-sm" id="btnPkDetToggleAdd">${this._ico('plus',12)} Gerenciar roster</button><span class="acc-chevron" id="accPkPartIco">▼</span></div>
@@ -9251,11 +9251,11 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <div class="pag" id="pag-streamers"><div class="ph"><div><div class="titulo">${this._ico('users',18)} Streamers</div><div class="psub">Perfis cadastrados</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnVerifExterno" style="border-color:rgba(0,212,212,.4);color:var(--cyan)">${this._ico('check_c',13)} Verificar Externo</button><button class="btn btn-g" id="btnAddS">${this._ico('plus',13)} Adicionar</button></div></div><div class="box"><div class="bhead"><div class="btitulo">Lista</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bS" type="text" placeholder="Buscar..."/></div></div></div><div id="tbS">${this._loading()}</div><div class="pag-bar" id="pgS"></div></div></div>
             <div class="pag" id="pag-afiliados">
-              <div class="ph"><div><div class="titulo">${this._ico('user_plus',18)} Afiliados</div><div class="psub">Streamers que indicam novos streamers — eles mesmos ativam a participação no painel deles; aqui você controla o programa, as metas e o fechamento</div></div><div class="ph-r"><button class="btn btn-o" id="btnAtuAfiliados">${this._ico('refresh',13)} Atualizar</button></div></div>
+              <div class="ph"><div><div class="titulo">${this._ico('user_plus',18)} Afiliados</div><div class="psub">Streamers que indicam novos streamers - eles mesmos ativam a participação no painel deles; aqui você controla o programa, as metas e o fechamento</div></div><div class="ph-r"><button class="btn btn-o" id="btnAtuAfiliados">${this._ico('refresh',13)} Atualizar</button></div></div>
               <div id="afRaiz">${this._loading()}</div>
             </div>
             <div class="pag" id="pag-streamersPremium">
-              <div class="ph"><div><div class="titulo">${this._ico('star',18)} Streamers Premium</div><div class="psub">Onboarding premium — lives-teste, início de contrato e selo Premium (Drive)</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnAtuStreamersPremium">${this._ico('refresh',13)} Atualizar</button><button class="btn btn-g" id="btnNovoStreamerPremium">${this._ico('plus',13)} Novo</button></div></div>
+              <div class="ph"><div><div class="titulo">${this._ico('star',18)} Streamers Premium</div><div class="psub">Onboarding premium - lives-teste, início de contrato e selo Premium (Drive)</div></div><div class="ph-r" style="display:flex;gap:8px"><button class="btn btn-o" id="btnAtuStreamersPremium">${this._ico('refresh',13)} Atualizar</button><button class="btn btn-g" id="btnNovoStreamerPremium">${this._ico('plus',13)} Novo</button></div></div>
               <div class="box"><div id="tbStreamersPremium">${this._loading()}</div></div>
               <div class="box" id="formStreamerPremiumBox" style="display:none;margin-top:10px">
                 <div class="bhead"><div class="btitulo" id="formStreamerPremiumTit">Novo Streamer Premium</div></div>
@@ -9271,8 +9271,8 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="mc"><label>Nome</label><input id="fSpNome" type="text" placeholder="Nome do streamer" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
                   <div class="mc"><label>Foto (URL)</label><input id="fSpFoto" type="text" placeholder="https://..." style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
                   <div style="display:flex;gap:12px;flex-wrap:wrap">
-                    <div class="mc" style="flex:1;min-width:200px"><label>1ª Live Teste — data e horário *</label><input id="fSpLive1" type="datetime-local" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
-                    <div class="mc" style="flex:1;min-width:200px"><label>2ª Live Teste — data e horário *</label><input id="fSpLive2" type="datetime-local" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <div class="mc" style="flex:1;min-width:200px"><label>1ª Live Teste - data e horário *</label><input id="fSpLive1" type="datetime-local" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
+                    <div class="mc" style="flex:1;min-width:200px"><label>2ª Live Teste - data e horário *</label><input id="fSpLive2" type="datetime-local" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
                   </div>
                   <div class="mc"><label>Início do contrato (data e mês) *</label><input id="fSpContrato" type="date" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;box-sizing:border-box"></div>
                   <div class="mc"><label>Link do símbolo Premium (Drive)</label>
@@ -9316,7 +9316,7 @@ class DimaiorAdmin extends HTMLElement {
             </div>
             <div class="pag" id="pag-uids">${ph('Autorização de UIDs','key_uid','Controle de acesso','btnAtuUIDs',`<button class="btn btn-g" id="btnNovoUID">${this._ico('plus',13)} Autorizar UID</button>`)}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('unlock',14)} UIDs Liberados</div><div class="bacoes" style="display:flex;gap:8px;flex-wrap:wrap"><div class="busca">${this._ico('search',12)}<input id="uidBusca" type="text" placeholder="Buscar por UID ou ID..." style="width:190px"/></div><select id="uidFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="">Todos</option><option value="pendente">Aguardando</option><option value="utilizado">Conta Criada</option><option value="inativo">Revogados</option><option value="legado">Contas antigas (antes da autorização)</option></select></div></div><div id="listaUids">${this._loading()}</div><div class="pag-bar" id="pgUID"></div></div></div>
             <div class="pag" id="pag-buscaUid">
-              <div class="ph"><div><div class="titulo">${this._ico('search',18)} Buscar UID Kwai</div><div class="psub">Resolve o ID (usuário) da Kwai para o UID numérico — funciona pra qualquer criador, mesmo sem cadastro na agência</div></div></div>
+              <div class="ph"><div><div class="titulo">${this._ico('search',18)} Buscar UID Kwai</div><div class="psub">Resolve o ID (usuário) da Kwai para o UID numérico - funciona pra qualquer criador, mesmo sem cadastro na agência</div></div></div>
               <div class="box">
                 <div class="bhead"><div class="btitulo">${this._ico('search',14)} Buscar por ID da Kwai</div></div>
                 <div style="padding:18px 18px 20px">
@@ -9334,7 +9334,7 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="bacoes" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                     <div class="busca">${this._ico('search',12)}<input id="violBusca" type="text" placeholder="Nome, @ ou UID (Enter)" style="width:170px"/></div>
                     ${this._sub?'':`<button class="btn btn-o" id="btnViolUid" title="Pergunta esse UID direto pra Kwai, mesmo que ele não venha na lista geral">${this._ico('search',13)} Consultar UID na Kwai</button>
-                    <button class="btn btn-o" id="btnVarrerViol" title="Pergunta pra Kwai UID por UID, o roster inteiro — pega os banidos, que não vêm na busca geral">${this._ico('refresh',13)} Varrer todos por UID</button>`}
+                    <button class="btn btn-o" id="btnVarrerViol" title="Pergunta pra Kwai UID por UID, o roster inteiro - pega os banidos, que não vêm na busca geral">${this._ico('refresh',13)} Varrer todos por UID</button>`}
                     <select id="violDias" class="viol-sel"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option><option value="tudo">Tudo</option></select>
                     <select id="violStatus" class="viol-sel"><option value="">Todos os status</option><option value="2">Banido</option><option value="3">Banido temporariamente</option><option value="1">Ativado</option><option value="4">Cancelado</option><option value="0">Solicitando</option><option value="5">Recusado</option><option value="-1">Sem permissão</option></select>
                     <label style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--t2)"><input type="checkbox" id="violNovas"/> Só não conferidas</label>
@@ -9457,7 +9457,7 @@ class DimaiorAdmin extends HTMLElement {
                       </div>
                       <div class="mc" style="margin-top:8px"><label>Recrutador responsável</label>
                         <select id="mConvRecrutador" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%">
-                          <option value="">— Usar padrão —</option>
+                          <option value=""> - Usar padrão - </option>
                         </select>
                       </div>
                       <div id="mConvRecrutadorResumo" style="margin-top:8px;padding:10px 12px;border:1px solid var(--brddim);border-radius:8px;background:rgba(0,212,212,.04)"></div>
@@ -9475,7 +9475,7 @@ class DimaiorAdmin extends HTMLElement {
             <div class="pag" id="pag-carteira">${ph('Carteira Financeira','wallet','Saldos dos streamers','btnAtuCart',`<button class="btn btn-g" id="btnCreditoRapido">${this._ico('plus',13)} Adicionar Saldo</button>`)}<div class="dc2-grid" id="carteiraResumo">${this._loading('grid-column:1/-1')}</div><div id="carteiraStreamers">${this._loading()}</div></div>
             <div class="pag" id="pag-agenteMigracoes">${ph('Migrações de Streamer (Agente)','refresh','Solicitações de migração enviadas pelos agentes','btnAtuMigracoesAgente')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('refresh',14)} Migrações</div><select id="migracaoAgFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaMigracoesAgente">${this._loading()}</div><div class="pag-bar" id="pgMigracoesAgente"></div></div></div>
             <div class="pag" id="pag-saques">${ph('Solicitações de Saque','send','Aprovação de saques','btnAtuSaques')}<div class="box"><div class="bhead"><div class="btitulo">${this._ico('pix_ico',14)} Saques</div><select id="saqueFiltro" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 9px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none"><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="pago">Pagos</option><option value="rejeitado">Rejeitados</option><option value="todos">Todos</option></select></div><div id="listaSaques">${this._loading()}</div><div class="pag-bar" id="pgSaques"></div></div></div>
-            <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Todo dia 1º, ~10h, o sistema processa sozinho o ranking do mês que acabou de fechar (diamantes e horas). O botão "Processar" continua disponível pra rodar na hora, corrigir ou repetir um mês — rodar os dois pro mesmo mês nunca credita em dobro.</div><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
+            <div class="pag" id="pag-premios">${ph('Prêmios','award','Premiação por ranking','btnAtuPremios',`<button class="btn btn-g" id="btnProcessarPremios">${this._ico('zap',13)} Processar</button>`)}<div class="box"><div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Todo dia 1º, ~10h, o sistema processa sozinho o ranking do mês que acabou de fechar (diamantes e horas). O botão "Processar" continua disponível pra rodar na hora, corrigir ou repetir um mês - rodar os dois pro mesmo mês nunca credita em dobro.</div><div class="bhead"><div class="btitulo">${this._ico('award',14)} Tabela de Prêmios</div></div><div style="padding:16px"><div class="premio-tipo-tabs"><button class="premio-tipo-tab on" data-tipo="diamantes">${this._ico('diamond',14)} Diamantes</button><button class="premio-tipo-tab" data-tipo="horas">${this._ico('clock_r',14)} Horas</button></div><div id="premiosConfigArea">${this._loading()}</div></div></div><div class="box"><div class="bhead"><div class="btitulo">${this._ico('history',14)} Histórico de Distribuições</div></div><div id="historicoPremios">${this._loading()}</div></div></div>
             <div class="pag" id="pag-tickets">${ph('Tickets & Presentes','star','Regras de pontuação e resgate de presentes','btnAtuTickets')}
               <div class="month-tabs" id="ticketsSubTabs" style="display:flex;gap:6px;padding:0 0 12px">
                 <button class="month-tab on" data-sub="regras">Metas</button>
@@ -9490,14 +9490,14 @@ class DimaiorAdmin extends HTMLElement {
                   <div style="padding:14px 16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
                     <label style="flex:1;min-width:220px"><div class="cfg-chave">Modo</div>
                       <select id="ticketsPeriodoModo" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
-                        <option value="mes_atual">Mês corrente — recalcula todo dia, streamer vê o nível subindo ao vivo</option>
-                        <option value="mes_fechado">Mês fechado — só credita quando o mês anterior já fechou por inteiro</option>
+                        <option value="mes_atual">Mês corrente - recalcula todo dia, streamer vê o nível subindo ao vivo</option>
+                        <option value="mes_fechado">Mês fechado - só credita quando o mês anterior já fechou por inteiro</option>
                       </select>
                     </label>
                   </div>
                   <div style="padding:0 16px 14px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
                     <label style="flex:1;min-width:260px"><div class="cfg-chave">Ícone de diamante (link do Google Drive)</div>
-                      <input id="ticketsIconeDiamante" type="text" placeholder="Cole o link de compartilhamento do Drive — vazio usa o ícone padrão" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none;box-sizing:border-box">
+                      <input id="ticketsIconeDiamante" type="text" placeholder="Cole o link de compartilhamento do Drive - vazio usa o ícone padrão" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none;box-sizing:border-box">
                     </label>
                     <div id="ticketsIconeDiamantePreview" style="display:none;width:36px;height:36px;flex-shrink:0"><img id="ticketsIconeDiamantePreviewImg" style="width:100%;height:100%;object-fit:contain;border-radius:6px" onerror="this.parentElement.style.display='none'"></div>
                     <button class="btn btn-o btn-sm" id="btnSalvarTicketsPeriodo">${this._ico('check',12)} Salvar</button>
@@ -9507,7 +9507,7 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="bhead"><div class="btitulo">${this._ico('star',14)} Metas de Pontuação</div>
                     <button class="btn btn-sm btn-g" id="btnNovaRegraTicket">${this._ico('plus',12)} Nova Meta</button>
                   </div>
-                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} As metas funcionam como níveis (mesmo modelo das Metas de Impulso) — só a de maior "Tickets fixos" que o streamer atingir vale no período, nunca soma todas as batidas. Ex: nível de 50 tickets + nível de 150 tickets → quem bate o segundo recebe 150 no total, não 200. A ordem dos níveis é decidida sozinha pelo valor em "Tickets fixos" (maior valor = nível mais alto), sem precisar configurar nada à parte. Nada aqui fica fixo no código — tudo editável.</div>
+                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} As metas funcionam como níveis (mesmo modelo das Metas de Impulso) - só a de maior "Tickets fixos" que o streamer atingir vale no período, nunca soma todas as batidas. Ex: nível de 50 tickets + nível de 150 tickets → quem bate o segundo recebe 150 no total, não 200. A ordem dos níveis é decidida sozinha pelo valor em "Tickets fixos" (maior valor = nível mais alto), sem precisar configurar nada à parte. Nada aqui fica fixo no código - tudo editável.</div>
                   <div id="tbTicketsRegras">${this._loading()}</div>
                 </div>
               </div>
@@ -9549,7 +9549,7 @@ class DimaiorAdmin extends HTMLElement {
               <div id="tickets-sub-acesso" class="rc-hidden-sub" style="display:none">
                 <div class="box">
                   <div class="bhead"><div class="btitulo">${this._ico('users',14)} Buscar Elegíveis</div></div>
-                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Só quem for marcado aqui vê a aba Tickets no painel do streamer — quem não for liberado nem sabe que a função existe. Busque pelo rendimento do período escolhido e marque quem deve ter acesso; desmarcar remove o acesso na hora. Sem expiração automática — fica liberado até você desmarcar.</div>
+                  <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Só quem for marcado aqui vê a aba Tickets no painel do streamer - quem não for liberado nem sabe que a função existe. Busque pelo rendimento do período escolhido e marque quem deve ter acesso; desmarcar remove o acesso na hora. Sem expiração automática - fica liberado até você desmarcar.</div>
                   <div style="padding:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
                     <label style="flex:1;min-width:180px"><div class="cfg-chave">Período</div>
                       <select id="ticketsAcessoPeriodo" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px 10px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;outline:none">
@@ -9574,7 +9574,7 @@ class DimaiorAdmin extends HTMLElement {
                 </div>
               </div>
             </div>
-             <div class="pag" id="pag-recargas">${ph('Recargas de Diamantes','diamond','Vendas, pedidos e ranking de quem recarrega — lidos do painel de revendedor do Rocket Bunny','btnAtuRecargas')}
+             <div class="pag" id="pag-recargas">${ph('Recargas de Diamantes','diamond','Vendas, pedidos e ranking de quem recarrega - lidos do painel de revendedor do Rocket Bunny','btnAtuRecargas')}
               <div class="month-tabs" id="recSubTabs" style="display:flex;gap:6px;padding:0 0 12px">
                 <button class="month-tab on" data-sub="resumo">Resumo</button>
                 <button class="month-tab" data-sub="ranking">Ranking</button>
@@ -9613,7 +9613,7 @@ class DimaiorAdmin extends HTMLElement {
             <div id="comPainelAvisos"><div class="box"><div id="tbCom">${this._loading()}</div></div></div>
             <div id="comPainelEventos" hidden>
               <div class="box ev-config">
-                <div class="ev-lbl">Planilha de eventos da plataforma (Google Planilhas — liberada por link)</div>
+                <div class="ev-lbl">Planilha de eventos da plataforma (Google Planilhas - liberada por link)</div>
                 <div class="ev-linha"><input id="evUrl" class="ev-inp" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off"><select id="evMes" class="ev-inp ev-mes"></select><button class="btn btn-g" id="evImportar">${this._ico('refresh',13)} Atualizar eventos do mês</button></div>
                 <div class="ev-sync" id="evSync"></div>
               </div>
@@ -9624,7 +9624,7 @@ class DimaiorAdmin extends HTMLElement {
               <div class="box ev-config">
                 <div class="ev-lbl">Inscrições dos streamers nos eventos</div>
                 <div class="ev-linha"><select id="insMes" class="ev-inp ev-mes"></select></div>
-                <div class="ev-sync"><span class="com-data">Toque em <b>Inscrever [nome]</b>: o formulário da plataforma abre já preenchido. Confira os campos, envie e volte aqui em <b>Marcar enviado</b> — a linha fica verde e você segue para o próximo.</span></div>
+                <div class="ev-sync"><span class="com-data">Toque em <b>Inscrever [nome]</b>: o formulário da plataforma abre já preenchido. Confira os campos, envie e volte aqui em <b>Marcar enviado</b> - a linha fica verde e você segue para o próximo.</span></div>
               </div>
               <div class="box"><div id="tbInsc"></div></div>
             </div></div>
@@ -9645,7 +9645,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('unlock',14)} Liberar Impulso por Streamer</div></div>
-                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Ninguém tem Impulso liberado por padrão — libere manual e/ou automático streamer por streamer aqui.</div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Ninguém tem Impulso liberado por padrão - libere manual e/ou automático streamer por streamer aqui.</div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="iLibUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/><button class="btn btn-o" id="btnBuscarLibUid">${this._ico('search',13)} Buscar</button></div></div>
                   <div id="iLibStreamerInfo" style="display:none;background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.15);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--t2)"></div>
@@ -9662,7 +9662,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('award',14)} Metas Automáticas de Impulso</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuMetas">${this._ico('refresh',12)} Atualizar</button></div></div>
-                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Quem bater uma dessas metas de diamantes no mês libera Impulso sozinho, com a cota de usos do degrau atingido — só vale pra quem ainda NÃO foi liberado manualmente acima. Bateu a meta esse mês: libera agora e continua liberado o mês inteiro seguinte, sem precisar bater de novo. Se no mês seguinte não bater pelo menos a mesma meta, no mês depois disso volta a zero. <b style="color:var(--t2)">Além dos diamantes, o streamer precisa ter cumprido os dias válidos (1h+ de live no dia) no mês anterior</b> — quem só faz diamante e não cumpre os dias fica sem Impulso por meta.</div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Quem bater uma dessas metas de diamantes no mês libera Impulso sozinho, com a cota de usos do degrau atingido - só vale pra quem ainda NÃO foi liberado manualmente acima. Bateu a meta esse mês: libera agora e continua liberado o mês inteiro seguinte, sem precisar bater de novo. Se no mês seguinte não bater pelo menos a mesma meta, no mês depois disso volta a zero. <b style="color:var(--t2)">Além dos diamantes, o streamer precisa ter cumprido os dias válidos (1h+ de live no dia) no mês anterior</b> - quem só faz diamante e não cumpre os dias fica sem Impulso por meta.</div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding-bottom:12px;border-bottom:1px solid var(--brddim)">
                     <div class="mc" style="width:220px"><label>Dias válidos mínimos (mês anterior)</label><input id="iMetaDiasMin" type="number" min="0" max="31" placeholder="Ex: 23" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/></div>
@@ -9681,7 +9681,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('award',14)} Streamers com Meta Atingida</div><div class="bacoes"><button class="btn btn-o btn-sm" id="btnAtuMetasAtingidas">${this._ico('refresh',12)} Atualizar</button></div></div>
-                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Streamers com algum degrau de meta ativo agora (batido este mês ou no mês passado, e com os dias válidos mínimos cumpridos no mês passado). Aqui dá pra escolher se deixa ativo o Manual, o Automático, ou os dois — desativar aqui não mexe no cálculo da meta, só impede o uso daquele modo enquanto o degrau estiver ativo.</div>
+                <div style="padding:10px 14px;background:rgba(0,212,212,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Streamers com algum degrau de meta ativo agora (batido este mês ou no mês passado, e com os dias válidos mínimos cumpridos no mês passado). Aqui dá pra escolher se deixa ativo o Manual, o Automático, ou os dois - desativar aqui não mexe no cálculo da meta, só impede o uso daquele modo enquanto o degrau estiver ativo.</div>
                 <div id="tbMetasAtingidas">${this._loading()}</div>
               </div>
               <div class="box impulso-section">
@@ -9690,7 +9690,7 @@ class DimaiorAdmin extends HTMLElement {
                   <div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="iBloqUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none"/><button class="btn btn-o" id="btnBuscarBloqUid">${this._ico('search',13)} Buscar</button></div></div>
                   <div id="iBloqStreamerInfo" style="display:none;background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.15);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--t2)"></div>
                   <div class="mc"><label>Motivo do Bloqueio <span style="color:var(--verm)">*</span></label><textarea id="iBloqMotivo" rows="2" placeholder="Ex: Suspeita de uso indevido, manipulação..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;resize:none"></textarea></div>
-                  <div class="mc"><label>Data de Expiração <span style="color:var(--t3);font-size:11px">(opcional — vazio = permanente)</span></label><input id="iBloqExpira" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%"/></div>
+                  <div class="mc"><label>Data de Expiração <span style="color:var(--t3);font-size:11px">(opcional - vazio = permanente)</span></label><input id="iBloqExpira" type="date" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%"/></div>
                   <div><button class="btn" id="btnAplicarBloqueio" style="background:linear-gradient(135deg,#c00030,#f87171)">${this._ico('lock_r',13)} Aplicar Bloqueio</button></div>
                 </div>
               </div>
@@ -9700,7 +9700,7 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div class="box impulso-section">
                 <div class="bhead"><div class="btitulo">${this._ico('warning',14)} UIDs Divergentes</div><div class="bacoes"><div class="busca">${this._ico('search',12)}<input id="bImpulsoHist" type="text" placeholder="Buscar por UID..."/></div></div></div>
-                <div style="padding:10px 14px;background:rgba(248,113,113,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Impulsos onde o link pertence à live de um UID diferente de quem pediu — possível uso pra impulsionar outra conta.</div>
+                <div style="padding:10px 14px;background:rgba(248,113,113,.06);border-bottom:1px solid var(--brddim);font-size:11px;color:var(--t3)">${this._ico('warning',12)} Impulsos onde o link pertence à live de um UID diferente de quem pediu - possível uso pra impulsionar outra conta.</div>
                 <div id="tbImpulsoHist">${this._loading()}</div>
                 <div class="pag-bar" id="pgImpulsoHist"></div>
               </div>
@@ -9720,7 +9720,7 @@ class DimaiorAdmin extends HTMLElement {
               <div id="vtConfig"></div>
               <div id="vtLista">${this._loading()}</div>
             </div>
-            <div class="pag" id="pag-livesCategorias">${ph('Lives — Categorias','live','Categorias da aba LIVES da home. O streamer escolhe a dele no painel (Perfil) e o site agrupa quem está ao vivo','btnAtuLc',`<button class="btn btn-g" id="btnLcNova">${this._ico('plus',13)} Nova subcategoria</button>`)}
+            <div class="pag" id="pag-livesCategorias">${ph('Lives - Categorias','live','Categorias da aba LIVES da home. O streamer escolhe a dele no painel (Perfil) e o site agrupa quem está ao vivo','btnAtuLc',`<button class="btn btn-g" id="btnLcNova">${this._ico('plus',13)} Nova subcategoria</button>`)}
               <div id="lcConfig"></div>
               <div class="lvc-grupo" id="lcStreamer">
                 <div class="lvc-gnome">${this._ico('user',16)} Definir categoria de um streamer</div>
@@ -9733,17 +9733,17 @@ class DimaiorAdmin extends HTMLElement {
               </div>
               <div id="lcLista">${this._loading()}</div>
             </div>
-            <div class="pag" id="pag-arquivos">${ph('Arquivos','image','Fotos e vídeos salvos no Cloudflare (banners, eventos, PK, votações) — veja o espaço usado e apague o que não usa mais','btnAtuArquivos')}
+            <div class="pag" id="pag-arquivos">${ph('Arquivos','image','Fotos e vídeos salvos no Cloudflare (banners, eventos, PK, votações) - veja o espaço usado e apague o que não usa mais','btnAtuArquivos')}
               <div id="arqResumo"></div>
               <div id="arqFiltros"></div>
               <div id="arqLista">${this._loading()}</div>
             </div>
-            <div class="pag" id="pag-historicoLive">${ph('Histórico de Live','play_circle','Tela de teste — mostra o que já foi capturado do review/list da Kwai pra 1 streamer','btnAtuHistoricoLive')}
+            <div class="pag" id="pag-historicoLive">${ph('Histórico de Live','play_circle','Tela de teste - mostra o que já foi capturado do review/list da Kwai pra 1 streamer','btnAtuHistoricoLive')}
               <div class="box mon-section">
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                  <div style="font-size:11px;color:var(--t3)">Busca o que já está gravado no banco (capturado automaticamente pelo Worker do monitor) — não consulta a Kwai na hora.</div>
+                  <div style="font-size:11px;color:var(--t3)">Busca o que já está gravado no banco (capturado automaticamente pelo Worker do monitor) - não consulta a Kwai na hora.</div>
                   <div class="cfg-row" style="flex-wrap:wrap">
-                    <label><div class="cfg-chave">UID ou nome do streamer <span style="color:var(--t3);font-size:10px">(opcional — vazio = todos)</span></div><input class="cfg-inp" id="hlKwaiUid" placeholder="Ex: 150001756165363 ou Haridade7" style="width:260px"></label>
+                    <label><div class="cfg-chave">UID ou nome do streamer <span style="color:var(--t3);font-size:10px">(opcional - vazio = todos)</span></div><input class="cfg-inp" id="hlKwaiUid" placeholder="Ex: 150001756165363 ou Haridade7" style="width:260px"></label>
                     <label><div class="cfg-chave">Período <span style="color:var(--t3);font-size:10px">(opcional)</span></div>
                       <button type="button" class="periodo-campo" id="hlPeriodoBtn">${this._ico('calendar',13)} <span id="hlPeriodoTexto">Selecionar período</span></button>
                       <input id="hlDataDe" type="hidden"/><input id="hlDataAte" type="hidden"/>
@@ -9751,12 +9751,12 @@ class DimaiorAdmin extends HTMLElement {
                     <button class="btn btn-g" id="btnBuscarHistoricoLive" style="margin-top:16px">${this._ico('search',13)} Buscar</button>
                     <button class="btn btn-o" id="btnCapturarAgoraHistoricoLive" style="margin-top:16px">${this._ico('refresh',13)} Capturar agora</button>
                   </div>
-                  <div style="font-size:10px;color:var(--t3)">"Capturar agora" busca a live mais recente desse streamer direto na Kwai e grava na hora — precisa do UID numérico (não funciona por nome). Use se a busca não achar nada e você quiser forçar sem esperar o próximo horário automático.</div>
+                  <div style="font-size:10px;color:var(--t3)">"Capturar agora" busca a live mais recente desse streamer direto na Kwai e grava na hora - precisa do UID numérico (não funciona por nome). Use se a busca não achar nada e você quiser forçar sem esperar o próximo horário automático.</div>
                   <div class="cfg-row" style="flex-wrap:wrap;align-items:flex-end">
                     <label><div class="cfg-chave">Capturar o dia inteiro (todos os streamers)</div><input class="cfg-inp" type="date" id="hlDiaCompleto" style="width:180px"></label>
                     <button class="btn btn-o" id="btnCapturarDiaHistoricoLive">${this._ico('refresh',13)} Capturar dia inteiro</button>
                   </div>
-                  <div style="font-size:10px;color:var(--t3)">Roda o reforço diário na hora, pra 1 dia específico — o mesmo que roda sozinho às 03h/06h/09h. Use se um dia inteiro estiver sem nenhum registro (não depende de UID).</div>
+                  <div style="font-size:10px;color:var(--t3)">Roda o reforço diário na hora, pra 1 dia específico - o mesmo que roda sozinho às 03h/06h/09h. Use se um dia inteiro estiver sem nenhum registro (não depende de UID).</div>
                 </div>
               </div>
               <div id="hlResultadoArea"></div>
@@ -9779,7 +9779,7 @@ class DimaiorAdmin extends HTMLElement {
                 <div style="padding:16px;display:flex;flex-direction:column;gap:16px">
                   <div class="mc">
                     <label>Modo</label>
-                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Automático roda sozinho todo dia às 03h (corrige D-2). Manual só roda quando você clicar em Executar Correção abaixo — o monitor ao vivo continua normal nos dois modos.</div>
+                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Automático roda sozinho todo dia às 03h (corrige D-2). Manual só roda quando você clicar em Executar Correção abaixo - o monitor ao vivo continua normal nos dois modos.</div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap" id="revModoBtns">
                       <button class="btn btn-sm" data-grupo="revisao_modo" data-valor="automatico">${this._ico('check_c',12)} Automático</button>
                       <button class="btn btn-sm" data-grupo="revisao_modo" data-valor="manual">${this._ico('lock_r',12)} Manual</button>
@@ -9787,7 +9787,7 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                   <div class="mc">
                     <label>Corrigir diamantes</label>
-                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Se desligado, a revisão nunca muda diamantes já gravados — só preenche lives novas.</div>
+                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Se desligado, a revisão nunca muda diamantes já gravados - só preenche lives novas.</div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap" id="revDiamantesBtns">
                       <button class="btn btn-sm" data-grupo="revisao_diamantes" data-valor="true">${this._ico('check_c',12)} Ligado</button>
                       <button class="btn btn-sm" data-grupo="revisao_diamantes" data-valor="false">${this._ico('x_circle',12)} Desligado</button>
@@ -9795,7 +9795,7 @@ class DimaiorAdmin extends HTMLElement {
                   </div>
                   <div class="mc">
                     <label>Corrigir horas/minutos</label>
-                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Se desligado, a revisão nunca muda minutos já gravados — só preenche lives novas.</div>
+                    <div style="font-size:11px;color:var(--t3);margin:2px 0 8px">Se desligado, a revisão nunca muda minutos já gravados - só preenche lives novas.</div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap" id="revHorasBtns">
                       <button class="btn btn-sm" data-grupo="revisao_horas" data-valor="true">${this._ico('check_c',12)} Ligado</button>
                       <button class="btn btn-sm" data-grupo="revisao_horas" data-valor="false">${this._ico('x_circle',12)} Desligado</button>
@@ -9806,7 +9806,7 @@ class DimaiorAdmin extends HTMLElement {
               <div class="box mon-section">
                 <div class="bhead"><div class="btitulo">${this._ico('history',14)} Resgate / Correção de Dados</div></div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                  <div style="background:rgba(248,193,0,.06);border:1px solid rgba(248,193,0,.25);border-radius:var(--rs);padding:10px 14px;font-size:11px;color:var(--amber-txt);display:flex;align-items:flex-start;gap:6px;line-height:1.6">${this._ico('warning',13)}<span><strong>Simular</strong> mostra o que seria alterado sem gravar nada. <strong>Executar</strong> grava os dados corrigidos no banco — confirme antes.</span></div>
+                  <div style="background:rgba(248,193,0,.06);border:1px solid rgba(248,193,0,.25);border-radius:var(--rs);padding:10px 14px;font-size:11px;color:var(--amber-txt);display:flex;align-items:flex-start;gap:6px;line-height:1.6">${this._ico('warning',13)}<span><strong>Simular</strong> mostra o que seria alterado sem gravar nada. <strong>Executar</strong> grava os dados corrigidos no banco - confirme antes.</span></div>
                   <div class="mc"><label>Período específico (opcional)</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                     <button type="button" class="periodo-campo" id="monPeriodoBtn">${this._ico('calendar',13)} <span id="monPeriodoTexto">Selecionar período</span></button>
                     <input id="monDataDe" type="hidden"/><input id="monDataAte" type="hidden"/>
@@ -9824,13 +9824,13 @@ class DimaiorAdmin extends HTMLElement {
               <div class="box mon-section">
                 <div class="bhead"><div class="btitulo">${this._ico('download',14)} Baixar Dados (Kwai oficial)</div></div>
                 <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                  <div style="font-size:11px;color:var(--t3)">Baixa um CSV com o total do período direto do member/list da Kwai — geral ou de um streamer específico.</div>
+                  <div style="font-size:11px;color:var(--t3)">Baixa um CSV com o total do período direto do member/list da Kwai - geral ou de um streamer específico.</div>
                   <div class="mc"><label>Período</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                     <button type="button" class="periodo-campo" id="expPeriodoBtn">${this._ico('calendar',13)} <span id="expPeriodoTexto">Selecionar período</span></button>
                     <input id="expDataDe" type="hidden"/><input id="expDataAte" type="hidden"/>
                   </div></div>
                   <div class="mc"><label>Agência</label><select id="expOrg" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="">Todos</option></select></div>
-                  <div class="mc"><label>UID do streamer <span style="color:var(--t3);font-size:11px">(opcional — vazio = todos)</span></label><input id="expUid" type="text" placeholder="Ex: 150001609526898" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div>
+                  <div class="mc"><label>UID do streamer <span style="color:var(--t3);font-size:11px">(opcional - vazio = todos)</span></label><input id="expUid" type="text" placeholder="Ex: 150001609526898" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"/></div>
                   <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none"><input type="checkbox" id="expPorDia" style="width:15px;height:15px;accent-color:var(--cyan)"/> Separar por dia <span style="color:var(--t3);font-size:11px">(1 linha por streamer em cada dia, em vez do total do período)</span></label>
                   <div><button class="btn btn-g" id="btnBaixarDados">${this._ico('download',13)} Baixar Dados</button></div>
                 </div>
@@ -9925,7 +9925,7 @@ class DimaiorAdmin extends HTMLElement {
                     <div><span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Observação</span><div id="aDObs" style="font-size:15px;margin-top:4px"></div></div>
                   </div>
                 </div>
-                <!-- #5 — Tarefas (regras de comissão) exclusivas deste recrutador -->
+                <!-- #5 - Tarefas (regras de comissão) exclusivas deste recrutador -->
                 <div class="box" style="margin-top:14px">
                   <div class="bhead">
                     <div class="btitulo">${this._ico('trend',14)} Tarefas de comissão deste recrutador</div>
@@ -9969,7 +9969,7 @@ class DimaiorAdmin extends HTMLElement {
       <div class="ov" id="mCart"><div class="modal modal-lg"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="m-titulo" id="mCartTitulo" style="margin-bottom:0">${this._ico('wallet',16)} Carteira</div><button class="btn btn-o btn-sm" id="btnFecharCart">${this._ico('x_circle',12)} Fechar</button></div><div id="mCartBody">${this._loading()}</div></div></div>
       <div class="ov" id="mOp"><div class="modal"><div class="m-titulo" id="mOpTitulo">${this._ico('wallet',16)} Operação</div><div class="mc"><label>Valor (R$)</label><input id="mOpValor" type="number" min="0.01" step="0.01" placeholder="0.00"/></div><div class="mc"><label>Descrição / Motivo <span style="color:var(--verm)">*</span></label><textarea id="mOpDesc" rows="3" placeholder="Ex: Fechamento maio..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarOp">Cancelar</button><button class="btn btn-g" id="mOpConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mCredito"><div class="modal"><div class="m-titulo">${this._ico('plus',16)} Adicionar Saldo</div><div id="mCrPasso1"><div class="mc"><label>UID do Streamer</label><div style="display:flex;gap:8px"><input id="mCrUid" type="number" placeholder="Ex: 11614413" style="flex:1;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;outline:none;transition:border-color .2s"/><button class="btn btn-g" id="btnCrBuscar">${this._ico('search',13)} Buscar</button></div></div><div id="mCrInfo" style="display:none;margin-top:12px"></div></div><div id="mCrPasso2" style="display:none"><div id="mCrStreamerCard" style="margin-bottom:14px"></div><div class="mc"><label>Valor (R$) <span style="color:var(--verm)">*</span></label><input id="mCrValor" type="number" min="0.01" step="0.01" placeholder="0.00" style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:16px;outline:none;width:100%;transition:border-color .2s"/></div><div class="mc"><label>Motivo <span style="color:var(--verm)">*</span></label><textarea id="mCrDesc" rows="2" placeholder="Ex: Prêmio, fechamento..." style="padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%;resize:none;transition:border-color .2s"></textarea></div></div><div class="mf" style="margin-top:14px"><button class="btn btn-o" id="btnCrCancelar">Cancelar</button><button class="btn btn-g" id="btnCrConfirmar" style="display:none">${this._ico('check',13)} Confirmar Crédito</button></div></div></div>
-      <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose" aria-label="Fechar">${this._ico('x',16)}</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: —</div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)">Valor a pagar</div><div id="mPixValor" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">—</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:var(--dm-font-body,'Exo 2',sans-serif)">—</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei — Confirmar no Sistema</button></div></div></div>
+      <div class="ov" id="mPix"><div class="modal-box" style="max-width:360px;width:94%;padding:0;overflow:hidden;background:#08081a !important;"><div style="background:linear-gradient(135deg,rgba(0,160,70,.3),rgba(0,0,0,.2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,180,80,.25)"><div style="display:flex;align-items:center;gap:7px">${this._ico('pix_ico',15)}<span style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:1px">Enviar PIX</span></div><button class="modal-close" id="mPixClose" aria-label="Fechar">${this._ico('x',16)}</button></div><div style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px"><div style="position:relative;flex-shrink:0"><img id="mPixFoto" src="" alt="" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(74,222,128,.5);object-fit:cover;display:block;background:#101020"><div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--verde);border-radius:50%;border:2px solid #08081a"></div></div><div style="min-width:0;flex:1"><div id="mPixNome" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</div><div id="mPixUid" style="font-size:10px;color:var(--t3);margin-top:1px">UID: - </div></div></div><div style="text-align:center;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;font-family:var(--dm-font-title,'Rajdhani',sans-serif)">Valor a pagar</div><div id="mPixValor" style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:2rem;font-weight:700;color:var(--verde);line-height:1">R$ 0,00</div></div><div style="background:rgba(0,212,212,.05);border:1px solid rgba(0,212,212,.18);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Chave PIX</div><div id="mPixTipo" style="font-size:10px;color:var(--t3);margin-bottom:2px">-</div><div id="mPixChave" style="font-size:13px;font-weight:700;color:var(--t1);word-break:break-all;margin-bottom:8px;line-height:1.4;font-family:var(--dm-font-body,'Exo 2',sans-serif)">-</div><button id="mPixCopiarChave" class="btn btn-o" style="width:100%;justify-content:center;padding:8px;font-size:11px;border-color:rgba(0,212,212,.35);color:var(--cyan)">${this._ico('clipboard',12)} Copiar chave PIX</button></div><div style="display:flex;align-items:flex-start;gap:7px;padding:8px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:9px;color:#93c5fd;line-height:1.5">${this._ico('warning',10)}<span>Abra o app do banco, copie a chave PIX e envie. Confirme abaixo após o pagamento.</span></div><input type="hidden" id="mPixSaqueId" value=""><button id="mPixConfirmar" class="btn" style="background:linear-gradient(135deg,#00b450,#007a30);width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:10px;letter-spacing:.05em">${this._ico('check_c',14)} Já Paguei - Confirmar no Sistema</button></div></div></div>
       <div class="ov" id="mSaque"><div class="modal"><div class="m-titulo" id="mSaqueTitulo">${this._ico('send',16)} Processar Saque</div><div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--cyan)" id="mSaqueInfo"></div><div class="mc"><label id="mSaqueObsLabel">Observação</label><textarea id="mSaqueObs" rows="3" placeholder="Opcional..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarSaque">Cancelar</button><button class="btn btn-g" id="mSaqueConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mMigracaoAg"><div class="modal"><div class="m-titulo" id="mMigracaoAgTitulo">${this._ico('refresh',16)} Processar Migração</div><div class="mc"><label>Observação (opcional)</label><textarea id="mMigracaoAgObs" rows="3" placeholder="Visível só pro admin, aparece no card..."></textarea></div><div class="mf"><button class="btn btn-o" id="btnCancelarMigracaoAg">Cancelar</button><button class="btn btn-g" id="mMigracaoAgConfirmar">${this._ico('check',13)} Confirmar</button></div></div></div>
       <div class="ov" id="mProc"><div class="modal"><div class="m-titulo">${this._ico('award',16)} Processar Premiação</div><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--verm);display:flex;align-items:flex-start;gap:6px;line-height:1.5">${this._ico('warning',13)}<span><strong>Atenção:</strong> Após processada, não pode ser desfeita automaticamente.</span></div><div class="mc"><label>Mês de Referência</label><input id="mProcMes" type="month" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);padding:9px 12px;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none;width:100%"/></div><div class="mc"><label>Tipo de Ranking</label><select id="mProcTipo" style="width:100%;padding:9px 12px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:13px;outline:none"><option value="diamantes">Ranking de Diamantes</option><option value="horas">Ranking de Horas</option></select></div><div id="mProcTaxaInfo"></div><div id="mProcStatus"></div><div class="mf"><button class="btn btn-o" id="btnCancelarProc">Cancelar</button><button class="btn btn-g" id="mProcConfirmar">${this._ico('zap',13)} Processar Premiação</button></div></div></div>
@@ -9994,12 +9994,12 @@ class DimaiorAdmin extends HTMLElement {
           </div>
           <div class="mc"><label>Imagem ou vídeo</label><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><button type="button" class="btn btn-o" id="mComImgUpBtn" style="white-space:nowrap;font-size:12px;padding:8px 12px">${this._ico('upload',13)} Enviar imagem ou vídeo</button><input id="mComImgFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" hidden/><span id="mComImgUpStatus" style="font-size:11px;color:var(--t3)"></span></div><input id="mComImagem" type="url" placeholder="ou cole o link"/><div style="font-size:11px;color:var(--t3);margin-top:5px">Tamanho ideal do banner da Home: <strong style="color:var(--t2)">1920 × 540 px</strong> (proporção 32:9)</div><div id="mComImagemPreview" style="margin-top:8px;display:none"><img id="mComImgEl" style="width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/><video id="mComVidEl" muted playsinline autoplay loop style="display:none;width:100%;aspect-ratio:32/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)"></video><div id="mComImgDim" style="font-size:11px;margin-top:4px;line-height:1.45"></div></div></div>
           <div id="mComGridLinks" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="mc" style="margin:0" data-so-avisos><label>Botão principal — Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
-            <div class="mc" style="margin:0"><label id="mComLinkUrlLbl">Botão principal — Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
-            <div class="mc" style="margin:0" data-so-avisos><label>Botão secundário — Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
-            <div class="mc" style="margin:0" data-so-avisos><label>Botão secundário — Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
+            <div class="mc" style="margin:0" data-so-avisos><label>Botão principal - Label</label><input id="mComLinkLabel" type="text" placeholder="Ex: INSCREVER-SE" maxlength="30"/></div>
+            <div class="mc" style="margin:0"><label id="mComLinkUrlLbl">Botão principal - Link</label><input id="mComLinkUrl" type="url" placeholder="https://..."/></div>
+            <div class="mc" style="margin:0" data-so-avisos><label>Botão secundário - Label <span style="color:var(--t3);font-size:10px">(opcional)</span></label><input id="mComLink2Label" type="text" placeholder="Ex: VER REGRAS" maxlength="30"/></div>
+            <div class="mc" style="margin:0" data-so-avisos><label>Botão secundário - Link</label><input id="mComLink2Url" type="url" placeholder="https://..."/></div>
           </div>
-          <div class="mc" style="margin-top:10px" data-so-avisos><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;${this._ii('star',12)}Destaque — exibe como card principal no topo das notificações</label></div>
+          <div class="mc" style="margin-top:10px" data-so-avisos><label class="com-check-label" style="font-size:13px"><input type="checkbox" id="mComDestaque"> &nbsp;${this._ii('star',12)}Destaque - exibe como card principal no topo das notificações</label></div>
         </div>
 
         <!-- ── CAMPOS COMUNS ── -->
@@ -10013,7 +10013,7 @@ class DimaiorAdmin extends HTMLElement {
         <div class="m-titulo" id="mVotTit">Nova Votação</div>
         <div class="mc"><label>Título <span style="color:var(--verm)">*</span></label><input id="mVotTitulo" type="text" placeholder="Ex: Melhor streamer do mês" maxlength="120"/></div>
         <div class="mc"><label>Descrição</label><textarea id="mVotDescricao" rows="2" placeholder="Contexto da votação (opcional)"></textarea></div>
-        <div class="mc"><label>Pergunta <span style="color:var(--t3);font-size:11px">(opcional — se vazio, usa o título)</span></label><input id="mVotPergunta" type="text" placeholder="Ex: Qual streamer você mais gostou?" maxlength="200"/></div>
+        <div class="mc"><label>Pergunta <span style="color:var(--t3);font-size:11px">(opcional - se vazio, usa o título)</span></label><input id="mVotPergunta" type="text" placeholder="Ex: Qual streamer você mais gostou?" maxlength="200"/></div>
         <div class="mc"><label>Banner (URL) <span style="color:var(--t3);font-size:11px">(Google Drive público ou link direto)</span></label><input id="mVotBanner" type="url" placeholder="https://drive.google.com/file/d/.../view"/><div id="mVotBannerPreview" style="margin-top:8px;display:none"><img id="mVotBannerImg" style="width:100%;max-width:260px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04)" alt="preview"/></div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div class="mc" style="margin:0"><label>Tipo</label><select id="mVotTipo"><option value="foto">Foto</option><option value="texto">Texto</option></select></div>
@@ -10091,7 +10091,7 @@ class DimaiorAdmin extends HTMLElement {
     _setBtn('Iniciando…');
     const r=await this._api('POST','/admin/cache/atualizar');
     if(!r?.ok){_setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);this._toast(r?.mensagem||'Erro ao iniciar cache','err');return;}
-    this._toast('Rebuild iniciado — aguardando conclusão…','ok');
+    this._toast('Rebuild iniciado - aguardando conclusão…','ok');
     const t0=Date.now();
     const poll=async()=>{
       if(Date.now()-t0>120000){_setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);this._toast('Timeout aguardando rebuild','err');return;}
@@ -10099,7 +10099,7 @@ class DimaiorAdmin extends HTMLElement {
       if(s?.status==='processando'){_setBtn('Processando…');setTimeout(poll,2500);}
       else if(s?.status==='concluido'){
         _setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);
-        this._toast(`Cache atualizado — ${s.cache?.total_membros??'?'} membros · ${s.cache?.total_convites??'?'} convites`,'ok');
+        this._toast(`Cache atualizado - ${s.cache?.total_membros??'?'} membros · ${s.cache?.total_convites??'?'} convites`,'ok');
       } else {
         _setBtn(`${this._ico('refresh',13)} Atualizar Cache`,false);
         this._toast(s?.status==='sem_cache'?'Cache ainda não disponível':'Erro desconhecido','err');
@@ -10172,7 +10172,7 @@ class DimaiorAdmin extends HTMLElement {
       <thead><tr style="border-bottom:1px solid var(--brddim)"><th style="padding:8px 12px;text-align:left;color:var(--t3);font-weight:600">Perfil</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Categoria</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Recrutador</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Status</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Data</th><th style="padding:8px;text-align:left;color:var(--t3);font-weight:600">Ações</th></tr></thead>
       <tbody>${lista.map(c=>{
         const foto=c.foto_url?`<img src="${this._safeImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(c.foto_url)}&w=36&h=36&fit=cover&output=webp`)}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--brd);vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">`:'';
-        const nome=this._esc(c.nome_kwai||c.uid||'—');
+        const nome=this._esc(c.nome_kwai||c.uid||'-');
         const wppRaw=String(c.whatsapp||'').replace(/\D/g,'');
         const wppNum=wppRaw?(wppRaw.length<=11?'55'+wppRaw:wppRaw):'';
         const wppMsg=encodeURIComponent(`Olá! Sou da DMaior Agency. Vi que você se candidatou para entrar na nossa agência, ${c.nome_kwai||c.uid||'streamer'}. Vamos conversar?`);
@@ -10277,12 +10277,12 @@ class DimaiorAdmin extends HTMLElement {
           <div style="display:flex;align-items:center;gap:8px">
             ${c.foto?`<img src="${this._esc(c.foto)}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy" onerror="this.style.display='none'">`:
               `<div style="width:30px;height:30px;border-radius:50%;background:var(--brddim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px">${this._ico('user',15)}</div>`}
-            <div><strong style="color:var(--t1)">${this._esc(c.memberName||c.kwaiId||'—')}</strong><br>
+            <div><strong style="color:var(--t1)">${this._esc(c.memberName||c.kwaiId||'-')}</strong><br>
             <span style="color:var(--t3);font-size:10px">${this._esc(c.kwaiId||'')} · ID ${this._esc(String(c.id||''))}</span></div>
           </div>
         </td>
-        <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||'—')}</td>
-        <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'—')}</td>
+        <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(c.inviteProcessText||'-')}</td>
+        <td style="padding:8px;color:var(--t3);font-size:11px">${this._esc(c.updateTimeText||'-')}</td>
         <td style="padding:8px">${/expir/i.test(c.inviteProcessText||'')&&(c.kwaiId||c.memberId)?`<button class="btn btn-sm btn-o" data-conv-novo="${this._esc(String(c.kwaiId||c.memberId))}" title="Envia um convite novo, como se nunca tivesse sido enviado">${this._ico('send',11)} Novo convite</button>`:''}</td>
       </tr>`).join('')}</tbody>
     </table>
@@ -10314,7 +10314,7 @@ class DimaiorAdmin extends HTMLElement {
       :await this._api('POST',`/admin/convites/${encodeURIComponent(inviteId)}/reenviar`,{dry_run:dry,member_id:memberId||undefined});
     if(btn)btn.disabled=false;
     if(r?.ok){
-      this._toast(dry?'Simulação OK — nada foi enviado à Kwai':'Convite reenviado!','ok');
+      this._toast(dry?'Simulação OK - nada foi enviado à Kwai':'Convite reenviado!','ok');
       if(!dry){ if(aoConcluir)aoConcluir(); else if(this.shadowRoot.getElementById('tbConvitesVoyager'))this._carregarConvitesVoyager(); }
     }else this._toast(r?.mensagem||r?.erro||'A Kwai não aceitou o reenvio','err');
   }
@@ -10357,7 +10357,7 @@ class DimaiorAdmin extends HTMLElement {
       </tr></thead>
       <tbody>${lista.map(m=>`<tr style="border-bottom:1px solid var(--brddim)">
         <td style="padding:8px 12px"><strong style="color:var(--t1)">${this._esc(m.uid)}</strong><br><span style="color:var(--t3);font-size:10px">${this._esc(m.kwai_id||'')}</span></td>
-        <td style="padding:8px;color:var(--gold)">${this._esc(m.agencia_origem||'—')}</td>
+        <td style="padding:8px;color:var(--gold)">${this._esc(m.agencia_origem||'-')}</td>
         <td style="padding:8px;font-size:11px;color:var(--t2)">${this._esc(m.status||'pendente')}</td>
         <td style="padding:8px;color:var(--t3)">${this._fdtCurto(m.criado_em)}</td>
       </tr>`).join('')}</tbody></table>`;
@@ -10382,7 +10382,7 @@ class DimaiorAdmin extends HTMLElement {
         const opt=document.createElement('option');
         opt.value=r.id;
         const dono=String(r.nome||'').trim().toLowerCase()==='dan';
-        opt.textContent=`${r.nome} — ${r.telefone}${r.padrao?' (padrão)':''}${dono?' · Dono da agência':''}`;
+        opt.textContent=`${r.nome} - ${r.telefone}${r.padrao?' (padrão)':''}${dono?' · Dono da agência':''}`;
         sel.appendChild(opt);
       });
       if(!this._convRecrutadores.length){
@@ -10515,7 +10515,7 @@ class DimaiorAdmin extends HTMLElement {
   // Datas de live-teste são timestamptz gravados "como digitado" (sem fuso):
   // exibição e round-trip usam sempre as partes UTC pra bater com o input.
   _spDataHora(v){
-    if(!v)return'—';const d=new Date(v);if(isNaN(d))return'—';
+    if(!v)return'-';const d=new Date(v);if(isNaN(d))return'-';
     const p=n=>String(n).padStart(2,'0');
     return `${p(d.getUTCDate())}/${p(d.getUTCMonth()+1)}/${d.getUTCFullYear()} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
   }
@@ -10544,9 +10544,9 @@ class DimaiorAdmin extends HTMLElement {
         const seloSafe=this._normalizarImagemUrl(r.selo_url||'');
         const seloCell=seloSafe
           ?`<img src="${this._esc(seloSafe)}" width="22" height="22" style="border-radius:4px;object-fit:cover;vertical-align:middle" onerror="this.style.display='none'"> ${r.selo_visivel?'<span style="font-size:10px;color:var(--verde)">visível</span>':'<span style="font-size:10px;color:var(--t3)">oculto</span>'}`
-          :'<span style="font-size:11px;color:var(--t3)">—</span>';
+          :'<span style="font-size:11px;color:var(--t3)">-</span>';
         return`<tr style="border-bottom:1px solid var(--brddim)">
-        <td style="padding:10px 16px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(r.foto_url||''),r.nome||r.kwai_uid,'av')}<div><strong style="color:var(--t1)">${this._esc(r.nome||'—')}</strong><div style="font-size:10px;color:var(--cyan)">${this._esc(r.kwai_uid)}</div></div></div></td>
+        <td style="padding:10px 16px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(r.foto_url||''),r.nome||r.kwai_uid,'av')}<div><strong style="color:var(--t1)">${this._esc(r.nome||'-')}</strong><div style="font-size:10px;color:var(--cyan)">${this._esc(r.kwai_uid)}</div></div></div></td>
         <td style="padding:10px 8px;color:var(--t2)">${this._fdtData(r.contrato_inicio)}</td>
         <td style="padding:10px 8px;color:var(--t2);font-size:11px">${this._spDataHora(r.live_teste_1)}<br>${this._spDataHora(r.live_teste_2)}</td>
         <td style="padding:10px 8px">${seloCell}</td>
@@ -10586,7 +10586,7 @@ class DimaiorAdmin extends HTMLElement {
     const safe=this._normalizarImagemUrl(s.getElementById('fSpSelo')?.value.trim()||'');
     prev.innerHTML=safe
       ?`<img src="${this._esc(safe)}" width="26" height="26" style="border-radius:5px;border:1px solid var(--brddim);object-fit:cover" onerror="this.style.display='none'"><span style="font-size:10px;color:var(--t3)">Preview do selo</span>`
-      :`<span style="font-size:10px;color:var(--t3)">Sem selo individual — usa o selo Premium global</span>`;
+      :`<span style="font-size:10px;color:var(--t3)">Sem selo individual - usa o selo Premium global</span>`;
   }
 
   async _buscarPrefillStreamerPremium(){
@@ -10597,10 +10597,10 @@ class DimaiorAdmin extends HTMLElement {
     if(info)info.textContent='Buscando…';
     const d=await this._api('GET',`/admin/streamers-premium/buscar?q=${encodeURIComponent(q)}`);
     if(!d?.ok){if(info)info.textContent='';this._toast(d?.erro||'Erro na busca','err');return;}
-    if(!d.encontrado){if(info)info.textContent='Nada encontrado no histórico — preencha os dados manualmente.';return;}
+    if(!d.encontrado){if(info)info.textContent='Nada encontrado no histórico - preencha os dados manualmente.';return;}
     const st=d.streamer||{};
     s.getElementById('fSpUid').value=st.kwai_uid||q;
-    if(st.nome&&st.nome!=='—')s.getElementById('fSpNome').value=st.nome;
+    if(st.nome&&st.nome!=='-')s.getElementById('fSpNome').value=st.nome;
     if(st.foto)s.getElementById('fSpFoto').value=st.foto;
     if(info)info.textContent=d.ja_cadastrado?'Este UID já tem cadastro premium.':`Encontrado: ${st.nome||st.kwai_uid}`;
   }
@@ -10667,8 +10667,8 @@ class DimaiorAdmin extends HTMLElement {
     s.getElementById('mConvPerfilResult').innerHTML=`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--brddim);margin-top:8px">
       ${foto}
       <div style="flex:1;min-width:0">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome||p.kwaiId||'—')}</div>
-        <div style="font-size:10px;color:var(--t3)">ID: ${this._esc(p.memberId||'—')} · Kwai: ${this._esc(p.kwaiId||'—')}</div>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:14px;font-weight:700;color:var(--t1)">${this._esc(p.nome||p.kwaiId||'-')}</div>
+        <div style="font-size:10px;color:var(--t3)">ID: ${this._esc(p.memberId||'-')} · Kwai: ${this._esc(p.kwaiId||'-')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${stBadge}${agBadge}</div>
         ${perfilUrl?`<a class="btn btn-o btn-sm" href="${this._esc(perfilUrl)}" target="_blank" rel="noopener noreferrer" style="margin-top:8px;text-decoration:none" title="Abrir o perfil no Kwai">${this._ico('globe',11)} Verificar perfil no Kwai</a>`:''}
       </div></div>`;
@@ -10700,7 +10700,7 @@ class DimaiorAdmin extends HTMLElement {
     const voyagerOk=Number(r?.resposta?.result)===1&&r?.resposta?.data?.checkResult!==false&&r?.resposta?.data?.success!==false;
     const envioOk=r?.ok&&(dry||voyagerOk);
     if(envioOk){
-      if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'Simulação OK — sem envio real':this._ii('check_c',13)+'Convite enviado com sucesso!'}</div>`;
+      if(res)res.innerHTML=`<div style="color:${dry?'var(--gold)':'var(--verde)'};font-size:12px;padding:6px 0">${dry?'Simulação OK - sem envio real':this._ii('check_c',13)+'Convite enviado com sucesso!'}</div>`;
       this._toast(dry?'Simulado OK':'Convite enviado!','ok');
     }else{
       const motivo=r?.checkMessage||r?.motivoBloqueio||r?.mensagem||r?.resposta?.data?.checkMessage||r?.resposta?.data?.message||r?.resposta?.message||r?.erro||'O Kwai recusou o convite.';
@@ -10710,7 +10710,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // ════════════════════════════════════════════════════════════
-  // AFILIADOS — streamers que indicam streamers (SQL/afiliados.sql; Worker admin /admin/afiliados/*)
+  // AFILIADOS - streamers que indicam streamers (SQL/afiliados.sql; Worker admin /admin/afiliados/*)
   // Tudo separado dos agentes: regras, percentuais e vínculos próprios. Desligar o programa
   // bloqueia só indicações NOVAS; nada do histórico é apagado.
   // ════════════════════════════════════════════════════════════
@@ -10770,7 +10770,7 @@ class DimaiorAdmin extends HTMLElement {
     const regras=(cfg.regras||[]).map(r=>`<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t1)">${this._esc(r.nome)}${r.ativo?'':' <span style="color:var(--t3);font-size:11px">(inativa)</span>'}</td><td style="padding:9px 8px;color:var(--t2)">${this._afNum(r.dias_minimos)}</td><td style="padding:9px 8px;color:var(--t2)">${this._afDec(r.horas_minimas)} h</td><td style="padding:9px 8px;color:var(--t1)"><b>${this._afDec(r.percentual)}%</b></td><td style="padding:9px 8px;text-align:right"><button class="btn btn-sm btn-o" data-af-regra-edit="${this._esc(JSON.stringify(r))}">${this._ico('edit',11)} Editar</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-regra-del="${r.id}">${this._ico('trash',11)}</button></td></tr>`).join('');
     const afs=lst.afiliados||[];
     const linhas=afs.map(a=>`<tr style="border-bottom:1px solid var(--brddim);${a.ativo?'':'opacity:.6'}">
-      <td style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(a.foto_url||''),a.nome||a.kwai_uid,'av')}<div><strong style="color:var(--t1)">${this._esc(a.nome||'—')}</strong><div style="font-size:10px;color:var(--cyan)">/${this._esc(a.codigo)} · UID ${this._esc(a.kwai_uid)}</div></div></div></td>
+      <td style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(a.foto_url||''),a.nome||a.kwai_uid,'av')}<div><strong style="color:var(--t1)">${this._esc(a.nome||'-')}</strong><div style="font-size:10px;color:var(--cyan)">/${this._esc(a.codigo)} · UID ${this._esc(a.kwai_uid)}</div></div></div></td>
       <td style="padding:10px 8px;color:var(--t2)">${a.indicacoes.concluidas} concl. · ${a.indicacoes.pendentes} pend. · ${a.indicacoes.total} total</td>
       <td style="padding:10px 8px;color:var(--t1)">${this._afNum(a.diamantes)}</td>
       <td style="padding:10px 8px;color:var(--t2)">${this._afDec(a.horas)} h</td>
@@ -10782,8 +10782,8 @@ class DimaiorAdmin extends HTMLElement {
         <button class="btn btn-sm btn-o" data-af-copiar="${this._esc(a.links?.curto||'')}" title="Copiar link curto">${this._ico('link',11)}</button>
         <button class="btn btn-sm" style="background:${a.ativo?'rgba(248,113,113,.1)':'rgba(74,222,128,.1)'};border:1px solid ${a.ativo?'rgba(248,113,113,.35)':'rgba(74,222,128,.4)'};color:${a.ativo?'var(--verm)':'var(--verde)'}" data-af-ativo="${a.id}" data-af-novo="${a.ativo?0:1}">${a.ativo?'Desativar':'Ativar'}</button>
       </td></tr>`).join('');
-    const bonus=(bon?.bonus||[]).map(b=>{const [rot,cor]=this._afStBonus(b.status);return `<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t2)">${this._esc(b.mes)}</td><td style="padding:9px 8px;color:var(--t1)">${this._esc(b.afiliados?.nome||'—')}</td><td style="padding:9px 8px;color:var(--t2)">${this._esc(b.indicado_nome||b.indicado_uid)}</td><td style="padding:9px 8px">${this._afNum(b.diamantes)}</td><td style="padding:9px 8px">${this._afDec(b.percentual)}%</td><td style="padding:9px 8px;color:var(--gold)"><b>${this._afBrl(b.brl)}</b></td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:700;color:${cor}">${rot}</span></td><td style="padding:9px 8px;text-align:right;white-space:nowrap">${b.status==='calculado'?`<button class="btn btn-sm btn-o" data-af-bonus="${b.id}" data-af-st="aprovado">Aprovar</button> `:''}${b.status==='aprovado'?`<button class="btn btn-sm btn-g" data-af-bonus="${b.id}" data-af-st="pago">Marcar pago</button> `:''}${(b.status==='calculado'||b.status==='aprovado')?`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-bonus="${b.id}" data-af-st="cancelado">Cancelar</button>`:''}</td></tr>`;}).join('');
-    const inds=(ind?.indicacoes||[]).slice(0,60).map(i=>{const cor=i.status==='confirmado'?'var(--verde)':i.status==='convidado'?'var(--gold)':'var(--t3)';return `<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t1)">${this._esc(i.indicado_nome||i.indicado_kwai_id||i.indicado_uid)}<div style="font-size:10px;color:var(--t3)">UID ${this._esc(i.indicado_uid)}</div></td><td style="padding:9px 8px;color:var(--t2)">${this._esc(i.afiliados?.nome||'—')}</td><td style="padding:9px 8px;color:var(--t2)">${this._esc(i.origem)}</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:700;color:${cor}">${this._esc(i.status)}</span>${i.cancelado_motivo?`<div style="font-size:10px;color:var(--t3)">${this._esc(i.cancelado_motivo)}</div>`:''}</td><td style="padding:9px 8px;color:var(--t2)">${this._fdt(i.convidado_em)}</td><td style="padding:9px 8px;text-align:right">${i.status!=='cancelado'?`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-ind-cancel="${i.id}">Cancelar</button>`:''}</td></tr>`;}).join('');
+    const bonus=(bon?.bonus||[]).map(b=>{const [rot,cor]=this._afStBonus(b.status);return `<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t2)">${this._esc(b.mes)}</td><td style="padding:9px 8px;color:var(--t1)">${this._esc(b.afiliados?.nome||'-')}</td><td style="padding:9px 8px;color:var(--t2)">${this._esc(b.indicado_nome||b.indicado_uid)}</td><td style="padding:9px 8px">${this._afNum(b.diamantes)}</td><td style="padding:9px 8px">${this._afDec(b.percentual)}%</td><td style="padding:9px 8px;color:var(--gold)"><b>${this._afBrl(b.brl)}</b></td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:700;color:${cor}">${rot}</span></td><td style="padding:9px 8px;text-align:right;white-space:nowrap">${b.status==='calculado'?`<button class="btn btn-sm btn-o" data-af-bonus="${b.id}" data-af-st="aprovado">Aprovar</button> `:''}${b.status==='aprovado'?`<button class="btn btn-sm btn-g" data-af-bonus="${b.id}" data-af-st="pago">Marcar pago</button> `:''}${(b.status==='calculado'||b.status==='aprovado')?`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-bonus="${b.id}" data-af-st="cancelado">Cancelar</button>`:''}</td></tr>`;}).join('');
+    const inds=(ind?.indicacoes||[]).slice(0,60).map(i=>{const cor=i.status==='confirmado'?'var(--verde)':i.status==='convidado'?'var(--gold)':'var(--t3)';return `<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:9px 8px;color:var(--t1)">${this._esc(i.indicado_nome||i.indicado_kwai_id||i.indicado_uid)}<div style="font-size:10px;color:var(--t3)">UID ${this._esc(i.indicado_uid)}</div></td><td style="padding:9px 8px;color:var(--t2)">${this._esc(i.afiliados?.nome||'-')}</td><td style="padding:9px 8px;color:var(--t2)">${this._esc(i.origem)}</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:700;color:${cor}">${this._esc(i.status)}</span>${i.cancelado_motivo?`<div style="font-size:10px;color:var(--t3)">${this._esc(i.cancelado_motivo)}</div>`:''}</td><td style="padding:9px 8px;color:var(--t2)">${this._fdt(i.convidado_em)}</td><td style="padding:9px 8px;text-align:right">${i.status!=='cancelado'?`<button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--verm)" data-af-ind-cancel="${i.id}">Cancelar</button>`:''}</td></tr>`;}).join('');
     el.innerHTML=`
       <div class="box"><div class="bhead"><div class="btitulo">${this._ico('user_plus',14)} Programa de indicações dos afiliados</div></div>
         <div style="padding:14px 18px 18px">
@@ -10795,7 +10795,7 @@ class DimaiorAdmin extends HTMLElement {
             <div>${this._afCampo('afCot','Cotação do dólar (R$)',c.cotacao_dolar,'type="number" min="0.01" step="any"')}</div>
             <div style="margin-bottom:12px"><button class="btn btn-o" id="afSalvarConv">${this._ico('check',13)} Salvar conversão</button></div>
           </div>
-          <div style="font-size:11px;color:var(--t3)">Configuração própria dos afiliados — alterar aqui não muda nada dos agentes.</div>
+          <div style="font-size:11px;color:var(--t3)">Configuração própria dos afiliados - alterar aqui não muda nada dos agentes.</div>
         </div></div>
       <div class="box"><div class="bhead"><div class="btitulo">${this._ico('trophy',14)} Metas e percentuais de bonificação</div><button class="btn btn-sm btn-g" id="afNovaRegra">${this._ico('plus',12)} Nova meta</button></div>
         <div style="padding:6px 10px 14px;overflow-x:auto">${regras?`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:1px solid var(--brddim)"><th style="${th}">Meta</th><th style="${th}">Dias mín.</th><th style="${th}">Horas mín.</th><th style="${th}">Percentual</th><th></th></tr></thead><tbody>${regras}</tbody></table>`:this._empty('trophy','Nenhuma meta cadastrada: sem meta e sem % manual, o bônus fica em 0%.')}
@@ -10883,8 +10883,8 @@ class DimaiorAdmin extends HTMLElement {
           offset=r.proximo_offset;
         }
         if(erroRede){ this._afMes=mes; recarregar(); return; }
-        if(!acabou){ this._toast('Fechamento INTERROMPIDO antes de acabar — rode de novo para continuar (nada é duplicado).','err'); this._afMes=mes; recarregar(); return; }
-        if(falhas.length) this._toast(`Fechamento PARCIAL — falhou para: ${falhas.join(', ')}. Rode de novo para completar (nada é duplicado).`,'err');
+        if(!acabou){ this._toast('Fechamento INTERROMPIDO antes de acabar - rode de novo para continuar (nada é duplicado).','err'); this._afMes=mes; recarregar(); return; }
+        if(falhas.length) this._toast(`Fechamento PARCIAL - falhou para: ${falhas.join(', ')}. Rode de novo para completar (nada é duplicado).`,'err');
         else this._toast(`Fechado: ${tot.criados} novos, ${tot.atualizados} recalculados, ${tot.mantidos} mantidos`,'ok');
         this._afMes=mes; recarregar();
       },{tom:'ok',rotulo:'Fechar mês'});
@@ -10902,9 +10902,9 @@ class DimaiorAdmin extends HTMLElement {
     const r=await this._api('GET',`/admin/afiliados/${id}${this._afMes?`?mes=${this._afMes}`:''}`);
     if(!r?.ok){this._toast(r?.erro||'Erro ao abrir','err');return;}
     const th='padding:8px 6px;text-align:left;color:var(--t3);font-weight:600;font-size:11px';
-    const linhas=(r.indicados||[]).map(i=>`<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:8px 6px;color:var(--t1)">${this._esc(i.nome||i.kwai_id||i.uid)}<div style="font-size:10px;color:var(--t3)">@${this._esc(i.kwai_id||'—')} · ${this._esc(i.uid)}</div></td><td style="padding:8px 6px;color:var(--t2)">${this._esc(i.status)}${i.vinculo==='desligado'?' (desligado)':''}</td><td style="padding:8px 6px">${this._afNum(i.diamantes)}</td><td style="padding:8px 6px;color:var(--t2)">${this._esc(i.hhmm_total)} <span style="font-size:10px;color:var(--t3)">vídeo ${this._esc(i.hhmm_video)} · áudio ${this._esc(i.hhmm_audio)}</span></td><td style="padding:8px 6px">${this._afNum(i.dias)}</td><td style="padding:8px 6px;color:var(--gold)">${this._afBrl(i.brl)}<div style="font-size:10px;color:var(--t3)">${this._afDec(i.percentual)}%</div></td></tr>`).join('');
+    const linhas=(r.indicados||[]).map(i=>`<tr style="border-bottom:1px solid var(--brddim)"><td style="padding:8px 6px;color:var(--t1)">${this._esc(i.nome||i.kwai_id||i.uid)}<div style="font-size:10px;color:var(--t3)">@${this._esc(i.kwai_id||'-')} · ${this._esc(i.uid)}</div></td><td style="padding:8px 6px;color:var(--t2)">${this._esc(i.status)}${i.vinculo==='desligado'?' (desligado)':''}</td><td style="padding:8px 6px">${this._afNum(i.diamantes)}</td><td style="padding:8px 6px;color:var(--t2)">${this._esc(i.hhmm_total)} <span style="font-size:10px;color:var(--t3)">vídeo ${this._esc(i.hhmm_video)} · áudio ${this._esc(i.hhmm_audio)}</span></td><td style="padding:8px 6px">${this._afNum(i.dias)}</td><td style="padding:8px 6px;color:var(--gold)">${this._afBrl(i.brl)}<div style="font-size:10px;color:var(--t3)">${this._afDec(i.percentual)}%</div></td></tr>`).join('');
     const t=r.totais||{};
-    this._afModal(`${r.afiliado.nome||'Afiliado'} — /${r.afiliado.codigo}`,
+    this._afModal(`${r.afiliado.nome||'Afiliado'} - /${r.afiliado.codigo}`,
       `<div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6">Período: <b>${this._esc(r.periodo.mes)}</b> · ${t.total_indicados} indicados (${t.concluidas} concluídos, ${t.convidados_pendentes} aguardando) · ${this._afNum(t.diamantes)} diamantes · ${this._afDec(t.horas_total)} h (vídeo ${this._afDec(t.horas_video)} · áudio ${this._afDec(t.horas_audio)}) · bônus <b style="color:var(--gold)">${this._afBrl(t.bonus_brl)}</b><br>Links: ${this._esc(r.afiliado.links?.completo)} · ${this._esc(r.afiliado.links?.curto)}<br>Códigos que levam a este afiliado: ${(r.codigos||[]).map(c=>this._esc(c.codigo)+(c.principal?' (atual)':'')).join(', ')}</div>
        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:1px solid var(--brddim)"><th style="${th}">Indicado</th><th style="${th}">Situação</th><th style="${th}">Diamantes</th><th style="${th}">Horas</th><th style="${th}">Dias</th><th style="${th}">Bônus</th></tr></thead><tbody>${linhas||`<tr><td colspan="6" style="padding:16px;text-align:center;color:var(--t3)">Sem indicados.</td></tr>`}</tbody></table></div>`,
       null,null);
@@ -10935,7 +10935,7 @@ class DimaiorAdmin extends HTMLElement {
         ${lista.map(a => `<tr>
           <td style="font-weight:600">${this._esc(a.nome)}</td>
           <td style="color:var(--t3);font-size:12px">${this._esc(a.login)}</td>
-          <td>${a.telefone ? this._esc(a.telefone) : '—'}</td>
+          <td>${a.telefone ? this._esc(a.telefone) : '-'}</td>
           <td><span style="color:var(--cyan);font-weight:700">${a.total_streamers||0}</span></td>
           <td>${a.ativo ? `<span style="color:var(--verde);font-size:12px">● Ativo</span>` : `<span style="color:var(--verm);font-size:12px">● Inativo</span>`}</td>
           <td style="white-space:nowrap"><button class="btn btn-sm btn-o" data-agente-id="${a.id}" data-agente-nome="${this._esc(a.nome)}">${this._ico('search',12)} Ver</button>
@@ -10947,12 +10947,12 @@ class DimaiorAdmin extends HTMLElement {
           <div class="ag-local-top">
             <div style="min-width:0">
               <div class="ag-local-name">${this._esc(a.nome || 'Agente')}</div>
-              <div class="ag-local-login">${this._esc(a.login || '—')}</div>
+              <div class="ag-local-login">${this._esc(a.login || '-')}</div>
             </div>
             <div>${a.ativo ? `<span style="color:var(--verde);font-size:12px">● Ativo</span>` : `<span style="color:var(--verm);font-size:12px">● Inativo</span>`}</div>
           </div>
           <div class="ag-local-grid">
-            <div class="ag-local-metric"><div class="ag-local-lbl">Telefone</div><div class="ag-local-val">${a.telefone ? this._esc(a.telefone) : '—'}</div></div>
+            <div class="ag-local-metric"><div class="ag-local-lbl">Telefone</div><div class="ag-local-val">${a.telefone ? this._esc(a.telefone) : '-'}</div></div>
             <div class="ag-local-metric"><div class="ag-local-lbl">Streamers</div><div class="ag-local-val" style="color:var(--cyan)">${a.total_streamers || 0}</div></div>
           </div>
           <div style="display:flex;gap:8px">
@@ -10966,7 +10966,7 @@ class DimaiorAdmin extends HTMLElement {
       });
       tb.querySelectorAll('[data-agente-del]').forEach(btn => {
         btn.addEventListener('click', () => this._confirmarDel(
-          `Excluir "${btn.dataset.agenteNome || 'este agente'}" definitivamente? Só funciona se ele nunca teve streamer vinculado — caso já tenha histórico, use Editar e mude o status pra Inativo em vez de excluir.`,
+          `Excluir "${btn.dataset.agenteNome || 'este agente'}" definitivamente? Só funciona se ele nunca teve streamer vinculado - caso já tenha histórico, use Editar e mude o status pra Inativo em vez de excluir.`,
           () => this._excluirAgenteAtual(btn.dataset.agenteDel)));
       });
     } catch(e) { tb.innerHTML = `<div style="padding:20px;color:var(--verm)">${e.message}</div>`; }
@@ -11076,7 +11076,7 @@ class DimaiorAdmin extends HTMLElement {
                     <summary style="cursor:pointer;color:var(--cyan);font-weight:700">Ver streamers</summary>
                     <div style="margin-top:8px;max-height:260px;overflow:auto;border:1px solid var(--brddim);border-radius:10px">
                       ${streamers.length ? `<table><tbody>${streamers.slice(0, 120).map(st => `<tr>
-                        <td>${this._esc(st.memberName || st.nome || st.kwaiId || st.memberId || '—')}</td>
+                        <td>${this._esc(st.memberName || st.nome || st.kwaiId || st.memberId || '-')}</td>
                         <td style="color:var(--t3)">${st.kwaiId ? '@'+this._esc(st.kwaiId) : this._esc(st.kwai_id || '')}</td>
                         <td style="color:var(--t3);font-size:11px">${this._esc(st.memberId || st.kwai_uid || st.uid || '')}</td>
                         <td style="color:var(--cyan)">${this._num(st.giftAmtOfCurMonth || st.diamantes || 0)}</td>
@@ -11118,7 +11118,7 @@ class DimaiorAdmin extends HTMLElement {
               <summary>Ver streamers</summary>
               <div class="ag-kwai-streamers">
                 ${streamers.length ? streamers.slice(0, 80).map(st => `<div class="ag-kwai-streamer">
-                  <strong style="color:var(--t1)">${this._esc(st.memberName || st.nome || st.kwaiId || st.memberId || '—')}</strong>
+                  <strong style="color:var(--t1)">${this._esc(st.memberName || st.nome || st.kwaiId || st.memberId || '-')}</strong>
                   <div style="color:var(--t3);margin-top:2px">${st.kwaiId ? '@'+this._esc(st.kwaiId) : this._esc(st.kwai_id || '')}</div>
                   <div style="color:var(--cyan);margin-top:2px">${this._num(st.giftAmtOfCurMonth || st.diamantes || 0)} diamantes</div>
                 </div>`).join('') : `<div style="padding:10px;color:var(--t3);font-size:12px">Worker ainda não enviou a lista de streamers deste agente.</div>`}
@@ -11200,8 +11200,8 @@ class DimaiorAdmin extends HTMLElement {
       const resumo = dash.resumo || {};
       const calc = comissao || {};
       s.getElementById('agenteDetalheTitulo').textContent = ag.nome || 'Agente';
-      s.getElementById('aDLogin').textContent   = ag.login    || '—';
-      s.getElementById('aDTel').textContent     = ag.telefone || '—';
+      s.getElementById('aDLogin').textContent   = ag.login    || '-';
+      s.getElementById('aDTel').textContent     = ag.telefone || '-';
       s.getElementById('aDStatus').innerHTML    = ag.ativo ? `<span style="color:var(--verde)">Ativo</span>` : `<span style="color:var(--verm)">Inativo</span>`;
       s.getElementById('aDStreamers').textContent = resumo.streamers  || 0;
       s.getElementById('aDDiamHoje').textContent  = (resumo.diamantes_hoje  || 0).toLocaleString('pt-BR');
@@ -11216,18 +11216,18 @@ class DimaiorAdmin extends HTMLElement {
         const v = ovInp.value.trim();
         try {
           await this._patch(`/admin/agentes/${id}/comissao-override`, { percentual: v === '' ? null : v });
-          this._toast(v === '' ? 'Override removido — voltou às regras' : `Comissão fixada em ${v}%`, 'ok');
+          this._toast(v === '' ? 'Override removido - voltou às regras' : `Comissão fixada em ${v}%`, 'ok');
           this._abrirDetalheAgente(id);
         } catch (e) { this._toast(e.message, 'err'); }
       };
       s.getElementById('btnLimparComissaoOverride').onclick = async () => {
         try {
           await this._patch(`/admin/agentes/${id}/comissao-override`, { percentual: null });
-          this._toast('Override removido — voltou às regras', 'ok');
+          this._toast('Override removido - voltou às regras', 'ok');
           this._abrirDetalheAgente(id);
         } catch (e) { this._toast(e.message, 'err'); }
       };
-      s.getElementById('aDObs').textContent       = ag.observacao || '—';
+      s.getElementById('aDObs').textContent       = ag.observacao || '-';
       // Streamers
       const streamers = detalhe.streamers || [];
       if (!streamers.length) {
@@ -11236,7 +11236,7 @@ class DimaiorAdmin extends HTMLElement {
         s.getElementById('tbAgenteStreamers').innerHTML = `<table class="tb"><thead><tr><th>Streamer</th><th>Kwai ID</th><th>UID</th><th>Ação</th></tr></thead><tbody>
           ${streamers.map(st => `<tr>
             <td>${this._esc(st.streamer_nome||st.streamer_uid)}</td>
-            <td style="color:var(--t3);font-size:12px">${st.streamer_kwai_id ? '@'+this._esc(st.streamer_kwai_id) : '—'}</td>
+            <td style="color:var(--t3);font-size:12px">${st.streamer_kwai_id ? '@'+this._esc(st.streamer_kwai_id) : '-'}</td>
             <td style="color:var(--t3);font-size:11px">${this._esc(st.streamer_uid)}</td>
             <td><button class="btn btn-sm" data-desvincular-uid="${this._esc(st.streamer_uid)}" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)">${this._ico('trash',12)} Desvincular</button></td>
           </tr>`).join('')}
@@ -11245,7 +11245,7 @@ class DimaiorAdmin extends HTMLElement {
           btn.addEventListener('click', () => this._desvincularStreamer(id, btn.dataset.desvincularUid));
         });
       }
-      // #5 — tarefas de comissão do recrutador
+      // #5 - tarefas de comissão do recrutador
       this._renderTarefasAgente(detalhe.regras);
       const btnNovaTarefa = s.getElementById('btnNovaTarefaAgente');
       if (btnNovaTarefa) btnNovaTarefa.onclick = () => this._modalTarefaAgente(null);
@@ -11254,7 +11254,7 @@ class DimaiorAdmin extends HTMLElement {
     }
   }
 
-  // #5 — regras de comissão ("tarefas") do recrutador. detalhe.regras vem do
+  // #5 - regras de comissão ("tarefas") do recrutador. detalhe.regras vem do
   // GET /admin/agentes/:id como { proprias, globais, efetivas }.
   _renderTarefasAgente(regras) {
     const box = this.shadowRoot.getElementById('aDTarefas');
@@ -11276,8 +11276,8 @@ class DimaiorAdmin extends HTMLElement {
     box.innerHTML = `
       <div style="font-size:12px;color:var(--t3);margin-bottom:10px;line-height:1.5">
         ${usaProprias
-          ? 'Este recrutador tem tarefas próprias — elas <b>substituem</b> as globais no cálculo da comissão dele.'
-          : 'Sem tarefas próprias — usando as <b>tarefas globais</b>. Crie uma aqui para personalizar só este recrutador.'}
+          ? 'Este recrutador tem tarefas próprias - elas <b>substituem</b> as globais no cálculo da comissão dele.'
+          : 'Sem tarefas próprias - usando as <b>tarefas globais</b>. Crie uma aqui para personalizar só este recrutador.'}
       </div>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
         <thead><tr style="color:var(--t3);text-align:left">
@@ -11345,9 +11345,9 @@ class DimaiorAdmin extends HTMLElement {
     } catch (e) { this._toast(e.message, 'err'); }
   }
 
-  // #6/#7 — Fechamento de comissão (Excel). Consome GET /admin/fechamento e
+  // #6/#7 - Fechamento de comissão (Excel). Consome GET /admin/fechamento e
   // monta o .xlsx no navegador com SheetJS (carregado sob demanda do
-  // cdn.jsdelivr.net — permitido pela CSP; não entra no carregamento da página).
+  // cdn.jsdelivr.net - permitido pela CSP; não entra no carregamento da página).
   _carregarSheetJS() {
     if (window.XLSX) return Promise.resolve(window.XLSX);
     if (this._xlsxLoading) return this._xlsxLoading;
@@ -11357,7 +11357,7 @@ class DimaiorAdmin extends HTMLElement {
       const falhar = (msg) => {
         if (acabou) return;
         acabou = true; limpar(); sc.remove();
-        this._xlsxLoading = null; // não guarda promise rejeitada — próximo clique tenta de novo
+        this._xlsxLoading = null; // não guarda promise rejeitada - próximo clique tenta de novo
         reject(new Error(msg));
       };
       const timeout = setTimeout(() => falhar('Excel não carregou (tempo esgotado). Tente de novo.'), 15000);
@@ -11386,7 +11386,7 @@ class DimaiorAdmin extends HTMLElement {
     const html = `<div id="mFech" style="position:fixed;inset:0;background:rgba(4,4,14,.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px">
       <div style="background:var(--glass,#0e1525);border:1px solid var(--brd);border-radius:14px;padding:26px;max-width:420px;width:100%">
         <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t1);margin-bottom:8px">Fechamento de comissão</div>
-        <div style="font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer — metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
+        <div style="font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5">Planilha da comissão de cada recrutador por streamer - metas, diamantes e valor em R$. Confira contra o painel de um agente antes de pagar.</div>
         <label style="display:block;font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Recrutador</label>
         <select id="fechAgente" style="width:100%;padding:10px 12px;background:var(--input-bg,rgba(0,0,0,.4));border:1px solid var(--brd);border-radius:8px;color:var(--t1);font-family:var(--dm-font-body,'Exo 2',sans-serif);font-size:14px;margin-bottom:14px">
           <option value="">Todos os recrutadores</option>
@@ -11436,7 +11436,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   async _baixarFechamento(mes, agenteId = '', agenteNome = '') {
-    // Timeout próprio pra essa chamada — _api() não tem um, e sem isso o botão
+    // Timeout próprio pra essa chamada - _api() não tem um, e sem isso o botão
     // fica preso em "Gerando planilha..." pra sempre se o Worker/Supabase travar.
     const buscarComTimeout = () => Promise.race([
       this._api('GET', `/admin/fechamento${mes ? `?mes=${encodeURIComponent(mes)}` : ''}`),
@@ -11470,7 +11470,7 @@ class DimaiorAdmin extends HTMLElement {
       Recrutador: a.agente_nome, Streamer: s.streamer_nome,
       'Kwai ID': s.streamer_kwai_id || '', UID: s.streamer_uid,
       'Dias ativos': s.dias_ativos, Horas: s.horas, Diamantes: s.diamantes,
-      Tarefa: s.regra || '—', 'Meta dias': s.meta_dias == null ? '' : s.meta_dias,
+      Tarefa: s.regra || '-', 'Meta dias': s.meta_dias == null ? '' : s.meta_dias,
       'Meta horas': s.meta_horas == null ? '' : s.meta_horas,
       '%': s.percentual, Koin: s.koin, USD: s.usd, 'Comissao (R$)': s.brl,
     })));
@@ -11583,7 +11583,7 @@ class DimaiorAdmin extends HTMLElement {
             <span>diamantes x percentual = Koin de comissão; Koin / ${Number(cfg.koin_por_dolar||100)} = US$; US$ x R$ ${Number(cfg.cotacao_dolar||5).toFixed(2)} = comissão em reais.</span>
           </div>
           <div class="mc-section-title">Regras ativas e metas</div>
-          <div class="mc-note" style="margin-bottom:12px"><span>Geral x específica:</span><span>Uma regra "Todos" vale pra todo recrutador. Ao escolher um recrutador, a regra passa a valer <b>só pra ele</b> — e as regras dele substituem as gerais no cálculo da comissão.</span></div>
+          <div class="mc-note" style="margin-bottom:12px"><span>Geral x específica:</span><span>Uma regra "Todos" vale pra todo recrutador. Ao escolher um recrutador, a regra passa a valer <b>só pra ele</b> - e as regras dele substituem as gerais no cálculo da comissão.</span></div>
           <div class="mc-rules">
             <div class="mc-rule mc-rule-head"><span>Nome</span><span>Dias</span><span>Horas</span><span>%</span><span>Ordem</span><span>Ativo</span><span>Ações</span></div>
             ${regras.length?regras.map(r=>`<div class="mc-rule" data-regra-id="${r.id}">
@@ -11810,7 +11810,7 @@ class DimaiorAdmin extends HTMLElement {
 
   // ══════════════════════════ TICKETS & PRESENTES ═════════════════════════════
   // Estrutura de tela construída antes do backend (rotas ainda não existem no
-  // Worker) — pedido explícito do usuário: revisar a tela primeiro, aplicar o
+  // Worker) - pedido explícito do usuário: revisar a tela primeiro, aplicar o
   // banco por último. Os erros de rede aqui são esperados até as rotas
   // /admin/tickets/* existirem no dashboard.agencydmaior.com.br.
 
@@ -11830,10 +11830,10 @@ class DimaiorAdmin extends HTMLElement {
     if(sub==='pedidos')this._carregarRecPedidos();
     if(sub==='parceiros')this._carregarRecParceiros();
   }
-  // Mensagem de erro do worker recarga explica o que falta configurar — vale mostrar inteira.
+  // Mensagem de erro do worker recarga explica o que falta configurar - vale mostrar inteira.
   _recErro(d,padrao){return this._empty('warning',(d&&d.erro)||padrao);}
-  _recForma(f){const m={dlocal:'dLocal',enjoy_2:'EnjoyPayment',enjoy_3:'EnjoyPayment'};return this._esc(m[f]||f||'—');}
-  _recData(d){if(!d)return'—';const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}:\d{2}))?/);return m?`${m[3]}/${m[2]}${m[4]?' '+m[4]:''}`:this._esc(d);}
+  _recForma(f){const m={dlocal:'dLocal',enjoy_2:'EnjoyPayment',enjoy_3:'EnjoyPayment'};return this._esc(m[f]||f||'-');}
+  _recData(d){if(!d)return'-';const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}:\d{2}))?/);return m?`${m[3]}/${m[2]}${m[4]?' '+m[4]:''}`:this._esc(d);}
 
   async _carregarRecResumo(){
     const el=this.shadowRoot.getElementById('recResumo');if(!el)return;
@@ -11846,10 +11846,10 @@ class DimaiorAdmin extends HTMLElement {
     const cartao=(cor,ico,val,lbl)=>`<div class="dc2 dc2-${cor}"><div class="dc2-ico">${this._ico(ico,26)}</div><div class="dc2-val">${val}</div><div class="dc2-lbl">${lbl}</div></div>`;
     const rotuloPeriodo=l=>this._esc((l?.rotulo||'').replace(/^Vendas do /i,'').replace(/^per[ií]odo /i,'Quinzena '));
     const cartoes=`<div class="dc2-grid">
-      ${cartao('cyan','diamond',hoje?this._num(hoje.quantidade):'—','Diamantes hoje')}
-      ${cartao('verde','wallet',hoje?.valor!=null?this._brl(hoje.valor):'—','Vendido hoje')}
-      ${cartao('indigo','bag',ped?this._num(ped.quantidade):'—','Pedidos hoje')}
-      ${cartao('gold','chart',periodo?.valor!=null?this._brl(periodo.valor):'—',rotuloPeriodo(periodo)||'Quinzena atual')}
+      ${cartao('cyan','diamond',hoje?this._num(hoje.quantidade):'-','Diamantes hoje')}
+      ${cartao('verde','wallet',hoje?.valor!=null?this._brl(hoje.valor):'-','Vendido hoje')}
+      ${cartao('indigo','bag',ped?this._num(ped.quantidade):'-','Pedidos hoje')}
+      ${cartao('gold','chart',periodo?.valor!=null?this._brl(periodo.valor):'-',rotuloPeriodo(periodo)||'Quinzena atual')}
       ${rk?.ok?cartao('indigo','users',this._num(rk.clientes),'Clientes em 30 dias'):''}
     </div>`;
     // O relatório completo, como o painel mostra: linhas com "-" são o detalhe da de cima
@@ -11870,7 +11870,7 @@ class DimaiorAdmin extends HTMLElement {
     if(!d?.ok){el.innerHTML=this._recErro(d,'Não foi possível montar o ranking');return;}
     const lista=d.ranking||[];
     const avisos=[];
-    if(d.historico_curto)avisos.push(`O painel do Rocket Bunny só tem pedidos a partir de ${d.ultimo_disponivel?this._recData(d.ultimo_disponivel):'uma data recente'} — o período escolhido começa antes disso, então o ranking cobre menos dias.`);
+    if(d.historico_curto)avisos.push(`O painel do Rocket Bunny só tem pedidos a partir de ${d.ultimo_disponivel?this._recData(d.ultimo_disponivel):'uma data recente'} - o período escolhido começa antes disso, então o ranking cobre menos dias.`);
     if(d.incompleto)avisos.push('Há mais pedidos do que dá pra ler de uma vez. O ranking mostra os mais recentes.');
     const aviso=avisos.length?`<div style="margin:12px 16px 0;padding:10px 14px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:var(--rs);font-size:12px;color:var(--amber-txt);display:flex;gap:8px;align-items:flex-start">${this._ico('warning',13)}<span>${avisos.map(a=>this._esc(a)).join('<br>')}</span></div>`:'';
     const resumo=`<div style="display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 18px 4px;font-size:12px;color:var(--t2)">
@@ -11904,10 +11904,10 @@ class DimaiorAdmin extends HTMLElement {
     const pager=(atual>1||prox)?`<div class="pag-bar"><button ${atual<=1?'disabled':''} data-recpg="prev">Anterior</button><span class="pn">Pág ${atual}</span><button ${prox?'':'disabled'} data-recpg="next">Próxima</button></div>`:'';
     if(!lista.length){el.innerHTML=this._empty('bag','Nenhum pedido aqui')+pager;return;}
     const tabela=`<div class="hist-table-wrap"><table><thead><tr><th>Pedido</th><th>ID do Kwai</th><th>Diamantes</th><th>Valor</th><th>Comissão</th><th>Pagamento</th><th>Data</th></tr></thead><tbody>
-      ${lista.map(x=>`<tr><td style="font-size:11px;color:var(--t3);font-family:ui-monospace,Consolas,monospace">${this._esc(x.numero)}</td><td>${this._esc(x.kwai_id)}</td><td>${x.diamantes!=null?`${this._num(x.diamantes)} ${this._dia()}`:'—'}</td><td><strong>${x.valor!=null?this._brl(x.valor):'—'}</strong></td><td style="color:var(--verde)">${x.comissao!=null?this._brl(x.comissao):'—'}</td><td style="font-size:12px">${this._recForma(x.forma_pagamento)}</td><td style="font-size:11px;color:var(--t3)">${this._recData(x.data)}</td></tr>`).join('')}
+      ${lista.map(x=>`<tr><td style="font-size:11px;color:var(--t3);font-family:ui-monospace,Consolas,monospace">${this._esc(x.numero)}</td><td>${this._esc(x.kwai_id)}</td><td>${x.diamantes!=null?`${this._num(x.diamantes)} ${this._dia()}`:'-'}</td><td><strong>${x.valor!=null?this._brl(x.valor):'-'}</strong></td><td style="color:var(--verde)">${x.comissao!=null?this._brl(x.comissao):'-'}</td><td style="font-size:12px">${this._recForma(x.forma_pagamento)}</td><td style="font-size:11px;color:var(--t3)">${this._recData(x.data)}</td></tr>`).join('')}
     </tbody></table></div>`;
-    const lista_mob=`<div class="hist-lista hist-mobile-only">${lista.map(x=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><div class="hist-info"><div class="hist-nome">${this._esc(x.kwai_id)}</div><div class="hist-diam">${this._ico('diamond',10)} ${x.diamantes!=null?this._num(x.diamantes):'—'} · ${x.valor!=null?this._brl(x.valor):'—'}</div></div><span class="hist-chevron">${this._ico('down',11)}</span></div>
-      <div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Pedido</div><div class="hist-val" style="font-size:11px">${this._esc(x.numero)}</div></div><div class="hist-cel"><div class="hist-lbl">Comissão</div><div class="hist-val" style="color:var(--verde)">${x.comissao!=null?this._brl(x.comissao):'—'}</div></div><div class="hist-cel"><div class="hist-lbl">Pagamento</div><div class="hist-val">${this._recForma(x.forma_pagamento)}</div></div><div class="hist-cel"><div class="hist-lbl">Data</div><div class="hist-val">${this._recData(x.data)}</div></div></div></div></div>`).join('')}</div>`;
+    const lista_mob=`<div class="hist-lista hist-mobile-only">${lista.map(x=>`<div class="hist-item"><div class="hist-preview" onclick="this.closest('.hist-item').classList.toggle('open')"><div class="hist-info"><div class="hist-nome">${this._esc(x.kwai_id)}</div><div class="hist-diam">${this._ico('diamond',10)} ${x.diamantes!=null?this._num(x.diamantes):'-'} · ${x.valor!=null?this._brl(x.valor):'-'}</div></div><span class="hist-chevron">${this._ico('down',11)}</span></div>
+      <div class="hist-body"><div class="hist-body-grid"><div class="hist-cel"><div class="hist-lbl">Pedido</div><div class="hist-val" style="font-size:11px">${this._esc(x.numero)}</div></div><div class="hist-cel"><div class="hist-lbl">Comissão</div><div class="hist-val" style="color:var(--verde)">${x.comissao!=null?this._brl(x.comissao):'-'}</div></div><div class="hist-cel"><div class="hist-lbl">Pagamento</div><div class="hist-val">${this._recForma(x.forma_pagamento)}</div></div><div class="hist-cel"><div class="hist-lbl">Data</div><div class="hist-val">${this._recData(x.data)}</div></div></div></div></div>`).join('')}</div>`;
     el.innerHTML=tabela+lista_mob+pager;
   }
 
@@ -11919,9 +11919,9 @@ class DimaiorAdmin extends HTMLElement {
     const lista=d.parceiros||[];
     if(!lista.length){el.innerHTML=this._empty('users','Nenhum parceiro na rede');return;}
     // Os rótulos dos números vêm do próprio painel ("Hoje", "Comissão total"...), então as colunas
-    // seguem o que estiver lá — se o parceiro mudar um nome, a tabela acompanha.
+    // seguem o que estiver lá - se o parceiro mudar um nome, a tabela acompanha.
     const rotulos=[...new Set(lista.flatMap(p=>Object.keys(p.numeros||{})))];
-    const fmt=(r,v)=>v==null?'—':/comiss/i.test(r)?this._brl(v):this._num(v);
+    const fmt=(r,v)=>v==null?'-':/comiss/i.test(r)?this._brl(v):this._num(v);
     const status=p=>p.ativo?'<span class="badge on">Ativo</span>':`<span class="badge off">${this._esc(p.status||'Inativo')}</span>`;
     const tabela=`<div class="hist-table-wrap"><table><thead><tr><th>Parceiro</th><th>Status</th>${rotulos.map(r=>`<th>${this._esc(r)}</th>`).join('')}</tr></thead><tbody>
       ${lista.map(p=>`<tr><td><div>${this._esc(p.nome||p.kwai_id)}</div><div style="font-size:11px;color:var(--t3)">${this._esc(p.kwai_id)}</div></td><td>${status(p)}</td>${rotulos.map(r=>`<td${/comiss/i.test(r)?' style="color:var(--verde)"':''}>${fmt(r,(p.numeros||{})[r])}</td>`).join('')}</tr>`).join('')}
@@ -11946,7 +11946,7 @@ class DimaiorAdmin extends HTMLElement {
     if(sub==='acesso')this._carregarTicketsLiberados();
   }
 
-  // Ícone de diamante usado em toda a feature Tickets — busca uma vez e
+  // Ícone de diamante usado em toda a feature Tickets - busca uma vez e
   // reaproveita a mesma imagem cadastrada em Regras → link do Google Drive.
   // Sem link cadastrado, cai no SVG padrão (_ico('diamond', …)).
   async _garantirIconeDiamanteTickets(){
@@ -12155,7 +12155,7 @@ class DimaiorAdmin extends HTMLElement {
   }
 
   // ── Acesso (elegibilidade) ────────────────────────────────────────────────
-  // Cada checkbox chama a API na hora — sem "confirmar" em lote, mesmo
+  // Cada checkbox chama a API na hora - sem "confirmar" em lote, mesmo
   // padrão do gerenciamento de participantes do PK Diário já em andamento.
   async _buscarTicketsElegiveis(){
     const s=this.shadowRoot;
@@ -12221,7 +12221,7 @@ class DimaiorAdmin extends HTMLElement {
         ${lista.map(l=>`<tr>
           <td><div style="display:flex;align-items:center;gap:8px">${this._avatar(l.foto,l.nome,'av')}<div><div>${this._esc(l.nome)}</div>${l.nome!==l.kwai_uid?`<div style="font-size:10px;color:var(--t3)">UID: ${this._esc(l.kwai_uid)}</div>`:''}</div></div></td>
           <td>${this._fdt(l.liberado_em)}</td>
-          <td style="color:var(--t3)">${this._esc(l.liberado_por||'—')}</td>
+          <td style="color:var(--t3)">${this._esc(l.liberado_por||'-')}</td>
           <td><button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-remover-liberado="${this._esc(l.kwai_uid)}">${this._ico('trash',12)} Remover</button></td>
         </tr>`).join('')}
       </tbody></table>`;
@@ -12259,10 +12259,10 @@ class DimaiorAdmin extends HTMLElement {
             ?`<button class="btn btn-sm btn-g" data-resg-aprovar="${r.id}">${this._ico('check',12)} Aprovar</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-resg-cancelar="${r.id}">${this._ico('x_circle',12)} Cancelar</button>`
             :r.status==='aprovado'
             ?`<button class="btn btn-sm btn-g" data-resg-enviar="${r.id}">${this._ico('send',12)} Marcar Enviado</button> <button class="btn btn-sm" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--verm)" data-resg-cancelar="${r.id}">${this._ico('x_circle',12)} Cancelar</button>`
-            :'—';
+            :'-';
           return`<tr>
             <td>${this._esc(r.streamer_nome||r.kwai_uid)}</td>
-            <td>${this._esc(r.presente_nome||'—')}</td>
+            <td>${this._esc(r.presente_nome||'-')}</td>
             <td>${this._num(r.valor_diamantes_no_momento||0)}</td>
             <td style="color:var(--cyan);font-weight:700">${this._num(r.custo_tickets_no_momento||0)}</td>
             <td><span style="font-size:11px;color:${COR[r.status]||'var(--t2)'}">● ${BADGE[r.status]||r.status}</span></td>
@@ -12282,7 +12282,7 @@ class DimaiorAdmin extends HTMLElement {
   async _processarResgateTicket(id,acao){
     try{
       await this._post(`/admin/tickets/resgates/${id}/${acao}`,{});
-      this._toast(acao==='aprovar'?'Resgate aprovado!':acao==='enviar'?'Resgate marcado como enviado!':'Resgate cancelado — tickets estornados','ok');
+      this._toast(acao==='aprovar'?'Resgate aprovado!':acao==='enviar'?'Resgate marcado como enviado!':'Resgate cancelado - tickets estornados','ok');
       this._carregarTicketsResgates();
     }catch(e){this._toast(e.message,'err');}
   }
@@ -12299,8 +12299,8 @@ class DimaiorAdmin extends HTMLElement {
         ${lista.map(a=>`<tr>
           <td>${this._esc(a.streamer_nome||a.kwai_uid)}</td>
           <td style="color:${Number(a.quantidade)>=0?'var(--verde)':'var(--verm)'};font-weight:700">${Number(a.quantidade)>=0?'+':''}${this._num(a.quantidade||0)}</td>
-          <td style="font-size:12px;color:var(--t2)">${this._esc(a.motivo||'—')}</td>
-          <td style="font-size:11px;color:var(--t3)">${this._esc(a.operador||'—')}</td>
+          <td style="font-size:12px;color:var(--t2)">${this._esc(a.motivo||'-')}</td>
+          <td style="font-size:11px;color:var(--t3)">${this._esc(a.operador||'-')}</td>
           <td style="color:var(--t3);font-size:11px">${this._fdt(a.criado_em)}</td>
         </tr>`).join('')}
       </tbody></table>`;
@@ -12334,19 +12334,19 @@ class DimaiorAdmin extends HTMLElement {
       recusada:['#f87171','Recusada'],
       necessita_correcao:['var(--orange)','Necessita correção'],
     };
-    return m[st]||['var(--t3)',st||'—'];
+    return m[st]||['var(--t3)',st||'-'];
   }
   _solicBadge(st){
     const [cor,txt]=this._solicStatusInfo(st);
     return `<span style="font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid ${cor}55;color:${cor};background:${cor}14">${this._esc(txt)}</span>`;
   }
   _fmtValorForm(entrada){
-    if(!entrada)return'—';
+    if(!entrada)return'-';
     const {tipo,valor}=entrada;
-    if(valor==null||valor==='')return'—';
+    if(valor==null||valor==='')return'-';
     if(tipo==='data')return this._fdtData(valor);
     if(tipo==='hora'){const m=String(valor).match(/^(\d{1,2}):(\d{2})/);return m?(Number(m[2])===0?`${Number(m[1])}h`:`${Number(m[1])}h${m[2]}`):this._esc(valor);}
-    if(tipo==='datahora'){const h=this._fmtValorForm({tipo:'hora',valor:valor.hora});return h!=='—'?`${this._fdtData(valor.data)} às ${h}`:this._fdtData(valor.data);}
+    if(tipo==='datahora'){const h=this._fmtValorForm({tipo:'hora',valor:valor.hora});return h!=='-'?`${this._fdtData(valor.data)} às ${h}`:this._fdtData(valor.data);}
     if(Array.isArray(valor))return valor.map(v=>this._esc(v)).join(', ');
     return this._esc(String(valor));
   }
@@ -12400,10 +12400,10 @@ class DimaiorAdmin extends HTMLElement {
         <th style="padding:9px 8px;text-align:left;color:var(--t3)">Atualizada</th>
         <th style="padding:9px 8px;text-align:right;color:var(--t3)">Ações</th>
       </tr></thead><tbody>${lista.map(r=>`<tr style="border-bottom:1px solid var(--brddim)">
-        <td style="padding:9px 12px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(r.streamer_foto||''),r.streamer_nome||r.streamer_id,'av')}<span style="color:var(--t1)">${this._esc(r.streamer_nome||'—')}</span></div></td>
-        <td style="padding:9px 8px;color:var(--t2)">${r.streamer_id?'@'+this._esc(r.streamer_id):'—'}<br><span style="font-size:10px;color:var(--t3)">${this._esc(r.streamer_uid||'')}</span></td>
+        <td style="padding:9px 12px"><div style="display:flex;align-items:center;gap:8px">${this._avatar(this._proxyFoto(r.streamer_foto||''),r.streamer_nome||r.streamer_id,'av')}<span style="color:var(--t1)">${this._esc(r.streamer_nome||'-')}</span></div></td>
+        <td style="padding:9px 8px;color:var(--t2)">${r.streamer_id?'@'+this._esc(r.streamer_id):'-'}<br><span style="font-size:10px;color:var(--t3)">${this._esc(r.streamer_uid||'')}</span></td>
         <td style="padding:9px 8px;color:var(--t2)">${this._esc(r.tipo_form)}</td>
-        <td style="padding:9px 8px;color:var(--t2)">${this._esc(r.agente_nome||'—')}</td>
+        <td style="padding:9px 8px;color:var(--t2)">${this._esc(r.agente_nome||'-')}</td>
         <td style="padding:9px 8px;color:var(--t3)">${this._fdt(r.criado_em)}</td>
         <td style="padding:9px 8px">${this._solicBadge(r.status)}</td>
         <td style="padding:9px 8px;color:var(--t3)">${this._fdt(r.atualizado_em)}</td>
@@ -12422,7 +12422,7 @@ class DimaiorAdmin extends HTMLElement {
     const camposAg=(snap.campos||[]).filter(c=>c.origem==='agente'||c.origem==='admin');
     const linhas=camposAg.map(c=>`<div style="padding:6px 0;border-bottom:1px solid var(--brddim)"><span style="font-size:10px;color:var(--t3);text-transform:uppercase">${this._esc(c.rotulo)}</span><br><span style="color:var(--t1)">${this._fmtValorForm(s.valores?.[c.chave])}</span></div>`).join('');
     const admOpcoes=(snap.adm_opcoes||[]).map(o=>o.nome);
-    const hist=(d.historico||[]).map(h=>`<li>${this._fdt(h.criado_em)} — <strong>${this._esc(h.acao)}</strong> · ${this._esc(h.ator_nome||h.ator_id)}${h.detalhe?.motivo?` · "${this._esc(h.detalhe.motivo)}"`:''}${h.detalhe?.adm?` · ADM: ${this._esc(h.detalhe.adm)}`:''}</li>`).join('');
+    const hist=(d.historico||[]).map(h=>`<li>${this._fdt(h.criado_em)} - <strong>${this._esc(h.acao)}</strong> · ${this._esc(h.ator_nome||h.ator_id)}${h.detalhe?.motivo?` · "${this._esc(h.detalhe.motivo)}"`:''}${h.detalhe?.adm?` · ADM: ${this._esc(h.detalhe.adm)}`:''}</li>`).join('');
     const podeAprovar=s.status==='pendente_analise';
     const podeCorrigir=['pendente_analise','aprovada','aguardando_envio'].includes(s.status);
     const podeRecusar=['pendente_analise','aprovada','aguardando_envio','necessita_correcao'].includes(s.status);
@@ -12433,14 +12433,14 @@ class DimaiorAdmin extends HTMLElement {
     over.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9500;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto';
     over.innerHTML=`<div style="background:var(--card,#0d1424);border:1px solid var(--brd);border-radius:14px;max-width:640px;width:100%;position:relative;font-family:var(--dm-font-body,'Exo 2',sans-serif)">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--brddim)">
-        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;color:var(--t1)">${this._esc(s.streamer_nome||s.streamer_id||'Solicitação')} — ${this._solicBadge(s.status)}</div>
+        <div style="font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:18px;color:var(--t1)">${this._esc(s.streamer_nome||s.streamer_id||'Solicitação')} - ${this._solicBadge(s.status)}</div>
         <button id="dsfX" style="background:none;border:none;color:var(--t3);font-size:20px;cursor:pointer">&times;</button>
       </div>
       <div style="padding:18px 20px">
-        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">${this._esc(s.tipo_form)} (versão ${d.versao?.versao||'?'}) · agente ${this._esc(s.agente_nome||'—')} · ${this._fdt(s.criado_em)}</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">${this._esc(s.tipo_form)} (versão ${d.versao?.versao||'?'}) · agente ${this._esc(s.agente_nome||'-')} · ${this._fdt(s.criado_em)}</div>
         ${v.memberId?`<div style="display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--brddim);border-radius:10px;margin-bottom:12px">
           ${this._avatar(this._proxyFoto(v.foto||''),v.nome,'av')}
-          <div><div style="color:var(--t1)">${this._esc(v.nome||v.kwaiId||'—')}</div>
+          <div><div style="color:var(--t1)">${this._esc(v.nome||v.kwaiId||'-')}</div>
           <div style="font-size:11px;color:var(--t3)">@${this._esc(v.kwaiId||'')} · UID ${this._esc(v.memberId||'')}</div>
           <div style="font-size:10px;color:${v.id_confere&&v.uid_confere?'#4ade80':'#f87171'}">${v.id_confere&&v.uid_confere?'ID e UID conferem com a verificação':'ATENÇÃO: divergência entre digitado e verificado'}</div></div>
         </div>`:'<div style="font-size:11px;color:var(--gold);margin-bottom:12px">Sem verificação de streamer registrada.</div>'}
@@ -12448,7 +12448,7 @@ class DimaiorAdmin extends HTMLElement {
         ${s.motivo_correcao?`<div style="font-size:12px;color:var(--orange);margin-bottom:8px">Correção pedida: ${this._esc(s.motivo_correcao)}</div>`:''}
         ${s.motivo_recusa?`<div style="font-size:12px;color:var(--verm);margin-bottom:8px">Recusada: ${this._esc(s.motivo_recusa)}</div>`:''}
         ${s.adm_plataforma?`<div style="font-size:12px;color:var(--t2);margin-bottom:8px">ADM responsável: <strong>${this._esc(s.adm_plataforma)}</strong></div>`:''}
-        ${s.enviado_em?`<div style="font-size:12px;color:var(--info);margin-bottom:8px">Enviada em ${this._fdt(s.enviado_em)} por ${this._esc(s.enviado_por||'—')}${s.envio_obs?` · ${this._esc(s.envio_obs)}`:''}${s.envio_comprovante_url?` · <a href="${this._esc(s.envio_comprovante_url)}" target="_blank" rel="noopener" style="color:var(--cyan)">comprovante</a>`:''}</div>`:''}
+        ${s.enviado_em?`<div style="font-size:12px;color:var(--info);margin-bottom:8px">Enviada em ${this._fdt(s.enviado_em)} por ${this._esc(s.enviado_por||'-')}${s.envio_obs?` · ${this._esc(s.envio_obs)}`:''}${s.envio_comprovante_url?` · <a href="${this._esc(s.envio_comprovante_url)}" target="_blank" rel="noopener" style="color:var(--cyan)">comprovante</a>`:''}</div>`:''}
         ${hist?`<details style="margin-bottom:14px"><summary style="cursor:pointer;font-size:12px;color:var(--t3)">Histórico (${(d.historico||[]).length})</summary><ul style="font-size:11px;color:var(--t2);margin:8px 0 0 16px;line-height:1.8">${hist}</ul></details>`:''}
         <div id="dsfAcoes" style="display:flex;gap:8px;flex-wrap:wrap">
           ${podeAprovar?`<button class="btn btn-sm btn-g" id="dsfAprovar">${this._ico('check_c',12)} Aprovar</button>`:''}
@@ -12470,7 +12470,7 @@ class DimaiorAdmin extends HTMLElement {
     over.querySelector('#dsfAprovar')?.addEventListener('click',()=>{
       painel.innerHTML=`<div style="padding:12px;border:1px solid var(--brddim);border-radius:8px">
         <div style="font-size:12px;color:var(--t2);margin-bottom:6px">Selecione o ADM da plataforma responsável *</div>
-        <select id="dsfAdm" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px;font-size:13px"><option value="">— selecione —</option>${admOpcoes.map(a=>`<option value="${this._esc(a)}">${this._esc(a)}</option>`).join('')}</select>
+        <select id="dsfAdm" style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:8px;font-size:13px"><option value=""> - selecione - </option>${admOpcoes.map(a=>`<option value="${this._esc(a)}">${this._esc(a)}</option>`).join('')}</select>
         <button class="btn btn-sm btn-g" id="dsfAprovarOk" style="margin-top:10px">${this._ico('check_c',12)} Confirmar aprovação</button>
       </div>`;
       painel.querySelector('#dsfAprovarOk').addEventListener('click',async()=>{
@@ -12509,7 +12509,7 @@ class DimaiorAdmin extends HTMLElement {
       try{
         const r=await this._get(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/prefill-url`);
         if(r.avisos?.length)painel.innerHTML=`<div style="font-size:11px;color:var(--gold);padding:8px;border:1px solid rgba(251,191,36,.3);border-radius:8px">${r.avisos.map(a=>'• '+this._esc(a)).join('<br>')}</div>`;
-        if(!r.url){this._toast('Não foi possível gerar a URL — confira o mapeamento','err');return;}
+        if(!r.url){this._toast('Não foi possível gerar a URL - confira o mapeamento','err');return;}
         window.open(r.url,'_blank','noopener');
         await this._post(`/admin/solicitacoes-formularios/${encodeURIComponent(id)}/form-aberto`,{});
         this._toast('Formulário aberto em nova aba','ok');
@@ -12565,7 +12565,7 @@ class DimaiorAdmin extends HTMLElement {
       return `<tr style="border-bottom:1px solid var(--brddim)">
         <td style="padding:10px 16px"><strong style="color:var(--t1)">${this._esc(f.nome)}</strong><div style="font-size:10px;color:var(--t3)">${this._esc(f.slug)}</div></td>
         <td style="padding:10px 8px">${estado}${rasc}</td>
-        <td style="padding:10px 8px;color:var(--t2)">${f.versao_atual?'v'+f.versao_atual:'—'}</td>
+        <td style="padding:10px 8px;color:var(--t2)">${f.versao_atual?'v'+f.versao_atual:'-'}</td>
         <td style="padding:10px 8px;color:var(--t2)">${f.total_solicitacoes||0}</td>
         <td style="padding:10px 8px;text-align:right;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
           <button class="btn btn-sm btn-o" data-cf-edit="${f.id}">${this._ico('edit',11)} Editar</button>
@@ -12663,7 +12663,7 @@ class DimaiorAdmin extends HTMLElement {
         <input type="text" data-fc-entry="${i}" value="${this._esc(f.gforms_entry_id||'')}" placeholder="entry.123456789" style="flex:1;min-width:120px;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:monospace">
         <select data-fc-fmt="${i}" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px;font-size:12px">${FORMATOS.map(o=>`<option value="${o}" ${f.gforms_formato===o?'selected':''}>${o}</option>`).join('')}</select>
         ${f.origem==='fixo'?`<input type="text" data-fc-fixo="${i}" value="${this._esc(f.valor_fixo||'')}" placeholder="valor fixo (vazio = nome da agência)" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px">`:''}
-        ${f.origem==='verificacao'?`<select data-fc-verif="${i}" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px;font-size:12px">${VERIF.map(o=>`<option value="${o}" ${f.chave_verificacao===o?'selected':''}>${o||'— campo —'}</option>`).join('')}</select>`:''}
+        ${f.origem==='verificacao'?`<select data-fc-verif="${i}" style="background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:6px;font-size:12px">${VERIF.map(o=>`<option value="${o}" ${f.chave_verificacao===o?'selected':''}>${o||' - campo - '}</option>`).join('')}</select>`:''}
       </div>
       ${['selecao','multi'].includes(f.tipo)?`<div style="margin-top:6px"><div style="font-size:10px;color:var(--t3)">Opções (rótulo | valor no Google Forms)</div>
         ${(f.opcoes||[]).map((o,j)=>`<div style="display:flex;gap:6px;margin-top:4px"><input type="text" data-fo-rot="${i}_${j}" value="${this._esc(o.rotulo||'')}" placeholder="rótulo" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 8px;font-size:12px"><input type="text" data-fo-val="${i}_${j}" value="${this._esc(o.gforms_valor||'')}" placeholder="valor" style="flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);border-radius:6px;color:var(--t1);padding:5px 8px;font-size:12px"><button class="btn btn-sm" data-fo-del="${i}_${j}" style="border:1px solid rgba(248,113,113,.3);color:var(--verm);padding:2px 6px">${this._ico('x',10)}</button></div>`).join('')}

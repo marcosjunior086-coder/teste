@@ -1,5 +1,5 @@
 /**
- * visita.js — conta a visita no Mapa de Acessos do admin (anônimo).
+ * visita.js - conta a visita no Mapa de Acessos do admin (anônimo).
  *
  * Manda só o caminho da página e se é a 1ª da sessão. O local (país/estado/cidade) é
  * descoberto pelo Cloudflare no Worker rank; IP, cookie e identificador NÃO são guardados.

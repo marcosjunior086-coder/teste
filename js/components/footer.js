@@ -1,11 +1,11 @@
 /**
- * footer.js — Rodapé global da DMaior Agency
+ * footer.js - Rodapé global da DMaior Agency
  *
  * Custom Element: <dmaior-footer>
  *
  * Exibe: logo, contato, redes sociais, links legais e copyright.
  * Responde ao sistema de temas via CSS custom properties (var()).
- * Sem chamadas de API — componente puramente visual.
+ * Sem chamadas de API - componente puramente visual.
  */
 
 class DmaiorFooter extends HTMLElement {
@@ -44,7 +44,7 @@ class DmaiorFooter extends HTMLElement {
     // SVG Kwai (ícone genérico de play/vídeo como substituto)
     const SVG_KWAI = `<span class="kwai-ico" aria-hidden="true"></span>`;
 
-    // Logo local (mesmo do menu) — era wixstatic, bloqueado por DNS/ad-block
+    // Logo local (mesmo do menu) - era wixstatic, bloqueado por DNS/ad-block
     // em alguns Android/Xiaomi.
     const URL_LOGO = 'assets/icons/dmaior-logo.png';
 
@@ -74,7 +74,7 @@ class DmaiorFooter extends HTMLElement {
           align-items: flex-start;
         }
 
-        /* Logo — coluna esquerda */
+        /* Logo - coluna esquerda */
         .col-logo {
           flex: 0 0 auto;
           display: flex;

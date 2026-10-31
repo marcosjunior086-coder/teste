@@ -13,7 +13,7 @@
 - [Política de Host](https://agencydmaior.com.br/politicas-host): pagamentos, metas de dias/horas e regras da Kwai
 - [Política Especial Premium](https://agencydmaior.com.br/politicas-premium): regras, qualidade e bonificação para Streamers Premium
 - [Política de Privacidade](https://agencydmaior.com.br/politicas): LGPD, termos de uso e uso de imagem
-- [Painel do Streamer](https://agencydmaior.com.br/painel/): área logada — diamantes, horas de live, ranking, carteira e saque via PIX
+- [Painel do Streamer](https://agencydmaior.com.br/painel/): área logada - diamantes, horas de live, ranking, carteira e saque via PIX
 
 ## Contato
 

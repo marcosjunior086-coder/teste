@@ -1,16 +1,16 @@
 /**
- * cookie-consent.js — Consentimento de cookies / armazenamento (LGPD)
+ * cookie-consent.js - Consentimento de cookies / armazenamento (LGPD)
  *
  * O site NÃO usa Google Analytics, Meta Pixel nem rastreadores de marketing.
  * A medição de audiência é o Cloudflare Web Analytics, que é agregado e não
  * usa cookies. O único recurso não essencial que depende de consentimento é
- * o conteúdo incorporado de terceiros — os vídeos do Vimeo na área de cursos.
+ * o conteúdo incorporado de terceiros - os vídeos do Vimeo na área de cursos.
  *
  * Modelo:
  *   - Essenciais (sessão, preferências): sempre ativos, não dependem de escolha.
  *   - "Conteúdo incorporado" (Vimeo): opt-in explícito.
  *   - "Aceitar"  → { embeds: true }
- *   - "Só essenciais" → { embeds: false }  — PERSISTE, não volta a perguntar.
+ *   - "Só essenciais" → { embeds: false } - PERSISTE, não volta a perguntar.
  *   - Rodapé "Gerenciar cookies" → reabre a escolha (DMaiorConsent.open()).
  *
  * O consentimento é gravado com versão e data (localStorage 'dm_consent') para
@@ -139,7 +139,7 @@
 
   class DmaiorCookieConsent extends HTMLElement {
     connectedCallback() {
-      if (ler()) return;                 // já escolheu — não mostra
+      if (ler()) return;                 // já escolheu - não mostra
       this._build();
     }
     _build() {

@@ -1,5 +1,5 @@
 /**
- * api.js — Centralização de TODAS as chamadas aos Workers da DMaior Agency
+ * api.js - Centralização de TODAS as chamadas aos Workers da DMaior Agency
  *
  * REGRA: Nenhum componente faz fetch() diretamente.
  *        Toda comunicação com os Workers passa por window.DmaiorAPI.
@@ -8,10 +8,10 @@
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONFIGURAÇÃO — URLs dos Workers Cloudflare
+// CONFIGURAÇÃO - URLs dos Workers Cloudflare
 // ─────────────────────────────────────────────────────────────────────────────
 window.DmaiorConfig = {
-  // URL base do site — usada pelos componentes para montar links internos
+  // URL base do site - usada pelos componentes para montar links internos
   // document.baseURI resolve o <base href> automaticamente
   get baseUrl() { return typeof document !== 'undefined' ? document.baseURI : '/'; },
   workers: {
@@ -70,7 +70,7 @@ window.DmaiorAPI = {
   },
 
   /**
-   * GET genérico para qualquer Worker — retorna JSON.
+   * GET genérico para qualquer Worker - retorna JSON.
    */
   async _get(base, endpoint, headers = {}) {
     const url = base.replace(/\/$/, '') + endpoint;
@@ -80,7 +80,7 @@ window.DmaiorAPI = {
   },
 
   /**
-   * GET genérico — retorna texto puro (para planilhas CSV).
+   * GET genérico - retorna texto puro (para planilhas CSV).
    */
   async _getText(base, endpoint, headers = {}) {
     const url = base.replace(/\/$/, '') + endpoint;
@@ -175,7 +175,7 @@ window.DmaiorAPI = {
     },
 
     /**
-     * Busca comunicados ativos filtrados por local (sem auth — público).
+     * Busca comunicados ativos filtrados por local (sem auth - público).
      * @param {string} local - 'ranking' | 'painel' | 'impulsionamento'
      */
     async getComunicados(local = '') {
@@ -193,7 +193,7 @@ window.DmaiorAPI = {
     },
 
     /**
-     * Vídeos de abertura da home (sem auth — público).
+     * Vídeos de abertura da home (sem auth - público).
      * Retorna { ativo, frequencia_horas, videos: [...] }; desligado = videos vazio.
      */
     async getVideosAbertura() {
@@ -201,7 +201,7 @@ window.DmaiorAPI = {
     },
 
     /**
-     * Área Lives da home (sem auth — público): categorias + canais ao vivo agora.
+     * Área Lives da home (sem auth - público): categorias + canais ao vivo agora.
      * Retorna { ativo:false } quando desligada no admin; senão { status, grupos,
      * categorias, canais, totais, atualizado_em, ... }. Ver Worker rank /lives/descoberta.
      */
@@ -210,7 +210,7 @@ window.DmaiorAPI = {
     },
 
     /**
-     * Vitrine de produtos da aba LOJA (sem auth — público).
+     * Vitrine de produtos da aba LOJA (sem auth - público).
      * Retorna { ativo:false } quando desligada no admin; senão { ativo:true, categorias, produtos }.
      * Ver Worker rank /vitrine.
      */
@@ -346,7 +346,7 @@ window.DmaiorAPI = {
   },
 
   // ── Módulo: PK Diário ──────────────────────────────────────────────────────
-  // Leitura pública pro streamer logado — mesmo Worker/nível de confiança do
+  // Leitura pública pro streamer logado - mesmo Worker/nível de confiança do
   // módulo votacao (não precisa de uid, o ranking/confrontos são iguais pra
   // qualquer streamer).
   pk: {
@@ -358,7 +358,7 @@ window.DmaiorAPI = {
     async confrontos(programacaoId) {
       return window.DmaiorAPI._get(window.DmaiorConfig.workers.admin, `/pk/confrontos?programacao_id=${encodeURIComponent(programacaoId)}`);
     },
-    /** Ranking — informe programacao_id OU { data_inicio, data_fim }. */
+    /** Ranking - informe programacao_id OU { data_inicio, data_fim }. */
     async ranking({ programacao_id, data_inicio, data_fim } = {}) {
       const qs = programacao_id
         ? `programacao_id=${encodeURIComponent(programacao_id)}`
@@ -424,7 +424,7 @@ window.DmaiorAPI = {
 
   // ── Módulo: Notificações Push ────────────────────────────────────────────
   // Auth = mesmo access_token do Supabase Auth (dm_token) já usado no painel.
-  // O worker deriva a identidade sozinho — nunca mandamos uid/kwai_uid daqui.
+  // O worker deriva a identidade sozinho - nunca mandamos uid/kwai_uid daqui.
   push: {
     _auth(token) { return token ? { Authorization: `Bearer ${token}` } : {}; },
 

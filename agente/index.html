@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="DMaior Agente">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="color-scheme" content="dark">
-  <title>Painel do Agente — DMaior Agency</title>
+  <title>Painel do Agente - DMaior Agency</title>
   <link rel="stylesheet" href="css/fonts.css?v=20261031-local">
 
   <!-- Boot de tema: aplica data-theme/data-font-size antes do 1º paint (evita flash).
@@ -34,13 +34,13 @@
 
   <!-- Design system oficial do site: tokens --dm-*, os 5 temas, tipografia, reset base.
        O painel do agente agora consome os MESMOS tokens do site/admin. -->
-  <link rel="stylesheet" href="css/global.css?v=20261031-seg">
+  <link rel="stylesheet" href="css/global.css?v=20261031-traco">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ─────────────────────────────────────────────────────────────────────────
-       Ponte de tokens — os nomes locais do painel do agente (--cyan, --card…)
+       Ponte de tokens - os nomes locais do painel do agente (--cyan, --card…)
        passam a apontar para o design system --dm-*. Assim os 5 temas + tamanho
        de texto + fonte + idioma valem automaticamente, sem tocar em cada tela.
        ───────────────────────────────────────────────────────────────────────── */
@@ -66,7 +66,7 @@
       --r-lg:      20px;
       --ease:      .25s ease;
 
-      /* Identidade herdada do painel admin — SEGUEM o tema:
+      /* Identidade herdada do painel admin - SEGUEM o tema:
          azul→ciano nos temas escuros/branco, rosa no Rosa, laranja no Laranja. */
       --azul:      var(--dm-effect-blue);
       --grad:      var(--dm-grad-effect);
@@ -79,7 +79,7 @@
 
     html, body { background: var(--bg); min-height: 100%; font-family: var(--font-b); color: var(--text); }
 
-    /* -- TELA DE LOGIN — estilo "app moderno": campos em pílula + selo de ícone -- */
+    /* -- TELA DE LOGIN - estilo "app moderno": campos em pílula + selo de ícone -- */
     #tela-login {
       display: flex; align-items: center; justify-content: center;
       min-height: 100vh; min-height: 100dvh; padding: 28px 22px;
@@ -179,7 +179,7 @@
     .btn-logout:hover { background: rgba(248,113,113,.2); }
 
     /* Conteúdo principal */
-    /* min-width:0 — sem isso o item flex cresce até o conteúdo mais largo (ex.: tabela
+    /* min-width:0 - sem isso o item flex cresce até o conteúdo mais largo (ex.: tabela
        de comissão) e a página fica maior que a tela no celular, cortando os cards */
     .main { flex: 1; min-width: 0; margin-left: 220px; padding: 28px; max-width: 1200px; }
 
@@ -452,7 +452,7 @@
     .live-player-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
     .live-player-status { color: var(--sub); font-size: 12px; text-align: center; margin-top: 9px; }
 
-    /* Seção de convites — form buscar */
+    /* Seção de convites - form buscar */
     .convite-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
     .convite-box h3 { font-family: var(--font-t); font-size: 17px; margin-bottom: 18px; }
     .conv-history-head {
@@ -508,7 +508,7 @@
     .msg-err { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
     .msg-warn{ background: rgba(240,192,64,.12);  border: 1px solid rgba(240,192,64,.3);  color: var(--gold); }
 
-    /* -- Migração de Agência — acordeão de circunstâncias -------------------- */
+    /* -- Migração de Agência - acordeão de circunstâncias -------------------- */
     .mc-field { margin-bottom: 16px; }
     .mc-field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
     .mc-field input[type="text"], .mc-field input[type="date"], .mc-field input[type="number"], .mc-field textarea {
@@ -555,7 +555,7 @@
     .spinner { width: 36px; height: 36px; border: 3px solid rgba(0,212,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* -- TABLET (=900px) — sidebar colapsa para ícones ---- */
+    /* -- TABLET (=900px) - sidebar colapsa para ícones ---- */
     @media (max-width: 900px) {
       .sidebar { width: 64px; }
       .sidebar-logo { padding: 18px 0; text-align: center; }
@@ -571,11 +571,11 @@
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* Mobile header — oculto por padrão, aparece via media query */
+    /* Mobile header - oculto por padrão, aparece via media query */
     .mobile-header { display: none; }
     .mobile-menu-btn, .mobile-menu-backdrop { display: none; }
 
-    /* -- MOBILE (=600px) — bottom nav bar ----------------- */
+    /* -- MOBILE (=600px) - bottom nav bar ----------------- */
     @media (max-width: 600px) {
       .mobile-header { display: flex; }
       .mobile-menu-btn {
@@ -641,7 +641,7 @@
         color: var(--red); font-size: 12px; cursor: pointer; flex-shrink: 0;
       }
 
-      /* Main — espaço para header fixo + bottom nav */
+      /* Main - espaço para header fixo + bottom nav */
       .main { margin-left: 0; padding: 16px 14px 28px; padding-top: 68px; }
 
       /* Cards */
@@ -654,7 +654,7 @@
       .topbar { margin-bottom: 16px; }
       .topbar h2 { font-size: 18px; }
 
-      /* Tabelas — scroll horizontal */
+      /* Tabelas - scroll horizontal */
       .table-wrap { overflow: visible; border-radius: var(--r); }
       .table-wrap.has-accordion table { display: none; }
       .table-wrap.has-accordion .ag-acc-list { display: block; }
@@ -696,7 +696,7 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════════════════
-       REDESIGN v1 — identidade alinhada ao painel admin (azul→ciano + vidro),
+       REDESIGN v1 - identidade alinhada ao painel admin (azul→ciano + vidro),
        menu recolhível e painel de Aparência. Regras abaixo vencem por ordem.
        ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -810,7 +810,7 @@
       body.nav-collapsed .ag-chrome { left: 0; }
     }
     @media (max-width: 900px) and (min-width: 601px) {
-      /* Desativa o trilho de 64px do CSS antigo — sidebar cheia + toggle de recolher */
+      /* Desativa o trilho de 64px do CSS antigo - sidebar cheia + toggle de recolher */
       .sidebar { width: 220px; }
       .main { margin-left: 220px; }
       .sidebar-logo { padding: 24px 20px 20px; justify-content: flex-start; text-align: left; }
@@ -890,7 +890,7 @@
       .mobile-header-nome { max-width: 26vw; }
     }
 
-    /* ═══ Navegação inferior flutuante (mobile) — padrão do demo ═══ */
+    /* ═══ Navegação inferior flutuante (mobile) - padrão do demo ═══ */
     .mnav { display: none; }
     .msheet { display: none; }
     .pm-voltar { display: none; }
@@ -947,7 +947,7 @@
       .fab.open { transform: translateX(-50%) rotate(45deg); }
 
       /* Menu do "+" em tela cheia, por categorias + busca. Mesmo padrão (.pm-*)
-         do painel do streamer e do admin — mudou lá, muda aqui */
+         do painel do streamer e do admin - mudou lá, muda aqui */
       .msheet {
         position: fixed; inset: 0; z-index: 175; background: var(--bg); color: var(--text);
         overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
@@ -1056,7 +1056,7 @@
     /* painel-resumo em gradiente do tema (estilo board-detail do demo) */
     .dash-resumo { background: var(--grad); border-radius: var(--r-lg); padding: 18px; color: #fff; }
     /* h4 aqui herdaria a cor escura do global.css (h1..h6{color:--dm-text}) e
-       sumiria sobre o gradiente nos temas claros — força branco. */
+       sumiria sobre o gradiente nos temas claros - força branco. */
     .dash-resumo h4,
     .dash-resumo b,
     .dash-resumo strong { color: #fff; }
@@ -1073,7 +1073,7 @@
     /* Celular: mesmas proporções do painel do STREAMER (cabeçalho do site
        ~64px com logo de 38px, títulos dos cartões em caixa-alta, números
        grandes). Antes aqui o texto era REDUZIDO no celular (22px/19px) e o
-       cabeçalho tinha 52px com logo de 20px — parecia "versão de computador". */
+       cabeçalho tinha 52px com logo de 20px - parecia "versão de computador". */
     @media (max-width: 600px) {
       .mobile-header { height: 64px; padding: 10px 16px; gap: 10px; }
       .mobile-header-logo img { height: 34px; }
@@ -1136,7 +1136,7 @@
 
 <!-- ---------------- PAINEL ---------------- -->
 <div id="painel">
-  <!-- Header fixo mobile — visível apenas em =600px via CSS -->
+  <!-- Header fixo mobile - visível apenas em =600px via CSS -->
   <div class="mobile-header" id="mobile-header">
     <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Abrir menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
@@ -1187,7 +1187,7 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="agente-info">
-          <strong id="sidebar-nome">—</strong>
+          <strong id="sidebar-nome">-</strong>
           <span id="sidebar-login"></span>
         </div>
         <button class="btn-voltar-site" onclick="voltarAoSite()">Voltar ao Site</button>
@@ -1217,18 +1217,18 @@
       <!-- --- DASHBOARD --- -->
       <section id="sec-dashboard" class="section">
         <div class="greet">
-          <span class="av" id="dash-av">—</span>
+          <span class="av" id="dash-av">-</span>
           <div style="flex:1;min-width:0">
             <h1 id="dash-greet-nome">Painel do Agente</h1>
             <p id="dash-greet-sub">Carregando…</p>
           </div>
-          <span class="badge-ao-vivo greet-act"><span class="dot-live"></span><span id="dash-ao-vivo-badge">— ao vivo</span></span>
+          <span class="badge-ao-vivo greet-act"><span class="dot-live"></span><span id="dash-ao-vivo-badge"> - ao vivo</span></span>
         </div>
 
         <div class="meu-link-box">
           <div class="meu-link-info">
             <span class="meu-link-titulo">Meu link de recrutamento</span>
-            <span class="meu-link-desc">Compartilhe com streamers — quem se candidatar por ele já fica vinculado a você.</span>
+            <span class="meu-link-desc">Compartilhe com streamers - quem se candidatar por ele já fica vinculado a você.</span>
           </div>
           <div class="meu-link-copia">
             <input type="text" id="meu-link-input" readonly>
@@ -1278,7 +1278,7 @@
         <div class="topbar">
           <div>
             <h2>Buscar UID Kwai</h2>
-            <p style="color:var(--sub);font-size:13px;margin-top:4px">Resolve o ID (@usuário) de qualquer conta da Kwai para o UID numérico — funciona para qualquer criador, de qualquer agência, vinculado ou não.</p>
+            <p style="color:var(--sub);font-size:13px;margin-top:4px">Resolve o ID (@usuário) de qualquer conta da Kwai para o UID numérico - funciona para qualquer criador, de qualquer agência, vinculado ou não.</p>
           </div>
         </div>
         <div class="convite-box">
@@ -1384,7 +1384,7 @@
           <div id="campos-condicionais"></div>
 
           <div class="mc-field">
-            <label>Evidência(s) — link do arquivo individual do Drive</label>
+            <label>Evidência(s) - link do arquivo individual do Drive</label>
             <div id="lista-evidencias"></div>
             <button type="button" class="btn btn-ghost" id="btn-add-evidencia" style="margin-top:4px">+ Adicionar link</button>
             <a href="#" id="btn-drive-evidencias" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;font-size:12px;color:var(--cyan)">Abrir pasta de evidências no Drive →</a>
@@ -1434,7 +1434,7 @@
   <!-- Rodapé do site (mesmo das páginas públicas) -->
   <dmaior-footer class="ag-footer"></dmaior-footer>
 
-  <!-- Navegação inferior flutuante (mobile) — preenchida por JS -->
+  <!-- Navegação inferior flutuante (mobile) - preenchida por JS -->
   <nav class="mnav" id="ag-mnav" aria-label="Navegação rápida">
     <svg class="mnav-bg" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor"></path></svg>
     <div class="grp" data-grp="a"></div>
@@ -1550,7 +1550,7 @@ function logout() {
   document.getElementById('login-erro').textContent = '';
 }
 
-// Mantém a mesma origem/domínio de onde o agente acessou — trocar de
+// Mantém a mesma origem/domínio de onde o agente acessou - trocar de
 // origem faria o navegador usar outro "armazenamento" de sessão, e ao
 // voltar pro painel pareceria deslogado sem realmente ter saído.
 function voltarAoSite() {
@@ -1606,7 +1606,7 @@ async function fazerLogin() {
 function iniciarPainel() {
   const ag = getAgente();
   if (ag) {
-    document.getElementById('sidebar-nome').textContent  = ag.nome  || '—';
+    document.getElementById('sidebar-nome').textContent  = ag.nome  || '-';
     document.getElementById('sidebar-login').textContent = ag.login || '';
     const linkInput = document.getElementById('meu-link-input');
     if (linkInput && ag.login) linkInput.value = `https://agencydmaior.com.br/recrutamento?agente=${encodeURIComponent(ag.login)}`;
@@ -1636,7 +1636,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (token) {
     _token = token; _agente = getAgente();
     // Valida sessão no servidor e atualiza os dados do agente (inclui a foto
-    // resolvida pelo kwai_uid — #1).
+    // resolvida pelo kwai_uid - #1).
     api('/agente/me').then(r => {
       if (r.ok) {
         if (r.agente) {
@@ -2020,7 +2020,7 @@ function iniciarVideosInline(container) {
 }
 
 function fmtData(iso) {
-  if (!iso) return '—';
+  if (!iso) return '-';
   const d = new Date(iso); const p = n => String(n).padStart(2,'0');
   return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
 }
@@ -2035,7 +2035,7 @@ function setAccordion(container, on = true) {
 }
 
 function agCell(label, value) {
-  return `<div class="ag-cell"><div class="ag-cell-label">${esc(label)}</div><div class="ag-cell-value">${value ?? '—'}</div></div>`;
+  return `<div class="ag-cell"><div class="ag-cell-label">${esc(label)}</div><div class="ag-cell-value">${value ?? '-'}</div></div>`;
 }
 
 function agItem({ avatar = '', title = '', sub = '', value = '', badge = '', body = '' }) {
@@ -2083,7 +2083,7 @@ async function carregarDashboard() {
     const primeiro = (ag.nome || '').trim().split(/\s+/)[0] || 'Agente';
     const iniciais = (ag.nome || 'A').trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
     const avEl = document.getElementById('dash-av');
-    // #1 — foto do próprio agente (resolvida no backend pelo kwai_uid). Só cai
+    // #1 - foto do próprio agente (resolvida no backend pelo kwai_uid). Só cai
     // na foto do painel do streamer no mesmo aparelho, e depois nas iniciais.
     const fotoS = ag.foto || fotoStreamerVinculada();
     if (fotoS) {
@@ -2135,14 +2135,14 @@ async function carregarDashboard() {
       renderizarGrafico(_graficoDados);
     }
 
-    // #2 — comissão por mês (histórico). O backend /agente/comissao já aceita ?mes=YYYY-MM.
+    // #2 - comissão por mês (histórico). O backend /agente/comissao já aceita ?mes=YYYY-MM.
     montarSeletorMesComissao(c);
   } catch (e) {
     container.innerHTML = `<div class="empty"><p>Erro ao carregar dashboard: ${e.message}</p></div>`;
   }
 }
 
-// #2 — seletor de mês da comissão (últimos 12 meses) + render do detalhe.
+// #2 - seletor de mês da comissão (últimos 12 meses) + render do detalhe.
 let _comissaoMesInit = false;
 function montarSeletorMesComissao(comissaoAtual) {
   const card = document.getElementById('comissao-mes-card');
@@ -2184,7 +2184,7 @@ function renderComissaoMes(c) {
   const com = (c && c.comissao) || {};
   const tot = (c && c.totais) || {};
   const streamers = (c && c.streamers) || [];
-  const regra = c && c.regra_aplicada ? esc(c.regra_aplicada.nome) : '—';
+  const regra = c && c.regra_aplicada ? esc(c.regra_aplicada.nome) : '-';
   const linhas = streamers
     .slice()
     .sort((a, b) => (b.diamantes || 0) - (a.diamantes || 0))
@@ -2217,7 +2217,7 @@ function saudacaoHora() {
   const h = new Date().getHours();
   return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
 }
-// Foto do painel do streamer (mesmo aparelho/origem) — usada no avatar se o
+// Foto do painel do streamer (mesmo aparelho/origem) - usada no avatar se o
 // agente também estiver logado como streamer. Chaves do js/auth.js do site.
 function fotoStreamerVinculada() {
   try {
@@ -2266,7 +2266,7 @@ function corAlpha(hex, alpha) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
-// Gráfico de linha suave em SVG (área + pontos) — padrão do redesign/demo
+// Gráfico de linha suave em SVG (área + pontos) - padrão do redesign/demo
 function renderizarGrafico(dados) {
   if (!dados || dados.length < 2) return;
   const host = document.getElementById('canvas-chart');
@@ -2337,7 +2337,7 @@ async function carregarStreamers() {
     const rows = list.map(s => {
       const badge = s.verificado_premium ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="*">' : s.verificado ? '<img class="verificado" src="https://images.weserv.nl/?url=https://cdn-icons-png.flaticon.com/512/7656/7656139.png&w=14&output=webp" alt="ok">' : '';
       const title = `${esc(s.nome)}${badge}`;
-      const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : '—';
+      const kwai = s.kwai_id ? '@' + esc(s.kwai_id) : '-';
       const uidAttr = esc(String(s.uid || ''));
       const btnDesvincular = `<button class="btn btn-ghost btn-desvincular" data-uid="${uidAttr}">Desvincular</button>`;
       return {
@@ -2360,7 +2360,7 @@ async function carregarStreamers() {
           value: fmtNum(s.diamantes_mes || 0),
           body: [
             agCell('Kwai ID', kwai),
-            agCell('UID', uidAttr || '—'),
+            agCell('UID', uidAttr || '-'),
             agCell('Diamantes mês', fmtNum(s.diamantes_mes || 0)),
             agCell('Horas mês', esc(s.horas_mes || '0:00')),
             agCell('Vinculado em', fmtData(s.vinculado_em)),
@@ -2403,7 +2403,7 @@ async function buscarUidAgente() {
       <div class="perfil-encontrado">
         ${d.foto ? `<img src="${esc(d.foto)}" alt="${esc(d.nome || d.kwai_id)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((d.nome || d.kwai_id || '?')[0])}</div>`}
         <div class="perfil-info">
-          <h4>${esc(d.nome || d.kwai_id || '—')}</h4>
+          <h4>${esc(d.nome || d.kwai_id || '-')}</h4>
           <p>@${esc(d.kwai_id || bruto)}${typeof d.seguidores === 'number' ? ` · ${fmtNum(d.seguidores)} seguidores` : ''}</p>
           <p style="font-family:monospace;color:var(--text);margin-top:4px">UID: <strong>${esc(d.uid)}</strong></p>
         </div>
@@ -2446,12 +2446,12 @@ const FORM_STATUS_LABEL = {
   necessita_correcao: ['badge-at',   'Necessita correção'],
 };
 function badgeSolic(status) {
-  const [cls, txt] = FORM_STATUS_LABEL[status] || ['badge-pend', status || '—'];
+  const [cls, txt] = FORM_STATUS_LABEL[status] || ['badge-pend', status || '-'];
   return `<span class="badge ${cls}">${esc(txt)}</span>`;
 }
 function fmtDataBRag(iso) {
   const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : (iso ? esc(iso) : '—');
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : (iso ? esc(iso) : '-');
 }
 function fmtHoraBRag(hhmm) {
   const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})/);
@@ -2459,9 +2459,9 @@ function fmtHoraBRag(hhmm) {
   return Number(m[2]) === 0 ? `${Number(m[1])}h` : `${Number(m[1])}h${m[2]}`;
 }
 function fmtValorSolic(entrada) {
-  if (!entrada) return '—';
+  if (!entrada) return '-';
   const { tipo, valor } = entrada;
-  if (valor == null || valor === '') return '—';
+  if (valor == null || valor === '') return '-';
   if (tipo === 'data') return fmtDataBRag(valor);
   if (tipo === 'hora') return fmtHoraBRag(valor);
   if (tipo === 'datahora') {
@@ -2604,7 +2604,7 @@ function renderCampoForm(campo, valorAtual) {
       return `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(o.rotulo || val)}</option>`;
     }).join('');
     return `<div class="mc-field"><label>${esc(campo.rotulo)}${req}</label>
-      <select id="fc-${key}" ${base}><option value="">— selecione —</option>${opts}</select>${ajuda}</div>`;
+      <select id="fc-${key}" ${base}><option value=""> - selecione - </option>${opts}</select>${ajuda}</div>`;
   }
   if (campo.tipo === 'multi') {
     const arr = Array.isArray(v) ? v : [];
@@ -2632,7 +2632,7 @@ function renderVerifResultado(p) {
     <div class="perfil-encontrado" style="margin-top:12px">
       ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome || '')}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome || p.kwaiId || '?')[0])}</div>`}
       <div class="perfil-info">
-        <h4>${esc(p.nome || p.kwaiId || '—')} <span style="color:var(--green)">&#10003;</span></h4>
+        <h4>${esc(p.nome || p.kwaiId || '-')} <span style="color:var(--green)">&#10003;</span></h4>
         <p>@${esc(p.kwaiId || '')}</p>
         <p style="font-family:monospace;color:var(--text);margin-top:2px">UID: <strong>${esc(p.memberId || '')}</strong></p>
       </div>
@@ -2736,7 +2736,7 @@ function mostrarResumoForm() {
       <h3>Confira antes de enviar</h3>
       ${v.memberId ? `<div class="perfil-encontrado" style="margin-bottom:14px">
         ${v.foto ? `<img src="${esc(v.foto)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px">${esc((v.nome || '?')[0])}</div>`}
-        <div class="perfil-info"><h4>${esc(v.nome || v.kwaiId || '—')}</h4><p>@${esc(v.kwaiId || '')} · UID ${esc(v.memberId)}</p></div>
+        <div class="perfil-info"><h4>${esc(v.nome || v.kwaiId || '-')}</h4><p>@${esc(v.kwaiId || '')} · UID ${esc(v.memberId)}</p></div>
       </div>` : ''}
       <div class="ag-grid" style="margin-top:0">${linhas}</div>
       <div id="msg-resumo"></div>
@@ -2774,14 +2774,14 @@ async function carregarMinhasSolicitacoes() {
     const list = d.solicitacoes || [];
     if (!list.length) { c.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Você ainda não enviou nenhuma solicitação.</p></div>`; return; }
     const rows = list.map(s => {
-      const title = `${esc(s.streamer_nome || s.streamer_id || s.streamer_uid || '—')}`;
+      const title = `${esc(s.streamer_nome || s.streamer_id || s.streamer_uid || '-')}`;
       const sub = `${esc(s.tipo_form)} · ${fmtData(s.criado_em)}`;
       return agItem({
         avatar: foto(s.streamer_foto, s.streamer_nome || s.streamer_id),
         title, sub, badge: badgeSolic(s.status),
         body: [
-          agCell('ID', s.streamer_id ? '@' + esc(s.streamer_id) : '—'),
-          agCell('UID', esc(s.streamer_uid || '—')),
+          agCell('ID', s.streamer_id ? '@' + esc(s.streamer_id) : '-'),
+          agCell('UID', esc(s.streamer_uid || '-')),
           agCell('Formulário', esc(s.tipo_form)),
           agCell('Atualizada', fmtData(s.atualizado_em)),
           s.motivo_correcao ? `<div class="ag-cell" style="grid-column:1/-1"><div class="ag-cell-label">Correção pedida</div><div class="ag-cell-value" style="color:var(--gold)">${esc(s.motivo_correcao)}</div></div>` : '',
@@ -2812,12 +2812,12 @@ async function abrirDetalheSolic(id) {
     const campos = (snap.campos || []).filter(c => c.origem === 'agente');
     const linhas = campos.map(c => `<div class="ag-cell"><div class="ag-cell-label">${esc(c.rotulo)}</div><div class="ag-cell-value">${fmtValorSolic(s.valores?.[c.chave])}</div></div>`).join('');
     const hist = (d.historico || []).map(h =>
-      `<li>${fmtData(h.criado_em)} — <strong>${esc(h.acao)}</strong> por ${esc(h.ator_nome || h.ator_id)}${h.detalhe?.motivo ? ` · ${esc(h.detalhe.motivo)}` : ''}</li>`).join('');
+      `<li>${fmtData(h.criado_em)} - <strong>${esc(h.acao)}</strong> por ${esc(h.ator_nome || h.ator_id)}${h.detalhe?.motivo ? ` · ${esc(h.detalhe.motivo)}` : ''}</li>`).join('');
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto';
     wrap.innerHTML = `<div class="convite-box" style="max-width:560px;width:100%;position:relative">
       <button type="button" id="det-solic-fechar" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer">&times;</button>
-      <h3>${esc(s.streamer_nome || s.streamer_id || '—')} — ${badgeSolic(s.status)}</h3>
+      <h3>${esc(s.streamer_nome || s.streamer_id || '-')} - ${badgeSolic(s.status)}</h3>
       <p style="color:var(--sub);font-size:12px;margin-bottom:12px">${esc(s.tipo_form)} · enviada ${fmtData(s.criado_em)}</p>
       ${s.motivo_correcao ? `<p class="msg-warn" style="display:block">Correção pedida: ${esc(s.motivo_correcao)}</p>` : ''}
       ${s.motivo_recusa ? `<p class="msg-err" style="display:block">Recusada: ${esc(s.motivo_recusa)}</p>` : ''}
@@ -2880,7 +2880,7 @@ async function carregarRanking() {
     const d = await api('/agente/ranking');
     const list = d.streamers || [];
     _rankingCarregado = true;
-    document.getElementById('ranking-titulo').textContent = `Ranking — ${d.mes||''}`;
+    document.getElementById('ranking-titulo').textContent = `Ranking - ${d.mes||''}`;
     if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('trophy',32)}</div><p>Sem dados de ranking ainda.</p></div>`; return; }
     setAccordion(container, true);
     const rows = list.map(s => {
@@ -2990,9 +2990,9 @@ async function carregarConvites() {
     if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><div class="ico">${ico('mail',32)}</div><p>Nenhum convite enviado ainda.</p></div>`; aplicarEstadoHistoricoConvites(); return; }
     setAccordion(container, true);
     const rows = list.map(c => {
-      const nome = esc(c.streamer_nome || c.streamer_uid || '—');
-      const kwai = c.streamer_kwai_id ? '@' + esc(c.streamer_kwai_id) : '—';
-      const categoria = esc(c.categoria || '—');
+      const nome = esc(c.streamer_nome || c.streamer_uid || '-');
+      const kwai = c.streamer_kwai_id ? '@' + esc(c.streamer_kwai_id) : '-';
+      const categoria = esc(c.categoria || '-');
       const status = badgeStatus(c.status);
       const data = fmtData(c.criado_em);
       return {
@@ -3055,7 +3055,7 @@ async function buscarPerfilConvite() {
       <div class="perfil-encontrado">
         ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome||'?')[0])}</div>`}
         <div class="perfil-info">
-          <h4>${esc(p.nome)||'—'}</h4>
+          <h4>${esc(p.nome)||'-'}</h4>
           <p>@${esc(p.kwaiId||'')} · ID: ${esc(p.memberId||uid)}</p>
         </div>
         ${d.pode_enviar ? `
@@ -3150,7 +3150,7 @@ function mostrarMsg(el, texto, tipo) {
 
 // -- MIGRAÇÃO DE AGÊNCIA ------------------------------------
 // O link da pasta de evidências não fica fixo aqui no HTML (esta página é
-// estática e sem gate de login — qualquer um veria via "ver código-fonte").
+// estática e sem gate de login - qualquer um veria via "ver código-fonte").
 // É buscado sob demanda, autenticado, na primeira vez que a aba é aberta.
 let _driveEvidenciasUrl = null;
 async function carregarDriveEvidenciasUrl() {
@@ -3252,7 +3252,7 @@ async function buscarPerfilMigracao() {
       <div class="perfil-encontrado">
         ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" onerror="this.src=''">` : `<div class="no-foto" style="width:52px;height:52px;font-size:20px">${esc((p.nome||'?')[0])}</div>`}
         <div class="perfil-info">
-          <h4>${esc(p.nome)||'—'}</h4>
+          <h4>${esc(p.nome)||'-'}</h4>
           <p>@${esc(p.kwaiId||'')} · ID: ${esc(p.memberId||uid)}</p>
         </div>
       </div>`;
@@ -3313,10 +3313,10 @@ async function enviarMigracao() {
 }
 
 // Datas "YYYY-MM-DD" (colunas `date`, sem hora) não podem passar por
-// `new Date(iso).getDate()` — isso interpreta como UTC-meia-noite e, ao
+// `new Date(iso).getDate()` - isso interpreta como UTC-meia-noite e, ao
 // exibir em hora local (UTC-3 no Brasil), volta um dia. Parse direto da string.
 function fmtDataSimples(isoData) {
-  if (!isoData) return '—';
+  if (!isoData) return '-';
   const m = String(isoData).match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!m) return fmtData(isoData);
   return `${m[3]}/${m[2]}/${m[1]}`;
@@ -3340,8 +3340,8 @@ async function carregarMigracoes() {
     if (!list.length) { setAccordion(container, false); container.innerHTML = `<div class="empty"><p>Nenhuma solicitação de migração ainda.</p></div>`; aplicarEstadoHistoricoMigracoes(); return; }
     setAccordion(container, true);
     const rows = list.map(m => {
-      const nome = esc(m.streamer_nome || m.streamer_uid || '—');
-      const kwai = m.streamer_kwai_id ? '@' + esc(m.streamer_kwai_id) : '—';
+      const nome = esc(m.streamer_nome || m.streamer_uid || '-');
+      const kwai = m.streamer_kwai_id ? '@' + esc(m.streamer_kwai_id) : '-';
       const circTxt = `<span class="migra-badge-circ">Circ. ${esc(m.circunstancia)}</span>`;
       const status = badgeStatusMigracao(m.status);
       const data = fmtData(m.criado_em);
@@ -3385,7 +3385,7 @@ async function carregarMigracoes() {
   <script src="js/preferences.js?v=20260905-agente-redesign-1"></script>
 
   <script>
-  /* ═══════ REDESIGN v1 — shell: olho da senha, menu recolhível, Aparência ═══════ */
+  /* ═══════ REDESIGN v1 - shell: olho da senha, menu recolhível, Aparência ═══════ */
   (function () {
     'use strict';
     var $  = function (s, r) { return (r || document).querySelector(s); };
@@ -3464,7 +3464,7 @@ async function carregarMigracoes() {
     syncAparencia();
     window.addEventListener('dmaior:preferences', syncAparencia);
 
-    /* ═══════ Navegação inferior flutuante (mobile) — padrão do demo ═══════ */
+    /* ═══════ Navegação inferior flutuante (mobile) - padrão do demo ═══════ */
     var SEC_META = {
       dashboard:    { label: 'Dashboard',    ico: 'dashboard' },
       streamers:    { label: 'Streamers',    ico: 'mic' },
@@ -3646,13 +3646,13 @@ async function carregarMigracoes() {
     window.addEventListener('resize', updateNotchBar);
     window.addEventListener('orientationchange', function () { setTimeout(updateNotchBar, 120); });
 
-    // A barra fica dentro de #painel (display:none até o login) — quando ela
+    // A barra fica dentro de #painel (display:none até o login) - quando ela
     // ganha largura pela 1ª vez o path do entalhe precisa ser (re)desenhado.
     if (window.ResizeObserver && mnav) {
       new ResizeObserver(function () { updateNotchBar(); }).observe(mnav);
     }
 
-    // Toda navegação passa por navegarPara() — embrulha pra manter a barra em sincronia.
+    // Toda navegação passa por navegarPara() - embrulha pra manter a barra em sincronia.
     if (typeof window.navegarPara === 'function') {
       var _navP = window.navegarPara;
       window.navegarPara = function (sec) {
@@ -3678,7 +3678,7 @@ async function carregarMigracoes() {
   })();
   </script>
 
-  <script defer charset=utf-8 src="js/components/footer.js?v=20261031-kwai-cnpj"></script>
+  <script defer charset=utf-8 src="js/components/footer.js?v=20261031-traco"></script>
   <script charset=utf-8 src="js/pwa.js?v=20260703-pwa-1"></script>
 </body>
 </html>

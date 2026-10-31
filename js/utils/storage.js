@@ -1,5 +1,5 @@
 /**
- * storage.js — Wrapper seguro para o localStorage da DMaior Agency
+ * storage.js - Wrapper seguro para o localStorage da DMaior Agency
  * Todas as operações verificam se window existe antes de acessar o localStorage,
  * evitando erros em ambientes SSR ou Worker.
  */
@@ -60,7 +60,7 @@ const Storage = {
 
   /**
    * Limpa completamente o localStorage.
-   * Use com cuidado — apaga tudo.
+   * Use com cuidado - apaga tudo.
    */
   clear() {
     if (typeof window === 'undefined') return;

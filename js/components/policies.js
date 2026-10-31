@@ -1,5 +1,5 @@
 /**
- * policies.js — Políticas DMaior Agency
+ * policies.js - Políticas DMaior Agency
  *
  * Custom Element: <dmaior-policies>
  * Shadow DOM, 15 seções LGPD, TOC interativo, IntersectionObserver.
@@ -55,7 +55,7 @@ class DMaiorPolicies extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
     <style>
-      /* Mapeia vars locais para as globais — adapta-se automaticamente ao tema ativo */
+      /* Mapeia vars locais para as globais - adapta-se automaticamente ao tema ativo */
       :host{display:block;width:100%;box-sizing:border-box;font-family:var(--dm-font-body,'Exo 2',sans-serif);--cyan:var(--dm-cyan);--cyan-dim:var(--dm-cyan-dim);--cyan-glow:var(--dm-cyan-08);--cyan-border:var(--dm-border);--bg-deep:var(--dm-bg-1);--bg-card:var(--dm-bg-card);--text-main:var(--dm-text);--text-muted:var(--dm-text-sub);--text-dim:var(--dm-text-muted);--radius:16px;--ease:0.35s cubic-bezier(.4,0,.2,1)}
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
       .root{background:var(--bg-deep);border:1px solid var(--cyan-border);border-radius:20px;box-shadow:0 8px 60px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.035);max-width:980px;margin:10px auto;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
@@ -137,7 +137,7 @@ class DMaiorPolicies extends HTMLElement {
       <div class="header">
         <div class="header-badge"><span class="badge-dot"></span> Documentos Oficiais</div>
         <h1>Políticas <em>DMaior</em></h1>
-        <p class="header-sub">Atualizado em: <span>10 de Setembro de 2026</span> &nbsp;·&nbsp; Versão 4.0 &nbsp;·&nbsp; Conformidade LGPD — Lei nº 13.709/2018</p>
+        <p class="header-sub">Atualizado em: <span>10 de Setembro de 2026</span> &nbsp;·&nbsp; Versão 4.0 &nbsp;·&nbsp; Conformidade LGPD - Lei nº 13.709/2018</p>
       </div>
       <div class="body">
         <nav class="toc" aria-label="Navegação das políticas">
@@ -170,18 +170,18 @@ class DMaiorPolicies extends HTMLElement {
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div><h2>Coleta e Uso dos Dados</h2></div>
             <p>Coletamos apenas os dados estritamente necessários para o funcionamento das atividades de agenciamento.</p>
             <div class="sub"><h3>Dados Pessoais</h3><div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Identificação — Contrato:</strong> Nome completo e CPF para vínculo civil entre as partes.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Contato — Painel:</strong> WhatsApp, e-mail e identificadores nas plataformas (ID e usuário no Kwai).</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Endereço — Contrato:</strong> Cidade e localização básica registrada no Termo de Cooperação.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Endereço — Painel:</strong> Endereço completo coletado opcionalmente para entregas de premiações físicas.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Identificação - Contrato:</strong> Nome completo e CPF para vínculo civil entre as partes.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Contato - Painel:</strong> WhatsApp, e-mail e identificadores nas plataformas (ID e usuário no Kwai).</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Endereço - Contrato:</strong> Cidade e localização básica registrada no Termo de Cooperação.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Endereço - Painel:</strong> Endereço completo coletado opcionalmente para entregas de premiações físicas.</span></div>
             </div></div>
             <div class="sub"><h3>Dados Financeiros</h3><div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Chave PIX — Painel:</strong> Utilizada para pagamento de bonificações e premiações de eventos internos. A chave pode ser um CPF, número de celular ou e-mail, conforme a opção do próprio streamer.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Chave PIX - Painel:</strong> Utilizada para pagamento de bonificações e premiações de eventos internos. A chave pode ser um CPF, número de celular ou e-mail, conforme a opção do próprio streamer.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Solicitações de saque:</strong> Chave PIX e valor de cada pedido, processados via provedor de pagamentos (Mercado Pago).</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Histórico de bonificações:</strong> Registro de pagamentos acessível apenas pelo streamer e equipe autorizada.</span></div>
             </div></div>
             <div class="sub"><h3>Dados de Desempenho</h3><div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Métricas de live:</strong> Diamantes recebidos, horas transmitidas, seguidores e ranking — coletados via API.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Métricas de live:</strong> Diamantes recebidos, horas transmitidas, seguidores e ranking - coletados via API.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Status de transmissão:</strong> Monitoramento em tempo real (online/offline) para gestão de metas.</span></div>
             </div></div>
             <div class="sub"><h3>Notificações e Formulários</h3><div class="ilist">
@@ -209,7 +209,7 @@ class DMaiorPolicies extends HTMLElement {
             <p>Usamos <strong>localStorage</strong> e <strong>sessionStorage</strong> do navegador para funcionalidades técnicas. Não carregamos Google Analytics, Meta Pixel nem qualquer rastreador de marketing.</p>
             <div class="ilist">
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Sessão (token de acesso):</strong> Guardado no armazenamento local do navegador para manter você conectado. Removido ao sair da conta; renovado automaticamente enquanto a sessão estiver ativa.</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Preferências de interface:</strong> Tema, idioma, tamanho de fonte, abas e filtros — salvos apenas no seu dispositivo.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Preferências de interface:</strong> Tema, idioma, tamanho de fonte, abas e filtros - salvos apenas no seu dispositivo.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Medição de audiência:</strong> Usamos o Cloudflare Web Analytics, que é agregado e <strong>não usa cookies</strong> nem identifica você individualmente.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Mapa de acessos:</strong> Para saber de quais cidades e estados vêm as visitas, contamos cada acesso por data, página e localização aproximada (cidade, estado e país, obtidos pela conexão). <strong>Não guardamos seu endereço IP</strong>, não usamos cookies nem identificador seu, e a contagem é anônima. Se o seu navegador envia o sinal "Não rastrear" (DNT) ou Global Privacy Control, sua visita não é contada.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Link de indicação:</strong> Se você abrir o link de um streamer afiliado, guardamos no seu navegador apenas o <strong>código de quem indicou</strong> e a data, por até 30 dias, para atribuir corretamente a indicação caso você conclua o cadastro mais tarde. Nenhum dado pessoal é guardado nesse registro, e ele é apagado quando o cadastro é concluído.</span></div>
@@ -222,7 +222,7 @@ class DMaiorPolicies extends HTMLElement {
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div><h2>Compartilhamento de Dados</h2></div>
             <p>A DMaior Agency <strong>não vende, aluga nem comercializa</strong> dados dos streamers. O compartilhamento ocorre somente com:</p>
             <div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Streamer afiliado que indicou você:</strong> Se você entrar na agência pelo link ou pelo convite de um streamer afiliado, ele passa a ver seu nome, seu ID do Kwai, a data de entrada, seus diamantes e suas horas de transmissão (vídeo e áudio) — somente números de desempenho, nunca o conteúdo das suas lives, seus dados de contato ou de pagamento. É usado para acompanhar a indicação e calcular o bônus dele. Se você não quiser participar, basta não usar o link ou recusar o convite.</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Streamer afiliado que indicou você:</strong> Se você entrar na agência pelo link ou pelo convite de um streamer afiliado, ele passa a ver seu nome, seu ID do Kwai, a data de entrada, seus diamantes e suas horas de transmissão (vídeo e áudio) - somente números de desempenho, nunca o conteúdo das suas lives, seus dados de contato ou de pagamento. É usado para acompanhar a indicação e calcular o bônus dele. Se você não quiser participar, basta não usar o link ou recusar o convite.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Kwai / plataformas parceiras:</strong> ID e dados de agenciamento, via APIs oficiais, para vínculo e gestão de carreira.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Infraestrutura técnica (operadores):</strong> Supabase (banco de dados) e Cloudflare (rede, segurança e hospedagem do site), que tratam os dados apenas conforme nossas instruções.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Google (Google Workspace / Google Sheets):</strong> Planilhas internas de cadastro e pagamento de premiações podem armazenar nome, contato, chave PIX e endereço para operação administrativa da agência.</span></div>
@@ -306,7 +306,7 @@ class DMaiorPolicies extends HTMLElement {
           <div class="policy-section animate" id="rescisao">
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><h2>Rescisão do Vínculo</h2></div>
             <div class="sub"><h3>Por Iniciativa do Streamer</h3><p>Encerramento a qualquer momento, mediante comunicação formal com antecedência mínima de <strong>90 dias corridos</strong>, conforme cláusula 2.3 do Termo de Cooperação.</p></div>
-            <div class="sub"><h3>Por Iniciativa da Agência — Imediata</h3><div class="ilist">
+            <div class="sub"><h3>Por Iniciativa da Agência - Imediata</h3><div class="ilist">
               <div class="irow"><span class="iarrow">→</span><span class="itext">Uso de bots, fraude em métricas ou violação dos Termos das plataformas parceiras.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext">Conduta que cause dano à reputação da Agência, de parceiros ou de outros streamers.</span></div>
               <div class="irow"><span class="iarrow">→</span><span class="itext">Banimento permanente da plataforma Kwai por violação dos seus Termos de Serviço.</span></div>
@@ -330,10 +330,10 @@ class DMaiorPolicies extends HTMLElement {
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h2>Lei Aplicável e Foro Competente</h2></div>
             <p>Este documento é regido pelas leis da <strong>República Federativa do Brasil</strong>, em especial:</p>
             <div class="ilist">
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 13.709/2018</strong> — Lei Geral de Proteção de Dados (LGPD)</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 12.965/2014</strong> — Marco Civil da Internet</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 10.406/2002</strong> — Código Civil Brasileiro</span></div>
-              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 8.078/1990</strong> — Código de Defesa do Consumidor (quando aplicável)</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 13.709/2018</strong> - Lei Geral de Proteção de Dados (LGPD)</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 12.965/2014</strong> - Marco Civil da Internet</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 10.406/2002</strong> - Código Civil Brasileiro</span></div>
+              <div class="irow"><span class="iarrow">→</span><span class="itext"><strong>Lei nº 8.078/1990</strong> - Código de Defesa do Consumidor (quando aplicável)</span></div>
             </div>
             <p style="margin-top:16px;">Fica eleito o foro da comarca da sede da DMaior Agency como competente para dirimir quaisquer controvérsias.</p>
           </div>
@@ -344,7 +344,7 @@ class DMaiorPolicies extends HTMLElement {
             <p>Para exercer seus direitos LGPD ou reportar qualquer violação, entre em contato com o <strong>Encarregado de Proteção de Dados (DPO)</strong> da DMaior Agency:</p>
             <div class="contact-card">
               <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              <p class="contact-label">Encarregado de Dados (DPO) — DMaior Agency</p>
+              <p class="contact-label">Encarregado de Dados (DPO) - DMaior Agency</p>
               <a class="contact-email" href="mailto:dmaior.agency@gmail.com">dmaior.agency@gmail.com</a>
               <p class="contact-note">Prazo de resposta: até 15 dias &nbsp;·&nbsp; Atendimento em Português</p>
             </div>

@@ -1,11 +1,11 @@
 /**
- * services-menu.js — Menu de serviços responsivo da DMaior Agency
+ * services-menu.js - Menu de serviços responsivo da DMaior Agency
  *
  * Custom Element: <dmaior-services-menu>
  *
  * LAYOUTS DISPONÍVEIS (salvo em localStorage como 'dm_layout'):
- *   'original'  — Botão "Entrar" + painel de ícones (mobile) | 4 botões (desktop)
- *   'dinamico'  — Banner Recarga + grid 2 colunas com seções desagrupadas (mobile only)
+ *   'original' - Botão "Entrar" + painel de ícones (mobile) | 4 botões (desktop)
+ *   'dinamico' - Banner Recarga + grid 2 colunas com seções desagrupadas (mobile only)
  *
  * Desktop (800px+) sempre exibe o layout original independente da preferência.
  * Troca de layout em tempo real via evento window 'dmaior:layout'.
@@ -33,7 +33,7 @@ class DmaiorServicesMenu extends HTMLElement {
     this._layoutHandler = (e) => { this._stopCarousel(); this.render(); this.setupListeners(); };
     window.addEventListener('dmaior:layout', this._layoutHandler);
 
-    // Sincroniza se outro contexto alterar o localStorage — handler guardado para limpeza
+    // Sincroniza se outro contexto alterar o localStorage - handler guardado para limpeza
     this._storageHandler = (e) => {
       if (e.key === 'dm_layout') { this.render(); this.setupListeners(); }
     };
@@ -75,7 +75,7 @@ class DmaiorServicesMenu extends HTMLElement {
       wrap.innerHTML = this._buildCarouselHTML(slides);
       window.DmaiorVideoCompat?.apply(wrap); // Xiaomi: vídeo sequestrado pelo navegador
       this._bindCarousel(slides);
-    } catch (_) { /* API indisponível — carrossel permanece oculto */ }
+    } catch (_) { /* API indisponível - carrossel permanece oculto */ }
   }
 
   _buildCarouselHTML(slides) {
@@ -252,10 +252,10 @@ class DmaiorServicesMenu extends HTMLElement {
         :host-context([data-theme="branco"]) .floating-btn svg { color:#00d4d4; stroke:#00d4d4; }
         .nav-item-center span { font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-size:.8rem; font-weight:700; color:var(--gem-accent); text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 7px var(--gem-text-shadow); }
         @keyframes pulse-gem { 0%{transform:scale(1);opacity:.9} 50%{transform:scale(1.08);opacity:1} 100%{transform:scale(1);opacity:.9} }
-        /* Desktop usa o mesmo layout do mobile — menu unificado */
+        /* Desktop usa o mesmo layout do mobile - menu unificado */
         .mobile-layout { max-width:520px; }
         @media (min-width:800px) {
-          /* ── Layout Original no desktop — ligeiramente maior ── */
+          /* ── Layout Original no desktop - ligeiramente maior ── */
           .container { padding:30px 20px; }
           .mobile-layout { max-width:620px; }
           .menu-panel { padding:18px 28px; }
@@ -265,10 +265,10 @@ class DmaiorServicesMenu extends HTMLElement {
           .floating-btn svg { width:36px; height:36px; }
           .btn-agency-mobile { padding:18px 24px; font-size:1.05rem; }
 
-          /* ── Dinâmico Pro no desktop — 3 colunas + containers largos ── */
+          /* ── Dinâmico Pro no desktop - 3 colunas + containers largos ── */
           .dinamico-layout { max-width:860px; width:100%; }
           .dp-grid { grid-template-columns:repeat(3,1fr); gap:14px; padding:0 20px 18px; }
-          /* Desktop tem 3 colunas — a sobra de item ímpar não fica isolada
+          /* Desktop tem 3 colunas - a sobra de item ímpar não fica isolada
              sozinha numa linha como no mobile, então reseta a centralização. */
           .dp-grid .dp-item:last-child:nth-child(odd) { grid-column:auto; max-width:none; margin:0; }
           .dp-item { min-height:96px; padding:16px 14px; border-radius:24px; }
@@ -310,7 +310,7 @@ class DmaiorServicesMenu extends HTMLElement {
         /* Grid 2 colunas */
         .dp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px 14px; }
         /* Quando o total de itens é ímpar, o último fica sozinho na coluna 1
-           com um vão vazio do lado — centraliza ele em vez de deixar preso
+           com um vão vazio do lado - centraliza ele em vez de deixar preso
            à esquerda (ex: "Portfólio" sozinho na última linha do Acesso rápido). */
         .dp-grid .dp-item:last-child:nth-child(odd) { grid-column:1 / -1; max-width:calc(50% - 5px); margin:0 auto; }
         .dp-item { display:flex; flex-direction:row; align-items:center; gap:11px; padding:13px 12px; border-radius:24px; background:var(--dm-grad-card-alt); border:1px solid var(--dm-bw06); text-decoration:none; position:relative; overflow:hidden; transition:transform .18s, border-color .18s, box-shadow .18s; min-height:68px; }
@@ -417,10 +417,10 @@ class DmaiorServicesMenu extends HTMLElement {
       </style>
 
       <div class="container" style="flex-direction:column">
-        <!-- ══ Banner Carousel — aparece acima dos dois layouts ══ -->
+        <!-- ══ Banner Carousel - aparece acima dos dois layouts ══ -->
         <div id="bc-wrap" style="display:none;width:100%;max-width:620px;"></div>
 
-        <!-- ══ Layout original — menu universal (mobile e desktop) ══ -->
+        <!-- ══ Layout original - menu universal (mobile e desktop) ══ -->
         <div class="mobile-layout" style="display:${layout === 'dinamico' ? 'none' : 'flex'}">
           <a href="recrutamento.html" class="btn-agency-mobile">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
@@ -444,7 +444,7 @@ class DmaiorServicesMenu extends HTMLElement {
           </div>
         </div>
 
-        <!-- ══ Layout Dinâmico Pro — universal (mobile e desktop) ════ -->
+        <!-- ══ Layout Dinâmico Pro - universal (mobile e desktop) ════ -->
         <div class="dinamico-layout">
 
           <!-- Banner destaque: Recarga de Diamantes -->
@@ -506,7 +506,7 @@ class DmaiorServicesMenu extends HTMLElement {
 
           </div>
 
-          <!-- Seção: Políticas (desagrupadas — antes dentro de "Material") -->
+          <!-- Seção: Políticas (desagrupadas - antes dentro de "Material") -->
           <div class="dp-section-title" data-i18n="homePolicies">Políticas</div>
           <div class="dp-grid">
 

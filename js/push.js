@@ -1,5 +1,5 @@
 /**
- * push.js — Notificações Web Push do painel do streamer (DMaior, Fase 1)
+ * push.js - Notificações Web Push do painel do streamer (DMaior, Fase 1)
  *
  * Aditivo: não mexe no sino de comunicados nem no localStorage existente.
  * Só roda no /painel/ (onde existe <dmaior-app> e o login Supabase Auth).
@@ -10,7 +10,7 @@
  *   - "Ativar" → pede permissão → PushManager.subscribe() → registra no
  *     worker push.agencydmaior.com.br (que descobre a identidade pelo token).
  *   - a cada abertura do painel, re-registra a subscription atual (idempotente)
- *     — cobre endpoint rotacionado e o "last_seen".
+ * - cobre endpoint rotacionado e o "last_seen".
  *
  * API pública: window.DmaiorPush = { estado, ativar, desativar, enviarTeste, reconciliar }
  */
@@ -159,7 +159,7 @@
           if (sub) return window.DmaiorAPI.push.subscribe(token(), sub.toJSON());
         });
       });
-    }).catch(function () { /* silencioso — não atrapalha o painel */ });
+    }).catch(function () { /* silencioso - não atrapalha o painel */ });
   }
 
   function enviarTeste() {
@@ -179,7 +179,7 @@
     try { localStorage.setItem(LS_DISMISS, String(Date.now())); } catch (_) {}
   }
 
-  // ícones SVG (traço, mesma linguagem do sino do menu) — nada de emoji
+  // ícones SVG (traço, mesma linguagem do sino do menu) - nada de emoji
   var IC_BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
   var IC_SEND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
   var IC_X    = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
@@ -192,9 +192,9 @@
     var s = document.createElement('style');
     s.id = 'dm-push-css';
     s.textContent = [
-      // Usa os tokens --dm-* do design system (css/global.css), que mudam
+      // Usa os tokens --dm-* do design system (css/global.css?v=20261031-traco), que mudam
       // sozinhos com o seletor de tema do menu (original/dark/branco/rosa/
-      // laranja) — nada de cor fixa aqui, senão a faixa não acompanha o tema.
+      // laranja) - nada de cor fixa aqui, senão a faixa não acompanha o tema.
       // ── faixa (convite curto) ──
       '#dmPushConvite{position:sticky;top:0;z-index:900;display:flex;gap:10px;align-items:center;',
       'padding:9px 14px;background:var(--dm-bg-panel,rgba(26,26,46,.97));',
@@ -269,7 +269,7 @@
       var msg = document.createElement('span');
       msg.className = 'dm-msg';
       msg.textContent = (st === 'ios-instalar')
-        ? 'Ative as notificações — adicione o painel à Tela de Início'
+        ? 'Ative as notificações - adicione o painel à Tela de Início'
         : 'Ative as notificações da DMaior';
       bar.appendChild(msg);
 
@@ -428,7 +428,7 @@
   }
   function removerUI() { removerConvite(); }
 
-  // toast simples (sem dependência) — reaproveita o visual escuro do painel
+  // toast simples (sem dependência) - reaproveita o visual escuro do painel
   function toast(txt, erro) {
     var t = document.createElement('div');
     t.textContent = txt;

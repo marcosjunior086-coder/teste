@@ -1,5 +1,5 @@
 /**
- * lives-descoberta.js — Aba lateral "LIVES" da home — DMaior Agency
+ * lives-descoberta.js - Aba lateral "LIVES" da home - DMaior Agency
  *
  * <dmaior-lives>: aba fina encostada na direita. Ao tocar, abre a área de
  * descoberta (Categorias / Canais ao vivo / Vídeos em breve) e a aba vira
@@ -13,7 +13,7 @@
  * "não deu pra confirmar", nunca "ninguém ao vivo".
  *
  * Sem <video> aqui (só capas): o navegador da Xiaomi não tem o que sequestrar.
- * "Assistir live" abre o link oficial que o próprio Kwai devolve (jump_url) —
+ * "Assistir live" abre o link oficial que o próprio Kwai devolve (jump_url) - 
  * no celular abre direto no app.
  */
 (function () {
@@ -133,7 +133,7 @@
         if (!this.d) { this._mostrarAba(false); this._agendar(); return; } // nunca carregou: sem aba
       } else {
         // Quem estava na tela e saiu da lista: marca "encerrada" em vez de sumir do nada.
-        // Só com todas as fontes confirmadas (status ok) — em 'parcial' a live pode só ter ficado de fora.
+        // Só com todas as fontes confirmadas (status ok) - em 'parcial' a live pode só ter ficado de fora.
         const novos = new Set(d.canais.map((c) => c.id));
         const ocultos = new Set((d.ocultos || []).map(String)); // o streamer escondeu a própria live: some, não "encerrou"
         if (this.aberto && this.d && Array.isArray(this.d.canais) && d.status === 'ok') {
@@ -564,7 +564,7 @@
       }
 
       if (!canais.length) {
-        html += this._parcial() ? this._htmlNaoConfirmado() : `<div class="estado">${ICO.vazio}<b>Ninguém ao vivo agora</b>Volte mais tarde — as lives aparecem aqui assim que começam.</div>`;
+        html += this._parcial() ? this._htmlNaoConfirmado() : `<div class="estado">${ICO.vazio}<b>Ninguém ao vivo agora</b>Volte mais tarde - as lives aparecem aqui assim que começam.</div>`;
       } else if (filtrados.length) {
         html += `<h2 class="sec">${ICO.coroa}Canais ao vivo<button type="button" class="ver" data-ir="canais">Ver todos ${ICO.dir}</button></h2>
           <div class="canais">${filtrados.slice(0, PREVIA_CANAIS).map((c) => this._htmlCanal(c)).join('')}</div>`;
@@ -583,7 +583,7 @@
         if (this._parcial()) return html + this._htmlNaoConfirmado();
         html += canais.length
           ? `<div class="estado">${ICO.vazio}<b>${cat ? `Ninguém ao vivo em ${esc(cat.nome)} agora` : 'Nenhum canal com esse filtro'}</b>${cat ? 'Veja as outras categorias ou volte mais tarde.' : 'Tente outra categoria ou limpe a busca.'}</div>`
-          : `<div class="estado">${ICO.vazio}<b>Ninguém ao vivo agora</b>Volte mais tarde — as lives aparecem aqui assim que começam.</div>`;
+          : `<div class="estado">${ICO.vazio}<b>Ninguém ao vivo agora</b>Volte mais tarde - as lives aparecem aqui assim que começam.</div>`;
         return html;
       }
       return html + `<div class="canais">${lista.map((c) => this._htmlCanal(c)).join('')}${fim.map((c) => this._htmlCanal(c, true)).join('')}</div>`;
@@ -615,7 +615,7 @@
           ${capa ? `<img class="fundo" src="${esc(capa)}" alt="" aria-hidden="true" loading="lazy" decoding="async"><img class="capa" src="${esc(capa)}" data-raw="${esc(capaRaw)}" alt="" loading="lazy" decoding="async">` : ''}
           ${encerrada ? '<span class="selo-live fim">ENCERRADA</span>' : '<span class="selo-live">AO VIVO</span>'}
           ${dur ? `<span class="dur">${dur}</span>` : ''}
-          ${encerrada ? '' : `<span class="esp-n">${ICO.olho}${c.espectadores == null ? '—' : fmtCurto(c.espectadores)}</span>`}
+          ${encerrada ? '' : `<span class="esp-n">${ICO.olho}${c.espectadores == null ? '-' : fmtCurto(c.espectadores)}</span>`}
         </div>
         <div class="corpo-c">
           <span class="av">${foto ? `<img src="${esc(foto)}" data-raw="${esc(fotoRaw)}" alt="" width="40" height="40" loading="lazy" decoding="async">` : ''}<span>${esc((c.nome || '?').trim().charAt(0).toUpperCase())}</span></span>
@@ -641,7 +641,7 @@
       svg{display:block;flex-shrink:0}
       .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-      /* Aba lateral — mesmo molde do botão REGRAS do ranking */
+      /* Aba lateral - mesmo molde do botão REGRAS do ranking */
       .tab{position:fixed;right:0;top:46%;z-index:1045;display:flex;align-items:center;gap:8px;writing-mode:vertical-lr;
         padding:18px 9px;border-radius:12px 0 0 12px;background:var(--dm-grad-effect,linear-gradient(135deg,#3b82f6,#00d4d4));color:#fff;
         font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.72rem;letter-spacing:3px;line-height:1;
@@ -713,7 +713,7 @@
       .chips button.on{background:var(--dm-grad-effect,linear-gradient(135deg,#3b82f6,#00d4d4));border-color:transparent;color:#fff;font-weight:600}
       .chips small{font-size:.7rem;opacity:.85}
 
-      /* Categorias — capa 3:4; 3 colunas no celular, mais largas no computador */
+      /* Categorias - capa 3:4; 3 colunas no celular, mais largas no computador */
       .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;margin-bottom:26px}
       @media(max-width:600px){.cats{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}}
       .cat{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0}

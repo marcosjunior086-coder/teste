@@ -1,5 +1,5 @@
 // ============================================================
-//  DMaior Agency — Custom Element: dmaior-votacao v1 (Fase 1)
+//  DMaior Agency - Custom Element: dmaior-votacao v1 (Fase 1)
 //  Um único componente pros dois contextos:
 //    - Página pública (votacao.html): sem dm_uid/dm_token no
 //      localStorage → mostra a etapa "informe seu ID".
@@ -27,7 +27,7 @@ class DmaiorVotacao extends HTMLElement {
     this._atual  = null;      // { votacao, pergunta, alternativas, ja_votou }
     this._selecionadas = new Set();
     this._iniciado = false;   // connectedCallback pode disparar mais de uma vez
-                              // (mesmo comportamento já visto em dmaior-impulso.js) —
+                              // (mesmo comportamento já visto em dmaior-impulso.js) - 
                               // essa flag garante que só carregamos dados uma vez.
   }
 
@@ -62,7 +62,7 @@ class DmaiorVotacao extends HTMLElement {
   }
 
   // Mesma conversão de link do Drive usada no admin (_normalizarImagemUrl +
-  // _proxyFoto), duplicada aqui de propósito — cada custom element deste
+  // _proxyFoto), duplicada aqui de propósito - cada custom element deste
   // projeto é autocontido, sem import entre componentes.
   _imgUrl(url, w = 400, h = 300) {
     if (!url || typeof url !== 'string') return '';
@@ -191,7 +191,7 @@ class DmaiorVotacao extends HTMLElement {
         .voltar-row { margin-bottom:16px; }
         .empty-msg { text-align:center; color:var(--muted); font-size:0.85rem; padding:30px 10px; }
 
-        /* ══ Temas claros — mesmas variáveis do resto do painel ══ */
+        /* ══ Temas claros - mesmas variáveis do resto do painel ══ */
         :host-context([data-theme="branco"]) , :host([data-theme="branco"]) { --cyan:#0095a8; --cyan-d:rgba(0,149,168,0.15); --gold:#b8860b; --text:#0d1117; --muted:#4a5568; --border:rgba(0,149,168,0.35); --glass:rgba(255,255,255,0.95); }
         :host-context([data-theme="rosa"]) , :host([data-theme="rosa"]) { --cyan:#e91e8c; --cyan-d:rgba(233,30,140,0.15); --gold:#c2185b; --text:#1a0010; --muted:#80004a; --border:rgba(233,30,140,0.35); --glass:rgba(255,255,255,0.95); }
         :host-context([data-theme="laranja"]) , :host([data-theme="laranja"]) { --cyan:#f97316; --cyan-d:rgba(249,115,22,0.15); --gold:#ea580c; --text:#1a0a00; --muted:#7c3a00; --border:rgba(249,115,22,0.35); --glass:rgba(255,255,255,0.95); }
@@ -384,7 +384,7 @@ class DmaiorVotacao extends HTMLElement {
     } else if (this._selecionadas.size < maxSelecoes) {
       this._selecionadas.add(id);
     }
-    // Não trava seleção nova quando já está no limite — só ignora o clique
+    // Não trava seleção nova quando já está no limite - só ignora o clique
     // (o card simplesmente não fica marcado até o usuário desmarcar outro).
 
     const sr = this.shadowRoot;

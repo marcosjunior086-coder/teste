@@ -1,6 +1,6 @@
 /* eslint-env browser */
 // ============================================================
-//  DMaior Agency — Custom Element: <dmaior-recarga>
+//  DMaior Agency - Custom Element: <dmaior-recarga>
 //  Chat de recarga de diamantes do Kwai. Fala SÓ com o Worker
 //  recarga.agencydmaior.com.br (que conversa com o RocketBunny); nenhum
 //  segredo passa pelo navegador.
@@ -19,7 +19,7 @@
 //    data-mock         presença = modo simulado, sem rede (painel de teste)
 //    data-suporte-url  link do botão "Falar com o suporte" (opcional)
 //
-//  Eventos: "dmaior-recarga:req" { rota, status, ms, ok, mock, corpo } — corpo já mascarado.
+//  Eventos: "dmaior-recarga:req" { rota, status, ms, ok, mock, corpo } - corpo já mascarado.
 //  Métodos: reiniciar(), simularStatus('AGUARDANDO'|'PAGO'|'FALHOU') (só modo simulado).
 //
 //  Visual: herda os tokens --dm-* do css/global.css (4 temas do site), igual ao <dmaior-afiliado>.
@@ -43,7 +43,7 @@
 
 
   // IDs do Kwai já usados, guardados SÓ neste aparelho (não há conta no sistema, então isso evita
-  // digitar tudo de novo). O ID do Kwai é público — é o @ do perfil —, e some com a limpeza do
+  // digitar tudo de novo). O ID do Kwai é público - é o @ do perfil - , e some com a limpeza do
   // navegador ou pelo botão de remover.
   const CHAVE_IDS = 'dmaior_recarga_ids';
   function idsSalvos() {
@@ -68,7 +68,7 @@
   }
 
   // Junto do ID, o que o perfil tem de público: nome, foto, seguidores e seguindo. Serve pra os
-  // atalhos mostrarem de quem é cada ID. Nada disso é dado do pagador — nome e CPF de quem paga
+  // atalhos mostrarem de quem é cada ID. Nada disso é dado do pagador - nome e CPF de quem paga
   // nunca passam por aqui.
   const CHAVE_PERFIS = 'dmaior_recarga_perfis_v2';
   function perfisSalvos() {
@@ -118,7 +118,7 @@
   }
 
   // ── QR CODE ────────────────────────────────────────────────────────────────
-  // Gerador próprio (modo byte, correção M, versões 1 a 20 — um payload PIX tem ~190 bytes). É
+  // Gerador próprio (modo byte, correção M, versões 1 a 20 - um payload PIX tem ~190 bytes). É
   // escrito aqui de propósito: pedir a imagem do QR a um serviço de fora mandaria o código do
   // pagamento pra um terceiro. Assim ele não sai do aparelho de quem paga.
   // Conferido lendo de volta com um decodificador de verdade (jsQR) em 620 textos, versões 1 a 19.
@@ -395,7 +395,7 @@
       bit++;
       return v === 1;
     };
-    // A direção alterna a cada par de colunas percorrido — e a coluna 6, que é de sincronismo, é
+    // A direção alterna a cada par de colunas percorrido - e a coluna 6, que é de sincronismo, é
     // pulada inteira sem entrar nessa conta. Por isso o par é contado à parte, e não deduzido da
     // posição da coluna.
     let par = 0;
@@ -475,7 +475,7 @@
 
   // ── NOME E DOCUMENTO DO PAGADOR ────────────────────────────────────────────
   // Mesma conferência que o Worker faz, repetida aqui só pra avisar o cliente antes de enviar: quem
-  // decide é sempre o Worker. Nada disso é guardado — nem no aparelho, nem no evento do painel.
+  // decide é sempre o Worker. Nada disso é guardado - nem no aparelho, nem no evento do painel.
   function digitoCpfOk(d) {
     if (d.split('').every(c => c === d[0])) return false;            // 111.111.111-11 e afins fecham na conta
     for (const [ate, peso] of [[9, 10], [10, 11]]) {
@@ -892,8 +892,8 @@
     _ok(g) { return g === this._gen && this.isConnected; }
 
     // ── rede (Worker) ────────────────────────────────────────────
-    // O evento é público (qualquer script da página ouve). Leva o que o painel de teste precisa —
-    // ID do Kwai (que o cliente digitou e já está na tela), quantidade e forma de pagamento — e,
+    // O evento é público (qualquer script da página ouve). Leva o que o painel de teste precisa - 
+    // ID do Kwai (que o cliente digitou e já está na tela), quantidade e forma de pagamento - e,
     // dos dados do pagador, só QUAIS campos foram enviados: nunca nome, CPF, WhatsApp nem o ticket.
     _resumo(corpo) {
       const c = {};
@@ -1120,7 +1120,7 @@
         <div class="lbl">Escolha ou digite</div>
         <div class="chips">${RAPIDOS.map(n => `<button type="button" class="chip" data-q="${n}">${num(n)}</button>`).join('')}</div>
         <label class="field"><span>Quantidade de diamantes</span><input data-qtd inputmode="numeric" autocomplete="off" maxlength="6" placeholder="Ex.: 1000"></label>
-        <div class="preco"><span class="small">Total a pagar</span><strong data-preco>—</strong></div>
+        <div class="preco"><span class="small">Total a pagar</span><strong data-preco>-</strong></div>
         <div class="inline-erro" data-erro role="alert" hidden></div>
         <p class="small">Esse é o valor do PIX. Mínimo de 100 diamantes.</p>
         <button type="button" class="btn full" data-ir disabled>Continuar</button>`);
@@ -1138,14 +1138,14 @@
         const n = parseInt(qtd.value, 10) || 0;
         marcarChips(n);
         erroEl.hidden = true;
-        if (!n) { preco.textContent = '—'; return; }
-        if (n < MIN) { preco.textContent = '—'; erroEl.textContent = `O mínimo é ${MIN} diamantes.`; erroEl.hidden = false; return; }
-        if (n > MAX) { preco.textContent = '—'; erroEl.textContent = `O máximo por pedido é ${num(MAX)} diamantes.`; erroEl.hidden = false; return; }
+        if (!n) { preco.textContent = '-'; return; }
+        if (n < MIN) { preco.textContent = '-'; erroEl.textContent = `O mínimo é ${MIN} diamantes.`; erroEl.hidden = false; return; }
+        if (n > MAX) { preco.textContent = '-'; erroEl.textContent = `O máximo por pedido é ${num(MAX)} diamantes.`; erroEl.hidden = false; return; }
         preco.textContent = '…';
         timer = setTimeout(async () => {
           const r = await this._chamar('/get-price', { diamantes: n });
           if (!this._ok(g) || meu !== seq) return;
-          if (!r.ok || !(r.json.valor > 0)) { preco.textContent = '—'; erroEl.textContent = this._msgErro(r, 'Não consegui calcular o valor agora.'); erroEl.hidden = false; return; }
+          if (!r.ok || !(r.json.valor > 0)) { preco.textContent = '-'; erroEl.textContent = this._msgErro(r, 'Não consegui calcular o valor agora.'); erroEl.hidden = false; return; }
           preco.textContent = brl(r.json.valor);
           valido = { n, valor: r.json.valor };
           ir.disabled = false;
@@ -1272,7 +1272,7 @@
         const documento = docEl.value.replace(/\D/g, '');
         const whatsapp = whatsDigitos(whatsEl.value);
         // O bloco inteiro sai da tela: campo desabilitado continua guardando o que foi digitado, e
-        // o shadow DOM é aberto — qualquer script da página leria dali. Na conversa não fica nem o
+        // o shadow DOM é aberto - qualquer script da página leria dali. Na conversa não fica nem o
         // nome, só o aviso de que os dados seguiram.
         this._largarDados();
         this._add('user', 'Dados enviados');
@@ -1337,17 +1337,17 @@
       this._add('bot', 'Tudo pronto! Agora é só pagar o PIX:');
       // Com o código em mãos, o pagamento acontece aqui mesmo: copia e cola no app do banco, ou lê
       // o QR de outro aparelho. O link do provedor continua embaixo, pra quem preferir a página
-      // dele — e é o único caminho quando o código não vem (outro meio de pagamento, por exemplo).
+      // dele - e é o único caminho quando o código não vem (outro meio de pagamento, por exemplo).
       const w = this._bloco(pix ? `
         ${svg ? `<div class="qr" style="--mods:${matriz.length + 8}"><img alt="QR Code do PIX" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}"></div>` : ''}
         <div class="lbl">PIX copia e cola</div>
         <div class="code" tabindex="0" data-pix>${esc(pix)}</div>
         <button type="button" class="btn full" data-copiar>${ico('copy')} Copiar código PIX</button>
-        <p class="small">${ico('lock')}Abra o app do seu banco, escolha pagar com PIX e cole o código — ou leia o QR por outro aparelho. Assim que o pagamento cair, eu aviso aqui.</p>
+        <p class="small">${ico('lock')}Abra o app do seu banco, escolha pagar com PIX e cole o código - ou leia o QR por outro aparelho. Assim que o pagamento cair, eu aviso aqui.</p>
         <a class="pagprov" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir a página do provedor</a>
         <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>` : `
         <a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Pagar com PIX</a>
-        <p class="small">${ico('lock')}Abre em outra aba, no provedor de pagamento (<strong>${esc(hostDe(url))}</strong>), com o código PIX e o QR. Confira o valor antes de pagar — o resultado aparece aqui.</p>
+        <p class="small">${ico('lock')}Abre em outra aba, no provedor de pagamento (<strong>${esc(hostDe(url))}</strong>), com o código PIX e o QR. Confira o valor antes de pagar - o resultado aparece aqui.</p>
         <div class="stt" data-stt role="status"><span class="spin"></span><span data-stt-t>Aguardando o pagamento…</span></div>`);
 
       this._ligarCopiar(w, pix);
@@ -1384,10 +1384,10 @@
             } catch (_) { selecionou = false; }
           }
         }
-        // Sem área de transferência e sem seleção, o jeito é a pessoa marcar o código na mão —
+        // Sem área de transferência e sem seleção, o jeito é a pessoa marcar o código na mão - 
         // e aí não adianta anunciar o que não aconteceu.
         copiar.innerHTML = deu ? `${ico('check')} Código copiado`
-          : selecionou ? `${ico('copy')} Código selecionado — agora é só copiar`
+          : selecionou ? `${ico('copy')} Código selecionado - agora é só copiar`
           : `${ico('copy')} Marque o código acima e copie`;
         setTimeout(() => { if (copiar.isConnected) copiar.innerHTML = antes; }, 3200);
       });
@@ -1427,7 +1427,7 @@
         <div class="lbl">PIX copia e cola</div>
         <div class="code" tabindex="0" data-pix>${esc(pix)}</div>
         <button type="button" class="btn full" data-copiar>${ico('copy')} Copiar código PIX</button>
-        <p class="small">${ico('lock')}Abra o app do seu banco, escolha pagar com PIX e cole o código — ou leia o QR por outro aparelho. Assim que o pagamento cair, eu aviso aqui.</p>
+        <p class="small">${ico('lock')}Abra o app do seu banco, escolha pagar com PIX e cole o código - ou leia o QR por outro aparelho. Assim que o pagamento cair, eu aviso aqui.</p>
         ${url ? `<a class="pagprov" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ico('ext')} Abrir a página do provedor</a>` : ''}`;
       if (stt) w.insertBefore(bloco, stt); else w.appendChild(bloco);
       this._ligarCopiar(w, pix);
@@ -1442,13 +1442,13 @@
           this._step = 'ENCERRADO';
           this._encerrarPagamento('Acompanhamento encerrado');
           // Não há como cancelar o pedido no parceiro: ser honesto sobre isso.
-          this._add('bot', `Acompanhamento encerrado. O pedido <strong>#${esc(this._orderNo)}</strong> continua em aberto no parceiro até expirar — se você pagar depois, fale com o suporte com esse número.`);
+          this._add('bot', `Acompanhamento encerrado. O pedido <strong>#${esc(this._orderNo)}</strong> continua em aberto no parceiro até expirar - se você pagar depois, fale com o suporte com esse número.`);
           this._fim();
         } },
       ]);
     }
     // Durante a troca o pedido antigo ainda pode ser aceito pelo parceiro, então o código sai de alcance
-    // ANTES de pedir a troca — e volta se a troca falhar.
+    // ANTES de pedir a troca - e volta se a troca falhar.
     _congelarPagamento(congelar) {
       const w = this._wPag;
       if (!w || !w.isConnected) return;

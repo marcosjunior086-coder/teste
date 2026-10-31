@@ -1,5 +1,5 @@
 /**
- * auth.js — Gerenciamento de sessão e autenticação do usuário DMaior Agency
+ * auth.js - Gerenciamento de sessão e autenticação do usuário DMaior Agency
  *
  * Centraliza leitura, escrita e limpeza das chaves de sessão no localStorage.
  * Todas as operações são protegidas com verificação de window (SSR-safe).
@@ -9,7 +9,7 @@
 
 const Auth = {
 
-  // Chaves do localStorage — altere aqui se precisar renomear
+  // Chaves do localStorage - altere aqui se precisar renomear
   KEYS: {
     uid:          'dm_uid',
     token:        'dm_token',

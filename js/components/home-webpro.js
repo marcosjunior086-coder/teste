@@ -1,9 +1,9 @@
 /**
- * home-webpro.js — Layout "Web Pro" da home (3ª opção da engrenagem)
+ * home-webpro.js - Layout "Web Pro" da home (3ª opção da engrenagem)
  *
  * Custom Element: <dmaior-home-webpro>
  *
- * Só renderiza quando localStorage.dm_layout === 'webpro' (que é o DEFAULT —
+ * Só renderiza quando localStorage.dm_layout === 'webpro' (que é o DEFAULT - 
  * quem abre o site pela 1ª vez sem preferência cai aqui). "Padrão" (dinamico)
  * e "Antigo" (original) continuam intactos no <dmaior-services-menu>.
  *
@@ -150,7 +150,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .banner .bc-slide img,.banner .bc-slide video,.banner .bc-slide canvas{display:block;width:100%;height:auto;aspect-ratio:32/9;object-fit:cover;border-radius:16px;background:var(--dm-bg-2);}
     .banner .bc-cap{position:absolute;bottom:0;left:0;right:0;padding:8px 14px 10px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);border-radius:0 0 16px 16px;pointer-events:none;}
     .banner .bc-cap span{font-family:var(--f-title);font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
-    /* dots FORA da imagem (numa faixa embaixo) — assim não se sobrepõem ao
+    /* dots FORA da imagem (numa faixa embaixo) - assim não se sobrepõem ao
        link do banner nem uns aos outros (Lighthouse: áreas de toque). */
     .banner .bc-dots{display:flex;justify-content:center;gap:2px;margin:6px auto 0;max-width:820px;}
     .banner .bc-dot{width:26px;height:24px;border:none;background:transparent;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;}
@@ -163,7 +163,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     /* HERO */
     .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,60px);align-items:center;padding-top:clamp(36px,6vw,68px);padding-bottom:clamp(24px,4vw,40px);}
     /* Sem ninguém ao vivo: o card de live (com o placeholder genérico) some
-       de vez em vez de ficar mostrando "Live ao vivo · Kwai" sem live nenhuma —
+       de vez em vez de ficar mostrando "Live ao vivo · Kwai" sem live nenhuma - 
        o texto ocupa a largura toda no lugar. */
     .hero.no-live{grid-template-columns:1fr;}
     .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--dm-cyan-10);border:1px solid var(--dm-cyan-30);color:var(--dm-cyan,#00d4d4);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:7px 14px;border-radius:999px;}
@@ -183,7 +183,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .proof p{font-size:.84rem;color:var(--dm-text-sub,#a0b8c8);line-height:1.4;margin:0;}
     .proof strong{color:var(--dm-text,#e2e8f0);font-weight:700;}
 
-    /* frame da live (placeholder — etapa 3 liga o player real) */
+    /* frame da live (placeholder - etapa 3 liga o player real) */
     .hlive{position:relative;width:min(330px,100%);margin:0 auto;}
     .hlive .halo{position:absolute;inset:-16% -12%;background:radial-gradient(closest-side,var(--dm-cyan-25),transparent 72%);filter:blur(8px);}
     .frame{position:relative;aspect-ratio:3/4;border-radius:24px;overflow:hidden;border:1px solid var(--dm-cyan-25);background:radial-gradient(120% 80% at 50% 0%,var(--dm-bg-2) 0%,var(--dm-bg-3) 70%);box-shadow:0 36px 70px var(--dm-shadow-lg);display:flex;align-items:center;justify-content:center;}
@@ -275,7 +275,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     .ben>.ic svg{width:44%;height:44%;stroke:var(--dm-cyan,#00d4d4);}
     .ben.gold>.ic{background:var(--dm-gold-10);border-color:var(--dm-gold-20);} .ben.gold>.ic svg{stroke:var(--dm-gold,#f0c040);}
     .ben.green>.ic{background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.22);} .ben.green>.ic svg{stroke:var(--dm-green,#4ade80);}
-    /* rosa/laranja: sem verde/dourado destoando — tudo no acento do tema */
+    /* rosa/laranja: sem verde/dourado destoando - tudo no acento do tema */
     :host([data-theme="rosa"]) .ben.gold>.ic,:host([data-theme="laranja"]) .ben.gold>.ic,
     :host([data-theme="rosa"]) .ben.green>.ic,:host([data-theme="laranja"]) .ben.green>.ic{background:var(--dm-cyan-08);border-color:var(--dm-cyan-20);}
     :host([data-theme="rosa"]) .ben.gold>.ic svg,:host([data-theme="laranja"]) .ben.gold>.ic svg,
@@ -395,13 +395,13 @@ class DmaiorHomeWebpro extends HTMLElement {
       <a href="recarga" class="surface strip recarga">
         <div class="l">
           <span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/><path d="M2 9h20"/></svg></span>
-          <div><h2>Recarga de Diamantes</h2><p>Rápido, seguro e pelo melhor preço — direto no seu perfil Kwai.</p></div>
+          <div><h2>Recarga de Diamantes</h2><p>Rápido, seguro e pelo melhor preço - direto no seu perfil Kwai.</p></div>
         </div>
         <span class="btn-grad go">Recarregar agora ${ARROW}</span>
       </a>
     </section>
 
-    <!-- LIVE 3:4 — só mobile -->
+    <!-- LIVE 3:4 - só mobile -->
     <section class="wrap livemob mobile-only" aria-label="Live acontecendo agora">
       <div class="frame" id="heroFrameMob">
         <span class="lp"><i></i>LIVE</span>
@@ -469,7 +469,7 @@ class DmaiorHomeWebpro extends HTMLElement {
         <article class="surface strip ben">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
           <h3>Método exclusivo</h3>
-          <p>Metodologia própria, validada de acordo com as regras oficiais da plataforma — segurança e consistência.</p>
+          <p>Metodologia própria, validada de acordo com as regras oficiais da plataforma - segurança e consistência.</p>
         </article>
         <article class="surface strip ben green">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"/></svg></span>
@@ -555,13 +555,13 @@ class DmaiorHomeWebpro extends HTMLElement {
       </div>
     </section>
 
-    <!-- CTA final — recrutamento de agentes -->
+    <!-- CTA final - recrutamento de agentes -->
     <section class="wrap">
       <div class="surface strip cta-band">
         <div>
           <span class="kicker">Programa de agentes</span>
           <h2>Recrute streamers e ganhe comissão.</h2>
-          <p>Você indica novos streamers pelo seu link e eles já entram vinculados a você. Acompanha o time num painel próprio — lives ao vivo, diamantes, horas e ranking — e recebe comissão pelo desempenho. Sem custo pra começar.</p>
+          <p>Você indica novos streamers pelo seu link e eles já entram vinculados a você. Acompanha o time num painel próprio - lives ao vivo, diamantes, horas e ranking - e recebe comissão pelo desempenho. Sem custo pra começar.</p>
         </div>
         <div class="btns">
           <a href="https://wa.me/5517997176407?text=Ol%C3%A1!%20Tenho%20interesse%20em%20ser%20agente%20recrutador%20da%20DMaior%20Agency.%20Como%20funciona%3F" target="_blank" rel="noopener noreferrer" class="btn-grad">
@@ -599,14 +599,14 @@ class DmaiorHomeWebpro extends HTMLElement {
       });
     });
 
-    // benefícios — empilhamento no scroll: cada card gruda um pouco mais embaixo (--i)
+    // benefícios - empilhamento no scroll: cada card gruda um pouco mais embaixo (--i)
     const grid = s.getElementById('benGrid');
     if (grid) grid.querySelectorAll('.ben').forEach((c, i) => c.style.setProperty('--i', i));
     this._bindBeneficios(grid);
   }
 
   // Cards de benefícios: entram em cascata (mola suave) quando aparecem na tela e,
-  // quando o card de baixo cobre o de cima, a sombra do coberto some — antes as
+  // quando o card de baixo cobre o de cima, a sombra do coberto some - antes as
   // sombras pretas de todos os cards empilhados ficavam somadas atrás da pilha.
   _bindBeneficios(grid) {
     if (this._benStop) this._benStop();
@@ -658,7 +658,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     lives = Array.isArray(lives) ? lives : [];
     const s = this.shadowRoot;
 
-    // pilha de avatares do hero — fotos reais dos streamers ao vivo
+    // pilha de avatares do hero - fotos reais dos streamers ao vivo
     const stack = s.querySelector('.proof .stack');
     if (stack) {
       const pics = lives.filter(l => l.image).slice(0, 4);
@@ -678,7 +678,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     // Streamer em destaque = mais espectadores (com stream pronto na frente) NA
     // 1ª ESCOLHA. Depois disso fica TRAVADO nele enquanto continuar ao vivo:
     // a lista vem ordenada por espectadores e, com audiência parecida, o 1º
-    // lugar trocava a cada atualização — o quadro era reconstruído toda vez
+    // lugar trocava a cada atualização - o quadro era reconstruído toda vez
     // (volta pra capa, vídeo reinicia) e ficava piscando. Só troca se o atual
     // sair do ar (tolera 1 atualização sem ele pra não piscar por falha do radar).
     const atual = this._featured && lives.find(l => l.url === this._featured.url);
@@ -736,7 +736,7 @@ class DmaiorHomeWebpro extends HTMLElement {
   }
 
   // Monta a live SÓ no quadro ativo do viewport atual (desktop OU mobile).
-  // Nunca abre modal — a live roda dentro do quadro; tocar liga/desliga o som.
+  // Nunca abre modal - a live roda dentro do quadro; tocar liga/desliga o som.
   _renderFeatured() {
     if (!this._rendered || !this.shadowRoot) return;
     const s = this.shadowRoot;
@@ -808,8 +808,8 @@ class DmaiorHomeWebpro extends HTMLElement {
         v.muted = !v.muted;
         active.classList.toggle('sound', !v.muted);
       };
-      // Fallback: se a foto redimensionada (weserv) falhar — proxy bloqueado
-      // por DNS/ad-block em alguns Android/Xiaomi — troca pra foto original
+      // Fallback: se a foto redimensionada (weserv) falhar - proxy bloqueado
+      // por DNS/ad-block em alguns Android/Xiaomi - troca pra foto original
       // do Kwai em vez de deixar o ícone de imagem quebrada.
       if (live.imageRaw && live.imageRaw !== live.image) {
         active.querySelectorAll('img').forEach((img) => {
@@ -837,7 +837,7 @@ class DmaiorHomeWebpro extends HTMLElement {
     }
   }
 
-  // ── Carrossel de campanha — getComunicados('home') (igual ao services-menu) ──
+  // ── Carrossel de campanha - getComunicados('home') (igual ao services-menu) ──
   _scheduleBanners(attempts = 0) {
     if (window.DmaiorAPI?.rank?.getComunicados) { this._loadBanners(); return; }
     if (attempts < 6) {
@@ -859,7 +859,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       wrap.innerHTML = this._carouselHTML(slides);
       window.DmaiorVideoCompat?.apply(wrap); // Xiaomi: vídeo sequestrado pelo navegador
       this._bindCarousel(slides.length);
-    } catch (_) { /* API indisponível — carrossel fica oculto */
+    } catch (_) { /* API indisponível - carrossel fica oculto */
       this.shadowRoot?.querySelector('.banner')?.classList.add('empty');
     }
   }
@@ -869,7 +869,7 @@ class DmaiorHomeWebpro extends HTMLElement {
       const tag  = s.link_url ? 'a' : 'div';
       const href = s.link_url ? ` href="${this._esc(s.link_url)}" target="_blank" rel="noopener noreferrer"` : '';
       // 1º slide é o elemento de LCP (fica acima da dobra): eager + fetchpriority=high,
-      // como o Lighthouse pede. O peso vem do srcset — no mobile puxa a versão w480.
+      // como o Lighthouse pede. O peso vem do srcset - no mobile puxa a versão w480.
       const load   = i === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
       const src    = this._normUrl(s.imagem_url, 720);
       const set    = this._srcSet(s.imagem_url);

@@ -1,5 +1,5 @@
 // ============================================================
-//  DMaior Agency — Custom Element: dmaior-impulso v12
+//  DMaior Agency - Custom Element: dmaior-impulso v12
 //  Atributo obrigatório:
 //    worker-url → URL base do Cloudflare Worker
 // ============================================================
@@ -78,11 +78,11 @@ class DmaiorImpulso extends HTMLElement {
     window.addEventListener('dmaior:tema', this._themeHandler);
   }
 
-  // Relê o localStorage e tenta iniciar se ainda não tiver iniciado — chamado
+  // Relê o localStorage e tenta iniciar se ainda não tiver iniciado - chamado
   // no connectedCallback E toda vez que o painel pai abre a aba Impulso.
   // Necessário porque esse elemento já existe no DOM desde o carregamento da
   // página (antes do login terminar), então na primeira checagem o token
-  // ainda não existe e ele mostra "Sessão Expirada" — sem isso, ficaria
+  // ainda não existe e ele mostra "Sessão Expirada" - sem isso, ficaria
   // preso nesse estado pro resto da sessão mesmo após o login completar.
   verificarSessao() {
     this._uid          = localStorage.getItem('dm_uid')      || '';
@@ -156,7 +156,7 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   async _iniciar() {
-    // Não renova o token aqui incondicionalmente — cada chamada abaixo que
+    // Não renova o token aqui incondicionalmente - cada chamada abaixo que
     // realmente precisa dele (_carregarQuota, _detectarLiveAtual,
     // _carregarAgendamento) já renova sozinha se receber 401. Renovar de
     // antemão em toda carga de página gastava uma troca de refresh_token à
@@ -213,7 +213,7 @@ class DmaiorImpulso extends HTMLElement {
       }
 
       if (!this._modoTocado) {
-        // Usuário ainda não mexeu em nenhuma aba — decide sozinho com base no servidor.
+        // Usuário ainda não mexeu em nenhuma aba - decide sozinho com base no servidor.
         this._trocarModo(data.ativo ? 'automatico' : 'manual');
       }
       this._atualizarBotaoDesativar();
@@ -284,7 +284,7 @@ class DmaiorImpulso extends HTMLElement {
   // Tenta preencher o link automaticamente cruzando o uid logado com o
   // radar de lives ao vivo. Se não detectar (streamer ainda não capturado
   // pelo monitor, fora do ar, ou erro de rede), o campo simplesmente
-  // continua vazio e editável — nada muda para quem preenche manualmente.
+  // continua vazio e editável - nada muda para quem preenche manualmente.
   async _detectarLiveAtual(retry = false) {
     const sr = this.shadowRoot;
     const linkInput = sr.getElementById('inp-link');
@@ -312,7 +312,7 @@ class DmaiorImpulso extends HTMLElement {
           linkStatus.style.display = 'block';
         }
       } else if (linkStatus) {
-        linkStatus.textContent = 'Não detectamos uma live sua ao vivo agora — cole o link manualmente.';
+        linkStatus.textContent = 'Não detectamos uma live sua ao vivo agora - cole o link manualmente.';
         linkStatus.style.display = 'block';
       }
     } catch (_) { /* mantém o campo manual, sem exibir erro */ }
@@ -346,13 +346,13 @@ class DmaiorImpulso extends HTMLElement {
       }
 
       // Verifica se o UID está bloqueado (denylist, trava tudo) ou se falta
-      // liberação por modalidade (allowlist — manual e automático são
+      // liberação por modalidade (allowlist - manual e automático são
       // independentes: a agência pode liberar só um dos dois, ou os dois).
       if (this._uid) {
         const check = await window.DmaiorAPI.rank.checkImpulsoBlock(this._uid);
 
         // Meta automática de diamantes do mês (ver _calcularMetaImpulso no
-        // worker) — só vem preenchida quando a agência ainda não liberou
+        // worker) - só vem preenchida quando a agência ainda não liberou
         // nenhum dos dois modos manualmente. Se já bateu algum degrau, o
         // worker já devolve liberado_manual/automatico=true e quota_max
         // personalizada; aqui só precisamos aplicar a cota e guardar os
@@ -389,7 +389,7 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   // Quando uma modalidade (ou as duas) não está liberada, esconde o
-  // formulário funcional e mostra um cartão simples no lugar — antes disso,
+  // formulário funcional e mostra um cartão simples no lugar - antes disso,
   // o painel continuava mostrando todos os campos "desabilitados" (parecendo
   // quebrado) em vez de deixar claro que o acesso ainda não foi concedido.
   _aplicarEstadoAcesso() {
@@ -400,12 +400,12 @@ class DmaiorImpulso extends HTMLElement {
     const modoSwitch    = sr.getElementById('modo-switch');
     const metaStrip     = sr.getElementById('meta-strip');
 
-    // Cota semanal só diz respeito ao modo manual — não faz sentido mostrá-la
+    // Cota semanal só diz respeito ao modo manual - não faz sentido mostrá-la
     // (eternamente carregando) se o manual nem está liberado.
     if (quotaBox) quotaBox.style.display = this._manualBloqueado ? 'none' : '';
 
     // Já liberado (manual pela agência ou por meta batida) e ainda tem
-    // degrau acima — mostra o progresso pro próximo, acima da cota semanal.
+    // degrau acima - mostra o progresso pro próximo, acima da cota semanal.
     if (metaStrip) {
       if (!this._bloqueado && this._meta && this._meta.quantidade_atual > 0) {
         metaStrip.innerHTML = this._metaProgressoHtml(this._meta);
@@ -461,23 +461,23 @@ class DmaiorImpulso extends HTMLElement {
       const alvoDia = meta.proxima_meta ? meta.proxima_meta.diamantes : 0;
       const jaCumpriu = diasAtual >= diasMin && meta.diamantes_mes >= alvoDia;
       const chamada = jaCumpriu
-        ? 'Você já cumpriu os dias e a meta deste mês — o impulso libera no dia 1º do mês que vem.'
+        ? 'Você já cumpriu os dias e a meta deste mês - o impulso libera no dia 1º do mês que vem.'
         : `Cumpra os ${diasMin} dias${alvoDia ? ` e pelo menos <b>${fmt(alvoDia)} ${D}</b>` : ''} este mês pra liberar no mês que vem.`;
       return `
-        <div class="meta-lbl">O impulso por meta exige <b>${diasMin} dias válidos</b> (1h ou mais de live no dia) no mês anterior — no mês passado você fez <b>${Number(meta.dias_mes_anterior) || 0}</b>. ${chamada}</div>
+        <div class="meta-lbl">O impulso por meta exige <b>${diasMin} dias válidos</b> (1h ou mais de live no dia) no mês anterior - no mês passado você fez <b>${Number(meta.dias_mes_anterior) || 0}</b>. ${chamada}</div>
         ${barraDias()}
         ${alvoDia ? `<div class="meta-bar" style="margin-top:10px"><div class="meta-bar-fill" style="width:${Math.max(0, Math.min(100, (meta.diamantes_mes / alvoDia) * 100))}%"></div></div>
         <div class="meta-vals"><span>${fmt(meta.diamantes_mes)} ${D} este mês</span><b>${fmt(alvoDia)} ${D}</b></div>` : ''}`;
     }
 
-    // Liberado, mas ainda não fechou os dias deste mês — avisa que é isso
+    // Liberado, mas ainda não fechou os dias deste mês - avisa que é isso
     // que mantém o impulso no mês que vem.
     const avisoDias = (meta.quantidade_atual > 0 && diasMin > 0 && diasAtual < diasMin)
       ? `<div class="meta-lbl" style="margin-top:12px">Pra continuar com impulso no mês que vem, feche <b>${diasMin} dias válidos</b> (1h+ de live no dia) este mês.</div>${barraDias()}`
       : '';
 
     if (!meta.proxima_meta) {
-      return `<div class="meta-lbl">Meta máxima do mês atingida — <b>${meta.quantidade_atual} usos de impulso por semana</b> liberados.</div>${avisoDias}`;
+      return `<div class="meta-lbl">Meta máxima do mês atingida - <b>${meta.quantidade_atual} usos de impulso por semana</b> liberados.</div>${avisoDias}`;
     }
     const alvo   = meta.proxima_meta.diamantes;
     const pct    = Math.max(0, Math.min(100, (meta.diamantes_mes / alvo) * 100));
@@ -534,7 +534,7 @@ class DmaiorImpulso extends HTMLElement {
 
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
 
-        /* Nav interno removido — o painel pai já tem menu */
+        /* Nav interno removido - o painel pai já tem menu */
         .shell {
           display: block;
           width: 100%;
@@ -689,7 +689,7 @@ class DmaiorImpulso extends HTMLElement {
         .spinner { width:16px; height:16px; border:2px solid rgba(0,212,212,0.3); border-top-color:var(--rank-cyan); border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
         @keyframes spin { to { transform:rotate(360deg); } }
 
-        /* ══ TEMA BRANCO — bloom azul-petróleo ══ */
+        /* ══ TEMA BRANCO - bloom azul-petróleo ══ */
         :host-context([data-theme="branco"]) , :host([data-theme="branco"]) {
           --cyan:#0095a8; --cyan-d:rgba(0,149,168,0.15);
           --gold:#b8860b; --text:#0d1117; --muted:#4a5568;
@@ -702,7 +702,7 @@ class DmaiorImpulso extends HTMLElement {
           box-shadow: 0 6px 24px rgba(0,149,168,0.1);
         }
 
-        /* ══ TEMA ROSA — bloom pink/magenta ══ */
+        /* ══ TEMA ROSA - bloom pink/magenta ══ */
         :host-context([data-theme="rosa"]) , :host([data-theme="rosa"]) {
           --cyan:#e91e8c; --cyan-d:rgba(233,30,140,0.15);
           --gold:#c2185b; --text:#1a0010; --muted:#80004a;
@@ -715,7 +715,7 @@ class DmaiorImpulso extends HTMLElement {
           box-shadow: 0 6px 24px rgba(233,30,140,0.1);
         }
 
-        /* ══ TEMA LARANJA — bloom laranja/âmbar ══ */
+        /* ══ TEMA LARANJA - bloom laranja/âmbar ══ */
         :host-context([data-theme="laranja"]) , :host([data-theme="laranja"]) {
           --cyan:#f97316; --cyan-d:rgba(249,115,22,0.15);
           --gold:#ea580c; --text:#1a0a00; --muted:#7c3a00;
@@ -728,7 +728,7 @@ class DmaiorImpulso extends HTMLElement {
           box-shadow: 0 6px 24px rgba(249,115,22,0.1);
         }
 
-        /* ══ Campos, radio e quota — todos os temas claros ══ */
+        /* ══ Campos, radio e quota - todos os temas claros ══ */
         :host-context([data-theme="branco"]) .quota-box, :host([data-theme="branco"]) .quota-box,
         :host-context([data-theme="rosa"]) .quota-box, :host([data-theme="rosa"]) .quota-box,
         :host-context([data-theme="laranja"]) .quota-box , :host([data-theme="laranja"]) .quota-box {
@@ -770,7 +770,7 @@ class DmaiorImpulso extends HTMLElement {
         :host-context([data-theme="branco"]) .modo-btn, :host([data-theme="branco"]) .modo-btn,
         :host-context([data-theme="rosa"]) .modo-btn, :host([data-theme="rosa"]) .modo-btn,
         :host-context([data-theme="laranja"]) .modo-btn , :host([data-theme="laranja"]) .modo-btn { color: var(--text); }
-        /* Radio card selecionado + botão impulso — usa bloom do tema */
+        /* Radio card selecionado + botão impulso - usa bloom do tema */
         :host-context([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card,
         :host-context([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card,
         :host-context([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card, :host([data-theme="laranja"]) .radio-opt input[type="radio"]:checked + .radio-card,
@@ -791,7 +791,7 @@ class DmaiorImpulso extends HTMLElement {
           color: #fff;
         }
         /* Texto da duração no cartão selecionado: a regra genérica (.rc-tempo
-           ciano) é mais específica e ganhava do #fff acima — ciano sobre o
+           ciano) é mais específica e ganhava do #fff acima - ciano sobre o
            fundo rosa/laranja ficava ilegível. */
         :host-context([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo, :host([data-theme="branco"]) .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo,
         :host-context([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo, :host([data-theme="rosa"])   .radio-opt input[type="radio"]:checked + .radio-card .rc-tempo,
@@ -957,13 +957,13 @@ class DmaiorImpulso extends HTMLElement {
   }
 
   // Mostra o botão "Desativar Automático" só quando o agendamento está
-  // realmente ativo no servidor — some sozinho depois de desativar.
+  // realmente ativo no servidor - some sozinho depois de desativar.
   _atualizarBotaoDesativar() {
     const btn = this.shadowRoot.getElementById('btn-desativar-automatico');
     if (btn) btn.style.display = this._agendamentoAtivo ? 'flex' : 'none';
   }
 
-  // Troca puramente visual — usada tanto no clique do usuário quanto para
+  // Troca puramente visual - usada tanto no clique do usuário quanto para
   // refletir o estado carregado do servidor, sem efeito colateral no backend.
   _trocarModo(modo) {
     const sr = this.shadowRoot;
@@ -975,7 +975,7 @@ class DmaiorImpulso extends HTMLElement {
 
   // Clique do usuário na aba: só troca a visual. Desativar o automático é
   // uma ação explícita agora (botão "Desativar Automático"), não mais um
-  // efeito colateral de só olhar a aba Manual — clicar pra ver não deveria
+  // efeito colateral de só olhar a aba Manual - clicar pra ver não deveria
   // desligar nada por trás sem avisar.
   _onModoClick(modo) {
     this._modoTocado = true;

@@ -1,12 +1,12 @@
 /**
- * menu-mobile.js — Sidebar hambúrguer mobile da DMaior Agency
+ * menu-mobile.js - Sidebar hambúrguer mobile da DMaior Agency
  *
  * Custom Element: <menu-mobile-dmaior>
  * Lê autenticação do localStorage.
  * Sidebar desliza da direita com overlay escuro.
  * Submenus animados com max-height.
  *
- * Preserva 100% o design original — nenhum estilo foi alterado.
+ * Preserva 100% o design original - nenhum estilo foi alterado.
  */
 
 /* eslint-env browser */
@@ -112,7 +112,7 @@ class MenuMobileDMaior extends HTMLElement {
 
   // Reflete o layout salvo (webpro | dinamico | original) num atributo no host,
   // pra nav do topo e foto do usuário aparecerem só no "Web Pro" via :host([data-layout="webpro"]).
-  // Dentro do painel (<dmaior-app> na página) a nav do site fica escondida — ali é app, não site.
+  // Dentro do painel (<dmaior-app> na página) a nav do site fica escondida - ali é app, não site.
   _syncLayoutHost() {
     let layout = 'webpro';
     try { layout = localStorage.getItem('dm_layout') || 'webpro'; } catch (_) {}
@@ -136,10 +136,10 @@ class MenuMobileDMaior extends HTMLElement {
   }
 
   render() {
-    // Hospedado localmente (era wixstatic) — em alguns Android/Xiaomi o DNS/
+    // Hospedado localmente (era wixstatic) - em alguns Android/Xiaomi o DNS/
     // ad-block do aparelho bloqueia static.wixstatic.com e a logo quebrava.
     const URL_LOGO   = `assets/icons/dmaior-logo.png`;
-    // Todos os ícones usam stroke="currentColor" — a cor é controlada por CSS via var(--dm-*)
+    // Todos os ícones usam stroke="currentColor" - a cor é controlada por CSS via var(--dm-*)
     const SVG_MENU   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
     const SVG_CLOSE  = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
     const SVG_CHEV   = `<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
@@ -154,7 +154,7 @@ class MenuMobileDMaior extends HTMLElement {
     const SVG_SHIELD = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>`;
     const SVG_AGENTE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
     const SVG_USER   = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
-    // Sacola de loja (genérica) — o ícone da LOJA; o logo de cada marketplace só aparece dentro do produto
+    // Sacola de loja (genérica) - o ícone da LOJA; o logo de cada marketplace só aparece dentro do produto
     const SVG_BAG    = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
     // Ícones do menu do topo (computador): 16px, traço do tema (cor definida em .topnav a svg)
     const topIco = (d) => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -165,7 +165,7 @@ class MenuMobileDMaior extends HTMLElement {
     const TOP_POL  = topIco('<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>');
     const SVG_BELL   = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
 
-    // Itens com disabled:true são exibidos mas não navegam — páginas ainda não criadas
+    // Itens com disabled:true são exibidos mas não navegam - páginas ainda não criadas
     const menuData = [
       { label: 'Início',      link: 'index.html',             icon: SVG_HOME   },
       { label: 'Material',    icon: SVG_FOLDER, subItems: [
@@ -196,7 +196,7 @@ class MenuMobileDMaior extends HTMLElement {
             <div class="sub-wrap" id="sub-${i}"><div class="sub-inner">${subs}</div></div>
           </div>`;
       } else if (item.disabled) {
-        // Página ainda não criada — exibe como "em breve" sem link clicável
+        // Página ainda não criada - exibe como "em breve" sem link clicável
         menuHTML += `
           <div class="menu-item direct disabled-item">
             <div class="menu-content">${item.icon}<span>${item.label}</span></div>
@@ -217,7 +217,7 @@ class MenuMobileDMaior extends HTMLElement {
       /* No mobile o menu do topo acompanha a rolagem (fixo no topo, em todas as páginas).
          z-index:1050 no :host cria um contexto de empilhamento: o menu inteiro (topbar +
          gaveta + overlay, que internamente ficam em 9998-10001) passa a valer 1050 na
-         página — acima do conteúdo e da nav flutuante do painel (1000-1003), abaixo do
+         página - acima do conteúdo e da nav flutuante do painel (1000-1003), abaixo do
          loader do painel (9999) e do banner de cookies (99999). */
       @media (max-width:768px){
         :host{ position:sticky; top:0; z-index:1050; }
@@ -255,7 +255,7 @@ class MenuMobileDMaior extends HTMLElement {
       :host-context([data-theme="branco"]) .close-btn svg,
       :host-context([data-theme="rosa"]) .close-btn svg,
       :host-context([data-theme="laranja"]) .close-btn svg { color: #1a1a1a; }
-      /* ── Nav do site no topo — só no layout "Web Pro", só desktop ── */
+      /* ── Nav do site no topo - só no layout "Web Pro", só desktop ── */
       .topnav{ display:none; align-items:center; gap:2px; margin-left:14px; }
       .topnav a{ font-size:.84rem; font-weight:600; color:var(--dm-text-sub); padding:8px 12px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; text-decoration:none; white-space:nowrap; transition:background .2s,color .2s; }
       .topnav a:hover, .topnav a.on{ background:var(--dm-cyan-08); color:var(--dm-text); }
@@ -436,7 +436,7 @@ class MenuMobileDMaior extends HTMLElement {
     <div class="topbar">
       <img src="${URL_LOGO}" alt="DMaior Agency" class="logo" width="150" height="46" fetchpriority="high" decoding="async">
 
-      <!-- Nav do site — visível só no layout "Web Pro" em telas largas -->
+      <!-- Nav do site - visível só no layout "Web Pro" em telas largas -->
       <nav class="topnav" aria-label="Navegação do site">
         <a href="index.html"        data-nav="index">${TOP_HOME}Início</a>
         <a href="cursos.html"       data-nav="cursos">${TOP_BOOK}Cursos</a>
@@ -535,7 +535,7 @@ class MenuMobileDMaior extends HTMLElement {
           </div>
         </div>
 
-        <!-- Sino de avisos — visível somente quando logado -->
+        <!-- Sino de avisos - visível somente quando logado -->
         <button class="bell-btn hidden" id="bellBtn" title="Avisos">
           ${SVG_BELL}
           <span class="bell-dot hidden" id="bellDot"></span>
@@ -554,7 +554,7 @@ class MenuMobileDMaior extends HTMLElement {
       </div>
 
       <div class="auth-area">
-        <!-- Botão de acesso ao painel — visível quando não logado -->
+        <!-- Botão de acesso ao painel - visível quando não logado -->
         <a href="painel/index.html" class="btn-access" id="btnAccess">
           ${SVG_ACCESS} ACESSAR PAINEL
         </a>
@@ -620,7 +620,7 @@ class MenuMobileDMaior extends HTMLElement {
         bellBtn.classList.remove('hidden');
         this._scheduleCheckUnread();
       }
-      // Cria <img> via DOM para evitar XSS — valida esquema antes de atribuir src
+      // Cria <img> via DOM para evitar XSS - valida esquema antes de atribuir src
       if (detail.foto) {
         const FALLBACK = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         let fotoSrc = FALLBACK;
@@ -676,7 +676,7 @@ class MenuMobileDMaior extends HTMLElement {
     const ddDinamico     = root.getElementById('ddDinamico');
     const ddWebpro       = root.getElementById('ddWebpro');
 
-    // Lê layout salvo e marca opção ativa (default = 'webpro' — layout Web Pro)
+    // Lê layout salvo e marca opção ativa (default = 'webpro' - layout Web Pro)
     const updateGearActive = () => {
       let saved = 'webpro';
       try { saved = localStorage.getItem('dm_layout') || 'webpro'; } catch (_) {}
@@ -820,7 +820,7 @@ class MenuMobileDMaior extends HTMLElement {
       });
     } catch (_) {}
 
-    // Abre/fecha a lista de atalhos (Painel do Host/Admin/Agente/Sair) — fica
+    // Abre/fecha a lista de atalhos (Painel do Host/Admin/Agente/Sair) - fica
     // recolhida por padrão pra não ocupar espaço, só expande ao clicar no nome.
     const userCardToggle = root.getElementById('userCardToggle');
     const authWrap        = root.getElementById('authWrap');
@@ -850,10 +850,10 @@ class MenuMobileDMaior extends HTMLElement {
       bellBtn.addEventListener('click', () => {
         this.markAvisosRead();
         if (document.querySelector('dmaior-app')) {
-          // Dentro do painel — navega inline via evento
+          // Dentro do painel - navega inline via evento
           window.dispatchEvent(new CustomEvent('dmaior:avisos'));
         } else {
-          // Site público — redireciona para o painel com deeplink #avisos
+          // Site público - redireciona para o painel com deeplink #avisos
           window.location.href = 'painel/index.html#avisos';
         }
       });
@@ -877,7 +877,7 @@ class MenuMobileDMaior extends HTMLElement {
       const delay = attempts < 3 ? 300 + attempts * 300 : 2000;
       setTimeout(() => this._scheduleCheckUnread(attempts + 1), delay);
     }
-    // Após 6 tentativas desiste silenciosamente — comunicados são opcionais
+    // Após 6 tentativas desiste silenciosamente - comunicados são opcionais
   }
 
   // Verifica se há comunicados não lidos e acende o ponto vermelho
@@ -888,14 +888,14 @@ class MenuMobileDMaior extends HTMLElement {
       const seen    = seenRaw ? JSON.parse(seenRaw) : [];
       const data    = await window.DmaiorAPI.rank.getComunicados('painel');
       // Só "importante" vira notificação de verdade (ver loadAvisos em
-      // dmaior-app.js) — sem esse filtro o sino acendia por causa de avisos
+      // dmaior-app.js) - sem esse filtro o sino acendia por causa de avisos
       // "rápido" que nunca aparecem na tela de Avisos, deixando o ponto
       // vermelho aceso pra sempre (o id nunca entra no set de "lidos").
       const lista   = (data.comunicados || []).filter(c => c.tipo === 'importante');
       const hasNew  = lista.some(c => !seen.includes(String(c.id)));
       const dot     = this.shadowRoot?.getElementById('bellDot');
       if (dot) dot.classList.toggle('hidden', !hasNew);
-    } catch { /* silencia — sino é opcional */ }
+    } catch { /* silencia - sino é opcional */ }
   }
 
   // Marca todos os comunicados atuais como lidos e apaga o ponto

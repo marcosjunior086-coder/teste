@@ -1,12 +1,12 @@
 /**
- * menu-desktop.js — Navbar desktop da DMaior Agency
+ * menu-desktop.js - Navbar desktop da DMaior Agency
  *
  * Custom Element: <menu-desktop-dmaior>
  * Lê autenticação do localStorage (dm_token, dm_foto, dm_nome).
  * Detecta mudanças via evento 'dmaior:auth' e via 'storage' (multi-aba).
  * Logout disparado via evento 'dmaior:logout' (capturado por auth.js).
  *
- * Preserva 100% o design original — nenhum estilo foi alterado.
+ * Preserva 100% o design original - nenhum estilo foi alterado.
  */
 
 /* eslint-env browser */
@@ -48,7 +48,7 @@ class MenuDesktopDMaior extends HTMLElement {
 
   render() {
     // Local (era wixstatic original 3785x1155 sem redimensionar pra exibir a
-    // 38px de altura — 129 KiB à toa; também bloqueado em alguns Xiaomi).
+    // 38px de altura - 129 KiB à toa; também bloqueado em alguns Xiaomi).
     const URL_LOGO   = `assets/icons/dmaior-logo.png`;
     const SVG_CHEV   = `<svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a0b8c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
     const SVG_HOME   = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00d4d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;

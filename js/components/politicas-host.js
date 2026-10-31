@@ -26,7 +26,7 @@ class PoliticasHost extends HTMLElement {
             
             :host {
                 display: block;
-                /* Mapeia vars locais para as globais — muda automaticamente com o tema */
+                /* Mapeia vars locais para as globais - muda automaticamente com o tema */
                 --bg-grad:  var(--dm-grad-card);
                 --cyan:     var(--dm-cyan);
                 --gold:     var(--dm-gold);

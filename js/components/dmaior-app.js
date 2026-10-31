@@ -76,12 +76,12 @@
                 this.sessionToken = token;
                 this.sessionEmail = email;
 
-                // Só renova se o token já expirou ou está perto de vencer (2min) — evita
+                // Só renova se o token já expirou ou está perto de vencer (2min) - evita
                 // chamar /api/refresh toda vez que a página abre. Chamar sempre era a
                 // principal causa de duas abas (ou 2 dispositivos) renovarem o mesmo
                 // dm_refresh ao mesmo tempo, e o Supabase derrubar a sessão inteira por
                 // "reuso suspeito" de refresh token. Se a renovação falhar aqui (rede
-                // instável, por exemplo), segue com o token que já tem — o primeiro
+                // instável, por exemplo), segue com o token que já tem - o primeiro
                 // fetch autenticado real (_fetchAutenticado) tenta de novo e só força
                 // logout se o refresh_token estiver de fato morto.
                 const exp = this._jwtExp(token);
@@ -96,7 +96,7 @@
                 const uidEl = this.qs('#dUid'); if(uidEl) uidEl.textContent = `UID: ${uid}`;
 
                 if (loading) loading.style.display = 'none';
-                // Verifica deeplink — sino no site público redireciona com #avisos
+                // Verifica deeplink - sino no site público redireciona com #avisos
                 if (window.location.hash === '#avisos' || window.location.hash === '#eventos' || window.location.hash === '#personalizacao') {
                     const destino = window.location.hash;
                     history.replaceState(null, '', window.location.pathname);
@@ -125,7 +125,7 @@
         } catch(e) {}
     }
 
-    // Lê o "exp" de um JWT sem validar assinatura — só pra saber se está perto
+    // Lê o "exp" de um JWT sem validar assinatura - só pra saber se está perto
     // de vencer (a validação de verdade é sempre feita no backend/Supabase).
     _jwtExp(token) {
         try {
@@ -136,7 +136,7 @@
 
     // Renova dm_token via /api/refresh. Compartilha 1 única chamada em
     // andamento entre quem pedir ao mesmo tempo (ex: várias telas dando 401
-    // juntas) — evita 2 chamadas simultâneas consumirem o mesmo dm_refresh e
+    // juntas) - evita 2 chamadas simultâneas consumirem o mesmo dm_refresh e
     // o Supabase derrubar a sessão inteira por "reuso suspeito". Retorna
     // true se conseguiu um token novo, false em qualquer outro caso.
     async _renovarToken() {
@@ -167,7 +167,7 @@
     // fetch autenticado padrão pro painel: manda o Bearer atual e, se vier
     // 401 (token expirado), tenta renovar 1x (via _renovarToken, deduplicado)
     // e repete a chamada original. Só encerra a sessão de verdade se a
-    // renovação também falhar — antes disso, cada tela tratava 401 do seu
+    // renovação também falhar - antes disso, cada tela tratava 401 do seu
     // jeito (algumas nem tratavam), sem nunca tentar renovar primeiro.
     async _fetchAutenticado(url, opts = {}) {
         const comAuth = () => ({
@@ -231,10 +231,10 @@
     svgShield()  { return `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.5 14.5L6 11l1.41-1.41L10.5 12.67l6.09-6.09L18 8l-7.5 7.5z"/></svg>`; }
     svgAgente()  { return `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`; }
     svgSend()    { return `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`; }
-    // Material Symbols Rounded (Apache 2.0), via api.iconify.design — mesmo estilo preenchido dos outros ícones do painel
+    // Material Symbols Rounded (Apache 2.0), via api.iconify.design - mesmo estilo preenchido dos outros ícones do painel
     svgPlay()    { return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712"/></svg>`; }
     svgOk()      { return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m10.6 13.8l-2.15-2.15q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7L9.9 15.9q.3.3.7.3t.7-.3l5.65-5.65q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>`; }
-    // Diamante "moeda" no meio do texto — mesmo desenho do ranking (ranking.js DSVG)
+    // Diamante "moeda" no meio do texto - mesmo desenho do ranking (ranking.js DSVG)
     svgDia()     { return `<svg class="ico-dia" viewBox="0 0 24 24" fill="currentColor" aria-label="diamantes" role="img"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 2h9l2.5 4H5L6.5 4zM12 18L5.5 9h13L12 18z"/></svg>`; }
     svgAlerta()  { return `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`; }
 
@@ -262,7 +262,7 @@
                 min-height:100%; flex:1 1 auto; display:flex; flex-direction:row; width:100%; overflow-x:hidden; overflow-x:clip; position:relative;
             }
             .content { flex:1; display:flex; flex-direction:column; align-items:flex-start; padding:24px 32px; min-width:0; overflow-x:hidden; overflow-x:clip; }
-            /* Sidebar do desktop — mesmo estilo do painel do Agente (linhas full-width, acento na borda esquerda).
+            /* Sidebar do desktop - mesmo estilo do painel do Agente (linhas full-width, acento na borda esquerda).
                position:sticky + height:100vh: acompanha o scroll e ocupa a tela toda até a base, sem cortar o fundo. */
             .bnav { order:-1; width:220px; min-width:220px; flex-shrink:0; display:none; flex-direction:column; align-items:stretch; justify-content:flex-start; position:sticky; top:0; align-self:flex-start; height:100vh; overflow-y:auto; scrollbar-width:thin; background:var(--glass); border-right:1px solid var(--border); padding:14px 0 0; z-index:100; }
             .bnav.on { display:flex; }
@@ -278,7 +278,7 @@
             [data-theme="rosa"] .shell .nit:hover,
             [data-theme="laranja"] .shell .nit:hover { background:rgba(0,0,0,.045); }
 
-            /* No desktop o menu já é uma lista vertical com espaço de sobra —
+            /* No desktop o menu já é uma lista vertical com espaço de sobra - 
                o wrapper "mais" fica transparente (display:contents) e o botão
                de seta some, pra tudo continuar visível de uma vez só. */
             .nav-more { display:contents; }
@@ -332,7 +332,7 @@
                 .mfab.on { transform:translateX(-50%) rotate(45deg); }
 
                 /* ── Menu do "+" em tela cheia, por categorias + busca. Mesmo
-                      padrão (.pm-*) do Admin e do Agente — mudou lá, muda aqui ── */
+                      padrão (.pm-*) do Admin e do Agente - mudou lá, muda aqui ── */
                 .msheet {
                     --pm-bg:var(--dm-bg,#060B16); --pm-card:var(--card-solid); --pm-brd:var(--border);
                     --pm-text:var(--text); --pm-muted:var(--muted); --pm-acc:var(--cyan); --pm-acc-d:var(--cyan-d);
@@ -416,7 +416,7 @@
             .view.on{display:block;}
             .auth-view{max-width:420px;margin:0 auto;}
             .dash-view{max-width:1100px;margin:0 auto;}
-            /* Login/cadastro/recuperar — padrão "app moderno" (mesmo do painel do agente):
+            /* Login/cadastro/recuperar - padrão "app moderno" (mesmo do painel do agente):
                campo em pílula + selo de ícone circular em gradiente + botão pílula com brilho */
             .vlogo{height:44px;width:auto;margin:0 auto 16px;display:block;}
             [data-theme="branco"] .vlogo,[data-theme="rosa"] .vlogo,[data-theme="laranja"] .vlogo{filter:brightness(0);}
@@ -439,7 +439,7 @@
             .dash-left,.dash-right{min-width:0;}
             @media(max-width:992px){.dash-grid{grid-template-columns:1fr;gap:0;}}
 
-            /* ── DASHBOARD do streamer — versão prévia (Finnova-like) ── */
+            /* ── DASHBOARD do streamer - versão prévia (Finnova-like) ── */
             .dash-view{max-width:1160px;margin:0;align-self:flex-start;}
             .greet{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:14px;}
             .greet .ava{width:52px;height:52px;}
@@ -460,7 +460,7 @@
             .dwide{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start;margin-bottom:14px;}
             @media(max-width:900px){.dwide{grid-template-columns:1fr;}}
             .dwide .dcol-main,.dwide .dcol-side{display:flex;flex-direction:column;gap:14px;min-width:0;}
-            /* Histórico diário — SÓ no desktop limita a ~8 linhas e rola dentro do card.
+            /* Histórico diário - SÓ no desktop limita a ~8 linhas e rola dentro do card.
                No mobile fica solto: scroll aninhado prende o gesto de arrastar o dedo. */
             .hist-card #hList::-webkit-scrollbar{width:5px;}
             .hist-card #hList::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
@@ -551,10 +551,10 @@
             .fEmail-box .fe-lbl{font-size:.7rem;color:var(--muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);text-transform:uppercase;margin-bottom:4px;}
             .fEmail-box .fe-val{font-size:1rem;color:var(--cyan);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;word-break:break-all;}
 
-            /* ── CARTEIRA — topo azul + card branco sobreposto (demo redesign) ── */
+            /* ── CARTEIRA - topo azul + card branco sobreposto (demo redesign) ── */
             .cart-view{max-width:660px;margin:0;align-self:flex-start;}
 
-            /* Perfil — mobile: coluna única (igual sempre foi). Desktop: sai dos 420px
+            /* Perfil - mobile: coluna única (igual sempre foi). Desktop: sai dos 420px
                das telas de login e vira 2 colunas (dados e preferências à esquerda;
                recebimento e senha à direita), no padrão da Carteira e do Desempenho. */
             @media(min-width:900px){
@@ -686,14 +686,14 @@
             [data-theme="rosa"] .shell .wallet-cta,
             [data-theme="laranja"] .shell .wallet-cta{ background:var(--bloom, var(--rank-grad)); }
 
-            /* Transações — estilo demo (.txn) */
+            /* Transações - estilo demo (.txn) */
             .txn-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 12px;flex-wrap:wrap;}
             .txn-head h3{font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:.95rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;}
             .txn-seg{display:flex;flex-wrap:wrap;gap:3px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:3px;}
             .txn-seg button{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;padding:6px 11px;border-radius:8px;transition:background .15s,color .15s;}
             .txn-seg button.on{background:var(--cyan-d);color:var(--cyan);}
 
-            /* Lista de transações — SÓ no desktop limita a ~8 itens e rola no container.
+            /* Lista de transações - SÓ no desktop limita a ~8 itens e rola no container.
                No mobile fica solta (scroll aninhado prende o gesto de arrastar). */
             #cTxLista::-webkit-scrollbar{width:5px;}
             #cTxLista::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
@@ -739,7 +739,7 @@
             /* ── Banners de comunicados ── */
             .dm-comunicado{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border-radius:12px;background:rgba(240,192,64,0.08);border:1px solid rgba(240,192,64,0.30);animation:fi .4s ease both;width:100%;}
             .dm-comunicado-ico{font-size:1.2rem;line-height:1;flex-shrink:0;}
-            /* Situação da conta — violações/punições da Kwai */
+            /* Situação da conta - violações/punições da Kwai */
             .viola-faixa{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px;padding:13px 16px;border-radius:12px;background:#dc2626;color:#fff;box-shadow:0 6px 18px rgba(220,38,38,.28);}
             .viola-faixa.leve{background:rgba(248,113,113,.10);color:var(--text);border:1px solid rgba(248,113,113,.45);box-shadow:none;}
             .viola-faixa .viola-ico svg{width:24px;height:24px;fill:currentColor;display:block;}
@@ -981,7 +981,7 @@
             .avisos-empty{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
             .avisos-loading{text-align:center;color:var(--muted);font-size:.85rem;padding:32px 0;opacity:.7;}
 
-            /* ══ TEMA DARK — cinza neutro, sem azul ══ */
+            /* ══ TEMA DARK - cinza neutro, sem azul ══ */
             [data-theme="dark"] .shell {
                 --glass: rgba(12,13,15,.97);
                 --border: rgba(255,255,255,.10);
@@ -996,7 +996,7 @@
                 [data-theme="dark"] .shell .nav-more .nit { background: rgba(255,255,255,.04); }
             }
 
-            /* ══ TEMA BRANCO — bloom azul-petróleo (padrão do ranking) ══ */
+            /* ══ TEMA BRANCO - bloom azul-petróleo (padrão do ranking) ══ */
             [data-theme="branco"] .shell {
                 --cyan:#0095a8; --cyan-d:rgba(0,149,168,0.15);
                 --gold:#b8860b; --red:#dc2626; --green:#15803d;
@@ -1004,7 +1004,7 @@
                 --text:#0d1117; --muted:#4a5568;
                 --bloom: linear-gradient(135deg,#0369a1 0%,#0095a8 100%);
             }
-            /* ══ TEMA ROSA — bloom pink/magenta ══ */
+            /* ══ TEMA ROSA - bloom pink/magenta ══ */
             [data-theme="rosa"] .shell {
                 --cyan:#e91e8c; --cyan-d:rgba(233,30,140,0.15);
                 --gold:#c2185b; --red:#b71c1c; --green:#2e7d32;
@@ -1012,7 +1012,7 @@
                 --text:#1a0010; --muted:#80004a;
                 --bloom: linear-gradient(135deg,#e91e8c 0%,#ff6090 100%);
             }
-            /* ══ TEMA LARANJA — bloom laranja/âmbar ══ */
+            /* ══ TEMA LARANJA - bloom laranja/âmbar ══ */
             [data-theme="laranja"] .shell {
                 --cyan:#f97316; --cyan-d:rgba(249,115,22,0.15);
                 --gold:#ea580c; --red:#dc2626; --green:#15803d;
@@ -1020,7 +1020,7 @@
                 --text:#1a0a00; --muted:#7c3a00;
                 --bloom: linear-gradient(135deg,#f97316 0%,#fbbf24 100%);
             }
-            /* ══ Cards, inputs, nav — todos os temas claros ══ */
+            /* ══ Cards, inputs, nav - todos os temas claros ══ */
             [data-theme="branco"] .shell .card,
             [data-theme="rosa"] .shell .card,
             [data-theme="laranja"] .shell .card {
@@ -1102,7 +1102,7 @@
                     background: rgba(0,0,0,0.04);
                 }
             }
-            /* Topo da carteira — segue a cor do tema */
+            /* Topo da carteira - segue a cor do tema */
             [data-theme="branco"] .shell .wallet-head { background: linear-gradient(155deg,#0284c7 0%,#0c4a6e 100%); }
             [data-theme="rosa"] .shell .wallet-head { background: linear-gradient(155deg,#e91e8c 0%,#831843 100%); }
             [data-theme="laranja"] .shell .wallet-head { background: linear-gradient(155deg,#f97316 0%,#7c2d12 100%); }
@@ -1147,7 +1147,7 @@
                 </div>
             </nav>
 
-            <!-- ══════ MENU MÓVEL — barra flutuante com entalhe + FAB (padrão Admin/Agente) ══════ -->
+            <!-- ══════ MENU MÓVEL - barra flutuante com entalhe + FAB (padrão Admin/Agente) ══════ -->
             <nav class="mnav" id="mNav" aria-label="Navegação rápida">
                 <svg class="mnav-bg" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor"></path></svg>
                 <div class="mgrp" data-g="a">
@@ -1392,7 +1392,7 @@
                                 </div>
                             </div>
 
-                            <!-- Bônus da plataforma (metas de 20 dias / 40 horas — separado da premiação da agência) -->
+                            <!-- Bônus da plataforma (metas de 20 dias / 40 horas - separado da premiação da agência) -->
                             <div class="card">
                                 <h3 class="dcard-h">Bônus da plataforma <span class="req-tag">${this.REQ_PLATAFORMA.dias} dias · ${this.REQ_PLATAFORMA.horas} h</span></h3>
                                 <p class="req-sub">Tarefa de diamantes da plataforma: exige ${this.REQ_PLATAFORMA.dias} dias válidos e ${this.REQ_PLATAFORMA.horas} horas válidas no mês, além de cumprir a meta correspondente.</p>
@@ -1419,7 +1419,7 @@
                         <div class="dcol-side">
                             <!-- Histórico diário -->
                             <div class="card hist-card">
-                                <h3 class="dcard-h">Histórico diário <span class="raaj" style="font-size:.7rem;color:var(--muted);font-weight:400;" id="hRes">— válidos · — ${this.svgDia()}</span></h3>
+                                <h3 class="dcard-h">Histórico diário <span class="raaj" style="font-size:.7rem;color:var(--muted);font-weight:400;" id="hRes"> - válidos · - ${this.svgDia()}</span></h3>
                                 <div id="hList"><p class="txn-empty">Carregando...</p></div>
                             </div>
                         </div>
@@ -1469,7 +1469,7 @@
                             </div>
                         </div>
                         <p class="pref-note" data-i18n="appearanceHelp">Essas opções ficam salvas neste aparelho e ajudam na leitura sem alterar seus dados.</p>
-                        <!-- Notificações push (Fase 1) — preenchido por js/push.js; fica vazio se o navegador não suportar -->
+                        <!-- Notificações push (Fase 1) - preenchido por js/push.js; fica vazio se o navegador não suportar -->
                         <div id="dmPushMount"></div>
                         </div>
                         <div class="perfil-col">
@@ -1505,7 +1505,7 @@
                         </div>
                         <button class="btn" id="btnSave" style="margin-top:20px;" data-i18n="updateData">ATUALIZAR DADOS</button>
                     </div>
-                    <!-- Categoria da transmissão (aba LIVES do site) — preenchido por _lvpCarregar() -->
+                    <!-- Categoria da transmissão (aba LIVES do site) - preenchido por _lvpCarregar() -->
                     <div class="card" id="cLivePerfil">
                         <h2 class="raaj" style="font-size:.9rem;margin-bottom:6px;color:var(--cyan);border-bottom:1px solid var(--border);padding-bottom:8px;">CATEGORIA DA TRANSMISSÃO</h2>
                         <p class="lvp-txt">Quando você estiver ao vivo, aparece nessa categoria na aba LIVES do site, pra quem procura esse tipo de live.</p>
@@ -1514,7 +1514,7 @@
                     </div>
                 </div>
 
-                <!-- ══════ PRIVACIDADE E PARTICIPAÇÃO — preenchido por _privCarregar() ══════ -->
+                <!-- ══════ PRIVACIDADE E PARTICIPAÇÃO - preenchido por _privCarregar() ══════ -->
                 <div id="vPriv" class="view" style="width:100%;">
                     <button type="button" class="iframe-back pm-voltar">${this.svgBack()} VOLTAR</button>
                     <div class="card">
@@ -1622,7 +1622,7 @@
                 </div>
 
                 <!-- ══════ VOTAÇÃO (componente nativo) ══════ -->
-                <!-- dmaior-votacao detecta sozinho dm_uid/dm_token no localStorage —
+                <!-- dmaior-votacao detecta sozinho dm_uid/dm_token no localStorage - 
                      rodando aqui dentro do painel já autenticado, pula direto pra
                      lista de votações sem pedir UID de novo. -->
                 <div id="vVotacao" class="view" style="width:100%;">
@@ -1639,7 +1639,7 @@
 
                 <!-- ══════ TICKETS (componente nativo) ══════ -->
                 <!-- dmaior-tickets lê dm_uid/dm_token do localStorage sozinho, igual
-                     dmaior-impulso — mas precisa do worker-url pra falar com o
+                     dmaior-impulso - mas precisa do worker-url pra falar com o
                      mesmo worker do painel (dashboard). -->
                 <div id="vTickets" class="view" style="width:100%;">
                     <button class="iframe-back pm-voltar" id="btnBackTickets">${this.svgBack()} VOLTAR</button>
@@ -1773,7 +1773,7 @@
         this._syncMobileNav(id);
     }
 
-    // ── Menu móvel (barra flutuante + FAB) — mesmo padrão do Admin/Agente ──
+    // ── Menu móvel (barra flutuante + FAB) - mesmo padrão do Admin/Agente ──
     _buildMobileNav(){
         const nav = this.qs('#mNav'), fab = this.qs('#mFab'), sheet = this.qs('#mSheet'), rowsEl = this.qs('#mSheetRows');
         if(!nav || !fab || !sheet || !rowsEl) return;
@@ -1817,7 +1817,7 @@
         this._mEscHandler = e=>{ if(e.key === 'Escape' && sheet.classList.contains('on')) closeSheet(); };
         document.addEventListener('keydown', this._mEscHandler);
 
-        // Entalhe em U — mesma geometria do Admin/Agente
+        // Entalhe em U - mesma geometria do Admin/Agente
         const path = (w,h) => {
             const r = Math.min(31, h/2), c = r*0.448, nw = 118, nd = 40, cx = w/2, nl = cx-nw/2, nr = cx+nw/2;
             return 'M'+r+' 0H'+nl.toFixed(1)
@@ -1859,7 +1859,7 @@
     }
 
     // Categorias do menu do "+" (mobile). Cada item aponta pro id do item real
-    // do .bnav — se ele estiver .hidden (Tickets não liberado, Carteira/Impulso
+    // do .bnav - se ele estiver .hidden (Tickets não liberado, Carteira/Impulso
     // desligados no admin, atalhos sem permissão), some daqui também; categoria
     // sem nenhum item some inteira. 3º campo = palavras extras pra busca.
     static get MENU_GRUPOS(){ return [
@@ -1902,7 +1902,7 @@
             const nome = (this.qs('#dName')?.textContent || '').trim() || localStorage.getItem('dm_nome') || 'Streamer DMaior';
             const foto = localStorage.getItem('dm_foto') || '';
             const ini  = nome.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase() || 'DM';
-            perfil.innerHTML = `<span class="pm-av">${foto ? `<img src="${this.esc(foto)}" alt="" onerror="this.remove()">` : ''}${foto ? '' : this.esc(ini)}</span><span class="pm-pinfo"><b>${this.esc(nome)}</b><small>UID ${this.esc(this.sessionUid || '—')} · DMaior</small></span>${chev}`;
+            perfil.innerHTML = `<span class="pm-av">${foto ? `<img src="${this.esc(foto)}" alt="" onerror="this.remove()">` : ''}${foto ? '' : this.esc(ini)}</span><span class="pm-pinfo"><b>${this.esc(nome)}</b><small>UID ${this.esc(this.sessionUid || '-')} · DMaior</small></span>${chev}`;
         }
         this._filtrarMenu(this.qs('#mSheetBusca')?.value || '');
         this._syncMobileNav();
@@ -1930,7 +1930,7 @@
         const vazio = this.qs('#mSheetVazio'); if(vazio) vazio.hidden = total > 0;
     }
 
-    // Saldo ao lado de "Carteira" no menu — busca uma vez por visita (depois
+    // Saldo ao lado de "Carteira" no menu - busca uma vez por visita (depois
     // disso quem atualiza é o loadCarteira)
     async _atualizarSaldoMenu(){
         if(this._saldoCarteira != null || this._saldoMenuBuscando) return;
@@ -1978,7 +1978,7 @@
         return days.reverse();
     }
 
-    // Dias do mês (offset 0 = atual, 1 = anterior) — mais NOVO primeiro, buracos = 0
+    // Dias do mês (offset 0 = atual, 1 = anterior) - mais NOVO primeiro, buracos = 0
     _mesData(offset){
         const mesStr=this._mesStr(offset);
         const map={};
@@ -2023,7 +2023,7 @@
     }
 
     fdt(v){
-        if(!v) return '—';
+        if(!v) return '-';
         const d = new Date(v);
         return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     }
@@ -2066,7 +2066,7 @@
         // Todas as setas de voltar das abas (ver _voltar)
         this.querySelectorAll('.pm-voltar').forEach(b=>b.addEventListener('click',()=>this._voltar()));
         this.qs('#btnMarkAllRead').addEventListener('click',()=>this._marcarTodosLidos());
-        // Escuta o clique no sino do menu — navega para a view de avisos
+        // Escuta o clique no sino do menu - navega para a view de avisos
         window.addEventListener('dmaior:avisos', this._avisosHandler);
         this._buildMobileNav();
         // Aplica o último estado conhecido já na abertura, pra Carteira/Impulso
@@ -2216,7 +2216,7 @@
             this.qs('#lPass').value='';
             this.navigate('vD');
             this.navActive('nD');
-            // Não espera o dashboard terminar de carregar pra liberar o botão —
+            // Não espera o dashboard terminar de carregar pra liberar o botão - 
             // a tela já navega e o conteúdo preenche em segundo plano (o próprio
             // loadDash tem seu spinner no botão de atualizar).
             this.loadDash();
@@ -2260,7 +2260,7 @@
             this.qs('#nAtalhoAgente')?.classList.toggle('hidden', !p.atalho_agente);
             this.qs('#nAtalhoSub')?.classList.toggle('hidden', !p.atalho_sub);
             // Aba Tickets só aparece pra quem o admin liberou (ver
-            // tickets_streamers_liberados) — quem não foi selecionado nem
+            // tickets_streamers_liberados) - quem não foi selecionado nem
             // sabe que a função existe.
             this.qs('#nTickets')?.classList.toggle('hidden', !p.tickets_liberado);
             this._aplicarRecursos(data.recursos);
@@ -2306,7 +2306,7 @@
     // Card só pra quem está numa posição premiada de algum ranking com prêmio em
     // dinheiro: mostra a posição em cada um desses rankings + progresso dos requisitos
     // da agência (23 dias / 60 horas válidas). Quem está fora das posições premiadas
-    // (ou nem aparece no ranking) não vê nada da agência — só as metas da plataforma.
+    // (ou nem aparece no ranking) não vê nada da agência - só as metas da plataforma.
     // Usa os mesmos endpoints públicos da aba Ranking (/api/ranking/v2 e /premios),
     // então a posição bate com a que ele vê lá; as posições premiadas vêm do cadastro
     // de prêmios (não é fixo top 3). Qualquer falha esconde o card em vez de mostrar
@@ -2440,7 +2440,7 @@
                       :ok?`<span class="hist-pill ok">dia válido</span>`
                       :`<span class="hist-pill mut">não válido</span>`;
             const mid=semLive
-                ? `<b>—</b><span>sem transmissão</span>`
+                ? `<b>-</b><span>sem transmissão</span>`
                 : `<b>${dia.diamantes.toLocaleString('pt-BR')} ${this.svgDia()}</b><span>${h}h ${String(m).padStart(2,'0')}m de live</span>`;
             return `<div class="hist-row${semLive?' off':''}"><span class="hist-d">${dd}/${mm}</span><div class="hist-mid">${mid}</div>${pill}</div>`;
         }).join('');
@@ -2455,7 +2455,7 @@
             const resCart = await this._fetchAutenticado(`${this.apiUrl}/api/carteira?uid=${this.sessionUid}`, {});
 
             if (resCart.status === 401) return; // _fetchAutenticado já limpou a sessão e avisou
-            // Admin desligou a Carteira enquanto a aba estava aberta — esconde e volta pro Resumo
+            // Admin desligou a Carteira enquanto a aba estava aberta - esconde e volta pro Resumo
             if (resCart.status === 403) { this._aplicarRecursos({ carteira:false }); return; }
             if (!resCart.ok) throw new Error('Erro ao carregar carteira');
             const cart   = await resCart.json();
@@ -2479,7 +2479,7 @@
 
             this.qs('#cPixWarn').style.display = pixOk ? 'none' : 'flex';
 
-            // Botão "Solicitar saque" no card branco — controla a abertura do formulário
+            // Botão "Solicitar saque" no card branco - controla a abertura do formulário
             const cta = this.qs('#btnAbrirSaque');
             if (cta) {
                 if (!pixOk) {
@@ -2514,7 +2514,7 @@
                 }
             }
 
-            // Transações — guarda e renderiza pelo filtro atual
+            // Transações - guarda e renderiza pelo filtro atual
             this._cartTxns = cart.transacoes || [];
             this._renderCartTxns();
 
@@ -2862,7 +2862,7 @@
             const data = await window.DmaiorAPI.rank.getComunicados('painel');
             const todos = data.comunicados || [];
 
-            // Dashboard: só avisos rápidos (tipo = 'rapido' ou sem tipo — compatibilidade)
+            // Dashboard: só avisos rápidos (tipo = 'rapido' ou sem tipo - compatibilidade)
             const rapidos = todos.filter(c => !c.tipo || c.tipo === 'rapido');
             const el = this.qs('#painelComunicados');
             if (el) {
@@ -2894,12 +2894,12 @@
             }
             this._checarEventosNovos();
             this._checarPersNovos();
-        } catch { /* silencia erro — comunicados são opcionais */ }
+        } catch { /* silencia erro - comunicados são opcionais */ }
     }
 
     // ── Ranking / Impulsionamento / Logout ───────────────────────────
     goRanking(){
-        // ranking-dmaior já existe no DOM desde antes do login terminar —
+        // ranking-dmaior já existe no DOM desde antes do login terminar - 
         // reconfirma a sessão real do streamer toda vez que a aba abre.
         this.qs('#rankingEl')?.verificarSessao?.();
         this.navigate('vRank');
@@ -2914,26 +2914,26 @@
             const workerUrl = window.DmaiorConfig?.workers?.dashboard || 'https://dashboard.agencydmaior.com.br';
             el.setAttribute('worker-url', workerUrl);
 
-            // Reconfirma a sessão sempre que abrir essa aba — o componente já
+            // Reconfirma a sessão sempre que abrir essa aba - o componente já
             // existe no DOM desde antes do login terminar, então pode ter
             // ficado preso em "Sessão Expirada" da primeira checagem (feita
             // sem token ainda). Isso corrige sozinho, sem precisar deslogar.
             el.verificarSessao?.();
 
-            // Nav interno do componente removido — painel pai já tem menu
+            // Nav interno do componente removido - painel pai já tem menu
         }
         this.navigate('vImpulso');
         this.navActive('nImpulso');
     }
     goVotacao(){
-        // dmaior-votacao já lê dm_uid/dm_token do localStorage sozinho — só
+        // dmaior-votacao já lê dm_uid/dm_token do localStorage sozinho - só
         // precisa navegar, sem passar atributo nenhum (diferente do impulso,
         // que precisa do worker-url porque fala com um worker diferente).
         this.navigate('vVotacao');
         this.navActive('nVotacao');
     }
     goPk(){
-        // painel-pk já lê dm_uid/dm_token do localStorage sozinho — só precisa
+        // painel-pk já lê dm_uid/dm_token do localStorage sozinho - só precisa
         // navegar e reconfirmar a sessão, igual ranking-dmaior/dmaior-votacao.
         this.qs('#pkEl')?.verificarSessao?.();
         this.navigate('vPk');
@@ -2950,7 +2950,7 @@
 
     // ── Aceite do Termo de Cooperação / Diretrizes do Kwai no painel ──
     // Pra quem já é da agência e não passou pelo aceite do recrutamento.
-    // Grava em termos_aceites (worker dashboard) — o admin mostra o selo.
+    // Grava em termos_aceites (worker dashboard) - o admin mostra o selo.
     async _carregarAceitesTermos(){
         const el = this.qs('#regrasEl'); if(!el?.setAceites || !this.sessionUid) return;
         try{
@@ -2975,7 +2975,7 @@
     // ── Situação da conta (violações/punições da Kwai) ──────────────────
     // O monitor.kwai busca 1x/dia (03h) todas as violações da agência e grava
     // por UID; aqui só lê as do próprio streamer (worker dashboard). Falha na
-    // consulta NUNCA vira "sem violação" — mostra que não deu pra consultar.
+    // consulta NUNCA vira "sem violação" - mostra que não deu pra consultar.
     static get VIOLA_STATUS(){ return {'-1':'Sem permissão','0':'Solicitando','1':'Ativado','2':'Banido','3':'Banido temporariamente','4':'Cancelado','5':'Recusado'}; }
     // punishResult vem em código da Kwai ("Ao vivoAnchorStop", "Ao vivoAnchorBan _ 1").
     // Anchor = streamer (termo das plataformas chinesas). Tradução confirmada
@@ -2990,8 +2990,8 @@
         return texto ? `${this._escHtml(texto)} <span class="viola-cod">(${this._escHtml(cod)})</span>` : this._escHtml(s);
     }
     _violaData(iso){
-        if(!iso) return '—';
-        try{ return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; }
+        if(!iso) return '-';
+        try{ return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return '-'; }
     }
     async carregarViolacoes(){
         if(!this.sessionUid) return null;
@@ -3010,7 +3010,7 @@
         if(!d || d.erro){ el.innerHTML=''; return; }
         if(d.destaque){
             // suspensao_dias > 0 = a Kwai suspendeu as LIVES por N dias, mesmo com
-            // a conta ainda "Ativado"/"Solicitando" — não dá pra dizer "sua conta está: Solicitando".
+            // a conta ainda "Ativado"/"Solicitando" - não dá pra dizer "sua conta está: Solicitando".
             const dias = Number(d.destaque.suspensao_dias) || 0;
             const txt = dias
                 ? `Você está suspenso de fazer live${dias ? ` (${dias} ${dias === 1 ? 'dia' : 'dias'})` : ''}`
@@ -3092,7 +3092,7 @@
         }
     }
     // Prova: imagem vem direto; vídeo/áudio da Kwai vêm como um "roteiro" JSON
-    // que aponta pro arquivo — tenta achar um arquivo que o navegador toca
+    // que aponta pro arquivo - tenta achar um arquivo que o navegador toca
     // sozinho (mp4/mp3/m4a/aac...). Formato que não toca aqui → avisa.
     async _carregarProvaViolacao(chave, alvo){
         if(!alvo) return;
@@ -3164,7 +3164,7 @@
             const player = mpegts.createPlayer({
                 type: 'flv', isLive: false, cors: true, duration: Number(rot.duration) || undefined,
                 hasAudio: rot.hasAudio !== false, hasVideo: rot.hasVideo !== false,
-                // Pedaços DIRETO do CDN da Kwai (públicos, CORS liberado) —
+                // Pedaços DIRETO do CDN da Kwai (públicos, CORS liberado) - 
                 // passar pelos nossos workers quebrava (download lento
                 // cortado no meio). Precisa de https://*.yximgs.com:8443 no
                 // connect-src da CSP. Sem cabeçalho de login: vai pra terceiro.
@@ -3184,7 +3184,7 @@
         this.navActive('nAfiliado');
     }
     goTickets(){
-        // dmaior-tickets já existe no DOM desde antes do login terminar — reconfirma
+        // dmaior-tickets já existe no DOM desde antes do login terminar - reconfirma
         // a sessão toda vez que a aba abre, igual dmaior-impulso.
         this.qs('#ticketsEl')?.verificarSessao?.();
         this.navigate('vTickets');
@@ -3198,7 +3198,7 @@
     }
     goAvisos(){
         this.navigate('vAvisos');
-        // Sem item no menu inferior — remove o active de todos
+        // Sem item no menu inferior - remove o active de todos
         this.querySelectorAll('.nit').forEach(e=>{
             e.classList.remove('on');
             if(e.id!=='nO') e.style.color='var(--muted)';
@@ -3431,8 +3431,8 @@
                 <div class="evt-body">
                     <div class="evt-top"><div class="evt-nome">${this._escHtml(e.nome)}</div>${chip}</div>
                     ${e.periodo_insc
-                        ? `<div class="evt-dias"><b>Inscrições:</b> dias ${this._escHtml(this._evtDiasTxt(this._evtDiasInscLista(e)) || '—')}</div><div class="evt-dias"><b>Evento:</b> dias ${this._escHtml(this._evtDiasTxt(this._evtDiasEvt(e)) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>`
-                        : `<div class="evt-dias">Dias ${this._escHtml(this._evtDiasTxt(e.dias) || '—')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>`}
+                        ? `<div class="evt-dias"><b>Inscrições:</b> dias ${this._escHtml(this._evtDiasTxt(this._evtDiasInscLista(e)) || '-')}</div><div class="evt-dias"><b>Evento:</b> dias ${this._escHtml(this._evtDiasTxt(this._evtDiasEvt(e)) || '-')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>`
+                        : `<div class="evt-dias">Dias ${this._escHtml(this._evtDiasTxt(e.dias) || '-')} · ${this._escHtml(String(am).padStart(2, '0') + '/' + ay)}</div>`}
                     ${pkTxt}
                     <div class="evt-tl">${tl}</div>
                     ${minha}
@@ -3520,7 +3520,7 @@
         if(m) return `https://docs.google.com/document/d/${m[1]}/preview`;
         m = /^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)/.exec(s);
         if(m) return `https://drive.google.com/file/d/${m[1]}/preview`;
-        // Página de campanha da própria Kwai (ex.: Arena Agência) — não bloqueia ser incorporada
+        // Página de campanha da própria Kwai (ex.: Arena Agência) - não bloqueia ser incorporada
         if(/^https:\/\/ppg\.kwai-pro\.com\//.test(s)) return s;
         return null;
     }
@@ -3784,7 +3784,7 @@
             return `<div class="pers-sec">${titulo}</div><div class="pers-sec-sub">${sub}</div>
                 ${lista.length ? `<div class="pers-grid">${lista.map(card).join('')}</div>` : '<div class="pers-vazio">Nada por aqui ainda. Novidades chegam em breve.</div>'}`;
         };
-        el.innerHTML = `<p class="pers-intro">Escolha como você aparece no ranking. Os itens são liberados por tempo de agência, metas de diamantes ou eventos — e cada um que você conquista fica salvo aqui.</p>
+        el.innerHTML = `<p class="pers-intro">Escolha como você aparece no ranking. Os itens são liberados por tempo de agência, metas de diamantes ou eventos - e cada um que você conquista fica salvo aqui.</p>
             ${secao('template', 'Templates', 'O fundo da sua linha no ranking.')}
             ${secao('moldura', 'Molduras', 'O aro em volta da sua foto no ranking.')}`;
         el.querySelectorAll('[data-pers-usar]').forEach(b => b.addEventListener('click', () => this._persUsar(b, b.dataset.persUsar, b.dataset.tipo)));

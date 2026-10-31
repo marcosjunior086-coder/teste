@@ -1,5 +1,5 @@
 /**
- * ferramentas.js — Cards de ferramentas externas úteis pro streamer
+ * ferramentas.js - Cards de ferramentas externas úteis pro streamer
  *
  * Custom Element: <dmaior-ferramentas>
  * Shadow DOM, sem chamadas de API. Segue o mesmo padrão visual de tutoriais.js.

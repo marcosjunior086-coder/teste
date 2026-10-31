@@ -1,10 +1,10 @@
 /**
- * helpers.js — Funções utilitárias reutilizáveis da DMaior Agency
+ * helpers.js - Funções utilitárias reutilizáveis da DMaior Agency
  * Contém formatadores, timers, áudio e sanitização de dados.
  */
 
-// ── SOM GLOBAL — singleton AudioContext ──────────────────────────────────────
-// AudioContext criado uma única vez na primeira interação — zero delay a partir daí.
+// ── SOM GLOBAL - singleton AudioContext ──────────────────────────────────────
+// AudioContext criado uma única vez na primeira interação - zero delay a partir daí.
 (function () {
   let _ctx = null;
 
@@ -32,7 +32,7 @@
     } catch {}
   };
 
-  // Listener global — captura cliques em botões e links de TODO o sistema,
+  // Listener global - captura cliques em botões e links de TODO o sistema,
   // incluindo dentro de Shadow DOM (via composedPath).
   document.addEventListener('click', function (e) {
     const path = e.composedPath();

@@ -1,4 +1,4 @@
-# Divulgação Coordenada de Vulnerabilidades — DMaior Agency
+# Divulgação Coordenada de Vulnerabilidades - DMaior Agency
 # https://agencydmaior.com.br
 #
 # Encontrou uma falha de segurança no site ou nos sistemas da agência?

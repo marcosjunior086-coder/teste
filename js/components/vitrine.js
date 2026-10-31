@@ -1,5 +1,5 @@
 /**
- * vitrine.js — Loja de produtos de afiliado (Shopee, Mercado Livre, Amazon) — DMaior Agency
+ * vitrine.js - Loja de produtos de afiliado (Shopee, Mercado Livre, Amazon) - DMaior Agency
  *
  * <dmaior-vitrine> tem dois jeitos de aparecer:
  *  1) Na home (index.html): aba fina "LOJA" encostada na direita, logo abaixo da aba LIVES.
@@ -97,7 +97,7 @@
       }, true);
 
       if (this._pagina) {
-        // Página inteira: sem aba, sem painel deslizante — só o conteúdo
+        // Página inteira: sem aba, sem painel deslizante - só o conteúdo
         const p = r.getElementById('painel');
         p.hidden = false; this.aberto = true;
         this._render();
@@ -354,7 +354,7 @@
         : p.preco_caiu ? `<span class="sel caiu">${ICO.queda}Preço caiu</span>`
         : p.promocao ? `<span class="sel promo">${ICO.tag}${esc(p.promocao)}</span>` : '';
       const meta = [p.nota != null ? `<span class="nota">${ICO.estrela}${Number(p.nota).toFixed(1).replace('.', ',')}</span>` : '', vend ? `<span>${esc(vend)}</span>` : ''].filter(Boolean).join('');
-      return `<a class="card ${p.esgotado ? 'esg' : ''}" href="${esc(link)}" target="_blank" rel="sponsored noopener noreferrer" aria-label="${esc(p.titulo)}${p.esgotado ? ' (esgotado)' : ''} — abrir na ${esc(m.nome)}">
+      return `<a class="card ${p.esgotado ? 'esg' : ''}" href="${esc(link)}" target="_blank" rel="sponsored noopener noreferrer" aria-label="${esc(p.titulo)}${p.esgotado ? ' (esgotado)' : ''} - abrir na ${esc(m.nome)}">
         <span class="foto">
           ${(img || raw) ? `<img src="${esc(img || raw)}" ${img && raw ? `data-raw="${esc(raw)}"` : ''} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
           ${p.desconto > 0 ? `<span class="desc">-${p.desconto}%</span>` : ''}
@@ -381,7 +381,7 @@
       svg{display:block;flex-shrink:0}
       .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-      /* Aba lateral — logo abaixo da aba LIVES (mesmo molde) */
+      /* Aba lateral - logo abaixo da aba LIVES (mesmo molde) */
       .tab{position:fixed;right:0;top:calc(46% + 132px);z-index:1051;display:flex;align-items:center;gap:8px;writing-mode:vertical-lr;
         padding:18px 9px;border-radius:12px 0 0 12px;background:var(--dm-grad-effect,linear-gradient(135deg,#3b82f6,#00d4d4));color:#fff;
         font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:.72rem;letter-spacing:3px;line-height:1;
@@ -445,7 +445,7 @@
       .ordem option{background:var(--dm-bg-2,#1a1a2e);color:var(--dm-text)}
       @media(max-width:600px){.barra{flex-wrap:wrap;gap:10px}.chips{flex:1 1 100%}.ordem{margin-left:0;width:100%}.ordem select{width:100%;padding:9px 10px}}
 
-      /* Produtos — 2 colunas no celular, mais no computador */
+      /* Produtos - 2 colunas no celular, mais no computador */
       .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:16px 14px}
       @media(max-width:600px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}}
       .card{display:flex;flex-direction:column;min-width:0;border-radius:12px;overflow:hidden;background:var(--dm-bg-card);border:1px solid var(--dm-border-dim);

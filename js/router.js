@@ -1,5 +1,5 @@
 /**
- * router.js — Controle de navegação e proteção de rotas — DMaior Agency
+ * router.js - Controle de navegação e proteção de rotas - DMaior Agency
  *
  * Como o Hostinger é hospedagem estática, cada "rota" é um arquivo HTML.
  * Este arquivo centraliza o mapeamento de caminhos e a proteção de páginas
@@ -22,7 +22,7 @@ const Router = {
     '/admin':           '/admin/index.html',
   },
 
-  // Rotas que exigem login pelo router — /painel/ e /admin/ têm login próprio,
+  // Rotas que exigem login pelo router - /painel/ e /admin/ têm login próprio,
   // portanto NÃO entram aqui (o router não deve interceptá-las)
   protectedRoutes: [
     '/painel-streamer',

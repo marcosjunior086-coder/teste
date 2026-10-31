@@ -1,5 +1,5 @@
 /**
- * components.css — Estilos compartilhados dos componentes DMaior Agency
+ * components.css - Estilos compartilhados dos componentes DMaior Agency
  *
  * Botões, cards, modais e elementos reutilizáveis entre páginas.
  * Importado após global.css em todas as páginas.
@@ -7,7 +7,7 @@
 
 /* ─── Botões primários ──────────────────────────────────────────────────────── */
 
-/* Botão cyan gradiente — ação principal */
+/* Botão cyan gradiente - ação principal */
 .dm-btn-primary {
   display: inline-flex;
   align-items: center;

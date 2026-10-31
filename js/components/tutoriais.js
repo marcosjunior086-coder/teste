@@ -1,9 +1,9 @@
 /**
- * tutoriais.js — Cards de tutoriais em vídeo (Google Drive)
+ * tutoriais.js - Cards de tutoriais em vídeo (Google Drive)
  *
  * Custom Element: <dmaior-tutoriais>
  * Shadow DOM, sem chamadas de API. Segue o mesmo padrão visual de ferramentas.js:
- * tudo em var(--dm-*) — reage sozinho aos 5 temas do site, sem listener próprio.
+ * tudo em var(--dm-*) - reage sozinho aos 5 temas do site, sem listener próprio.
  */
 
 class DmaiorTutoriais extends HTMLElement {

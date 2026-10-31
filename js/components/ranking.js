@@ -1,9 +1,9 @@
 /**
- * ranking.js — Ranking interativo da DMaior Agency
+ * ranking.js - Ranking interativo da DMaior Agency
  *
  * Custom Element: <ranking-dmaior>
  * Pódio top 3, lista paginada, abas Diamantes/Horas, histórico por mês.
- * Exclusivo do painel do streamer — não existe mais página pública própria;
+ * Exclusivo do painel do streamer - não existe mais página pública própria;
  * o acesso é sempre a sessão real do painel (dm_uid/dm_token).
  *
  * ALTERAÇÕES em relação ao original Wix:
@@ -58,7 +58,7 @@ class RankingDmaior extends HTMLElement {
     this.VERIFICADO_PREMIUM_SVG = `<span class="verified-badge premium" title="Verificado Premium"><svg viewBox="0 0 20 20" width="9" height="9"><path d="M5.5 10.5l3 3 6-6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   }
 
-  // O acesso ao ranking geral agora é o mesmo do painel do streamer — não
+  // O acesso ao ranking geral agora é o mesmo do painel do streamer - não
   // existe mais senha própria. dm_uid/dm_token são a sessão real (Supabase
   // Auth), setados no login do painel e lidos aqui do localStorage.
   _getToken() {
@@ -71,7 +71,7 @@ class RankingDmaior extends HTMLElement {
     try { return !!localStorage.getItem('dm_uid') && !!this._getToken(); } catch { return false; }
   }
 
-  // Reconfirma a sessão — chamado pelo painel (dmaior-app.js) toda vez que a
+  // Reconfirma a sessão - chamado pelo painel (dmaior-app.js) toda vez que a
   // aba Ranking é aberta, porque este elemento já existe no DOM desde antes
   // do login do streamer terminar (primeira checagem pode não achar token
   // ainda). Sem efeito se o dashboard já tiver sido iniciado.
@@ -221,7 +221,7 @@ class RankingDmaior extends HTMLElement {
       .verified-badge.premium{background:linear-gradient(135deg,#ffd600,#ff5722)}
       img.verified-badge{display:inline-block;object-fit:cover}
       .rank-name-text{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      /* ── Botões de faixa (1-20, 21-40…) — reage ao tema (ativo = bloom-grad, inativo = bg-card) ── */
+      /* ── Botões de faixa (1-20, 21-40…) - reage ao tema (ativo = bloom-grad, inativo = bg-card) ── */
       .page-btn{padding:8px 15px;border-radius:8px;cursor:pointer;font-family:var(--font-title);font-weight:700;background:var(--bg-card);color:var(--text-muted);border:1px solid var(--border-dim);transition:all .2s}
       .page-btn:hover{background:var(--border-dim);color:var(--text-sub);border-color:var(--border);}
       .page-btn.active{background:var(--bloom-grad);color:#fff;border:1px solid transparent;box-shadow:0 0 15px var(--border)}
@@ -239,10 +239,10 @@ class RankingDmaior extends HTMLElement {
       .time-counter{font-size:var(--t-info);color:var(--gold);font-family:var(--dm-font-title,'Rajdhani',sans-serif);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;min-height:20px}
       .period-wrapper{position:relative;width:100%;max-width:300px;margin:0 auto}
       .period-wrapper::after{content:"▼";position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--roxo);pointer-events:none;font-size:0.8rem}
-      /* MÊS ATUAL — fundo usa var(--bg-card) para ficar claro nos temas claros */
+      /* MÊS ATUAL - fundo usa var(--bg-card) para ficar claro nos temas claros */
       .period-select{width:100%;padding:12px 35px 12px 15px;background:var(--bg-card);color:var(--text);border:1px solid var(--border);border-radius:10px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:var(--t-title-md);outline:none;cursor:pointer;appearance:none;text-align:center;text-transform:uppercase;box-shadow:0 2px 8px var(--border-dim);transition:border-color .2s,box-shadow .2s}
       .period-select:focus{border-color:var(--roxo);box-shadow:0 0 0 3px var(--border-dim)}
-      /* Barra DIAMANTES/HORAS — fundo usa var(--bg-card2) para adaptar ao tema */
+      /* Barra DIAMANTES/HORAS - fundo usa var(--bg-card2) para adaptar ao tema */
       .tabs{display:flex;gap:10px;margin-bottom:15px;margin-top:15px;background:var(--bg-card2);padding:5px;border-radius:12px;border:1px solid var(--border-dim)}
       .tab-btn{flex:1;padding:12px;border:none;background:transparent;color:var(--text-muted);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-size:var(--t-info);border-radius:8px;cursor:pointer;transition:0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
       .tab-btn:hover{background:var(--border-dim);color:var(--text-sub);}
@@ -266,7 +266,7 @@ class RankingDmaior extends HTMLElement {
       .podium{display:flex;justify-content:center;align-items:flex-end;height:320px;margin-bottom:40px;margin-top:70px;gap:14px;animation:fadeUp 0.6s ease both}
       /* Cards totalmente arredondados e com borda completa nos 4 lados */
       .podium-item{display:flex;flex-direction:column;align-items:center;width:30%;border-radius:16px;padding-top:15px;padding-bottom:14px;position:relative;border:1px solid;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-      /* Fundo adapta ao tema: gradient de tint para bg-card2 — fica escuro no dark, branco no claro */
+      /* Fundo adapta ao tema: gradient de tint para bg-card2 - fica escuro no dark, branco no claro */
       .podium-item.second{height:230px;background:linear-gradient(to bottom,var(--podium-2),var(--bg-card2));border-color:var(--roxo)}
       .podium-item.first{height:290px;background:linear-gradient(to bottom,var(--podium-1),var(--bg-card2));border-color:var(--azul);width:36%;box-shadow:0 0 28px var(--podium-1)}
       .podium-item.third{height:200px;background:linear-gradient(to bottom,var(--podium-3),var(--bg-card2));border-color:var(--bronze)}
@@ -286,7 +286,7 @@ class RankingDmaior extends HTMLElement {
       .crown-emoji{position:absolute;top:-42px;left:50%;transform:translateX(-50%) rotate(-10deg);font-size:36px;filter:drop-shadow(0 2px 8px rgba(240,192,64,0.7));z-index:5}
       .podium-item .name{width:95%;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:visible;text-align:center;margin-bottom:0;font-size:13px}
       .podium-id{font-size:10px;color:var(--text-muted);margin-bottom:4px;font-family:var(--dm-font-body,'Exo 2',sans-serif)}
-      /* Tag de prêmio: verde sólido preenchido + texto branco — igual ao design de referência */
+      /* Tag de prêmio: verde sólido preenchido + texto branco - igual ao design de referência */
       .prize-tag{font-size:0.9rem;color:#fff;background:#166534;padding:6px 16px;border-radius:20px;margin-top:8px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;border:none;display:flex;align-items:center;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(22,101,52,0.35)}
       .first .prize-tag{font-size:1.1rem;padding:7px 18px}
       .list-prize-tag{font-size:0.75rem;color:#fff;background:#166534;padding:3px 9px;border-radius:12px;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;border:none;display:inline-flex;align-items:center;margin-top:4px;box-shadow:0 1px 5px rgba(22,101,52,0.3)}
@@ -309,7 +309,7 @@ class RankingDmaior extends HTMLElement {
       .list-item.has-tpl .list-name,.list-item.has-tpl .list-score,.list-item.has-tpl .list-rank,.list-item.has-tpl .list-id{text-shadow:0 1px 3px rgba(0,0,0,.85)}
       .podium-item.has-tpl .name,.podium-item.has-tpl .podium-val,.podium-item.has-tpl .podium-id,.podium-item.has-tpl .prize-tag{text-shadow:0 1px 4px rgba(0,0,0,.9)}
       /* Card com arte de fundo ganha mais altura: o desenho fica embaixo e não pode ficar por baixo da etiqueta do prêmio */
-      /* Só no computador (cards mais baixos): se QUALQUER card do pódio tem arte, os TRÊS ganham +24px — assim a etiqueta do prêmio
+      /* Só no computador (cards mais baixos): se QUALQUER card do pódio tem arte, os TRÊS ganham +24px - assim a etiqueta do prêmio
          não cobre o desenho de baixo e a ordem 1º>2º>3º se mantém. No celular o tamanho é o padrão. (.pod-tpl é posto na montagem do pódio) */
       @media(min-width:481px){
         /* Lista no computador: card com template fica da MESMA altura dos outros (o 6:1 deixava ~130px num card de ~800px).
@@ -324,18 +324,18 @@ class RankingDmaior extends HTMLElement {
       .list-rank{width:35px;font-size:var(--t-title-md);font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;color:var(--text-muted);text-align:center}
       .list-avatar-wrap{position:relative;width:45px;height:45px;margin-right:15px;flex-shrink:0}
       .list-avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid var(--border-dim);display:block}
-      /* ── Live: sem borda azul, sem texto LIVE — só bolinha com barrinhas animadas ── */
+      /* ── Live: sem borda azul, sem texto LIVE - só bolinha com barrinhas animadas ── */
       .avatar-wrapper.is-live .avatar,.list-avatar-wrap.is-live .list-avatar{border:2px solid var(--border-dim)}
       video.av-live{background-color:var(--bg-card2);pointer-events:none}
       .live-badge,.list-live-badge{display:none}
-      /* Bolinha animada estilo Kwai — tema escuro: sólida na cor azul do tema */
+      /* Bolinha animada estilo Kwai - tema escuro: sólida na cor azul do tema */
       .live-dot{position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;gap:1.5px;z-index:4;box-shadow:0 0 6px var(--border);border:2px solid var(--azul);outline:2px solid rgba(0,0,0,0.5);}
       .live-dot span{display:block;width:2px;border-radius:2px;background:#fff;animation:livebar 0.9s ease-in-out infinite;}
       .live-dot span:nth-child(1){height:4px;animation-delay:0s}
       .live-dot span:nth-child(2){height:7px;animation-delay:0.2s}
       .live-dot span:nth-child(3){height:4px;animation-delay:0.4s}
       @keyframes livebar{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1.2)}}
-      /* Temas claros — bolinha branca com borda/glow da cor do tema */
+      /* Temas claros - bolinha branca com borda/glow da cor do tema */
       :host-context([data-theme="branco"]) .live-dot, :host([data-theme="branco"]) .live-dot,
       :host-context([data-theme="rosa"]) .live-dot, :host([data-theme="rosa"]) .live-dot,
       :host-context([data-theme="laranja"]) .live-dot, :host([data-theme="laranja"]) .live-dot{background:#fff;border-color:var(--azul);outline-color:rgba(255,255,255,0.6);}
@@ -345,7 +345,7 @@ class RankingDmaior extends HTMLElement {
       .list-name-col{display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;margin-right:10px}
       .list-name{font-size:var(--t-info);color:var(--text);font-weight:600;display:flex;align-items:center;justify-content:flex-start;gap:4px;white-space:nowrap;overflow:visible;min-width:0}
       .list-id{font-size:0.7rem;color:var(--text-muted);font-family:var(--dm-font-body,'Exo 2',sans-serif)}
-      /* Valor do score na lista — estilo idêntico ao panel-value do painel admin: gradiente de texto + letter-spacing */
+      /* Valor do score na lista - estilo idêntico ao panel-value do painel admin: gradiente de texto + letter-spacing */
       .list-score{font-size:var(--t-val);font-weight:700;font-family:var(--dm-font-title,'Rajdhani',sans-serif);margin-left:auto;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;background:var(--bloom-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
       .state-msg{text-align:center;padding:40px;color:var(--roxo);font-family:var(--dm-font-title,'Rajdhani',sans-serif)}
       .spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border-dim);border-top-color:var(--roxo);animation:spin 0.8s linear infinite;margin:0 auto 15px}
@@ -354,7 +354,7 @@ class RankingDmaior extends HTMLElement {
       @keyframes spin{100%{transform:rotate(360deg)}}
       .panel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:298;}
       .panel-overlay.show{display:block}
-      /* Botão "Regras" lateral — box-shadow usa var(--roxo) para seguir o tema */
+      /* Botão "Regras" lateral - box-shadow usa var(--roxo) para seguir o tema */
       .info-tab-btn{position:fixed;right:0;bottom:28%;background:var(--bloom-grad);color:#fff;border:none;border-radius:10px 0 0 10px;padding:22px 10px;cursor:pointer;font-family:var(--dm-font-title,'Rajdhani',sans-serif);font-weight:700;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-lr;z-index:299;box-shadow:-4px 0 22px var(--border);display:flex;align-items:center;gap:10px;line-height:1;opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.25s ease,visibility 0.25s ease,box-shadow 0.3s;}
       .info-tab-btn:hover{box-shadow:-4px 0 32px var(--azul)}
       .info-tab-btn .tab-icon{display:block;transform:rotate(90deg);width:15px;height:15px;flex-shrink:0;}
@@ -465,7 +465,7 @@ class RankingDmaior extends HTMLElement {
         :host(.dinamico) .pod-pos-num{font-size:4rem}
       }
 
-      /* ══ PÓDIO DINÂMICO — TEMAS CLAROS (sobrescreve o fundo escuro) ══════════ */
+      /* ══ PÓDIO DINÂMICO - TEMAS CLAROS (sobrescreve o fundo escuro) ══════════ */
 
       /* ── Tema Branco/Azul ── */
       :host-context([data-theme="branco"]) .podium-item.first, :host([data-theme="branco"]) .podium-item.first{background:linear-gradient(to bottom,rgba(210,165,0,.84) 0%,rgba(255,195,0,.48) 48%,rgba(232,240,252,.99) 100%)!important;border-color:rgba(180,145,0,.28)!important;border-bottom:none!important;box-shadow:0 0 26px rgba(180,145,0,.18),0 4px 16px rgba(0,0,0,.10)!important}
@@ -617,7 +617,7 @@ class RankingDmaior extends HTMLElement {
           : { nome: String(m.nome).trim(), tipo: 'sheets', gid: String(m.gid).trim(),
               compararCom: m.compararCom ?? m.comparar_com ?? null });
       // Se o admin cadastrou um mês novo sem preencher "Comparar com", assume
-      // o mês seguinte na ordem (o mais antigo) — evita que a % de variação
+      // o mês seguinte na ordem (o mais antigo) - evita que a % de variação
       // suma sozinha até alguém lembrar de preencher esse campo manualmente.
       historicos.forEach((m, i) => { if (!m.compararCom && historicos[i + 1]) m.compararCom = historicos[i + 1].nome; });
       this.ABAS_CONFIG = historicos.length
@@ -725,7 +725,7 @@ class RankingDmaior extends HTMLElement {
           img:        this.proxyImg(s.foto_url),
           id:         s.kwai_id  || s.kwai_uid,
           uid:        s.kwai_uid,
-          nome:       s.kwai_id  || s.kwai_uid || '—',
+          nome:       s.kwai_id  || s.kwai_uid || '-',
           diamonds:   Number(s.diamantes_acumulados) || 0,
           hoursStr:   s.horas_video || '00:00',
           hoursMin:   this.h2m(s.horas_video),
@@ -866,7 +866,7 @@ class RankingDmaior extends HTMLElement {
     return (parseInt(p[0] || 0) * 60) + parseInt(p[1] || 0);
   }
 
-  // Valida que a URL tem esquema http/https antes de usar — bloqueia javascript: e data:
+  // Valida que a URL tem esquema http/https antes de usar - bloqueia javascript: e data:
   safeUrl(url) {
     if (!url) return '';
     try {
@@ -876,7 +876,7 @@ class RankingDmaior extends HTMLElement {
   }
 
   // Personalização (template/moldura): só aceita imagem hospedada no nosso domínio e com caracteres
-  // seguros — o valor entra num style="url(...)", então nada de aspas/parênteses vindo de fora.
+  // seguros - o valor entra num style="url(...)", então nada de aspas/parênteses vindo de fora.
   _imgPers(u) {
     return (typeof u === 'string' && /^https:\/\/[a-z0-9.-]+\.agencydmaior\.com\.br\/[A-Za-z0-9._\-\/%]+$/.test(u)) ? u : '';
   }
@@ -942,7 +942,7 @@ class RankingDmaior extends HTMLElement {
     const pv  = this.prevRows.find(p => p.uid === s.uid);
     const cur = this.currentTab === 'diamonds' ? s.diamonds : s.hoursMin;
     const prv = pv ? (this.currentTab === 'diamonds' ? pv.diamonds : pv.hoursMin) : 0;
-    if (!pv) return ''; // "Novo" já é sinalizado pelo positionBadge — evita badge duplicado
+    if (!pv) return ''; // "Novo" já é sinalizado pelo positionBadge - evita badge duplicado
     const pct = prv > 0 ? ((cur - prv) / prv) * 100 : 100;
     if (pct > 0)  return `<span class="growth up">▲ ${pct.toFixed(1)}%</span>`;
     if (pct < 0)  return `<span class="growth down">▼ ${Math.abs(pct).toFixed(1)}%</span>`;
@@ -978,7 +978,7 @@ class RankingDmaior extends HTMLElement {
       const delta   = prevPos - curPos;
       if (delta > 0)  return `<span class="growth up">↑ ${delta}</span>`;
       if (delta < 0)  return `<span class="growth down">↓ ${Math.abs(delta)}</span>`;
-      return `<span class="growth neutral">—</span>`;
+      return `<span class="growth neutral">-</span>`;
     }
     const saved = this._getSavedPositions();
     if (!saved) return '';
@@ -987,7 +987,7 @@ class RankingDmaior extends HTMLElement {
     const delta = prevPos - curPos;
     if (delta > 0)  return `<span class="growth up">↑ ${delta}</span>`;
     if (delta < 0)  return `<span class="growth down">↓ ${Math.abs(delta)}</span>`;
-    return `<span class="growth neutral">—</span>`;
+    return `<span class="growth neutral">-</span>`;
   }
 
   _getSavedPositions() {
@@ -1131,8 +1131,8 @@ class RankingDmaior extends HTMLElement {
   // ── Live rodando dentro da bolinha (só Mês Atual) ─────────────────────────
   // Quem está ao vivo e tem o link da transmissão na lista pública de lives
   // ganha um <video> no lugar da foto, com a MESMA classe (tamanho, borda,
-  // recorte redondo) e a foto como capa: até a live carregar — ou se ela
-  // falhar — continua aparecendo a foto. Mudo, sem controles, não abre nada
+  // recorte redondo) e a foto como capa: até a live carregar - ou se ela
+  // falhar - continua aparecendo a foto. Mudo, sem controles, não abre nada
   // ao clicar. Só toca o que está visível na tela (no máx. LIVE_MAX ao mesmo
   // tempo) e para quando a aba Ranking some ou o celular apaga a tela.
   // Navegador da Xiaomi troca <video> por player nativo: lá fica só a foto.
@@ -1144,7 +1144,7 @@ class RankingDmaior extends HTMLElement {
     return `<img src="${s.img}" class="${cls}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">`;
   }
 
-  // Link da transmissão por UID (Worker live — o mesmo do widget da home)
+  // Link da transmissão por UID (Worker live - o mesmo do widget da home)
   // Devolve true se atualizou. Teto de 8s: servidor lento = fica só a foto.
   async _buscarStreams() {
     const seq = this._streamsSeq = (this._streamsSeq || 0) + 1;

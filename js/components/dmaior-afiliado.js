@@ -1,6 +1,6 @@
 /* eslint-env browser */
 // ============================================================
-//  DMaior Agency — Custom Element: <dmaior-afiliado>
+//  DMaior Agency - Custom Element: <dmaior-afiliado>
 //  Programa de indicações DENTRO do painel do streamer (aba "Indicações"):
 //  o próprio streamer ativa a participação, divulga o link, convida pessoas,
 //  acompanha os indicados (diamantes e horas de vídeo/áudio), vê o ranking dos
@@ -12,7 +12,7 @@
 //  pódio 2-1-3 + lista numerada, selo de período/contagem/regras).
 //
 //  Dados: lê dm_uid/dm_token/dm_refresh do localStorage e fala com o Worker admin
-//  (rotas /afiliado/*). Só estatística (diamantes/horas) — nada de acompanhar lives.
+//  (rotas /afiliado/*). Só estatística (diamantes/horas) - nada de acompanhar lives.
 // ============================================================
 class DmaiorAfiliado extends HTMLElement {
   static get observedAttributes() { return ['worker-url']; }
@@ -159,7 +159,7 @@ class DmaiorAfiliado extends HTMLElement {
   _num(n) { return Number(n || 0).toLocaleString('pt-BR'); }
   _dec(n) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   _brl(n) { return Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-  _data(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' }); } catch (_) { return '—'; } }
+  _data(iso) { if (!iso) return '-'; try { return new Date(iso).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' }); } catch (_) { return '-'; } }
   _foto(url, w = 120) { return url ? `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${w}&h=${w}&fit=cover&output=webp` : ''; }
   _avatar(nome, foto, cls = 'avatar') {
     const ini = this._esc(String(nome || '?').trim().charAt(0).toUpperCase() || '?');
@@ -260,7 +260,7 @@ class DmaiorAfiliado extends HTMLElement {
       @media(max-width:520px){ .tab .ico{ display:none; } .tab{ padding:9px 6px; font-size:.82rem; } .tab .lg{ display:none; } }
       @media(min-width:521px){ .tab .sm{ display:none; } }
 
-      /* Cartões — mesmo padrão do .card do painel */
+      /* Cartões - mesmo padrão do .card do painel */
       .card{ width:100%; background:var(--c-card); border:1px solid var(--c-border); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:0 8px 32px rgba(0,0,0,.3); min-width:0; }
       .card-h{ font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.95rem; text-transform:uppercase; letter-spacing:.04em; color:var(--c-text); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
       .card-h .ico{ color:var(--c-cyan); width:18px; height:18px; }
@@ -278,7 +278,7 @@ class DmaiorAfiliado extends HTMLElement {
       .msg.err{ color:var(--c-red); border-color:var(--c-red); background:rgba(248,113,113,.08); }
       .msg.warn{ color:var(--c-gold); border-color:var(--c-gold); background:rgba(240,192,64,.08); }
 
-      /* Botões — mesmo padrão do painel (.btn / .btn-sm) */
+      /* Botões - mesmo padrão do painel (.btn / .btn-sm) */
       .btn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:11px 18px; border-radius:999px; border:1px solid var(--c-border); background:var(--c-grad); color:#000; font-family:var(--dm-font-title,'Rajdhani',sans-serif); font-weight:700; font-size:.9rem; letter-spacing:.03em; text-transform:uppercase; cursor:pointer; text-decoration:none; white-space:nowrap; box-shadow:inset 0 3px 5px rgba(255,255,255,.35), 0 3px 10px var(--c-glow); transition:.2s; }
       .btn:hover{ transform:translateY(-1px); }
       .btn[disabled]{ background:var(--c-row); color:var(--c-muted); box-shadow:none; cursor:not-allowed; transform:none; opacity:.7; }
@@ -443,7 +443,7 @@ class DmaiorAfiliado extends HTMLElement {
         <div class="perfil-top">${this._avatar(pf.nome || pf.kwaiId, pf.foto, 'avatar')}
           <div style="min-width:0"><div class="perfil-nome">${this._esc(pf.nome || pf.kwaiId)}</div>
             <div class="idrow"><span>UID: <strong>${this._esc(pf.memberId)}</strong></span><button class="btn mini" data-copiar="${this._esc(pf.memberId)}">${this._ico('copy')} Copiar</button></div>
-            <div class="idrow"><span>ID: <strong>${this._esc(pf.kwaiId || '—')}</strong></span><button class="btn mini" data-copiar="${this._esc(pf.kwaiId || '')}">${this._ico('copy')} Copiar</button></div>
+            <div class="idrow"><span>ID: <strong>${this._esc(pf.kwaiId || '-')}</strong></span><button class="btn mini" data-copiar="${this._esc(pf.kwaiId || '')}">${this._ico('copy')} Copiar</button></div>
           </div></div>
         <div class="action-row">
           ${p.pode_enviar ? `<select class="sel" id="cat"><option value="entretenimento">Entretenimento</option><option value="games">Games</option></select>` : ''}
@@ -511,7 +511,7 @@ class DmaiorAfiliado extends HTMLElement {
         ${this._avatar(i.nome || i.kwai_id, i.foto, 'avatar sm')}
         <div class="item-info">
           <div class="item-nome">${this._esc(i.nome || i.kwai_id || i.uid)}</div>
-          <div class="item-sub"><span>@${this._esc(i.kwai_id || '—')}</span><span>${i.status === 'confirmado' ? `entrou em ${this._data(i.confirmado_em)}` : `convidado em ${this._data(i.convidado_em)}`}</span></div>
+          <div class="item-sub"><span>@${this._esc(i.kwai_id || '-')}</span><span>${i.status === 'confirmado' ? `entrou em ${this._data(i.confirmado_em)}` : `convidado em ${this._data(i.convidado_em)}`}</span></div>
           ${i.status === 'confirmado' ? `<div class="item-sub"><span>${this._ico('gem')} <b>${this._num(i.diamantes)}</b></span><span>${this._ico('clock')} <b>${this._esc(i.hhmm_total)}</b></span><span>${this._ico('video')} <b>${this._esc(i.hhmm_video)}</b></span><span>${this._ico('mic')} <b>${this._esc(i.hhmm_audio)}</b></span></div>` : ''}
         </div>
         ${this._situacao(i)}
@@ -533,7 +533,7 @@ class DmaiorAfiliado extends HTMLElement {
 
   // ── aba: Bônus ───────────────────────────────────────────────
   _statusBonus(s) {
-    return ({ em_apuracao: ['Em apuração', 'b-wait'], calculado: ['Calculado', 'b-wait'], aprovado: ['Aprovado', 'b-ok'], pago: ['Pago', 'b-ok'], cancelado: ['Cancelado', 'b-off'] }[s]) || ['—', 'b-mut'];
+    return ({ em_apuracao: ['Em apuração', 'b-wait'], calculado: ['Calculado', 'b-wait'], aprovado: ['Aprovado', 'b-ok'], pago: ['Pago', 'b-ok'], cancelado: ['Cancelado', 'b-off'] }[s]) || ['-', 'b-mut'];
   }
 
   _abaBonus() {
@@ -541,7 +541,7 @@ class DmaiorAfiliado extends HTMLElement {
     const regras = d.regras || [];
     const apl = d.percentual_manual !== null && d.percentual_manual !== undefined
       ? `<b>${this._dec(d.percentual_manual)}%</b> (percentual definido pela agência para a sua conta)`
-      : (regras.length ? 'conforme as metas abaixo (cada indicado é avaliado pelos próprios dias e horas)' : 'a agência ainda não definiu os percentuais — enquanto isso o bônus fica em 0%');
+      : (regras.length ? 'conforme as metas abaixo (cada indicado é avaliado pelos próprios dias e horas)' : 'a agência ainda não definiu os percentuais - enquanto isso o bônus fica em 0%');
     const tabRegras = regras.length ? `<div style="overflow-x:auto;margin-top:6px"><table><thead><tr><th>Meta</th><th>Dias</th><th>Horas</th><th>%</th></tr></thead><tbody>${regras.map(r => `<tr><td>${this._esc(r.nome)}</td><td>${this._num(r.dias_minimos)}</td><td>${this._dec(r.horas_minimas)} h</td><td><b>${this._dec(r.percentual)}%</b></td></tr>`).join('')}</tbody></table></div>` : '';
     const periodoLinhas = this._periodo === 'historico' ? '' : (d.indicados || []).filter(i => i.status === 'confirmado').map(i => {
       const [rot, cls] = this._statusBonus(i.bonus_status);

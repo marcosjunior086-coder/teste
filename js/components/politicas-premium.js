@@ -27,7 +27,7 @@ class PoliticasPremium extends HTMLElement {
             
             :host {
                 display: block;
-                /* Mapeia vars locais para as globais — muda automaticamente com o tema */
+                /* Mapeia vars locais para as globais - muda automaticamente com o tema */
                 --bg-grad:  var(--dm-grad-card);
                 --cyan:     var(--dm-cyan);
                 --gold:     var(--dm-gold);
@@ -144,7 +144,7 @@ class PoliticasPremium extends HTMLElement {
             tbody tr:hover { background: rgba(0,220,220,0.05); }
             td { text-align: center; padding: 6px 2px; font-size: clamp(0.65rem, 2.5vw, 0.75rem); color: var(--cyan); vertical-align: middle; word-wrap: break-word; line-height: 1.2; }
             
-            /* Tabela Padrão (4 colunas: Mês 1 — mesma estrutura do Mês 2/3) */
+            /* Tabela Padrão (4 colunas: Mês 1 - mesma estrutura do Mês 2/3) */
             .t-mes1 th:nth-child(1) { width: 20%; }
             .t-mes1 th:nth-child(2) { width: 25%; }
             .t-mes1 th:nth-child(3) { width: 25%; }

@@ -1,5 +1,5 @@
 /**
- * video-abertura.js — janela com um vídeo (9:16, até 1min30) de uma streamer,
+ * video-abertura.js - janela com um vídeo (9:16, até 1min30) de uma streamer,
  * promoção ou anúncio ao abrir a home. Cadastro e liga/desliga no admin (aba "Vídeos de abertura").
  *
  * - Aparece depois que a página termina de carregar (não pesa no carregamento).
@@ -23,7 +23,7 @@
 
   var LS = 'dm_video_abertura';
   var PULAR_PADRAO = 3;      // segundos até liberar o "Pular" quando o vídeo não define
-  var FREQ_MIN_MIN = 1;      // menor frequência que o admin aceita (1 minuto) — antes disso nem consulta a API
+  var FREQ_MIN_MIN = 1;      // menor frequência que o admin aceita (1 minuto) - antes disso nem consulta a API
   var forcar = /[?&]videoabertura=1\b/.test(location.search);
 
   function ler() {
@@ -327,7 +327,7 @@
   }
 
   // Xiaomi: os outros vídeos da home (live em destaque, bolinhas do "ao vivo") viram
-  // player nativo POR CIMA de tudo, inclusive desta janela — esconde enquanto ela está
+  // player nativo POR CIMA de tudo, inclusive desta janela - esconde enquanto ela está
   // aberta e devolve como estavam ao fechar. Devolve a função que restaura.
   // Repete a varredura enquanto a janela está aberta: o widget pode criar vídeo novo nesse meio-tempo.
   function esconderVideosDaPagina() {
@@ -370,7 +370,7 @@
     var vistos = typeof live.espectadores === 'number' ? live.espectadores.toLocaleString('pt-BR') + ' assistindo' : 'agora';
     var href = esc(live.link);
 
-    // Xiaomi: nada por cima do vídeo (o player nativo cobre) — vira botão na barra de cima
+    // Xiaomi: nada por cima do vídeo (o player nativo cobre) - vira botão na barra de cima
     if (xiaomi) {
       var slot = root.querySelector('.slot-live');
       slot.outerHTML = '<a class="pill aovivo" href="' + href + '" target="_blank" rel="noopener noreferrer"><span class="dot"></span> AO VIVO</a>';
