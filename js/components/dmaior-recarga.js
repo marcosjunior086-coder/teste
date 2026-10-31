@@ -1218,7 +1218,7 @@
         <label class="field"><span>CPF ou CNPJ</span><input data-doc inputmode="numeric" autocomplete="off" maxlength="18" placeholder="000.000.000-00"></label>
         <label class="field"><span>WhatsApp</span><input data-whats inputmode="tel" autocomplete="tel-national" maxlength="24" placeholder="(85) 99999-9999"></label>
         <div class="inline-erro" data-erro role="alert" hidden></div>
-        <p class="small">${ico('lock')}Nome e CPF precisam ser do titular da conta que vai pagar, senão o provedor recusa. O WhatsApp é pra revenda falar com você se houver algum problema com o pedido (como ID do Kwai errado). Enviamos para a Rocket Bunny e para o provedor de pagamento, e não guardamos nada no site.</p>
+        <p class="small">${ico('lock')}Nome e CPF precisam ser do titular da conta que vai pagar, senão o provedor recusa. O WhatsApp é pra revenda falar com você se houver algum problema com o pedido (como ID do Kwai errado). Enviamos para a Rocket Bunny e para o provedor de pagamento, e não guardamos seu nome, CPF nem WhatsApp. Guardamos por pouco tempo só o número do pedido e contagens de segurança por IP, como explica a <a href="politicas.html" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline">Política de Privacidade</a>. Responsável: 64.207.221 DANILO DUARTE (nome fantasia DMaior Agency), CNPJ 64.207.221/0001-18.</p>
         <button type="button" class="btn full" data-ir disabled>Gerar PIX</button>`);
 
       this._wDados = w;

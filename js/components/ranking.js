@@ -152,7 +152,7 @@ class RankingDmaior extends HTMLElement {
       const link = document.createElement('link');
       link.id  = 'google-fonts-ranking';
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Rajdhani:wght@700&display=swap';
+      link.href = 'css/fonts.css?v=20261031-local';
       document.head.appendChild(link);
     }
   }

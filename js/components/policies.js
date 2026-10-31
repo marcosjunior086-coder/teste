@@ -258,7 +258,7 @@ class DMaiorPolicies extends HTMLElement {
               <div class="right-card"><div class="rc-title">Informação</div><p>Saber com quem seus dados foram compartilhados e por qual finalidade.</p></div>
               <div class="right-card"><div class="rc-title">Revisão Automatizada</div><p>Solicitar revisão de decisões tomadas por sistemas automatizados.</p></div>
             </div>
-            <p style="margin-top:16px;">Prazo de resposta: até <strong>15 dias úteis</strong> a partir do recebimento da solicitação.</p>
+            <p style="margin-top:16px;">Prazo de resposta: até <strong>15 dias</strong> a partir do recebimento da solicitação.</p>
           </div>
           <div class="divider"></div>
           <div class="policy-section animate" id="imagem">
@@ -340,12 +340,13 @@ class DMaiorPolicies extends HTMLElement {
           <div class="divider"></div>
           <div class="policy-section animate" id="contato">
             <div class="sec-title"><div class="sec-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><h2>Contato e Encarregado de Dados (DPO)</h2></div>
+            <p><strong>Controlador dos dados:</strong> 64.207.221 DANILO DUARTE (nome fantasia DMaior Agency), CNPJ 64.207.221/0001-18. Contato: dmaior.agency@gmail.com.</p>
             <p>Para exercer seus direitos LGPD ou reportar qualquer violação, entre em contato com o <strong>Encarregado de Proteção de Dados (DPO)</strong> da DMaior Agency:</p>
             <div class="contact-card">
               <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               <p class="contact-label">Encarregado de Dados (DPO) — DMaior Agency</p>
               <a class="contact-email" href="mailto:dmaior.agency@gmail.com">dmaior.agency@gmail.com</a>
-              <p class="contact-note">Prazo de resposta: até 15 dias úteis &nbsp;·&nbsp; Atendimento em Português</p>
+              <p class="contact-note">Prazo de resposta: até 15 dias &nbsp;·&nbsp; Atendimento em Português</p>
             </div>
             <div class="footer-note"><strong>Autoridade Nacional de Proteção de Dados (ANPD):</strong> Caso não fique satisfeito com nossa resposta, você tem o direito de apresentar reclamação diretamente à ANPD. Acesse <strong>gov.br/anpd</strong> para mais informações.</div>
           </div>

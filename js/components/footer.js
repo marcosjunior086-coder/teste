@@ -253,7 +253,7 @@ class DmaiorFooter extends HTMLElement {
 
         <!-- Copyright -->
         <div class="footer-bottom">
-          © ${ANO} - <strong>DMaior Agency</strong> · <strong>Todos os direitos reservados</strong>
+          © ${ANO} - <strong>DMaior Agency</strong> · 64.207.221 Danilo Duarte · CNPJ 64.207.221/0001-18 · <strong>Todos os direitos reservados</strong>
         </div>
       </footer>
     `;
