@@ -271,10 +271,10 @@ class DmaiorVotacao extends HTMLElement {
     const foto = this._imgUrl(p.foto_url, 104, 104);
     el.innerHTML = `
       <div class="perfil-card">
-        <div class="perfil-ava">${foto ? `<img src="${foto}" alt="">` : SVG_USERS}</div>
+        <div class="perfil-ava">${foto ? `<img src="${this._esc(foto)}" alt="">` : SVG_USERS}</div>
         <div>
-          <div class="perfil-nome">${p.nome || 'Streamer'}</div>
-          <div class="perfil-uid">UID: ${p.uid}</div>
+          <div class="perfil-nome">${this._esc(p.nome || 'Streamer')}</div>
+          <div class="perfil-uid">UID: ${this._esc(p.uid)}</div>
         </div>
       </div>
       <p style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;">É você mesmo?</p>

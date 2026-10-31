@@ -2314,7 +2314,7 @@
     async carregarPremiacaoAgencia(t){
         const card=this.qs('#agCard'); if(!card) return;
         try{
-            const [rk,pr]=await Promise.all([window.DmaiorAPI.rank.getRanking(),window.DmaiorAPI.rank.getPrizes()]);
+            const [rk,pr]=await Promise.all([window.DmaiorAPI.rank.getRanking(localStorage.getItem('dm_token')||''),window.DmaiorAPI.rank.getPrizes()]);
             const premiadas={
                 diamantes:(pr?.premiosD||[]).filter(p=>p.valor>0).map(p=>Number(p.posicao)),
                 horas:(pr?.premiosH||[]).filter(p=>p.valor>0).map(p=>Number(p.posicao)),
